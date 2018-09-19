@@ -1,0 +1,15 @@
+{
+  "name": "evm_niknaks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "hashPoint": "node ./js_snippets/hashToPoint.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bn.js": "^4.11.8"
+  }
+}
