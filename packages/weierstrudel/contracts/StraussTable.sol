@@ -1,8 +1,11 @@
 pragma solidity ^0.4.23;
 
-contract StraussTable {
+contract StraussTableInterface {
+    function generateTablePure(uint x, uint y, uint z) public pure returns (uint[17]) {}
+}
 
-    function() external {
+contract StraussTable {
+    function() external payable {
         assembly {
 
         strauss_table_single:
@@ -27,7 +30,7 @@ contract StraussTable {
             // stack state: t2 p t1 z y x (t2 = 4x overloaded)
             dup2 dup1 dup1
             // stack state: p p p t2 p t1 z y x
-            dup4 dup2
+            dup4 dup10
             // stack state: x t2 p p p t2 p t1 z y x
             mulmod
             // stack state: (x.t2) p p t2 p t1 z y x
@@ -79,7 +82,6 @@ contract StraussTable {
             mulmod
             // stack state: z3 y3 x3
 
-
             // we now have zd yd xd z1 y1 x1 (2P 1P) on the stack
             // we want to calculate 3P, 5P, 7P ... etc, by adding 2P to an accumulator
             // if we scale 1P's x and y coordinates by zd then we can tread zd yd as affine
@@ -87,13 +89,14 @@ contract StraussTable {
             21888242871839275222246405745257275088696311157297823662689037894645226208583
             dup1    // p p zd yd xd z1 y1 x1
             dup3    // zd p p zd yd xd z1 y1 x1
-            dup1    // zd z3 p p zd yd xd z1 y1 x1
+            dup1    // zd zd p p zd yd xd z1 y1 x1
             mulmod  // zd^2 p zd yd xd z1 y1 x1
             dup2    // p zd^2 p zd yd xd z1 y1 x1
             dup4    // zd p zd^2 p zd yd xd z1 y1 x1
             dup3    // zd^2 zd p zd^2 p zd yd xd z1 y1 x1
             mulmod  // zd^3 zd^2 p zd yd xd z1 y1 x1
-            swap9   // x1 zd^2 p zd yd xd z1 y1 zd^3
+
+            swap8   // x1 zd^2 p zd yd xd z1 y1 zd^3
             mulmod  // x' zd yd xd z1 y1 zd^3
             swap6   // zd^3 zd yd xd z1 y1 x'
             21888242871839275222246405745257275088696311157297823662689037894645226208583
@@ -101,13 +104,23 @@ contract StraussTable {
             swap2   // zd zd^3 p yd xd z1 y1 x'
             swap6   // y1 zd^3 p yd xd z1 zd x'
             mulmod  // y' yd xd z1 zd x'
+
+            // ### HACKY WORKAROUND. Mixed Addition routine expects y to be 3x overloaded! Fix fix fix
+            21888242871839275222246405745257275088696311157297823662689037894645226208583
+            21888242871839275222246405745257275088696311157297823662689037894645226208583
+            add
+            add
+
             swap4   // zd yd xd z1 y' x'
+
+
             0x40 mstore // yd xd z1 y' x'
             0x00 mstore
             65664728615517825666739217235771825266088933471893470988067113683935678625749
             sub     // we store -xd to save a sub instruction in our mixed addition algorithm
                     // subtract 3P because x3 is 3x overloaded
             0x20 mstore
+
             // stack state: z1 y1 x1
             // we now want to add P and 2P, without overwriting  P
             // TODO: write a more optimized algo instead of re-using mixed add!
@@ -115,28 +128,34 @@ contract StraussTable {
             dup3 dup3       // y1 x1 z1 y1 x1
             p3_return       // [tag] y1 x1 z1 y1 x1
             swap3           // z1 y1 x1 [tag] y1 x1 // we don't need to store z, consume it
-            // stack state: z1 y1 x1 [tag] z1 y1 x1
+            // stack state: z1 y1 x1 [tag] y1 x1
             bn128_add_strauss jump
-        
-        p3_return:      // x3 y3 z3 y1 x1
-            swap2       // z3 y3 x3 y1 x1
+
+        // y3 x3 z3
+
+        p3_return:      // y3 x3 z3 y1 x1
+            swap1       // x3 y3 z3 y1 x1
+            swap2       // z3 x3 y3 y1 x1
             dup3 dup3   // y3 x3 z3 y3 x3 y1 x1
             p5_return swap3 // z3 y3 x3 [tag] y3 x3 y1 x1
             bn128_add_strauss jump
     
         p5_return:      // x3 y3 z3 y1 x1
+            swap1
             swap2       // z3 y3 x3 y1 x1
             dup3 dup3   // y3 x3 z3 y3 x3 y1 x1
             p7_return swap3 // z3 y3 x3 [tag] y3 x3 y1 x1
             bn128_add_strauss jump
     
         p7_return:      // x3 y3 z3 y1 x1
+            swap1
             swap2       // z3 y3 x3 y1 x1
             dup3 dup3   // y3 x3 z3 y3 x3 y1 x1
             p9_return swap3 // z3 y3 x3 [tag] y3 x3 y1 x1
             bn128_add_strauss jump
     
         p9_return:      // x3 y3 z3 y1 x1
+            swap1
             swap2       // z3 y3 x3 y1 x1
             dup3 dup3   // y3 x3 z3 y3 x3 y1 x1
             p11_return swap3 // z3 y3 x3 [tag] y3 x3 y1 x1
@@ -144,18 +163,21 @@ contract StraussTable {
 
     
         p11_return:      // x3 y3 z3 y1 x1
+            swap1
             swap2       // z3 y3 x3 y1 x1
             dup3 dup3   // y3 x3 z3 y3 x3 y1 x1
             p13_return swap3 // z3 y3 x3 [tag] y3 x3 y1 x1
             bn128_add_strauss jump
     
         p13_return:      // x3 y3 z3 y1 x1
+            swap1
             swap2       // z3 y3 x3 y1 x1
             dup3 dup3   // y3 x3 z3 y3 x3 y1 x1
             p15_return swap3 // z3 y3 x3 [tag] y3 x3 y1 x1
             bn128_add_strauss jump
     
         p15_return:      // x3 y3 z3 y1 x1
+            swap1
             swap2       // zf yf xf ...
             // zf is off by a factor of zd, scale up
             21888242871839275222246405745257275088696311157297823662689037894645226208583
@@ -167,23 +189,24 @@ contract StraussTable {
         // question: we aren't storing zr yet. This is more than enough to test though!
 
         // return data: 8 points = 16 words + zf = 17
-        0x0 mstore
-        0x20 mstore
-        0x40 mstore
-        0x60 mstore
-        0x80 mstore
-        0xa0 mstore
-        0xc0 mstore
-        0xe0 mstore
-        0x100 mstore
-        0x120 mstore
-        0x140 mstore
-        0x160 mstore
-        0x180 mstore
-        0x1a0 mstore
-        0x1c0 mstore
-        0x1e0 mstore
         0x200 mstore
+        0x1e0 mstore
+        0x1c0 mstore
+        0x1a0 mstore
+        0x180 mstore
+        0x160 mstore
+        0x140 mstore
+        0x120 mstore
+        0x100 mstore
+        0xe0 mstore
+        0xc0 mstore
+        0xa0 mstore
+        0x80 mstore
+        0x60 mstore
+        0x40 mstore
+        0x20 mstore
+        0x0 mstore
+
         0x220 0x00 return
         pop pop pop pop pop pop // wat...
 
@@ -207,6 +230,7 @@ contract StraussTable {
             0x00 mload          // y2 t2 p p p t1 p z1 y1 x1
             mulmod              // t2 p p t1 p z1 y1 x1
             dup7
+            // 21888242871839275222246405745257275088696311157297823662689037894645226208583
             65664728615517825666739217235771825266088933471893470988067113683935678625749
             sub                 // y1 is 3x overloaded (both from dbl and add). So subtract 3p to negate
                                 // -y1 t2 p p t1 p z1 y1 x1

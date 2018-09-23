@@ -13,15 +13,12 @@ const bn128 = {};
 
 bn128.p = p;
 
-bn128.double = (x, y, z) => {
-    let xRed = x.toRed(pRed);
-    let yRed = y.toRed(pRed);
-    let zRed = z.toRed(pRed);
-    let xx = xRed.redSqr();
-    let yy = yRed.redSqr();
+function _double({ x, y, z }) {
+    let xx = x.redSqr();
+    let yy = y.redSqr();
     let yyyy = yy.redSqr();
-    let zz = zRed.redSqr();
-    let s = xRed.redAdd(yy).redSqr().redSub(xx).redSub(yyyy);
+    let zz = z.redSqr();
+    let s = x.redAdd(yy).redSqr().redSub(xx).redSub(yyyy);
     s = s.redAdd(s);
     let m = xx.redAdd(xx).redAdd(xx);
     let t = m.redSqr().redSub(s).redSub(s);
@@ -30,12 +27,59 @@ bn128.double = (x, y, z) => {
     yyyy8 = yyyy8.redAdd(yyyy8);
     yyyy8 = yyyy8.redAdd(yyyy8);
     let y3 = s.redSub(t).redMul(m).redSub(yyyy8);
-    let z3 = yRed.add(zRed).redSqr().redSub(yy).redSub(zz);
+    let z3 = y.add(z).redSqr().redSub(yy).redSub(zz);
     return {
-        x: x3.fromRed(),
-        y: y3.fromRed(),
-        z: z3.fromRed(),
+        x: x3,
+        y: y3,
+        z: z3,
     };
+}
+
+function _mixedAdd({ x2, y2 }, { x1, y1, z1 }) {
+    let t1 = z1.redSqr();
+    let t2 = t1.redMul(z1);
+    t1 = t1.redMul(x2);
+    t2 = t2.redMul(y2);
+    t1 = x1.redSub(t1);
+    t2 = t2.redSub(y1);
+    let z3 = z1.redMul(t1);
+    let t4 = t1.redSqr();
+    t1 = t1.redMul(t4);
+    t4 = t4.redMul(x1);
+    let x3 = t2.redSqr();
+    x3 = x3.redAdd(t1);
+    let y3 = t1.redMul(y1);
+    t1 = t4.redAdd(t4);
+    x3 = x3.redSub(t1);
+    t4 = x3.redSub(t4);
+    t4 = t4.redMul(t2);
+    y3 = t4.redSub(y3);
+    return {
+        x: x3,
+        y: y3,
+        z: z3,
+    };
+}
+
+function _normalize({ x, y, z }, newZ) {
+    const zz = newZ.redSqr();
+    return {
+        x: x.redMul(zz),
+        y: y.redMul(newZ.redMul(zz)),
+        z,
+    };
+}
+
+bn128.double = (x, y, z) => {
+    let xRed = x.toRed(pRed);
+    let yRed = y.toRed(pRed);
+    let zRed = z.toRed(pRed);
+    let p = _double({ x: xRed, y: yRed, z: zRed });
+    return {
+        x: p.x.fromRed(),
+        y: p.y.fromRed(),
+        z: p.z.fromRed(),
+    }
 };
 
 bn128.mixedAdd = (x2, y2, x1, y1, z1) => {
@@ -46,31 +90,35 @@ bn128.mixedAdd = (x2, y2, x1, y1, z1) => {
     let y1Red = y1.toRed(pRed);
     let z1Red = z1.toRed(pRed);
 
-    let t1 = z1Red.redSqr();
-    let t2 = t1.redMul(z1Red);
-    t1 = t1.redMul(x2Red);
-    t2 = t2.redMul(y2Red);
-    t1 = x1Red.redSub(t1);
-    t2 = t2.redSub(y1Red);
-    let z3 = z1Red.redMul(t1);
-    let t4 = t1.redSqr();
-    t1 = t1.redMul(t4);
-    t4 = t4.redMul(x1Red);
-    let x3 = t2.redSqr();
-    x3 = x3.redAdd(t1);
-    let y3 = t1.redMul(y1Red);
-    t1 = t4.redAdd(t4);
-    x3 = x3.redSub(t1);
-    t4 = x3.redSub(t4);
-    debug = t4;
-    t4 = t4.redMul(t2);
-    y3 = t4.redSub(y3);
+    let p = _mixedAdd({ x2: x2Red, y2: y2Red }, { x1: x1Red, y1: y1Red, z1: z1Red });
     return {
-        x: x3.fromRed(),
-        y: y3.fromRed(),
-        z: z3.fromRed(),
-        debug: debug.fromRed(),
+        x: p.x.fromRed(),
+        y: p.y.fromRed(),
+        z: p.z.fromRed(),
     };
+};
+
+bn128.generateTableSingle = (x, y, z) => {
+    const pBase = { x: x.toRed(pRed), y: y.toRed(pRed), z: z.toRed(pRed) };
+    const dBase = _double(pBase);
+    const d = { x: dBase.x, y: dBase.y };
+    const p = [];
+    const dz = [];
+    let zAcc = pBase.z;
+    let prev = _normalize(pBase, dBase.z);
+    p.push({ x: prev.x.fromRed(), y: prev.y.fromRed(), z: prev.z.fromRed() });
+
+    console.log('d = ', { x: d.x.fromRed(), y: d.y.fromRed(), z: dBase.z.fromRed() })
+    for(let i = 1; i < 8; i += 1) {
+        let zz = prev.z.redSqr();
+        let u = prev.x.redMul(zz).redSub(d.x);
+        dz.push(u.fromRed());
+        prev = _mixedAdd({ x2: d.x, y2: d.y}, { x1: prev.x, y1: prev.y, z1: prev.z });
+        p.push({ x: prev.x.fromRed(), y: prev.y.fromRed(), z: prev.z.fromRed() });
+    }
+    let t = p[p.length - 1].z.toRed(pRed);
+    p[p.length - 1].z = t.redMul(dBase.z).fromRed();
+    return p;
 };
 
 function randomPointInternal() {
