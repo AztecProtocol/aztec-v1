@@ -108,17 +108,16 @@ bn128.generateTableSingle = (x, y, z) => {
     let prev = _normalize(pBase, dBase.z);
     p.push({ x: prev.x.fromRed(), y: prev.y.fromRed(), z: prev.z.fromRed() });
 
-    console.log('d = ', { x: d.x.fromRed(), y: d.y.fromRed(), z: dBase.z.fromRed() })
     for(let i = 1; i < 8; i += 1) {
         let zz = prev.z.redSqr();
-        let u = prev.x.redMul(zz).redSub(d.x);
+        let u = prev.x.redSub(d.x.redMul(zz));
         dz.push(u.fromRed());
         prev = _mixedAdd({ x2: d.x, y2: d.y}, { x1: prev.x, y1: prev.y, z1: prev.z });
         p.push({ x: prev.x.fromRed(), y: prev.y.fromRed(), z: prev.z.fromRed() });
     }
     let t = p[p.length - 1].z.toRed(pRed);
     p[p.length - 1].z = t.redMul(dBase.z).fromRed();
-    return p;
+    return { p, dz };
 };
 
 function randomPointInternal() {

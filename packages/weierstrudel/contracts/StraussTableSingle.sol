@@ -1,14 +1,15 @@
 pragma solidity ^0.4.23;
 
-contract StraussTableInterface {
-    function generateTablePure(uint x, uint y, uint z) public pure returns (uint[17]) {}
+contract StraussTableSingleInterface {
+    function generateTablePure(uint x, uint y, uint z) public pure returns (uint[24]) {}
 }
 
-contract StraussTable {
+contract StraussTableSingle {
     function() external payable {
         assembly {
 
         strauss_table_single:
+            0x220 0x60 mstore   // store dz offset location at 0x40. See, we *do* use a memory pointer!
             calldataload(0x04)
             calldataload(0x24)
             calldataload(0x44)
@@ -189,6 +190,7 @@ contract StraussTable {
         // question: we aren't storing zr yet. This is more than enough to test though!
 
         // return data: 8 points = 16 words + zf = 17
+        
         0x200 mstore
         0x1e0 mstore
         0x1c0 mstore
@@ -207,7 +209,7 @@ contract StraussTable {
         0x20 mstore
         0x0 mstore
 
-        0x220 0x00 return
+        0x320 0x00 return
         pop pop pop pop pop pop // wat...
 
         /// @dev mixed point addition
@@ -244,6 +246,16 @@ contract StraussTable {
 
             dup7
             add                     // t1 p t2 p z1 y1 x1
+
+            // t1 is the intermediate scalar that transforms z1 to z3. Cache it for later
+            0x60 mload              // memory pointer
+            dup2                    // t m
+            dup2                    // m t m
+            mstore                  // m
+            0x20 add                // m'
+            0x60 mstore             // store updated result
+
+
             dup2 dup1 dup1          // p p p t1 p t2 p z1 y1 x1
             dup4 dup1               // t1 t1 p p p t1 p t2 p z1 y1 x1
             mulmod                  // t3 p p t1 p t2 p z1 y1 x1
