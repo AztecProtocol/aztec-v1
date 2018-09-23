@@ -32,18 +32,9 @@ contract('Bn128Add', (accounts) => {
             `0x${z1.toString(16)}`,
         );
         const result = resultOverloaded.map(r => new BN(r.toString(16), 16).umod(bn128Reference.p));
-        console.log('result? = ', result.map(r => r.toString(16)));
         // this is an intermediate fn and points are overloaded, and may be multiples of p
         // reduce down to mod p to validate against bn128
         const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
-        console.log('debug = ', reference.debug.toString(16));
-
-        console.log('result.x = ', result[0].toString(16));
-        console.log('reference.x = ', reference.x.toString(16));
-        console.log('result.y = ', result[1].toString(16));
-        console.log('reference.y = ', reference.y.toString(16));
-        console.log('result.z = ', result[2].toString(16));
-        console.log('reference.z = ', reference.z.toString(16));
 
         assert(result.length === 3);
         assert(result[0].toString(16) === reference.x.toString(16));
