@@ -98,6 +98,43 @@ bn128.mixedAdd = (x2, y2, x1, y1, z1) => {
     };
 };
 
+bn128.generateTableMultiple = (points) => {
+    const windowSize = 8;
+    let normalizeFactor = new BN('1', 10).toRed(pRed);
+    const tableTemp = points.map(({ x, y }) => {
+        // normalize point
+        const xRed = x.toRed(pRed);
+        const yRed = y.toRed(pRed);
+        const nn = normalizeFactor.redSqr();
+        const xMod = xRed.redMul(nn);
+        const yMod = yRed.redMul(nn.redMul(normalizeFactor));
+        const res = bn128.generateTableSingle(xMod.fromRed(), yMod.fromRed(), normalizeFactor.fromRed());
+        normalizeFactor = normalizeFactor.redMul(res.p[res.p.length - 1].z.toRed(pRed));
+        return res;
+    });
+
+    const tmp = tableTemp[tableTemp.length - 1];
+    const globalZ = tableTemp[tableTemp.length - 1].p[windowSize - 1].z;
+    let runningZ = new BN('1', 10).toRed(pRed);
+    let tableCoordinates = [];
+    const runningZDebug = [runningZ.fromRed()];
+    for (let i = tableTemp.length - 1; i > -1; i -= 1) {
+        const table = tableTemp[i];
+        for (let j = table.p.length - 1; j > -1; j -= 1) {
+            const zz = runningZ.redSqr();
+            const zzz = zz.redMul(runningZ);
+            const x = table.p[j].x.toRed(pRed).redMul(zz);
+            const y = table.p[j].y.toRed(pRed).redMul(zzz);
+            tableCoordinates.push({ x: x.fromRed(), y: y.fromRed() });
+            if (j > 0) {
+                runningZ = runningZ.redMul(table.dz[j-1].toRed(pRed));
+                runningZDebug.push(runningZ.fromRed());
+            }
+        }
+    }
+    return tableCoordinates;
+};
+
 bn128.generateTableSingle = (x, y, z) => {
     const pBase = { x: x.toRed(pRed), y: y.toRed(pRed), z: z.toRed(pRed) };
     const dBase = _double(pBase);
