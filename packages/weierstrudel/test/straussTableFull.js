@@ -31,8 +31,6 @@ contract('StraussTableFull', (accounts) => {
             x: new BN(r[0].toString(16), 16).umod(bn128Reference.p),
             y: new BN(r[1].toString(16), 16).umod(bn128Reference.p),
         }));
-
-        console.log(normalized);
         assert(normalized.length === (outputReference.length));
         for (let i = 0; i < outputReference.length; i += 1) {
             assert(normalized[i].x.toString(16) === outputReference[i].x.toString(16))
