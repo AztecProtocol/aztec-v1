@@ -70,6 +70,22 @@ function _normalize({ x, y, z }, newZ) {
     };
 }
 
+bn128.zFactors = ({ x2, y2 }, { x1, y1, z1 }) => {
+    const z1Red = z1.toRed(pRed);
+    const x2Red = x2.toRed(pRed);
+    const x1Red = x1.toRed(pRed);
+    let t1 = z1Red.redSqr();
+    let t2 = t1.redMul(z1Red);
+    t1 = t1.redMul(x2Red);
+    t1 = x1Red.redSub(t1);
+    const zz = t1.redSqr();
+    const zzz = zz.redMul(t1);
+    return {
+        zz: zz.fromRed(),
+        zzz: zzz.fromRed(),
+    };
+};
+
 bn128.double = (x, y, z) => {
     let xRed = x.toRed(pRed);
     let yRed = y.toRed(pRed);
