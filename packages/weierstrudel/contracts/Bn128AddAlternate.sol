@@ -10,9 +10,10 @@ contract Bn128AddAlternate {
     function() external payable {
         assembly {
         /// @dev mixed point addition
-        /// @notice expects (z1 y1 x1) to be on stack
+        /// @notice expects (z1 -y1 x1) to be on stack
             0x04 calldataload
             0x24 calldataload
+            21888242871839275222246405745257275088696311157297823662689037894645226208583 sub
             0x44 calldataload
 
             0x64 calldataload
@@ -20,7 +21,6 @@ contract Bn128AddAlternate {
             sub 0x00 mstore
             0x84 calldataload 0x20 mstore
         bn128_add_strauss:
-
             21888242871839275222246405745257275088696311157297823662689037894645226208583
             dup2 dup1 mulmod
 
@@ -30,14 +30,17 @@ contract Bn128AddAlternate {
             // zzz p p zz z y x
             0x20 mload mulmod
             // t2 p zz z y x
-            dup5 dup3 sub add
+            dup5 add
             // t2 p zz z y x
             swap2
             // zz p t2 z y x
             0x00 mload mulmod
             // t1 t2 z y x
-            dup5 add
+            dup5
+            // x t1 t2 z y x
+            add
             // t1 t2 z y x
+            dup1 21888242871839275222246405745257275088696311157297823662689037894645226208583 eq reject jumpi
 
             21888242871839275222246405745257275088696311157297823662689037894645226208583
             dup1 dup3 dup1 mulmod
@@ -64,9 +67,9 @@ contract Bn128AddAlternate {
             // y3 x3 p t3 p t1 t4 z y x
             dup3 dup8 dup11 mulmod
             // t6 y3 x3 p t3 p t1 t4 z y x
-            dup4 sub
             add
-            // y3 x3 p t3 p t1 t4 z y x
+            43776485743678550444492811490514550177392622314595647325378075789290452417166 sub
+            // -y3 x3 p t3 p t1 t4 z y x
             dup3 dup1
             // p p y3 x3 p t3 p t1 t4 z y x
             swap7
@@ -128,7 +131,8 @@ contract Bn128AddAlternate {
             mulmod                  // z3 y3 x3 p t3 p p t4 p y x
             */
     
-
+        reject:
+        0x00 0x00 revert
         }
     }
 }
