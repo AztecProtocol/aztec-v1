@@ -2,35 +2,34 @@
 const BN = require('bn.js');
 const crypto = require('crypto');
 
-const Bn128AddAlternate = artifacts.require('../contracts/Bn128AddAlternate');
-const Bn128AddAlternateInterface = artifacts.require('../contrats/Bn128AddAlternateInterface');
+const Bn128AddAlternateAffine = artifacts.require('../contracts/Bn128AddAlternateAffine');
+const Bn128AddAlternateAffineInterface = artifacts.require('../contrats/Bn128AddAlternateAffineInterface');
 
 const bn128Reference = require('../js_snippets/bn128_reference.js');
 
 // p = 30644E72E131A029B85045B68181585D97816A916871CA8D3C208C16D87CFD47
 
-Bn128AddAlternate.abi = Bn128AddAlternateInterface.abi; // hon hon hon
-contract('Bn128AddAlternate', (accounts) => {
+Bn128AddAlternateAffine.abi = Bn128AddAlternateAffineInterface.abi; // hon hon hon
+contract('Bn128AddAlternateAffine', (accounts) => {
     let contract;
     beforeEach(async () => {
-        contract = await Bn128AddAlternate.new();
+        contract = await Bn128AddAlternateAffine.new();
     });
 
-    it('method "addAlternate" correctly calculates mixed point addition on input coordinates', async () => {
+    it('method "addAlternateAffine" correctly calculates mixed point addition on input coordinates', async () => {
         const { x: x2, y: y2 } = bn128Reference.randomPoint();
-        const { x: x1, y: y1, z: z1 } = bn128Reference.randomPointJacobian();
-        const { zz, zzz } = bn128Reference.zFactors({ x2, y2 }, { x1, y1, z1 });
+        const { x: x1, y: y1 } = bn128Reference.randomPoint();
+        const { zz, zzz } = bn128Reference.zFactors({ x2, y2 }, { x1, y1, z1: new BN(1) });
         const resultOverloaded = await contract.addPure(
             `0x${x1.toString(16)}`,
             `0x${y1.toString(16)}`,
-            `0x${z1.toString(16)}`,
             `0x${x2.toString(16)}`,
             `0x${y2.toString(16)}`,
         );
         const result = resultOverloaded.map(r => new BN(r.toString(16), 16).umod(bn128Reference.p));
         // this is an intermediate fn and points are overloaded, and may be multiples of p
         // reduce down to mod p to validate against bn128
-        const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
+        const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, new BN(1));
 
         const pReference = bn128Reference.p.umod(bn128Reference.p);
         assert(result.length === 11);
@@ -49,21 +48,12 @@ contract('Bn128AddAlternate', (accounts) => {
 
     it('method "addAlternate" will throw if points are equivalent', async () => {
         const { x: x2, y: y2 } = bn128Reference.randomPoint();
-        const { x: f, y: ff, z: z1 } = bn128Reference.randomPointJacobian();
-        const zRed = z1.toRed(bn128Reference.pRed);
-        const zz = zRed.redSqr();
-        const zzz = zz.redMul(zRed);
-        const xRed = x2.toRed(bn128Reference.pRed);
-        const yRed = y2.toRed(bn128Reference.pRed);
-        const x1 = xRed.redMul(zz).fromRed();
-        const y1 = yRed.redMul(zzz).fromRed();
         try {
             const resultOverloaded = await contract.addPure(
                 `0x${x1.toString(16)}`,
                 `0x${y1.toString(16)}`,
-                `0x${z1.toString(16)}`,
-                `0x${x2.toString(16)}`,
-                `0x${y2.toString(16)}`,
+                `0x${x1.toString(16)}`,
+                `0x${y1.toString(16)}`,
             );
             expect(true === false);
         } catch (e) {

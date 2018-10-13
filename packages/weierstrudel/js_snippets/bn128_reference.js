@@ -12,6 +12,7 @@ const one = new BN('1', 10);
 const bn128 = {};
 
 bn128.p = p;
+bn128.pRed = pRed;
 
 function _double({ x, y, z }) {
     let xx = x.redSqr();
@@ -128,9 +129,10 @@ bn128.generateTableMultiple = (points) => {
         normalizeFactor = normalizeFactor.redMul(res.p[res.p.length - 1].z.toRed(pRed));
         return res;
     });
-
+    console.log('table temp = ', tableTemp);
     const tmp = tableTemp[tableTemp.length - 1];
     const globalZ = tableTemp[tableTemp.length - 1].p[windowSize - 1].z;
+    console.log('global z = ', globalZ.toString(16));
     let runningZ = new BN('1', 10).toRed(pRed);
     let tableCoordinates = [];
     const runningZDebug = [runningZ.fromRed()];
@@ -142,14 +144,36 @@ bn128.generateTableMultiple = (points) => {
             const x = table.p[j].x.toRed(pRed).redMul(zz);
             const y = table.p[j].y.toRed(pRed).redMul(zzz);
             tableCoordinates.push({ x: x.fromRed(), y: y.fromRed() });
+
             if (j > 0) {
+                // we fill dz in a weird way, first entry does not exist so point j
+                // corresponds to j-1
                 runningZ = runningZ.redMul(table.dz[j-1].toRed(pRed));
                 runningZDebug.push(runningZ.fromRed());
             }
+
+       
         }
     }
+    console.log('running z result = ', runningZ.fromRed().toString(16));
     return tableCoordinates;
 };
+
+// so how does the normalization work
+// we have an affine P
+// we get a jacobian 2P
+// we then scale P's x-y coords to that of 2P.
+// so it's z-coord is off by a factor of 2Y
+// we then cache all of the U-factors for subsequent addition chains
+// the overall z coordinate can be reconstructed from multiplying U's
+// but then multiplying by 2Y. 
+
+// when we hit our second point we have an affine P
+// we convert to a Jacobean P' by scaling by the previous point's z coordinate
+// we then calculate 2P, which has a different z-coordinate
+// we then normalize P to 2Ps z-coordinate and treat 2P, P as affine
+// then calculate U factors that transform future additions
+// hmm
 
 bn128.generateTableSingle = (x, y, z) => {
     const pBase = { x: x.toRed(pRed), y: y.toRed(pRed), z: z.toRed(pRed) };
