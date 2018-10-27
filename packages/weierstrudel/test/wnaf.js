@@ -9,7 +9,7 @@ const referenceWnaf = require('../js_snippets/wnaf_reference_implementation');
 
 Wnaf.abi = WnafInterface.abi; // hon hon hon
 DummyContract.abi = WnafInterface.abi;
-contract('Wnaf', (accounts) => {
+contract.only('Wnaf', (accounts) => {
     let contract;
     let dummyContract;
     beforeEach(async () => {

@@ -6,7 +6,6 @@ contract Bn128AddAlternateInterface {
 }
 
 contract Bn128AddAlternate {
-
     function() external payable {
         assembly {
         /// @dev mixed point addition

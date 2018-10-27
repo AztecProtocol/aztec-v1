@@ -7,6 +7,20 @@ const pRed = BN.red(p);
 // bn128 weierstrass formula = y^2 = x^3 + 3
 const b = new BN('3', 10).toRed(pRed);
 
+const beta = new BN('1e37a68a14ddd1f28e9f6452322e6f2c22a573dc45aa1e7dcf6917dda1583b6e', 16);
+const lambda = new BN('b3c4d79d41a917585bfc41088d8daaa78b17ea66b99c90dd', 16);
+const basis = [
+    {
+        a: new BN('89d3256894d213e3', 16),
+        b: new BN('-6f4d8248eeb859fc8211bbeb7d4f1128', 16), // 30644e72e131a029b85045b68181585e06ceecda572a2489be32480255cc0e6f need this?
+    },
+    {
+        a: new BN('6f4d8248eeb859fd0be4e1541221250b', 16),
+        b: new BN('89d3256894d213e3', 16),
+    }
+]
+
+
 const one = new BN('1', 10);
 
 const bn128 = {};

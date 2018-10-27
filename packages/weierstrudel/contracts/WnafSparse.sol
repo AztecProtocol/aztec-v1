@@ -28,12 +28,12 @@ contract DummyContract {
 }
 
 // An interface for 'Wnaf' so we an send data to fallback functions through truffle
-contract WnafInterface {
-    function calculateWnaf(uint) public returns(uint[10]) {}
-    function calculateWnafPure(uint) public view returns(uint[10]) {}
+contract WnafSparseInterface {
+    function calculateWnaf(uint) public returns(uint[258]) {}
+    function calculateWnafPure(uint) public view returns(uint[258]) {}
 }
 
-contract Wnaf{
+contract WnafSparse{
     function () public {
         assembly {
             // righto, what are we doing here?
@@ -141,6 +141,7 @@ contract Wnaf{
             0x1f and         // mask off bits to get our wnaf value. Stack state: m w o
             dup1             // copy m, we need a copy later one
             dup4             // copy o. Stack state: o m m w o
+            0x20 mul         // o m m w o
             mstore8          // store our wnaf fragment // m w o
 
             // Right, what's left now? We need to prepare our scalar for the next round of iteration
@@ -171,9 +172,9 @@ contract Wnaf{
             dup1 wnaf_start jumpi
 
             // The only way we've reached this part of the code is if w = 0, so we're done.
-            // Return 9 words, starting at the starting index of our wnaf (0x140).
-            // Maximum number of wnaf chunks = 256 + 3 = 258 bytes = 9 machine words
-            0x120 0x140 return
+            // Return 256 words, starting at the starting index of our wnaf (0x140).
+            // Maximum number of wnaf chunks = 256 + 3 = 258 words = 9 machine words
+            0x8256 0x140 return
 
             // Overall size of main loop = 29 opcodes including JUMPDEST.
             // With an average hamming weight of 1/6, the main loop is run about 256/6 ~ 42.667 times.
