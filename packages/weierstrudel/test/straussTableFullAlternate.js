@@ -10,7 +10,7 @@ const bn128Reference = require('../js_snippets/bn128_reference.js');
 // p = 30644E72E131A029B85045B68181585D97816A916871CA8D3C208C16D87CFD47
 
 StraussTableFullAlternate.abi = StraussTableFullAlternateInterface.abi; // hon hon hon
-contract.only('StraussTableFullAlternate', (accounts) => {
+contract('StraussTableFullAlternate', (accounts) => {
     let contract;
     beforeEach(async () => {
         contract = await StraussTableFullAlternate.new();

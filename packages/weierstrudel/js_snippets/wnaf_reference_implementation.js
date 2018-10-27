@@ -19,7 +19,7 @@ module.exports = function calculateWnaf(scalar) {
             return wnafArray;
         }
         if (currentScalar.and(one).eq(one)) {
-            const m = currentScalar.and(twoFiveFive);
+            const m = currentScalar.and(thirtyOne);
             let newWnafArray = [...wnafArray];
 
             newWnafArray[iterator] = m;
