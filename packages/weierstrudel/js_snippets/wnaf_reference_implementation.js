@@ -1,7 +1,36 @@
 const BN = require('bn.js');
 const toBytes32 = require('./toBytes32');
+const crypto = require('crypto');
 // reference wnaf implenentation to test smart contract against.
 // performs standard window NAF method of dividing-by-2 until least significant bit is high
+function alternativeWnaf(scalar) {
+    let next = scalar;
+    let wnaf = [];
+    let o = 0;
+    let count = 0;
+    while (!next.eq(new BN(0))) {
+        const i = next.zeroBits();
+        o = o + i;
+        next = next.shrn(i);
+        let m = next.and(new BN(31));
+        wnaf[o] = m;
+        if (m.gt(new BN(16))) {
+            next = next.add(new BN(32));
+        }
+        next = next.sub(m);
+        count++;
+    }
+ //   console.log('count = ', count);
+}
+// so count is from 20 to 23
+// so we can hard-code 20 and then jump
+
+for (let i = 0; i < 100; i++) {
+    const scalar = new BN(crypto.randomBytes(32), 16).maskn(127);
+    alternativeWnaf(scalar);
+}
+
+
 module.exports = function calculateWnaf(scalar) {
     // assume 'scalar' is a BN
     // phew what a mess

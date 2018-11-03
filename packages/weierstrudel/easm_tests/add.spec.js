@@ -5,21 +5,21 @@ const chai = require('chai');
 const { expect, assert } = chai;
 
 const testHelper = `
-#include "./easm_modules/straus_add.easm"
+#include "./easm_modules/add.easm"
 #include "./easm_modules/constants.easm"
 #define X2 = takes(0) returns(1) { 0x20 }
 #define Y2 = takes(0) returns(1) { 0x00 }
-#define STRAUS_ADD_IMPL = takes(3) returns(11) {
-    STRAUS_ADD<P,P,P,X2,Y2>()
+#define PRECOMPUTE_TABLE_ADD_IMPL = takes(3) returns(11) {
+    PRECOMPUTE_TABLE_ADD<P,P,P,X2,Y2>()
 }`;
 
 
-describe('bn128 straus-add', () => {
+describe('bn128 add', () => {
     let add;
     before(() => {
         add = new Runtime(testHelper);
     });
-    it('macro STRAUS_ADD correctly calculates point addition', async () => {
+    it('macro PRECOMPUTE_TABLE_ADD correctly calculates point addition', async () => {
         const { x: x2, y: y2 } = bn128Reference.randomPoint();
         const { x: x1, y: y1, z: z1 } = bn128Reference.randomPointJacobian();
         const { zz, zzz } = bn128Reference.zFactors({ x2, y2 }, { x1, y1, z1 });
@@ -33,7 +33,7 @@ describe('bn128 straus-add', () => {
             value: y2,
         }];
         const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
-        const { stack, memory } = await add('STRAUS_ADD_IMPL', [x1, bn128Reference.p.sub(y1), z1], initialMemory);
+        const { stack, memory } = await add('PRECOMPUTE_TABLE_ADD_IMPL', [x1, bn128Reference.p.sub(y1), z1], initialMemory);
         expect(stack.length).to.equal(11);
         const [x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
         expect(pA.eq(bn128Reference.p)).to.equal(true);
@@ -47,6 +47,6 @@ describe('bn128 straus-add', () => {
         expect(z3.umod(pA).eq(reference.z)).to.equal(true);
         expect(zzOut.umod(pA).eq(zz)).to.equal(true);
         expect(zzzOut.umod(pA).eq(zzz)).to.equal(true);
-
+    
     });
 });

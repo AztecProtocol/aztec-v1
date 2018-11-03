@@ -33,7 +33,15 @@ const basis = [
 // When splitting scalar in 'endoSplit', calculate g1.k/2^(256) and g2.k/2^(256) to extract
 // c1, c2. o.e. the top-halves of 512-bit multiplications (g1.k) and (g2.k).
 
+// c1 = (b2.k/n)
+// c2 = (-b1.k/n)
 
+// p1 = c1.a1
+// p2 = c2.a2
+// q1 = c1.b1 = (b1.b2.k)/n
+// q2 = c2.b2 = (-b1.b2.k)/n
+
+// (b2.k)
 const power = (new BN(2)).pow(new BN(256));
 // g1 = round(2^(256)b1 / n)
 const g1 = basis[0].b.mul(power).div(n);

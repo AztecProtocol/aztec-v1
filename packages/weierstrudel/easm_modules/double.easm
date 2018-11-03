@@ -1,3 +1,5 @@
+#include "./easm_modules/constants.easm"
+
 #define DOUBLE = takes(4) returns(4) {
     dup4 dup3 dup1
     mulmod
@@ -56,4 +58,95 @@
     dup1 add
     // stack state: 2z y p y3 x3 p
     mulmod
+}
+
+template <mx2,my2,mz2>
+#define DOUBLE_AFFINE = takes(2) returns(2) {
+    P() dup2 dup1 mulmod
+    // stack state: t1 y x
+    P() dup2 4 mul
+    // stack state: t2 p t1 y x p (t2 = 4x overloaded)
+    dup2 dup1 dup1 dup4 dup9 mulmod
+    // stack state: zzx p p t2 p t1 y x
+    swap7
+    // stack state: x p p t2 p t1 y zzx
+    dup1 mulmod 3 mul
+    // stack state: t4 p t2 p t1 y zzx (t4 = 3x overloaded)
+    dup2 dup2 dup1 mulmod
+    // stack state: (t4^2) t4 p t2 p t1 y zzx
+    dup8 dup4 sub dup1 add add
+    // stack state: x3 t4 p t2 p t1 y t3 (x3 = 3x overloaded)
+    3P() sub
+    dup1 <mx2> mstore
+    // stack state: -x3 t4 p t2 p t1 y zzx p (x3 = 3x overloaded)
+    dup8 add mulmod
+    // stack state: y3' t2 p t1 z y zzx (x3 = 3x overloaded)
+    swap3 mulmod
+    P() sub dup1 add
+    // stack state: zzzy y3' y zzx (x3 = 3x overloaded)
+    swap2
+    // stack state: y y3' zzzy zzx
+    dup1 add
+    // stack state: z3 y3' zzzy zzx
+    <mz2> mstore
+    // stack state: y3' zzzy zzx
+    dup2 add <my2> mstore
+    // stack state: zzzy zzx
+}
+
+// stack state y p x z
+template <mx2,my2,mz2>
+#define PRECOMPUTE_TABLE_DOUBLE = takes(4) returns(3) {
+    dup2
+    dup1
+    dup3 dup1// stack state: y y p p z y x p
+    mulmod
+    // stack state: t1 p y p x z
+    dup2 dup2
+    // stack state: t1 p t1 p y p x z
+    4 mul
+    // stack state: t2 p t1 p y p x z
+    dup2 dup1
+    // stack state: p p t2 p t1 p y p x z
+    dup3 dup10
+    // stack state: x t2 p p t2 p t1 p y p x z
+    mulmod
+    // stack state: (x.t2) p t2 p t1 p y p x z
+    dup2
+    sub
+    // stack state: t3 p t2 p t1 p y p x z
+    dup2 dup10 dup1 mulmod 3 mul
+    // stack state: t4 t3 p t2 p t1 p y p x z
+    swap1
+    // stack state: t3 t4 p t2 p t1 p y p x z
+    dup3 dup3 dup1 mulmod
+    // stack state: t4^2 t3 t4 p t2 p t1 p y p x z
+    dup2 dup1 add
+    // stack state: 2t3 t4^2 t3 t4 p t2 p t1 p y p x z
+    add
+    // stack state: x3 t3 t4 p t2 p t1 p y p x z
+    dup1 65664728615517825666739217235771825266088933471893470988067113683935678625749 sub
+    <mx2> mstore // (storing -x3)
+    // stack state: x3 t3 t4 p t2 p t1 p y p x z
+    add
+    // stack state: (x3 + t3) t4 p t2 p t1 p y p x z
+    mulmod
+    // stack state: y3' t2 p t1 p y p x z
+    swap3
+    // stack state: t1 t2 p y3' p y p x z
+    mulmod
+    // stack state: t1 y3' p y p x z
+    dup1 add
+    // stack state: 2t1 y3' p y p x z
+    add
+    // stack state: y3 p y p x z
+    65664728615517825666739217235771825266088933471893470988067113683935678625749 sub
+    <my2> mstore // (storing y3)
+    // stack state: p y p x z
+    dup1 dup6 dup1 add
+    // stack state: 2z p p y p x z
+    dup4 mulmod
+    // stack state z3 p y p x z
+    dup1 <mz2> mstore
+    // final stack state z3 p y p x z
 }
