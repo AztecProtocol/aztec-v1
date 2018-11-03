@@ -1,0 +1,97 @@
+#include "./easm_modules/constants.easm"
+#include "./easm_modules/add.easm"
+#include "./easm_modules/double.easm"
+#include "./easm_modules/add.easm"
+#define X2 = takes(0) returns(1) { 0x00 }
+#define Y2 = takes(0) returns(1) { 0x20 }
+#define Z2 = takes(0) returns(1) { 0x40 }
+
+// input stack state = y p x z
+// performs the first part of our Straus table algorithm
+// Calculates P, 3P, ..., 15P and leaves x/y coordinaes on stack
+// We also calculate the value required to transform each point's subsequent z-coordinate
+// e.g. Z3 * dz3 = Z5
+// We leave dz^2 and dz^3 on the stack as we use these to re-scale the x/y coordinates once we've
+// calculated the entire precomputed table
+// we also leave some values of p on the stack to minimize swap ops
+// initial stack state y p x z
+#define PRECOMPUTE_TABLE_SINGLE = takes(4) returns(59) {
+    PRECOMPUTE_TABLE_DOUBLE<X2,Y2,Z2>()
+    // we normalize x and y as if they were scaled by 'zd', without changing 'z'
+    // i.e. x' = x(zd^{2}) , y' = y(zd^{3})
+    // we can treat xd, yd, zd as an affine point when we calculate 3P, 5P, 7P etc.
+    // each point will have a z-coordinate that is (zd) too small, but we can normalize that later
+    // stack state: zd p y p x z
+    dup2 dup1 dup3 dup1 mulmod            // zz' p z' p y p x z
+    swap6 dup7 mulmod                     // x' z' p y p zz z
+    swap5 mulmod mulmod
+    P() sub swap1 swap2       // z -y x
+    PRECOMPUTE_TABLE_ADD<P,P,P,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD_AND_RESCALE<dup4,dup5,dup6,X2,Y2,Z2>()
+}
+
+
+// When calculating our precomputed table, the first point will always be affine
+// take advantage of that to remove scaling some opcodes!
+// initial stack state: y x
+// final stack state  : z15 (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=15}^{n=3} y_1 x_1
+#define PRECOMPUTE_TABLE_SINGLE_AFFINE = takes(2) returns(59) {
+    DOUBLE_AFFINE<X2,Y2,Z2>()
+    // DOUBLE_AFFINE rescales X1 and Y1 by dz^2 and dz^3.
+    // Because P is affine, dz = 2Y
+    ADD_AFFINE<X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD_AND_RESCALE<dup4,dup5,dup6,X2,Y2,Z2>()
+}
+
+// for the last iteration of calculating table coordinates, we want the final stack variables
+// to be in slightly different positions, to reduce the number of swap ops
+// initial stack state: y x
+// final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1
+#define PRECOMPUTE_TABLE_SINGLE_AFFINE_FINAL = takes(2) returns(59) {
+    DOUBLE_AFFINE<X2,Y2,Z2>()
+    // DOUBLE_AFFINE rescales X1 and Y1 by dz^2 and dz^3.
+    // Because P is affine, dz = 2Y
+    ADD_AFFINE<X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD_AND_RESCALE_FINAL<dup4,dup5,dup6,dup7,dup8,dup9,X2,Y2,Z2>()
+}
+
+
+// for the last iteration of calculating table coordinates, we want the final stack variables
+// to be in slightly different positions, to reduce the number of swap ops
+// initial stack state y p x z
+// final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1
+#define PRECOMPUTE_TABLE_SINGLE_FINAL = takes(2) returns(59) {
+    PRECOMPUTE_TABLE_DOUBLE<X2,Y2,Z2>()
+    // we normalize x and y as if they were scaled by 'zd', without changing 'z'
+    // i.e. x' = x(zd^{2}) , y' = y(zd^{3})
+    // we can treat xd, yd, zd as an affine point when we calculate 3P, 5P, 7P etc.
+    // each point will have a z-coordinate that is (zd) too small, but we can normalize that later
+    // stack state: zd p y p x z
+    dup2 dup1 dup3 dup1 mulmod            // zz' p z' p y p x z
+    swap6 dup7 mulmod                     // x' z' p y p zz z
+    swap5 mulmod mulmod
+    P() sub swap1 swap2       // z -y x
+    PRECOMPUTE_TABLE_ADD<P,P,P,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD_AND_RESCALE_FINAL<dup4,dup5,dup6,dup7,dup8,dup9,X2,Y2,Z2>()
+}
+

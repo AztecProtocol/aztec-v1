@@ -1,12 +1,12 @@
 const BN = require('bn.js');
 const crypto = require('crypto');
 
+const n = new BN('30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001', 16);
 const p = new BN('21888242871839275222246405745257275088696311157297823662689037894645226208583', 10);
 const pRed = BN.red(p);
 
 // bn128 weierstrass formula = y^2 = x^3 + 3
 const b = new BN('3', 10).toRed(pRed);
-
 const beta = new BN('1e37a68a14ddd1f28e9f6452322e6f2c22a573dc45aa1e7dcf6917dda1583b6e', 16);
 const lambda = new BN('b3c4d79d41a917585bfc41088d8daaa78b17ea66b99c90dd', 16);
 const basis = [
@@ -27,7 +27,9 @@ const bn128 = {};
 
 bn128.p = p;
 bn128.pRed = pRed;
-
+bn128.n = n;
+bn128.lambda = lambda;
+bn128.beta = beta;
 function _double({ x, y, z }) {
     let xx = x.redSqr();
     let yy = y.redSqr();
@@ -143,10 +145,8 @@ bn128.generateTableMultiple = (points) => {
         normalizeFactor = normalizeFactor.redMul(res.p[res.p.length - 1].z.toRed(pRed));
         return res;
     });
-    console.log('table temp = ', tableTemp);
     const tmp = tableTemp[tableTemp.length - 1];
     const globalZ = tableTemp[tableTemp.length - 1].p[windowSize - 1].z;
-    console.log('global z = ', globalZ.toString(16));
     let runningZ = new BN('1', 10).toRed(pRed);
     let tableCoordinates = [];
     const runningZDebug = [runningZ.fromRed()];
@@ -157,20 +157,16 @@ bn128.generateTableMultiple = (points) => {
             const zzz = zz.redMul(runningZ);
             const x = table.p[j].x.toRed(pRed).redMul(zz);
             const y = table.p[j].y.toRed(pRed).redMul(zzz);
-            tableCoordinates.push({ x: x.fromRed(), y: y.fromRed() });
-
+            tableCoordinates[(((tableTemp.length - 1) - i)*tableTemp[0].p.length) + j] = { x: x.fromRed(), y: y.fromRed() };
             if (j > 0) {
                 // we fill dz in a weird way, first entry does not exist so point j
                 // corresponds to j-1
                 runningZ = runningZ.redMul(table.dz[j-1].toRed(pRed));
                 runningZDebug.push(runningZ.fromRed());
-            }
-
-       
+            }   
         }
     }
-    console.log('running z result = ', runningZ.fromRed().toString(16));
-    return tableCoordinates;
+    return { referenceTable: tableCoordinates, globalZ };
 };
 
 // so how does the normalization work
