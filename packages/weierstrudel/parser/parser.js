@@ -320,7 +320,7 @@ function formatEvenBytes(bytes) {
     return bytes;
 }
 
-function newExpression(...params) {
+function newExpression(params) {
     return {
         name: '',
         takes: -1,
@@ -340,6 +340,7 @@ function Parser() {
     this.currentExpression = newExpression();
     this.macros = {};
     this.includedFiles = {};
+    this.inlineMacroId = 0;
 }
 
 Parser.prototype.parseTopLevel = function parseTopLevel(token) {
@@ -397,7 +398,7 @@ Parser.prototype.parseTopLevel = function parseTopLevel(token) {
     }
     if (token === '{' && this.contextState === 'expression_start') {
         this.contextState = '';
-        return this.parseExpression(this.next());
+        return this.parseExpression();
     }
     if (token === 'end') {
         return this.macros;
@@ -405,97 +406,89 @@ Parser.prototype.parseTopLevel = function parseTopLevel(token) {
     throw new Error(`error, cannot parse top-level token ${token}`);
 }
 
-Parser.prototype.parseExpression = function parseExpression(token) {
-    if (token === '') { return this.parseExpression(this.next()); }
-    const opcode = opcodes[token];
-    if (opcode) {
-        this.currentExpression.ops.push({
-            type: TYPES.OPCODE,
-            value: opcode,
-            args: [],
-        });
-        return this.parseExpression(this.next());
+Parser.prototype.parseExpression = function parseExpression() {
+    let foundTerminator = false;
+    while (!foundTerminator) {
+        let token = this.next();
+        const opcode = opcodes[token];
+        if (token === '') {
+        } else if (opcode) {
+            this.currentExpression.ops.push({
+                type: TYPES.OPCODE,
+                value: opcode,
+                args: [],
+            });
+        } else if (token.slice(-1) === ':') {
+            const jumpDest = token.slice(0, -1);
+            check(!this.currentExpression.jumpDests[jumpDest], `jump label ${jumpDest} has already been defined`);
+            this.currentExpression.ops.push({
+                type: TYPES.JUMPDEST,
+                value: jumpDest,
+                args: [],
+            });
+            this.currentExpression.jumpDests[jumpDest] = true;
+        } else if (token.slice(-3) === '>()') {
+            const separated = token.split('<');
+            const macroName = separated[0];
+            const templateArgs = separated[1].slice(0, -3).split(',');
+            const macro = this.macros[macroName];
+            check(macro, `expected ${macroName} to be a macro`);
+            // check(templateArgs.length === macro.templateParams.length, `call to macro ${macroName} has ${templateArgs.length} entries. Expected ${macro.templateParams.length}`);
+            this.currentExpression.ops.push({
+                type: TYPES.MACRO,
+                value: macroName,
+                args: templateArgs,
+            });
+        } else if (token.slice(0, 1) === '<') {
+            check(token.slice(-1) === '>', `expected ${token} to be a template param`);
+            // check(this.currentExpression.templateParams.indexOf(token.slice(1, -1)) !== -1, `cannot find template param ${token}`);
+            this.currentExpression.ops.push({
+                type: TYPES.TEMPLATE,
+                value: token.slice(1, -1),
+                args: [],
+            });
+        } else if (token.slice(token.length - 2) === '()') {
+            const macroToken = token.slice(0, token.length - 2);
+            const [name, templateParams] = macroToken.split('<');
+            const macro = this.macros[name];
+            check(macro, `expected ${name} from ${token} to be a macro`);
+            this.currentExpression.ops.push({
+                type: TYPES.MACRO,
+                value: name,
+                args: [],
+            })
+        } else if (token.includes('0x')) {
+            let hex = formatEvenBytes(token.slice(2));
+            const opcode = toHex(95 + (hex.length / 2));
+            this.currentExpression.ops.push({
+                type: TYPES.PUSH,
+                value: opcode,
+                args: [hex],
+            })
+        } else if (token.match(/^-{0,1}\d+$/)) {
+            let hex = formatEvenBytes(new BN(token, 10).toString(16)); // todo, something better than this!
+            const opcode = toHex(95 + (hex.length / 2));
+            this.currentExpression.ops.push({
+                type: TYPES.PUSH,
+                value: opcode,
+                args: [hex],
+            })
+        } else if (token === '}') {
+            this.macros = {
+                ...this.macros,
+                [this.currentExpression.name]: this.currentExpression,
+            };
+            this.contextState = '';
+            foundTerminator = true;
+            break;
+        } else {
+            this.currentExpression.ops.push({
+                type: TYPES.PUSH_JUMP_LABEL,
+                value: token
+            });
+        }
     }
-    if (token.slice(-1) === ':') {
-        const jumpDest = token.slice(0, -1);
-        check(!this.currentExpression.jumpDests[jumpDest], `jump label ${jumpDest} has already been defined`);
-        this.currentExpression.ops.push({
-            type: TYPES.JUMPDEST,
-            value: jumpDest,
-            args: [],
-        });
-        this.currentExpression.jumpDests[jumpDest] = true;
-        return this.parseExpression(this.next());
-    }
-    if (token.slice(-3) === '>()') {
-        const separated = token.split('<');
-        const macroName = separated[0];
-        const templateArgs = separated[1].slice(0, -3).split(',');
-        const macro = this.macros[macroName];
-        check(macro, `expected ${macroName} to be a macro`);
-        // check(templateArgs.length === macro.templateParams.length, `call to macro ${macroName} has ${templateArgs.length} entries. Expected ${macro.templateParams.length}`);
-        this.currentExpression.ops.push({
-            type: TYPES.MACRO,
-            value: macroName,
-            args: templateArgs,
-        });
-        return this.parseExpression(this.next());
-    }
-    if (token.slice(0, 1) === '<') {
-        check(token.slice(-1) === '>', `expected ${token} to be a template param`);
-        // check(this.currentExpression.templateParams.indexOf(token.slice(1, -1)) !== -1, `cannot find template param ${token}`);
-        this.currentExpression.ops.push({
-            type: TYPES.TEMPLATE,
-            value: token.slice(1, -1),
-            args: [],
-        });
-        return this.parseExpression(this.next());
-    }
-    if (token.slice(token.length - 2) === '()') {
-        const macroToken = token.slice(0, token.length - 2);
-        const [name, templateParams] = macroToken.split('<');
-        const macro = this.macros[name];
-        check(macro, `expected ${name} from ${token} to be a macro`);
-        this.currentExpression.ops.push({
-            type: TYPES.MACRO,
-            value: name,
-            args: [],
-        })
-        return this.parseExpression(this.next());
-    }
-    if (token.includes('0x')) {
-        let hex = formatEvenBytes(token.slice(2));
-        const opcode = toHex(95 + (hex.length / 2));
-        this.currentExpression.ops.push({
-            type: TYPES.PUSH,
-            value: opcode,
-            args: [hex],
-        })
-        return this.parseExpression(this.next());
-    }
-    if (token.match(/^-{0,1}\d+$/)) {
-        let hex = formatEvenBytes(new BN(token, 10).toString(16)); // todo, something better than this!
-        const opcode = toHex(95 + (hex.length / 2));
-        this.currentExpression.ops.push({
-            type: TYPES.PUSH,
-            value: opcode,
-            args: [hex],
-        })
-        return this.parseExpression(this.next());
-    }
-    if (token === '}') {
-        this.macros = {
-            ...this.macros,
-            [this.currentExpression.name]: this.currentExpression,
-        };
-        this.contextState = '';
-        return this.parseTopLevel(this.next());
-    }
-    this.currentExpression.ops.push({
-        type: TYPES.PUSH_JUMP_LABEL,
-        value: token
-    });
-    return this.parseExpression(this.next());
+    return this.parseTopLevel(this.next());
 }
 
 Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParams = {}) {
@@ -545,9 +538,39 @@ Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParam
             case TYPES.TEMPLATE: {
                 const index = templateLabels.indexOf(op.value);
                 check(index !== -1, `cannot find template label ${op.value}`);
-                const macroName = templateParams[index];
-                const templateMacro = this.macros[macroName];
-                check(templateMacro, `cannot find template ${macroName}`);
+                let macroName = templateParams[index];
+                let templateMacro;
+                // TODO: adopt parseExpression to support inline template compilation
+                if (opcodes[macroName]) {
+                    templateMacro = newExpression({
+                        name: macroName,
+                        ops: [{
+                            type: TYPES.OPCODE,
+                            value: opcodes[macroName],
+                            args: [],
+                        }],
+                    });
+                    macroName = `inline-${macroName}-${this.inlineMacroId}`;
+                    this.macros[macroName] = templateMacro;
+                    this.inlineMacroId += 1;
+                } else if (macroName.includes('0x')) {
+                    let hex = formatEvenBytes(macroName.slice(2));
+                    const opcode = toHex(95 + (hex.length / 2));
+                    templateMacro = newExpression({
+                        name: macroName,
+                        ops: [{
+                            type: TYPES.PUSH,
+                            value: opcode,
+                            args: [hex],
+                        }],
+                    });
+                    macroName = `inline-${macroName}-${this.inlineMacroId}`;
+                    this.macros[macroName] = templateMacro;
+                    this.inlineMacroId += 1;
+                } else {
+                    templateMacro = this.macros[macroName];
+                    check(templateMacro, `cannot find template ${macroName}`);
+                }
                 // TODO: support recursive templating
                 const newContext = this.processMacro(macroName, offset, []);
                 context.bytecode += newContext.bytecode;
@@ -556,7 +579,7 @@ Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParam
                 break;
             }
             case TYPES.PUSH_JUMP_LABEL: {
-                const jumpEntry = jumpTable[op.value] || [];                
+                const jumpEntry = jumpTable[op.value] || [];
                 jumpEntry.push(Number(offset) + 1 - Number(bytecodeIndex));
                 context.bytecode += `${opcodes['push2']}xxxx`;
                 context.transcript = [...context.transcript, `${identifier}.${op.value}`];
@@ -587,11 +610,11 @@ Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParam
             const pushOffset = byteOffset * 2;
             check(context.bytecode.slice(pushOffset, pushOffset + 4) === 'xxxx', `jump to ${jumpLabel} at index ${pushOffset * 2} badly formed.`);
             let first = context.bytecode.slice(0, pushOffset);
-            let second = context.bytecode.slice(pushOffset  + 4);
+            let second = context.bytecode.slice(pushOffset + 4);
             context.bytecode = `${first}${jumpOffset}${second}`;
         }
     }
-    check(context.bytecode.indexOf('x') === -1, `error, did not replace all jump invokations in ${macro}. ${JSON.stringify(macro)}`);
+    check(context.bytecode.indexOf('x') === -1, `error, did not replace all jump invokations in ${JSON.stringify(macro)}. ${context.bytecode}`);
     return context;
 }
 
