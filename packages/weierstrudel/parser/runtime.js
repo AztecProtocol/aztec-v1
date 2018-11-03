@@ -37,7 +37,7 @@ function processMemory(bnArray) {
 function Runtime(filename) {
     const parser = new Parser();
     parser.parseFile(filename);
-    return async function runMacro(macroName, stack = null, memory = null) {
+    return async function runMacro(macroName, stack = null, memory = null, data = null) {
         const macro = parser.macros[macroName];
         const { bytecode } = parser.processMacro(macroName);
         const { takes } = macro;
@@ -50,10 +50,13 @@ function Runtime(filename) {
             gasLimit: Buffer.from('ffffffff', 'hex'),
             stack: stack,
             memory: memory ? processMemory(memory) : null,
+            data: data ? processMemory(data) : null,
         });
         if (err) {
             throw new Error(err);
         }
+        const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).toString(10);
+        console.log('gas consumed = ', gasSpent);
         return { stack: results.runState.stack, memory: results.runState.memory };
     }
 }
