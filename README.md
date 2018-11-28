@@ -4,7 +4,8 @@ The AZTEC protocol enables confidential transactions on the Ethereum network, wi
 
 * [Read the AZTEC Paper](https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf)
 * [View the AZTEC.sol zero-knowledge validator](https://github.com/AztecProtocol/AZTEC/blob/master/contracts/AZTEC.sol)
-* [View a deployed AZTEC Token Smart Contract](https://etherscan.io/address/0x6c8b12c650594a9fdb0b1f52084bbd0d9010aa09)
+* [View a deployed AZTEC zero-knowledge validator Smart Contract](https://etherscan.io/address/0xb729d78f799f62036a3b149e8d799bf109c214da)
+* [View a deployed AZTEC Token Smart Contract, which uses the zero-knowledge validator to create confidential DAI](https://etherscan.io/address/0x6c8b12c650594a9fdb0b1f52084bbd0d9010aa09)
 
 ## What is the AZTEC Protocol?
 
