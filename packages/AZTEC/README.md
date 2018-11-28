@@ -16,7 +16,7 @@ The protocol enables transactions of value, where the *values* of the transactio
 
 Instead of balances, the protocol uses AZTEC **notes**. A note encrypts a number that represents a value (for example a number of ERC-20 tokens). Each note has an owner, defined via an Ethereum address. In order to *spend* a note the owner must provide a valid ECDSA signature attesting to this.
 
-## What is this enable?
+## What does this enable?
 
 ### Confidential representations of ERC20-tokens
 
