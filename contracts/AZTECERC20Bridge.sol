@@ -16,7 +16,7 @@ contract ERC20Interface {
 /**
  * @title  AZTEC token, providing a confidential representation of an ERC20 token 
  * @author Zachary Williamson, AZTEC
- * Copyright AZTEC 2018. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2018. All rights reserved.
  * We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum.
  * This will include our bespoke AZTEC decentralized exchange, allowing for cross-asset transfers with full transaction privacy
  * and interopability with public decentralized exchanges.
