@@ -10,7 +10,7 @@ library AZTECInterface {
  * @dev Don't include this as an internal library. This contract uses a static memory table to cache elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
  * The intended use case is to call this externally via `deletagecall`. External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no storage and makes no external calls (other than to precompiles)
- * Copyright AZTEC 2018. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2018. All rights reserved.
  * We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum.
  * This will include our bespoke AZTEC decentralized exchange, allowing for cross-asset transfers with full transaction privacy
  * and interopability with public decentralized exchanges.
