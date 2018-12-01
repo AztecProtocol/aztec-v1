@@ -23,7 +23,7 @@ contract AZTEC {
      * @notice See AZTECInterface for how method calls should be constructed.
      * 'Cost' of raw elliptic curve primitives for a transaction: 260,700 gas + (124,500 * number of input notes) + (167,600 * number of output notes).
      * For a basic 'joinSplit' with 2 inputs and 2 outputs = 844,900 gas.
-     * AZTEC is written in IULIA to enable manual memory management and for other efficiency savings.
+     * AZTEC is written in JULIA to enable manual memory management and for other efficiency savings.
      **/
     function() external payable {
         assembly {
