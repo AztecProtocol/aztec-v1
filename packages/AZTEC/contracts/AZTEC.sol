@@ -138,7 +138,7 @@ contract AZTEC {
                     case 0 { k := calldataload(noteIndex) }
 
                     // Check this commitment is well formed...
-                    // validateCommitment(noteIndex, k, a)
+                    validateCommitment(noteIndex, k, a)
                     // If i > m then this is an output note.
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
                     switch gt(add(i, 0x01), m)
