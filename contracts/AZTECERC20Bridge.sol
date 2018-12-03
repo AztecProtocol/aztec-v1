@@ -46,6 +46,7 @@ contract AZTECERC20Bridge {
         setupPubKey = _setupPubKey;
         token = ERC20Interface(_token);
         scalingFactor = _scalingFactor;
+
         // calculate the EIP712 domain hash, for hashing structured data
         bytes32 _domainHash;
         assembly {
@@ -98,6 +99,7 @@ contract AZTECERC20Bridge {
             signatureMessage := keccak256(add(m, 0x1e), 0x42)
         }
         address owner = ecrecover(signatureMessage, uint8(signature[0]), signature[1], signature[2]);
+        require(owner != address(0), "signature invalid");
         require(noteRegistry[noteHash] == owner, "expected input note to exist in registry");
         noteRegistry[noteHash] = 0;
     }
@@ -118,6 +120,7 @@ contract AZTECERC20Bridge {
             mstore(add(m, 0x60), mload(add(note, 0xa0)))
             noteHash := keccak256(m, 0x80)
         }
+        require(owner != address(0), "owner must be valid Ethereum address");
         require(noteRegistry[noteHash] == 0, "expected output note to not exist in registry");
         noteRegistry[noteHash] = owner;
     }
@@ -146,6 +149,7 @@ contract AZTECERC20Bridge {
 
         // extract variable kPublic from proof
         uint256 kPublic = uint(notes[notes.length - 1][0]);
+        require(kPublic < groupModulus, "invalid value of kPublic");
 
         // iterate over the notes array and validate each input/output note
         for (uint256 i = 0; i < notes.length; i++) {
