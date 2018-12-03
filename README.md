@@ -6,8 +6,8 @@ The AZTEC protocol enables confidential transactions on the Ethereum network, wi
 
 * [Read the AZTEC Paper](https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf)
 * [View the AZTEC.sol zero-knowledge validator](https://github.com/AztecProtocol/AZTEC/blob/master/contracts/AZTEC.sol)
-* [View a deployed AZTEC zero-knowledge validator Smart Contract](https://etherscan.io/address/0xb729d78f799f62036a3b149e8d799bf109c214da)
-* [View a deployed AZTEC Token Smart Contract, which uses the zero-knowledge validator to create confidential DAI](https://etherscan.io/address/0x6c8b12c650594a9fdb0b1f52084bbd0d9010aa09)
+* [View a deployed AZTEC zero-knowledge validator Smart Contract](https://etherscan.io/address/0xa43f8675850ac3f60a4d4cec954f1a1b0e1dbb07)
+* [View a deployed AZTEC Token Smart Contract, which uses the zero-knowledge validator to create confidential DAI](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F)
 * [Contributing](https://github.com/AztecProtocol/AZTEC#this-sounds-interesting-how-can-i-get-involved)
 
 ## What is the AZTEC Protocol?
@@ -23,7 +23,7 @@ Instead of balances, the protocol uses AZTEC **notes**. A note encrypts a number
 
 ### Confidential representations of ERC20-tokens
 
-The AZTEC protocol can enable confidential transactions for *any* generic digital asset on Ethereum, including *existing* assets. [For our proof of concept implementation of the AZTEC protocol](https://etherscan.io/address/0x6c8b12c650594a9fdb0b1f52084bbd0d9010aa09), we attached an AZTEC token to MakerDAO's DAI token. This smart contract can be used to convert DAI from its public ERC-20 form into a confidential AZTEC note form.
+The AZTEC protocol can enable confidential transactions for *any* generic digital asset on Ethereum, including *existing* assets. [For our proof of concept implementation of the AZTEC protocol](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F), we attached an AZTEC token to MakerDAO's DAI token. This smart contract can be used to convert DAI from its public ERC-20 form into a confidential AZTEC note form.
 
 ### Fully confidential digital assets
 
@@ -39,7 +39,7 @@ The gas costs scale with the number of input and output notes in a **join-split*
 
 ## Where can I see this in action?
 
-The AZTEC protocol is live today on the Etheruem main-net. [Our proof of concept contract](https://etherscan.io/address/0x6c8b12c650594a9fdb0b1f52084bbd0d9010aa09) converts DAI into AZTEC note form and is live on the Ethereum main-net. [Here is an example AZTEC join-split transaction](https://etherscan.io/tx/0xdd879c3181a40c80d738320be2fd2f9d919412537d07d252db8ec974343ff0c1).
+The AZTEC protocol is live today on the Etheruem main-net. [Our proof of concept contract](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F) converts DAI into AZTEC note form and is live on the Ethereum main-net. [Here is an example AZTEC join-split transaction](https://etherscan.io/tx/0x6cb6bccb6d51445ce026dd76b8526e8014a6a276255d22e4f5be26f8efb891fb).
 
 ## What is the future of the AZTEC protocol?
 
