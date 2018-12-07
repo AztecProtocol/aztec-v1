@@ -1,3 +1,4 @@
+/* eslint-disable quote-props, no-restricted-syntax */
 const fs = require('fs');
 const BN = require('bn.js');
 
@@ -374,7 +375,7 @@ Parser.prototype.parseTopLevel = function parseTopLevel(token) {
         this.currentExpression = {
             ...this.currentExpression,
             name: token,
-        }
+        };
         this.contextState = 'expression_equals';
         return this.parseTopLevel(this.next());
     }
@@ -404,15 +405,14 @@ Parser.prototype.parseTopLevel = function parseTopLevel(token) {
         return this.macros;
     }
     throw new Error(`error, cannot parse top-level token ${token}`);
-}
+};
 
 Parser.prototype.parseExpression = function parseExpression() {
     let foundTerminator = false;
     while (!foundTerminator) {
-        let token = this.next();
+        const token = this.next();
         const opcode = opcodes[token];
-        if (token === '') {
-        } else if (opcode) {
+        if (opcode) {
             this.currentExpression.ops.push({
                 type: TYPES.OPCODE,
                 value: opcode,
@@ -433,7 +433,6 @@ Parser.prototype.parseExpression = function parseExpression() {
             const templateArgs = separated[1].slice(0, -3).split(',');
             const macro = this.macros[macroName];
             check(macro, `expected ${macroName} to be a macro`);
-            // check(templateArgs.length === macro.templateParams.length, `call to macro ${macroName} has ${templateArgs.length} entries. Expected ${macro.templateParams.length}`);
             this.currentExpression.ops.push({
                 type: TYPES.MACRO,
                 value: macroName,
@@ -441,7 +440,6 @@ Parser.prototype.parseExpression = function parseExpression() {
             });
         } else if (token.slice(0, 1) === '<') {
             check(token.slice(-1) === '>', `expected ${token} to be a template param`);
-            // check(this.currentExpression.templateParams.indexOf(token.slice(1, -1)) !== -1, `cannot find template param ${token}`);
             this.currentExpression.ops.push({
                 type: TYPES.TEMPLATE,
                 value: token.slice(1, -1),
@@ -449,30 +447,28 @@ Parser.prototype.parseExpression = function parseExpression() {
             });
         } else if (token.slice(token.length - 2) === '()') {
             const macroToken = token.slice(0, token.length - 2);
-            const [name, templateParams] = macroToken.split('<');
+            const [name] = macroToken.split('<');
             const macro = this.macros[name];
             check(macro, `expected ${name} from ${token} to be a macro`);
             this.currentExpression.ops.push({
                 type: TYPES.MACRO,
                 value: name,
                 args: [],
-            })
+            });
         } else if (token.includes('0x')) {
-            let hex = formatEvenBytes(token.slice(2));
-            const opcode = toHex(95 + (hex.length / 2));
+            const hex = formatEvenBytes(token.slice(2));
             this.currentExpression.ops.push({
                 type: TYPES.PUSH,
-                value: opcode,
+                value: toHex(95 + (hex.length / 2)),
                 args: [hex],
-            })
+            });
         } else if (token.match(/^-{0,1}\d+$/)) {
-            let hex = formatEvenBytes(new BN(token, 10).toString(16)); // todo, something better than this!
-            const opcode = toHex(95 + (hex.length / 2));
+            const hex = formatEvenBytes(new BN(token, 10).toString(16)); // todo, something better than this!
             this.currentExpression.ops.push({
                 type: TYPES.PUSH,
-                value: opcode,
+                value: toHex(95 + (hex.length / 2)),
                 args: [hex],
-            })
+            });
         } else if (token === '}') {
             this.macros = {
                 ...this.macros,
@@ -481,17 +477,17 @@ Parser.prototype.parseExpression = function parseExpression() {
             this.contextState = '';
             foundTerminator = true;
             break;
-        } else {
+        } else if (token !== '') {
             this.currentExpression.ops.push({
                 type: TYPES.PUSH_JUMP_LABEL,
-                value: token
+                value: token,
             });
         }
     }
     return this.parseTopLevel(this.next());
-}
+};
 
-Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParams = {}) {
+Parser.prototype.processMacro = function processMacro(name, bytecodeIndex = 0, templateParams = {}) {
     const identifier = `${name}.${bytecodeIndex}`;
     const context = { bytecode: '', transcript: [`#${identifier}`] };
     const macro = this.macros[name];
@@ -501,22 +497,10 @@ Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParam
     const jumpTable = {};
     const jumpIndices = [];
     const templateLabels = this.macros[name].templateParams;
-    for (op of ops) {
+    for (const op of ops) {
         switch (op.type) {
             case TYPES.MACRO: {
-                // const templateArgs = op.args;
-                // const args = {};
-                // for (templateName of templateArgs) {
-                //     // for now rule out args being native expressions, either macros or args
-                //     if (this.macros[templateName]) {
-                //         args[templateName] = this.macros[templateName];
-                //     } else if (templateParams[templateName]) {
-                //         args[templateName] = templateParams[templateName];
-                //     } else {
-                //         check(false, `cannot find matching macro for template param ${templateName}`);
-                //     }
-                // }
-                let newContext = this.processMacro(op.value, offset, op.args);
+                const newContext = this.processMacro(op.value, offset, op.args);
                 context.bytecode += newContext.bytecode;
                 context.transcript = [...context.transcript, newContext.transcript];
                 offset += (newContext.bytecode.length / 2);
@@ -554,7 +538,7 @@ Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParam
                     this.macros[macroName] = templateMacro;
                     this.inlineMacroId += 1;
                 } else if (macroName.includes('0x')) {
-                    let hex = formatEvenBytes(macroName.slice(2));
+                    const hex = formatEvenBytes(macroName.slice(2));
                     const opcode = toHex(95 + (hex.length / 2));
                     templateMacro = newExpression({
                         name: macroName,
@@ -581,16 +565,15 @@ Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParam
             case TYPES.PUSH_JUMP_LABEL: {
                 const jumpEntry = jumpTable[op.value] || [];
                 jumpEntry.push(Number(offset) + 1 - Number(bytecodeIndex));
-                context.bytecode += `${opcodes['push2']}xxxx`;
+                context.bytecode += `${opcodes.push2}xxxx`;
                 context.transcript = [...context.transcript, `${identifier}.${op.value}`];
                 offset += 3;
                 jumpTable[op.value] = jumpEntry;
                 break;
             }
             case TYPES.JUMPDEST: {
-                const label = op.value;
                 jumpIndices.push({ label: op.value, offset });
-                context.bytecode += opcodes['jumpdest'];
+                context.bytecode += opcodes.jumpdest;
                 context.transcript = [...context.transcript, `${identifier}.${op.value}:`];
                 offset += 1;
                 break;
@@ -602,21 +585,27 @@ Parser.prototype.processMacro = function (name, bytecodeIndex = 0, templateParam
     }
 
     // add in jump indices
-    for ({ label: jumpLabel, offset: offsetBase } of jumpIndices) {
+    for (const { label: jumpLabel, offset: offsetBase } of jumpIndices) {
         const jumpInvocations = jumpTable[jumpLabel];
         const jumpOffset = padNBytes(toHex(offsetBase), 2);
         check(jumpInvocations, `jump label ${jumpLabel} is not used any where in ${name}!`);
-        for (byteOffset of jumpInvocations) {
+        for (const byteOffset of jumpInvocations) {
             const pushOffset = byteOffset * 2;
-            check(context.bytecode.slice(pushOffset, pushOffset + 4) === 'xxxx', `jump to ${jumpLabel} at index ${pushOffset * 2} badly formed.`);
-            let first = context.bytecode.slice(0, pushOffset);
-            let second = context.bytecode.slice(pushOffset + 4);
+            check(
+                context.bytecode.slice(pushOffset, pushOffset + 4) === 'xxxx',
+                `jump to ${jumpLabel} at index ${pushOffset * 2} badly formed.`
+            );
+            const first = context.bytecode.slice(0, pushOffset);
+            const second = context.bytecode.slice(pushOffset + 4);
             context.bytecode = `${first}${jumpOffset}${second}`;
         }
     }
-    check(context.bytecode.indexOf('x') === -1, `error, did not replace all jump invokations in ${JSON.stringify(macro)}. ${context.bytecode}`);
+    check(
+        context.bytecode.indexOf('x') === -1,
+        `error, did not replace all jump invokations in ${JSON.stringify(macro)}. ${context.bytecode}`
+    );
     return context;
-}
+};
 
 function removeComments(lines) {
     const output = [];
@@ -646,8 +635,8 @@ function removeComments(lines) {
 
 Parser.prototype.getFileContents = function getFileContents(filename) {
     let fileString;
-    if (filename.includes("#")) {
-        fileString = filename; // hacky workaround for direct strings
+    if (filename.includes('#')) {
+        fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
     } else {
         fileString = fs.readFileSync(filename, 'utf8');
     }
@@ -668,7 +657,7 @@ Parser.prototype.getFileContents = function getFileContents(filename) {
     }
     this.includedFiles[filename] = true;
     return [...imported, ...lines.slice(i)];
-}
+};
 
 Parser.prototype.parseFile = function parseFile(filename) {
     const lines = this.getFileContents(filename);
@@ -677,19 +666,18 @@ Parser.prototype.parseFile = function parseFile(filename) {
     }, []);
     this.parseTopLevel(this.next());
     return this.macros;
-}
+};
 
 Parser.prototype.next = function next() {
     this.tokenPtr += 1;
     if (Number(this.tokenPtr) === Number(this.tokens.length)) {
         return 'end';
-    } else {
-        return this.tokens[this.tokenPtr];
     }
-}
+    return this.tokens[this.tokenPtr];
+};
 
 Parser.prototype.getInitState = function getInitState(...params) {
-    let bytecode = ''
+    let bytecode = '';
     for (let i = 0; i < params.length; i += 1) {
         let hex = new BN(params[i], 10).toString(16); // todo, something better than this!
         if ((Math.floor(hex.length / 2) * 2) !== hex.length) {
@@ -699,6 +687,6 @@ Parser.prototype.getInitState = function getInitState(...params) {
         bytecode += `${new BN(opcode, 10).toString(16)}${hex}`;
     }
     return bytecode;
-}
+};
 
 module.exports = Parser;
