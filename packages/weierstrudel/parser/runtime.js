@@ -1,12 +1,8 @@
-const VM = require('../ethereumjs-vm-tracer/ethereumjs-vm');
+/* eslint-disable no-restricted-syntax */
 const BN = require('bn.js');
-const crypto = require('crypto');
 
 const Parser = require('./parser');
-
-// const parser = new Parser();
-
-const bn128Reference = require('../js_snippets/bn128_reference.js');
+const VM = require('../ethereumjs-vm-tracer/ethereumjs-vm');
 
 function toBytes32(input, padding = 'left') { // assumes hex format
     let s = input;
@@ -23,12 +19,14 @@ function toBytes32(input, padding = 'left') { // assumes hex format
     return s;
 }
 
+// TODO, fix this
 function processMemory(bnArray) {
     const buffer = [];
-    for ({ index, value } of bnArray) {
-        let hex = toBytes32(value.toString(16));
+    console.log('bnArray = ', bnArray);
+    for (const { index, value } of bnArray) {
+        const hex = toBytes32(value.toString(16));
         for (let i = 0; i < hex.length; i += 2) {
-            buffer[((i/2) + index)] = new BN(`${hex[i]}${hex[i+1]}`, 16).toNumber();
+            buffer[((i / 2) + index)] = new BN(`${hex[i]}${hex[i + 1]}`, 16).toNumber();
         }
     }
     return buffer;
@@ -48,7 +46,7 @@ function Runtime(filename) {
         const [err, results] = await vm.runCode({
             code: Buffer.from(bytecode, 'hex'),
             gasLimit: Buffer.from('ffffffff', 'hex'),
-            stack: stack,
+            stack,
             memory: memory ? processMemory(memory) : null,
             data: data ? processMemory(data) : null,
         });
@@ -57,8 +55,8 @@ function Runtime(filename) {
         }
         const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).toString(10);
         console.log('gas consumed = ', gasSpent);
-        return { stack: results.runState.stack, memory: results.runState.memory };
-    }
+        return { stack: results.runState.stack, memory: results.runState.memory, returnValue: results.runState.returnValue };
+    };
 }
 
 module.exports = Runtime;
