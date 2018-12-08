@@ -19,10 +19,8 @@ function toBytes32(input, padding = 'left') { // assumes hex format
     return s;
 }
 
-// TODO, fix this
 function processMemory(bnArray) {
     const buffer = [];
-    console.log('bnArray = ', bnArray);
     for (const { index, value } of bnArray) {
         const hex = toBytes32(value.toString(16));
         for (let i = 0; i < hex.length; i += 2) {
