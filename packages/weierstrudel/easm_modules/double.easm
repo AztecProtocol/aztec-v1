@@ -1,5 +1,68 @@
 #include "./easm_modules/constants.easm"
 
+// dup4 dup5
+template <p1,p2>
+#define DOUBLE_MAIN = takes(3) returns(3) {
+    <p1> dup3 dup1
+    mulmod
+    // stack state: t1 z y x p
+    <p2> dup2
+    // stack state: t1 p t1 z y x p
+    4 mul
+    // stack state: t2 p t1 z y x p (t2 = 4x overloaded)
+    dup2 dup1 dup1
+    // stack state: p p p t2 p t1 z y x p
+    dup4 dup10
+    // stack state: x t2 p p p t2 p t1 z y x p
+    mulmod
+    // stack state: (x.t2) p p t2 p t1 z y x p
+    dup2 sub
+    // stack state: t3 p p t2 p t1 z y x p
+    swap8
+    // stack state: x p p t2 p t1 z y t3 p
+    dup1 mulmod
+    // stack state: x^2 p t2 p t1 z y t3 p
+    3 mul
+    // stack state: t4 p t2 p t1 z y t3 p (t4 = 3x overloaded)
+    dup2 dup2 dup1
+    // stack state: t4 t4 p t4 p t2 p t1 z y t3 p
+    mulmod
+    // stack state: (t4^2) t4 p t2 p t1 z y t3 p
+    dup9 dup1 add
+    // stack state: 2t3 (t4^2) t4 p t2 p t1 z y t3 p
+    add
+    // x3 is 3x overloaded
+    // stack state: x3 t4 p t2 p t1 z y t3 p (x3 = 3x overloaded)
+    
+    swap8
+    // stack state: t3 t4 p t2 p t1 z y x3 p
+    dup9 add
+    // stack state: (x3+t3) t4 p t2 p t1 z y x3 p (x3+t3 = 4x overloaded)
+    mulmod
+    // stack state: y3' t2 p t1 z y x3 p
+    swap3
+    // stack state: t1 t2 p y3' z y x3 p
+    mulmod
+    // stack state: t1 y3' z y x3 p
+    dup1 add
+    // stack state: 2t1 y3' z y x3 p
+    add
+    // stack state: y3 z y x3 p
+    // y3 is 3x overloaded
+    swap2
+    // stack state: y z y3 x3 p
+    <p2>
+    // stack state: p y z -y3 x3 p
+    swap2
+    // stack state: z y p -y3 x3 p
+    dup1 add
+    // stack state: 2z y p -y3 x3 p
+    mulmod
+    // stack state: -z3 -y3 x3
+    <p1> sub
+    // stack state: z3 -y3 x3
+}
+
 #define DOUBLE = takes(4) returns(4) {
     dup4 dup3 dup1
     mulmod
