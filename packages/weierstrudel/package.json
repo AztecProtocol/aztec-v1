@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "jstest": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
     "test": "mocha ./easm_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
     "hashPoint": "node ./js_snippets/hashToPoint.js"
   },
@@ -15,6 +16,9 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0"
   }
 }
