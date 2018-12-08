@@ -12,10 +12,10 @@ template <x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     swap2   // y dz2 dz3 x p
     dup5 swap1  // y p dz2 dz3 x p
     dup4 mulmod // y' dz2 dz3 x p
-    dup1 <y> mstore
-    dup1 <yEndoNeg> mstore
-    dup5 sub dup1 <yNeg> mstore
-    <yEndo> mstore // dz2 dz3 x p
+    dup1 <yNeg> mstore
+    dup1 <yEndo> mstore
+    dup5 sub dup1 <y> mstore
+    <yEndoNeg> mstore // dz2 dz3 x p
     swap2 dup4 swap1 // x p dz3 dz2 p
     dup4 mulmod // x' dz3 dz2 p
     dup4 sub    // -x' dz3 dz2 p
@@ -50,10 +50,10 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     // y p dz3 dz2
     dup3 mulmod
     // y' dz3 dz2 p
-    dup1 <y> mstore
-    dup1 <yEndoNeg> mstore
-    <p1> sub dup1 <yNeg> mstore
-    <yEndo> mstore // dz3 dz2 p dz2' p p dz3' p y x
+    dup1 <yNeg> mstore
+    dup1 <yEndo> mstore
+    <p1> sub dup1 <y> mstore
+    <yEndoNeg> mstore // dz3 dz2 p dz2' p p dz3' p y x
 }
 
 // expected stack state = dz3 dz2 p dz2' p p dz3' p y x
@@ -63,11 +63,11 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     swap3 mulmod                // dz2'' dz3 p p dz3' p y x
     swap4 mulmod                // dz3'' p dz2'' p y x
     swap4 dup5 mulmod           // y' dz2'' p dz3'' x
-    dup1 <y> mstore
-    dup1 <yEndoNeg> mstore
-    dup3 sub
     dup1 <yNeg> mstore
-    <yEndo> mstore           // dz2'' p dz3'' x
+    dup1 <yEndo> mstore
+    dup3 sub
+    dup1 <y> mstore
+    <yEndoNeg> mstore           // dz2'' p dz3'' x
     swap3 dup4 mulmod           // x' dz3'' dz2''
     <p1> sub                    // -x' dz3'' dz2''
     <p1> BETA() dup3 mulmod     // -betax -x dz3'' dz2''
@@ -82,10 +82,10 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
 template <p1,p2,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
 #define RESCALE_15 = takes(3) returns(0) {
     <p1> swap1 mod
-    dup1 <y> mstore
-    dup1 <yEndoNeg> mstore
-    <p1> sub dup1 <yNeg> mstore
-    <yEndo> mstore
+    dup1 <yNeg> mstore
+    dup1 <yEndo> mstore
+    <p1> sub dup1 <y> mstore
+    <yEndoNeg> mstore
     <p2> swap1 mod
     <p2> sub
     <p2> dup2 BETA() mulmod dup1 <xEndo> mstore

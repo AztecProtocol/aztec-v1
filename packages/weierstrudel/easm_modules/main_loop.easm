@@ -117,6 +117,7 @@ main_loop_end:  // looks like we've finished
     GET_P2_LOCATION()   // o_y o_x
     mload swap1 mload   // x y i p 2p 3p
     dup4 sub swap1      // y x i p 2p 3p
+    dup4 sub
     0x01
 
     0x00 mload get_first_entry jumpi
@@ -226,6 +227,7 @@ skip_main_loop:
     GET_P2_LOCATION()   // o_y o_x
     mload swap1 mload   // x y i p 2p 3p
     dup4 sub swap1      // y x i p 2p 3p
+    dup4 sub            // y x i p 2p 3p
     0x01
 
     0x00 mload get_first_entry jumpi

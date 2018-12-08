@@ -15,7 +15,6 @@ const { p, pRed, n } = bn128Reference;
 
 function sliceMemory(memArray) {
     const numWords = Math.ceil(memArray.length / 32);
-    console.log('num words = ', numWords);
     const result = [];
     for (let i = 0; i < numWords * 32; i += 32) {
         result.push(new BN(memArray.slice(i, i + 32), 16));

@@ -14,7 +14,7 @@ template <getP2Location,p,2p>
     dup2            // p t1 p z1 -y1 x1
     <getP2Location> // o_y o_x p t1 p z1 -y1 x1
     mload           // y2 o_x p t1 p z1 -y1 x1
-    dup3 sub        // DEBUG!!!!! THIS SHOULD NOT BE NEGATIVE
+    // dup3 sub        // DEBUG!!!!! THIS SHOULD NOT BE NEGATIVE
     dup3            // p y2 o_x p t1 p z1 -y1 x1
     dup7                // z1 p y2 o_x p t1 p z1 -y1 x1
     dup6                // t1 z1 p y2 o_x p t1 p z1 -y1 x1
