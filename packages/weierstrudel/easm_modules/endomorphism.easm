@@ -9,7 +9,7 @@
     // c1, c2 calculated through Babai rounding and are half-length scalars
     // q1 = c1.b1 = k.b1.a1 and q2 = c2.b2 = -k.b2.a2
     // -(q1+q2) = -(k.b1.a1-k.b2.a2) = k2
-    // k1 = k - k2\lambda
+    // k1 - k2\lambda = k
     // push group modulus n onto stack
     0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 dup1 dup1
     // we need to calculate k*b1. We require a full-width 512 bit multiplication,
