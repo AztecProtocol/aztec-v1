@@ -45,6 +45,8 @@
     0x1f and         // mask off bits to get our wnaf value. Stack state: m w o
     dup1             // copy m, we need a copy later on
     dup4             // copy o. Stack state: o m m w o
+
+
     mstore8          // store our wnaf fragment // m w o
 
     // Right, what's left now? We need to prepare our scalar for the next round of iteration
@@ -70,162 +72,9 @@
     // And we're done with one round of iteration.
 }
 
-#define NEW_WNAF_2 = takes(0) returns(1) {
-    // righto, what are we doing here?
-    // the standard way to calculate a window-non adjacent form is to
-    // divide the scalar down by 2 until the scalar is odd (and keep track of the bit index as we divide down)
-    // we then take the value of the scalar mod 2^(window size)
-    // this is our wnaf value for the calculated bit position , after accounting for negative values
-    // we then subtract off the wnaf from the scalar (if the wnaf is negative this will increase the scalar),
-    // divide by 2 again and keep going until our scalar = 0
-
-    // however, we can cheat quite a bit here
-    // first of all, instead of dividing down by 2 until we find an odd bit,
-    // it's much cheaper to calculate the bit index of the least significant high bit
-    // by using some bitwise shenanigans and a lookup table
-
-    // this removes a lot of conditional jumps that we would otherwise need and is MUCH cheaper
-    // we hard-code for a window size of 5; this resulting wnaf has a hamming weight of 1/6
-    // i.e. using the divide-by-2 method results in aimlessly dividing by 2 5/6th of the time,
-    // and only doing anything interesting in 1/6 of all iterations
-    
-    // Once we isolate the least significant high bit, we can then use that as the denominator to
-    // divide down our scalar, instead of iteratively dividing by 2
-
-    // To start with, we need a lookup table.
-    // The most efficient way I can come up with for getting the index of the least significant high bit
-    // is to isolate the lsb and take the result of that value modulo 269.
-    // 269 is relatively prime to 2^n for all n from 0 to 256, resulting in 256 unique integers < 269.
-    // We then convert these into the correct bit positions by using a lookup table
-
-    // This algorithm creates a wnaf structure where each bit index is offset by 32 bytes in memory.
-    // This is so that we can concatenate the same wnaf entry from multiple points into a single 32-byte word
-    // Becaues of this our lookup table does not map (value mod 269) to bit index positions, but instead
-    // maps to bit index positions * 32.
-
-    // For example, if the next non-zero bit index is 4, then mload(2^4 mod 269) & 0x1fe0 = 4*32 = 128
-
-    // I think it's possible to use the isolated bit as a divisor against some constant to get
-    // 256 unique integers, but I think that technique requires a mask in addition to a lookup table
-
-    // Anyhow, here's the table. It's calculated in 'js_snippets/find_lookup_table.js'
-    // We use (scalar mod 269) directly to byte-address memory. Beause the evm
-    // loads data in 32-byte machine words, we need to offset the table by 31 bytes so that
-    // the relevant lookup value is in the least significant byte (shifted left by 5 bits) and can be masked off
-    // TODO: We could store this table directly in code and use CODECOPY to save in memory
-    // Would be cheaper but requires modifying the bytecode directly which is...eugh, can't be bothered 
-    0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
-    0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
-    0xca49108d623c85fbb5c7201c3f3f83da95193d7045bfe39d2353f4364c84346e 0x5f mstore
-    0x4f44f692c01aecd22898a467a9f574a2eee82e97ab998f869801a5200b1dd6c0 0x7f mstore
-    0xebea73093e50a00d99e25b3cb1a60d1bcff5f267574008dc46ff58ffb3a3e4ba 0x9f mstore
-    0xb87527f9417d8a306205d5a01f03b4fd458363340c744f36600ca86449d48ece 0xbf mstore
-    0x6b6f77e50af6abd2fe2019db118cefd25728a6d8d3849847c14a01f59ef4c563 0xdf mstore
-    0x0c4f000849aeab57cacbbe19b16fb706b3782121dec54c20098b2abdf156f341 0xff mstore
-    0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
-
-    // To start out our algorithm, we place an offset on the stack ('o'); this is where we'll start
-    // string the wnaf in memory
-    // 0x140
-    // Now load the scalar onto the stack ('w')
-    // 0x0 calldataload // stack state: w o
-    // Call WNAF_SLICE 19 times. 127-bit random scalars take between 19-24 iterations of the loop
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-loop:
-    WNAF_SLICE()
-    dup1 loop jumpi
-}
-
-#define ENDO_WNAF = takes(0) returns(1) {
-    0x0 calldataload
-    ENDOMORPHISM()
-    0x140 swap1
-    NEW_WNAF_2()
-    pop pop 0x141 swap1
-    NEW_WNAF_2()
-}
-#define NEW_WNAF = takes(0) returns(1) {
-    // righto, what are we doing here?
-    // the standard way to calculate a window-non adjacent form is to
-    // divide the scalar down by 2 until the scalar is odd (and keep track of the bit index as we divide down)
-    // we then take the value of the scalar mod 2^(window size)
-    // this is our wnaf value for the calculated bit position , after accounting for negative values
-    // we then subtract off the wnaf from the scalar (if the wnaf is negative this will increase the scalar),
-    // divide by 2 again and keep going until our scalar = 0
-
-    // however, we can cheat quite a bit here
-    // first of all, instead of dividing down by 2 until we find an odd bit,
-    // it's much cheaper to calculate the bit index of the least significant high bit
-    // by using some bitwise shenanigans and a lookup table
-
-    // this removes a lot of conditional jumps that we would otherwise need and is MUCH cheaper
-    // we hard-code for a window size of 5; this resulting wnaf has a hamming weight of 1/6
-    // i.e. using the divide-by-2 method results in aimlessly dividing by 2 5/6th of the time,
-    // and only doing anything interesting in 1/6 of all iterations
-    
-    // Once we isolate the least significant high bit, we can then use that as the denominator to
-    // divide down our scalar, instead of iteratively dividing by 2
-
-    // To start with, we need a lookup table.
-    // The most efficient way I can come up with for getting the index of the least significant high bit
-    // is to isolate the lsb and take the result of that value modulo 269.
-    // 269 is relatively prime to 2^n for all n from 0 to 256, resulting in 256 unique integers < 269.
-    // We then convert these into the correct bit positions by using a lookup table
-
-    // This algorithm creates a wnaf structure where each bit index is offset by 32 bytes in memory.
-    // This is so that we can concatenate the same wnaf entry from multiple points into a single 32-byte word
-    // Becaues of this our lookup table does not map (value mod 269) to bit index positions, but instead
-    // maps to bit index positions * 32.
-
-    // For example, if the next non-zero bit index is 4, then mload(2^4 mod 269) & 0x1fe0 = 4*32 = 128
-
-    // I think it's possible to use the isolated bit as a divisor against some constant to get
-    // 256 unique integers, but I think that technique requires a mask in addition to a lookup table
-
-    // Anyhow, here's the table. It's calculated in 'js_snippets/find_lookup_table.js'
-    // We use (scalar mod 269) directly to byte-address memory. Beause the evm
-    // loads data in 32-byte machine words, we need to offset the table by 31 bytes so that
-    // the relevant lookup value is in the least significant byte (shifted left by 5 bits) and can be masked off
-    // TODO: We could store this table directly in code and use CODECOPY to save in memory
-    // Would be cheaper but requires modifying the bytecode directly which is...eugh, can't be bothered 
-    0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
-    0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
-    0xca49108d623c85fbb5c7201c3f3f83da95193d7045bfe39d2353f4364c84346e 0x5f mstore
-    0x4f44f692c01aecd22898a467a9f574a2eee82e97ab998f869801a5200b1dd6c0 0x7f mstore
-    0xebea73093e50a00d99e25b3cb1a60d1bcff5f267574008dc46ff58ffb3a3e4ba 0x9f mstore
-    0xb87527f9417d8a306205d5a01f03b4fd458363340c744f36600ca86449d48ece 0xbf mstore
-    0x6b6f77e50af6abd2fe2019db118cefd25728a6d8d3849847c14a01f59ef4c563 0xdf mstore
-    0x0c4f000849aeab57cacbbe19b16fb706b3782121dec54c20098b2abdf156f341 0xff mstore
-    0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
 
 
-    // To start out our algorithm, we place an offset on the stack ('o'); this is where we'll start
-    // string the wnaf in memory
-    0x140
-    // Now load the scalar onto the stack ('w')
-    0x0 calldataload // stack state: w o
-
-    dup1 wnaf_start jumpi // we should check that there's actually some data to operate on
-        wnaf_end jump
-// MAIN LOOP
-    wnaf_start:
+#define WNAF_SLICE_DEBUG = takes(2) returns(1) {
     // Step 1: we need to isolate the least significant high bit of w
     // Can do this by taking w & -w
     // This function isn't payable for a reason!
@@ -270,6 +119,8 @@ loop:
     0x1f and         // mask off bits to get our wnaf value. Stack state: m w o
     dup1             // copy m, we need a copy later on
     dup4             // copy o. Stack state: o m m w o
+
+
     mstore8          // store our wnaf fragment // m w o
 
     // Right, what's left now? We need to prepare our scalar for the next round of iteration
@@ -293,23 +144,10 @@ loop:
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 and
 
     // And we're done with one round of iteration.
-    // We want to keep iterating until our scalar has been reduced down to 0 and we have our
-    // wnaf chunks stored in memory
-
-    // So, the condition test to iterate is...the scalar itself. Convenient.
-    dup1 wnaf_start jumpi
-
-wnaf_end:
-    // The only way we've reached this part of the code is if w = 0, so we're done.
-    pop // keep o on the stack
-    // Overall size of main loop = 29 opcodes including JUMPDEST.
-    // With an average hamming weight of 1/6, the main loop is run about 256/6 ~ 42.667 times.
-    // Main loop gas cost = (1 label (1 gas) + 1 v.low (2 gas, hon hon) + 25 low (3 gas) + 2 mid (5 gas) + 1 high (10 gas)) = 98 gas.
-    // In addition a wnaf is stored in 9 machine words which is ~ 27 gas in gas expansion costs.
-    // Average total cost ~ 4,208 gas.
 }
 
-#define WNAF = takes(0) returns(1) {
+// expects w o to be on stack
+#define WNAF = takes(2) returns(1) {
     // righto, what are we doing here?
     // the standard way to calculate a window-non adjacent form is to
     // divide the scalar down by 2 until the scalar is odd (and keep track of the bit index as we divide down)
@@ -318,9 +156,8 @@ wnaf_end:
     // we then subtract off the wnaf from the scalar (if the wnaf is negative this will increase the scalar),
     // divide by 2 again and keep going until our scalar = 0
 
-    // however, we can cheat quite a bit here
-    // first of all, instead of dividing down by 2 until we find an odd bit,
-    // it's much cheaper to calculate the bit index of the least significant high bit
+    // But that sounds like a lot of effort, so we take the lazy approach
+    // instead of dividing down by 2 until we find an odd bit, it's much cheaper to calculate the bit index of the least significant high bit
     // by using some bitwise shenanigans and a lookup table
 
     // this removes a lot of conditional jumps that we would otherwise need and is MUCH cheaper
@@ -337,114 +174,94 @@ wnaf_end:
     // 269 is relatively prime to 2^n for all n from 0 to 256, resulting in 256 unique integers < 269.
     // We then convert these into the correct bit positions by using a lookup table
 
+    // This algorithm creates a wnaf structure where each bit index is offset by 32 bytes in memory.
+    // This is so that we can concatenate the same wnaf entry from multiple points into a single 32-byte word
+    // Becaues of this our lookup table does not map (value mod 269) to bit index positions, but instead
+    // maps to bit index positions * 32.
+
+    // For example, if the next non-zero bit index is 4, then mload(2^4 mod 269) & 0x1fe0 = 4*32 = 128
+
     // I think it's possible to use the isolated bit as a divisor against some constant to get
     // 256 unique integers, but I think that technique requires a mask in addition to a lookup table
 
     // Anyhow, here's the table. It's calculated in 'js_snippets/find_lookup_table.js'
     // We use (scalar mod 269) directly to byte-address memory. Beause the evm
     // loads data in 32-byte machine words, we need to offset the table by 31 bytes so that
-    // the relevant lookup value is in the least significant byte and can be masked off
+    // the relevant lookup value is in the least significant byte (shifted left by 5 bits) and can be masked off
     // TODO: We could store this table directly in code and use CODECOPY to save in memory
     // Would be cheaper but requires modifying the bytecode directly which is...eugh, can't be bothered 
-    0x0000016d02d06e1303dad1e66f8e14310469dbdfd280e7b070948f3b15bb3200 0x1f mstore
-    0x05476ae3dc38e0fbd3c881fee89eb120712695d690c43caa1640bccb330c00ed 0x3f mstore
-    0x065248846b11e42fddae3900e1f9fc1ed4a8c9eb822dff1ce91a9fa1b26421a3 0x5f mstore
-    0x727a27b49600d7669144c5233d4faba517774174bd5ccc7c34c00d290058eeb6 0x7f mstore
-    0x075f539849f285006ccf12d9e58d3068de7faf933aba0046e237fac7fd9d1f25 0x9f mstore
-    0xd5c3a93fca0bec5183102ead00f81da7ea2c1b19a063a279b3006543224ea476 0xbf mstore
-    0x735b7bbf2857b55e97f100ced88c677e92b94536c69c24c23e0a500facf7a62b 0xdf mstore
-    0x18627800424d755abe565df0cd8b7db8359bc1090ef62a61004c5955ef8ab79a 0xff mstore
-    0x08f5604b548999f44a88f3878600000000000000000000000000000000000000 0x11f mstore
-
+    // TODO, this memory conflicts with point table
+    0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
+    0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
+    0xca49108d623c85fbb5c7201c3f3f83da95193d7045bfe39d2353f4364c84346e 0x5f mstore
+    0x4f44f692c01aecd22898a467a9f574a2eee82e97ab998f869801a5200b1dd6c0 0x7f mstore
+    0xebea73093e50a00d99e25b3cb1a60d1bcff5f267574008dc46ff58ffb3a3e4ba 0x9f mstore
+    0xb87527f9417d8a306205d5a01f03b4fd458363340c744f36600ca86449d48ece 0xbf mstore
+    0x6b6f77e50af6abd2fe2019db118cefd25728a6d8d3849847c14a01f59ef4c563 0xdf mstore
+    0x0c4f000849aeab57cacbbe19b16fb706b3782121dec54c20098b2abdf156f341 0xff mstore
+    0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
 
     // To start out our algorithm, we place an offset on the stack ('o'); this is where we'll start
     // string the wnaf in memory
-    0x0a
+    // 0x140
     // Now load the scalar onto the stack ('w')
-    0x0 calldataload // stack state: w o
-
-    dup1 wnaf_start jumpi // we should check that there's actually some data to operate on
-        wnaf_end jump
-// MAIN LOOP
-    wnaf_start:
-    // Step 1: we need to isolate the least significant high bit of w
-    // Can do this by taking w & -w
-    // This function isn't payable for a reason!
-    // Instead of pushing '0' onto the stack (3 gas), we can get the amount of ether sent by the tx sender
-    // As we throw if this is > 0, it's a cheaper (2 gas) way of shoving 0 onto the stack
-    dup1 dup1 callvalue sub  // stack state: (0 - w) w w o
-    and              // w' w o
-
-    // Step 2: use w' and the lookup table to calculate the bit index of the high bit in w'
-    // We want to add this offset to 'o', which is our accumulated memory offset
-    // So swap 'o' to the front of the stak in preparation
-    swap2            // stack state: o w w'
-
-    // We want to calculate w' mod 269; the literal needs to preceed w' so push it onto the stack
-    // before duplicating w' (we don't consume w' as we need it later) and taking the modulus
-    269
-    dup4             // stack state: w' 269 o w w'
-    mod              // stack state: (w' % 269) o w w'
-
-    mload            // use the result to byte-address the lookup table we stored
-    0xff and         // and mask off all but the low byte
-
-    // Tadaa, we have our index, no conditional branching in sight
-    // We only need this value to find the right byte-offset to store our wnaf, so add it straight to 'o'
-    add             // stack state: o w w'
-
-    // Now we know *where* to store the next wnaf section, we need to figure out *what* to store
-    // Our scalar has an abritrary amount of leading 0 bits we need to remove, we can use w' as
-    // our divisor without explicitly figuring out how many bits need to be culled
-    swap2            // get w' in front of w on the stack. Needs two swap ops. Disgusting!
-    swap1            // stack state: w w' o
-    div              // w o
-
-    // To get the actual scalar value we want to store at this bit index, we usually would take
-    // w mod 2^(window size). We hardcode a window size of 5, so this can be simplified to (w & 31)
-
-    // Instead, we just store the least significant *byte* at our calculated memory offset, using mstore8.
-    // Our wnaf window has width 5, so we want to store the least 5 signficant bits of w
-    dup1             // copy w. Stack state: w w o
-    0x1f and         // mask off bits to get our wnaf value. Stack state: m w o
-    dup1             // copy m, we need a copy later on
-    dup4             // copy o. Stack state: o m m w o
-    0x20 mul         // o m m w o
-    mstore8          // store our wnaf fragment // m w o
-
-    // Right, what's left now? We need to prepare our scalar for the next round of iteration
-    // We've already stored the next 5 bits of the wnaf in our fragment at memory offset 'o'
-    // So we need to zero out the 5 least significant bits so we don't double-count.
-    // We *could* divide down by 2^5, but div operations are expensive and we don't save anything as
-    // our lookup table shenanigans divide down the scalar by the required amount in the next cycle.
-
-    // So instead we just calculate (w & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0)
-    // (the literal has every bit set high except the least significant 5)
-
-    // There is one catch. If our wnaf fragment is negative (> 15), we need to add 2^{w} (32) to the scalar.
-    // This is because we're subtracting (32 - m) at this bit position.
-    // We want to set it up so that the next wnaf entry will contain an additional factor of 32.
-
-    // The easiest way of doing this is... adding 'm' into w.
-    // If m > 15 then the 5th bit will be high in both m and w. So adding them together will trigger an
-    // overflow and add into the 6th bit. All lower order bits don't matter because we're about to mask them off
-    add
-    // Now all that's left is to mask out the lowest 5 bits
-    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 and
-
-    // And we're done with one round of iteration.
-    // We want to keep iterating until our scalar has been reduced down to 0 and we have our
-    // wnaf chunks stored in memory
-
-    // So, the condition test to iterate is...the scalar itself. Convenient.
-    dup1 wnaf_start jumpi
-
-wnaf_end:
-    // The only way we've reached this part of the code is if w = 0, so we're done.
-    pop // keep o on the stack
-    // Overall size of main loop = 29 opcodes including JUMPDEST.
-    // With an average hamming weight of 1/6, the main loop is run about 256/6 ~ 42.667 times.
-    // Main loop gas cost = (1 label (1 gas) + 1 v.low (2 gas, hon hon) + 25 low (3 gas) + 2 mid (5 gas) + 1 high (10 gas)) = 98 gas.
-    // In addition a wnaf is stored in 9 machine words which is ~ 27 gas in gas expansion costs.
-    // Average total cost ~ 4,208 gas.
+    // 0x0 calldataload // stack state: w o
+    // Call WNAF_SLICE 19 times. 127-bit random scalars take between 19-24 iterations of the loop
+    /* WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE()
+    WNAF_SLICE() */
+// TODO, assert > 0
+loop:
+    WNAF_SLICE()
+    dup1 loop jumpi
 }
+
+// expects w o to be on stack
+#define WNAF2 = takes(2) returns(1) {
+    // TODO, this memory conflicts with point table
+    0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
+    0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
+    0xca49108d623c85fbb5c7201c3f3f83da95193d7045bfe39d2353f4364c84346e 0x5f mstore
+    0x4f44f692c01aecd22898a467a9f574a2eee82e97ab998f869801a5200b1dd6c0 0x7f mstore
+    0xebea73093e50a00d99e25b3cb1a60d1bcff5f267574008dc46ff58ffb3a3e4ba 0x9f mstore
+    0xb87527f9417d8a306205d5a01f03b4fd458363340c744f36600ca86449d48ece 0xbf mstore
+    0x6b6f77e50af6abd2fe2019db118cefd25728a6d8d3849847c14a01f59ef4c563 0xdf mstore
+    0x0c4f000849aeab57cacbbe19b16fb706b3782121dec54c20098b2abdf156f341 0xff mstore
+    0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
+
+
+// TODO, assert > 0
+loop:
+    WNAF_SLICE()
+    WNAF_SLICE_DEBUG()
+    dup1 loop jumpi
+}
+
+#define ENDO_WNAF = takes(0) returns(1) {
+    0x0 calldataload
+    ENDOMORPHISM()
+    0x140 swap1
+    WNAF()
+    pop pop 0x141 swap1
+    WNAF()
+}
+
+
+
+
+
