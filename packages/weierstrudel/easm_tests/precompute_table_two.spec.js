@@ -51,8 +51,8 @@ function splitPoint(x, y) {
     return {
         x: p.sub(x),
         xEndo: p.sub(x).mul(beta).umod(p),
-        y,
-        yNeg: p.sub(y),
+        yNeg: y,
+        y: p.sub(y),
     };
 }
 
@@ -85,7 +85,7 @@ const helperMacros = `
 }*/
 `;
 
-describe('bn128 precompute table two', () => {
+describe.only('bn128 precompute table two', () => {
     let precomputeTable;
     let templateWrapper;
     before(() => {
@@ -305,19 +305,19 @@ describe('bn128 precompute table two', () => {
             for (let j = 0; j < 16; j += 2) {
                 const resultPoint = bn128Reference.toAffine({
                     x: p.sub(baseTable[i + j].umod(p)),
-                    y: p.sub(baseTable[i + j + 1].umod(p)),
+                    y: (baseTable[i + j + 1].umod(p)),
                     z: baseMem[3].umod(p),
                 });
                 expect(comparisonTable[j / 2].x.fromRed().eq(resultPoint.x.fromRed())).to.equal(true);
                 expect(comparisonTable[j / 2].y.fromRed().eq(resultPoint.y.fromRed())).to.equal(true);
                 expect(baseTable[i + j].umod(p).eq(p.sub(expected[j / 2].x))).to.equal(true);
-                expect(baseTable[i + j + 1].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
+                expect(baseTable[i + j + 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
                 expect(baseTable[i + 32 - j - 2].umod(p).eq(p.sub(expected[j / 2].x))).to.equal(true);
-                expect(baseTable[i + 32 - j - 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
+                expect(baseTable[i + 32 - j - 1].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
                 expect(endoTable[i + j].umod(p).eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
-                expect(endoTable[i + j + 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
+                expect(endoTable[i + j + 1].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
                 expect(endoTable[i + 32 - j - 2].umod(p).eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
-                expect(endoTable[i + 32 - j - 1].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
+                expect(endoTable[i + 32 - j - 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
             }
         }
     });
@@ -354,19 +354,19 @@ describe('bn128 precompute table two', () => {
             for (let j = 0; j < 16; j += 2) {
                 const resultPoint = bn128Reference.toAffine({
                     x: p.sub(baseTable[i + j]),
-                    y: p.sub(baseTable[i + j + 1]),
+                    y: (baseTable[i + j + 1]),
                     z: baseMem[0],
                 });
                 expect(comparisonTable[j / 2].x.fromRed().eq(resultPoint.x.fromRed())).to.equal(true);
                 expect(comparisonTable[j / 2].y.fromRed().eq(resultPoint.y.fromRed())).to.equal(true);
-                expect(baseTable[i + j].eq(p.sub(expected[j / 2].x))).to.equal(true);
-                expect(baseTable[i + j + 1].eq(p.sub(expected[j / 2].y))).to.equal(true);
-                expect(baseTable[i + 32 - j - 2].eq(p.sub(expected[j / 2].x))).to.equal(true);
-                expect(baseTable[i + 32 - j - 1].eq(expected[j / 2].y)).to.equal(true);
-                expect(baseTable[i + j + 32].eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
-                expect(baseTable[i + j + 33].eq(expected[j / 2].y)).to.equal(true);
-                expect(baseTable[i + 64 - j - 2].eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
-                expect(baseTable[i + 64 - j - 1].eq(p.sub(expected[j / 2].y))).to.equal(true);
+                expect(baseTable[i + j].umod(p).eq(p.sub(expected[j / 2].x))).to.equal(true);
+                expect(baseTable[i + j + 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
+                expect(baseTable[i + 32 - j - 2].umod(p).eq(p.sub(expected[j / 2].x))).to.equal(true);
+                expect(baseTable[i + 32 - j - 1].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
+                expect(baseTable[i + j + 32].umod(p).eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
+                expect(baseTable[i + j + 33].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
+                expect(baseTable[i + 64 - j - 2].umod(p).eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
+                expect(baseTable[i + 64 - j - 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
             }
         }
     });

@@ -26,7 +26,7 @@ describe('bn128 precompute table single', () => {
             const stackIndex = (i * 8);
             const expected = reference[i];
             expect(expected.x.eq(stack[stackIndex].umod(p))).to.equal(true);
-            expect(p.sub(expected.y).eq(stack[stackIndex + 1].umod(p))).to.equal(true);
+            expect((expected.y).eq(stack[stackIndex + 1].umod(p))).to.equal(true);
             if (i < reference.length - 1) {
                 const u = dz[i];
                 const zz = u.mul(u).umod(bn128Reference.p);
