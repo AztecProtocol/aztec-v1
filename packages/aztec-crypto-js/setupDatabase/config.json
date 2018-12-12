@@ -1,0 +1,22 @@
+{
+    "G1": {
+        "x": "1",
+        "y": "2"
+    },
+    "G2x": {
+        "c0": "1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed",
+        "c1": "198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2"
+    },
+    "G2y": {
+        "c0": "12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa",
+        "c1": "90689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b"
+    },
+    "pubKeyX": {
+        "c0": "1cf7cc93bfbf7b2c5f04a3bc9cb8b72bbcf2defcabdceb09860c493bdf1588d",
+        "c1": "8d554bf59102bbb961ba81107ec71785ef9ce6638e5332b6c1a58b87447d181"
+    },
+    "pubKeyY": {
+        "c0": "204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2",
+        "c1": "2cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc"
+    }
+}
