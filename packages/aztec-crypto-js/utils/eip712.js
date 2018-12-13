@@ -1,63 +1,75 @@
-const web3Utils = require('web3-utils');
+const { padLeft, sha3 } = require('web3-utils');
 const web3EthAbi = require('web3-eth-abi');
 
+function padKeccak256(data) {
+    return padLeft(sha3(data).slice(2), 64);
+}
+
+/**
+ * Module to construct ECDSA messages for structured data,
+ * following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
+ *
+ * @module eip712
+ */
 const eip712 = {};
 
-eip712.encodeTypedData = function encodeTypedData(typedData) {
-    const {
-        types,
-        primaryType,
-        domain,
-        message,
-    } = typedData;
-
-    const { EIP712Domain, ...rest } = types;
-    const params = rest || {};
-    const structHash = eip712.hashStruct(primaryType, params, message).slice(2);
-    const domainHash = eip712.hashStruct('EIP712Domain', { EIP712Domain }, domain).slice(2);
-    const result = web3Utils.sha3(`0x1901${domainHash}${structHash}`, 'hex');
-    return result;
-};
-
-eip712.hashStruct = function hashStruct(primaryType, types, message) {
-    const typeString = eip712.encodeStruct(primaryType, types);
-
-    // Note to self, why on Earth was I slicing 2 chars off this string? It's not hex!
-    // TODO: figure out what to do about this, our deployed contracts use an incorrect type hash...
-    const typeHash = web3Utils.sha3(web3EthAbi.encodeParameters(['string'], [typeString.slice(2)]), 'hex');
-    const encodedData = eip712.encodeMessageData(message, types, types[primaryType]);
-    const hashedStruct = web3Utils.sha3(`${typeHash}${encodedData.slice(2)}`, 'hex');
-
-    return hashedStruct;
-};
-
+/**
+ * Create 'type' component of a struct
+ *
+ * @method encodeStruct
+ * @param {string} primaryType the top-level type of the struct
+ * @param  {{name: string, type: string}} types set of all types encompassed by struct
+ * @returns {string} encoded type string
+ */
 eip712.encodeStruct = function encodeStruct(primaryType, types) {
-    const typeKeys = [primaryType, ...Object.keys(types).filter(key => key !== primaryType).sort((a, b) => a.localeCompare(b))];
-    // eslint-disable-next-line max-len
-    return typeKeys.reduce((acc, typeKey) => `${acc}${typeKey}(${types[typeKey].reduce((typeAcc, { name, type }) => `${typeAcc}${name} ${type},`, '').slice(0, -1)})`, '');
+    return [primaryType]
+        .concat(types[primaryType]
+            .reduce((acc, { type: typeKey }) => {
+                if (types[typeKey] && acc.indexOf(typeKey) === -1) {
+                    return [...acc, typeKey];
+                }
+                return acc;
+            }, [])
+            .sort((a, b) => a.localeCompare(b)))
+        .reduce((acc, key) => `${acc}${key}(${types[key]
+            .reduce((iacc, { name, type }) => `${iacc}${type} ${name},`, '').slice(0, -1)})`, '');
 };
 
+/**
+ * Recursively encode a struct's data into a unique string
+ *
+ * @method encodeMessageData
+ * @param  {{name: string, type: string}} types set of all types encompassed by struct
+ * @param {string} primaryType the top-level type of the struct
+ * @param {Object} message the struct instance's data
+ * @returns {string} encoded message data string
+ */
+eip712.encodeMessageData = function encodeMessageData(types, primaryType, message) {
+    return types[primaryType].reduce((acc, { name, type }) => {
+        if (types[type]) {
+            return `${acc}${padKeccak256(`0x${encodeMessageData(types, type, message[name])}`)}`;
+        }
+        if (type === 'string' || type === 'bytes') {
+            return `${acc}${padKeccak256(message[name])}`;
+        }
+        if (type.includes('[')) {
+            return `${acc}${padKeccak256(web3EthAbi.encodeParameter(type, message[name]))}`;
+        }
+        return `${acc}${web3EthAbi.encodeParameters([type], [message[name]]).slice(2)}`;
+    }, padKeccak256(eip712.encodeStruct(primaryType, types)));
+};
 
-eip712.encodeMessageData = function encodeMessageData(message, types, topLevel = {}) {
-    function recurse(_message, _topLevel = {}) {
-        const messageKeys = Object.keys(_message);
-        const topLevelTypes = _topLevel.reduce((acc, { name, type }) => ({ ...acc, [name]: { name, type } }), {});
-        return messageKeys.reduce((acc, messageKey) => {
-            const { type } = topLevelTypes[messageKey];
-            if (types[type]) {
-                const newMessage = _message[messageKey];
-                return `${acc}${recurse(newMessage, types[type])}`;
-            }
-            if (type === 'string' || type === 'bytes' || type.includes('[')) {
-                const data = web3EthAbi.encodeParameters([type], [_message[messageKey]]);
-                const hash = web3Utils.sha3(data, 'hex');
-                return `${acc}${hash.slice(2)}`;
-            }
-            return `${acc}${web3EthAbi.encodeParameters([type], [_message[messageKey]]).slice(2)}`;
-        }, '');
-    }
-    const result = `0x${recurse(message, topLevel)}`;
-    return result;
+/**
+ * Construct ECDSA signature message for structured data
+ *
+ * @method encodeTypedData
+ * @param {Object} typedData the EIP712 struct object
+ * @returns {string} encoded message string
+ */
+eip712.encodeTypedData = function encodeTypeData(typedData) {
+    const domainHash = padKeccak256(`0x${eip712.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain)}`);
+    const structHash = padKeccak256(`0x${eip712.encodeMessageData(typedData.types, typedData.primaryType, typedData.message)}`);
+    return `0x${padKeccak256(`0x1901${domainHash}${structHash}`)}`;
 };
 
 module.exports = eip712;
