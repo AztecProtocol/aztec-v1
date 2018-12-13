@@ -18,7 +18,9 @@ const eip712 = {};
  *
  * @method encodeStruct
  * @param {string} primaryType the top-level type of the struct
- * @param  {{name: string, type: string}} types set of all types encompassed by struct
+ * @param {Object} types set of all types encompassed by struct
+ * @param {string} types.name name
+ * @param {string} types.type type
  * @returns {string} encoded type string
  */
 eip712.encodeStruct = function encodeStruct(primaryType, types) {
@@ -39,7 +41,9 @@ eip712.encodeStruct = function encodeStruct(primaryType, types) {
  * Recursively encode a struct's data into a unique string
  *
  * @method encodeMessageData
- * @param  {{name: string, type: string}} types set of all types encompassed by struct
+ * @param {Object} types set of all types encompassed by struct
+ * @param {string} types.name name
+ * @param {string} types.type type
  * @param {string} primaryType the top-level type of the struct
  * @param {Object} message the struct instance's data
  * @returns {string} encoded message data string

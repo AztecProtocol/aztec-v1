@@ -9,7 +9,7 @@ const eip712 = require('./eip712');
 
 const { AZTEC_MAINNET_DOMAIN_PARAMS } = require('../params.js');
 
-describe.only('eip712.js tests', () => {
+describe('eip712.js tests', () => {
     let simple;
     let complex;
     let exampleStruct;
