@@ -7,12 +7,9 @@ const { expect } = chai;
 
 const eip712 = require('./eip712');
 
-const { AZTEC_MAINNET_DOMAIN_PARAMS } = require('../params.js');
-
 describe('eip712.js tests', () => {
     let simple;
     let complex;
-    let exampleStruct;
     let alphabetical;
     before(() => {
         simple = {
@@ -78,33 +75,6 @@ describe('eip712.js tests', () => {
                 },
             },
         };
-
-        exampleStruct = {
-            types: {
-                Foo: [
-                    { name: 'first', type: 'bytes32' },
-                    { name: 'second', type: 'uint256' },
-                    { name: 'third', type: 'address' },
-                ],
-                EIP712Domain: [
-                    { name: 'name', type: 'string' },
-                    { name: 'version', type: 'string' },
-                    { name: 'chainId', type: 'uint256' },
-                    { name: 'verifyingContract', type: 'address' },
-                    { name: 'salt', type: 'bytes32' },
-                ],
-            },
-            primaryType: 'Foo',
-            message: {
-                first: '0x13',
-                second: 104344,
-                third: '0x1234567890abcdef10121234567890abcdef1012',
-            },
-            domain: {
-                ...AZTEC_MAINNET_DOMAIN_PARAMS,
-                verifyingContract: '0x1234567890abcdef10121234567890abcdef1012',
-            },
-        };
     });
 
     it('encodeData will correctly encode a basic struct', () => {
@@ -139,13 +109,7 @@ describe('eip712.js tests', () => {
         const expected = web3Utils.sha3(`${typedHash}${encodedData.slice(2)}`);
         expect(hashed).to.equal(expected);
     });
-
-    it('encodeTypedData correctly calculates the encoding for a Struct', () => {
-        const encoded = eip712.encodeTypedData(exampleStruct);
-        expect(encoded.length === 64);
-    });
 });
-
 
 describe('comparison with reference implementation', () => {
     const typedData = {
