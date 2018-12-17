@@ -4,13 +4,19 @@ const { AZTEC_NOTE_SIGNATURE, AZTEC_MAINNET_DOMAIN_PARAMS } = require('../params
 
 const sign = {};
 
-sign.signNote = function signNote(note, challenge, senderAddress, verifyingContract, privateKey) {
+sign.generateAZTECDomainParams = function generateAZTECDomainParams(verifyingContract, chainId) {
+    return {
+        name: 'AZTECERC20BRIDGE_DOMAIN',
+        version: '0.1.1',
+        chainId,
+        verifyingContract,
+    };
+};
+
+sign.signNote = function signNote(note, challenge, senderAddress, verifyingContract, privateKey, chainId) {
     const messageBase = {
         ...AZTEC_NOTE_SIGNATURE,
-        domain: {
-            ...AZTEC_MAINNET_DOMAIN_PARAMS,
-            verifyingContract,
-        },
+        domain: sign.generateAZTECDomainParams(verifyingContract, chainId),
         message: {
             note: [note[2], note[3], note[4], note[5]],
             challenge,

@@ -89,7 +89,6 @@ module.exports = {
                 { name: 'version', type: 'string' },
                 { name: 'chainId', type: 'uint256' },
                 { name: 'verifyingContract', type: 'address' },
-                { name: 'salt', type: 'bytes32' },
             ],
         },
         primaryType: 'AZTEC_NOTE_SIGNATURE',
