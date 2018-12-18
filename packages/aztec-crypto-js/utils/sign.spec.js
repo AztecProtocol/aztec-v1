@@ -6,7 +6,7 @@ const { expect } = chai;
 
 const sign = require('./sign');
 
-describe.only('sign tests', () => {
+describe('sign tests', () => {
     const domainTypes = {
         EIP712Domain: [
             { name: 'name', type: 'string' },
