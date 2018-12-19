@@ -5,7 +5,7 @@
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const Hash = require('../utils/keccak');
+const Hash = require('../keccak/keccak');
 const bn128 = require('../bn128/bn128');
 
 const { groupReduction } = bn128;
