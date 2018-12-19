@@ -1,3 +1,9 @@
+/**
+ * Helper methods to construct AZTEC zero-knowledge proof commitments. Used for debugging and testing.
+ *
+ * @module proofHelpers
+ */
+
 const BN = require('bn.js');
 const crypto = require('crypto');
 const { padLeft, toHex } = require('web3-utils');
@@ -31,6 +37,14 @@ function generateFakeCommitment(k, trapdoor) {
     };
 }
 
+/**
+ * Create a set of AZTEC commitments from vectors of input and output values
+ * @method generateCommitmentSet
+ * @param {Object} values
+ * @param {number[]} values.kIn vector of input note values
+ * @param {number[]} values.kOut vector of output note values
+ * @returns {Object} AZTEC commitment array
+ */
 helpers.generateCommitmentSet = ({ kIn, kOut }) => {
     const inputs = kIn.map((k) => {
         return generateCommitment(k);
@@ -42,7 +56,15 @@ helpers.generateCommitmentSet = ({ kIn, kOut }) => {
     return { commitments, m: inputs.length };
 };
 
-
+/**
+ * Create a set of fake AZTEC commitments from vectors of input and output values.
+ * This method uses a randomly generated trapdoor key instead of the trusted setup key.
+ * @method generateFakeCommitmentSet
+ * @param {Object} values
+ * @param {number[]} values.kIn vector of input note values
+ * @param {number[]} values.kOut vector of output note values
+ * @returns {Object} AZTEC commitment array
+ */
 helpers.generateFakeCommitmentSet = ({ kIn, kOut }) => {
     const trapdoor = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
     const inputs = kIn.map((k) => {

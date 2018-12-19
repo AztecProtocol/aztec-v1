@@ -1,3 +1,9 @@
+/**
+ * Read in points from the trusted setup points database
+ *
+ * @module setup
+ */
+
 const BN = require('bn.js');
 const fs = require('fs');
 const path = require('path');
@@ -9,7 +15,15 @@ const bn128 = require('../bn128/bn128');
 const partialPath = path.posix.resolve(__dirname, '../setupDatabase');
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 
-// @param compressed: 32-byte representation of a bn128 G1 element in BN.js form
+/**
+ * Decompress a 256-bit representation of a bn128 G1 element.
+ *   The first 254 bits define the x-coordinate. The most significant bit defines whether the
+ *   y-coordinate is odd
+ *
+ * @method decompress
+ * @param {BN} compressed 256-bit compressed coordinate in BN form
+ * @returns {Object.<BN, BN>} x and y coordinates of point, in BN form
+ */
 setup.decompress = (compressed) => {
     const yBit = compressed.testn(255);
     const x = compressed.maskn(255).toRed(bn128.red);
@@ -25,6 +39,14 @@ setup.decompress = (compressed) => {
     return { x: x.fromRed(), y };
 };
 
+/**
+ * Compress a bn128 point into 256 bits.
+ *
+ * @method compress
+ * @param {BN} x x coordinate
+ * @param {BN} y y coordinate
+ * @returns {BN} 256-bit compressed coordinate, in BN form
+ */
 setup.compress = (x, y) => {
     let compressed = x;
     if (y.testn(0)) {
@@ -33,6 +55,13 @@ setup.compress = (x, y) => {
     return compressed;
 };
 
+/**
+ * Load a trusted setup signature point h^{\frac{1}{y - k}}, y = setup key, k = input value
+ *
+ * @method readSignature
+ * @param {Number} inputValue the integer whose negation was signed by the trusted setup key
+ * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
+ */
 setup.readSignature = (inputValue) => {
     const value = Number(inputValue);
     return new Promise((resolve, reject) => {
@@ -56,6 +85,13 @@ setup.readSignature = (inputValue) => {
     });
 };
 
+/**
+ * Load a trusted setup signature, using synchronous file loading methods (see: {@link module:setup~readSignature})
+ *
+ * @method readSignatureSync
+ * @param {Number} inputValue the integer whose negation was signed by the trusted setup key
+ * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
+ */
 setup.readSignatureSync = (inputValue) => {
     const value = Number(inputValue);
     const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);

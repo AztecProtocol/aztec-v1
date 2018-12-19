@@ -1,3 +1,9 @@
+/**
+ * Create and validate ECDSA signatures, uses elliptic.js library
+ *
+ * @module ecdsa
+ */
+
 const BN = require('bn.js');
 const web3Utils = require('web3-utils');
 const Web3EthAccounts = require('web3-eth-accounts');
@@ -8,20 +14,14 @@ const web3EthAccounts = new Web3EthAccounts();
 
 const ecdsa = {};
 
-ecdsa.keyPairFromPrivate = function keyPairFromPrivate(privateKey) {
-    const buffer = Buffer.from(privateKey.slice(2), 'hex');
-    const ecKey = secp256k1.keyFromPrivate(buffer);
-    const publicKey = `0x${ecKey.getPublic(false, 'hex').slice(2)}`;
-    const publicHash = web3Utils.sha3(publicKey);
-    const address = web3Utils.toChecksumAddress(`0x${publicHash.slice(-40)}`);
-    return {
-        privateKey,
-        publicKey: ecKey.getPublic(),
-        address,
-    };
-};
-
-ecdsa.accountFromPublicKey = function accountFromPublicKey(publicKey) {
+/**
+ * Convert an Ethereum public key into an address
+ *
+ * @method accountFromPublicKey
+ * @param {String} publicKey hex-string formatted public key (uncompressed)
+ * @returns {String} address
+ */
+ecdsa.accountFromPublicKey = (publicKey) => {
     const ecKey = secp256k1.keyFromPublic(publicKey);
     const publicKeyHex = `0x${ecKey.getPublic(false, 'hex').slice(2)}`;
     const publicHash = web3Utils.sha3(publicKeyHex);
@@ -29,6 +29,14 @@ ecdsa.accountFromPublicKey = function accountFromPublicKey(publicKey) {
     return address;
 };
 
+/**
+ * Sign a message hash with a given private key
+ *
+ * @method signMessage
+ * @param {String} hash hex-string formatted message hash
+ * @param {String} privateKey hex-string formatted private key
+ * @returns {String[3]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ */
 ecdsa.signMessage = (hash, privateKey) => {
     const signature = secp256k1
         .keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
@@ -40,24 +48,52 @@ ecdsa.signMessage = (hash, privateKey) => {
     ];
 };
 
+
+/**
+ * Verify an ECDSA signature against a publickey
+ *
+ * @method verifyMessage
+ * @param {String} hash hex-string formatted message hash
+ * @param {String} r hex-string formatted ECDSA parameter r
+ * @param {String} s hex-string formatted ECDSA parameter s
+ * @param {String} publicKey hex-string formatted public key (uncompressed)
+ * @returns {bool} true if signature signed by publicKey, false otherwise
+ */
 ecdsa.verifyMessage = (hash, r, s, publicKey) => {
     const rBn = new BN(r.slice(2), 16);
     const sBn = new BN(s.slice(2), 16);
     return secp256k1.verify(hash.slice(2), { r: rBn, s: sBn }, secp256k1.keyFromPublic(publicKey.slice(2), 'hex'));
 };
 
-ecdsa.recoverPublicKey = (hash, r, s, vn) => {
+/**
+ * Recover the signing key of an ECDSA signature
+ *
+ * @method recoverPublicKey
+ * @param {String} hash hex-string formatted message hash
+ * @param {String} r hex-string formatted ECDSA parameter r
+ * @param {String} s hex-string formatted ECDSA parameter s
+ * @param {String} vn hex-string ECDSA parameter v
+ * @returns {Object} elliptic.js public key object of message signer
+ */
+ecdsa.recoverPublicKey = (hash, r, s, v) => {
     const rBn = new BN(r.slice(2), 16);
     const sBn = new BN(s.slice(2), 16);
-    const v = new BN(vn.slice(2), 16).toNumber();
+    const vn = new BN(v.slice(2), 16).toNumber();
     const ecPublicKey = secp256k1.recoverPubKey(
         Buffer.from(web3Utils.padLeft(hash.slice(2), 64), 'hex'),
         { r: rBn, s: sBn },
-        v < 2 ? v : 1 - (v % 2)
+        vn < 2 ? vn : 1 - (vn % 2)
     );
     return ecPublicKey;
 };
 
+/**
+ * Compares signatures from this module with those signed by web3. For debug and test purposes
+ * (we don't use web3 because we want a different preamble for eip712 signatures)
+ *
+ * @method web3Comparison
+ * @returns {Object} ecdsa module signature and web3 signature
+ */
 ecdsa.web3Comparison = () => {
     const account = web3EthAccounts.create();
     const { privateKey } = account;

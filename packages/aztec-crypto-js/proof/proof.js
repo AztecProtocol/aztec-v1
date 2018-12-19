@@ -1,3 +1,8 @@
+/**
+ * Constructs AZTEC join-split zero-knowledge proofs
+ *
+ * @module proof
+ */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const Hash = require('../utils/keccak');
@@ -5,13 +10,7 @@ const bn128 = require('../bn128/bn128');
 
 const { groupReduction } = bn128;
 
-/**
- * Constructs AZTEC join-split zero-knowledge proofs
- *
- * @module proof
-  */
 const proof = {};
-
 
 /**
  * Construct AZTEC join-split proof transcript
