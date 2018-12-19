@@ -72,7 +72,6 @@ eip712.encodeMessageData = function encodeMessageData(types, primaryType, messag
  */
 eip712.encodeTypedData = function encodeTypeData(typedData) {
     const domainHash = padKeccak256(`0x${eip712.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain)}`);
-    console.log('we think domain hash is ', domainHash);
     const structHash = padKeccak256(`0x${eip712.encodeMessageData(typedData.types, typedData.primaryType, typedData.message)}`);
     return `0x${padKeccak256(`0x1901${domainHash}${structHash}`)}`;
 };
