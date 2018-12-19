@@ -1,7 +1,7 @@
 /**
  * Wrapper around elliptic.js implemenation of the secp256k1 curve
  *
- * @module Secp256k1
+ * @module secp256k1
  */
 
 const BN = require('bn.js');

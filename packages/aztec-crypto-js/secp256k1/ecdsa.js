@@ -35,7 +35,7 @@ ecdsa.accountFromPublicKey = (publicKey) => {
  * @method signMessage
  * @param {String} hash hex-string formatted message hash
  * @param {String} privateKey hex-string formatted private key
- * @returns {String[3]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
 ecdsa.signMessage = (hash, privateKey) => {
     const signature = secp256k1

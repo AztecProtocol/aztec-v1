@@ -1,3 +1,10 @@
+/**
+ * Module to construct ECDSA messages for structured data,
+ * following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
+ *
+ * @module eip712
+ */
+
 const { padLeft, sha3 } = require('web3-utils');
 const web3EthAbi = require('web3-eth-abi');
 
@@ -5,12 +12,6 @@ function padKeccak256(data) {
     return padLeft(sha3(data).slice(2), 64);
 }
 
-/**
- * Module to construct ECDSA messages for structured data,
- * following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
- *
- * @module eip712
- */
 const eip712 = {};
 
 /**

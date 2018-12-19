@@ -13,6 +13,7 @@ const { padLeft } = web3Utils;
  *
  * @method getNoteHash
  * @private
+ * @memberof module:note
  * @param {Object} gamma AZTEC commitment base point
  * @param {Object} sigma AZTEC commitment signed point
  * @returns {String} sha3 hash in hex-string format
@@ -30,6 +31,7 @@ function getNoteHash(gamma, sigma) {
  *
  * @method getSharedSecret
  * @private
+ * @memberof module:note
  * @param {Object} ephemeralPoint secp256k1 point
  * @param {Object} privateKey hex-string formatted private key
  * @returns {String} hex-string formatted shared secret
@@ -45,6 +47,7 @@ function getSharedSecret(ephemeralPoint, privateKey) {
  *
  * @method createSharedSecret
  * @private
+ * @memberof module:note
  * @param {Object} pubicKeyHex elliptic.js hex-formatted public key
  * @return {{type: string, name: ephemeralKey}} elliptic.js hex-formatted ephemeral key
  * @return {{type: string, name: encoded}} hex-string formatted shared secret
