@@ -75,6 +75,8 @@ proof.constructJoinSplit = (notes, m, sender, kPublic = 0) => {
     let kPublicBn;
     if (BN.isBN(kPublic)) {
         kPublicBn = kPublic;
+    } else if (kPublic < 0) {
+        kPublicBn = bn128.n.sub(new BN(-kPublic));
     } else {
         kPublicBn = new BN(kPublic);
     }
