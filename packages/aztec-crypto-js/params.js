@@ -63,8 +63,6 @@ module.exports = {
         `0x${padLeft('204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2', 64)}`,
         `0x${padLeft('2cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc', 64)}`,
     ],
-    daiAddress: '0xaaa',
-    erc20ScalingFactor: new BN('100000000000000000', 10),
     AZTEC_RINKEBY_DOMAIN_PARAMS: {
         name: 'AZTEC_RINKEBY_DOMAIN',
         version: '0.1.1',
