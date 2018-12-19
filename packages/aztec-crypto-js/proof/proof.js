@@ -1,10 +1,10 @@
 const BN = require('bn.js');
 const crypto = require('crypto');
-const { padLeft } = require('web3-utils');
-
+const { padLeft, toHex } = require('web3-utils');
+const aztecNote = require('../note/note');
 const Hash = require('../utils/keccak');
 const bn128 = require('../bn128/bn128');
-const setup = require('../setup/setup');
+const secp256k1 = require('../secp256k1/secp256k1');
 
 const { groupReduction } = bn128;
 
@@ -17,36 +17,14 @@ const proof = {};
 
 
 proof.generateCommitment = async (k) => {
-    const kBn = new BN(k).toRed(groupReduction);
-    const { x, y } = await setup.readSignature(k);
-    const mu = bn128.point(x, y);
-    const a = new BN(crypto.randomBytes(32), 16).toRed(groupReduction);
-    const gamma = mu.mul(a);
-    const sigma = gamma.mul(kBn).add(bn128.h.mul(a));
-    return {
-        gamma,
-        sigma,
-        a,
-        k: kBn,
-    };
+    const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.n).toString(16), 64);
+    const kHex = padLeft(toHex(Number(k).toString(10)).slice(2), 8);
+    const ephemeral = secp256k1.keyFromPrivate(crypto.randomBytes(32));
+    const viewKey = `0x${a}${kHex}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
+    return aztecNote.fromViewKey(viewKey);
 };
 
-proof.constructCommitment = async (k, a) => {
-    const kBn = new BN(k).toRed(groupReduction);
-    const { x, y } = await setup.readSignature(k);
-    const mu = bn128.point(x, y);
-    const aBn = new BN(a.slice(2), 16).toRed(groupReduction);
-    const gamma = mu.mul(aBn);
-    const sigma = gamma.mul(kBn).add(bn128.h.mul(aBn));
-    return {
-        gamma,
-        sigma,
-        a: aBn,
-        k: kBn,
-    };
-};
-
-proof.constructModifiedCommitmentSet = async ({ kIn, kOut }) => {
+proof.constructCommitmentSet = async ({ kIn, kOut }) => {
     const inputs = await Promise.all(kIn.map(async (k) => {
         return proof.generateCommitment(k);
     }));
@@ -61,11 +39,11 @@ proof.constructModifiedCommitmentSet = async ({ kIn, kOut }) => {
  * Construct AZTEC join-split proof transcript
  *
  * @method constructJoinSplit
- * @param {Array[Note]} notes array of AZTEC notes
+ * @param {Object[]} notes array of AZTEC notes
  * @param {Number} m number of input notes
- * @param {string} sender Ethereum address of transaction sender
- * @param {string|BN} kPublic public commitment being added to proof
- * @returns {{proofData:Array[string]}, {challenge: string}} proof data and challenge
+ * @param {String} sender Ethereum address of transaction sender
+ * @param {String} kPublic public commitment being added to proof
+ * @returns {Object} proof data and challenge
  */
 proof.constructJoinSplit = (notes, m, sender, kPublic = 0) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison

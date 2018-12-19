@@ -12,6 +12,7 @@ const { padLeft } = web3Utils;
  * Get the hash of a note's coordinates. Used as identifier in note registry
  *
  * @method getNoteHash
+ * @private
  * @param {Object} gamma AZTEC commitment base point
  * @param {Object} sigma AZTEC commitment signed point
  * @returns {String} sha3 hash in hex-string format
@@ -27,7 +28,8 @@ function getNoteHash(gamma, sigma) {
 /**
  * Compute a Diffie-Hellman shared secret between an ephemeral point and a private key
  *
- * @method getSharedSigma
+ * @method getSharedSecret
+ * @private
  * @param {Object} ephemeralPoint secp256k1 point
  * @param {Object} privateKey hex-string formatted private key
  * @returns {String} hex-string formatted shared secret
@@ -41,7 +43,8 @@ function getSharedSecret(ephemeralPoint, privateKey) {
 /**
  * Create a Diffie-Hellman shared secret for a given public key
  *
- * @method getSharedSigma
+ * @method createSharedSecret
+ * @private
  * @param {Object} pubicKeyHex elliptic.js hex-formatted public key
  * @return {{type: string, name: ephemeralKey}} elliptic.js hex-formatted ephemeral key
  * @return {{type: string, name: encoded}} hex-string formatted shared secret
@@ -60,13 +63,13 @@ function createSharedSecret(publicKeyHex) {
 }
 
 /**
- * Contains methods and data to manage AZTEC zero-knowledge notes.
- * Can be constructed either from a public key or a viewing key.
- * Viewing key is required to use note in an AZTEC zero-knowledge proof
- *
- * @class Note
- * @param {string} pubicKey hex-formatted public key
+ * Initializes a new instance of Note from either a public key or a viewing key.
+ * @class
+ * @param {string} publicKey hex-formatted public key
  * @param {string} viewingKey hex-formatted viewing key
+ * @classdesc A class for AZTEC zero-knowledge notes.
+ *   Notes have public keys and viewing keys.
+ *   The viewing key is required to use note in an AZTEC zero-knowledge proof
  */
 function Note(publicKey, viewingKey) {
     if (publicKey && viewingKey) {
@@ -79,10 +82,31 @@ function Note(publicKey, viewingKey) {
         if (publicKey.length !== 200) {
             throw new Error(`invalid public key length for key ${publicKey}, expected 200, got ${publicKey.length}`);
         }
+        /**
+         * Viewing key of note. BN instance in bn128 group's reduction context
+         * @member {BN}
+         */
         this.a = null;
+        /**
+         * Value of note. BN instance in bn128 group's reduction context
+         * @member {BN}
+         */
         this.k = null;
+        /**
+         * AZTEC commitment point \gamma, a bn128 group element
+         * @member {Point}
+         */
         this.gamma = bn128.decodePoint(publicKey.slice(2, 68), 'hex');
+        /**
+         * AZTEC commitment point \sigma, a bn128 group element
+         * @member {Point}
+         */
         this.sigma = bn128.decodePoint(publicKey.slice(68, 134), 'hex');
+        /**
+         * Note's ephemeral key, a secp256k1 group element. A note owner can use this point
+         * to compute the note's viewing key.
+         * @member {Point}
+         */
         this.ephemeral = secp256k1.keyFromPublic(publicKey.slice(134, 200), 'hex');
     }
     if (viewingKey) {
@@ -94,13 +118,19 @@ function Note(publicKey, viewingKey) {
         this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
         this.ephemeral = secp256k1.keyFromPublic(viewingKey.slice(74, 140), 'hex');
     }
+    /**
+     * keccak256 hash of note coordinates, aligned in 32-byte chunks.
+     *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
+     * @member {String}
+     */
     this.noteHash = getNoteHash(this.gamma, this.sigma);
 }
 
 /**
  * Get the public key representation of a note
  *
- * @method getSharedSigma
+ * @name Note#getPublic
+ * @function
  * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
  */
 Note.prototype.getPublic = function getPublic() {
@@ -113,7 +143,8 @@ Note.prototype.getPublic = function getPublic() {
 /**
  * Get the viewing key of a note
  *
- * @method getView
+ * @name Note#getView
+ * @function
  * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
  */
 Note.prototype.getView = function getView() {
@@ -126,7 +157,8 @@ Note.prototype.getView = function getView() {
 /**
  * Compute value of a note, from the public key and the spending key
  *
- * @method derive
+ * @name Note#derive
+ * @function
  * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
  */
 Note.prototype.derive = function derive(spendingKey) {
@@ -139,7 +171,8 @@ Note.prototype.derive = function derive(spendingKey) {
 /**
  * Export note coordinates in a form that can be used by proof.js
  *
- * @method exportNote
+ * @name Note#exportNote
+ * @function
  * @returns {{ publicKey:string, viewKey: string, k: string, a: string, noteHash: string }}
  */
 Note.prototype.exportNote = function exportNote() {
@@ -165,7 +198,8 @@ Note.prototype.exportNote = function exportNote() {
 /**
  * Export note's ephemeral key in compressed string form
  *
- * @method exportMetadata
+ * @name Note#exportMetadata
+ * @function
  * @returns {string} hex-string compressed ephemeral key
  */
 Note.prototype.exportMetadata = function exportMetadata() {
@@ -180,6 +214,13 @@ Note.prototype.exportMetadata = function exportMetadata() {
  */
 const note = {};
 
+/**
+ * Create Note instance from a Note public key
+ *
+ * @method fromPublicKey
+ * @param {string} publicKey the public key for the note
+ * @returns {Note} created note instance
+ */
 note.fromPublicKey = function fromPublicKey(publicKey) {
     return new Note(publicKey, null);
 };

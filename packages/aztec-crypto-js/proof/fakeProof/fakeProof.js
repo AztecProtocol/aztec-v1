@@ -23,7 +23,7 @@ fakeProof.generateCommitment = async (k) => {
     };
 };
 
-fakeProof.constructModifiedCommitmentSet = async ({ kIn, kOut }) => {
+fakeProof.constructCommitmentSet = async ({ kIn, kOut }) => {
     const inputs = await Promise.all(kIn.map(async (k) => {
         return fakeProof.generateCommitment(k);
     }));

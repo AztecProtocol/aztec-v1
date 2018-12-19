@@ -1,3 +1,4 @@
+const BN = require('bn.js');
 const crypto = require('crypto');
 const elliptic = require('elliptic');
 const web3Utils = require('web3-utils');
@@ -19,6 +20,25 @@ function Secp256k1() {
 
     curve.generateAccount = function generateAccount() {
         return curve.accountFromPrivateKey(`0x${crypto.randomBytes(32).toString('hex')}`);
+    };
+
+    /**
+     * Get a random point on the curve
+     * @method randomPoint
+     * @memberof module:secp256k1
+     * @returns {Point} a random point
+     */
+    curve.randomPoint = function randomPoint() {
+        function recurse() {
+            const x = new BN(crypto.randomBytes(32), 16).toRed(curve.curve.red);
+            const y2 = x.redSqr().redMul(x).redIAdd(curve.curve.b);
+            const y = y2.redSqrt();
+            if (y.redSqr(y).redSub(y2).cmp(curve.curve.a)) {
+                return recurse();
+            }
+            return curve.curve.point(x, y);
+        }
+        return recurse();
     };
 
     return curve;
