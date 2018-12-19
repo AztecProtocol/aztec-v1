@@ -1,10 +1,7 @@
 const BN = require('bn.js');
-const crypto = require('crypto');
-const { padLeft, toHex } = require('web3-utils');
-const aztecNote = require('../note/note');
+const { padLeft } = require('web3-utils');
 const Hash = require('../utils/keccak');
 const bn128 = require('../bn128/bn128');
-const secp256k1 = require('../secp256k1/secp256k1');
 
 const { groupReduction } = bn128;
 
@@ -15,25 +12,6 @@ const { groupReduction } = bn128;
   */
 const proof = {};
 
-
-proof.generateCommitment = async (k) => {
-    const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.n).toString(16), 64);
-    const kHex = padLeft(toHex(Number(k).toString(10)).slice(2), 8);
-    const ephemeral = secp256k1.keyFromPrivate(crypto.randomBytes(32));
-    const viewKey = `0x${a}${kHex}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-    return aztecNote.fromViewKey(viewKey);
-};
-
-proof.constructCommitmentSet = async ({ kIn, kOut }) => {
-    const inputs = await Promise.all(kIn.map(async (k) => {
-        return proof.generateCommitment(k);
-    }));
-    const outputs = await Promise.all(kOut.map(async (k) => {
-        return proof.generateCommitment(k);
-    }));
-    const commitments = [...inputs, ...outputs];
-    return { commitments, m: inputs.length };
-};
 
 /**
  * Construct AZTEC join-split proof transcript
