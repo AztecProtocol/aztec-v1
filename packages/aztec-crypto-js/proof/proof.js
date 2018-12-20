@@ -94,17 +94,11 @@ proof.parseInputs = (notes, m, sender, kPublic) => {
         if (!note.k.fromRed().lt(new BN(K_MAX))) {
             throw new Error('note value malformed');
         }
-        if (note.gamma.isInfinity()) {
-            throw new Error('gamma at infinity');
+        if (note.gamma.isInfinity() || note.sigma.isInfinity()) {
+            throw new Error('point at infinity');
         }
-        if (note.sigma.isInfinity()) {
-            throw new Error('sigma at infinity');
-        }
-        if (!isOnCurve(note.gamma)) {
-            throw new Error('gamma not on curve');
-        }
-        if (!isOnCurve(note.sigma)) {
-            throw new Error('sigma not on curve');
+        if (!isOnCurve(note.gamma) || !isOnCurve(note.sigma)) {
+            throw new Error('point not on curve');
         }
     });
 
@@ -126,7 +120,7 @@ proof.parseInputs = (notes, m, sender, kPublic) => {
  * @param {string} kPublic public commitment being added to proof
  * @returns {Object} proof data and challenge
  */
-proof.constructJoinSplit = (notes, m, sender, kPublic = 0) => {
+proof.constructJoinSplit = (notes, m, sender, kPublic) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
     // convert kPublic into a BN instance if it is not one

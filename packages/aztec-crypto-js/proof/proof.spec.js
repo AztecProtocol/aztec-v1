@@ -52,12 +52,7 @@ describe('AZTEC proof construction tests', () => {
 
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         const k = getKPublic(kIn, kOut);
-        let kPublic;
-        if (k < 0) {
-            kPublic = bn128.n.sub(new BN(-k));
-        } else {
-            kPublic = new BN(k);
-        }
+        const kPublic = bn128.n.add(new BN(k)).umod(bn128.n);
 
         const { proofData, challenge } = proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
 
@@ -109,7 +104,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructJoinSplit(commitments, 500, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('gamma not on curve');
+            expect(err.message).to.contain('point not on curve');
         }
     });
 
@@ -118,15 +113,17 @@ describe('AZTEC proof construction tests', () => {
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
-        commitments[0].gamma.infinity = true;
+        commitments[0].gamma = commitments[0].gamma.add(commitments[0].gamma.neg());
+        let message = '';
         try {
             proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('gamma at infinity');
+            ({ message } = err);
         }
+        expect(message).to.contain('point at infinity');
     });
 
-    it('proof.constructJoinSplit will throw if viewing key is 0', () => {
+    it('proof.constructJoinSplit will throw if viewing key response is 0', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
