@@ -1,3 +1,8 @@
+/**
+ * Verification algorithm for AZTEC join-split zero-knowledge proofs
+ *
+ * @module verifier
+ */
 const BN = require('bn.js');
 
 const bn128 = require('../bn128/bn128');
@@ -7,16 +12,6 @@ const { groupReduction } = bn128;
 const zero = new BN(0).toRed(groupReduction);
 
 const verifier = {};
-
-verifier.ERRORS = {
-    SCALAR_TOO_BIG: 'group scalar is not modulo the bn128 group order!',
-    SCALAR_ZERO: 'group scalar cannot equal zero!',
-    X_TOO_BIG: 'group element x coordinate is not modulo the bn128 field order!',
-    Y_TOO_BIG: 'group element y coordinate is not modulo the bn128 field order!',
-    NOT_ON_CURVE: 'group element is not on bn128 curve!',
-    BAD_BLINDING_FACTOR: 'blinding factor is at infinity or is zero!',
-    CHALLENGE_RESPONSE_FAIL: 'challenge does not match challenge response',
-};
 
 function hexToGroupScalar(hex, errors, canBeZero = false) {
     const hexBn = new BN(hex.slice(2), 16);
@@ -48,6 +43,29 @@ function hexToGroupElement(xHex, yHex, errors) {
     return bn128.point(x, y);
 }
 
+/**
+ * @enum {ERRORS}
+ * @description enum to track verification errors. We want to accumulate all errors instead of throwing at the first
+ */
+verifier.ERRORS = {
+    SCALAR_TOO_BIG: 'group scalar is not modulo the bn128 group order!',
+    SCALAR_ZERO: 'group scalar cannot equal zero!',
+    X_TOO_BIG: 'group element x coordinate is not modulo the bn128 field order!',
+    Y_TOO_BIG: 'group element y coordinate is not modulo the bn128 field order!',
+    NOT_ON_CURVE: 'group element is not on bn128 curve!',
+    BAD_BLINDING_FACTOR: 'blinding factor is at infinity or is zero!',
+    CHALLENGE_RESPONSE_FAIL: 'challenge does not match challenge response',
+};
+
+/**
+ * Convert ABI encoded proof transcript back into BN.js form (for scalars) and elliptic.js form (for points)
+ *
+ * @method convertTranscript
+ * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
+ * @param {Number} m number of input notes
+ * @param {String} challengeHex hex-string formatted proof challenge
+ * @param {String[]} errors container for discovered errors
+ */
 verifier.convertTranscript = (proofData, m, challengeHex, errors) => {
     const challenge = hexToGroupScalar(challengeHex, errors);
     const n = proofData.length;
@@ -92,6 +110,15 @@ verifier.convertTranscript = (proofData, m, challengeHex, errors) => {
     };
 };
 
+/**
+ * Verify an AZTEC zero-knowledge proof
+ *
+ * @method verifyProof
+ * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
+ * @param {Number} m number of input notes
+ * @param {String} challengeHex hex-string formatted proof challenge
+ * @param {String} sender Ethereum address of transaction sender
+ */
 verifier.verifyProof = (proofData, m, challengeHex, sender) => {
     const errors = [];
     const {
