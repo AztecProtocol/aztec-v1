@@ -74,7 +74,7 @@ helpers.generateFakeCommitmentSet = ({ kIn, kOut }) => {
         return generateFakeCommitment(k, trapdoor);
     });
     const commitments = [...inputs, ...outputs];
-    return { commitments, m: inputs.length };
+    return { commitments, m: inputs.length, trapdoor };
 };
 
 module.exports = helpers;
