@@ -59,7 +59,7 @@ helpers.generateCommitmentSet = ({ kIn, kOut }) => {
 };
 
 /**
- * Create a set of fake AZTEC commitments from vectors of input and output values.
+ * Create a set of fake AZTEC commitments from vectors of input and output values.  
  * This method uses a randomly generated trapdoor key instead of the trusted setup key.
  * @method generateFakeCommitmentSet
  * @memberof module:proof.proofHelpers

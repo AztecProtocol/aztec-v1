@@ -1,5 +1,5 @@
 /**
- * Module to ECDSA signatures over structured data,
+ * Module to ECDSA signatures over structured data,  
  *   following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
  * @namespace sign

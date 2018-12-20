@@ -93,7 +93,7 @@ ecdsa.recoverPublicKey = (hash, r, s, v) => {
 };
 
 /**
- * Compares signatures from this module with those signed by web3. For debug and test purposes
+ * Compares signatures from this module with those signed by web3. For debug and test purposes  
  * (we don't use web3 because we want a different preamble for eip712 signatures)
  *
  * @method web3Comparison

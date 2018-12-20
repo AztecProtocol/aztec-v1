@@ -39,8 +39,8 @@ module.exports = {
     GROUP_MODULUS: new BN('21888242871839275222246405745257275088548364400416034343698204186575808495617', 10),
     /**
      * X-Coordinate of AZTEC's second generator point 'h'.
-     *      Created by taking the keccak256 hash of the asci string 'just read the instructions', right-padded to 32 bytes.
-     *      i.e: 0x6A75737420726561642074686520696E737472756374696F6E73000000000000.
+     *      Created by taking the keccak256 hash of the asci string 'just read the instructions', right-padded to 32 bytes.  
+     *      i.e: 0x6A75737420726561642074686520696E737472756374696F6E73000000000000.  
      *      H_X is the result of this hash, modulo the elliptic curve group modulus n.
      *  @constant H_X
      *  @type {BN}

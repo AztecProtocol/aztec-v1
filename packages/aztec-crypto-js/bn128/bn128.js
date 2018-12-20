@@ -90,7 +90,7 @@ function Bn128() {
 
     // TODO: replace with optimized C++ implementation, this is way too slow
     /**
-     * Brute-force recover an AZTEC note value from a decrypted point pair.
+     * Brute-force recover an AZTEC note value from a decrypted point pair.  
      *   Requires the value 'k' is less than ~ 1 million
      * @method recoverMessage
      * @memberof module:bn128

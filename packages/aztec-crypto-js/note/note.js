@@ -71,7 +71,7 @@ function createSharedSecret(publicKeyHex) {
  * @param {string} publicKey hex-formatted public key
  * @param {string} viewingKey hex-formatted viewing key
  * @classdesc A class for AZTEC zero-knowledge notes.
- *   Notes have public keys and viewing keys.
+ *   Notes have public keys and viewing keys.  
  *   The viewing key is required to use note in an AZTEC zero-knowledge proof
  */
 function Note(publicKey, viewingKey) {
@@ -122,7 +122,7 @@ function Note(publicKey, viewingKey) {
         this.ephemeral = secp256k1.keyFromPublic(viewingKey.slice(74, 140), 'hex');
     }
     /**
-     * keccak256 hash of note coordinates, aligned in 32-byte chunks.
+     * keccak256 hash of note coordinates, aligned in 32-byte chunks.  
      *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
      * @member {string}
      */

@@ -1,5 +1,5 @@
 /**
- * Module to construct ECDSA messages for structured data,
+ * Module to construct ECDSA messages for structured data,  
  * following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
  * @module eip712

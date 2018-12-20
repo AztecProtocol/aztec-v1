@@ -10,7 +10,7 @@ const verifier = require('./verifier');
 const extractor = {};
 
 /**
- * Extract the witnesses for two proof transcripts over the same input string but with different challenges.
+ * Extract the witnesses for two proof transcripts over the same input string but with different challenges.  
  * We use this to validate the soundness of our implementation in the random oracle model.
  *
  * @method extractWitness
