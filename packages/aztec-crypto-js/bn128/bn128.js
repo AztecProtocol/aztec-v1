@@ -96,7 +96,7 @@ function Bn128() {
      * @memberof module:bn128
      * @param {Point} gamma the AZTEC note coordinate \gamma
      * @param {Point} gammaK the AZTEC decrypted coordinate \gamma^{k}. Computed from \sigma.h^{-a}
-     * @returns {Number} the value of the note
+     * @returns {number} the value of the note
      */
     curve.recoverMessage = function recoverMessage(gamma, gammaK) {
         if (gammaK.isInfinity()) {

@@ -16,7 +16,7 @@ const { padLeft } = web3Utils;
  * @memberof module:note
  * @param {Object} gamma AZTEC commitment base point
  * @param {Object} sigma AZTEC commitment signed point
- * @returns {String} sha3 hash in hex-string format
+ * @returns {string} sha3 hash in hex-string format
  */
 function getNoteHash(gamma, sigma) {
     const gammaX = padLeft(gamma.x.fromRed().toString(16), 64);
@@ -34,7 +34,7 @@ function getNoteHash(gamma, sigma) {
  * @memberof module:note
  * @param {Object} ephemeralPoint secp256k1 point
  * @param {Object} privateKey hex-string formatted private key
- * @returns {String} hex-string formatted shared secret
+ * @returns {string} hex-string formatted shared secret
  */
 function getSharedSecret(ephemeralPoint, privateKey) {
     const sharedSecret = ephemeralPoint.mul(privateKey);
@@ -124,7 +124,7 @@ function Note(publicKey, viewingKey) {
     /**
      * keccak256 hash of note coordinates, aligned in 32-byte chunks.
      *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
-     * @member {String}
+     * @member {string}
      */
     this.noteHash = getNoteHash(this.gamma, this.sigma);
 }
@@ -259,7 +259,7 @@ note.derive = function derive(publicKey, spendingKey) {
  *
  * @method fromValue
  * @param {string} publicKey hex-string formatted recipient public key
- * @param {Number} value value of the note
+ * @param {number} value value of the note
  * @returns {Note} created note instance
  */
 note.create = function fromValue(spendingPublicKey, value) {

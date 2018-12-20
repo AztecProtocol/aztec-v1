@@ -59,7 +59,7 @@ setup.compress = (x, y) => {
  * Load a trusted setup signature point h^{\frac{1}{y - k}}, y = setup key, k = input value
  *
  * @method readSignature
- * @param {Number} inputValue the integer whose negation was signed by the trusted setup key
+ * @param {number} inputValue the integer whose negation was signed by the trusted setup key
  * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
  */
 setup.readSignature = (inputValue) => {
@@ -89,7 +89,7 @@ setup.readSignature = (inputValue) => {
  * Load a trusted setup signature, using synchronous file loading methods (see: {@link module:setup~readSignature})
  *
  * @method readSignatureSync
- * @param {Number} inputValue the integer whose negation was signed by the trusted setup key
+ * @param {number} inputValue the integer whose negation was signed by the trusted setup key
  * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
  */
 setup.readSignatureSync = (inputValue) => {

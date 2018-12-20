@@ -18,8 +18,8 @@ const proof = {};
  *   Separated out into a distinct method so that we can stub this for extractor tests
  *
  * @method generateBlindingScalars
- * @param {Number} n number of notes
- * @param {Number} m number of input notes
+ * @param {number} n number of notes
+ * @param {number} m number of input notes
  */
 proof.generateBlindingScalars = (n, m) => {
     let runningBk = new BN(0).toRed(groupReduction);
@@ -49,9 +49,9 @@ proof.generateBlindingScalars = (n, m) => {
  *   Separated out into a distinct method so that we can stub this for extractor tests
  *
  * @method computeChallenge
- * @param {String} sender Ethereum address of transaction sender
- * @param {String} kPublic public commitment being added to proof
- * @param {Number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ * @param {number} m number of input notes
  * @param {Object[]} notes array of AZTEC notes
  * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
  */
@@ -82,9 +82,9 @@ function isOnCurve(point) {
  *
  * @method parseInputs
  * @param {Object[]} notes array of AZTEC notes
- * @param {Number} m number of input notes
- * @param {String} sender Ethereum address of transaction sender
- * @param {String} kPublic public commitment being added to proof
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
  */
 proof.parseInputs = (notes, m, sender, kPublic) => {
     notes.forEach((note) => {
@@ -121,9 +121,9 @@ proof.parseInputs = (notes, m, sender, kPublic) => {
  *
  * @method constructJoinSplit
  * @param {Object[]} notes array of AZTEC notes
- * @param {Number} m number of input notes
- * @param {String} sender Ethereum address of transaction sender
- * @param {String} kPublic public commitment being added to proof
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
  * @returns {Object} proof data and challenge
  */
 proof.constructJoinSplit = (notes, m, sender, kPublic = 0) => {

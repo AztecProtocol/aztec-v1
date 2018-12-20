@@ -9,7 +9,7 @@ const { padLeft } = require('web3-utils');
 module.exports = {
     /** Number of signatures per file in trusted setup database
      *  @constant SIGNATURES_PER_FILE
-     *  @type {Number}
+     *  @type {number}
      *  @default 1024
      */
     SIGNATURES_PER_FILE: 1024,

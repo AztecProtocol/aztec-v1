@@ -13,7 +13,7 @@ const extractor = {};
  *
  * @method extractWitness
  * @param {Object[]} transcripts size-2 array of AZTEC proof data
- * @param {Number} m number of input notes
+ * @param {number} m number of input notes
  * @param {string[]} challenges size-2 array of hex-string formated proof challenges
  * @returns {Object[]} the AZTEC notes used in the proof, with their extracted witnesses (the note value and note viewing key)
  */

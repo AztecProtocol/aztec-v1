@@ -18,8 +18,8 @@ const ecdsa = {};
  * Convert an Ethereum public key into an address
  *
  * @method accountFromPublicKey
- * @param {String} publicKey hex-string formatted public key (uncompressed)
- * @returns {String} address
+ * @param {string} publicKey hex-string formatted public key (uncompressed)
+ * @returns {string} address
  */
 ecdsa.accountFromPublicKey = (publicKey) => {
     const ecKey = secp256k1.keyFromPublic(publicKey);
@@ -33,8 +33,8 @@ ecdsa.accountFromPublicKey = (publicKey) => {
  * Sign a message hash with a given private key
  *
  * @method signMessage
- * @param {String} hash hex-string formatted message hash
- * @param {String} privateKey hex-string formatted private key
+ * @param {string} hash hex-string formatted message hash
+ * @param {string} privateKey hex-string formatted private key
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
 ecdsa.signMessage = (hash, privateKey) => {
@@ -53,10 +53,10 @@ ecdsa.signMessage = (hash, privateKey) => {
  * Verify an ECDSA signature against a publickey
  *
  * @method verifyMessage
- * @param {String} hash hex-string formatted message hash
- * @param {String} r hex-string formatted ECDSA parameter r
- * @param {String} s hex-string formatted ECDSA parameter s
- * @param {String} publicKey hex-string formatted public key (uncompressed)
+ * @param {string} hash hex-string formatted message hash
+ * @param {string} r hex-string formatted ECDSA parameter r
+ * @param {string} s hex-string formatted ECDSA parameter s
+ * @param {string} publicKey hex-string formatted public key (uncompressed)
  * @returns {bool} true if signature signed by publicKey, false otherwise
  */
 ecdsa.verifyMessage = (hash, r, s, publicKey) => {
@@ -69,10 +69,10 @@ ecdsa.verifyMessage = (hash, r, s, publicKey) => {
  * Recover the signing key of an ECDSA signature
  *
  * @method recoverPublicKey
- * @param {String} hash hex-string formatted message hash
- * @param {String} r hex-string formatted ECDSA parameter r
- * @param {String} s hex-string formatted ECDSA parameter s
- * @param {String} vn hex-string ECDSA parameter v
+ * @param {string} hash hex-string formatted message hash
+ * @param {string} r hex-string formatted ECDSA parameter r
+ * @param {string} s hex-string formatted ECDSA parameter s
+ * @param {string} vn hex-string ECDSA parameter v
  * @returns {Object} elliptic.js public key object of message signer
  */
 ecdsa.recoverPublicKey = (hash, r, s, v) => {

@@ -62,9 +62,9 @@ verifier.ERRORS = {
  *
  * @method convertTranscript
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
- * @param {Number} m number of input notes
- * @param {String} challengeHex hex-string formatted proof challenge
- * @param {String[]} errors container for discovered errors
+ * @param {number} m number of input notes
+ * @param {string} challengeHex hex-string formatted proof challenge
+ * @param {string[]} errors container for discovered errors
  */
 verifier.convertTranscript = (proofData, m, challengeHex, errors) => {
     const challenge = hexToGroupScalar(challengeHex, errors);
@@ -115,9 +115,9 @@ verifier.convertTranscript = (proofData, m, challengeHex, errors) => {
  *
  * @method verifyProof
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
- * @param {Number} m number of input notes
- * @param {String} challengeHex hex-string formatted proof challenge
- * @param {String} sender Ethereum address of transaction sender
+ * @param {number} m number of input notes
+ * @param {string} challengeHex hex-string formatted proof challenge
+ * @param {string} sender Ethereum address of transaction sender
  */
 verifier.verifyProof = (proofData, m, challengeHex, sender) => {
     const errors = [];
