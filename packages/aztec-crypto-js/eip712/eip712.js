@@ -25,15 +25,18 @@ const eip712 = {};
  * @returns {string} encoded type string
  */
 eip712.encodeStruct = function encodeStruct(primaryType, types) {
-    return [primaryType]
-        .concat(types[primaryType]
+    const findTypes = (type) => {
+        return [type].concat(types[type]
             .reduce((acc, { type: typeKey }) => {
                 if (types[typeKey] && acc.indexOf(typeKey) === -1) {
-                    return [...acc, typeKey];
+                    return [...acc, ...findTypes(typeKey)];
                 }
                 return acc;
-            }, [])
-            .sort((a, b) => a.localeCompare(b)))
+            }, []));
+    };
+    return (findTypes(primaryType)
+        .sort((a, b) => a.localeCompare(b))
+        .sort((a, b) => (b === primaryType)))
         .reduce((acc, key) => `${acc}${key}(${types[key]
             .reduce((iacc, { name, type }) => `${iacc}${type} ${name},`, '').slice(0, -1)})`, '');
 };
