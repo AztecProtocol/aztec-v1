@@ -1,5 +1,10 @@
 /**
- * Read in points from the trusted setup points database
+ * Read in points from the trusted setup points database.
+ * NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY AZTEC ON A SINGLE DEVICE AND
+ *   IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY.
+ *   We will be launching our multiparty computation trusted setup protocol shortly, where mulitple entities
+ *   create the trusted setup database and only one of them must act honestly in order for the setup database to be secure.
+ *   If you wish to participate please let us know at hello@aztecprotocol.com
  *
  * @module setup
  */
