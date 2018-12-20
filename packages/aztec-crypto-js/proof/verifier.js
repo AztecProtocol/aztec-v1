@@ -1,7 +1,8 @@
 /**
  * Verification algorithm for AZTEC join-split zero-knowledge proofs
  *
- * @module verifier
+ * @namespace verifier
+ * @memberof module:proof
  */
 const BN = require('bn.js');
 
@@ -45,6 +46,7 @@ function hexToGroupElement(xHex, yHex, errors) {
 
 /**
  * @enum {ERRORS}
+ * @memberof module:proof.verifier
  * @description enum to track verification errors. We want to accumulate all errors instead of throwing at the first
  */
 verifier.ERRORS = {
@@ -61,6 +63,7 @@ verifier.ERRORS = {
  * Convert ABI encoded proof transcript back into BN.js form (for scalars) and elliptic.js form (for points)
  *
  * @method convertTranscript
+ * @memberof module:proof.verifier
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
  * @param {number} m number of input notes
  * @param {string} challengeHex hex-string formatted proof challenge
@@ -114,6 +117,7 @@ verifier.convertTranscript = (proofData, m, challengeHex, errors) => {
  * Verify an AZTEC zero-knowledge proof
  *
  * @method verifyProof
+ * @memberof module:proof.verifier
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
  * @param {number} m number of input notes
  * @param {string} challengeHex hex-string formatted proof challenge

@@ -2,7 +2,8 @@
  * Module to ECDSA signatures over structured data,
  *   following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
- * @module sign
+ * @namespace sign
+ * @memberof module:eip712
  */
 
 const ecdsa = require('../secp256k1/ecdsa');
@@ -14,6 +15,7 @@ const sign = {};
 /**
  * generate EIP712 domain parameters for AZTECERC20Bridge.sol
  * @method generateAZTECDomainParams
+ * @memberof module:eip712.sign
  * @param {string} verifyingContract address of target contract
  * @param {number} chainId the network ID
  * @returns {Object} EIP712 Domain type object
@@ -30,6 +32,7 @@ sign.generateAZTECDomainParams = function generateAZTECDomainParams(verifyingCon
 /**
  * create an EIP712 ECDSA signature over an AZTEC note
  * @method signNote
+ * @memberof module:eip712.sign
  * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
  * @param {string} challenge AZTEC zero-knowledge proof challenge variable
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
@@ -56,6 +59,7 @@ sign.signNote = function signNote(note, challenge, senderAddress, verifyingContr
 /**
  * recover the Ethereum address of an EIP712 AZTEC note signature
  * @method recoverAddress
+ * @memberof module:eip712.sign
  * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
  * @param {string} challenge AZTEC zero-knowledge proof challenge variable
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)

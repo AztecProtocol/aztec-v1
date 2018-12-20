@@ -1,8 +1,10 @@
 /**
  * Extractor algorithm for AZTEC join-split zero-knowledge proofs. Used to validate the soundness of our sigma protocol
  *
- * @module extractor
+ * @namespace extractor
+ * @memberof module:proof
  */
+
 const verifier = require('./verifier');
 
 const extractor = {};
@@ -12,6 +14,7 @@ const extractor = {};
  * We use this to validate the soundness of our implementation in the random oracle model.
  *
  * @method extractWitness
+ * @memberof module:proof.extractor
  * @param {Object[]} transcripts size-2 array of AZTEC proof data
  * @param {number} m number of input notes
  * @param {string[]} challenges size-2 array of hex-string formated proof challenges
