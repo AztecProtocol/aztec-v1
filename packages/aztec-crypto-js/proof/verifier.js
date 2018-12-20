@@ -99,7 +99,7 @@ verifier.verifyProof = (proofData, m, challengeHex, sender) => {
         kPublic,
         notes,
         challenge,
-    } = verifier.convertTranscript(proofData, m, challengeHex);
+    } = verifier.convertTranscript(proofData, m, challengeHex, errors);
 
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));

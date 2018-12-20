@@ -74,7 +74,7 @@ describe('AZTEC extractor tests', () => {
         computeChallenge.restore();
     });
 
-    it('extractor can extract witnesses from two satisfying proofs in the random oracle model', () => {
+    it('extractor can extract witnesses from two satisfying proofs over the same input string in the random oracle model', () => {
         const kIn = [...Array(nIn)].map(() => generateNoteValue());
         const kOut = [...Array(nOut)].map(() => generateNoteValue());
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });

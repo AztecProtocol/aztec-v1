@@ -195,7 +195,7 @@ proof.constructJoinSplit = (notes, m, sender, kPublic = 0) => {
     });
     return {
         proofData,
-        challenge: `0x${padLeft(challenge)}`,
+        challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
 };
 
