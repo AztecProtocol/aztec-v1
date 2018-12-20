@@ -15,6 +15,17 @@ describe('setup.js tests', () => {
         expect(BN.isBN(point.y)).to.equal(true);
     });
 
+    it('setup.readSignature will throw if asked for a point > K_MAX', async () => {
+        const k = K_MAX * 2;
+        let message = '';
+        try {
+            await setup.readSignature(k);
+        } catch (e) {
+            ({ message } = e);
+        }
+        expect(message).to.contain('no such file or directory');
+    });
+
     it('setup.compress will correctly compress coordinate with even y', () => {
         const compressed = setup.compress(new BN(2), new BN(4));
         expect(compressed.eq(new BN(2))).to.equal(true);
@@ -32,5 +43,16 @@ describe('setup.js tests', () => {
         const { x, y } = setup.decompress(setup.compress(point.x.fromRed(), point.y.fromRed()));
         expect(x.eq(point.x.fromRed())).to.equal(true);
         expect(y.eq(point.y.fromRed())).to.equal(true);
+    });
+
+    it('setup.decompress will throw when given malformed input', () => {
+        let message = '';
+        try {
+            // this will produce a value that is not a quadratic residue
+            setup.decompress(new BN('2e4d6a154b5bf6bf2387ed08793d059f6e43247587c5fed538f861101f08dc52', 16));
+        } catch (e) {
+            ({ message } = e);
+        }
+        expect(message).to.equal('x^3 + 3 not a square, malformed input');
     });
 });
