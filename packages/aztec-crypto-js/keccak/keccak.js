@@ -15,9 +15,6 @@ function Keccak() {
 }
 
 function hashStrings(inputArr) {
-    if (!Array.isArray(inputArr)) {
-        throw new Error(`expected ${inputArr} to be of type 'array'`);
-    }
     const input = `${inputArr.map((i) => {
         const res = padLeft(i, 64);
         return res;
