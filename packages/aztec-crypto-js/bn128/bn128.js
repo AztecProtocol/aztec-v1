@@ -67,27 +67,12 @@ function Bn128() {
     };
 
     /**
-     * Map a hash to a point on the curve
-     * @method getFromHash
-     * @memberof module:bn128
-     * @param {BN} x the hash as a BN.js instance
-     * @returns {Object} x, y coordinates of point
-     */
-    curve.getFromHash = function getFromHash(x) {
-        const y2 = x.redSqr().redMul(x).redIAdd(curve.b);
-        const y = y2.redSqrt();
-        if (!y.redSqr().eq(y2)) {
-            throw new Error('point is not on curve');
-        }
-        return { x, y };
-    };
-
-    /**
      * elliptic.js Point representation of AZTEC generator point
      * @memberof module:bn128
      */
     curve.h = curve.point(H_X, H_Y);
 
+    curve.K_MAX = K_MAX;
     // TODO: replace with optimized C++ implementation, this is way too slow
     /**
      * Brute-force recover an AZTEC note value from a decrypted point pair.  
@@ -104,14 +89,14 @@ function Bn128() {
         }
         let accumulator = gamma;
         let k = 1;
-        while (k < K_MAX) {
+        while (k < curve.K_MAX) {
             if (accumulator.eq(gammaK)) {
                 break;
             }
             accumulator = accumulator.add(gamma);
             k += 1;
         }
-        if (k === K_MAX) {
+        if (k === curve.K_MAX) {
             throw new Error('could not find k!');
         }
         return k;
