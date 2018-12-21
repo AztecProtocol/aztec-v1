@@ -1,0 +1,28 @@
+{
+    "plugins": ["plugins/markdown"],
+    "recurseDepth": 10,
+    "source": {
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_",
+        "include": ["./"],
+        "exclude": [".nyc_output", "node_modules", "setupDatabase", "out"]
+    },
+    "sourceType": "module",
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc","closure"]
+    },
+    "templates": {
+        "referenceTitle": "aztec-crypto-js",
+        "disableSort": false,
+        "collapse": true
+    },
+    "opts": {
+        "private": true,
+        "recurse": true,
+        "encoding": "utf-8",
+        "destination": "./out/",
+        "readme": "./README.md",
+        "template": "node_modules/braintree-jsdoc-template"
+    }
+}
