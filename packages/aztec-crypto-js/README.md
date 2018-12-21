@@ -31,16 +31,16 @@ const accounts = [
 ];
 
 const inputNotes = [
-    note.create(accounts[0].publicKey, 100),
-    note.create(accounts[0].publicKey, 50),
+    note.create(accounts[0].publicKey, 80),
+    note.create(accounts[0].publicKey, 60),
 ];
 
 const outputNotes = [
-    note.create(accounts[1].publicKey, 80),
-    note.create(accounts[1].publicKey, 60),
+    note.create(accounts[1].publicKey, 50),
+    note.create(accounts[1].publicKey, 100),
 ];
 
-const kPublic = -10; // output notes contain 10 less than input notes = deposit of 10 public tokens
+const kPublic = -10; // input notes contain 10 fewer than output notes = deposit of 10 public tokens
 const sender = accounts[0].address; // address of transaction sender
 
 // proofData and challenge are ABI-encoded and ready to beused as inputs to an AZTEC smart contract

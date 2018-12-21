@@ -59,13 +59,11 @@ describe('AZTEC verifier tests', function describeVerifier() {
     describe('success states', function success() {
         this.timeout(10000);
         it('proof.constructJoinSplit creates a valid join-split proof', () => {
-            const kIn = [...Array(5)].map(() => generateNoteValue());
-            const kOut = [...Array(5)].map(() => generateNoteValue());
-
+            const kIn = [80, 60];
+            const kOut = [50, 100];
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
-            const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, -10);
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.pairingGammas.mul(trapdoor).eq(result.pairingSigmas.neg())).to.equal(true);
             expect(result.valid).to.equal(true);
