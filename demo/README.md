@@ -13,16 +13,6 @@ The demo script will, if used on the Ethereum main-net, convert 10 DAI into zero
 
 For the test-nets, the AZTEC token smart contract is attached to a dummy ERC20 contract that anybody can mint from - the ```demoTransactions.js``` script will automatically mint tokens for you.
 
-Once that has been done, the following scripts will run the demo script and issue AZTEC confidential transactions:
-
-* ```npm run demoRinkeby```  
-* ```npm run demoMainNet```
-* ```npm run demoKovan```
-* ```npm run demoRopsten```
-* ```npm run demoDevelopment```
-
-...you get the picture. The ```npm run demoDevelopment``` command expects a local blockchain network on port 8545 to be open. You can change the port number in ```config.js```.  
-
 You can deploy your own AZTEC contracts (attached to different ERC20 token contracts if you want) by running ```truffle migrate```, specifying the appropriate network. See [the truffle docs](https://truffleframework.com/docs/truffle/getting-started/running-migrations) for more details.  
 
 If you're running this script on a local test-net, run ```truffle migrate``` to deploy the AZTEC contracts locally.
@@ -37,7 +27,7 @@ followed by ```npm install``` && ```npm install ./aztec-crypto-js```
 
 to run a test net and deploy contracts, run  
 
-```node ./node_modules/ganache-cli/cli.js``` && ```truffle migreate```  
+```node ./node_modules/ganache-cli/cli.js``` && ```truffle migrate```  
 
 run truffle tests with ```truffle test```  
 
