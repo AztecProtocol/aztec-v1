@@ -3,6 +3,9 @@
   "version": "0.1.1",
   "description": "AZTEC javascript cryptography libarary",
   "main": "truffle-config.js",
+  "engines": {
+    "npm": ">=4"
+  },
   "directories": {
     "doc": "docs",
     "test": "test"
