@@ -6,8 +6,7 @@ This library contains methods required to construct AZTEC zero-knowledge proofs,
 
 To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in ```demo```.  
 
-For full API docs, view our github pages API at (TODO, ahem...)
-
+For full API docs, [view our github pages API](https://aztecprotocol.github.io/aztec-crypto-js/)
 ## Install
 
 clone this repo to your desired directory and run ```npm install```
