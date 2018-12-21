@@ -31,15 +31,15 @@ const compressionMask = new BN('800000000000000000000000000000000000000000000000
  */
 setup.decompress = (compressed) => {
     const yBit = compressed.testn(255);
-    const x = compressed.maskn(255).toRed(bn128.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(bn128.b);
+    const x = compressed.maskn(255).toRed(bn128.curve.red);
+    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
     const yRoot = y2.redSqrt();
     if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
     if (Boolean(y.isOdd()) !== Boolean(yBit)) {
-        y = bn128.p.sub(y);
+        y = bn128.curve.p.sub(y);
     }
     return { x: x.fromRed(), y };
 };

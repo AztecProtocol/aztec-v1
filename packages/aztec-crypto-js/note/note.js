@@ -66,12 +66,12 @@ function Note(publicKey, viewingKey) {
          * AZTEC commitment point \gamma, a bn128 group element
          * @member {Point}
          */
-        this.gamma = bn128.decodePoint(publicKey.slice(2, 68), 'hex');
+        this.gamma = bn128.curve.decodePoint(publicKey.slice(2, 68), 'hex');
         /**
          * AZTEC commitment point \sigma, a bn128 group element
          * @member {Point}
          */
-        this.sigma = bn128.decodePoint(publicKey.slice(68, 134), 'hex');
+        this.sigma = bn128.curve.decodePoint(publicKey.slice(68, 134), 'hex');
         /**
          * Note's ephemeral key, a secp256k1 group element. A note owner can use this point
          * to compute the note's viewing key.
@@ -89,7 +89,7 @@ function Note(publicKey, viewingKey) {
         this.a = new BN(viewingKey.slice(2, 66), 16).toRed(bn128.groupReduction);
         this.k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
         const { x, y } = setup.readSignatureSync(this.k.toNumber());
-        const mu = bn128.point(x, y);
+        const mu = bn128.curve.point(x, y);
         this.gamma = (mu.mul(this.a));
         this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
         this.ephemeral = secp256k1.keyFromPublic(viewingKey.slice(74, 140), 'hex');
@@ -240,7 +240,7 @@ note.derive = (publicKey, spendingKey) => {
  */
 note.create = (spendingPublicKey, value) => {
     const sharedSecret = createSharedSecret(spendingPublicKey);
-    const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.n).toString(16), 64);
+    const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
     const k = padLeft(web3Utils.toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;

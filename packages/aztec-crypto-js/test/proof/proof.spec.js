@@ -27,7 +27,7 @@ function randomAddress() {
 
 function validateGroupScalar(hex, canBeZero = false) {
     const scalar = new BN(hex.slice(2), 16);
-    expect(scalar.lt(bn128.n)).to.equal(true);
+    expect(scalar.lt(bn128.curve.n)).to.equal(true);
     if (!canBeZero) {
         expect(scalar.gt(new BN(0))).to.equal(true);
     }
@@ -38,11 +38,11 @@ function validateGroupElement(xHex, yHex) {
     const y = new BN(yHex.slice(2), 16);
     expect(x.gt(new BN(0))).to.equal(true);
     expect(y.gt(new BN(0))).to.equal(true);
-    expect(x.lt(bn128.p)).to.equal(true);
-    expect(y.lt(bn128.p)).to.equal(true);
+    expect(x.lt(bn128.curve.p)).to.equal(true);
+    expect(y.lt(bn128.curve.p)).to.equal(true);
     const lhs = x.mul(x).mul(x).add(new BN(3));
     const rhs = y.mul(y);
-    expect(lhs.umod(bn128.p).eq(rhs.umod(bn128.p))).that.equal(true);
+    expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
 describe('AZTEC proof construction tests', () => {
@@ -52,7 +52,7 @@ describe('AZTEC proof construction tests', () => {
 
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         const k = getKPublic(kIn, kOut);
-        const kPublic = bn128.n.add(new BN(k)).umod(bn128.n);
+        const kPublic = bn128.curve.n.add(new BN(k)).umod(bn128.curve.n);
 
         const { proofData, challenge } = proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
 
@@ -73,7 +73,7 @@ describe('AZTEC proof construction tests', () => {
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
-        const kPublic = bn128.n.add(new BN(100));
+        const kPublic = bn128.curve.n.add(new BN(100));
 
         try {
             proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
@@ -100,7 +100,7 @@ describe('AZTEC proof construction tests', () => {
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
-        commitments[0].gamma.x = new BN(bn128.p.add(new BN(100))).toRed(bn128.red);
+        commitments[0].gamma.x = new BN(bn128.curve.p.add(new BN(100))).toRed(bn128.curve.red);
         try {
             proof.constructJoinSplit(commitments, 500, randomAddress(), kPublic);
         } catch (err) {

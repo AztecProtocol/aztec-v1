@@ -156,7 +156,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
             const sender = randomAddress();
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.n).toString(16)}`;
+            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
             const proofData = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
 
             const { valid, errors } = verifier.verifyProof(proofData, 1, challenge, sender);
@@ -211,7 +211,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
 
         it('will REJECT if kPublic > group modulus', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
-            const kPublic = bn128.n.add(new BN(100));
+            const kPublic = bn128.curve.n.add(new BN(100));
             kIn.push(100);
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();

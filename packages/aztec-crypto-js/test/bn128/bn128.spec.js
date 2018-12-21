@@ -24,7 +24,7 @@ describe('bn128 tests', () => {
         const scalarInverse = scalar.redInvm();
         const result = testPoint.mul(scalar).mul(scalarInverse);
         expect(result.eq(testPoint));
-        expect(testPoint.x.redSqr().redMul(testPoint.x).redAdd(bn128.b).eq(testPoint.y.redSqr())).to.equal(true);
+        expect(testPoint.x.redSqr().redMul(testPoint.x).redAdd(bn128.curve.b).eq(testPoint.y.redSqr())).to.equal(true);
     });
 
     it('random group scalar creates well-formed BN instance', () => {
@@ -39,7 +39,7 @@ describe('bn128 tests', () => {
         for (let i = 0; i < 10; i += 1) {
             const point = bn128.randomPoint();
             const lhs = point.y.redSqr();
-            const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.b);
+            const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.curve.b);
             expect(lhs.fromRed().eq(rhs.fromRed())).to.equal(true);
         }
     });
@@ -47,7 +47,7 @@ describe('bn128 tests', () => {
     it('AZTEC generator point h is correctly represented', () => {
         const { h } = bn128;
         const lhs = h.y.redSqr();
-        const rhs = h.x.redSqr().redMul(h.x).redAdd(bn128.b);
+        const rhs = h.x.redSqr().redMul(h.x).redAdd(bn128.curve.b);
 
         expect(h.x.fromRed().eq(H_X)).to.equal(true);
         expect(h.y.fromRed().eq(H_Y)).to.equal(true);
@@ -56,21 +56,21 @@ describe('bn128 tests', () => {
 
     it('recoverMessage correctly recovers a note message', () => {
         const k = new BN(300);
-        const gamma = bn128.g;
-        const gammaK = bn128.g.mul(k);
+        const gamma = bn128.curve.g;
+        const gammaK = bn128.curve.g.mul(k);
         expect(bn128.recoverMessage(gamma, gammaK)).to.equal(300);
     });
 
     it('recoverMessage returns 1 for point at infinity', () => {
-        const gamma = bn128.g.add(bn128.g.neg());
+        const gamma = bn128.curve.g.add(bn128.curve.g.neg());
         const gammaK = gamma;
         expect(bn128.recoverMessage(gamma, gammaK)).to.equal(1);
     });
 
     it('recoverMessage will throw if cannot find a solution from 0 to K_MAX', () => {
         const k = new BN(999);
-        const gamma = bn128.g;
-        const gammaK = bn128.g.mul(k);
+        const gamma = bn128.curve.g;
+        const gammaK = bn128.curve.g.mul(k);
         try {
             bn128.recoverMessage(gamma, gammaK);
         } catch (e) {

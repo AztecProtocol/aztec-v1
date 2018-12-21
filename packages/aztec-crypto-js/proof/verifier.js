@@ -16,7 +16,7 @@ const verifier = {};
 
 function hexToGroupScalar(hex, errors, canBeZero = false) {
     const hexBn = new BN(hex.slice(2), 16);
-    if (!hexBn.lt(bn128.n)) {
+    if (!hexBn.lt(bn128.curve.n)) {
         errors.push(verifier.ERRORS.SCALAR_TOO_BIG);
     }
     if (!canBeZero && hexBn.eq(new BN(0))) {
@@ -28,20 +28,20 @@ function hexToGroupScalar(hex, errors, canBeZero = false) {
 function hexToGroupElement(xHex, yHex, errors) {
     let x = new BN(xHex.slice(2), 16);
     let y = new BN(yHex.slice(2), 16);
-    if (!x.lt(bn128.p)) {
+    if (!x.lt(bn128.curve.p)) {
         errors.push(verifier.ERRORS.X_TOO_BIG);
     }
-    if (!y.lt(bn128.p)) {
+    if (!y.lt(bn128.curve.p)) {
         errors.push(verifier.ERRORS.Y_TOO_BIG);
     }
-    x = x.toRed(bn128.red);
-    y = y.toRed(bn128.red);
+    x = x.toRed(bn128.curve.red);
+    y = y.toRed(bn128.curve.red);
     const lhs = y.redSqr();
-    const rhs = x.redSqr().redMul(x).redAdd(bn128.b);
+    const rhs = x.redSqr().redMul(x).redAdd(bn128.curve.b);
     if (!lhs.fromRed().eq(rhs.fromRed())) {
         errors.push(verifier.ERRORS.NOT_ON_CURVE);
     }
-    return bn128.point(x, y);
+    return bn128.curve.point(x, y);
 }
 
 /**

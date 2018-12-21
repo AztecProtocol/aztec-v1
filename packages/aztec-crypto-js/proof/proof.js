@@ -58,7 +58,7 @@ proof.generateBlindingScalars = (n, m) => {
 proof.computeChallenge = (sender, kPublic, m, notes, blindingFactors) => {
     const hash = new Keccak();
     hash.appendBN(new BN(sender.slice(2), 16)); // add message sender to hash
-    hash.appendBN(kPublic.umod(bn128.n)); // add kPublic to hash
+    hash.appendBN(kPublic.umod(bn128.curve.n)); // add kPublic to hash
     hash.appendBN(new BN(m)); // add input note variable to hash
     notes.forEach((note) => {
         hash.append(note.gamma);
@@ -72,7 +72,7 @@ proof.computeChallenge = (sender, kPublic, m, notes, blindingFactors) => {
 
 function isOnCurve(point) {
     const lhs = point.y.redSqr();
-    const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.b);
+    const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.curve.b);
     return (lhs.fromRed().eq(rhs.fromRed()));
 }
 
@@ -87,7 +87,7 @@ function isOnCurve(point) {
  */
 proof.parseInputs = (notes, m, sender, kPublic) => {
     notes.forEach((note) => {
-        if (!note.a.fromRed().lt(bn128.n) || note.a.fromRed().eq(new BN(0))) {
+        if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
             throw new Error('viewing key malformed');
         }
         if (!note.k.fromRed().lt(new BN(K_MAX))) {
@@ -101,7 +101,7 @@ proof.parseInputs = (notes, m, sender, kPublic) => {
         }
     });
 
-    if (!kPublic.lt(bn128.n)) {
+    if (!kPublic.lt(bn128.curve.n)) {
         throw new Error('kPublic value malformed');
     }
     if (m > notes.length) {
@@ -127,7 +127,7 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
     if (BN.isBN(kPublic)) {
         kPublicBn = kPublic;
     } else if (kPublic < 0) {
-        kPublicBn = bn128.n.sub(new BN(-kPublic));
+        kPublicBn = bn128.curve.n.sub(new BN(-kPublic));
     } else {
         kPublicBn = new BN(kPublic);
     }
