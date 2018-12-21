@@ -49,12 +49,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AZTECProtocol/AZTEC.git"
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "author": "",
   "license": "copyright Spilsbury Holdings Ltd 2018, all rights reserved",
   "bugs": {
-    "url": "https://github.com/AZTECProtocol/AZTEC/issues"
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
-  "homepage": "https://github.com/AZTECProtocol/AZTEC#readme"
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme"
 }
