@@ -67,8 +67,7 @@ proof.computeChallenge = (sender, kPublic, m, notes, blindingFactors) => {
     blindingFactors.forEach(({ B }) => {
         hash.append(B);
     });
-    hash.keccak();
-    return hash.toGroupScalar(groupReduction);
+    return hash.keccak(groupReduction);
 };
 
 function isOnCurve(point) {
@@ -140,7 +139,6 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
         rollingHash.append(note.sigma);
     });
     // finalHash is used to create final proof challenge
-    rollingHash.keccak(); // create first iteration of rollingHash
 
     // define 'running' blinding factor for the k-parameter in final note
     let runningBk = new BN(0).toRed(groupReduction);
@@ -152,11 +150,11 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
         let x = new BN(0).toRed(groupReduction);
         const { bk, ba } = blindingScalars[i];
         if ((i + 1) > m) {
-            x = rollingHash.toGroupScalar(groupReduction);
+            // get next iteration of our rolling hash
+            x = rollingHash.keccak(groupReduction);
             const xbk = bk.redMul(x);
             const xba = ba.redMul(x);
             runningBk = runningBk.redSub(bk);
-            rollingHash.keccak();
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
         } else {
             runningBk = runningBk.redAdd(bk);

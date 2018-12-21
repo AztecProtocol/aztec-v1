@@ -5,33 +5,9 @@ const crypto = require('crypto');
 const secp256k1 = require('../secp256k1/secp256k1');
 const bn128 = require('../bn128/bn128');
 const setup = require('../setup/setup');
+const { getSharedSecret, getNoteHash } = require('./utils');
 
 const { padLeft } = web3Utils;
-
-/**
- * Get the hash of a note's coordinates. Used as identifier in note registry
- *
- * @method getNoteHash
- * @private
- * @memberof module:note
- * @param {Object} gamma AZTEC commitment base point
- * @param {Object} sigma AZTEC commitment signed point
- * @returns {string} sha3 hash in hex-string format
- */
-function getNoteHash(gamma, sigma) {
-    const gammaX = padLeft(gamma.x.fromRed().toString(16), 64);
-    const gammaY = padLeft(gamma.y.fromRed().toString(16), 64);
-    const sigmaX = padLeft(sigma.x.fromRed().toString(16), 64);
-    const sigmaY = padLeft(sigma.y.fromRed().toString(16), 64);
-    return web3Utils.sha3(`0x${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
-}
-
-// see note.getSharedSecret
-function getSharedSecret(ephemeralPoint, privateKey) {
-    const sharedSecret = ephemeralPoint.mul(Buffer.from(privateKey.slice(2), 'hex'));
-    const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
-    return web3Utils.sha3(sharedSecretHex, 'hex');
-}
 
 /**
  * Create a Diffie-Hellman shared secret for a given public key
@@ -216,18 +192,6 @@ Note.prototype.exportMetadata = function exportMetadata() {
  * @module note
  */
 const note = {};
-
-/**
- * Compute a Diffie-Hellman shared secret between an ephemeral point and a private key
- *
- * @method getSharedSecret
- * @param {Object} ephemeralPoint secp256k1 point
- * @param {Object} privateKey hex-string formatted private key
- * @returns {string} hex-string formatted shared secret
- */
-note.getSharedSecret = (ephemeralPoint, privateKey) => {
-    return getSharedSecret(ephemeralPoint, privateKey);
-};
 
 /**
  * Create Note instance from a Note public key

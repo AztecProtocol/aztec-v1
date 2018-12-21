@@ -4,6 +4,7 @@ const web3Utils = require('web3-utils');
 const BN = require('bn.js');
 
 const notes = require('../../note/note');
+const noteUtils = require('../../note/utils');
 const secp256k1 = require('../../secp256k1/secp256k1');
 const { GROUP_MODULUS } = require('../../params');
 
@@ -59,10 +60,10 @@ describe('note tests', () => {
         ];
 
         const sharedSecrets = [
-            notes.getSharedSecret(ephemeralKeys[0], accounts[0].privateKey),
-            notes.getSharedSecret(ephemeralKeys[1], accounts[0].privateKey),
-            notes.getSharedSecret(ephemeralKeys[2], accounts[1].privateKey),
-            notes.getSharedSecret(ephemeralKeys[3], accounts[1].privateKey),
+            noteUtils.getSharedSecret(ephemeralKeys[0], accounts[0].privateKey),
+            noteUtils.getSharedSecret(ephemeralKeys[1], accounts[0].privateKey),
+            noteUtils.getSharedSecret(ephemeralKeys[2], accounts[1].privateKey),
+            noteUtils.getSharedSecret(ephemeralKeys[3], accounts[1].privateKey),
         ];
         expect(new BN(sharedSecrets[0].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[0].a.fromRed())).to.equal(true);
         expect(new BN(sharedSecrets[1].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[1].a.fromRed())).to.equal(true);

@@ -138,7 +138,6 @@ verifier.verifyProof = (proofData, m, challengeHex, sender) => {
     finalHash.appendBN(new BN(m));
     finalHash.data = [...finalHash.data, ...rollingHash.data];
 
-    rollingHash.keccak();
     let x;
 
     let pairingGammas;
@@ -147,11 +146,10 @@ verifier.verifyProof = (proofData, m, challengeHex, sender) => {
         let { kBar, aBar } = note;
         let c = challenge;
         if (i >= m) {
-            x = rollingHash.toGroupScalar(groupReduction);
+            x = rollingHash.keccak(groupReduction);
             kBar = kBar.redMul(x);
             aBar = aBar.redMul(x);
             c = challenge.redMul(x);
-            rollingHash.keccak();
         }
         const sigma = note.sigma.mul(c).neg();
         const B = note.gamma.mul(kBar)
@@ -175,8 +173,7 @@ verifier.verifyProof = (proofData, m, challengeHex, sender) => {
             finalHash.append(B);
         }
     });
-    finalHash.keccak();
-    const challengeResponse = finalHash.toGroupScalar(groupReduction);
+    const challengeResponse = finalHash.keccak(groupReduction);
     if (!challengeResponse.fromRed().eq(challenge.fromRed())) {
         errors.push(verifier.ERRORS.CHALLENGE_RESPONSE_FAIL);
     }

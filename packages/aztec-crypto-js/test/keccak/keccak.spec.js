@@ -23,13 +23,13 @@ describe('keccak tests', () => {
         const keccak = new Keccak();
         keccak.append(bn128.point(new BN(points[0][0], 16), new BN(points[0][1], 16)));
         keccak.append(bn128.point(new BN(points[1][0], 16), new BN(points[1][1], 16)));
-        keccak.keccak();
+        const hash = keccak.keccak();
 
         const expected = sha3(points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'), 'hex').slice(2);
 
-        expect(keccak.data[0]).to.equal(expected);
-        expect(keccak.toGroupScalar(bn128.groupReduction).fromRed().toString(16))
-            .to.equal(new BN(expected, 16).umod(bn128.n).toString(16));
+        expect(hash[0]).to.equal(expected);
+        expect(keccak.keccak(bn128.groupReduction).fromRed().toString(16))
+            .to.equal(new BN(sha3(`0x${expected}`).slice(2), 16).umod(bn128.n).toString(16));
     });
 
     it('keccak will correctly hash a set of BN big numbers', () => {

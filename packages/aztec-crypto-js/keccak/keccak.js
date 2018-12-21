@@ -52,21 +52,13 @@ Keccak.prototype.appendBN = function append(scalar) {
  * @function
  * @param {scalar} scalar BN.js number
  */
-Keccak.prototype.keccak = function keccak() {
+Keccak.prototype.keccak = function keccak(reductionContext = null) {
     const result = hashStrings(this.data);
     this.data = [result];
-};
-
-/**
- * Convert first element of {@link Keccak#data} to a BN instance in a reduction context
- *
- * @name Keccak#toGroupScalar
- * @function
- * @param {BN} reductionContext BN.js reduction context
- * @returns {BN}
- */
-Keccak.prototype.toGroupScalar = function toGroupScalar(reductionContext) {
-    return new BN(this.data[0], 16).toRed(reductionContext);
+    if (reductionContext) {
+        return new BN(this.data[0], 16).toRed(reductionContext);
+    }
+    return this.data;
 };
 
 module.exports = Keccak;
