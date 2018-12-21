@@ -1,0 +1,60 @@
+{
+  "name": "aztec",
+  "version": "0.1.1",
+  "description": "AZTEC Smart Contract Repository",
+  "main": "truffle-config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "dependencies": {
+    "aztec-crypto-js": "file:aztec-crypto-js",
+    "bn.js": "^4.11.8",
+    "elliptic": "^6.4.1",
+    "ethereumjs-tx": "^1.3.7",
+    "ethereumjs-wallet": "^0.6.3",
+    "ganache-cli": "^6.2.3",
+    "lowdb": "^1.0.0",
+    "truffle": "^4.1.14",
+    "truffle-wallet-provider": "0.0.5",
+    "web3": "^1.0.0-beta.36",
+    "web3-eth-abi": "^1.0.0-beta.36",
+    "web3-eth-accounts": "^1.0.0-beta.36",
+    "web3-provider-engine": "^14.1.0",
+    "web3-utils": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "braintree-jsdoc-template": "^3.3.0",
+    "chai": "^4.2.0",
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "ethereumjs-abi": "^0.6.5",
+    "ethereumjs-util": "^6.0.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "sinon": "^7.2.2",
+    "solidity-coverage": "^0.5.11"
+  },
+  "scripts": {
+    "test": "NODE_ENV=TEST mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec",
+    "testCoverage": "NODE_ENV=TEST nyc mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec",
+    "doorbellTest": "NODE_ENV=TEST mocha ./extractPublicKey --trace-warnings --exit --colors --recursive --reporter spec",
+    "demoRinkeby": "NODE_ENV=RINKEBY node ./demo/demoTransactions.js",
+    "demoRopsten": "NODE_ENV=ROPSTEN node ./demo/demoTransactions.js",
+    "demoKovan": "NODE_ENV=KOVAN node ./demo/demoTransactions.js",
+    "demoDevelopment": "NODE_ENV=DEVELOPMENT node ./demo/demoTransactions.js",
+    "demoMainnet": "NODE_ENV=MAINNET node ./demo/demoTransactions.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
+  "author": "",
+  "license": "copyright Spilsbury Holdings Ltd 2018, all rights reserved",
+  "bugs": {
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
+  },
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme"
+}

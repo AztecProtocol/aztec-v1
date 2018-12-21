@@ -1,0 +1,14 @@
+.DS_Store
+.nyc_output
+
+node_modules
+accounts.json
+
+demo/dbDevelopment.json
+demo/dbRinkeby.json
+demo/dbMainNet.json
+demo/dbKovan.json
+demo/dbRopsten.json
+demo/dbTest.json
+demo/wallets.json
+demo/testWallets.json

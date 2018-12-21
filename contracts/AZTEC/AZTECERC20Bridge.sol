@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import "./AZTEC.sol";
 
@@ -18,17 +18,16 @@ contract ERC20Interface {
  * @author Zachary Williamson, AZTEC
  * Copyright Spilsbury Holdings Ltd 2018. All rights reserved.
  * We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum.
- * This will include our bespoke AZTEC decentralized exchange, allowing for cross-asset transfers with full transaction privacy
- * and interopability with public decentralized exchanges.
- * Stay tuned for updates!
+ * Our full vision of the protocol includes confidential cross-asset interactions via our family of AZTEC zero-knowledge proofs
+ * and the AZTEC token standard, stay tuned for updates!
  **/
 contract AZTECERC20Bridge {
+    bytes32[4] setupPubKey;
+    bytes32 domainHash;
     uint private constant groupModulusBoundary = 10944121435919637611123202872628637544274182200208017171849102093287904247808;
     uint private constant groupModulus = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     uint public scalingFactor;
     mapping(bytes32 => address) public noteRegistry;
-    bytes32[4] setupPubKey;
-    bytes32 domainHash;
     ERC20Interface token;
 
     event Created(bytes32 domainHash, address contractAddress);
@@ -42,22 +41,19 @@ contract AZTECERC20Bridge {
     * AZTEC notes have a range between 0 and 2^{25}-1 and ERC20 tokens range between 0 and 2^{255} - 1
     * so we don't want to directly map note value : token value
     **/
-    constructor(bytes32[4] _setupPubKey, address _token, uint256 _scalingFactor) public {
+    constructor(bytes32[4] _setupPubKey, address _token, uint256 _scalingFactor, uint256 _chainId) public {
         setupPubKey = _setupPubKey;
         token = ERC20Interface(_token);
         scalingFactor = _scalingFactor;
-
-        // calculate the EIP712 domain hash, for hashing structured data
         bytes32 _domainHash;
         assembly {
             let m := mload(0x40)
-            mstore(m, 0x8d4b25bfecb769291b71726cd5ec8a497664cc7292c02b1868a0534306741fd9)
-            mstore(add(m, 0x20), 0x87a23625953c9fb02b3570c86f75403039bbe5de82b48ca671c10157d91a991a) // name = "AZTEC_MAINNET_DOMAIN"
-            mstore(add(m, 0x40), 0x25130290f410620ec94e7cf11f1cdab5dea284e1039a83fa7b87f727031ff5f4) // version = "0.1.0"
-            mstore(add(m, 0x60), 1) // chain id
-            mstore(add(m, 0x80), 0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639)
-            mstore(add(m, 0xa0), address) // verifying contract
-            _domainHash := keccak256(m, 0xc0)
+            mstore(m, 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f) // "EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)"
+            mstore(add(m, 0x20), 0x60d177492a60de7c666b3e3d468f14d59def1d4b022d08b6adf554d88da60d63) // name = "AZTECERC20BRIDGE_DOMAIN"
+            mstore(add(m, 0x40), 0x28a43689b8932fb9695c28766648ed3d943ff8a6406f8f593738feed70039290) // version = "0.1.1"
+            mstore(add(m, 0x60), _chainId) // chain id
+            mstore(add(m, 0x80), address) // verifying contract
+            _domainHash := keccak256(m, 0xa0)
         }
         domainHash = _domainHash;
         emit Created(_domainHash, this);
@@ -89,7 +85,7 @@ contract AZTECERC20Bridge {
             mstore(add(m, 0x40), mload(add(note, 0x80)))
             mstore(add(m, 0x60), mload(add(note, 0xa0)))
             noteHash := keccak256(m, 0x80)
-            mstore(m, 0x1aba5d08f7cd777136d3fa7eb7baa742ab84001b34c9de5b17d922fc2ca75cce) // keccak256 hash of "AZTEC_NOTE_SIGNATURE(bytes32[4] note,uint256 challenge,address sender)"
+            mstore(m, 0x0f1ea84c0ceb3ad2f38123d94a164612e1a0c14a694dc5bfa16bc86ea1f3eabd) // keccak256 hash of "AZTEC_NOTE_SIGNATURE(bytes32[4] note,uint256 challenge,address sender)"
             mstore(add(m, 0x20), noteHash)
             mstore(add(m, 0x40), challenge)
             mstore(add(m, 0x60), caller)
@@ -162,7 +158,7 @@ contract AZTECERC20Bridge {
                 // this will remove the input notes from noteRegistry
                 validateInputNote(notes[i], inputSignatures[i], challenge, domainHash);
             } else {
-                
+
                 // if i >= m this is an output note
                 // validate that output notes, attached to the specified owners do not exist in noteRegistry.
                 // if all checks pass, add notes into note registry
