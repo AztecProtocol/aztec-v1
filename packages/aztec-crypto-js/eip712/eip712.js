@@ -31,9 +31,9 @@ eip712.encodeStruct = function encodeStruct(primaryType, types) {
         }
         return acc;
     }, []));
-    return (findTypes(primaryType)
+    return [primaryType].concat(findTypes(primaryType)
         .sort((a, b) => a.localeCompare(b))
-        .sort((a, b) => (b === primaryType)))
+        .filter(a => a !== primaryType))
         .reduce((acc, key) => `${acc}${key}(${types[key]
             .reduce((iacc, { name, type }) => `${iacc}${type} ${name},`, '').slice(0, -1)})`, '');
 };
