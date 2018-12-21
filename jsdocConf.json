@@ -20,7 +20,7 @@
         "private": true,
         "recurse": true,
         "encoding": "utf-8",
-        "destination": "./out/",
+        "destination": "./docs/",
         "readme": "./demo/README.md",
         "template": "node_modules/braintree-jsdoc-template"
     }
