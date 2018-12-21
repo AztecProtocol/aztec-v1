@@ -2,7 +2,6 @@
 .nyc_output
 
 node_modules
-out
 accounts.json
 
 demo/dbDevelopment.json
