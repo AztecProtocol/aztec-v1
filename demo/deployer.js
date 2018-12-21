@@ -10,7 +10,7 @@ const config = require('./config');
 const web3 = require('./web3Listener');
 const wallets = require('./resources/wallets');
 
-// N.B. you must be running ganache-cli 6.2.5 or greater or this won't work - previous versions
+// N.B. you must be running ganache-cli 6.2.5 or greater or this won't work - I think previous versions
 // used EIP-155 to get the transaction hash, instead of hashing the rlp-encoded signed transaction
 function getTransactionHash(transaction) {
     return `0x${transaction.hash(true).toString('hex')}`;
