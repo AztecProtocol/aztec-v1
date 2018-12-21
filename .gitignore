@@ -13,8 +13,3 @@ demo/dbRopsten.json
 demo/dbTest.json
 demo/wallets.json
 demo/testWallets.json
-
-build/contracts/ERC20Interface.json
-build/contracts/ERC20.json
-build/contracts/IERC20.json
-build/contracts/SafeMath.json
