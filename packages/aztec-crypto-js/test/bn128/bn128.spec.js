@@ -2,8 +2,8 @@ const chai = require('chai');
 const crypto = require('crypto');
 
 const BN = require('bn.js');
-const bn128 = require('./bn128');
-const { H_X, H_Y } = require('../params');
+const bn128 = require('../../bn128/bn128');
+const { H_X, H_Y } = require('../../params');
 
 const { expect } = chai;
 

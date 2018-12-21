@@ -1,0 +1,44 @@
+{
+  "name": "aztec-crypto-js",
+  "version": "0.1.1",
+  "description": "AZTEC javascript cryptography libarary",
+  "main": "truffle-config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "dependencies": {
+    "bn.js": "^4.11.8",
+    "elliptic": "^6.4.1",
+    "web3-eth-abi": "^1.0.0-beta.36",
+    "web3-eth-accounts": "^1.0.0-beta.36",
+    "web3-utils": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "braintree-jsdoc-template": "^3.3.0",
+    "chai": "^4.2.0",
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "ethereumjs-abi": "^0.6.5",
+    "ethereumjs-util": "^6.0.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "sinon": "^7.2.2"
+  },
+  "scripts": {
+    "testCoverage": "NODE_ENV=TEST nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "test": "NODE_ENV=TEST mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CreditMint/aztec-crypto-js.git"
+  },
+  "author": "AZTEC",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/CreditMint/aztec-crypto-js/issues"
+  },
+  "homepage": "https://github.com/CreditMint/aztec-crypto-js#readme"
+}

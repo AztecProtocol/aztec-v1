@@ -4,8 +4,8 @@ const BN = require('bn.js');
 
 const { expect } = chai;
 
-const Keccak = require('./keccak');
-const bn128 = require('../bn128/bn128');
+const Keccak = require('../../keccak/keccak');
+const bn128 = require('../../bn128/bn128');
 
 describe('keccak tests', () => {
     it('keccak will correctly hash a set of points', () => {

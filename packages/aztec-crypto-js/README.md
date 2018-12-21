@@ -73,4 +73,4 @@ Unless stated otherwise, public keys, private keys and addresses are encoded as 
 
 ## Tests
 
-run the repository's tests with ```npm run test```
+Run the repository's tests with ```npm run test```

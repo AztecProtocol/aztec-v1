@@ -1,9 +1,9 @@
 const chai = require('chai');
 const BN = require('bn.js');
 
-const setup = require('./setup');
-const { K_MAX, K_MIN } = require('../params');
-const bn128 = require('../bn128/bn128');
+const setup = require('../../setup/setup');
+const { K_MAX, K_MIN } = require('../../params');
+const bn128 = require('../../bn128/bn128');
 
 const { expect } = chai;
 

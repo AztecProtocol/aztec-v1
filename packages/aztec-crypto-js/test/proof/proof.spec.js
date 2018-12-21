@@ -3,10 +3,10 @@ const chai = require('chai');
 const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
 
-const bn128 = require('../bn128/bn128');
-const proof = require('./proof');
-const proofHelpers = require('./helpers');
-const { K_MAX } = require('../params');
+const bn128 = require('../../bn128/bn128');
+const proof = require('../../proof/proof');
+const proofHelpers = require('../../proof/helpers');
+const { K_MAX } = require('../../params');
 
 const { expect } = chai;
 

@@ -3,9 +3,9 @@ const crypto = require('crypto');
 const web3Utils = require('web3-utils');
 const BN = require('bn.js');
 
-const notes = require('./note');
-const secp256k1 = require('../secp256k1/secp256k1');
-const { GROUP_MODULUS } = require('../params');
+const notes = require('../../note/note');
+const secp256k1 = require('../../secp256k1/secp256k1');
+const { GROUP_MODULUS } = require('../../params');
 
 const { padLeft } = web3Utils;
 const { expect } = chai;
