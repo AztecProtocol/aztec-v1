@@ -24,7 +24,7 @@ const ecdsa = {};
  * @returns {string} address
  */
 ecdsa.accountFromPublicKey = (publicKey) => {
-    const ecKey = secp256k1.keyFromPublic(publicKey);
+    const ecKey = secp256k1.ec.keyFromPublic(publicKey);
     const publicKeyHex = `0x${ecKey.getPublic(false, 'hex').slice(2)}`;
     const publicHash = web3Utils.sha3(publicKeyHex);
     const address = web3Utils.toChecksumAddress(`0x${publicHash.slice(-40)}`);
@@ -42,7 +42,7 @@ ecdsa.accountFromPublicKey = (publicKey) => {
  */
 ecdsa.signMessage = (hash, privateKey) => {
     const signature = secp256k1
-        .keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
+        .ec.keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
         .sign(Buffer.from(hash.slice(2), 'hex'), { canonical: true });
     return [
         `0x${web3Utils.padLeft(Number(27 + Number(signature.recoveryParam)).toString(16), 64)}`,
@@ -66,7 +66,7 @@ ecdsa.signMessage = (hash, privateKey) => {
 ecdsa.verifyMessage = (hash, r, s, publicKey) => {
     const rBn = new BN(r.slice(2), 16);
     const sBn = new BN(s.slice(2), 16);
-    return secp256k1.verify(hash.slice(2), { r: rBn, s: sBn }, secp256k1.keyFromPublic(publicKey.slice(2), 'hex'));
+    return secp256k1.ec.verify(hash.slice(2), { r: rBn, s: sBn }, secp256k1.ec.keyFromPublic(publicKey.slice(2), 'hex'));
 };
 
 /**
@@ -84,7 +84,7 @@ ecdsa.recoverPublicKey = (hash, r, s, v) => {
     const rBn = new BN(r.slice(2), 16);
     const sBn = new BN(s.slice(2), 16);
     const vn = new BN(v.slice(2), 16).toNumber();
-    const ecPublicKey = secp256k1.recoverPubKey(
+    const ecPublicKey = secp256k1.ec.recoverPubKey(
         Buffer.from(web3Utils.padLeft(hash.slice(2), 64), 'hex'),
         { r: rBn, s: sBn },
         vn < 2 ? vn : 1 - (vn % 2)

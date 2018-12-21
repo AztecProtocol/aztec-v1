@@ -17,7 +17,7 @@ const helpers = {};
 function generateCommitment(k) {
     const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
     const kHex = padLeft(toHex(Number(k).toString(10)).slice(2), 8);
-    const ephemeral = secp256k1.keyFromPrivate(crypto.randomBytes(32));
+    const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
     const viewingKey = `0x${a}${kHex}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
     return aztecNote.fromViewKey(viewingKey);
 }

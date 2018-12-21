@@ -17,7 +17,7 @@ describe('note tests', () => {
         const a = padLeft(aBn.toString(16), 64);
 
         const k = padLeft(web3Utils.toHex('13456').slice(2), 8);
-        const ephemeral = secp256k1.keyFromPrivate(crypto.randomBytes(32));
+        const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
         const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
         const note = notes.fromViewKey(viewingKey);
         const expectedViewKey = note.getView();
@@ -31,7 +31,7 @@ describe('note tests', () => {
     });
 
     it('note.create and note.derive create well formed notes', () => {
-        const spendingKey = secp256k1.keyFromPrivate(crypto.randomBytes(32));
+        const spendingKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
         const result = notes.create(`0x${spendingKey.getPublic(true, 'hex')}`, 1234);
         const expected = notes.derive(result.getPublic(), `0x${spendingKey.getPrivate('hex')}`);
         expect(result.gamma.encode('hex', false)).to.equal(expected.gamma.encode('hex', false));

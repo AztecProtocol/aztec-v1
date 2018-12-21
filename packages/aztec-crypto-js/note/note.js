@@ -20,9 +20,9 @@ const { padLeft } = web3Utils;
  * @return {{type: string, name: encoded}} hex-string formatted shared secret
  */
 function createSharedSecret(publicKeyHex) {
-    const publicKey = secp256k1.keyFromPublic(publicKeyHex.slice(2), 'hex');
+    const publicKey = secp256k1.ec.keyFromPublic(publicKeyHex.slice(2), 'hex');
 
-    const ephemeralKey = secp256k1.keyFromPrivate(crypto.randomBytes(32));
+    const ephemeralKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
     const sharedSecret = publicKey.getPublic().mul(ephemeralKey.priv);
     const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
     const encoded = web3Utils.sha3(sharedSecretHex, 'hex');
@@ -77,7 +77,7 @@ function Note(publicKey, viewingKey) {
          * to compute the note's viewing key.
          * @member {Point}
          */
-        this.ephemeral = secp256k1.keyFromPublic(publicKey.slice(134, 200), 'hex');
+        this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
     }
     if (viewingKey) {
         if (typeof (viewingKey) !== 'string') {
@@ -92,7 +92,7 @@ function Note(publicKey, viewingKey) {
         const mu = bn128.curve.point(x, y);
         this.gamma = (mu.mul(this.a));
         this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
-        this.ephemeral = secp256k1.keyFromPublic(viewingKey.slice(74, 140), 'hex');
+        this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
     }
     /**
      * keccak256 hash of note coordinates, aligned in 32-byte chunks.  
