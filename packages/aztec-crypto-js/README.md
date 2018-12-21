@@ -70,3 +70,7 @@ return transactionData;
 ## Notation
 
 Unless stated otherwise, public keys, private keys and addresses are encoded as hex-strings, prepended by the characters ```0x```.
+
+## Tests
+
+run repo tests via ```npm run test```
