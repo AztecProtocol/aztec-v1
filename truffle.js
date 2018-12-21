@@ -3,7 +3,7 @@ const { toWei, toHex } = require('web3-utils');
 const NonceTrackerSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
 const WalletProvider = require('truffle-wallet-provider');
 
-// when deploying to a non-development network, add the private key of wallet being used into 'privateKeys.json'
+// when deploying to a non-development network, add the private key of wallet being used into 'accounts.json'
 const accounts = require('./accounts');
 
 const keys = accounts.keys || [{ public: '', private: '' }];
