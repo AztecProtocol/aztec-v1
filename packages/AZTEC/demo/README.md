@@ -1,6 +1,6 @@
 # AZTEC Demonstration Scripts
 
-This directory uses the ```aztec-crypto-js``` library to issue AZTEC confidential transactions, using AZTEC contracts deployed to the following networks:
+This directory uses the [```aztec-crypto-js```](https://github.com/AztecProtocol/aztec-crypto-js) library to issue AZTEC confidential transactions, using AZTEC contracts deployed to the following networks:
 
 * Main-net
 * Rinkeby
@@ -16,6 +16,10 @@ For the test-nets, the AZTEC token smart contract is attached to a dummy ERC20 c
 You can deploy your own AZTEC contracts (attached to different ERC20 token contracts if you want) by running ```truffle migrate```, specifying the appropriate network. See [the truffle docs](https://truffleframework.com/docs/truffle/getting-started/running-migrations) for more details.  
 
 If you're running this script on a local test-net, run ```truffle migrate``` to deploy the AZTEC contracts locally.
+
+## API Docs
+
+API documentation can be found on our [github pages site](https://aztecprotocol.github.io/AZTEC/)  
 
 ## Usage
 
