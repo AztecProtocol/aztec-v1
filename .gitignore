@@ -5,6 +5,7 @@ node_modules
 
 out
 
+demo/dbDevelopment.json
 demo/dbRinkeby.json
 demo/dbMainNet.json
 demo/dbKovan.json
