@@ -53,6 +53,7 @@ const inputSignatures = [
 
 const outputOwners = [accounts[1].address, accounts[1].address];
 
+// transactionData's members can be directly fed into an AZTECERC20Bridge.sol contract's confidentialTransfer method
 const transactionData = {
     proofData,
     m: inputNotes.length,
@@ -61,6 +62,7 @@ const transactionData = {
     outputOwners,
     metadata: note.encodeMetadata(outputNotes),
 };
+```
 
 ## Notation
 
