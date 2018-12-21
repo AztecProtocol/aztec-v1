@@ -9,6 +9,7 @@ const notes = require('./resources/notes');
 const transactions = require('./resources/transactions');
 const wallets = require('./resources/wallets');
 const web3 = require('./web3Listener');
+const keystore = require('../accounts');
 
 const { erc20ScalingFactor: scalingFactor } = config;
 
@@ -22,11 +23,8 @@ const { erc20ScalingFactor: scalingFactor } = config;
  * @private
  */
 async function demoTransactions(mint = false) {
-    const accounts = [
-        '0xa9b16b8C2399510706cD275aD9F86Ef668067351',
-        '0x52c7e34f94412567A8d067261Ff715389ddF5Cb6',
-        '0x35F4d8747FC8c44670b0Ff53affcf5e4cEFC62D8',
-    ];
+    const accounts = keystore.keys.map(({ address }) => address);
+
     await wallets.init(accounts[0]);
     await wallets.init(accounts[1]);
     await wallets.init(accounts[2]);
