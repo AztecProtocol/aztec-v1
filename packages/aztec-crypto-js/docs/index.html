@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      Home - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+  <link type="text/css" rel="stylesheet" href="styles/collapse.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li  class="active" >
+        <a href="index.html">
+          
+          
+            <svg fill="#0095dd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      aztec-crypto-js
+    </h3>
+
+    
+
+    <h3>Classes</h3><ul><li id="Keccak-nav"><a href="Keccak.html">Keccak</a><ul class='methods'><li data-type="method" id="Keccak-append-nav"><a href="Keccak.html#append">append</a></li><li data-type="method" id="Keccak-appendBN-nav"><a href="Keccak.html#appendBN">appendBN</a></li><li data-type="method" id="Keccak-appendBN-nav"><a href="Keccak.html#appendBN">appendBN</a></li></ul></li><li id="Note-nav"><a href="Note.html">Note</a><ul class='methods'><li data-type="method" id="Note-derive-nav"><a href="Note.html#derive">derive</a></li><li data-type="method" id="Note-exportMetadata-nav"><a href="Note.html#exportMetadata">exportMetadata</a></li><li data-type="method" id="Note-exportNote-nav"><a href="Note.html#exportNote">exportNote</a></li><li data-type="method" id="Note-getPublic-nav"><a href="Note.html#getPublic">getPublic</a></li><li data-type="method" id="Note-getView-nav"><a href="Note.html#getView">getView</a></li></ul></li></ul><h3>Modules</h3><ul><li id="bn128-nav"><a href="module-bn128.html">bn128</a><ul class='methods'><li data-type="method" id="bn128-randomGroupScalar-nav"><a href="module-bn128.html#.randomGroupScalar">randomGroupScalar</a></li><li data-type="method" id="bn128-randomPoint-nav"><a href="module-bn128.html#.randomPoint">randomPoint</a></li><li data-type="method" id="bn128-recoverMessage-nav"><a href="module-bn128.html#.recoverMessage">recoverMessage</a></li></ul></li><li id="eip712-nav"><a href="module-eip712.html">eip712</a><ul class='methods'><li data-type="method" id="eip712-encodeMessageData-nav"><a href="module-eip712.html#~encodeMessageData">encodeMessageData</a></li><li data-type="method" id="eip712-encodeStruct-nav"><a href="module-eip712.html#~encodeStruct">encodeStruct</a></li><li data-type="method" id="eip712-encodeTypedData-nav"><a href="module-eip712.html#~encodeTypedData">encodeTypedData</a></li></ul></li><li id="note-nav"><a href="module-note.html">note</a><ul class='methods'><li data-type="method" id="note-createSharedSecret-nav"><a href="module-note.html#.createSharedSecret">createSharedSecret</a></li><li data-type="method" id="note-derive-nav"><a href="module-note.html#~derive">derive</a></li><li data-type="method" id="note-fromPublicKey-nav"><a href="module-note.html#~fromPublicKey">fromPublicKey</a></li><li data-type="method" id="note-fromValue-nav"><a href="module-note.html#~fromValue">fromValue</a></li><li data-type="method" id="note-fromValue-nav"><a href="module-note.html#~fromValue">fromValue</a></li><li data-type="method" id="note-fromViewKey-nav"><a href="module-note.html#~fromViewKey">fromViewKey</a></li></ul></li><li id="params-nav"><a href="module-params.html">params</a></li><li id="proof-nav"><a href="module-proof.html">proof</a><ul class='methods'><li data-type="method" id="proof-computeChallenge-nav"><a href="module-proof.html#~computeChallenge">computeChallenge</a></li><li data-type="method" id="proof-constructJoinSplit-nav"><a href="module-proof.html#~constructJoinSplit">constructJoinSplit</a></li><li data-type="method" id="proof-generateBlindingScalars-nav"><a href="module-proof.html#~generateBlindingScalars">generateBlindingScalars</a></li><li data-type="method" id="proof-parseInputs-nav"><a href="module-proof.html#~parseInputs">parseInputs</a></li></ul></li><li id="secp256k1-nav"><a href="module-secp256k1.html">secp256k1</a><ul class='methods'><li data-type="method" id="secp256k1-accountFromPrivateKey-nav"><a href="module-secp256k1.html#.accountFromPrivateKey">accountFromPrivateKey</a></li><li data-type="method" id="secp256k1-generateAccount-nav"><a href="module-secp256k1.html#.generateAccount">generateAccount</a></li><li data-type="method" id="secp256k1-randomPoint-nav"><a href="module-secp256k1.html#.randomPoint">randomPoint</a></li></ul></li><li id="setup-nav"><a href="module-setup.html">setup</a><ul class='methods'><li data-type="method" id="setup-compress-nav"><a href="module-setup.html#~compress">compress</a></li><li data-type="method" id="setup-decompress-nav"><a href="module-setup.html#~decompress">decompress</a></li><li data-type="method" id="setup-readSignature-nav"><a href="module-setup.html#~readSignature">readSignature</a></li><li data-type="method" id="setup-readSignatureSync-nav"><a href="module-setup.html#~readSignatureSync">readSignatureSync</a></li></ul></li></ul>
+  </nav>
+
+  <div id="main">
+    
+
+    
+      
+
+
+
+    
+
+      
+
+
+  <section class="readme">
+    <article>
+      <h1>aztec-crypto-js</h1><p>This library contains methods required to construct AZTEC zero-knowledge proofs, and to create the required <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md">EIP712</a> signatures in order to spend AZTEC notes.  </p>
+<p><strong>IMPORTANT: The deployed AZTEC smart contracts use a trusted setup created by AZTEC in-house and should only be used for testing and development purposes. We will be launching a multiparty computation protocol to create a trusted setup that is secured by the wider Ethereum community, where only one person has to act honestly for the setup database to be secure. If you wish to participate please let us know at <a href="mailto:hello@aztecprotocol.com">hello@aztecprotocol.com</a></strong>  </p>
+<p>To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in <code>demo</code>.  </p>
+<p>For full API docs, view our github pages API at (TODO, ahem...)</p>
+<h2>Install</h2><p>clone this repo to your desired directory and run <code>npm install</code></p>
+<h2>Usage</h2><pre class="prettyprint source"><code>const note = require('./note/note');
+const proof = require('./proof/proof');
+const secp256k1 = require('./secp256k1/secp256k1');
+const sign = require('./eip712/sign');
+
+// address of confidential AZTEC - DAI smart contract
+const aztecContract = '0x0000';
+// main-net chain Id
+const chainId = 1;
+
+const accounts = [
+    secp256k1.generateAccount(),
+    secp256k1.generateAccount(),
+];
+
+const inputNotes = [
+    note.create(accounts[0].publicKey, 80),
+    note.create(accounts[0].publicKey, 60),
+];
+
+const outputNotes = [
+    note.create(accounts[1].publicKey, 50),
+    note.create(accounts[1].publicKey, 100),
+];
+
+const kPublic = -10; // input notes contain 10 fewer than output notes = deposit of 10 public tokens
+const sender = accounts[0].address; // address of transaction sender
+
+// proofData and challenge are ABI-encoded and ready to beused as inputs to an AZTEC smart contract
+const { proofData, challenge } = proof.constructJoinSplit([...inputNotes, ...outputNotes], inputNotes.length, sender, kPublic);
+
+// construct EIP712-compatible ECDSA sigantures over input notes, required to spend input notes
+const inputSignatures = [
+    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
+    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
+];
+
+const outputOwners = [accounts[1].address, accounts[1].address];
+
+// transactionData's members can be directly fed into an AZTECERC20Bridge.sol contract's confidentialTransfer method
+const transactionData = {
+    proofData,
+    m: inputNotes.length,
+    challenge,
+    inputSignatures,
+    outputOwners,
+    metadata: note.encodeMetadata(outputNotes),
+};
+
+return transactionData;</code></pre><h2>Notation</h2><p>Unless stated otherwise, public keys, private keys and addresses are encoded as hex-strings, prepended by the characters <code>0x</code>.</p>
+<h2>Tests</h2><p>Run the repository's tests with <code>npm run test</code></p>
+    </article>
+  </section>
+
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>
