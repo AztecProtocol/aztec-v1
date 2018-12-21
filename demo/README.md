@@ -33,4 +33,20 @@ clone this repo to your desired directory
 
 run ```git submodule update --init --recursive```  
 
-followed by ```npm install``` and ```npm install ./aztec-crypto-js```
+followed by ```npm install``` && ```npm install ./aztec-crypto-js```  
+
+to run a test net and deploy contracts, run  
+
+```node ./node_modules/ganache-cli/cli.js``` && ```truffle migreate```  
+
+run truffle tests with ```truffle test```  
+
+run javascript tests with ```npm run test```  
+
+run the demo transactions script (to the appropriate network) with the following:
+
+```npm run demoDevelopment``` (to a network running on port 8545)  
+```npm run demoRinkeby```  
+```npm run demoKovan```  
+```npm run demoRopsten```  
+```npm run demoMainnet```  
