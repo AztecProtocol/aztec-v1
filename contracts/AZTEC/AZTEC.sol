@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 library AZTECInterface {
     function validateJoinSplit(bytes32[6][], uint, uint, bytes32[4]) external pure returns (bool) {}
@@ -12,9 +12,8 @@ library AZTECInterface {
  * The intended use case is to call this externally via `staticcall`. External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no storage and makes no external calls (other than to precompiles)
  * Copyright Spilbury Holdings Ltd 2018. All rights reserved.
  * We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum.
- * This will include our bespoke AZTEC decentralized exchange, allowing for cross-asset transfers with full transaction privacy
- * and interopability with public decentralized exchanges.
- * Stay tuned for updates!
+ * Our full vision of the protocol includes confidential cross-asset interactions via our family of AZTEC zero-knowledge proofs
+ * and the AZTEC token standard, stay tuned for updates!
  **/
 contract AZTEC {
     /**
@@ -27,9 +26,11 @@ contract AZTEC {
      **/
     function() external payable {
         assembly {
+
             // We don't check for function signatures, there's only one function that ever gets called: validateJoinSplit()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract through a compatible ABI
             validateJoinSplit()
+
             // should not get here
             mstore(0x00, 404)
             revert(0x00, 0x20)
