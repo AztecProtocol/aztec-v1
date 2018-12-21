@@ -26,18 +26,9 @@ function getNoteHash(gamma, sigma) {
     return web3Utils.sha3(`0x${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
 }
 
-/**
- * Compute a Diffie-Hellman shared secret between an ephemeral point and a private key
- *
- * @method getSharedSecret
- * @private
- * @memberof module:note
- * @param {Object} ephemeralPoint secp256k1 point
- * @param {Object} privateKey hex-string formatted private key
- * @returns {string} hex-string formatted shared secret
- */
+// see note.getSharedSecret
 function getSharedSecret(ephemeralPoint, privateKey) {
-    const sharedSecret = ephemeralPoint.mul(privateKey);
+    const sharedSecret = ephemeralPoint.mul(Buffer.from(privateKey.slice(2), 'hex'));
     const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
     return web3Utils.sha3(sharedSecretHex, 'hex');
 }
@@ -80,10 +71,10 @@ function Note(publicKey, viewingKey) {
     }
     if (publicKey) {
         if (typeof (publicKey) !== 'string') {
-            throw new Error(`expected key ${publicKey} to be of type string`);
+            throw new Error(`expected key type ${typeof (publicKey)} to be of type string`);
         }
         if (publicKey.length !== 200) {
-            throw new Error(`invalid public key length for key ${publicKey}, expected 200, got ${publicKey.length}`);
+            throw new Error(`invalid public key length, expected 200, got ${publicKey.length}`);
         }
         /**
          * Viewing key of note. BN instance in bn128 group's reduction context
@@ -113,6 +104,12 @@ function Note(publicKey, viewingKey) {
         this.ephemeral = secp256k1.keyFromPublic(publicKey.slice(134, 200), 'hex');
     }
     if (viewingKey) {
+        if (typeof (viewingKey) !== 'string') {
+            throw new Error(`expected key type ${typeof (viewingKey)} to be of type string`);
+        }
+        if (viewingKey.length !== 140) {
+            throw new Error(`invalid viewing key length, expected 140, got ${viewingKey.length}`);
+        }
         this.a = new BN(viewingKey.slice(2, 66), 16).toRed(bn128.groupReduction);
         this.k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
         const { x, y } = setup.readSignatureSync(this.k.toNumber());
@@ -151,6 +148,9 @@ Note.prototype.getPublic = function getPublic() {
  * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
  */
 Note.prototype.getView = function getView() {
+    if (!BN.isBN(this.k) || !BN.isBN(this.a)) {
+        return '0x';
+    }
     const a = padLeft(this.a.fromRed().toString(16), 64);
     const k = padLeft(this.k.fromRed().toString(16), 8);
     const ephemeral = padLeft(this.ephemeral.getPublic(true, 'hex'), 66);
@@ -165,7 +165,7 @@ Note.prototype.getView = function getView() {
  * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
  */
 Note.prototype.derive = function derive(spendingKey) {
-    const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), Buffer.from(spendingKey.slice(2), 'hex'));
+    const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), spendingKey);
     this.a = new BN(sharedSecret.slice(2), 16).toRed(bn128.groupReduction);
     const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
     this.k = new BN(bn128.recoverMessage(this.gamma, gammaK)).toRed(bn128.groupReduction);
@@ -176,13 +176,13 @@ Note.prototype.derive = function derive(spendingKey) {
  *
  * @name Note#exportNote
  * @function
- * @returns {{ publicKey:string, viewKey: string, k: string, a: string, noteHash: string }}
+ * @returns {{ publicKey:string, viewingKey: string, k: string, a: string, noteHash: string }}
  */
 Note.prototype.exportNote = function exportNote() {
     const publicKey = this.getPublic();
-    const viewKey = this.getView();
-    let k = '';
-    let a = '';
+    const viewingKey = this.getView();
+    let k = '0x';
+    let a = '0x';
     if (BN.isBN(this.k)) {
         k = padLeft(this.k.fromRed().toString(16), 64);
     }
@@ -191,7 +191,7 @@ Note.prototype.exportNote = function exportNote() {
     }
     return {
         publicKey,
-        viewKey,
+        viewingKey,
         k,
         a,
         noteHash: this.noteHash,
@@ -218,13 +218,25 @@ Note.prototype.exportMetadata = function exportMetadata() {
 const note = {};
 
 /**
+ * Compute a Diffie-Hellman shared secret between an ephemeral point and a private key
+ *
+ * @method getSharedSecret
+ * @param {Object} ephemeralPoint secp256k1 point
+ * @param {Object} privateKey hex-string formatted private key
+ * @returns {string} hex-string formatted shared secret
+ */
+note.getSharedSecret = (ephemeralPoint, privateKey) => {
+    return getSharedSecret(ephemeralPoint, privateKey);
+};
+
+/**
  * Create Note instance from a Note public key
  *
  * @method fromPublicKey
  * @param {string} publicKey the public key for the note
  * @returns {Note} created note instance
  */
-note.fromPublicKey = function fromPublicKey(publicKey) {
+note.fromPublicKey = (publicKey) => {
     return new Note(publicKey, null);
 };
 
@@ -232,11 +244,11 @@ note.fromPublicKey = function fromPublicKey(publicKey) {
  * Create Note instance from a viewing key
  *
  * @method fromViewKey
- * @param {string} viewKey the viewing key for the note
+ * @param {string} viewingKey the viewing key for the note
  * @returns {Note} created note instance
  */
-note.fromViewKey = function fromViewKey(viewKey) {
-    const newNote = new Note(null, viewKey);
+note.fromViewKey = (viewingKey) => {
+    const newNote = new Note(null, viewingKey);
     return newNote;
 };
 
@@ -248,7 +260,7 @@ note.fromViewKey = function fromViewKey(viewKey) {
  * @param {string} spendingKey hex-string formatted spending key (can also be an Ethereum private key)
  * @returns {Note} created note instance
  */
-note.derive = function derive(publicKey, spendingKey) {
+note.derive = (publicKey, spendingKey) => {
     const newNote = new Note(publicKey);
     newNote.derive(spendingKey);
     return newNote;
@@ -262,13 +274,35 @@ note.derive = function derive(publicKey, spendingKey) {
  * @param {number} value value of the note
  * @returns {Note} created note instance
  */
-note.create = function fromValue(spendingPublicKey, value) {
+note.create = (spendingPublicKey, value) => {
     const sharedSecret = createSharedSecret(spendingPublicKey);
     const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.n).toString(16), 64);
     const k = padLeft(web3Utils.toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
-    const viewKey = `0x${a}${k}${ephemeral}`;
-    return new Note(null, viewKey);
+    const viewingKey = `0x${a}${k}${ephemeral}`;
+    return new Note(null, viewingKey);
 };
+
+/**
+ * Encode compressed metadata of an array of notes as a hex-string, with each entry occupying 33 bytes
+ *
+ * @method fromValue
+ * @param {string} publicKey hex-string formatted recipient public key
+ * @param {number} value value of the note
+ * @returns {Note} created note instance
+ */
+note.encodeMetadata = (noteArray) => {
+    return noteArray.reduce((acc, aztecNote) => {
+        const ephemeral = aztecNote.exportMetadata();
+        return `${acc}${padLeft(ephemeral.slice(2), 66)}`; // remove elliptic.js encoding byte, broadcast metadata is always compressed
+    }, '0x');
+};
+
+/**
+ * Export the Note class as part of the note module. We shouldn't really use this directly, but useful for testing purposes
+ *
+ * @memberof module:note
+ */
+note.Note = Note;
 
 module.exports = note;
