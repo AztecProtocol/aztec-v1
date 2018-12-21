@@ -15,9 +15,10 @@ clone this repo to your desired directory and run ```npm install```
 ## Usage
 
 ```
-const proof = require('./proof/proof);
-const note = require('./note/note);
-const secp256k1 = require(./secp256k1/secp256k1);
+const note = require('./note/note');
+const proof = require('./proof/proof');
+const secp256k1 = require('./secp256k1/secp256k1');
+const sign = require('./eip712/sign');
 
 // address of confidential AZTEC - DAI smart contract
 const aztecContract = '0x0000';
@@ -43,9 +44,9 @@ const kPublic = -10; // output notes contain 10 less than input notes = deposit 
 const sender = accounts[0].address; // address of transaction sender
 
 // proofData and challenge are ABI-encoded and ready to be used as inputs to an AZTEC smart contract
-const { proofData, challenge } = proof.constructJoinSplit([...inputNotes, ...outputNotes], inputNotes.length, sender, -10);
+const { proofData, challenge } = proof.constructJoinSplit([...inputNotes, ...outputNotes], inputNotes.length, sender, kPublic);
 
-construct EIP712-compatible ECDSA sigantures over input notes, required to spend input notes
+// construct EIP712-compatible ECDSA sigantures over input notes, required to spend input notes
 const inputSignatures = [
     sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
     sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
@@ -62,6 +63,8 @@ const transactionData = {
     outputOwners,
     metadata: note.encodeMetadata(outputNotes),
 };
+
+return transactionData;
 ```
 
 ## Notation
