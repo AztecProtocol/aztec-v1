@@ -24,7 +24,7 @@ function getKPublic(kIn, kOut) {
 }
 
 function randomAddress() {
-    return `0x${padLeft(crypto.randomBytes(20, 16).toString('hex'), 64)}`;
+    return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
 /**
