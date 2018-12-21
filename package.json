@@ -12,6 +12,7 @@
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.1",
     "ethereumjs-tx": "^1.3.7",
+    "ethereumjs-wallet": "^0.6.3",
     "ganache-cli": "^6.2.3",
     "lowdb": "^1.0.0",
     "truffle": "^4.1.14",
@@ -19,6 +20,7 @@
     "web3": "^1.0.0-beta.36",
     "web3-eth-abi": "^1.0.0-beta.36",
     "web3-eth-accounts": "^1.0.0-beta.36",
+    "web3-provider-engine": "^14.1.0",
     "web3-utils": "^1.0.0-beta.36"
   },
   "devDependencies": {
@@ -40,6 +42,8 @@
     "testCoverage": "NODE_ENV=TEST nyc mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec",
     "doorbellTest": "NODE_ENV=TEST mocha ./extractPublicKey --trace-warnings --exit --colors --recursive --reporter spec",
     "demoRinkeby": "NODE_ENV=RINKEBY node ./demo/demoTransactions.js",
+    "demoRopsten": "NODE_ENV=ROPSTEN node ./demo/demoTransactions.js",
+    "demoKovan": "NODE_ENV=KOVAN node ./demo/demoTransactions.js",
     "demoDevelopment": "NODE_ENV=DEVELOPMENT node ./demo/demoTransactions.js",
     "demoMainnet": "NODE_ENV=MAINNET node ./demo/demoTransactions.js"
   },

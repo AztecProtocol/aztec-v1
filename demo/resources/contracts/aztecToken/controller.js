@@ -49,7 +49,6 @@ aztecToken.confidentialTransfer = async (address, proofData, m, challenge, input
     const contractAddress = await aztecToken.getContractAddress();
     const aztecTokenContract = new web3.eth.Contract(AZTECERC20Bridge.abi, contractAddress);
     aztecTokenContract.contractAddress = contractAddress;
-
     const transactionHash = await deployer.methodCall(
         [proofData, m, challenge, inputSignatures, outputOwners, metadata],
         {

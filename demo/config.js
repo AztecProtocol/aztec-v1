@@ -21,13 +21,25 @@ const environment = {
     },
     RINKEBY: {
         db: 'dbRinkeby.json',
-        provider: 'wss://rinkeby.infura.io/ws/v3/ef95d642a1ab405aa9f71e5096294a92',
+        provider: 'wss://rinkeby.infura.io/ws',
+        gasPrice: '10',
+        env: 'RINKEBY',
+    },
+    KOVAN: {
+        db: 'dbRinkeby.json',
+        provider: 'wss://rinkeby.infura.io/ws',
+        gasPrice: '10',
+        env: 'RINKEBY',
+    },
+    ROPSTEN: {
+        db: 'dbRinkeby.json',
+        provider: 'wss://rinkeby.infura.io/ws',
         gasPrice: '10',
         env: 'RINKEBY',
     },
     MAINNET: {
         db: 'dbMainNet.json',
-        provider: 'wss://mainnet.infura.io/ws/v3/ef95d642a1ab405aa9f71e5096294a92',
+        provider: 'wss://mainnet.infura.io/ws',
         gasPrice: '5',
         env: 'MAINNET',
     },

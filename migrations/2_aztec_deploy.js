@@ -10,11 +10,10 @@ module.exports = (deployer, network) => {
     // just a bytecode switcheroo, nothing to see here...
     AZTECERC20Bridge.bytecode = AZTECERC20Bridge.bytecode.replace('AZTECInterface', 'AZTEC');
     AZTECERC20Bridge.deployedBytecode = AZTECERC20Bridge.deployedBytecode.replace('AZTECInterface', 'AZTEC');
-
     return deployer.deploy(AZTEC)
         .then(() => deployer.link(AZTEC, AZTECERC20Bridge))
         .then(() => {
-            if (network === 'MainNet') {
+            if (network === 'mainnet') {
                 return Promise.resolve({ address: daiAddress });
             }
             return deployer.deploy(ERC20Mintable);

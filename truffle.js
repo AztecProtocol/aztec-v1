@@ -1,6 +1,7 @@
-const WalletProvider = require('truffle-wallet-provider');
 const Wallet = require('ethereumjs-wallet');
-const { toWei } = require('web3-utils');
+const { toWei, toHex } = require('web3-utils');
+const NonceTrackerSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
+const WalletProvider = require('truffle-wallet-provider');
 
 // when deploying to a non-development network, add the private key of wallet being used into 'privateKeys.json'
 const accounts = require('./accounts');
@@ -8,10 +9,17 @@ const accounts = require('./accounts');
 const keys = accounts.keys || [{ public: '', private: '' }];
 
 const wallet = Wallet.fromPrivateKey(Buffer.from(keys[0].private.slice(2), 'hex'));
-const rinkebyProvider = new WalletProvider(wallet, 'https://rinkeby.infura.io/FPuvsFyuZmA7p9xKUc9Q');
-const ropstenProvider = new WalletProvider(wallet, 'https://ropsten.infura.io/FPuvsFyuZmA7p9xKUc9Q');
-const mainNetProvider = new WalletProvider(wallet, 'https://mainnet.infura.io/FPuvsFyuZmA7p9xKUc9Q');
-const kovanProvider = new WalletProvider(wallet, 'https://kovan.infura.io/FPuvsFyuZmA7p9xKUc9Q');
+
+function createProvider(infuraUrl) {
+    return () => {
+        const hdWallet = new WalletProvider(wallet, infuraUrl);
+        const nonceTracker = new NonceTrackerSubprovider();
+        // eslint-disable-next-line no-underscore-dangle
+        hdWallet.engine._providers.unshift(nonceTracker);
+        nonceTracker.setEngine(hdWallet.engine);
+        return hdWallet;
+    };
+}
 
 
 module.exports = {
@@ -24,27 +32,27 @@ module.exports = {
             network_id: '*', // Match any network id
         },
         rinkeby: {
-            provider: rinkebyProvider,
+            provider: createProvider('https://rinkeby.infura.io'),
             gas: 4600000,
-            gasPrice: toWei('10', 'gwei'),
+            gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
         },
-        mainNet: {
-            provider: mainNetProvider,
-            gas: 4600000,
-            gasPrice: toWei('10', 'gwei'),
+        mainnet: {
+            provider: createProvider('https://mainnet.infura.io'),
+            gas: 6000000,
+            gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
         },
         ropsten: {
-            provider: ropstenProvider,
+            provider: createProvider('https://ropsten.infura.io'),
             gas: 4600000,
-            gasPrice: toWei('10', 'gwei'),
+            gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
         },
         kovan: {
-            provider: kovanProvider,
+            provider: createProvider('https://kovan.infura.io'),
             gas: 4600000,
-            gasPrice: toWei('10', 'gwei'),
+            gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '42',
         },
     },

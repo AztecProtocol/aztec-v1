@@ -40,30 +40,28 @@ async function demoTransactions(mint = false) {
         }));
     }
     const aztecBridgeContractAddress = await aztecBridgeContract.getContractAddress();
-
-
-    // approve aztecBridgeContract for scalingFactor.mul(500) tokens from account 0
+    // approve aztecBridgeContract for scalingFactor.mul(100) tokens from account 0
     // create 4 notes split between accounts 0, 1 and 2
     // split 1st and 3rd note
     // split 2nd and 4th note
     if (mint) {
-        console.log('minting 500 tokens');
+        console.log('minting 100 tokens');
         await transactions.getTransactionReceipt(
             await erc20.mint(
                 accounts[0],
                 accounts[0],
-                scalingFactor.mul(new BN(500)).toString(10)
+                scalingFactor.mul(new BN(100)).toString(10)
             )
         );
         console.log('minted');
     }
 
-    console.log('approving aztecBridgeContract to spend 500 tokens owned by accounts[0]');
+    console.log('approving aztecBridgeContract to spend 100 tokens owned by accounts[0]');
     await transactions.getTransactionReceipt(
         await erc20.approve(
             accounts[0],
             aztecBridgeContractAddress,
-            scalingFactor.mul(new BN(500)).toString(10)
+            scalingFactor.mul(new BN(100)).toString(10)
         )
     );
     const proofs = [];
@@ -72,8 +70,8 @@ async function demoTransactions(mint = false) {
 
     proofs[0] = await notes.createConfidentialTransfer(
         [],
-        [[accounts[0], 107], [accounts[0], 83], [accounts[1], 204], [accounts[2], 106]],
-        -500,
+        [[accounts[0], 22], [accounts[0], 20], [accounts[1], 22], [accounts[2], 36]],
+        -100,
         accounts[0],
         aztecBridgeContractAddress
     );
@@ -94,11 +92,13 @@ async function demoTransactions(mint = false) {
 
     proofs[1] = await notes.createConfidentialTransfer(
         [proofs[0].noteHashes[0], proofs[0].noteHashes[2]],
-        [[accounts[0], 140], [accounts[2], 171]],
+        [[accounts[0], 30], [accounts[2], 14]],
         0,
         accounts[0],
         aztecBridgeContractAddress
     );
+
+    console.log('sending transaction');
     transactionHashes[1] = await aztecBridgeContract.confidentialTransfer(
         accounts[0],
         proofs[1].proofData,
@@ -117,8 +117,8 @@ async function demoTransactions(mint = false) {
 
     proofs[2] = await notes.createConfidentialTransfer(
         [proofs[0].noteHashes[1], proofs[0].noteHashes[3]],
-        [[accounts[0], 50], [accounts[2], 50]],
-        89,
+        [[accounts[0], 25], [accounts[2], 25]],
+        6,
         accounts[1],
         aztecBridgeContractAddress
     );

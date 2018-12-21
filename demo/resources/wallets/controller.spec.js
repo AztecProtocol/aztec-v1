@@ -43,8 +43,8 @@ describe('basicWallet controller tests', () => {
         it('address and public key are expected to be well-formed', () => {
             const privateKey = `0x${crypto.randomBytes(32).toString('hex')}`;
             const wallet = basicWallet.createFromPrivateKey(privateKey);
-            const publicKey = secp256k1.keyFromPublic(wallet.publicKey.slice(2), 'hex');
-            const expected = secp256k1.g.mul(Buffer.from(privateKey.slice(2), 'hex'));
+            const publicKey = secp256k1.ec.keyFromPublic(wallet.publicKey.slice(2), 'hex');
+            const expected = secp256k1.curve.g.mul(Buffer.from(privateKey.slice(2), 'hex'));
             expect(publicKey.getPublic().eq(expected)).to.equal(true);
         });
 
