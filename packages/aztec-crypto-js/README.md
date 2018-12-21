@@ -4,7 +4,7 @@ This library contains methods required to construct AZTEC zero-knowledge proofs,
 
 **IMPORTANT: The deployed AZTEC smart contracts use a trusted setup created by AZTEC in-house and should only be used for testing and development purposes. We will be launching a multiparty computation protocol to create a trusted setup that is secured by the wider Ethereum community, where only one person has to act honestly for the setup database to be secure. If you wish to participate please let us know at hello@aztecprotocol.com**  
 
-To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in ```demo```.  
+To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in the [Aztec repository](https://github.com/AztecProtocol/AZTEC/tree/master/demo)
 
 For full API docs, [view our github pages API](https://aztecprotocol.github.io/aztec-crypto-js/)
 ## Install
