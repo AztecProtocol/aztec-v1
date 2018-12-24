@@ -566,6 +566,7 @@ Parser.prototype.processMacro = function processMacro(name, bytecodeIndex = 0, t
                 break;
             }
             case TYPES.PUSH_JUMP_LABEL: {
+                console.log('jump label ', op.value);
                 const jumpEntry = jumpTable[op.value] || [];
                 jumpEntry.push(Number(offset) + 1 - Number(bytecodeIndex));
                 context.bytecode += `${opcodes.push2}xxxx`;
