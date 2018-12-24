@@ -1,7 +1,6 @@
 #include "constants.huff"
 #include "add.huff"
 #include "double.huff"
-#include "add.huff"
 #define X2 = takes(0) returns(1) { 0x00 }
 #define Y2 = takes(0) returns(1) { 0x20 }
 #define Z2 = takes(0) returns(1) { 0x40 }
@@ -56,7 +55,7 @@
 // for the last iteration of calculating table coordinates, we want the final stack variables
 // to be in slightly different positions, to reduce the number of swap ops
 // initial stack state: y x
-// final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1
+// final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1  p d.z^2 p d.z^3
 #define PRECOMPUTE_TABLE_SINGLE_AFFINE_FINAL = takes(2) returns(59) {
     DOUBLE_AFFINE<X2,Y2,Z2>()
     // DOUBLE_AFFINE rescales X1 and Y1 by dz^2 and dz^3.
@@ -97,8 +96,29 @@ template <p1,p2>
 // for the last iteration of calculating table coordinates, we want the final stack variables
 // to be in slightly different positions, to reduce the number of swap ops
 // initial stack state y x z (-yold, -xold, pold)
+// final stack state  : z15 (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=15}^{n=3} y_1 x_1 p d.z^2 p d.z^3
+#define PRECOMPUTE_TABLE_SINGLE_B = takes(6) returns(59) {
+    PRECOMPUTE_TABLE_DOUBLE_B<dup6,dup7,X2,Y2,Z2>()
+    // we normalize x and y as if they were scaled by 'zd', without changing 'z'
+    // i.e. x' = x(zd^{2}) , y' = y(zd^{3})
+    // we can treat xd, yd, zd as an affine point when we calculate 3P, 5P, 7P etc.
+    // each point will have a z-coordinate that is (zd) too small, but we can normalize that later
+    // stack state: zd y x z
+    PRECOMPUTE_TABLE_NORMALIZE<dup7,dup8>()
+
+    // z' - y' x' p zz' p zzz'
+    PRECOMPUTE_TABLE_ADD<P,P,P,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD_AND_RESCALE<dup4,dup5,dup6,X2,Y2,Z2>()
+}
+
+// initial stack state y x z (-yold, -xold, pold)
 // final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1
-#define PRECOMPUTE_TABLE_SINGLE_FINAL_B = takes(2) returns(59) {
+#define PRECOMPUTE_TABLE_SINGLE_FINAL_B = takes(6) returns(59) {
     PRECOMPUTE_TABLE_DOUBLE_B<dup6,dup7,X2,Y2,Z2>()
     // we normalize x and y as if they were scaled by 'zd', without changing 'z'
     // i.e. x' = x(zd^{2}) , y' = y(zd^{3})
@@ -116,7 +136,6 @@ template <p1,p2>
     PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
     PRECOMPUTE_TABLE_ADD_AND_RESCALE_FINAL<dup4,dup5,dup6,dup7,dup8,dup9,X2,Y2,Z2>()
 }
-
 
 // for the last iteration of calculating table coordinates, we want the final stack variables
 // to be in slightly different positions, to reduce the number of swap ops
