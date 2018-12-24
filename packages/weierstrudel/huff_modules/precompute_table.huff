@@ -153,7 +153,7 @@ precompute_table_start:
     RESCALE<dup6,0x20,0x40,0x3e0,0x400,0x420,0x440,0x7e0,0x800>()
 }
 
-#define PRECOMPUTE_TABLE_TWO_MODIFIED = takes(0) returns(0) {
+#define PRECOMPUTE_TABLE_TWO = takes(0) returns(0) {
     // somehow we need an affine point on the stack.
     // Is this where we should start using calldata?
     0x00 calldataload

@@ -100,7 +100,7 @@ main_loop_end:  // looks like we've finished
     0x1020 mstore
     
     // calculate precomputed table
-    PRECOMPUTE_TABLE_TWO_MODIFIED() pop pop
+    PRECOMPUTE_TABLE_TWO() pop pop
 
     3P()
     2P()
@@ -210,7 +210,7 @@ skip_main_loop:
 
 
     // calculate precomputed table
-    PRECOMPUTE_TABLE_TWO_MODIFIED() pop pop
+    PRECOMPUTE_TABLE_TWO() pop pop
 
     3P()
     2P()
