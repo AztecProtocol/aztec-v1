@@ -1,6 +1,9 @@
 /* eslint-disable quote-props, no-restricted-syntax */
 const fs = require('fs');
 const BN = require('bn.js');
+const path = require('path');
+
+const partialPath = path.posix.resolve(__dirname, '../huff_modules');
 
 const reverseOpcodes = {
     '00': 'STOP',
@@ -638,7 +641,8 @@ Parser.prototype.getFileContents = function getFileContents(filename) {
     if (filename.includes('#')) {
         fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
     } else {
-        fileString = fs.readFileSync(filename, 'utf8');
+        const filepath = path.posix.resolve(partialPath, filename);
+        fileString = fs.readFileSync(filepath, 'utf8');
     }
     const lines = removeComments(fileString.split('\n'));
     let i = 0;

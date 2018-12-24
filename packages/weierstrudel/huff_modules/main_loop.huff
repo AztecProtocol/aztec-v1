@@ -1,7 +1,7 @@
-#include "./easm_modules/wnaf.easm"
-#include "./easm_modules/endomorphism.easm"
-#include "./easm_modules/precompute_table.easm"
-#include "./easm_modules/constants.easm"
+#include "wnaf.huff"
+#include "endomorphism.huff"
+#include "precompute_table.huff"
+#include "constants.huff"
 
 /// @dev use wnaf table to get the memory location of a point, and update wnaf table
 #define GET_P2_LOCATION = takes(0) returns(0) {
@@ -32,24 +32,24 @@
     // point lookup tables take 32 words of memory per point (excluding endomorphism)
     // which equals precisely 1kb (0x400)
     swap1
-    dup2 0x400 mul  // o w x // TODO CHANGE TO 400 WITH ENDO
+    dup2 0x400 mul // o w x
     swap2 byte
 
     0x20 mul add // o_x
 
-    dup1 0x20 add           // o_y o_x
+    dup1 0x20 add // o_y o_x
 }
 
 /// @dev perform one iteration of the main loop
 #define MAIN_LOOP = takes(6) returns(0) {
     // on the stack we will have.....
-    // z y x i p 2p
+    // z y x w i p 2p
     // i = iterator that points to memory of current wnaf entry
+    // w = wnaf word
     // z y x = current accumulated elliptic curve point
  main_loop_start:
     DOUBLE_MAIN<dup5,dup6>()
     
-    // TODO. this is hideous! Fix it fix it fix it
     // get i and also decrease i by 0x20 for next pass
     0x20 dup5 sub swap4 // i z y x i' p 2p 3p
     mload               // w z y x i' p 2p 3p
@@ -59,11 +59,11 @@
         // note, using 'sub' instead of eq iszero. TODO: check if this can cause problems!
         dup4 0x1020 sub main_loop_start jumpi
         main_loop_end jump
-add_points_start:    //  w z y x i' p 2p 3p
-    0x00 mstore      // z y x i' p 2p 3p
+add_points_start:       // w z y x i' p 2p 3p
+    0x00 mstore         // z y x i' p 2p 3p
 add_points_next:
     ADD_MAIN<GET_P2_LOCATION,dup5,dup6>()
-    0x00 mload add_points_next jumpi // z y x i' p 2p 3p
+    0x00 mload add_points_next jumpi // z y x w i' p 2p 3p
     dup4 0x1020 sub main_loop_start jumpi
 
 main_loop_end:  // looks like we've finished
@@ -81,6 +81,7 @@ main_loop_end:  // looks like we've finished
     // 0x80 - 0xa0 = s1
     // 0xa0 - 0xc0 = s2
     // TODO, put this in a loop, so much bytecode!
+    SET_WNAF_TABLE()
     0x80 calldataload
     0x1042 swap1
     WNAF()
@@ -99,7 +100,7 @@ main_loop_end:  // looks like we've finished
     0x1020 mstore
     
     // calculate precomputed table
-    PRECOMPUTE_TABLE_TWO() pop pop
+    PRECOMPUTE_TABLE_TWO_MODIFIED() pop pop
 
     3P()
     2P()
@@ -156,7 +157,7 @@ skip_main_loop:
     // 0x40 - 0x80 = P2
     // 0x80 - 0xa0 = s1
     // 0xa0 - 0xc0 = s2
-
+    SET_WNAF_TABLE()
     0x80 calldataload
     ENDOMORPHISM()
 
@@ -209,7 +210,7 @@ skip_main_loop:
 
 
     // calculate precomputed table
-    PRECOMPUTE_TABLE_TWO() pop pop
+    PRECOMPUTE_TABLE_TWO_MODIFIED() pop pop
 
     3P()
     2P()
@@ -224,17 +225,16 @@ skip_main_loop:
 
     // get coordinates of first point
     0x00 mstore
-    GET_P2_LOCATION()   // o_y o_x
+    GET_P2_LOCATION()   // o_y o_x i p 2p 3p
     mload swap1 mload   // x y i p 2p 3p
     dup4 sub swap1      // y x i p 2p 3p
     dup4 sub            // y x i p 2p 3p
-    0x01
-
+    0x01                // z y x i p 2p 3p
     0x00 mload get_first_entry jumpi
         begin_festivities jump
 get_first_entry:
     ADD_MAIN<GET_P2_LOCATION,dup5,dup6>()
-    0x00 mload get_first_entry jumpi // z y x i' p 2p 3p
+    0x00 mload get_first_entry jumpi // z y x w i' p 2p 3p
     // (this assumes we have two wnaf entries for each point respectively)
 begin_festivities:
     swap3 0x20 swap1 sub swap3

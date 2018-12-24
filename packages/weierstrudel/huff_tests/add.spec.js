@@ -6,8 +6,8 @@ const bn128Reference = require('../js_snippets/bn128_reference');
 const { expect } = chai;
 
 const testHelper = `
-#include "./easm_modules/add.easm"
-#include "./easm_modules/constants.easm"
+#include "add.huff"
+#include "constants.huff"
 #define X2 = takes(0) returns(1) { 0x20 }
 #define Y2 = takes(0) returns(1) { 0x00 }
 #define PRECOMPUTE_TABLE_ADD_IMPL = takes(3) returns(11) {

@@ -5,14 +5,15 @@
   "main": "index.js",
   "scripts": {
     "jstest": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "test": "mocha ./easm_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
     "hashPoint": "node ./js_snippets/hashToPoint.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bn.js": "^4.11.8",
-    "ethereumjs-vm": "^2.4.0"
+    "ethereumjs-vm": "^2.4.0",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "chai": "^4.2.0",
