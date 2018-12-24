@@ -41,6 +41,7 @@ function Runtime(filename) {
             throw new Error(`stack length ${stack.length} does not equal macro takes param ${takes}`);
         }
         const vm = new VM();
+        console.log('bytecode byte length = ', Math.ceil(bytecode.length / 2));
         const [err, results] = await vm.runCode({
             code: Buffer.from(bytecode, 'hex'),
             gasLimit: Buffer.from('ffffffff', 'hex'),

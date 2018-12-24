@@ -192,6 +192,10 @@ bn128.randomScalar = () => {
     return new BN(crypto.randomBytes(32), 16).umod(n);
 };
 
+bn128.randomFieldElement = () => {
+    return new BN(crypto.randomBytes(32), 16).umod(p);
+};
+
 bn128.randomPointJacobian = () => {
     let { x, y } = bn128.randomPointInternal();
     let z = new BN(crypto.randomBytes(32), 16);
@@ -285,7 +289,9 @@ bn128.generateSingleTable = (x, y, z) => {
     };
 };
 
-bn128.rescale = ({ x, y }, z) => {
+bn128.rescale = (point, zIn) => {
+    const { x, y } = setRed(point);
+    const z = zIn.red ? zIn : zIn.toRed(pRed);
     const zz = z.redSqr();
     const zzz = zz.redMul(z);
     return {

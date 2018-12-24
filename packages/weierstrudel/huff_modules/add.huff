@@ -1,4 +1,4 @@
-#include "./easm_modules/constants.easm"
+#include "constants.huff"
 
 /// @dev mixed point addition
 /// @notice expects (z1 -y1 x1) to be on stack
@@ -14,7 +14,6 @@ template <getP2Location,p,2p>
     dup2            // p t1 p z1 -y1 x1
     <getP2Location> // o_y o_x p t1 p z1 -y1 x1
     mload           // y2 o_x p t1 p z1 -y1 x1
-    // dup3 sub        // DEBUG!!!!! THIS SHOULD NOT BE NEGATIVE
     dup3            // p y2 o_x p t1 p z1 -y1 x1
     dup7                // z1 p y2 o_x p t1 p z1 -y1 x1
     dup6                // t1 z1 p y2 o_x p t1 p z1 -y1 x1
@@ -240,6 +239,7 @@ template <p1,p2,p3,mx2,my2,mz2>
 }
 
 // output stack state = z3 p y3 x3 dz2 p p dz3 p y x
+
 template <p1,p2,p3,p4,p5,p6,mx2,my2,mz2>
 #define PRECOMPUTE_TABLE_ADD_AND_RESCALE_FINAL = takes(3) returns(11) {
     <p1>
@@ -301,3 +301,4 @@ template <p1,p2,p3,p4,p5,p6,mx2,my2,mz2>
     <mz2> mload mulmod
     // z3 p y3 x3 p t3 p t4 p y x
 }
+// output stack state = z3 p y3 x3 dz2 p p dz3 p y x

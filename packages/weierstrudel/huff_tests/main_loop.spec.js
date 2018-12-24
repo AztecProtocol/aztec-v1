@@ -1,3 +1,4 @@
+/* eslint-disable prefer-arrow-callback */
 const chai = require('chai');
 const BN = require('bn.js');
 const EC = require('elliptic');
@@ -33,10 +34,11 @@ const referenceCurve = new EC.curve.short({
 });
 
 
-describe.only('bn128 main loop', () => {
+describe('bn128 main loop', function describe() {
+    this.timeout(10000);
     let main;
     before(() => {
-        main = new Runtime('./easm_modules/main_loop.easm');
+        main = new Runtime('../huff_modules/main_loop.huff');
     });
     it('macro GET_P2_LOCATION correctly calculates point location from a wnaf', async () => {
         const wnaf = new BN('1f00000000000000050000000001000000000b00000000000000000000000000', 16);
