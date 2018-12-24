@@ -322,56 +322,6 @@ describe('bn128 precompute table two', () => {
         }
     });
 
-    it('macro PRECOMPUTE_TABLE_TWO correctly calculates precomputed table for two points', async () => {
-        const points = [
-            bn128Reference.randomPoint(),
-            bn128Reference.randomPoint(),
-        ].map(point => ({ x: point.x, y: point.y, z: new BN(1) }));
-
-        const { tables, globalZ } = bn128Reference.generateTable(points);
-        const referenceTables = bn128Reference.rescaleMultiTable(tables, globalZ);
-
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE_TWO', [], [], [
-            { index: 0, value: points[0].x },
-            { index: 32, value: points[0].y },
-            { index: 64, value: points[1].x },
-            { index: 96, value: points[1].y },
-        ]);
-        const result = sliceMemory(memory, 129);
-        const baseMem = result.slice(0, 1);
-        const baseTable = result.slice(1, 129);
-        expect(baseTable.length).to.equal(128);
-
-
-        expect(baseMem[0].eq(globalZ)).to.equal(true);
-        expect(stack.length).to.equal(2);
-
-        for (let i = 0; i < baseTable.length; i += 64) {
-            const expected = referenceTables[1 - Math.round(i / 64)];
-            const referencePoint = points[1 - Math.round(i / 64)];
-            const comparisonTable = getComparisonTable(referencePoint.x, referencePoint.y, referencePoint.z);
-
-            for (let j = 0; j < 16; j += 2) {
-                const resultPoint = bn128Reference.toAffine({
-                    x: p.sub(baseTable[i + j]),
-                    y: (baseTable[i + j + 1]),
-                    z: baseMem[0],
-                });
-                expect(comparisonTable[j / 2].x.fromRed().eq(resultPoint.x.fromRed())).to.equal(true);
-                expect(comparisonTable[j / 2].y.fromRed().eq(resultPoint.y.fromRed())).to.equal(true);
-                expect(baseTable[i + j].umod(p).eq(p.sub(expected[j / 2].x))).to.equal(true);
-                expect(baseTable[i + j + 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
-                expect(baseTable[i + 32 - j - 2].umod(p).eq(p.sub(expected[j / 2].x))).to.equal(true);
-                expect(baseTable[i + 32 - j - 1].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
-                expect(baseTable[i + j + 32].umod(p).eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
-                expect(baseTable[i + j + 33].umod(p).eq(p.sub(expected[j / 2].y))).to.equal(true);
-                expect(baseTable[i + 64 - j - 2].umod(p).eq(beta.mul(p.sub(expected[j / 2].x)).umod(p))).to.equal(true);
-                expect(baseTable[i + 64 - j - 1].umod(p).eq(expected[j / 2].y)).to.equal(true);
-            }
-        }
-    });
-
-
     it('macro PRECOMPUTE_TABLE_TWO_MODIFIED correctly calculates precomputed table for two points', async () => {
         const points = [
             bn128Reference.randomPoint(),
