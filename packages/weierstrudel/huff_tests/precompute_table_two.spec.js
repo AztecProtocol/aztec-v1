@@ -322,7 +322,7 @@ describe('bn128 precompute table two', () => {
         }
     });
 
-    it('macro PRECOMPUTE_TABLE_TWO_MODIFIED correctly calculates precomputed table for two points', async () => {
+    it('macro PRECOMPUTE_TABLE_TWO correctly calculates precomputed table for two points', async () => {
         const points = [
             bn128Reference.randomPoint(),
             bn128Reference.randomPoint(),
@@ -331,7 +331,7 @@ describe('bn128 precompute table two', () => {
         const { tables, globalZ } = bn128Reference.generateTable(points);
         const referenceTables = bn128Reference.rescaleMultiTable(tables, globalZ);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE_TWO_MODIFIED', [], [], [
+        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE_TWO', [], [], [
             { index: 0, value: points[0].x },
             { index: 32, value: points[0].y },
             { index: 64, value: points[1].x },
