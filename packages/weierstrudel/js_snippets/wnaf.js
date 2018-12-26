@@ -1,9 +1,17 @@
 const BN = require('bn.js');
 
+const wnafReference = {};
+
+wnafReference.countNonzeroEntries = (wnaf) => {
+    return wnaf.reduce((result, entry) => {
+        return entry ? result + 1 : result;
+    }, 0);
+};
+
 // TODO: Change wnaf implementation to this
 // reference wnaf implenentation to test smart contract against.
 // performs standard window NAF method of dividing-by-2 until least significant bit is high
-/* function alternativeWnaf(scalar) {
+wnafReference.wnaf = (scalar) => {
     let next = scalar;
     const wnaf = [];
     let o = 0;
@@ -18,8 +26,24 @@ const BN = require('bn.js');
         }
         next = next.sub(m);
     }
-} */
+    return wnaf;
+};
 
+wnafReference.recoverWnaf = (wnaf) => {
+    return wnaf.reduce((result, entry, index) => {
+        if (entry) {
+            if (entry.gt(new BN(15))) {
+                return result.sub(new BN(32).sub(entry).shln(index));
+            }
+            return result.add(entry.shln(index));
+        }
+        return result;
+    }, new BN(0));
+};
+
+module.exports = wnafReference;
+
+/*
 module.exports = function calculateWnaf(scalar) {
     // assume 'scalar' is a BN
     // phew what a mess
@@ -50,3 +74,4 @@ module.exports = function calculateWnaf(scalar) {
     const wnafData = recurse(scalar);
     return wnafData;
 };
+*/
