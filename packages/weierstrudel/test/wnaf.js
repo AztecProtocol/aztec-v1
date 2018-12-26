@@ -5,7 +5,7 @@ const DummyContract = artifacts.require('../contracts/DummyContract');
 const Wnaf = artifacts.require('../contracts/Wnaf');
 const WnafInterface = artifacts.require('../contrats/WnafInterface');
 
-const referenceWnaf = require('../js_snippets/wnaf_reference_implementation');
+const referenceWnaf = require('../js_snippets/wnaf');
 
 Wnaf.abi = WnafInterface.abi; // hon hon hon
 DummyContract.abi = WnafInterface.abi;
