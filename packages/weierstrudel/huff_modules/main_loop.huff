@@ -24,7 +24,7 @@
     0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f div 0xff and // x w
 
     // we want to clear the wnaf entry at byte index 'b' (for future iterations)
-    0x00 dup2 mstore8 // that'll do it
+    0x00 dup2 mstore8 // that'll do it.
 
     // now what we have our wnaf byte index, we can use it for two purposes
     // 1: access the relevant byte in 'w' that contains our wnaf entry
@@ -218,6 +218,66 @@ skip_main_loop:
 
     // 1020 stores the location we called mstore8 on, for the largest wnaf index (m)
     0x20 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
+    0x00 mload 0x1020 mstore // store globalZ in 0x1020
+
+    // this should be i - the memory index with the largest nonzero wnaf
+    dup1 mload                  // w i p 2p 3p
+    WNAF_MASK() and
+    // get coordinates of first point
+    0x00 mstore
+    GET_P2_LOCATION()   // o_y o_x i p 2p 3p
+    mload swap1 mload   // x y i p 2p 3p
+    dup4 sub swap1      // y x i p 2p 3p
+    dup4 sub            // y x i p 2p 3p
+    0x01                // z y x i p 2p 3p
+    0x00 mload get_first_entry jumpi
+        begin_festivities jump
+get_first_entry:
+    ADD_MAIN<GET_P2_LOCATION,dup5,dup6>()
+    0x00 mload get_first_entry jumpi // z y x w i' p 2p 3p
+    // (this assumes we have two wnaf entries for each point respectively)
+begin_festivities:
+    swap3 0x20 swap1 sub swap3
+    dup4 0x1020 eq skip_main_loop jumpi
+    MAIN_LOOP()             // zf yf xf i p 2p 3p 
+skip_main_loop:
+
+// Finished with main loop. Final thing to do is scale the point's z-coordinate by the precomputed table's globalZ coordinate
+    0x1020 mload            // z zf yf xf i p 2p 3p
+    dup6 swap2 mulmod       // z'' yf xf i p 2p 3p
+    0x40 mstore             // yf xf i p 2p 3p
+    dup4 swap1 mod          // yf xf i p 2p 3p
+    dup4 sub                // y xf i p 2p 3p
+    0x20 mstore             // xf i p 2p 3p
+    dup3 swap1 mod          // x i p 2p 3p
+    0x00 mstore             // i p 2p 3p
+    pop pop pop pop
+    0x60 0x00 return
+}
+
+
+/// @dev performs scalar multiplication for two affine points
+#define MAIN_TWO_ENDO_MOD = takes(0) returns(0) {
+    // point table starts at 0x20
+    // for two points, table will end at 0x1020
+    // store globalZ at 0x1020
+    // wnaf table starts at 0x1040
+    // 0x00 - 0x40 = P1
+    // 0x40 - 0x80 = P2
+    // 0x80 - 0xa0 = s1
+    // 0xa0 - 0xc0 = s2
+    COMPUTE_WNAFS()
+
+    // calculate precomputed table
+    PRECOMPUTE_TABLE_FULL() pop pop
+
+    3P()
+    2P()
+    P()
+
+    // 1020 stores the location we called mstore8 on, for the largest wnaf index (m)
+    // 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
+    0x1020 mload
     0x00 mload 0x1020 mstore // store globalZ in 0x1020
 
     // this should be i - the memory index with the largest nonzero wnaf

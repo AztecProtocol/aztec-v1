@@ -286,7 +286,7 @@ wnaf_end:
 
     // compute calldata and memory offsets
     0x60 calldatasize div // n
-    dup1 dup1 add 0x103f add       // m n
+    dup1 dup1 add 0x103e add       // m n
     swap1 0x40 mul        // s m 269 0x1fe0 16 mask b
 }
 
@@ -306,12 +306,12 @@ wnaf_start:
     // k1 k2 m s 269 0x1fe0 16 mask b
     // We want to add 2^{133} to each scalar k1 and k2.
     // This is so that our hardcoded loop doesn't overwrite our most significant wnaf entry with zeroes
-    0x5000 mstore    // k2 s m 269 0x1fe0 16 mask b // TODO remove memory storage blahblah
+    swap1 0x200 mstore    // k2 s m 269 0x1fe0 16 mask b // TODO remove memory storage blahblah
     dup8 or // k2' s m
     dup3 ENDO_WNAF_FIXED() // w o k2 s m 269 0x1fe0 16 mask b
     pop pop
     // k2 s m 269 0x1fe0 16 mask b
-    0x5000 mload dup8 or
+    0x200 mload dup8 or
     dup3 1 add ENDO_WNAF_FIXED() // w o s m 269 0x1fe0 16 mask b
     pop pop
 
@@ -322,5 +322,70 @@ wnaf_start:
     dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
     pop pop pop pop pop pop pop
     FIND_FIRST_ENTRY()
+    0x00 0x200 mstore
+
+    0x1020 mstore
 }
 
+#define COMPUTE_WNAFS_COMPARISON = takes(0) returns(1) {
+        // point table starts at 0x20
+    // for two points, table will end at 0x1020
+    // store globalZ at 0x1020
+    // wnaf table starts at 0x1040
+    // 0x00 - 0x40 = P1
+    // 0x40 - 0x80 = P2
+    // 0x80 - 0xa0 = s1
+    // 0xa0 - 0xc0 = s2
+    SET_WNAF_TABLE()
+    0x80 calldataload
+    ENDOMORPHISM()
+
+    0x1042 swap1
+    WNAF()
+
+    pop 0x1020 mstore 0x1043 swap1
+    WNAF()
+
+    // r = x ^ ((x ^ y) & -(x < y));
+    pop
+    0x1020 mload    // x y
+
+    dup2 dup2 xor   // x^y x y
+    swap2           // y x x^y
+    dup2 lt 0 sub     // -(x < y) x x^y
+    swap1 swap2 and // (x^y & -(x < y)) x
+    xor             // max(x, y)
+
+    0x1020 mstore
+
+    0xa0 calldataload
+    ENDOMORPHISM()
+
+    0x1040 swap1
+    WNAF()
+    pop
+    0x1020 mload    // x y
+
+    dup2 dup2 xor   // x^y x y
+    swap2           // y x x^y
+    dup2 lt 0 sub     // -(x < y) x x^y
+    swap1 swap2 and // (x^y & -(x < y)) x
+    xor             // max(x, y)
+
+    0x1020 mstore
+    0x1041 swap1
+
+    WNAF()
+    pop
+    0x1020 mload    // x y
+
+    dup2 dup2 xor   // x^y x y
+    swap2           // y x x^y
+    dup2 lt 0 sub     // -(x < y) x x^y
+    swap1 swap2 and // (x^y & -(x < y)) x
+    xor             // max(x, y)
+
+    0x1020 mstore
+    0x20 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
+    0x1020 mstore
+}
