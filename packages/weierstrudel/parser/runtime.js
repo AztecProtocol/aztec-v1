@@ -54,7 +54,12 @@ function Runtime(filename) {
         }
         const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).toString(10);
         console.log('gas consumed = ', gasSpent);
-        return { stack: results.runState.stack, memory: results.runState.memory, returnValue: results.runState.returnValue };
+        return {
+            gas: gasSpent,
+            stack: results.runState.stack,
+            memory: results.runState.memory,
+            returnValue: results.runState.returnValue,
+        };
     };
 }
 
