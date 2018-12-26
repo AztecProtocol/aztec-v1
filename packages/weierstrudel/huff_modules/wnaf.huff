@@ -1,34 +1,86 @@
 #include "endomorphism.huff"
 
-// starting stack state o w
-#define WNAF_SLICE_A = takes(2) returns(1) {
-    dup2 dup1 returndatasize sub and
-    // w' o w
-    swap1
-    // o w' w
-    269 dup3 mod
-    // (w' % 269) o w' w
-    mload 0x1fe0 and
-    // x o w' w
-    add
-    // o' w' w
-    swap2
-    // w w' o'
-    div
-    // w o'
-    dup1 dup3
-    // o' w w o'
-    mstore8
-    // w o'
-    16 add 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 and
-    // w o'
+// starting stack state o w 260 0x1fe0 16 mask
+/**
+ * @title single iteration of width-non-adjacent-form algorithm
+ * @dev Starting stack state = o w c_269 c_0x1fe0 c_16 c_mask
+ * We have two 'slice' macros that do the same thing, but variables 'o' and 'w'
+ * have reversed stack positions. This is to reduce the number of swap ops we use.
+ * We use 4 constants in this macro, which we require on the stack instead of using PUSH ops.
+ * This is to reduce the code size of this macro (PUSH is at least 2 bytes, other opcodes are a single byte)
+ * @param o current memory offset to latest wnaf entry
+ * @param w the scalar we're creating our wnaf from
+ * @param c_269 the integer '269' (base 10), used in a lookup table
+ * @param c_0x1fe0 the integer '1fe0' (base 16), used as a mask in our lookup table
+ * @param c_16 the integer '16' (base 10), used to mutate ```w``` for next iteration cycle
+ * @param c_mask 256-bit integer with all bits set high, except the least significant 5 bits
+ **/
+#define WNAF_SLICE_A = takes(6) returns(1) {
+    // Step 1: we need to isolate the least significant high bit of w
+    // Can do this by taking w & -w
+    // Instead of pushing '0' onto the stack (3 gas), we can get the 'return data size' of this EVM execution context.
+    // As this contract doesn't call external contracts this will always be 0, and the opcode costs 2 gas.
+    dup2 dup1 returndatasize sub and // stack state: w' o w
+
+    // Step 2: use w' and the lookup table to calculate the bit index of the high bit in w'
+    // We want to add this offset to 'o', which is our accumulated memory offset
+    // So swap 'o' to the front of the stak in preparation
+    swap1 // stack state: o w' w 269 0x1fe0 16 mask
+
+    // We want to calculate w' mod 269; the literal needs to preceed w' so push it onto the stack
+    // before duplicating w' (we don't consume w' as we need it later) and taking the modulus
+    dup4 dup3 mod // stack state: (w' % 269) o w' w 269 0x1fe0 16 mask
+
+    // use the result to byte-address the lookup table we stored
+    // and mask off the byte corresponding to the bit index,
+    // we use 0x1fe0 instead of 0xff because the table entry is shifted by 5 bits
+    // this is because we use this value to address words in memory, so '1' needs to be '32'
+    mload dup6 and // stack state: x o w' w
+
+    // Tadaa, we have our index, no conditional branching in sight
+    // We need this value to find the current byte-offset to store our wnaf, so add it straight to 'o'
+    add // stack state: o' w' w
+
+    // Now we know *where* to store the next wnaf section, we need to figure out *what* to store
+    // Our scalar has an abritrary amount of leading 0 bits we need to remove, we can use w' as
+    // our divisor without explicitly figuring out how many bits need to be culled
+    swap2 // stack state: w w' o'
+    div  // stack state: w o'
+
+    // We want to store our wnaf entry at byte position 'o'.
+    // We've divided w by the least significant bit in w, so we know that
+    // our wnaf entry is in the least significant 5 bits of 'w'.
+    // Instead of masking off the higher order bits, we can use mstore8
+    // to store the least significant byte of 'w' at position 'o'.
+    // We're storing multiple wnaf entries in a single EVM word, so it's cheaper
+    // to mask off the unwanted 3 high bits per-evm-word, which we can do in the main loop
+    dup1 dup3 mstore8 // stack state: w o' 269 0x1fe0 16 mask
+
+    // We need to prepare our scalar for the next round of iteration
+    // We've already stored the next 5 bits of the wnaf in our fragment at memory offset 'o'
+    // So we need to zero out the 5 least significant bits of w so we don't double-count.
+
+    // i.e. we calculate  w = (w & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0)
+    // (the literal has every bit set high except the least significant 5)
+
+    // There is one catch. If our wnaf fragment is negative (> 15), we need to add 2^{w} (32) to the scalar w.
+    // This is because we're subtracting (32 - m) at this bit position.
+    // So we need to add in 32 at the adjacent wnaf entry, but as that entry represents a value that is 2^{5} greater than this one,
+    // we actually need to add 1, not 32. Clear as mud, yes?
+
+    // The easiest way of doing this is by adding 16 into w.
+    // If m > 15 then the 5th bit will be high w. So adding 16 will trigger an
+    // overflow and add into the 6th bit. All lower order bits don't matter because we're about to mask them off
+    dup5 add dup6 and // stack state: w o
 }
 
-// starting stack state w o
-#define WNAF_SLICE_B = takes(2) returns(1) {
+// starting stack state w o 260 0x1fe0 16 mask
+#define WNAF_SLICE_B = takes(6) returns(1) {
     dup1 dup1 returndatasize sub and
-    // w' w o
-    269 dup2 mod mload 0x1fe0 and
+    // w' w o 269 0x1fe0 16 mask
+    dup4 dup2 mod
+    // (w' % 269) w' w o 269 0x1fe0 16 mask
+    mload dup6 and
     // x w' w o
     swap2
     // w w' x o
@@ -37,8 +89,8 @@
     swap2
     // o x w"
     add
-    // o' w"
-    dup2 16 add 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 and
+    // o' w" 269 0x1fe0 16 mask
+    dup2 dup6 add dup7 and
     // w''' o' w"
     swap2
     // w" o' w'''
@@ -47,6 +99,8 @@
     mstore8
     // o' w'''
 }
+
+
 #define WNAF_SLICE = takes(2) returns(1) {
     // Step 1: we need to isolate the least significant high bit of w
     // Can do this by taking w & -w
@@ -181,61 +235,34 @@ loop:
 }
 
 
-#define ENDO_WNAF_FIXED_B = takes(2) returns(1) {
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
-    WNAF_SLICE_B()
-    WNAF_SLICE_A()
+#define ENDO_WNAF_FIXED = takes(2) returns(1) {
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
 loop:
-    WNAF_SLICE_B()
+    WNAF_SLICE_B<dup4,dup5,dup5,dup6>()
     33 dup3 lt wnaf_end jumpi
-    WNAF_SLICE_A()
+    WNAF_SLICE_A<dup4,dup5,dup5,dup6>()
     dup1 32 lt loop jumpi
 wnaf_end:
-}
-
-#define ENDO_WNAF_FIXED = takes(2) returns(1) {
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-    WNAF_SLICE()
-loop:
-    WNAF_SLICE()
-    dup1 32 lt loop jumpi
 }
 
 #define ENDO_WNAF = takes(0) returns(1) {
