@@ -13,7 +13,7 @@ const testHelper = `
     PRECOMPUTE_TABLE_NORMALIZE<P,P>()
 }`;
 
-describe.only('bn128 precompute table single', () => {
+describe('bn128 precompute table single', () => {
     let precomputeTableSingleHelper;
     before(() => {
         precomputeTableSingleHelper = new Runtime(testHelper);
@@ -40,7 +40,7 @@ describe.only('bn128 precompute table single', () => {
         expect(stack[6].umod(p).eq(point.z)).to.equal(true);
     });
 
-    it.only('macro PRECOMPUTE_TABLE_SINGLE_AFFINE calculates coordinates and scaling factors for affine point', async () => {
+    it('macro PRECOMPUTE_TABLE_SINGLE_AFFINE calculates coordinates and scaling factors for affine point', async () => {
         const point = bn128Reference.randomPoint();
         point.z = new BN(1);
         const { tables: [{ table, zFactors, tableZ }] } = bn128Reference.generateTable([point]);
@@ -74,7 +74,7 @@ describe.only('bn128 precompute table single', () => {
     });
 
 
-    it.only('macro PRECOMPUTE_TABLE_SINGLE_AFFINE_FINAL calculates coordinates and scaling factors for affine point', async () => {
+    it('macro PRECOMPUTE_TABLE_SINGLE_AFFINE_FINAL calculates coordinates and scaling factors for affine point', async () => {
         const point = bn128Reference.randomPoint();
         point.z = new BN(1);
         const { tables: [{ table, zFactors, tableZ }] } = bn128Reference.generateTable([point]);
@@ -152,7 +152,7 @@ describe.only('bn128 precompute table single', () => {
         expect(stack.length === 59);
     });
 
-    it.only('macro PRECOMPUTE_TABLE_SINGLE_FINAL_B correctly calculates precomputed table for one point', async () => {
+    it('macro PRECOMPUTE_TABLE_SINGLE_FINAL_B correctly calculates precomputed table for one point', async () => {
         const point = bn128Reference.randomPoint();
         point.z = new BN(1);
         const {
@@ -215,7 +215,7 @@ describe.only('bn128 precompute table single', () => {
     });
 
 
-    it.only('macro PRECOMPUTE_TABLE_SINGLE_B correctly calculates precomputed table for one point', async () => {
+    it('macro PRECOMPUTE_TABLE_SINGLE_B correctly calculates precomputed table for one point', async () => {
         const point = bn128Reference.randomPoint();
         point.z = new BN(1);
         const {

@@ -1,7 +1,7 @@
 const chai = require('chai');
 const BN = require('bn.js');
 
-const referenceWnaf = require('../js_snippets/wnaf_reference_implementation');
+const referenceWnaf = require('../js_snippets/wnaf');
 const Runtime = require('../parser/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
@@ -17,8 +17,10 @@ const testHelper = `
 
 describe('sparse wnaf', () => {
     let wnaf;
+    let thirtyTwo;
     before(() => {
         wnaf = new Runtime(testHelper);
+        thirtyTwo = new BN(32);
     });
     it('macro WNAF correctly calculates a w=5 windowed non adjacent form of a 254 bit number', async () => {
         const testVar = bn128Reference.randomPoint().x;
@@ -28,7 +30,7 @@ describe('sparse wnaf', () => {
         for (let i = 0; i < reference.length; i += 1) {
             const memoryOffset = (i * 32);
             if (reference[i].gt(new BN(0))) {
-                expect(reference[i].eq(new BN(memory[memoryOffset], 16))).to.equal(true);
+                expect(reference[i].eq(new BN(memory[memoryOffset], 16).umod(thirtyTwo))).to.equal(true);
             }
         }
     });
@@ -41,7 +43,7 @@ describe('sparse wnaf', () => {
         for (let i = 0; i < reference.length; i += 1) {
             const memoryOffset = baseOffset + (i * 32);
             if (reference[i].gt(new BN(0))) {
-                expect(reference[i].eq(new BN(memory[memoryOffset], 16))).to.equal(true);
+                expect(reference[i].eq(new BN(memory[memoryOffset], 16).umod(thirtyTwo))).to.equal(true);
             }
         }
     });

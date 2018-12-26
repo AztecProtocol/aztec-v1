@@ -39,13 +39,12 @@
     // w mod 2^(window size). We hardcode a window size of 5, so this can be simplified to (w & 31)
 
     // Instead, we just store the least significant *byte* at our calculated memory offset, using mstore8.
-    // Our wnaf window has width 5, so we want to store the least 5 signficant bits of w
+    // Our wnaf window has width 5, so we want to store the least 5 signficant bits of w.
+    // HOWEVER, it's cheaper to mask this off when we *load* the wnaf, because we're storing
+    // multiple wnaf entries in an evm word, so we can mask off at the word-level and not the byte-level
     dup1             // copy w. Stack state: w w o
-    0x1f and         // mask off bits to get our wnaf value. Stack state: m w o
-    dup1             // copy m, we need a copy later on
-    dup4             // copy o. Stack state: o m m w o
-
-    mstore8          // store our wnaf fragment // m w o
+    dup3             // copy o. Stack state: o m w o
+    mstore8          // store our wnaf fragment // w o
 
     // Right, what's left now? We need to prepare our scalar for the next round of iteration
     // We've already stored the next 5 bits of the wnaf in our fragment at memory offset 'o'
@@ -60,10 +59,10 @@
     // This is because we're subtracting (32 - m) at this bit position.
     // We want to set it up so that the next wnaf entry will contain an additional factor of 32.
 
-    // The easiest way of doing this is by adding 'm' into w.
-    // If m > 15 then the 5th bit will be high in both m and w. So adding them together will trigger an
+    // The easiest way of doing this is by adding 16 into w.
+    // If m > 15 then the 5th bit will be high w. So adding 16 will trigger an
     // overflow and add into the 6th bit. All lower order bits don't matter because we're about to mask them off
-    add
+    16 add
     // Now all that's left is to mask out the lowest 5 bits
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 and
 
@@ -150,6 +149,11 @@
 loop:
     WNAF_SLICE()
     dup1 loop jumpi
+}
+
+
+#define WNAF_FIXED = takes(0) returns(0) {
+
 }
 
 #define ENDO_WNAF = takes(0) returns(1) {
