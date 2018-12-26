@@ -83,7 +83,7 @@ const helperMacros = `
 }*/
 `;
 
-describe.only('bn128 precompute table two', () => {
+describe('bn128 precompute table two', () => {
     let precomputeTable;
     let templateWrapper;
     before(() => {

@@ -112,16 +112,13 @@ describe('bn128 main loop', function describe() {
         const { stack, returnValue } = await main('MAIN_TWO_ENDO', [], [], calldata);
         const expected = referenceCurve.point(P1.x, P1.y).mul(scalars[0]).add(referenceCurve.point(P2.x, P2.y).mul(scalars[1]));
         const returnWords = sliceMemory(returnValue);
-        console.log(returnWords);
-        returnWords.forEach((w) => { console.log(w.bitLength()); });
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
         const z = returnWords[2].toRed(pRed);
         const result = bn128Reference.toAffine({ x, y, z });
 
         expect(returnWords.length).to.equal(3);
-        // expect(stack.length).to.equal(0);
-        console.log('stack = ', stack.toString(10));
+        expect(stack.length).to.equal(0);
         expect(result.x.fromRed().eq(expected.x.fromRed())).to.equal(true);
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
