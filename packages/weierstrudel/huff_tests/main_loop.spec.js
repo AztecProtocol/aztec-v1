@@ -34,7 +34,7 @@ const referenceCurve = new EC.curve.short({
 });
 
 
-describe('bn128 main loop', function describe() {
+describe.only('bn128 main loop', function describe() {
     this.timeout(10000);
     let main;
     before(() => {
@@ -110,6 +110,39 @@ describe('bn128 main loop', function describe() {
         ];
 
         const { stack, returnValue } = await main('MAIN_TWO_ENDO', [], [], calldata);
+        const expected = referenceCurve.point(P1.x, P1.y).mul(scalars[0]).add(referenceCurve.point(P2.x, P2.y).mul(scalars[1]));
+        const returnWords = sliceMemory(returnValue);
+        const x = returnWords[0].toRed(pRed);
+        const y = returnWords[1].toRed(pRed);
+        const z = returnWords[2].toRed(pRed);
+        const result = bn128Reference.toAffine({ x, y, z });
+
+        expect(returnWords.length).to.equal(3);
+        expect(stack.length).to.equal(0);
+        expect(result.x.fromRed().eq(expected.x.fromRed())).to.equal(true);
+        expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
+    });
+
+
+    it('macro MAIN_TWO_ENDO_MOD calculates scalar multiplication of two points', async () => {
+        const P1 = bn128Reference.randomPoint();
+        const P2 = bn128Reference.randomPoint();
+
+        const scalars = [
+            bn128Reference.randomScalar(),
+            bn128Reference.randomScalar(),
+        ];
+
+        const calldata = [
+            { index: 0, value: P1.x },
+            { index: 32, value: P1.y },
+            { index: 64, value: P2.x },
+            { index: 96, value: P2.y },
+            { index: 128, value: scalars[0] },
+            { index: 160, value: scalars[1] },
+        ];
+
+        const { stack, returnValue } = await main('MAIN_TWO_ENDO_MOD', [], [], calldata);
         const expected = referenceCurve.point(P1.x, P1.y).mul(scalars[0]).add(referenceCurve.point(P2.x, P2.y).mul(scalars[1]));
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
