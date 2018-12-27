@@ -6,7 +6,7 @@ const endomorphism = require('./endomorphism');
 
 const { expect } = chai;
 
-describe.only('wnaf tests', () => {
+describe('wnaf tests', () => {
     it('wnaf works', () => {
         const scalar = bn128.randomScalar();
         const wnaf = wnafReference.wnaf(scalar);
