@@ -83,7 +83,7 @@ const helperMacros = `
 }*/
 `;
 
-describe.only('bn128 precompute table two', () => {
+describe('bn128 precompute table two', () => {
     let precomputeTable;
     let templateWrapper;
     before(() => {
@@ -412,7 +412,7 @@ describe.only('bn128 precompute table two', () => {
         }
     });
 
-    it.only('PRECOMPUTE_TABLE_TWO and PRECOMPUTE_TABLE_FULL create identical memory maps for p = 2', async () => {
+    it('PRECOMPUTE_TABLE_TWO and PRECOMPUTE_TABLE_FULL create identical memory maps for p = 2', async () => {
         const points = [
             bn128Reference.randomPoint(),
             bn128Reference.randomPoint(),

@@ -490,7 +490,119 @@ Parser.prototype.parseExpression = function parseExpression() {
     return this.parseTopLevel(this.next());
 };
 
-Parser.prototype.processMacro = function processMacro(name, bytecodeIndex = 0, templateParams = {}) {
+/*
+this.calls[identifier] = {
+    parent: parentIdentifier,
+    templateParams,
+    templateLabels,
+}
+
+Can recurse up calls until we find the root, or we find a templateParameter that matches what we're looking for
+
+
+*/
+/*
+Parser.prototype.findTemplate = function findTemplate(name, currentId, calls) {
+    const recurse = (id) => {
+        const index = calls[id].templateLabels.indexOf(name);
+        if (index !== -1) {
+            const name = calls[id].templateParams[index];
+            // do something
+        }
+        const { parentId } = calls[id];
+        if (parentId) {
+            return recurse(parentId);
+        }
+        return null;
+    };
+    return recurse(currentId);
+};
+*/
+
+/* Parser.prototype.processTemplates = function processTemplates(_macroName, identifier, calls) {
+    const { templateParams, templateLabels, parentId } = calls[identifier];
+    // let macroName = templateParams[index];
+    let templateMacro;
+    let macroName = _macroName;
+    // TODO: adopt parseExpression to support inline template compilation
+    // hmmmmmm...also need to support recursive template parameters. E.g.
+    // So we call a macro with some template parameters.
+    // That macro in turn calls a macro, with a new set of template parameters.
+    // If those template parameters aren't macros, but belong to the parent...
+    if (macroName.includes('+')) {
+        const addOps = macroName.split('+');
+        // TODO, add in recursion and regex for this. God this is ugly
+        let result = new BN(0);
+        let expressions;
+        for (const addOp of addOps) {
+            expressions.push(this.processTemplates(addOp, identifier, calls));
+            // if (addOp.includes('0x')) {
+            //     result = result.add(new BN(addOp.slice(2), 16));
+            // } else if (this.macros[addOp]) {
+            //     check(
+            //         this.macros[addOp].ops.length === 1 && this.macros[addOp].ops[0].type === TYPES.PUSH,
+            //         `cannot add ${addOp}, ${this.macros[addOp].ops} not a literal`
+            //     );
+            //     result = result.add(new BN(this.macros[addOp].ops[0].args[0], 16));
+            // } else if (addOp.match(/^-{0,1}\d+$/)) {
+            //     result = result.add(new BN(addOp, 10));
+            // } else {
+            //     this.processTemplates(addOp, )
+            // } else {
+            //     throw new Error(`I don't know how to process macro ${macroName}`);
+            // }
+        }
+        const hex = formatEvenBytes(result.toString(16));
+        const opcode = toHex(95 + (hex.length / 2));
+        templateMacro = newExpression({
+            name: macroName,
+            ops: [{
+                type: TYPES.PUSH,
+                value: opcode,
+                args: [hex],
+            }],
+        });
+        macroName = `inline-${macroName}-${this.inlineMacroId}`;
+        this.macros[macroName] = templateMacro;
+        this.inlineMacroId += 1;
+    } else if (opcodes[macroName]) {
+        templateMacro = newExpression({
+            name: macroName,
+            ops: [{
+                type: TYPES.OPCODE,
+                value: opcodes[macroName],
+                args: [],
+            }],
+        });
+        macroName = `inline-${macroName}-${this.inlineMacroId}`;
+        this.macros[macroName] = templateMacro;
+        this.inlineMacroId += 1;
+    } else if (macroName.includes('0x')) {
+        const hex = formatEvenBytes(macroName.slice(2));
+        const opcode = toHex(95 + (hex.length / 2));
+        templateMacro = newExpression({
+            name: macroName,
+            ops: [{
+                type: TYPES.PUSH,
+                value: opcode,
+                args: [hex],
+            }],
+        });
+        macroName = `inline-${macroName}-${this.inlineMacroId}`;
+        this.macros[macroName] = templateMacro;
+        this.inlineMacroId += 1;
+    } else if (this.macros[macroName]) {
+        templateMacro = this.macros[macroName];
+    } else {
+        // we link a param (label) with a value
+        // if that value makes sense, we don't reach here
+        // the next step is to find out if this value is a parameter (label) in a parent call
+        const macroThing = this.processTemplates()
+    }
+} */
+
+
+Parser.prototype.processMacro = function processMacro(name, bytecodeIndex = 0, templateParams = []) {
     const identifier = `${name}.${bytecodeIndex}`;
     const context = { bytecode: '', transcript: [`#${identifier}`] };
     const macro = this.macros[name];
@@ -499,11 +611,21 @@ Parser.prototype.processMacro = function processMacro(name, bytecodeIndex = 0, t
     let offset = bytecodeIndex;
     const jumpTable = {};
     const jumpIndices = [];
-    const templateLabels = this.macros[name].templateParams;
+    const templateLabels = this.macros[name].templateParams || [];
+    const templateRegExps = templateLabels.map((label, i) => {
+        const pattern = new RegExp(`\\b(${label})\\b`, 'g');
+        const value = templateParams[i];
+        return { pattern, value };
+    });
     for (const op of ops) {
         switch (op.type) {
             case TYPES.MACRO: {
-                const newContext = this.processMacro(op.value, offset, op.args);
+                const args = op.args.map((arg) => {
+                    return templateRegExps.reduce((acc, { pattern, value }) => {
+                        return acc.replace(pattern, value);
+                    }, arg);
+                }, []);
+                const newContext = this.processMacro(op.value, offset, args);
                 context.bytecode += newContext.bytecode;
                 context.transcript = [...context.transcript, newContext.transcript];
                 offset += (newContext.bytecode.length / 2);
@@ -528,7 +650,43 @@ Parser.prototype.processMacro = function processMacro(name, bytecodeIndex = 0, t
                 let macroName = templateParams[index];
                 let templateMacro;
                 // TODO: adopt parseExpression to support inline template compilation
-                if (opcodes[macroName]) {
+                // hmmmmmm...also need to support recursive template parameters. E.g.
+                // So we call a macro with some template parameters.
+                // That macro in turn calls a macro, with a new set of template parameters.
+                // If those template parameters aren't macros, but belong to the parent...
+                if (macroName.includes('+')) {
+                    const addOps = macroName.split('+');
+                    // TODO, add in recursion and regex for this. God this is ugly
+                    let result = new BN(0);
+                    for (const addOp of addOps) {
+                        if (addOp.includes('0x')) {
+                            result = result.add(new BN(addOp.slice(2), 16));
+                        } else if (this.macros[addOp]) {
+                            check(
+                                this.macros[addOp].ops.length === 1 && this.macros[addOp].ops[0].type === TYPES.PUSH,
+                                `cannot add ${addOp}, ${this.macros[addOp].ops} not a literal`
+                            );
+                            result = result.add(new BN(this.macros[addOp].ops[0].args[0], 16));
+                        } else if (addOp.match(/^-{0,1}\d+$/)) {
+                            result = result.add(new BN(addOp, 10));
+                        } else {
+                            throw new Error(`I don't know how to process macro ${macroName}`);
+                        }
+                    }
+                    const hex = formatEvenBytes(result.toString(16));
+                    const opcode = toHex(95 + (hex.length / 2));
+                    templateMacro = newExpression({
+                        name: macroName,
+                        ops: [{
+                            type: TYPES.PUSH,
+                            value: opcode,
+                            args: [hex],
+                        }],
+                    });
+                    macroName = `inline-${macroName}-${this.inlineMacroId}`;
+                    this.macros[macroName] = templateMacro;
+                    this.inlineMacroId += 1;
+                } else if (opcodes[macroName]) {
                     templateMacro = newExpression({
                         name: macroName,
                         ops: [{
