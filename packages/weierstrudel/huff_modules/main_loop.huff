@@ -31,7 +31,7 @@
     // 2: calculate the memory offset where our point is stored
     // point lookup tables take 32 words of memory per point (excluding endomorphism)
     // which equals precisely 1kb (0x400)
-    swap1
+    swap1 // w x
     dup2 0x400 mul // o w x
     swap2 byte
 
@@ -61,6 +61,35 @@
         main_loop_end jump
 add_points_start:       // w z y x i' p 2p 3p
     WNAF_MASK() and 0x00 mstore         // z y x i' p 2p 3p
+add_points_next:
+    ADD_MAIN<GET_P2_LOCATION,dup5,dup6>()
+    0x00 mload add_points_next jumpi // z y x w i' p 2p 3p
+    dup4 0x1020 sub main_loop_start jumpi
+
+main_loop_end:  // looks like we've finished
+    // z y x 
+}
+
+#define OFFSET_MAIN_LOOP = takes(6) returns(0) {
+        // on the stack we will have.....
+    // z y x w i p 2p
+    // i = iterator that points to memory of current wnaf entry
+    // w = wnaf word
+    // z y x = current accumulated elliptic curve point
+ main_loop_start:
+    DOUBLE_MAIN<dup5,dup6>()
+    
+    // get i and also decrease i by 0x20 for next pass
+    0x20 dup5 sub swap4 // i z y x i' p 2p 3p
+    mload               // w z y x i' p 2p 3p
+    dup1 add_points_start jumpi
+// nothing to add       // w z y x i' p 2p 3p
+        pop
+        // note, using 'sub' instead of eq iszero. TODO: check if this can cause problems!
+        dup4 0x1020 sub main_loop_start jumpi
+        main_loop_end jump
+add_points_start:       // w z y x i' p 2p 3p
+    WNAF_MASK() and WNAF_OFFSET() or 0x00 mstore         // z y x i' p 2p 3p
 add_points_next:
     ADD_MAIN<GET_P2_LOCATION,dup5,dup6>()
     0x00 mload add_points_next jumpi // z y x w i' p 2p 3p
