@@ -344,6 +344,385 @@ rescale_1:
 
 }
 
+template <m,p1,p2>
+#define RESCALE_SLICE = takes(0) returns(0) {
+    RESCALE_15_TRANSITION<m+0x1c0,m+0x1e0,m+0x200,m+0x220,m+0x5c0,m+0x5e0,m+0x600,m+0x620>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<p1,m+0x180,m+0x1a0,m+0x240,m+0x260,m+0x580,m+0x5a0,m+0x640,m+0x660>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<p1,m+0x140,m+0x160,m+0x280,m+0x2a0,m+0x540,m+0x560,m+0x680,m+0x6a0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<p1,m+0x100,m+0x120,m+0x2c0,m+0x2e0,m+0x500,m+0x520,m+0x6c0,m+0x6e0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<p1,m+0xc0,m+0xe0,m+0x300,m+0x320,m+0x4c0,m+0x4e0,m+0x700,m+0x720>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<p1,m+0x80,m+0xa0,m+0x340,m+0x360,m+0x480,m+0x4a0,m+0x740,m+0x760>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<p1,m+0x40,m+0x60,m+0x380,m+0x3a0,m+0x440,m+0x460,m+0x780,m+0x7a0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<p2,m,m+0x20,m+0x3c0,m+0x3e0,m+0x400,m+0x420,m+0x7c0,m+0x7e0>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+}
+
+#define PRECOMPUTE_TABLE_FULL_OFFSET = takes(0) returns(0) {
+// first iteration. This point is affine, so we can use affine doubling and addition formulae to start with.
+// Saves about 100 gas because we can cut out a few mulmod ops
+    
+    0x40 3 calldatasize div dup1 add sub calldataload
+    0x20 3 calldatasize div dup1 add sub calldataload
+    DOUBLE_AFFINE<X2,Y2,Z2>()
+    ADD_AFFINE<X2,Y2>()
+// we want to keep track of the number of points we're iterating over.
+// can't store on stack because our stack size is a function of the number of loop iterations
+// store at memory location PRECOMPUTE_ITERATOR()
+// we store a calldata pointer to next point
+    0x40 3 calldatasize div dup1 add sub PRECOMPUTE_ITERATOR() mstore
+// we want to insert ourselves halfway through a loop iteration to reduce number of conditional jumps
+    precompute_table_start jump
+
+precompute_table_repeat:
+    // calculate the next point's lookup table.
+    // first off, decrease the calldatapointer to point to the new point
+    0x40 PRECOMPUTE_ITERATOR() mload sub PRECOMPUTE_ITERATOR() mstore
+    // we want to bring this input point to the same z-coordinate as our current global-z coordinate.
+    PRECOMPUTE_RESCALE_INPUT()
+    // compute 2P
+    PRECOMPUTE_TABLE_DOUBLE_B<dup6,dup7,X2,Y2,Z2>()
+    // rescale original point's x/y coords to same z-coordinate as 2P, without scaling z-coordinate.
+    // calculate each point entry on isomorphism where 2P.Z = 1 (rephrase?)
+    // this way we can use mixed addition formulae
+    PRECOMPUTE_TABLE_NORMALIZE<dup7,dup8>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+precompute_table_start:
+    // at this point, we have performed a point doubling and a point addition. So we have P and 3P
+    // we need to construct 5P, 7P, 9P, 11P, 13P, 15P
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD_AND_RESCALE<dup4,dup5,dup6,X2,Y2,Z2>()
+
+    // we have calculated the table required for one point, with the arguments left on the stack.
+    // we need to determine if there are any more points to calculate
+    PRECOMPUTE_ITERATOR() mload precompute_table_repeat jumpi
+
+    // if we've fallen through to this point, our loop has finished.
+    // now for the next part - we have our points lying around on the stack so that we can efficiently rescale them
+    // We want every point in each lookup table to have the same Z-coordinate.
+    // If this is the case, all points can be treated as affine and we can use mixed addition formulae in our main loop
+    // The global z coordinate is the first item on the stack, so store it at 0x00.
+    0x00 mstore // TODO hardcode?
+
+
+    1 1 // add in dz^2 and dz^3 onto stack
+    rescale_1 0x20 mstore
+    rescale_2 0x40 mstore
+    rescale_3 0x60 mstore
+    rescale_4 0x80 mstore
+    rescale_5 0xa0 mstore
+    rescale_6 0xc0 mstore
+    rescale_7 0xe0 mstore
+    rescale_8 0x100 mstore
+    rescale_9 0x120 mstore
+    rescale_10 0x140 mstore
+    rescale_11 0x160 mstore
+    rescale_12 0x180 mstore
+    rescale_13 0x1a0 mstore
+    rescale_14 0x1c0 mstore
+    rescale_15 0x1e0 mstore
+    0x3 calldatasize div mload jump
+
+rescale_15:
+    RESCALE_15_TRANSITION<0x81e0,0x8200,0x8220,0x8240,0x85e0,0x8600,0x8620,0x8640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x81a0,0x81c0,0x8260,0x8280,0x85a0,0x85c0,0x8660,0x8680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x8160,0x8180,0x82a0,0x82c0,0x8560,0x8580,0x86a0,0x86c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x8120,0x8140,0x82e0,0x8300,0x8520,0x8540,0x86e0,0x8700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x80e0,0x8100,0x8320,0x8340,0x84e0,0x8500,0x8720,0x8740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x80a0,0x80c0,0x8360,0x8380,0x84a0,0x84c0,0x8760,0x8780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x8060,0x8080,0x83a0,0x83c0,0x8460,0x8480,0x87a0,0x87c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x8020,0x8040,0x83e0,0x8400,0x8420,0x8440,0x87e0,0x8800>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_14:
+    RESCALE_15_TRANSITION<0x79e0,0x7a00,0x7a20,0x7a40,0x7de0,0x7e00,0x7e20,0x7e40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x79a0,0x79c0,0x7a60,0x7a80,0x7da0,0x7dc0,0x7e60,0x7e80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x7960,0x7980,0x7aa0,0x7ac0,0x7d60,0x7d80,0x7ea0,0x7ec0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x7920,0x7940,0x7ae0,0x7b00,0x7d20,0x7d40,0x7ee0,0x7f00>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x78e0,0x7900,0x7b20,0x7b40,0x7ce0,0x7d00,0x7f20,0x7f40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x78a0,0x78c0,0x7b60,0x7b80,0x7ca0,0x7cc0,0x7f60,0x7f80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x7860,0x7880,0x7ba0,0x7bc0,0x7c60,0x7c80,0x7fa0,0x7fc0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x7820,0x7840,0x7be0,0x7c00,0x7c20,0x7c40,0x7fe0,0x8000>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_13:
+    RESCALE_15_TRANSITION<0x71e0,0x7200,0x7220,0x7240,0x75e0,0x7600,0x7620,0x7640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x71a0,0x71c0,0x7260,0x7280,0x75a0,0x75c0,0x7660,0x7680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x7160,0x7180,0x72a0,0x72c0,0x7560,0x7580,0x76a0,0x76c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x7120,0x7140,0x72e0,0x7300,0x7520,0x7540,0x76e0,0x7700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x70e0,0x7100,0x7320,0x7340,0x74e0,0x7500,0x7720,0x7740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x70a0,0x70c0,0x7360,0x7380,0x74a0,0x74c0,0x7760,0x7780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x7060,0x7080,0x73a0,0x73c0,0x7460,0x7480,0x77a0,0x77c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x7020,0x7040,0x73e0,0x7400,0x7420,0x7440,0x77e0,0x7800>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_12:
+    RESCALE_15_TRANSITION<0x69e0,0x6a00,0x6a20,0x6a40,0x6de0,0x6e00,0x6e20,0x6e40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x69a0,0x69c0,0x6a60,0x6a80,0x6da0,0x6dc0,0x6e60,0x6e80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x6960,0x6980,0x6aa0,0x6ac0,0x6d60,0x6d80,0x6ea0,0x6ec0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x6920,0x6940,0x6ae0,0x6b00,0x6d20,0x6d40,0x6ee0,0x6f00>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x68e0,0x6900,0x6b20,0x6b40,0x6ce0,0x6d00,0x6f20,0x6f40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x68a0,0x68c0,0x6b60,0x6b80,0x6ca0,0x6cc0,0x6f60,0x6f80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x6860,0x6880,0x6ba0,0x6bc0,0x6c60,0x6c80,0x6fa0,0x6fc0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x6820,0x6840,0x6be0,0x6c00,0x6c20,0x6c40,0x6fe0,0x7000>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_11:
+    RESCALE_15_TRANSITION<0x61e0,0x6200,0x6220,0x6240,0x65e0,0x6600,0x6620,0x6640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x61a0,0x61c0,0x6260,0x6280,0x65a0,0x65c0,0x6660,0x6680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x6160,0x6180,0x62a0,0x62c0,0x6560,0x6580,0x66a0,0x66c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x6120,0x6140,0x62e0,0x6300,0x6520,0x6540,0x66e0,0x6700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x60e0,0x6100,0x6320,0x6340,0x64e0,0x6500,0x6720,0x6740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x60a0,0x60c0,0x6360,0x6380,0x64a0,0x64c0,0x6760,0x6780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x6060,0x6080,0x63a0,0x63c0,0x6460,0x6480,0x67a0,0x67c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x6020,0x6040,0x63e0,0x6400,0x6420,0x6440,0x67e0,0x6800>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_10:
+    RESCALE_15_TRANSITION<0x59e0,0x5a00,0x5a20,0x5a40,0x5de0,0x5e00,0x5e20,0x5e40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x59a0,0x59c0,0x5a60,0x5a80,0x5da0,0x5dc0,0x5e60,0x5e80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x5960,0x5980,0x5aa0,0x5ac0,0x5d60,0x5d80,0x5ea0,0x5ec0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x5920,0x5940,0x5ae0,0x5b00,0x5d20,0x5d40,0x5ee0,0x5f00>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x58e0,0x5900,0x5b20,0x5b40,0x5ce0,0x5d00,0x5f20,0x5f40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x58a0,0x58c0,0x5b60,0x5b80,0x5ca0,0x5cc0,0x5f60,0x5f80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x5860,0x5880,0x5ba0,0x5bc0,0x5c60,0x5c80,0x5fa0,0x5fc0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x5820,0x5840,0x5be0,0x5c00,0x5c20,0x5c40,0x5fe0,0x6000>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_9:
+    RESCALE_15_TRANSITION<0x51e0,0x5200,0x5220,0x5240,0x55e0,0x5600,0x5620,0x5640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x51a0,0x51c0,0x5260,0x5280,0x55a0,0x55c0,0x5660,0x5680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x5160,0x5180,0x52a0,0x52c0,0x5560,0x5580,0x56a0,0x56c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x5120,0x5140,0x52e0,0x5300,0x5520,0x5540,0x56e0,0x5700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x50e0,0x5100,0x5320,0x5340,0x54e0,0x5500,0x5720,0x5740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x50a0,0x50c0,0x5360,0x5380,0x54a0,0x54c0,0x5760,0x5780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x5060,0x5080,0x53a0,0x53c0,0x5460,0x5480,0x57a0,0x57c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x5020,0x5040,0x53e0,0x5400,0x5420,0x5440,0x57e0,0x5800>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_8:
+    RESCALE_15_TRANSITION<0x49e0,0x4a00,0x4a20,0x4a40,0x4de0,0x4e00,0x4e20,0x4e40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x49a0,0x49c0,0x4a60,0x4a80,0x4da0,0x4dc0,0x4e60,0x4e80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x4960,0x4980,0x4aa0,0x4ac0,0x4d60,0x4d80,0x4ea0,0x4ec0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x4920,0x4940,0x4ae0,0x4b00,0x4d20,0x4d40,0x4ee0,0x4f00>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x48e0,0x4900,0x4b20,0x4b40,0x4ce0,0x4d00,0x4f20,0x4f40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x48a0,0x48c0,0x4b60,0x4b80,0x4ca0,0x4cc0,0x4f60,0x4f80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x4860,0x4880,0x4ba0,0x4bc0,0x4c60,0x4c80,0x4fa0,0x4fc0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x4820,0x4840,0x4be0,0x4c00,0x4c20,0x4c40,0x4fe0,0x5000>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_7:
+    RESCALE_15_TRANSITION<0x41e0,0x4200,0x4220,0x4240,0x45e0,0x4600,0x4620,0x4640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x41a0,0x41c0,0x4260,0x4280,0x45a0,0x45c0,0x4660,0x4680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x4160,0x4180,0x42a0,0x42c0,0x4560,0x4580,0x46a0,0x46c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x4120,0x4140,0x42e0,0x4300,0x4520,0x4540,0x46e0,0x4700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x40e0,0x4100,0x4320,0x4340,0x44e0,0x4500,0x4720,0x4740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x40a0,0x40c0,0x4360,0x4380,0x44a0,0x44c0,0x4760,0x4780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x4060,0x4080,0x43a0,0x43c0,0x4460,0x4480,0x47a0,0x47c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x4020,0x4040,0x43e0,0x4400,0x4420,0x4440,0x47e0,0x4800>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_6:
+    RESCALE_15_TRANSITION<0x39e0,0x3a00,0x3a20,0x3a40,0x3de0,0x3e00,0x3e20,0x3e40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x39a0,0x39c0,0x3a60,0x3a80,0x3da0,0x3dc0,0x3e60,0x3e80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x3960,0x3980,0x3aa0,0x3ac0,0x3d60,0x3d80,0x3ea0,0x3ec0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x3920,0x3940,0x3ae0,0x3b00,0x3d20,0x3d40,0x3ee0,0x3f00>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x38e0,0x3900,0x3b20,0x3b40,0x3ce0,0x3d00,0x3f20,0x3f40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x38a0,0x38c0,0x3b60,0x3b80,0x3ca0,0x3cc0,0x3f60,0x3f80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x3860,0x3880,0x3ba0,0x3bc0,0x3c60,0x3c80,0x3fa0,0x3fc0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x3820,0x3840,0x3be0,0x3c00,0x3c20,0x3c40,0x3fe0,0x4000>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_5:
+    RESCALE_15_TRANSITION<0x31e0,0x3200,0x3220,0x3240,0x35e0,0x3600,0x3620,0x3640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x31a0,0x31c0,0x3260,0x3280,0x35a0,0x35c0,0x3660,0x3680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x3160,0x3180,0x32a0,0x32c0,0x3560,0x3580,0x36a0,0x36c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x3120,0x3140,0x32e0,0x3300,0x3520,0x3540,0x36e0,0x3700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x30e0,0x3100,0x3320,0x3340,0x34e0,0x3500,0x3720,0x3740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x30a0,0x30c0,0x3360,0x3380,0x34a0,0x34c0,0x3760,0x3780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x3060,0x3080,0x33a0,0x33c0,0x3460,0x3480,0x37a0,0x37c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x3020,0x3040,0x33e0,0x3400,0x3420,0x3440,0x37e0,0x3800>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_4:
+    RESCALE_15_TRANSITION<0x29e0,0x2a00,0x2a20,0x2a40,0x2de0,0x2e00,0x2e20,0x2e40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x29a0,0x29c0,0x2a60,0x2a80,0x2da0,0x2dc0,0x2e60,0x2e80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x2960,0x2980,0x2aa0,0x2ac0,0x2d60,0x2d80,0x2ea0,0x2ec0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x2920,0x2940,0x2ae0,0x2b00,0x2d20,0x2d40,0x2ee0,0x2f00>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x28e0,0x2900,0x2b20,0x2b40,0x2ce0,0x2d00,0x2f20,0x2f40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x28a0,0x28c0,0x2b60,0x2b80,0x2ca0,0x2cc0,0x2f60,0x2f80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x2860,0x2880,0x2ba0,0x2bc0,0x2c60,0x2c80,0x2fa0,0x2fc0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x2820,0x2840,0x2be0,0x2c00,0x2c20,0x2c40,0x2fe0,0x3000>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_3:
+    RESCALE_15_TRANSITION<0x21e0,0x2200,0x2220,0x2240,0x25e0,0x2600,0x2620,0x2640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x21a0,0x21c0,0x2260,0x2280,0x25a0,0x25c0,0x2660,0x2680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x2160,0x2180,0x22a0,0x22c0,0x2560,0x2580,0x26a0,0x26c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x2120,0x2140,0x22e0,0x2300,0x2520,0x2540,0x26e0,0x2700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x20e0,0x2100,0x2320,0x2340,0x24e0,0x2500,0x2720,0x2740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x20a0,0x20c0,0x2360,0x2380,0x24a0,0x24c0,0x2760,0x2780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x2060,0x2080,0x23a0,0x23c0,0x2460,0x2480,0x27a0,0x27c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x2020,0x2040,0x23e0,0x2400,0x2420,0x2440,0x27e0,0x2800>()
+    // dz^3' dz^2'
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_2:
+    RESCALE_15_TRANSITION<0x19e0,0x1a00,0x1a20,0x1a40,0x1de0,0x1e00,0x1e20,0x1e40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x19a0,0x19c0,0x1a60,0x1a80,0x1da0,0x1dc0,0x1e60,0x1e80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x1960,0x1980,0x1aa0,0x1ac0,0x1d60,0x1d80,0x1ea0,0x1ec0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x1920,0x1940,0x1ae0,0x1b00,0x1d20,0x1d40,0x1ee0,0x1f00>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x18e0,0x1900,0x1b20,0x1b40,0x1ce0,0x1d00,0x1f20,0x1f40>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x18a0,0x18c0,0x1b60,0x1b80,0x1ca0,0x1cc0,0x1f60,0x1f80>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x1860,0x1880,0x1ba0,0x1bc0,0x1c60,0x1c80,0x1fa0,0x1fc0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<dup6,0x1820,0x1840,0x1be0,0x1c00,0x1c20,0x1c40,0x1fe0,0x2000>()
+    // dz^3' dz^2'
+    // stack state  : dz^3' dz^2' p d.z^2 p d.z^3 -y_15 x_15 (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    swap3 mulmod // dz^2 dz^3' p d.z^3
+    swap3 mulmod // dz^3 dz^2 -y_15 x_15
+rescale_1:
+    RESCALE_15_TRANSITION<0x11e0,0x1200,0x1220,0x1240,0x15e0,0x1600,0x1620,0x1640>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+    RESCALE<dup4,0x11a0,0x11c0,0x1260,0x1280,0x15a0,0x15c0,0x1660,0x1680>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
+    RESCALE<dup4,0x1160,0x1180,0x12a0,0x12c0,0x1560,0x1580,0x16a0,0x16c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
+    RESCALE<dup4,0x1120,0x1140,0x12e0,0x1300,0x1520,0x1540,0x16e0,0x1700>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
+    RESCALE<dup4,0x10e0,0x1100,0x1320,0x1340,0x14e0,0x1500,0x1720,0x1740>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
+    RESCALE<dup4,0x10a0,0x10c0,0x1360,0x1380,0x14a0,0x14c0,0x1760,0x1780>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
+    RESCALE<dup4,0x1060,0x1080,0x13a0,0x13c0,0x1460,0x1480,0x17a0,0x17c0>()
+    // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
+    RESCALE<P,0x1020,0x1040,0x13e0,0x1400,0x1420,0x1440,0x17e0,0x1800>()
+    // stack state  : dz^3' dz^2' p d.z^2 p d.z^3 -y_15 x_15 (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
+
+}
+
+
 #define PRECOMPUTE_TABLE_THREE = takes(0) returns(0) {
     0x00 calldataload
     0x20 calldataload
