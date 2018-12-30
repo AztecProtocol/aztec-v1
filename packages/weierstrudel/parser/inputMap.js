@@ -32,9 +32,16 @@ inputMap.getFileLine = (charIndex, map) => {
     const { filename, data } = map.files[filenameIndex];
     const charPosition = charIndex - map.startingIndices[filenameIndex];
     const sliced = data.slice(0, charPosition);
-    const lineNumber = sliced.match(RegExp('\\r\\n|\\r|\\n', 'g')).length;
-    const line = (data.slice(charPosition).match(RegExp('^.*')) || [''])[0];
-    return { filename, lineNumber, line };
+    const lines = sliced.split(RegExp('\\r\\n|\\r|\\n'));
+    const lineNumber = lines.length - 1;
+    const lineIndex = lines[lines.length - 1].length;// charIndex - lines[lines.length - 1].length;
+    const line = data.slice(charPosition - lineIndex).match(RegExp('^(.*)'))[0];
+    return {
+        filename,
+        line,
+        lineNumber,
+        lineIndex,
+    };
 };
 
 module.exports = inputMap;
