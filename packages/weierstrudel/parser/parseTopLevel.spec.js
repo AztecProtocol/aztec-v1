@@ -1,12 +1,144 @@
 const chai = require('chai');
 const sinon = require('sinon');
+const BN = require('bn.js');
 
 const parseTopLevel = require('./parseTopLevel');
 const inputMap = require('./inputMap');
+const { opcodes } = require('./opcodes');
 
 const { expect } = chai;
 
 describe('parser tests', () => {
+    describe('templates', () => {
+        let getId;
+        beforeEach(() => {
+            getId = sinon.stub(parseTopLevel, 'getId').callsFake(() => {
+                return 'stub';
+            });
+        });
+        afterEach(() => {
+            getId.restore();
+        });
+        // it('splitTemplateCalls will isolate recursive templates', () => {
+        //     const source = 'foo<A+0x10,bar<baz>, bip>';
+        //     expect(parseTopLevel.splitTemplateCalls(source)).to.deep.equal(
+        //         {
+        //             name: 'foo',
+        //             params: [
+        //                 { name: 'A+0x10', params: [] },
+        //                 { name: 'bar', params: [{ name: 'baz', params: [] }] },
+        //                 { name: 'bip', params: [{}] },
+        //             ],
+        //         }
+        //     );
+        // });
+
+        it('processMacroLiteral will convert literals to BN form', () => {
+            let source = '0x2234';
+            expect(parseTopLevel.processMacroLiteral(source, {}).toString(16)).to.equal(new BN('2234', 16).toString(16));
+            source = '356';
+            expect(parseTopLevel.processMacroLiteral(source, {}).toString(16)).to.equal(new BN(356, 10).toString(16));
+
+            const macros = {
+                FOO: {
+                    ops: [{ type: 'PUSH', value: '62', args: ['01e2a2'] }],
+                },
+            };
+            source = 'FOO';
+            expect(parseTopLevel.processMacroLiteral(source, macros).toString(16)).to.equal(new BN('1e2a2', 16).toString(16));
+        });
+
+        it('processTemplateLiteral will convert template literals to BN form', () => {
+            const source = 'FOO+0x1234-222*BAR';
+            const macros = {
+                FOO: {
+                    ops: [{ type: 'PUSH', value: '62', args: ['01e2a2'] }],
+                },
+                BAR: {
+                    ops: [{ type: 'PUSH', value: '62', args: ['12345'] }],
+                },
+            };
+            const result = parseTopLevel
+                .normalize(new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))));
+            expect(parseTopLevel.processTemplateLiteral(source, macros).toString(16)).to.equal(result.toString(16));
+        });
+
+        it('parseTemplate will convert template call into macro ops', () => {
+            expect(parseTopLevel.parseTemplate('A', {})).to.equal(null);
+
+            let result = parseTopLevel.parseTemplate('dup4', {});
+            const keys = Object.keys(result);
+            expect(keys.length).to.equal(1);
+            expect(result[keys[0]]).to.deep.equal({
+                name: 'dup4',
+                ops: [{
+                    type: 'OPCODE',
+                    value: '83',
+                    args: [],
+                    index: 0,
+                }],
+            });
+            const source = 'FOO+0x1234-222*BAR';
+            const macros = {
+                FOO: {
+                    ops: [{ type: 'PUSH', value: '62', args: ['01e2a2'] }],
+                },
+                BAR: {
+                    ops: [{ type: 'PUSH', value: '62', args: ['12345'] }],
+                },
+            };
+            const numericResult = parseTopLevel
+                .normalize(new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))));
+            result = parseTopLevel.parseTemplate(source, macros, 0);
+            expect(result['inline-FOO+0x1234-222*BAR-stub']).to.deep.equal({
+                name: 'FOO+0x1234-222*BAR',
+                ops: [{
+                    type: 'PUSH',
+                    value: '7f',
+                    args: [numericResult.toString(16)],
+                    index: 0,
+                }],
+            });
+        });
+    });
+
+    describe('process macro', () => {
+        it('can process a macro', () => {
+            const foo = `
+        start:
+         dup4 mulmod
+         0x1234 swap2 start jumpi`;
+            /* const bar = 'dup2 mulmod';
+            const source = `
+                blah: dup2 mulmod FOO() 0x1234 add BAR()`; */
+            const { ops: fooOps } = parseTopLevel.parseMacro(foo, {}, 0);
+            const macros = {
+                FOO: {
+                    name: 'FOO',
+                    ops: fooOps,
+                    templateParams: [],
+                },
+            };
+            const files = [
+                { filename: 'FOO', data: foo },
+            ];
+            const map = inputMap.createInputMap(files);
+            const output = parseTopLevel.processMacro('FOO', 0, [], macros, map);
+            const expected = [
+                opcodes.jumpdest,
+                opcodes.dup4,
+                opcodes.mulmod,
+                opcodes.push2,
+                '1234',
+                opcodes.swap2,
+                opcodes.push2,
+                '0000',
+                opcodes.jumpi,
+            ].join('');
+            expect(output.bytecode).to.equal(expected);
+        });
+    });
+
     describe('parse macro', () => {
         it('can parse basic macro', () => {
             const source = `
@@ -19,7 +151,11 @@ describe('parser tests', () => {
         start
         __codesize(FOO) 0x1234aae 123554
             `;
-            const { ops, jumpdests } = parseTopLevel.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' });
+            const { ops: fullOps, jumpdests } = parseTopLevel.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
+            const ops = fullOps.map((o) => {
+                expect(typeof (o.index)).to.equal('number');
+                return { args: o.args, type: o.type, value: o.value };
+            });
             expect(ops.length).to.equal(12);
             expect(ops).to.deep.equal([
                 {
