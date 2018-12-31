@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "hufftest": "mocha ./parser/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "huffcoverage": "nyc mocha ./parser/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "hufftest": "mocha ./huff/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "huffcoverage": "nyc mocha ./huff/ --trace-warnings --exit --colors --recursive --reporter spec",
     "jstest": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
     "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
     "hashPoint": "node ./js_snippets/hashToPoint.js"
