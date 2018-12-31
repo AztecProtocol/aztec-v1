@@ -467,6 +467,13 @@ parser.getFileContents = (originalFilename, partialPath) => {
     return { filedata, raw };
 };
 
+parser.parseFile = (filename, partialPath) => {
+    const { filedata, raw } = parser.getFileContents(filename, partialPath);
+    const map = inputMaps.createInputMap(filedata);
+    const macros = parser.parseTopLevel(raw, 0, map);
+    return { inputMap: map, macros };
+};
+
 parser.compileMacro = (macroName, filename, partialPath) => {
     const { filedata, raw } = parser.getFileContents(filename, partialPath);
     const map = inputMaps.createInputMap(filedata);

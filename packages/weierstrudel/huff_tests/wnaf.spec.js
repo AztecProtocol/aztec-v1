@@ -1,5 +1,6 @@
 const chai = require('chai');
 const BN = require('bn.js');
+const path = require('path');
 
 const endomorphism = require('../js_snippets/endomorphism');
 const referenceWnaf = require('../js_snippets/wnaf');
@@ -7,6 +8,8 @@ const Runtime = require('../parser/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
+
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 const testHelper = `
 #include "wnaf.huff"
@@ -31,13 +34,13 @@ const testHelper = `
 }
 `;
 
-describe('sparse wnaf', function describe() {
+describe.only('sparse wnaf', function describe() {
     this.timeout(5000);
     let wnaf;
     let thirtyTwo;
     let wnafStartingStack;
     before(() => {
-        wnaf = new Runtime(testHelper);
+        wnaf = new Runtime(testHelper, pathToTestData);
         thirtyTwo = new BN(32);
 
         wnafStartingStack = [

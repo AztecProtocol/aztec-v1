@@ -1,7 +1,9 @@
 /* eslint-disable no-restricted-syntax */
 const BN = require('bn.js');
 
-const Parser = require('./parser');
+const newParser = require('./parser');
+const utils = require('./utils');
+const { opcodes } = require('./opcodes/opcodes');
 const VM = require('../ethereumjs-vm-tracer/ethereumjs-vm');
 
 function toBytes32(input, padding = 'left') { // assumes hex format
@@ -24,35 +26,55 @@ function processMemory(bnArray) {
     for (const { index, value } of bnArray) {
         const hex = toBytes32(value.toString(16));
         for (let i = 0; i < hex.length; i += 2) {
-            buffer[((i / 2) + index)] = new BN(`${hex[i]}${hex[i + 1]}`, 16).toNumber();
+            buffer[((i / 2) + index)] = parseInt(`${hex[i]}${hex[i + 1]}`, 16);
         }
     }
     return buffer;
 }
 
-function Runtime(filename) {
-    const parser = new Parser();
-    parser.parseFile(filename);
-    return async function runMacro(macroName, stack = null, memory = null, data = null) {
-        const macro = parser.macros[macroName];
-        const { bytecode } = parser.processMacro(macroName);
-        const { takes } = macro;
-        if (stack.length !== takes) {
-            throw new Error(`stack length ${stack.length} does not equal macro takes param ${takes}`);
-        }
+function getPushOp(hex) {
+    const data = utils.formatEvenBytes(hex);
+    const opcode = utils.toHex(95 + (data.length / 2));
+    return `${opcode}${data}`;
+}
+
+function encodeMemory(memory) {
+    return memory.reduce((bytecode, word, index) => {
+        const value = getPushOp(word.toString(16));
+        const memIndex = getPushOp(Number(index) * 32);
+        const mstore = { opcodes };
+        return bytecode + `${value}${memIndex}${mstore}`;
+    }, '');
+}
+
+function encodeStack(stack) {
+    return stack.reduce((bytecode, word) => {
+        const value = getPushOp(word.toString(16));
+        return bytecode + `${value}`;
+    }, '');
+}
+
+function Runtime(filename, path) {
+    const { inputMap, macros } = newParser.parseFile(filename, path);
+    return async function runMacro(macroName, stack = [], memory = [], calldata = null) {
+        const memoryCode = encodeMemory(memory);
+        const stackCode = encodeStack(stack);
+        const initCode = `${memoryCode}${stackCode}`;
+        const initGasEstimate = (memory.length * 9) + (stack.length * 3);
+        const offset = initCode.length / 2;
+        const { bytecode: macroCode } = newParser.processMacro(macroName, offset, [], macros, inputMap);
+        const bytecode = `${initCode}${macroCode}`;
         const vm = new VM();
-        console.log('bytecode byte length = ', Math.ceil(bytecode.length / 2));
+        console.log('bytecode byte length = ', Math.ceil(macroCode.length / 2));
         const [err, results] = await vm.runCode({
             code: Buffer.from(bytecode, 'hex'),
             gasLimit: Buffer.from('ffffffff', 'hex'),
-            stack,
-            memory: memory ? processMemory(memory) : null,
-            data: data ? processMemory(data) : null,
+            data: calldata ? processMemory(calldata) : null,
         });
         if (err) {
             throw new Error(err);
         }
-        const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).toString(10);
+        const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).sub(new BN(initGasEstimate)).toString(10);
         console.log('gas consumed = ', gasSpent);
         return {
             gas: gasSpent,
