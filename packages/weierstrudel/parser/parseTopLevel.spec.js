@@ -1,12 +1,16 @@
 const chai = require('chai');
 const sinon = require('sinon');
 const BN = require('bn.js');
+const path = require('path');
+const fs = require('fs');
 
 const parseTopLevel = require('./parseTopLevel');
 const inputMap = require('./inputMap');
 const { opcodes } = require('./opcodes');
 
 const { expect } = chai;
+
+const pathToTestData = path.posix.resolve(__dirname, './testData');
 
 describe('parser tests', () => {
     describe('templates', () => {
@@ -151,7 +155,7 @@ describe('parser tests', () => {
         start
         __codesize(FOO) 0x1234aae 123554
             `;
-            const { ops: fullOps, jumpdests } = parseTopLevel.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
+            const { ops: fullOps } = parseTopLevel.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
             const ops = fullOps.map((o) => {
                 expect(typeof (o.index)).to.equal('number');
                 return { args: o.args, type: o.type, value: o.value };
@@ -219,9 +223,6 @@ describe('parser tests', () => {
                     args: ['01e2a2'],
                 },
             ]);
-            expect(jumpdests).to.deep.equal({
-                start: true,
-            });
         });
     });
 
@@ -255,6 +256,36 @@ describe('parser tests', () => {
             expect(macros.length).to.equal(2);
             expect(macros[0].name).to.equal('FIRST');
             expect(macros[1].name).to.equal('SECOND');
+        });
+
+        it('removeComments will strip comments', () => {
+            const source = `
+                  foo bar // this is a comment.
+                dup4 mulmod /* and here is another comment
+                */ bah bah`;
+            const result = parseTopLevel.removeComments(source);
+
+            expect(result.length).to.equal(source.length);
+            expect(result.indexOf('dup4')).to.equal(source.indexOf('dup4'));
+            expect(result.indexOf('bah')).to.equal(source.indexOf('bah'));
+        });
+
+        it('can read input files', () => {
+            const result = parseTopLevel.getFileContents('./test.huff', pathToTestData).raw;
+            const foo = fs.readFileSync('./parser/testData/foo.huff', 'utf8');
+            const test = fs.readFileSync('./parser/testData/test.huff', 'utf8');
+            let expected = `${foo}${test}`;
+            expected = expected.replace('#include "foo.huff"', '                   ');
+            expect(result).to.equal(expected);
+        });
+    });
+
+    describe('compile macros', () => {
+        it.only('can compile macro', () => {
+            const result = parseTopLevel.compileMacro('FIRST', './test.huff', pathToTestData);
+            console.log(result.bytecode);
+            console.log(result.sourcemap);
+            expect(result.sourcemap.length).to.equal(result.bytecode.length / 2);
         });
     });
 });
