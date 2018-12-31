@@ -150,7 +150,14 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
     };
 };
 
-parser.processMacro = (name, startingBytecodeIndex = 0, templateArgumentsRaw = [], startingMacros = {}, map = {}) => {
+parser.processMacro = (
+    name,
+    startingBytecodeIndex = 0,
+    templateArgumentsRaw = [],
+    startingMacros = {},
+    map = {},
+    measuring = false
+) => {
     let macros = startingMacros;
     const macro = macros[name];
 
@@ -183,11 +190,30 @@ parser.processMacro = (name, startingBytecodeIndex = 0, templateArgumentsRaw = [
                 const macroNameIndex = templateParams.indexOf(op.value);
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
+                if (measuring) {
+                    const codesize = '00'.repeat(templateArguments[macroNameIndex]);
+                    return {
+                        bytecode: codesize,
+                        sourcemap: [],
+                    };
+                }
                 let templateName = templateArguments[macroNameIndex];
                 ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
                 const result = parser.processMacro(templateName, offset, [], macros, map);
                 offset += (result.bytecode.length / 2);
                 return result;
+            }
+            case TYPES.CODESIZE: {
+                check(index !== -1, `cannot find macro ${op.value}`);
+                const result = parser.processMacro(op.value, offset, op.args, macros, map, true);
+                const hex = formatEvenBytes((result.bytecode.length / 2).toString(16));
+                const opcode = toHex(95 + (hex.length / 2));
+                const bytecode = `${opcode}${hex}`;
+                offset += (bytecode.length / 2);
+                return {
+                    bytecode: `${opcode}${hex}`,
+                    sourcemap: [inputMaps.getFileLine(op.index, map)],
+                };
             }
             case TYPES.OPCODE: {
                 offset += 1;
