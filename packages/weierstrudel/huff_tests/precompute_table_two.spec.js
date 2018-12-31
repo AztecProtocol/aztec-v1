@@ -1,8 +1,9 @@
 const chai = require('chai');
 const BN = require('bn.js');
 const EC = require('elliptic');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 
@@ -13,6 +14,7 @@ const {
     n,
 } = bn128Reference;
 const { expect } = chai;
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 // eslint-disable-next-line new-cap
 const referenceCurve = new EC.curve.short({
@@ -87,8 +89,8 @@ describe('bn128 precompute table two', () => {
     let precomputeTable;
     let templateWrapper;
     before(() => {
-        precomputeTable = new Runtime('../huff_modules/precompute_table.huff');
-        templateWrapper = new Runtime(helperMacros);
+        precomputeTable = new Runtime('precompute_table.huff', pathToTestData);
+        templateWrapper = new Runtime(helperMacros, pathToTestData);
     });
 
     it('macro RESCALE_15 correctly performs point rescaling', async () => {

@@ -1,12 +1,14 @@
 const chai = require('chai');
 const BN = require('bn.js');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { p } = bn128Reference;
 const { expect } = chai;
 
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 const testHelper = `
 #include "double.huff"
@@ -37,7 +39,7 @@ function sliceMemory(memArray) {
 describe('bn128 double', () => {
     let double;
     before(() => {
-        double = new Runtime(testHelper);
+        double = new Runtime(testHelper, pathToTestData);
     });
     it('macro DOUBLE correctly calculates point doubling', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();

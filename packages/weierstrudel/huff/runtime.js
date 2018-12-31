@@ -39,11 +39,10 @@ function getPushOp(hex) {
 }
 
 function encodeMemory(memory) {
-    return memory.reduce((bytecode, word, index) => {
-        const value = getPushOp(word.toString(16));
-        const memIndex = getPushOp(Number(index) * 32);
-        const mstore = { opcodes };
-        return bytecode + `${value}${memIndex}${mstore}`;
+    return memory.reduce((bytecode, { index, value }) => {
+        const word = getPushOp(value.toString(16));
+        const memIndex = getPushOp(Number(index).toString(16));
+        return bytecode + `${word}${memIndex}${opcodes.mstore}`;
     }, '');
 }
 
