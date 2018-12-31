@@ -273,8 +273,8 @@ describe('parser tests', () => {
 
         it('can read input files', () => {
             const result = parser.getFileContents('./test.huff', pathToTestData).raw;
-            const foo = fs.readFileSync('./parser/testData/foo.huff', 'utf8');
-            const test = fs.readFileSync('./parser/testData/test.huff', 'utf8');
+            const foo = fs.readFileSync(path.posix.resolve(pathToTestData, 'foo.huff'), 'utf8');
+            const test = fs.readFileSync(path.posix.resolve(pathToTestData, 'test.huff'), 'utf8');
             let expected = `${foo}${test}`;
             expected = expected.replace('#include "foo.huff"', '                   ');
             expect(result).to.equal(expected);
@@ -291,6 +291,22 @@ describe('parser tests', () => {
             const result = parser.compileMacro('MAIN_TWO_ENDO_MOD', './main_loop.huff', pathToTestData);
             const expected = fs.readFileSync(path.posix.resolve(pathToTestData, 'compiled.txt'), 'utf8');
             expect(result.bytecode).to.equal(expected);
+        });
+
+
+        it('can process codesize macro', () => {
+            const source = `
+            template <p, q>
+            #define FOO = takes(0) returns (4) {
+                dup4 0x1234aae <p> <q> swap5
+            }
+            
+            #define BAR = takes(0) returns (1) {
+                __codesize(FOO<1,2>)
+            }`;
+
+            const { bytecode } = parser.compileMacro('BAR', source, '');
+            expect(bytecode).to.equal('600a');
         });
     });
 });
