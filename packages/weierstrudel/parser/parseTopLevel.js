@@ -1,5 +1,8 @@
 /* eslint-disable no-bitwise */
 const BN = require('bn.js');
+const path = require('path');
+const fs = require('fs');
+
 const grammar = require('./grammar');
 const inputMaps = require('./inputMap');
 const regex = require('./regex');
@@ -177,11 +180,14 @@ parser.processMacro = (name, startingBytecodeIndex = 0, templateArguments = [], 
 
     const jumptable = [];
     const jumpindices = {};
+    let offset = startingBytecodeIndex;
     const codes = ops.map((op, index) => {
         switch (op.type) {
             case TYPES.MACRO: {
                 const args = parser.substituteTemplateArguments(op.args, templateRegExps);
-                return parser.processMacro(op.value, args, macros, map);
+                const result = parser.processMacro(op.value, offset, args, macros, map);
+                offset += (result.bytecode.length / 2);
+                return result;
             }
             case TYPES.TEMPLATE: {
                 const macroNameIndex = templateArguments.indexOf(op.value);
@@ -189,9 +195,12 @@ parser.processMacro = (name, startingBytecodeIndex = 0, templateArguments = [], 
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
                 ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
-                return parser.processMacro(templateName, [], macros, map);
+                const result = parser.processMacro(templateName, [], macros, map);
+                offset += (result.bytecode.length / 2);
+                return result;
             }
             case TYPES.OPCODE: {
+                offset += 1;
                 return {
                     bytecode: op.value,
                     sourcemap: [inputMaps.getFileLine(op.index, map)],
@@ -201,6 +210,7 @@ parser.processMacro = (name, startingBytecodeIndex = 0, templateArguments = [], 
                 check(op.args.length === 1, `wrong argument count for PUSH, ${JSON.stringify(op)}`);
                 const codebytes = 1 + (op.args[0].length / 2);
                 const sourcemap = [inputMaps.getFileLine(op.index, map)];
+                offset += codebytes;
                 return {
                     bytecode: `${op.value}${op.args[0]}`,
                     sourcemap: [...new Array(codebytes)].map(() => sourcemap),
@@ -209,15 +219,15 @@ parser.processMacro = (name, startingBytecodeIndex = 0, templateArguments = [], 
             case TYPES.PUSH_JUMP_LABEL: {
                 jumptable[index] = op.value;
                 const sourcemap = inputMaps.getFileLine(op.index, map);
+                offset += 3;
                 return {
                     bytecode: `${opcodes.push2}xxxx`,
                     sourcemap: [sourcemap, sourcemap, sourcemap],
                 };
             }
             case TYPES.JUMPDEST: {
-                console.log('index = ', index);
                 jumpindices[op.value] = index;
-                // jumpindices.push({ label: op.value, index });
+                offset += 1;
                 return {
                     bytecode: opcodes.jumpdest,
                     sourcemap: [inputMaps.getFileLine(op.index, map)],
@@ -350,15 +360,15 @@ parser.parseMacro = (body, macros, startingIndex = 0) => {
         }
         input = body.slice(index);
     }
-    return { ops, jumpdests, startingIndex };
+    return ops;
 };
 
 parser.parseTopLevel = (raw, startingIndex, inputMap) => {
     let input = raw.slice(startingIndex);
     let currentContext = CONTEXT.NONE;
 
-    const macros = [];
-    let currentExpression = {};
+    let macros = {};
+    let currentExpression = { templateParams: [] };
     let index = startingIndex;
     while (!regex.endOfData(input)) {
         if ((currentContext === CONTEXT.NONE) && input.match(grammar.topLevel.TEMPLATE)) {
@@ -372,17 +382,20 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             currentContext = CONTEXT.MACRO;
         } else if ((currentContext & (CONTEXT.NONE | CONTEXT.MACRO)) && grammar.topLevel.MACRO.test(input)) {
             const macro = input.match(grammar.topLevel.MACRO);
-            currentExpression = {
-                ...currentExpression,
-                name: macro[1],
-                takes: macro[2],
-                returns: macro[3],
-                body: macro[4],
+            const body = macro[4];
+            macros = {
+                ...macros,
+                [macro[1]]: {
+                    ...currentExpression,
+                    name: macro[1],
+                    takes: macro[2],
+                    ops: parser.parseMacro(body, macros, index),
+                    body: macro[4],
+                },
             };
-            macros.push(parser.parseMacro(currentExpression, macros, index));
             index += macro[0].length;
             currentContext = CONTEXT.NONE;
-            currentExpression = {};
+            currentExpression = { templateParams: [] };
         } else {
             const { filename, lineNumber, line } = inputMaps.getFileLine(index, inputMap);
             throw new Error(`could not process line ${lineNumber} in ${filename}: ${line}`);
@@ -390,6 +403,81 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
         input = raw.slice(index);
     }
     return macros;
+};
+
+parser.removeComments = (string) => {
+    let data = string;
+    let formatted = '';
+    while (!regex.endOfData(data)) {
+        const multiIndex = data.indexOf('/*');
+        const singleIndex = data.indexOf('//');
+        if (multiIndex !== -1 && ((multiIndex < singleIndex) || singleIndex === -1)) {
+            formatted += data.slice(0, multiIndex);
+            const endBlock = data.indexOf('*/');
+            check(endBlock !== -1, 'could not find closing comment block \\*');
+            formatted += ' '.repeat(endBlock - multiIndex + 2);
+            data = data.slice(endBlock + 2);
+        } else if (singleIndex !== -1) {
+            formatted += data.slice(0, singleIndex);
+            data = data.slice(singleIndex);
+            const endBlock = data.indexOf('\n');
+            if (!endBlock) {
+                formatted += ' '.repeat(data.length);
+                data = '';
+            } else {
+                formatted += ' '.repeat(endBlock + 1);
+                data = data.slice(endBlock + 1);
+            }
+        } else {
+            formatted += data;
+            break;
+        }
+    }
+    return formatted;
+};
+
+
+parser.getFileContents = (originalFilename, partialPath) => {
+    const included = {};
+    const inner = (filename) => {
+        let fileString;
+        if (filename.includes('#')) {
+            fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
+        } else {
+            const filepath = path.posix.resolve(partialPath, filename);
+            fileString = fs.readFileSync(filepath, 'utf8');
+        }
+        let formatted = parser.removeComments(fileString);
+        let imported = [];
+        while (formatted.match(grammar.topLevel.IMPORT)) {
+            const importStatement = formatted.match(grammar.topLevel.IMPORT);
+            const empty = ' '.repeat(importStatement[0].length);
+            formatted = empty + formatted.slice(importStatement[0].length);
+            if (!included[importStatement[1]]) {
+                imported = [...imported, ...inner(importStatement[1])];
+                included[importStatement[1]] = true;
+            }
+        }
+
+        const result = [...imported, {
+            filename,
+            data: formatted,
+        }];
+        return result;
+    };
+    const filedata = inner(originalFilename);
+    const raw = filedata.reduce((acc, { data }) => {
+        return acc + data;
+    }, '');
+    return { filedata, raw };
+};
+
+parser.compileMacro = (macroName, filename, partialPath) => {
+    const { filedata, raw } = parser.getFileContents(filename, partialPath);
+    const map = inputMaps.createInputMap(filedata);
+    const macros = parser.parseTopLevel(raw, 0, map);
+    const { bytecode, sourcemap } = parser.processMacro(macroName, 0, [], macros, map);
+    return { bytecode, sourcemap };
 };
 
 module.exports = parser;
