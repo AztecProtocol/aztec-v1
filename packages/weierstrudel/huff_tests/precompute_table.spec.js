@@ -1,8 +1,9 @@
 const chai = require('chai');
 const BN = require('bn.js');
 const EC = require('elliptic');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 
@@ -12,6 +13,7 @@ const {
     n,
 } = bn128Reference;
 const { expect } = chai;
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 // eslint-disable-next-line new-cap
 const referenceCurve = new EC.curve.short({
@@ -111,7 +113,7 @@ function validateTables(points, memory, referenceTables, globalZ) {
 describe('bn128 precompute table full', () => {
     let precomputeTable;
     before(() => {
-        precomputeTable = new Runtime('../huff_modules/precompute_table.huff');
+        precomputeTable = new Runtime('precompute_table.huff', pathToTestData);
     });
 
     it('macro PRECOMPUTE_TABLE_FULL_OFFSET correctly calculates precomputed table for ONE point', async () => {

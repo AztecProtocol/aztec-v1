@@ -2,8 +2,9 @@ const chai = require('chai');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const EC = require('elliptic');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 const {
     n,
     lambda,
@@ -13,6 +14,7 @@ const {
 } = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 // eslint-disable-next-line new-cap
 const referenceCurve = new EC.curve.short({
@@ -27,7 +29,7 @@ const referenceCurve = new EC.curve.short({
 describe('endomorphism split', () => {
     let endomorphism;
     before(() => {
-        endomorphism = new Runtime('../huff_modules/endomorphism.huff');
+        endomorphism = new Runtime('endomorphism.huff', pathToTestData);
     });
     it('macro ENDOMORPHISM correctly splits scalar k into half-length scalars k1, k2', async () => {
         const k = new BN(crypto.randomBytes(32), 16).umod(n);

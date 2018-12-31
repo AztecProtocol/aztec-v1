@@ -1,8 +1,10 @@
 const chai = require('chai');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 
 const { expect } = chai;
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 const testHelper = `
 template <b>
@@ -31,7 +33,7 @@ template <x>
 describe('template tests', () => {
     let test;
     before(() => {
-        test = new Runtime(testHelper);
+        test = new Runtime(testHelper, pathToTestData);
     });
     it('template addition works as expected', async () => {
         const { stack } = await test('COMPILER_ADD_TEST_ENTRY', [], [], []);

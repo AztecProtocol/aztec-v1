@@ -1,11 +1,13 @@
 const BN = require('bn.js');
 const chai = require('chai');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { p } = bn128Reference;
 const { expect } = chai;
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 const testHelper = `
 #include "precompute_table_single.huff"
@@ -16,7 +18,7 @@ const testHelper = `
 describe('bn128 precompute table single', () => {
     let precomputeTableSingleHelper;
     before(() => {
-        precomputeTableSingleHelper = new Runtime(testHelper);
+        precomputeTableSingleHelper = new Runtime(testHelper, pathToTestData);
     });
 
     it('macro PRECOMPUTE_TABLE_NORMALIZE correctly normalizes a poin\'ts x/y coordinates', async () => {

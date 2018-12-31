@@ -1,9 +1,11 @@
 const chai = require('chai');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 const testHelper = `
 #include "add.huff"
@@ -28,7 +30,7 @@ const testHelper = `
 describe('bn128 add', () => {
     let add;
     before(() => {
-        add = new Runtime(testHelper);
+        add = new Runtime(testHelper, pathToTestData);
     });
     it('macro PRECOMPUTE_TABLE_ADD correctly calculates point addition', async () => {
         const { x: x2, y: y2 } = bn128Reference.randomPoint();
@@ -73,6 +75,7 @@ describe('bn128 add', () => {
             value: y2,
         }];
         const { stack } = await add('ADD_MAIN_IMPL', [x1, y1Neg, z1], initialMemory);
+
         expect(stack.length).to.equal(3);
         const [x3, y3, z3] = stack;
         expect(x3.umod(bn128Reference.p).eq(reference.x)).to.equal(true);

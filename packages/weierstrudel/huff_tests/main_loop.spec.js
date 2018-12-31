@@ -2,12 +2,15 @@
 const chai = require('chai');
 const BN = require('bn.js');
 const EC = require('elliptic');
+const path = require('path');
 
-const Runtime = require('../parser/runtime');
+const Runtime = require('../huff/runtime');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
 const { p, pRed, n } = bn128Reference;
+
+const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 // NOTE: potential areas to improve
 // 1: main loop is garbage, too many special case tests
@@ -38,7 +41,7 @@ describe('bn128 main loop', function describe() {
     this.timeout(10000);
     let main;
     before(() => {
-        main = new Runtime('../huff_modules/main_loop.huff');
+        main = new Runtime('main_loop.huff', pathToTestData);
     });
     it('macro GET_P2_LOCATION correctly calculates point location from a wnaf', async () => {
         const wnaf = new BN('1f00000000000000050000000001000000000b00000000000000000000000000', 16);
