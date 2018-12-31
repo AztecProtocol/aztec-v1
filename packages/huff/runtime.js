@@ -1,10 +1,10 @@
 /* eslint-disable no-restricted-syntax */
 const BN = require('bn.js');
+const VM = require('ethereumjs-vm');
 
 const newParser = require('./parser');
 const utils = require('./utils');
 const { opcodes } = require('./opcodes/opcodes');
-const VM = require('../ethereumjs-vm-tracer/ethereumjs-vm');
 
 function toBytes32(input, padding = 'left') { // assumes hex format
     let s = input;
@@ -53,6 +53,21 @@ function encodeStack(stack) {
     }, '');
 }
 
+function runCode(vm, bytecode, calldata) {
+    return new Promise((resolve, reject) => {
+        vm.runCode({
+            code: Buffer.from(bytecode, 'hex'),
+            gasLimit: Buffer.from('ffffffff', 'hex'),
+            data: calldata ? processMemory(calldata) : null,
+        }, (err, results) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(results);
+        });
+    });
+}
+
 function Runtime(filename, path) {
     const { inputMap, macros } = newParser.parseFile(filename, path);
     return async function runMacro(macroName, stack = [], memory = [], calldata = null) {
@@ -65,14 +80,15 @@ function Runtime(filename, path) {
         const bytecode = `${initCode}${macroCode}`;
         const vm = new VM();
         console.log('bytecode byte length = ', Math.ceil(macroCode.length / 2));
-        const [err, results] = await vm.runCode({
-            code: Buffer.from(bytecode, 'hex'),
-            gasLimit: Buffer.from('ffffffff', 'hex'),
-            data: calldata ? processMemory(calldata) : null,
-        });
-        if (err) {
-            throw new Error(err);
-        }
+        const results = await runCode(vm, bytecode, calldata);
+        // const [err, results] = await vm.runCode({
+        //     code: Buffer.from(bytecode, 'hex'),
+        //     gasLimit: Buffer.from('ffffffff', 'hex'),
+        //     data: calldata ? processMemory(calldata) : null,
+        // });
+        // if (err) {
+        //     throw new Error(err);
+        // }
         const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).sub(new BN(initGasEstimate)).toString(10);
         console.log('gas consumed = ', gasSpent);
         return {
