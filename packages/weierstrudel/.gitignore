@@ -6,3 +6,4 @@ debug.txt
 log.txt
 
 .vscode
+.nyc_output

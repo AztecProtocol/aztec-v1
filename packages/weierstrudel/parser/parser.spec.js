@@ -4,9 +4,10 @@ const BN = require('bn.js');
 const path = require('path');
 const fs = require('fs');
 
-const parseTopLevel = require('./parseTopLevel');
-const inputMap = require('./inputMap');
-const { opcodes } = require('./opcodes');
+const utils = require('./utils');
+const parser = require('./parser');
+const inputMap = require('./inputMap/inputMap');
+const { opcodes } = require('./opcodes/opcodes');
 
 const { expect } = chai;
 
@@ -16,7 +17,7 @@ describe('parser tests', () => {
     describe('templates', () => {
         let getId;
         beforeEach(() => {
-            getId = sinon.stub(parseTopLevel, 'getId').callsFake(() => {
+            getId = sinon.stub(parser, 'getId').callsFake(() => {
                 return 'stub';
             });
         });
@@ -25,7 +26,7 @@ describe('parser tests', () => {
         });
         // it('splitTemplateCalls will isolate recursive templates', () => {
         //     const source = 'foo<A+0x10,bar<baz>, bip>';
-        //     expect(parseTopLevel.splitTemplateCalls(source)).to.deep.equal(
+        //     expect(parser.splitTemplateCalls(source)).to.deep.equal(
         //         {
         //             name: 'foo',
         //             params: [
@@ -39,9 +40,9 @@ describe('parser tests', () => {
 
         it('processMacroLiteral will convert literals to BN form', () => {
             let source = '0x2234';
-            expect(parseTopLevel.processMacroLiteral(source, {}).toString(16)).to.equal(new BN('2234', 16).toString(16));
+            expect(parser.processMacroLiteral(source, {}).toString(16)).to.equal(new BN('2234', 16).toString(16));
             source = '356';
-            expect(parseTopLevel.processMacroLiteral(source, {}).toString(16)).to.equal(new BN(356, 10).toString(16));
+            expect(parser.processMacroLiteral(source, {}).toString(16)).to.equal(new BN(356, 10).toString(16));
 
             const macros = {
                 FOO: {
@@ -49,7 +50,7 @@ describe('parser tests', () => {
                 },
             };
             source = 'FOO';
-            expect(parseTopLevel.processMacroLiteral(source, macros).toString(16)).to.equal(new BN('1e2a2', 16).toString(16));
+            expect(parser.processMacroLiteral(source, macros).toString(16)).to.equal(new BN('1e2a2', 16).toString(16));
         });
 
         it('processTemplateLiteral will convert template literals to BN form', () => {
@@ -62,15 +63,15 @@ describe('parser tests', () => {
                     ops: [{ type: 'PUSH', value: '62', args: ['12345'] }],
                 },
             };
-            const result = parseTopLevel
+            const result = utils
                 .normalize(new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))));
-            expect(parseTopLevel.processTemplateLiteral(source, macros).toString(16)).to.equal(result.toString(16));
+            expect(parser.processTemplateLiteral(source, macros).toString(16)).to.equal(result.toString(16));
         });
 
         it('parseTemplate will convert template call into macro ops', () => {
-            expect(parseTopLevel.parseTemplate('A', {})).to.deep.equal({ templateName: 'A', macros: {} });
+            expect(parser.parseTemplate('A', {})).to.deep.equal({ templateName: 'A', macros: {} });
 
-            let result = parseTopLevel.parseTemplate('dup4', {});
+            let result = parser.parseTemplate('dup4', {});
             const keys = Object.keys(result.macros);
             expect(keys.length).to.equal(1);
             expect(result.macros[keys[0]]).to.deep.equal({
@@ -92,9 +93,9 @@ describe('parser tests', () => {
                     ops: [{ type: 'PUSH', value: '62', args: ['12345'] }],
                 },
             };
-            const numericResult = parseTopLevel
+            const numericResult = utils
                 .normalize(new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))));
-            result = parseTopLevel.parseTemplate(source, macros, 0);
+            result = parser.parseTemplate(source, macros, 0);
             expect(result.macros['inline-FOO+0x1234-222*BAR-stub']).to.deep.equal({
                 name: 'inline-FOO+0x1234-222*BAR-stub',
                 ops: [{
@@ -114,7 +115,7 @@ describe('parser tests', () => {
         start:
          dup4 mulmod
          0x1234 swap2 start jumpi`;
-            const ops = parseTopLevel.parseMacro(foo, {}, 0);
+            const ops = parser.parseMacro(foo, {}, 0);
             const macros = {
                 FOO: {
                     name: 'FOO',
@@ -126,7 +127,7 @@ describe('parser tests', () => {
                 { filename: 'FOO', data: foo },
             ];
             const map = inputMap.createInputMap(files);
-            const output = parseTopLevel.processMacro('FOO', 0, [], macros, map);
+            const output = parser.processMacro('FOO', 0, [], macros, map);
             const expected = [
                 opcodes.jumpdest,
                 opcodes.dup4,
@@ -154,7 +155,7 @@ describe('parser tests', () => {
         start
         __codesize(FOO) 0x1234aae 123554
             `;
-            const fullOps = parseTopLevel.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
+            const fullOps = parser.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
             const ops = fullOps.map((o) => {
                 expect(typeof (o.index)).to.equal('number');
                 return { args: o.args, type: o.type, value: o.value };
@@ -228,14 +229,14 @@ describe('parser tests', () => {
     describe('parse top level', () => {
         let parseMacro;
         beforeEach(() => {
-            parseMacro = sinon.stub(parseTopLevel, 'parseMacro').callsFake((x) => {
+            parseMacro = sinon.stub(parser, 'parseMacro').callsFake((x) => {
                 return x;
             });
         });
         afterEach(() => {
             parseMacro.restore();
         });
-        it('parseTopLevel will currectly identify templates and macros', () => {
+        it('parser will currectly identify templates and macros', () => {
             const source = `
 
             #define FIRST = takes(0) returns(1) {
@@ -251,7 +252,7 @@ describe('parser tests', () => {
             const map = inputMap.createInputMap([{
                 filename: 'test', data: source,
             }]);
-            const macros = parseTopLevel.parseTopLevel(source, 0, map);
+            const macros = parser.parseTopLevel(source, 0, map);
             const keys = Object.keys(macros);
             expect(keys.length).to.equal(2);
             expect(keys[0]).to.equal('FIRST');
@@ -263,7 +264,7 @@ describe('parser tests', () => {
                   foo bar // this is a comment.
                 dup4 mulmod /* and here is another comment
                 */ bah bah`;
-            const result = parseTopLevel.removeComments(source);
+            const result = parser.removeComments(source);
 
             expect(result.length).to.equal(source.length);
             expect(result.indexOf('dup4')).to.equal(source.indexOf('dup4'));
@@ -271,7 +272,7 @@ describe('parser tests', () => {
         });
 
         it('can read input files', () => {
-            const result = parseTopLevel.getFileContents('./test.huff', pathToTestData).raw;
+            const result = parser.getFileContents('./test.huff', pathToTestData).raw;
             const foo = fs.readFileSync('./parser/testData/foo.huff', 'utf8');
             const test = fs.readFileSync('./parser/testData/test.huff', 'utf8');
             let expected = `${foo}${test}`;
@@ -282,12 +283,12 @@ describe('parser tests', () => {
 
     describe('compile macros', () => {
         it('can compile macro', () => {
-            const result = parseTopLevel.compileMacro('FIRST', './test.huff', pathToTestData);
+            const result = parser.compileMacro('FIRST', './test.huff', pathToTestData);
             expect(result.sourcemap.length).to.equal(result.bytecode.length / 2);
         });
 
         it('frozen version of MAIN_TWO_ENDO_MOD macro is correctly compiled', () => {
-            const result = parseTopLevel.compileMacro('MAIN_TWO_ENDO_MOD', './main_loop.huff', pathToTestData);
+            const result = parser.compileMacro('MAIN_TWO_ENDO_MOD', './main_loop.huff', pathToTestData);
             const expected = fs.readFileSync(path.posix.resolve(pathToTestData, 'compiled.txt'), 'utf8');
             expect(result.bytecode).to.equal(expected);
         });
