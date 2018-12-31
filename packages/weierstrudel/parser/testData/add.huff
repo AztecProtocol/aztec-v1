@@ -1,0 +1,304 @@
+#include "constants.huff"
+
+/// @dev mixed point addition
+/// @notice expects (z1 -y1 x1) to be on stack
+/// <getP2Location> should push o_y o_x onto stack
+/// where o_y = mem offset of y2, o_x = mem offset of -x2
+template <getP2Location,p,2p>
+#define ADD_MAIN = takes(3) returns(3) {
+    <p>             // p z1 -y1 x1
+    dup1            // p p z1 -y1 x1
+    dup3            // z1 p p z1 -y1 x1
+    dup1            // z1 z1 p p z1 -y1 x1
+    mulmod          // t1 p z1 -y1 x1
+    dup2            // p t1 p z1 -y1 x1
+    <getP2Location> // o_y o_x p t1 p z1 -y1 x1
+    mload           // y2 o_x p t1 p z1 -y1 x1
+    dup3            // p y2 o_x p t1 p z1 -y1 x1
+    dup7                // z1 p y2 o_x p t1 p z1 -y1 x1
+    dup6                // t1 z1 p y2 o_x p t1 p z1 -y1 x1
+    mulmod              // t2 y2 o_x p t1 p z1 -y1 x1
+    dup4 swap2          // y2 t2 p o_x p t1 p z1 -y1 x1
+    mulmod              // t2 o_x p t1 p z1 -y1 x1
+    dup7                // -y1 t2 o_x p t1 p z1 -y1 x1
+    // NOTE: -y1 is 2x/3x overloaded
+    add                 // t2 o_x p t1 p z1 -y1 x1
+    // t2 is 3x/4x overloaded
+    swap3               // t1 o_x p t2
+    dup3 swap2 mload    // -x2 t1 p p t2
+    mulmod              // t1 p t2 p z1 -y1 x1
+    dup7                // x1 t1 p t2 p z1 -y1 x1
+    // NOTE: x1 is 1x/3x overloaded
+    add                     // t1 p t2 p z1 -y1 x1
+    dup2 dup1 dup1          // p p p t1 p t2 p z1 -y1 x1
+    dup4 dup1               // t1 t1 p p p t1 p t2 p z1 -y1 x1
+    mulmod                  // t3 p p t1 p t2 p z1 -y1 x1
+    dup1 skip_reject jumpi
+        0x00 0x00 revert
+    skip_reject:
+    dup2 dup5 dup3          // t3 t1 p t3 p p t1 p t2 p z1 -y1 x1
+    mulmod                  // t4 t3 p p t1 p t2 p z1 -y1 x1
+    swap10                  // x1 t3 p p t1 p t2 p z1 -y1 t4
+    mulmod                  // t3 p t1 p t2 p z1 -y1 t4
+    dup2 sub                // t3 p t1 p t2 p z1 -y1 t4
+    swap7                   // -y1 p t1 p t2 p z1 t3 t4
+    dup2 dup10              // t4 p -y1 p t1 p t2 p z1 t3 t4
+    dup2 dup8 dup1          // t2 t2 p t4 p -y1 p t1 p t2 p z1 t3 t4
+    mulmod                  // x3 t4 p -y1 p t1 p t2 p z1 t3 t4
+    dup11 dup1 add
+    add
+    addmod                  // x3 -y1 p t1 p t2 p z1 t3 t4
+    swap9                   // t4 -y1 p t1 p t2 p z1 t3 x3
+    mulmod                  // t4 t1 p t2 p z1 t3 x3
+    swap5                   // z1 t1 p t2 p t4 t3 x3
+    mulmod                  // z3 t2 p t4 t3 x3
+    swap4                   // t3 t2 p t4 z3 x3
+    dup6                    // x3 t3 t2 p t4 z3 x3
+    add                     // t3 t2 p t4 z3 x3
+    mulmod                  // t3 t4 z3 x3
+    add                     // y3 z3 x3
+    <2p> sub                // -y3 z3 x3
+    swap1                   // z3 -y3 x3
+}
+
+// initial state y x
+template <mx2,my2>
+#define ADD_AFFINE = takes(4) returns(11) {   
+    P() <my2> mload dup3 add
+    // t2 p y x
+    <mx2> mload dup5 add
+    // t1 t2 p y x
+    dup3 dup1 dup3 dup1 mulmod
+    // t3 p t1 t2 p y x
+    dup1 add_affine_skip jumpi
+        0x00 0x00 revert
+    add_affine_skip:
+    dup2 dup2 dup5 mulmod
+    // t4 t3 p t1 t2 p y x
+    swap4
+    // t2 t3 p t1 t4 p y x
+    dup3 dup3 dup10 mulmod
+    // t5 t2 t3 p t1 t4 p y x
+    dup4 sub dup4 dup1 dup1 dup5 dup1 mulmod
+    // x3 p p t5 t2 t3 p t1 t4 p y x
+    dup4 dup1 add add dup9 addmod
+    // x3 p t5 t2 t3 p t1 t4 p y x
+    swap2
+    // t5 p x3 t2 t3 p t1 t4 p y x
+    dup3 add
+    // t5 p x3 t2 t3 p t1 t4 p y x
+    dup2 swap4 mulmod
+    // y3 x3 p t3 p t1 t4 p y x
+    dup3 dup8 dup11 mulmod
+    // t6 y3 x3 p t3 p t1 t4 p y x
+    add
+    2P() sub
+    // -y3 x3 p t3 p t1 t4 p y x
+    dup3
+    // p y3 x3 p t3 p t1 t4 p y x
+    swap6
+    // z3 y3 x3 p t3 p p t4 p y x
+}
+
+/// @dev mixed point addition for our precomputed point table algorithm
+/// @notice expects (z1 -y1 x1) to be on stack
+/// expects (-x2) to be at memory index mx2 and (y2) at my2
+/// p1, p2, p3 represent opcodes to get prime field moduli
+/// (sometimes there's one lurking further down the stack we can grab)
+/// initial stack state: z y x
+template <p1,p2,p3,mx2,my2>
+#define PRECOMPUTE_TABLE_ADD = takes(3) returns(11) {
+    <p1>
+    dup2 dup1 mulmod
+    // zz z y x
+    <p2>
+    dup1 dup1 dup4 dup6 mulmod
+    // zzz p p zz z y x
+    <my2> mload mulmod
+    // t2 p zz z y x
+    dup5 add
+    // t2 p zz z y x
+    swap2
+    // zz p t2 z y x
+    <mx2> mload mulmod
+    // t1 t2 z y x
+    dup5
+    // x t1 t2 z y x
+    add
+    // t1 t2 z y x
+    <p3> dup1 dup3 dup1 mulmod
+    // We want to figure out if X2Z1Z1 - X1 = 0
+    // i.e. does t1 = 0?
+    // We cannot test t1 directly as doubling overloads x by 2x, and addition overloads x by 3x.
+    // So t1 can be either 0, p or 2p. Instead we check if t3 = t1*t1 is zero.
+    // As t3 is the output of a mulmod opcode it is not overloaded.
+    // We also save some gas by testing if t3 is anything but 0 - our jump condition is just t3
+    // t3 p t1 t2 z y x
+    dup1 skip_reject jumpi
+        0x00 0x00 revert
+    skip_reject:
+    dup2 dup2 dup5 mulmod
+    // t4 t3 p t1 t2 z y x
+    swap4
+    // t2 t3 p t1 t4 z y x
+    dup3 dup3 dup10 mulmod
+    // t5 t2 t3 p t1 t4 z y x
+    dup4 sub
+    dup4 dup1 dup1 dup5 dup1 mulmod
+    // x3 p p t5 t2 t3 p t1 t4 z y x
+    dup4 dup1 add add
+    dup9 addmod
+    // x3 p t5 t2 t3 p t1 t4 z y x
+    swap2
+    // t5 p x3 t2 t3 p t1 t4 z y x
+    dup3 add
+    // t5 p x3 t2 t3 p t1 t4 z y x
+    dup2 swap4
+    // t2 t5 p x3 p t3 p t1 t4 z y x
+    mulmod
+    // y3 x3 p t3 p t1 t4 z y x
+    dup3 dup8 dup11 mulmod
+    // t6 y3 x3 p t3 p t1 t4 z y x
+    add
+    2P() sub
+    // -y3 x3 p t3 p t1 t4 z y x
+    dup3 dup1
+    // p p y3 x3 p t3 p t1 t4 z y x
+    swap7
+    // t1 p y3 x3 p t3 p p t4 z y x
+    dup2
+    // p t1 p y3 x3 p t3 p p t4 z y x
+    swap10
+    // z t1 p y3 x3 p t3 p p t4 p y x
+    mulmod
+    // z3 y3 x3 p t3 p p t4 p y x
+}
+
+
+template <p1,p2,p3,mx2,my2,mz2>
+#define PRECOMPUTE_TABLE_ADD_AND_RESCALE = takes(3) returns(11) {
+    <p1> // p z y x
+    dup2 dup1 mulmod
+    <p2> // zz z y x
+    dup1 dup1 dup4 dup6 mulmod
+    // zzz p p zz z y x
+    <my2> mload mulmod
+    // t2 p zz z y x
+    dup5 add
+    // t2 p zz z y x
+    swap2
+    // zz p t2 z y x
+    <mx2> mload mulmod
+    // t1 t2 z y x
+    dup5
+    // x t1 t2 z y x
+    add
+    // t1 t2 z y x
+    <p3> dup1 dup3 dup1 mulmod
+    dup1 skip_reject jumpi
+        0x00 0x00 revert
+    skip_reject:
+    // t3 p t1 t2 z y x
+    dup2 dup2 dup5 mulmod
+    // t4 t3 p t1 t2 z y x
+    swap4
+    // t2 t3 p t1 t4 z y x
+    dup3 dup3 dup10 mulmod
+    // t5 t2 t3 p t1 t4 z y x
+    dup4 sub
+    dup4 dup1 dup1 dup5 dup1 mulmod
+    // x3 p p t5 t2 t3 p t1 t4 z y x
+    dup4 dup1 add add
+    dup9 addmod
+    // x3 p t5 t2 t3 p t1 t4 z y x
+    swap2
+    // t5 p x3 t2 t3 p t1 t4 z y x
+    dup3 add
+    // t5 p x3 t2 t3 p t1 t4 z y x
+    dup2 swap4
+    // t2 t5 p x3 p t3 p t1 t4 z y x
+    mulmod
+    // y3 x3 p t3 p t1 t4 z y x
+    dup3 dup8 dup11 mulmod
+    // t6 y3 x3 p t3 p t1 t4 z y x
+    add
+    2P() sub
+    // -y3 x3 p t3 p t1 t4 z y x
+    dup3 dup1 dup1
+    // p p p y3 x3 p t3 p t1 t4 z y x
+    swap8
+    // t1 p p y3 x3 p t3 p p t4 z y x
+    dup2
+    // p t1 p p y3 x3 p t3 p p t4 z y x
+    swap11
+    // z t1 p p y3 x3 p t3 p p t4 p y x
+    mulmod
+    // z3 p y3 x3 p t3 p p t4 p y x
+    <mz2> mload mulmod
+    // z3 y3 x3 p t3 p p t4 p y x
+}
+
+// output stack state = z3 p y3 x3 dz2 p p dz3 p y x
+
+template <p1,p2,p3,p4,p5,p6,mx2,my2,mz2>
+#define PRECOMPUTE_TABLE_ADD_AND_RESCALE_FINAL = takes(3) returns(11) {
+    <p1>
+    dup2 dup1 mulmod
+    // zz z y x
+    <p2>
+    dup1 dup1 dup4 dup6 mulmod
+    // zzz p p zz z y x
+    <my2> mload mulmod
+    // t2 p zz z y x
+    dup5 add
+    // t2 p zz z y x
+    swap2
+    // zz p t2 z y x
+    <mx2> mload mulmod
+    // t1 t2 z y x
+    dup5
+    // x t1 t2 z y x
+    add
+    // t1 t2 z y x
+    <p3> dup2 dup1 mulmod
+    dup1 skip_reject jumpi
+        0x00 0x00 revert
+    skip_reject:
+    // t3 t1 t2 z y x
+    <p4> dup2 dup4 mulmod // depth 7
+    // t4 t3 t1 t2 z y x
+    swap3
+    // t2 t3 t1 t4 z y x
+    <p5> dup1 dup4 dup10 mulmod // depth 8
+    // t5 p t2 t3 t1 t4 z y x
+    dup2 sub
+    dup2 dup1 dup5 dup1 mulmod
+    // x3 p t5 p t2 t3 t1 t4 z y x
+    dup3 dup1 add add
+    dup8 addmod
+    // x3 t5 p t2 t3 t1 t4 z y x
+    swap3 swap1
+    // t5 t2 p x3
+    dup4 add
+    // t5 t2 p x3
+    mulmod
+    // y3 x3 t3 t1 t4 z y x // depth 9
+    <p6> dup6 dup9 mulmod
+    // t6 y3 x3 t3 t1 t4 z y x
+    add
+    2P() sub
+    // -y3 x3 t3 t1 t4 z y x
+    <p6> dup1 dup1 dup1 // depth 9
+    // p p p p y3 x3 t3 t1 t4 z y x
+    swap7
+    // t1 p p p y3 x3 t3 p t4 z y x
+    dup2
+    // p t1 p p p y3 x3 t3 p t4 z y x
+    swap10
+    // z t1 p p p y3 x3 t3 p t4 p y x
+    mulmod
+    // z3 p p y3 x3 p t3 p t4 p y x
+    <mz2> mload mulmod
+    // z3 p y3 x3 p t3 p t4 p y x
+}
+// output stack state = z3 p y3 x3 dz2 p p dz3 p y x

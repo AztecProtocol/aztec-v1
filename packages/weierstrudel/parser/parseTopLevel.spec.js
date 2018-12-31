@@ -68,12 +68,12 @@ describe('parser tests', () => {
         });
 
         it('parseTemplate will convert template call into macro ops', () => {
-            expect(parseTopLevel.parseTemplate('A', {})).to.equal(null);
+            expect(parseTopLevel.parseTemplate('A', {})).to.deep.equal({ templateName: 'A', macros: {} });
 
             let result = parseTopLevel.parseTemplate('dup4', {});
-            const keys = Object.keys(result);
+            const keys = Object.keys(result.macros);
             expect(keys.length).to.equal(1);
-            expect(result[keys[0]]).to.deep.equal({
+            expect(result.macros[keys[0]]).to.deep.equal({
                 name: 'dup4',
                 ops: [{
                     type: 'OPCODE',
@@ -81,6 +81,7 @@ describe('parser tests', () => {
                     args: [],
                     index: 0,
                 }],
+                templateParams: [],
             });
             const source = 'FOO+0x1234-222*BAR';
             const macros = {
@@ -94,14 +95,15 @@ describe('parser tests', () => {
             const numericResult = parseTopLevel
                 .normalize(new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))));
             result = parseTopLevel.parseTemplate(source, macros, 0);
-            expect(result['inline-FOO+0x1234-222*BAR-stub']).to.deep.equal({
-                name: 'FOO+0x1234-222*BAR',
+            expect(result.macros['inline-FOO+0x1234-222*BAR-stub']).to.deep.equal({
+                name: 'inline-FOO+0x1234-222*BAR-stub',
                 ops: [{
                     type: 'PUSH',
                     value: '7f',
                     args: [numericResult.toString(16)],
                     index: 0,
                 }],
+                templateParams: [],
             });
         });
     });
@@ -112,14 +114,11 @@ describe('parser tests', () => {
         start:
          dup4 mulmod
          0x1234 swap2 start jumpi`;
-            /* const bar = 'dup2 mulmod';
-            const source = `
-                blah: dup2 mulmod FOO() 0x1234 add BAR()`; */
-            const { ops: fooOps } = parseTopLevel.parseMacro(foo, {}, 0);
+            const ops = parseTopLevel.parseMacro(foo, {}, 0);
             const macros = {
                 FOO: {
                     name: 'FOO',
-                    ops: fooOps,
+                    ops,
                     templateParams: [],
                 },
             };
@@ -155,7 +154,7 @@ describe('parser tests', () => {
         start
         __codesize(FOO) 0x1234aae 123554
             `;
-            const { ops: fullOps } = parseTopLevel.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
+            const fullOps = parseTopLevel.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
             const ops = fullOps.map((o) => {
                 expect(typeof (o.index)).to.equal('number');
                 return { args: o.args, type: o.type, value: o.value };
@@ -253,9 +252,10 @@ describe('parser tests', () => {
                 filename: 'test', data: source,
             }]);
             const macros = parseTopLevel.parseTopLevel(source, 0, map);
-            expect(macros.length).to.equal(2);
-            expect(macros[0].name).to.equal('FIRST');
-            expect(macros[1].name).to.equal('SECOND');
+            const keys = Object.keys(macros);
+            expect(keys.length).to.equal(2);
+            expect(keys[0]).to.equal('FIRST');
+            expect(keys[1]).to.equal('SECOND');
         });
 
         it('removeComments will strip comments', () => {
@@ -281,11 +281,15 @@ describe('parser tests', () => {
     });
 
     describe('compile macros', () => {
-        it.only('can compile macro', () => {
+        it('can compile macro', () => {
             const result = parseTopLevel.compileMacro('FIRST', './test.huff', pathToTestData);
-            console.log(result.bytecode);
-            console.log(result.sourcemap);
             expect(result.sourcemap.length).to.equal(result.bytecode.length / 2);
+        });
+
+        it('frozen version of MAIN_TWO_ENDO_MOD macro is correctly compiled', () => {
+            const result = parseTopLevel.compileMacro('MAIN_TWO_ENDO_MOD', './main_loop.huff', pathToTestData);
+            const expected = fs.readFileSync(path.posix.resolve(pathToTestData, 'compiled.txt'), 'utf8');
+            expect(result.bytecode).to.equal(expected);
         });
     });
 });

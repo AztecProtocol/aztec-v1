@@ -86,7 +86,7 @@ parser.processMacroLiteral = (op, macros) => {
         );
         return new BN(macros[op].ops[0].args[0], 16);
     }
-    throw new Error(`cannot interpret parameter ${op} as literal`);
+    throw new Error(`I don't know how to process literal ${op}`);
 };
 
 parser.processTemplateLiteral = (literal, macros) => {
@@ -123,7 +123,7 @@ parser.processTemplateLiteral = (literal, macros) => {
             return acc.mul(val);
         }, null));
     }
-    throw new Error(`I don't know how to process literal ${literal}`);
+    return parser.processMacroLiteral(literal, macros);
 };
 
 parser.parseTemplate = (templateName, macros = {}, index = 0) => {
@@ -133,44 +133,58 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
         const hex = formatEvenBytes(parser.processTemplateLiteral(templateName, macros).toString(16));
         const opcode = toHex(95 + (hex.length / 2));
         return {
-            ...macros,
-            [`inline-${templateName}-${macroId}`]: {
-                name: templateName,
-                ops: [{
-                    type: TYPES.PUSH,
-                    value: opcode,
-                    args: [hex],
-                    index,
-                }],
+            templateName: `inline-${templateName}-${macroId}`,
+            macros: {
+                ...macros,
+                [`inline-${templateName}-${macroId}`]: {
+                    name: `inline-${templateName}-${macroId}`,
+                    ops: [{
+                        type: TYPES.PUSH,
+                        value: opcode,
+                        args: [hex],
+                        index,
+                    }],
+                    templateParams: [],
+                },
             },
         };
     }
     if (opcodes[templateName]) {
         return {
-            ...macros,
-            [`inline-${templateName}-${macroId}`]: {
-                name: templateName,
-                ops: [{
-                    type: TYPES.OPCODE,
-                    value: opcodes[templateName],
-                    args: [],
-                    index,
-                }],
+            templateName: `inline-${templateName}-${macroId}`,
+            macros: {
+                ...macros,
+                [`inline-${templateName}-${macroId}`]: {
+                    name: templateName,
+                    ops: [{
+                        type: TYPES.OPCODE,
+                        value: opcodes[templateName],
+                        args: [],
+                        index,
+                    }],
+                    templateParams: [],
+                },
             },
         };
     }
-    return null;// this.processMacro(templateName, bytecodeIndex, [], macros, map);
+    return {
+        macros,
+        templateName,
+    };// this.processMacro(templateName, bytecodeIndex, [], macros, map);
 };
 
-parser.processMacro = (name, startingBytecodeIndex = 0, templateArguments = [], startingMacros = {}, map = {}) => {
+parser.processMacro = (name, startingBytecodeIndex = 0, templateArgumentsRaw = [], startingMacros = {}, map = {}) => {
     let macros = startingMacros;
     const macro = macros[name];
+
     check(macro, `expected ${macro} to exist!`);
     const {
         ops,
         /* jumpdests, */
         templateParams,
     } = macro;
+    const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommas(t)], []);
+
     check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs!`);
     const templateRegExps = templateParams.map((label, i) => {
         const pattern = new RegExp(`\\b(${label})\\b`, 'g');
@@ -190,12 +204,12 @@ parser.processMacro = (name, startingBytecodeIndex = 0, templateArguments = [], 
                 return result;
             }
             case TYPES.TEMPLATE: {
-                const macroNameIndex = templateArguments.indexOf(op.value);
+                const macroNameIndex = templateParams.indexOf(op.value);
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
                 ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
-                const result = parser.processMacro(templateName, [], macros, map);
+                const result = parser.processMacro(templateName, offset, [], macros, map);
                 offset += (result.bytecode.length / 2);
                 return result;
             }
@@ -217,6 +231,9 @@ parser.processMacro = (name, startingBytecodeIndex = 0, templateArguments = [], 
                 };
             }
             case TYPES.PUSH_JUMP_LABEL: {
+                if (op.value === 'DOUBLE_AFFINE<X2,Y2,Z2>()') {
+                    throw new Error('hey?');
+                }
                 jumptable[index] = op.value;
                 const sourcemap = inputMaps.getFileLine(op.index, map);
                 offset += 3;
@@ -439,7 +456,7 @@ parser.removeComments = (string) => {
 
 parser.getFileContents = (originalFilename, partialPath) => {
     const included = {};
-    const inner = (filename) => {
+    const recurse = (filename) => {
         let fileString;
         if (filename.includes('#')) {
             fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
@@ -449,14 +466,16 @@ parser.getFileContents = (originalFilename, partialPath) => {
         }
         let formatted = parser.removeComments(fileString);
         let imported = [];
-        while (formatted.match(grammar.topLevel.IMPORT)) {
+        let test = formatted.match(grammar.topLevel.IMPORT);
+        while (test !== null) {
             const importStatement = formatted.match(grammar.topLevel.IMPORT);
             const empty = ' '.repeat(importStatement[0].length);
             formatted = empty + formatted.slice(importStatement[0].length);
             if (!included[importStatement[1]]) {
-                imported = [...imported, ...inner(importStatement[1])];
+                imported = [...imported, ...recurse(importStatement[1])];
                 included[importStatement[1]] = true;
             }
+            test = formatted.match(grammar.topLevel.IMPORT);
         }
 
         const result = [...imported, {
@@ -465,7 +484,7 @@ parser.getFileContents = (originalFilename, partialPath) => {
         }];
         return result;
     };
-    const filedata = inner(originalFilename);
+    const filedata = recurse(originalFilename);
     const raw = filedata.reduce((acc, { data }) => {
         return acc + data;
     }, '');

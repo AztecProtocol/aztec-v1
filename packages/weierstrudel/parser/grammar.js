@@ -7,11 +7,11 @@ function regex(params) {
 
 grammar.topLevel = {
     TEMPLATE: regex([
-        '^(?:\\s*\\n*)*template',
+        '^(?:[\\s\\n]*)template',
         '\\<(.*)\\>',
     ]),
     MACRO: regex([
-        '^(?:\\s*#\\s*define)',
+        '^(?:[\\s\\n]*#[\\s\\n]*define)',
         '([A-Za-z0-9_]\\w*)',
         '=',
         'takes',
@@ -21,7 +21,7 @@ grammar.topLevel = {
         '\\{((?:[^\\}])*)\\}',
     ]),
     IMPORT: regex([
-        '^(?:\\s*\\n*)*#',
+        '^(?:[\\s\\n]*)#',
         '(?:include)',
         '(?:\\"|\\\')',
         '(.*)',
@@ -32,30 +32,30 @@ grammar.topLevel = {
 // ^(?:\s*\n*)*__codesize\(([a-zA-Z0-9_\-]+)(?:<([a-zA-Z0-9_\-\+,\s\n]+)>)?\)
 grammar.macro = {
     MACRO_CALL: regex([
-        '^(?:\\s*\\n*)*([a-zA-Z0-9_]+)',
-        '(?:<([a-zA_Z0-9_,\\+\\-\\s\\n]+)>)?\\s*\\n*',
+        '^(?:[\\s\\n]*)([a-zA-Z0-9_]+)',
+        '(?:<([a-zA-Z0-9_,\\+\\-\\s\\n]+)>)?',
         '(?:\\(\\))',
     ]),
     TEMPLATE: regex([
-        '^(?:\\s*\\n*)*<',
+        '^(?:[\\s\\n]*)<',
         '([a-zA-Z0-9_\\-\\+]+)',
         '>\\s*\\n*',
     ]),
     CODE_SIZE: regex([
-        '^(?:\\s*\\n*)*__codesize',
+        '^(?:[\\s\\n]*)__codesize',
         '\\(',
         '([a-zA-Z0-9_\\-]+)',
         '(?:<([0-9,\\s\\n]+)>)?',
         '\\)\\s*\\n*',
     ]),
     JUMP_LABEL: regex([
-        '^(?:\\s*\\n*)*([a-zA-Z0-9_\\-]+):\\s*\\n*',
+        '^(?:[\\s\\n]*)([a-zA-Z0-9_\\-]+):\\s*\\n*',
     ]),
     LITERAL_DECIMAL: regex([
-        '^(?:\\s*\\n*)*(\\d+)\\b',
+        '^(?:[\\s\\n]*)(\\d+)\\b',
     ]),
     LITERAL_HEX: regex([
-        '^(?:\\s*\\n*)*0x([0-9a-fA-F]+)\\b',
+        '^(?:[\\s\\n]*)0x([0-9a-fA-F]+)\\b',
     ]),
     TOKEN: regex([
         '\\s*\\n*([^\\s]*)\\s*\\n*',

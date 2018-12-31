@@ -1,0 +1,130 @@
+#include "wnaf.huff"
+#include "endomorphism.huff"
+#include "precompute_table.huff"
+#include "constants.huff"
+
+/// @dev use wnaf table to get the memory location of a point, and update wnaf table
+#define GET_P2_LOCATION = takes(0) returns(0) {
+    0x00 mload      // w
+    // we want to get a byte index of our wnaf table that is non-zero
+    // we don't want to iterate over every byte, because that's slow!
+    // instead we isolate the least significant set bit of t.
+    // We know that non-zero wnaf entries are aligned at byte boundaries because we stored them via mstore8
+    // we also know that every wnaf entry is odd. Ipso facto, if we isolate the least significant bit of w
+    // then that bit corresponds to the first bit in a byte that contains a non-zero wnaf entry
+
+    dup1 0x00 sub               // -w w
+    dup2 and                    // b w
+    // next up, is to calculate the index of the byte in 'b' that is nonzero.
+    // In WNAF, we used a lookup table to calculate this, but because we are testing the byte index here and not the bit index we can be more efficient.
+    // (credit to Recmo Bloemen for showing me this trick).
+    // use b as the divisor against literal 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f.
+    // because b only has one bit set, and that bit is the 1st bit of a byte, this acts like a bit-shift operation on the literal.
+    // which will place our desired byte index in the least significant byte, which we can mask off
+    0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f div 0xff and // x w
+
+    // we want to clear the wnaf entry at byte index 'b' (for future iterations)
+    0x00 dup2 mstore8 // that'll do it.
+
+    // now what we have our wnaf byte index, we can use it for two purposes
+    // 1: access the relevant byte in 'w' that contains our wnaf entry
+    // 2: calculate the memory offset where our point is stored
+    // point lookup tables take 32 words of memory per point (excluding endomorphism)
+    // which equals precisely 1kb (0x400)
+    swap1 // w x
+    dup2 0x400 mul // o w x
+    swap2 byte
+
+    0x20 mul add // o_x
+
+    dup1 0x20 add // o_y o_x
+}
+
+/// @dev perform one iteration of the main loop
+#define MAIN_LOOP = takes(6) returns(0) {
+    // on the stack we will have.....
+    // z y x w i p 2p
+    // i = iterator that points to memory of current wnaf entry
+    // w = wnaf word
+    // z y x = current accumulated elliptic curve point
+ main_loop_start:
+    DOUBLE_MAIN<dup5,dup6>()
+    
+    // get i and also decrease i by 0x20 for next pass
+    0x20 dup5 sub swap4 // i z y x i' p 2p 3p
+    mload               // w z y x i' p 2p 3p
+    dup1 add_points_start jumpi
+// nothing to add       // w z y x i' p 2p 3p
+        pop
+        // note, using 'sub' instead of eq iszero. TODO: check if this can cause problems!
+        dup4 0x1020 sub main_loop_start jumpi
+        main_loop_end jump
+add_points_start:       // w z y x i' p 2p 3p
+    WNAF_MASK() and 0x00 mstore         // z y x i' p 2p 3p
+add_points_next:
+    ADD_MAIN<GET_P2_LOCATION,dup5,dup6>()
+    0x00 mload add_points_next jumpi // z y x w i' p 2p 3p
+    dup4 0x1020 sub main_loop_start jumpi
+
+main_loop_end:  // looks like we've finished
+    // z y x 
+}
+
+/// @dev performs scalar multiplication for two affine points
+#define MAIN_TWO_ENDO_MOD = takes(0) returns(0) {
+    // point table starts at 0x20
+    // for two points, table will end at 0x1020
+    // store globalZ at 0x1020
+    // wnaf table starts at 0x1040
+    // 0x00 - 0x40 = P1
+    // 0x40 - 0x80 = P2
+    // 0x80 - 0xa0 = s1
+    // 0xa0 - 0xc0 = s2
+    COMPUTE_WNAFS()
+
+    // calculate precomputed table
+    PRECOMPUTE_TABLE_FULL() pop pop
+
+    3P()
+    2P()
+    P()
+
+    // 1020 stores the location we called mstore8 on, for the largest wnaf index (m)
+    // 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
+    0x1020 mload
+    0x00 mload 0x1020 mstore // store globalZ in 0x1020
+
+    // this should be i - the memory index with the largest nonzero wnaf
+    dup1 mload                  // w i p 2p 3p
+    WNAF_MASK() and
+    // get coordinates of first point
+    0x00 mstore
+    GET_P2_LOCATION()   // o_y o_x i p 2p 3p
+    mload swap1 mload   // x y i p 2p 3p
+    dup4 sub swap1      // y x i p 2p 3p
+    dup4 sub            // y x i p 2p 3p
+    0x01                // z y x i p 2p 3p
+    0x00 mload get_first_entry jumpi
+        begin_festivities jump
+get_first_entry:
+    ADD_MAIN<GET_P2_LOCATION,dup5,dup6>()
+    0x00 mload get_first_entry jumpi // z y x w i' p 2p 3p
+    // (this assumes we have two wnaf entries for each point respectively)
+begin_festivities:
+    swap3 0x20 swap1 sub swap3
+    dup4 0x1020 eq skip_main_loop jumpi
+    MAIN_LOOP()             // zf yf xf i p 2p 3p 
+skip_main_loop:
+
+// Finished with main loop. Final thing to do is scale the point's z-coordinate by the precomputed table's globalZ coordinate
+    0x1020 mload            // z zf yf xf i p 2p 3p
+    dup6 swap2 mulmod       // z'' yf xf i p 2p 3p
+    0x40 mstore             // yf xf i p 2p 3p
+    dup4 swap1 mod          // yf xf i p 2p 3p
+    dup4 sub                // y xf i p 2p 3p
+    0x20 mstore             // xf i p 2p 3p
+    dup3 swap1 mod          // x i p 2p 3p
+    0x00 mstore             // i p 2p 3p
+    pop pop pop pop
+    0x60 0x00 return
+}
