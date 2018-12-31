@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "hufftest": "mocha ./parser/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "huffcoverage": "nyc mocha ./parser/ --trace-warnings --exit --colors --recursive --reporter spec",
     "jstest": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
     "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
     "hashPoint": "node ./js_snippets/hashToPoint.js"
@@ -22,6 +23,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
     "sinon": "^7.2.2"
   }
 }
