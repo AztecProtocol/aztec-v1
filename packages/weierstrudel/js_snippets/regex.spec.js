@@ -2,7 +2,7 @@ const chai = require('chai');
 
 const { expect } = chai;
 
-describe.only('regex tests', () => {
+describe('regex tests', () => {
     it('wnaf dynamic word replace', () => {
         const source = 'a+0x20,d';
         const target = 'd';
