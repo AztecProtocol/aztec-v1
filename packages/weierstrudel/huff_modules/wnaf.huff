@@ -190,6 +190,6 @@ wnaf_start:
     swap1 2 swap1 sub swap1 // s' m' // TODO optimize this
     dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
     pop pop pop pop pop pop pop
-    FIND_FIRST_ENTRY()
-    0x100 mstore
+    // FIND_FIRST_ENTRY()
+    // 0x100 mstore
 }
