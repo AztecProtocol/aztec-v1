@@ -53,7 +53,7 @@ function encodeStack(stack) {
     }, '');
 }
 
-function runCode(vm, bytecode, calldata) {
+function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = []) {
     return new Promise((resolve, reject) => {
         vm.runCode({
             code: Buffer.from(bytecode, 'hex'),
@@ -61,6 +61,8 @@ function runCode(vm, bytecode, calldata) {
             data: calldata ? processMemory(calldata) : null,
         }, (err, results) => {
             if (err) {
+                console.log(results.runState.programCounter);
+                console.log(sourcemap[results.runState.programCounter - sourcemapOffset]);
                 return reject(err);
             }
             return resolve(results);
@@ -76,19 +78,10 @@ function Runtime(filename, path) {
         const initCode = `${memoryCode}${stackCode}`;
         const initGasEstimate = (memory.length * 9) + (stack.length * 3);
         const offset = initCode.length / 2;
-        const { bytecode: macroCode } = newParser.processMacro(macroName, offset, [], macros, inputMap);
+        const { bytecode: macroCode, sourcemap } = newParser.processMacro(macroName, offset, [], macros, inputMap);
         const bytecode = `${initCode}${macroCode}`;
         const vm = new VM();
-        console.log('bytecode byte length = ', Math.ceil(macroCode.length / 2));
-        const results = await runCode(vm, bytecode, calldata);
-        // const [err, results] = await vm.runCode({
-        //     code: Buffer.from(bytecode, 'hex'),
-        //     gasLimit: Buffer.from('ffffffff', 'hex'),
-        //     data: calldata ? processMemory(calldata) : null,
-        // });
-        // if (err) {
-        //     throw new Error(err);
-        // }
+        const results = await runCode(vm, bytecode, calldata, offset, sourcemap);
         const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).sub(new BN(initGasEstimate)).toString(10);
         console.log('gas consumed = ', gasSpent);
         return {
@@ -96,6 +89,7 @@ function Runtime(filename, path) {
             stack: results.runState.stack,
             memory: results.runState.memory,
             returnValue: results.runState.returnValue,
+            bytecode: macroCode,
         };
     };
 }

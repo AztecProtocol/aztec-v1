@@ -63,6 +63,30 @@ template <p1,p2>
     // z -y' x' p zz' p zzz'
 }
 
+// starts with: z' y x z
+// scales y and x by z'
+// returns: z -y' x' p zz' p zzz'
+template <p1,p2,beta>
+#define PRECOMPUTE_TABLE_NORMALIZE_BETA = takes(4) returns(7) {
+    // z' y x z
+    swap1 swap2 swap3
+    // z z' y x B p
+    <p1> <beta> dup2 dup1
+    // p p B p z z' y x
+    dup1 dup7 dup1 mulmod
+    // zz' p p B p z z' y x
+    swap6 dup7 mulmod
+    // zzz' p B p z zz' y x
+    swap7 dup6 mulmod
+    // x' B p z zz' y zzz'
+    dup3 dup1
+    // p p x' B p z zz' y zzz'
+    swap7 dup9 mulmod
+    // y' x' B p z zz' p zzz'
+    dup7 sub dup7 swap5
+    // z -y' x' B p p zz' p zzz'
+}
+
 // for the last iteration of calculating table coordinates, we want the final stack variables
 // to be in slightly different positions, to reduce the number of swap ops
 // initial stack state y x z (-yold, -xold, pold)

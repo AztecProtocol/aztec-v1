@@ -21,8 +21,12 @@ const testHelper = `
 #define Y2 = takes(0) returns(1) { 0x20 }
 #define Z2 = takes(0) returns(1) { 0x40 }
 
-#define PRECOMPUTE_TABLE_DOUBLE_B_IMPL = takes(3) returns(3) {
-    PRECOMPUTE_TABLE_DOUBLE_B<P,P,X2,Y2,Z2>()
+#define PRECOMPUTE_TABLE_DOUBLE_C_IMPL = takes(3) returns(3) {
+    PRECOMPUTE_TABLE_DOUBLE_C<X2,Y2,Z2,dup4,dup5,dup13,dup6>()
+}
+
+#define DOUBLE_AFFINE_SHORT_IMPL = takes(3) returns(3) {
+    DOUBLE_AFFINE_SHORT<0x00,0x20,0x40,dup3,dup4,dup5,dup10>()
 }
 `;
 
@@ -54,18 +58,20 @@ describe('bn128 double', () => {
         expect(zOut.umod(pOut).eq(reference.z)).to.equal(true);
     });
 
-    it('macro PRECOMPUTE_TABLE_DOUBLE_B correctly calculates point doubling', async () => {
+    it.only('macro PRECOMPUTE_TABLE_DOUBLE_C correctly calculates point doubling', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();
         const reference = bn128Reference.double(x, y, z);
-
-        const { stack, memory } = await double('PRECOMPUTE_TABLE_DOUBLE_B_IMPL', [z, x, y]);
+        const p3 = p.mul(new BN(3));
+        const { stack, memory } = await double('PRECOMPUTE_TABLE_DOUBLE_C_IMPL', [p3, p, z, x, y]);
         const slicedMemory = sliceMemory(memory);
         expect(slicedMemory.length).to.equal(3);
-        expect(stack.length).to.equal(4);
-        const [z1, x1, y1, z2] = stack;
+        expect(stack.length).to.equal(6);
+        const [p3Out, pOut, z1, x1, y1, z2] = stack;
         const [x2, y2, z2Mem] = slicedMemory;
 
         // results are overloaded, normalize before comparison
+        expect(p3Out.eq(p3)).to.equal(true);
+        expect(pOut.eq(p)).to.equal(true);
         expect(x1.eq(x)).to.equal(true);
         expect(y1.eq(y)).to.equal(true);
         expect(z1.eq(z)).to.equal(true);
@@ -87,5 +93,21 @@ describe('bn128 double', () => {
         expect(xOut.umod(bn128Reference.p).eq(reference.x)).to.equal(true);
         expect(yOut.umod(bn128Reference.p).eq(bn128Reference.p.sub(reference.y))).to.equal(true);
         expect(zOut.umod(bn128Reference.p).eq(reference.z)).to.equal(true);
+    });
+
+    it('macro DOUBLE_AFFINE_SHORT correctly calculates point doubling', async () => {
+        const { x, y } = bn128Reference.randomPoint();
+        const ppp = bn128Reference.p.mul(new BN(3));
+        const { stack, memory } = await double('DOUBLE_AFFINE_SHORT_IMPL', [ppp, p, x, y]);
+        const reference = bn128Reference.double(x, y, new BN(1));
+        const slicedMemory = sliceMemory(memory);
+        expect(slicedMemory.length).to.equal(3);
+        const [x1, y1, z1] = slicedMemory;
+
+        // results are overloaded, normalize before comparison
+        expect(z1.umod(p).eq(reference.z)).to.equal(true);
+        expect(y1.umod(p).eq(reference.y)).to.equal(true);
+        expect(x1.umod(p).eq(p.sub(reference.x))).to.equal(true);
+        expect(stack.length).to.equal(4);
     });
 });
