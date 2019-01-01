@@ -7,3 +7,4 @@
 #define X2 = takes(0) returns(1) { 0x00 }
 #define Y2 = takes(0) returns(1) { 0x20 }
 #define Z2 = takes(0) returns(1) { 0x40 }
+#define TABLE_OFFSET = takes(0) returns(1) { 0x8a }
