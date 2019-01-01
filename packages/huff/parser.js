@@ -159,7 +159,7 @@ parser.processMacro = (
 ) => {
     let macros = startingMacros;
     const macro = macros[name];
-    check(macro, `expected ${macro} to exist!`);
+    check(macro, `expected ${name} to exist!`);
     const {
         ops,
         templateParams,
