@@ -13,10 +13,6 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 const testHelper = `
 #include "wnaf.huff"
-#define WNAF_IMPL = takes(2) returns(1) {
-    SET_WNAF_TABLE()
-    WNAF()
-}
 
 #define ENDO_WNAF_FIXED_IMPL = takes(8) returns(1) {
     SET_WNAF_TABLE()
@@ -51,46 +47,6 @@ describe('sparse wnaf', function describe() {
             new BN(0),
             new BN(0),
         ];
-    });
-    it('macro WNAF correctly calculates a w=5 windowed non adjacent form of a 254 bit number', async () => {
-        const testVar = bn128Reference.randomPoint().x;
-        const reference = referenceWnaf.wnaf(testVar);
-        const { memory } = await wnaf('WNAF_IMPL', [new BN(0), testVar], [], []);
-
-        for (let i = 0; i < reference.length; i += 1) {
-            const memoryOffset = (i * 32);
-            if (reference[i] && reference[i].gt(new BN(0))) {
-                expect(reference[i].eq(new BN(memory[memoryOffset], 16).umod(thirtyTwo))).to.equal(true);
-            }
-        }
-    });
-
-    it('macro WNAF correctly calculates a w=5 NAF of a 254 bit number with added memory offset', async () => {
-        const testVar = bn128Reference.randomPoint().x;
-        const reference = referenceWnaf.wnaf(testVar);
-        const baseOffset = 1025;
-        const { memory } = await wnaf('WNAF_IMPL', [new BN(baseOffset), testVar], [], []);
-        for (let i = 0; i < reference.length; i += 1) {
-            const memoryOffset = baseOffset + (i * 32);
-            if (reference[i] && reference[i].gt(new BN(0))) {
-                expect(reference[i].eq(new BN(memory[memoryOffset], 16).umod(thirtyTwo))).to.equal(true);
-            }
-        }
-    });
-
-
-    it('macro WNAF correctly calculates a w=5 NAF of a 127 bit number with added memory offset', async () => {
-        const scalar = bn128Reference.randomScalar();
-        const { k1: endoScalar } = endomorphism.endoSplit(scalar);
-        const reference = referenceWnaf.wnaf(endoScalar);
-        const baseOffset = 1025;
-        const { memory } = await wnaf('WNAF_IMPL', [new BN(baseOffset), endoScalar], [], []);
-        for (let i = 0; i < reference.length; i += 1) {
-            const memoryOffset = baseOffset + (i * 32);
-            if (reference[i] && reference[i].gt(new BN(0))) {
-                expect(reference[i].eq(new BN(memory[memoryOffset], 16).umod(thirtyTwo))).to.equal(true);
-            }
-        }
     });
 
     it('macro WNAF_SLICE_A correctly calclates a wnaf slice', async () => {
@@ -165,7 +121,7 @@ describe('sparse wnaf', function describe() {
         expect(stack[2].toString(10)).to.equal('16');
         expect(stack[3].toString(16)).to.equal('1fe0');
         expect(stack[4].toString(10)).to.equal('269');
-        expect(stack[5].toString(16)).to.equal('1046');
+        expect(stack[5].toString(16)).to.equal('166');
         expect(stack[6].toString(16)).to.equal('100');
     });
 
@@ -196,7 +152,7 @@ describe('sparse wnaf', function describe() {
         expect(stack[2].toString(10)).to.equal('16');
         expect(stack[3].toString(16)).to.equal('1fe0');
         expect(stack[4].toString(10)).to.equal('269');
-        expect(stack[5].toString(16)).to.equal('1042');
+        expect(stack[5].toString(16)).to.equal('162');
         expect(stack[6].toString(16)).to.equal('80');
     });
 
@@ -238,7 +194,8 @@ describe('sparse wnaf', function describe() {
 
         const referenceWnafs = endoScalars.map(s => referenceWnaf.wnaf(s));
 
-        const startingOffset = new BN('1046', 16);
+        const offset = new BN('160', 16);
+        const startingOffset = offset.add(new BN((points.length - 1) * 2));
         let maxEntry = 0;
         for (let j = 0; j < referenceWnafs.length; j += 1) {
             const reference = referenceWnafs[j];
@@ -253,9 +210,8 @@ describe('sparse wnaf', function describe() {
                 }
             }
         }
-
-        const size = new BN(memory.slice(4128, 4128 + 32), 16);
-        expect(size.toString(16)).to.equal(new BN(4160 + (maxEntry * 32)).toString(16));
+        const size = new BN(memory.slice(256, 256 + 32), 16);
+        expect(size.toString(16)).to.equal(new BN(offset.toNumber() + (maxEntry * 32)).toString(16));
     });
 
 
@@ -287,7 +243,8 @@ describe('sparse wnaf', function describe() {
 
         const referenceWnafs = endoScalars.map(s => referenceWnaf.wnaf(s));
 
-        const startingOffset = new BN('1042', 16);
+        const offset = new BN('160', 16);
+        const startingOffset = offset.add(new BN((points.length - 1) * 2));
         let maxEntry = 0;
         for (let j = 0; j < referenceWnafs.length; j += 1) {
             const reference = referenceWnafs[j];
@@ -303,40 +260,7 @@ describe('sparse wnaf', function describe() {
             }
         }
 
-        const size = new BN(memory.slice(4128, 4128 + 32), 16);
-        expect(size.toString(16)).to.equal(new BN(4160 + (maxEntry * 32)).toString(16));
-    });
-
-    it('comparison', async () => {
-        const scalars = [
-            bn128Reference.randomScalar(),
-            bn128Reference.randomScalar(),
-        ];
-        const points = [
-            bn128Reference.randomPoint(),
-            bn128Reference.randomPoint(),
-        ];
-
-        const calldata = [
-            { index: 0, value: points[0].x },
-            { index: 32 * 1, value: points[0].y },
-            { index: 32 * 2, value: points[1].x },
-            { index: 32 * 3, value: points[1].y },
-            { index: 32 * 4, value: scalars[0] },
-            { index: 32 * 5, value: scalars[1] },
-        ];
-        const { memory } = await wnaf('COMPUTE_WNAFS', [], [], calldata);
-        const { memory: expectedMemory } = await wnaf('COMPUTE_WNAFS_COMPARISON', [], [], calldata);
-
-        const end = memory.slice(4128, 4128 + 32);
-        const second = expectedMemory.slice(4128, 4128 + 32);
-        expect(new BN(end, 16).toString(16)).to.equal(new BN(second, 16).toString(16));
-
-        const mask = new BN('1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f', 16);
-        for (let i = 4160; i < new BN(end, 16).toNumber(); i += 32) {
-            const a = new BN(memory.slice(i, i + 32), 16).uand(mask);
-            const b = new BN(Buffer.from(expectedMemory.slice(i, i + 32), 16)).uand(mask);
-            expect(a.toString(16)).to.equal(b.toString(16));
-        }
+        const size = new BN(memory.slice(256, 256 + 32), 16);
+        expect(size.toString(16)).to.equal(new BN(offset.toNumber() + (maxEntry * 32)).toString(16));
     });
 });

@@ -11,8 +11,6 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 const testHelper = `
 #include "add.huff"
 #include "constants.huff"
-#define X2 = takes(0) returns(1) { 0x20 }
-#define Y2 = takes(0) returns(1) { 0x00 }
 #define PRECOMPUTE_TABLE_ADD_IMPL = takes(3) returns(11) {
     PRECOMPUTE_TABLE_ADD<P,P,P,X2,Y2>()
 }
@@ -26,8 +24,8 @@ const testHelper = `
     ADD_MAIN<P2_LOCATION_TEST,P,2P>()
 }
 
-#define ADD_AFFINE_SHORT_IMPL = takes(5) returns(11) {
-    ADD_AFFINE_SHORT<X2,Y2,dup3,dup12>()
+#define ADD_AFFINE_IMPL = takes(5) returns(11) {
+    ADD_AFFINE<X2,Y2,dup3,dup12>()
 } 
 `;
 
@@ -44,10 +42,10 @@ describe('bn128 add', () => {
         const { zz, zzz } = bn128Reference.zFactors({ x2, y2 }, { x1, y1, z1 });
 
         const initialMemory = [{
-            index: 32,
+            index: 0,
             value: bn128Reference.p.sub(x2),
         }, {
-            index: 0,
+            index: 32,
             value: y2,
         }];
         const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
@@ -89,7 +87,7 @@ describe('bn128 add', () => {
         expect(z3.umod(bn128Reference.p).eq(reference.z)).to.equal(true);
     });
 
-    it('macro ADD_AFFINE_SHORT correctly calculates affine point addition', async () => {
+    it('macro ADD_AFFINE correctly calculates affine point addition', async () => {
         const { x: x1, y: y1 } = bn128Reference.randomPoint();
         const { x: x2, y: y2 } = bn128Reference.randomPoint();
 
@@ -98,14 +96,14 @@ describe('bn128 add', () => {
         const x2Neg = bn128Reference.p.sub(x2);
         const { zz, zzz } = bn128Reference.zFactors({ x2, y2 }, { x1, y1, z1: new BN(1) });
         const initialMemory = [{
-            index: 32,
+            index: 0,
             value: x2Neg,
         }, {
-            index: 0,
+            index: 32,
             value: y2,
         }];
         const pp = p.add(p);
-        const { stack } = await add('ADD_AFFINE_SHORT_IMPL', [pp, p, x1, p.sub(y1)], initialMemory);
+        const { stack } = await add('ADD_AFFINE_IMPL', [pp, p, x1, p.sub(y1)], initialMemory);
         const [ppOut, pOut, x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
 
         expect(stack.length).to.equal(13);

@@ -100,76 +100,6 @@
     // o' w'''
 }
 
-
-#define WNAF_SLICE = takes(2) returns(1) {
-    // Step 1: we need to isolate the least significant high bit of w
-    // Can do this by taking w & -w
-    // Instead of pushing '0' onto the stack (3 gas), we can get the 'return data size' of this EVM execution context.
-    // As this contract doesn't call external contracts this will always be 0, and the opcode costs 2 gas.
-    dup1 dup1 returndatasize sub  // stack state: (0 - w) w w o
-    and                 // w' w o
-
-    // Step 2: use w' and the lookup table to calculate the bit index of the high bit in w'
-    // We want to add this offset to 'o', which is our accumulated memory offset
-    // So swap 'o' to the front of the stak in preparation
-    swap2               // stack state: o w w'
-
-    // We want to calculate w' mod 269; the literal needs to preceed w' so push it onto the stack
-    // before duplicating w' (we don't consume w' as we need it later) and taking the modulus
-    269
-    dup4                // stack state: w' 269 o w w'
-    mod                 // stack state: (w' % 269) o w w'
-
-    mload               // use the result to byte-address the lookup table we stored
-    0x1fe0 and          // and mask off the byte corresponding to the bit index
-                        // mask by 0x1fe0 because the table entry is shifted by 5 bits
-                        // because we're using this index to address a word in memory
-
-    // Tadaa, we have our index, no conditional branching in sight
-    // We only need this value to find the right byte-offset to store our wnaf, so add it straight to 'o'
-    add             // stack state: o w w'
-
-    // Now we know *where* to store the next wnaf section, we need to figure out *what* to store
-    // Our scalar has an abritrary amount of leading 0 bits we need to remove, we can use w' as
-    // our divisor without explicitly figuring out how many bits need to be culled
-    swap2            // get w' in front of w on the stack. Needs two swap ops. Disgusting!
-    swap1            // stack state: w w' o
-    div              // w o
-
-    // To get the actual scalar value we want to store at this bit index, we usually would take
-    // w mod 2^(window size). We hardcode a window size of 5, so this can be simplified to (w & 31)
-
-    // Instead, we just store the least significant *byte* at our calculated memory offset, using mstore8.
-    // Our wnaf window has width 5, so we want to store the least 5 signficant bits of w.
-    // HOWEVER, it's cheaper to mask this off when we *load* the wnaf, because we're storing
-    // multiple wnaf entries in an evm word, so we can mask off at the word-level and not the byte-level
-    dup1             // copy w. Stack state: w w o
-    dup3             // copy o. Stack state: o m w o
-    mstore8          // store our wnaf fragment // w o
-
-    // Right, what's left now? We need to prepare our scalar for the next round of iteration
-    // We've already stored the next 5 bits of the wnaf in our fragment at memory offset 'o'
-    // So we need to zero out the 5 least significant bits so we don't double-count.
-    // We *could* divide down by 2^5, but div operations are expensive and we don't save anything as
-    // our lookup table shenanigans divide down the scalar by the required amount in the next cycle.
-
-    // So instead we just calculate (w & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0)
-    // (the literal has every bit set high except the least significant 5)
-
-    // There is one catch. If our wnaf fragment is negative (> 15), we need to add 2^{w} (32) to the scalar.
-    // This is because we're subtracting (32 - m) at this bit position.
-    // We want to set it up so that the next wnaf entry will contain an additional factor of 32.
-
-    // The easiest way of doing this is by adding 16 into w.
-    // If m > 15 then the 5th bit will be high w. So adding 16 will trigger an
-    // overflow and add into the 6th bit. All lower order bits don't matter because we're about to mask them off
-    16 add
-    // Now all that's left is to mask out the lowest 5 bits
-    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 and
-
-    // And we're done with one round of iteration.
-}
-
 #define SET_WNAF_TABLE = takes(0) returns(0) {
     0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
     0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
@@ -181,59 +111,6 @@
     0x0c4f000849aeab57cacbbe19b16fb706b3782121dec54c20098b2abdf156f341 0xff mstore
     0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
 }
-
-// expects w o to be on stack
-#define WNAF = takes(2) returns(1) {
-    // righto, what are we doing here?
-    // the standard way to calculate a window-non adjacent form is to
-    // divide the scalar down by 2 until the scalar is odd (and keep track of the bit index as we divide down)
-    // we then take the value of the scalar mod 2^(window size)
-    // this is our wnaf value for the calculated bit position , after accounting for negative values
-    // we then subtract off the wnaf from the scalar (if the wnaf is negative this will increase the scalar),
-    // divide by 2 again and keep going until our scalar = 0
-
-    // But that sounds like a lot of effort, so we take the lazy approach
-    // instead of dividing down by 2 until we find an odd bit, it's much cheaper to calculate the bit index of the least significant high bit
-    // by using some bitwise shenanigans and a lookup table
-
-    // this removes a lot of conditional jumps that we would otherwise need and is MUCH cheaper
-    // we hard-code for a window size of 5; this resulting wnaf has a hamming weight of 1/6
-    // i.e. using the divide-by-2 method results in aimlessly dividing by 2 5/6th of the time,
-    // and only doing anything interesting in 1/6 of all iterations
-    
-    // Once we isolate the least significant high bit, we can then use that as the denominator to
-    // divide down our scalar, instead of iteratively dividing by 2
-
-    // To start with, we need a lookup table.
-    // The most efficient way I can come up with for getting the index of the least significant high bit
-    // is to isolate the lsb and take the result of that value modulo 269.
-    // 269 is relatively prime to 2^n for all n from 0 to 256, resulting in 256 unique integers < 269.
-    // We then convert these into the correct bit positions by using a lookup table
-
-    // This algorithm creates a wnaf structure where each bit index is offset by 32 bytes in memory.
-    // This is so that we can concatenate the same wnaf entry from multiple points into a single 32-byte word
-    // Becaues of this our lookup table does not map (value mod 269) to bit index positions, but instead
-    // maps to bit index positions * 32.
-
-    // For example, if the next non-zero bit index is 4, then mload(2^4 mod 269) & 0x1fe0 = 4*32 = 128
-
-    // I think it's possible to use the isolated bit as a divisor against some constant to get
-    // 256 unique integers, but I think that technique requires a mask in addition to a lookup table
-
-    // Anyhow, here's the table. It's calculated in 'js_snippets/find_lookup_table.js'
-    // We use (scalar mod 269) directly to byte-address memory. Beause the evm
-    // loads data in 32-byte machine words, we need to offset the table by 31 bytes so that
-    // the relevant lookup value is in the least significant byte (shifted left by 5 bits) and can be masked off
-    // TODO: We could store this table directly in code and use CODECOPY to save in memory
-    // Would be cheaper but requires modifying the bytecode directly which is...eugh, can't be bothered 
-
-    // Call WNAF_SLICE 19 times. 127-bit random scalars take between 19-24 iterations of the loop
-// TODO, assert > 0
-loop:
-    WNAF_SLICE()
-    dup1 loop jumpi
-}
-
 
 #define ENDO_WNAF_FIXED = takes(2) returns(1) {
     WNAF_SLICE_A()
@@ -265,32 +142,7 @@ loop:
 wnaf_end:
 }
 
-#define ENDO_WNAF = takes(0) returns(1) {
-    0x0 calldataload
-    ENDOMORPHISM()
-    0x140 swap1
-    WNAF()
-    pop pop 0x141 swap1
-    WNAF()
-}
-
 #define WNAF_INIT = takes(0) returns(1) {
-    // add wnaf table to memory
-    SET_WNAF_TABLE()
-    // set up constants
-    0x1000000000000000000000000000000000 // b
-    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 // mask b
-    16 // 16 mask b
-    0x1fe0 // 0x1fe0 16 mask b
-    269 // 269 0x1fe0 16 mask b
-
-    // compute calldata and memory offsets
-    0x60 calldatasize div // n
-    dup1 dup1 add 0x103e add       // m n
-    swap1 0x40 mul        // s m 269 0x1fe0 16 mask b
-}
-
-#define WNAF_INIT_OFFSET = takes(0) returns(1) {
     // add wnaf table to memory
     SET_WNAF_TABLE()
     // set up constants
@@ -307,54 +159,17 @@ wnaf_end:
 }
 
 #define FIND_FIRST_ENTRY = takes(0) returns(1) {
-    0x2040  // m
-search_next:
-    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
-    dup1 mload iszero search_next jumpi
-}
-
-#define FIND_FIRST_ENTRY_OFFSET = takes(0) returns(1) {
     0x1160  // m
 search_next:
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
     dup1 mload iszero search_next jumpi
 }
+
 // starting stack state = s m
 // m = memory location of start of next wnaf
 // s = calldata location of start of wnaf
 #define COMPUTE_WNAFS = takes(0) returns(1) {
     WNAF_INIT()
-wnaf_start:
-    dup1 calldataload ENDOMORPHISM()
-    // k1 k2 m s 269 0x1fe0 16 mask b
-    // We want to add 2^{133} to each scalar k1 and k2.
-    // This is so that our hardcoded loop doesn't overwrite our most significant wnaf entry with zeroes
-    swap1 0x200 mstore    // k2 s m 269 0x1fe0 16 mask b // TODO remove memory storage blahblah
-    dup8 or // k2' s m
-    dup3 ENDO_WNAF_FIXED() // w o k2 s m 269 0x1fe0 16 mask b
-    pop pop
-    // k2 s m 269 0x1fe0 16 mask b
-    0x200 mload dup8 or
-    dup3 1 add ENDO_WNAF_FIXED() // w o s m 269 0x1fe0 16 mask b
-    pop pop
-
-    // stack state: s m 269 0x1fe0 16 mas kb
-
-    0x20 add    // s' m
-    swap1 2 swap1 sub swap1 // s' m' // TODO optimize this
-    dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
-    pop pop pop pop pop pop pop
-    FIND_FIRST_ENTRY()
-    0x00 0x200 mstore
-
-    0x1020 mstore
-}
-
-// starting stack state = s m
-// m = memory location of start of next wnaf
-// s = calldata location of start of wnaf
-#define COMPUTE_WNAFS_OFFSET = takes(0) returns(1) {
-    WNAF_INIT_OFFSET()
 wnaf_start:
     dup1 calldataload ENDOMORPHISM()
     // k1 k2 m s 269 0x1fe0 16 mask b
@@ -375,69 +190,6 @@ wnaf_start:
     swap1 2 swap1 sub swap1 // s' m' // TODO optimize this
     dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
     pop pop pop pop pop pop pop
-    FIND_FIRST_ENTRY_OFFSET()
+    FIND_FIRST_ENTRY()
     0x100 mstore
-}
-
-#define COMPUTE_WNAFS_COMPARISON = takes(0) returns(1) {
-        // point table starts at 0x20
-    // for two points, table will end at 0x1020
-    // store globalZ at 0x1020
-    // wnaf table starts at 0x1040
-    // 0x00 - 0x40 = P1
-    // 0x40 - 0x80 = P2
-    // 0x80 - 0xa0 = s1
-    // 0xa0 - 0xc0 = s2
-    SET_WNAF_TABLE()
-    0x80 calldataload
-    ENDOMORPHISM()
-
-    0x1042 swap1
-    WNAF()
-
-    pop 0x1020 mstore 0x1043 swap1
-    WNAF()
-
-    // r = x ^ ((x ^ y) & -(x < y));
-    pop
-    0x1020 mload    // x y
-
-    dup2 dup2 xor   // x^y x y
-    swap2           // y x x^y
-    dup2 lt 0 sub     // -(x < y) x x^y
-    swap1 swap2 and // (x^y & -(x < y)) x
-    xor             // max(x, y)
-
-    0x1020 mstore
-
-    0xa0 calldataload
-    ENDOMORPHISM()
-
-    0x1040 swap1
-    WNAF()
-    pop
-    0x1020 mload    // x y
-
-    dup2 dup2 xor   // x^y x y
-    swap2           // y x x^y
-    dup2 lt 0 sub     // -(x < y) x x^y
-    swap1 swap2 and // (x^y & -(x < y)) x
-    xor             // max(x, y)
-
-    0x1020 mstore
-    0x1041 swap1
-
-    WNAF()
-    pop
-    0x1020 mload    // x y
-
-    dup2 dup2 xor   // x^y x y
-    swap2           // y x x^y
-    dup2 lt 0 sub     // -(x < y) x x^y
-    swap1 swap2 and // (x^y & -(x < y)) x
-    xor             // max(x, y)
-
-    0x1020 mstore
-    0x20 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
-    0x1020 mstore
 }
