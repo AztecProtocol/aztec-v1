@@ -4,4 +4,4 @@
 #define BETA = takes(0) returns(1) { 0x59e26bcea0d48bacd4f263f1acdb5c4f5763473177fffffe }
 
 #define WNAF_MASK = takes(0) returns(1) { 0x1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f }
-#define WNAF_OFFSET = takes(0) returns(1) { 0x8080808080808080808080808080808080808080808080808080808080808080 }
+#define WNAF_OFFSET = takes(0) returns(1) { 0x8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b }

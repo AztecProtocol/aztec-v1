@@ -110,10 +110,31 @@ function validateTables(points, memory, referenceTables, globalZ) {
         }
     }
 }
+
+const helperMacros = `
+#include "constants.huff"
+#include "precompute_table.huff"
+#define RESCALE_SLICE_IMPL = takes(100) returns(0) {
+    RESCALE_SLICE<0x1020,gas,gas>()
+}
+
+#define RESCALE_SLICE_CODESIZE = takes(0) returns(1) {
+    __codesize(RESCALE_SLICE<0x1020,gas,gas>)
+}
+`;
+
 describe('bn128 precompute table full', () => {
     let precomputeTable;
     before(() => {
-        precomputeTable = new Runtime('precompute_table.huff', pathToTestData);
+        precomputeTable = new Runtime(helperMacros, pathToTestData);
+    });
+
+    it('macro RESCALE_SLICE has correct code size', async () => {
+        const input = [...new Array(100)].map(() => new BN(1));
+        const { bytecode } = await precomputeTable('RESCALE_SLICE_IMPL', input, [], []);
+
+        const { stack } = await precomputeTable('RESCALE_SLICE_CODESIZE', [], [], []);
+        expect(bytecode.length / 2).to.equal(stack[0].toNumber());
     });
 
     it('macro PRECOMPUTE_TABLE_FULL_OFFSET correctly calculates precomputed table for ONE point', async () => {

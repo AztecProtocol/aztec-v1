@@ -302,12 +302,19 @@ wnaf_end:
 
     // compute calldata and memory offsets
     0x60 calldatasize div // n
-    dup1 dup1 add 0x103e add       // m n
+    dup1 dup1 add 0x15e add       // m n
     swap1 0x40 mul        // s m 269 0x1fe0 16 mask b
 }
 
 #define FIND_FIRST_ENTRY = takes(0) returns(1) {
     0x2040  // m
+search_next:
+    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
+    dup1 mload iszero search_next jumpi
+}
+
+#define FIND_FIRST_ENTRY_OFFSET = takes(0) returns(1) {
+    0x1160  // m
 search_next:
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
     dup1 mload iszero search_next jumpi
@@ -353,12 +360,12 @@ wnaf_start:
     // k1 k2 m s 269 0x1fe0 16 mask b
     // We want to add 2^{133} to each scalar k1 and k2.
     // This is so that our hardcoded loop doesn't overwrite our most significant wnaf entry with zeroes
-    swap1 0x200 mstore    // k2 s m 269 0x1fe0 16 mask b // TODO remove memory storage blahblah
+    swap1 0x2000 mstore    // k2 s m 269 0x1fe0 16 mask b // TODO remove memory storage blahblah
     dup8 or // k2' s m
     dup3 ENDO_WNAF_FIXED() // w o k2 s m 269 0x1fe0 16 mask b
     pop pop
     // k2 s m 269 0x1fe0 16 mask b
-    0x200 mload dup8 or
+    0x2000 mload dup8 or
     dup3 1 add ENDO_WNAF_FIXED() // w o s m 269 0x1fe0 16 mask b
     pop pop
 
@@ -368,10 +375,8 @@ wnaf_start:
     swap1 2 swap1 sub swap1 // s' m' // TODO optimize this
     dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
     pop pop pop pop pop pop pop
-    FIND_FIRST_ENTRY()
-    0x00 0x200 mstore
-
-    0x1020 mstore
+    FIND_FIRST_ENTRY_OFFSET()
+    0x100 mstore
 }
 
 #define COMPUTE_WNAFS_COMPARISON = takes(0) returns(1) {
