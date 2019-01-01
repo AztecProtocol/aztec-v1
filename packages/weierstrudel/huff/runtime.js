@@ -79,6 +79,7 @@ function Runtime(filename, path) {
         const initGasEstimate = (memory.length * 9) + (stack.length * 3);
         const offset = initCode.length / 2;
         const { bytecode: macroCode, sourcemap } = newParser.processMacro(macroName, offset, [], macros, inputMap);
+        console.log('code size = ', macroCode.length / 2);
         const bytecode = `${initCode}${macroCode}`;
         const vm = new VM();
         const results = await runCode(vm, bytecode, calldata, offset, sourcemap);
