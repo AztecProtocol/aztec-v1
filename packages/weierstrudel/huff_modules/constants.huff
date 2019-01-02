@@ -8,3 +8,6 @@
 #define Y2 = takes(0) returns(1) { 0x20 }
 #define Z2 = takes(0) returns(1) { 0x40 }
 #define TABLE_OFFSET = takes(0) returns(1) { 0x8a }
+#define BETA_LOCATION = takes(0) returns(1) { 0xc0 }
+#define 2P_LOCATION = takes(0) returns(1) { 0x80 }
+#define 3P_LOCATION = takes(0) returns(1) { 0xa0 }

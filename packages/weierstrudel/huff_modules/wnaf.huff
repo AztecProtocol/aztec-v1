@@ -29,13 +29,13 @@
 
     // We want to calculate w' mod 269; the literal needs to preceed w' so push it onto the stack
     // before duplicating w' (we don't consume w' as we need it later) and taking the modulus
-    dup6 dup3 mod // stack state: (w' % 269) o w' w 269 0x1fe0 16 mask
+    dup8 dup3 mod // stack state: (w' % 269) o w' w 269 0x1fe0 16 mask
 
     // use the result to byte-address the lookup table we stored
     // and mask off the byte corresponding to the bit index,
     // we use 0x1fe0 instead of 0xff because the table entry is shifted by 5 bits
     // this is because we use this value to address words in memory, so '1' needs to be '32'
-    mload dup8 and // stack state: x o w' w
+    mload dup10 and // stack state: x o w' w
 
     // Tadaa, we have our index, no conditional branching in sight
     // We need this value to find the current byte-offset to store our wnaf, so add it straight to 'o'
@@ -71,16 +71,16 @@
     // The easiest way of doing this is by adding 16 into w.
     // If m > 15 then the 5th bit will be high w. So adding 16 will trigger an
     // overflow and add into the 6th bit. All lower order bits don't matter because we're about to mask them off
-    dup7 add dup8 and // stack state: w o
+    dup9 add dup10 and // stack state: w o
 }
 
 // starting stack state w o 260 0x1fe0 16 mask
 #define WNAF_SLICE_B = takes(6) returns(1) {
     dup1 dup1 returndatasize sub and
-    // w' w o 269 0x1fe0 16 mask
-    dup6 dup2 mod
+    // w' w o x x 269 0x1fe0 16 mask
+    dup8 dup2 mod
     // (w' % 269) w' w o 269 0x1fe0 16 mask
-    mload dup8 and
+    mload dup10 and
     // x w' w o
     swap2
     // w w' x o
@@ -90,7 +90,7 @@
     // o x w"
     add
     // o' w" 269 0x1fe0 16 mask
-    dup2 dup8 add dup9 and
+    dup2 dup10 add dup11 and
     // w''' o' w"
     swap2
     // w" o' w'''
@@ -171,25 +171,20 @@ search_next:
 #define COMPUTE_WNAFS = takes(0) returns(1) {
     WNAF_INIT()
 wnaf_start:
-    dup1 calldataload ENDOMORPHISM()
-    // k1 k2 m s 269 0x1fe0 16 mask b
-    // We want to add 2^{133} to each scalar k1 and k2.
-    // This is so that our hardcoded loop doesn't overwrite our most significant wnaf entry with zeroes
-    swap1 0x2000 mstore    // k2 s m 269 0x1fe0 16 mask b // TODO remove memory storage blahblah
-    dup8 or // k2' s m
-    dup3 ENDO_WNAF_FIXED() // w o k2 s m 269 0x1fe0 16 mask b
-    pop pop
-    // k2 s m 269 0x1fe0 16 mask b
-    0x2000 mload dup8 or
-    dup3 1 add ENDO_WNAF_FIXED() // w o s m 269 0x1fe0 16 mask b
-    pop pop
-
-    // stack state: s m 269 0x1fe0 16 mas kb
-
+    0x01
+    dup2 calldataload ENDOMORPHISM() // k1 k2 v s m 269 0x1fe0 16 mask b
+    dup10 or
+    swap1 dup10 or // k2 k1 v s m 269
+wnaf_continue:
+    dup5 dup4 add     // get wnaf memory offset, and add 'v'
+                      // (if k2, v = 1, increasing mem index by 1. if k1, v = 0)
+    ENDO_WNAF_FIXED() // w o k1 v s m 269 0x1fe0 16 mask b
+    pop swap1                  // k1 o v s m 269 0x1fe0 16 mas kb
+    0x01 dup4 sub swap3 wnaf_continue jumpi
+    // x x x v s m 269 0x1fe0 16 mask b
+    pop pop pop
     0x20 add    // s' m
-    swap1 2 swap1 sub swap1 // s' m' // TODO optimize this
+    swap1 0x02 swap1 sub swap1 // s' m' // TODO optimize this
     dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
     pop pop pop pop pop pop pop
-    // FIND_FIRST_ENTRY()
-    // 0x100 mstore
 }

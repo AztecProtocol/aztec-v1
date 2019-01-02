@@ -167,7 +167,7 @@ template <p1,p2,p3,mx2,my2>
     // t6 y3 x3 p t3 p t1 t4 z y x
     add
     // y3 x3 p t3 p t1 t4 z y x
-    2P() sub
+    2P_LOCATION() mload sub
     // -y3 x3 p t3 p t1 t4 z y x
     dup3 dup1
     // p p y3 x3 p t3 p t1 t4 z y x
@@ -228,7 +228,7 @@ template <p1,p2,p3,mx2,my2,mz2>
     dup3 dup8 dup11 mulmod
     // t6 y3 x3 p t3 p t1 t4 z y x
     add
-    2P() sub
+    2P_LOCATION() mload sub
     // -y3 x3 p t3 p t1 t4 z y x
     dup3 dup1 dup1
     // p p p y3 x3 p t3 p t1 t4 z y x
