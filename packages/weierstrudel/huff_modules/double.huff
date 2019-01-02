@@ -141,7 +141,7 @@ template <p1,p2,mx2,my2,mz2>
     // stack state: 2t3 t4^2 t3 t4 p t2 p t1 y x z
     add
     // stack state: x3 t3 t4 p t2 p t1 y x z
-    dup1 65664728615517825666739217235771825266088933471893470988067113683935678625749 sub
+    dup1 3P_LOCATION() mload sub
     <mx2> mstore // (storing -x3)
     // stack state: x3 t3 t4 p t2 p t1 y x z
     add
@@ -156,7 +156,7 @@ template <p1,p2,mx2,my2,mz2>
     // stack state: 2t1 y3' y x z
     add
     // stack state: y3 p y x z
-    65664728615517825666739217235771825266088933471893470988067113683935678625749 sub
+    3P_LOCATION() mload sub
     <my2> mstore // (storing y3)
     // stack state: y x z
     <p1> dup4 dup1 add

@@ -19,7 +19,7 @@ template <x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     swap2 dup4 swap1 // x p dz3 dz2 p
     dup4 mulmod // x' dz3 dz2 p
     dup4 sub    // -x' dz3 dz2 p
-    dup4 dup2 BETA() mulmod
+    dup4 dup2 BETA_LOCATION() mload mulmod
     dup1 <xEndo> mstore
     <xEndoNeg> mstore
     dup1 <x> mstore
@@ -40,7 +40,7 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     <yEndoNeg> mstore           // dz2'' p dz3'' x
     swap3 dup4 mulmod           // x' dz3'' dz2''
     <p1> sub                    // -x' dz3'' dz2''
-    <p1> BETA() dup3 mulmod     // -betax -x dz3'' dz2''
+    <p1> BETA_LOCATION() mload dup3 mulmod     // -betax -x dz3'' dz2''
     dup1 <xEndo> mstore
     <xEndoNeg> mstore
     dup1 <x> mstore
@@ -57,7 +57,7 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     swap9 mulmod                // x' dz2' p p dz3' p y dz3
     mulmod                      // x p dz3' p y dz3
     dup2 sub                    // -x p dz3' p y dz3
-    dup2 BETA() dup3 mulmod     // -betax -x p dz3' p y dz3
+    dup2 BETA_LOCATION() mload dup3 mulmod     // -betax -x p dz3' p y dz3
     dup1 <xEndo> mstore
     <xEndoNeg> mstore           // -x p dz3' p y dz3
     dup1 <x> mstore
@@ -199,7 +199,7 @@ precompute_table_start:
     // We want every point in each lookup table to have the same Z-coordinate.
     // If this is the case, all points can be treated as affine and we can use mixed addition formulae in our main loop
     // The global z coordinate is the first item on the stack, so store it at 0x00.
-    0x00 mstore // TODO hardcode?
+    returndatasize mstore // TODO hardcode?
 
 
     1 1 // add in dz^2 and dz^3 onto stack
