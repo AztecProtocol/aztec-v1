@@ -22,9 +22,9 @@ This EIP defines the standard interface and behaviours of a confidential token c
 
 ## Abstract
 <!--A short (~200 word) description of the technical issue being addressed.-->
-This standard defines a way of interacting with a *confidential* token contract. Confidential tokens do not have traditional balances - value is represented by *notes*, which are composed of a public owner and an encrypted value. Value is transferred by splitting a note into multiple notes with different owners. Similarly notes can be combined into a larger note.
+This standard defines a way of interacting with a *confidential* token contract. Confidential tokens do not have traditional balances - value is represented by *notes*, which are composed of a public owner and an encrypted value. Value is transferred by splitting a note into multiple notes with different owners. Similarly notes can be combined into a larger note. Note splitting is analogous to Bitcoin UTXOs, they are a good mental model to follow.
   
-These 'join-split' transactions must satisfy a balancing relationship (the sum of the values of the old notes must be equal to the sum of the values of the new notes) - this can be proven via a zero-knowledge proof described by the AZTEC protocol. Traditional, Bitoin UTXOs are a good mental model to follow here.
+These 'join-split' transactions must satisfy a balancing relationship (the sum of the values of the old notes must be equal to the sum of the values of the new notes) - this can be proven via a zero-knowledge proof described by the AZTEC protocol.
 
 ## Motivation
 <!--The motivation is critical for EIPs that want to change the Ethereum protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the EIP solves. EIP submissions without sufficient motivation may be rejected outright.-->
@@ -54,7 +54,7 @@ interface ERCZ20 {
 }
 ```  
 
-The token contract MUST implement the above interface to be compatible with the standard. The implementation MUST follow the specifications described below.
+The token contract must implement the above interface to be compatible with the standard. The implementation must follow the specifications described below.
 
 ### The AZTEC `noteRegistry`
 
@@ -111,7 +111,7 @@ The rationale behind using a `uint16` variable is twofold:
 function confidentialTotalSupply() view returns (uint256);
 ```
 
-This function returns the total sum of tokens that are currently represented in zero-knowledge note form by the contract. This value MUST be equal to the sum of the values of all unspent notes, which is validated by the AZTEC cryptography engine.
+This function returns the total sum of tokens that are currently represented in zero-knowledge note form by the contract. This value must be equal to the sum of the values of all unspent notes, which is validated by the AZTEC cryptography engine. Note that this function may leak privacy if there's only one user of the ERCZ20 contract instance.
 
 > <small>**returns:** the combined value of all confidential tokens</small>
 
