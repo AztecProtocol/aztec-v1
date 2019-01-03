@@ -22,9 +22,9 @@ This EIP defines the standard interface and behaviours of a confidential token c
 
 ## Abstract
 <!--A short (~200 word) description of the technical issue being addressed.-->
-This standard defines a way of interacting with a *confidential* token contract. Confidential tokens do not have traditional balances - value is represented by *notes*, which are composed of a public owner and an encrypted value. Value is transferred by splitting a note into multiple notes with different owners. Similarly notes can be combined into a larger note.  
+This standard defines a way of interacting with a *confidential* token contract. Confidential tokens do not have traditional balances - value is represented by *notes*, which are composed of a public owner and an encrypted value. Value is transferred by splitting a note into multiple notes with different owners. Similarly notes can be combined into a larger note.
   
-These 'join-split' transactions must satisfy a balancing relationship (the sum of the values of the old notes must be equal to the sum of the values of the new notes) - this can be proven via a zero-knowledge proof described by the AZTEC protocol.
+These 'join-split' transactions must satisfy a balancing relationship (the sum of the values of the old notes must be equal to the sum of the values of the new notes) - this can be proven via a zero-knowledge proof described by the AZTEC protocol. Traditional, Bitoin UTXOs are a good mental model to follow here.
 
 ## Motivation
 <!--The motivation is critical for EIPs that want to change the Ethereum protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the EIP solves. EIP submissions without sufficient motivation may be rejected outright.-->
@@ -42,19 +42,19 @@ interface ERCZ20 {
     function confidentialIsApproved(address spender, bytes32 noteHash) public view returns (bool);
     function confidentialTotalSupply() public view returns (uint256);
     function publicToken() public view returns (address);
-    function supportsProof(uint16 proofId) public view returns (bool);
+    function supportsProof(uint16 _proofId) public view returns (bool);
     function scalingFactor() public view returns (uint256);
 
-    function confidentialApprove(bytes32 noteHash, address approved, bool status, bytes signature) public;
-    function confidentialTransfer(bytes aztecProof) public;
-    function confidentialTransferFrom(uint16 aztecProofId, bytes aztecProof) public;
+    function confidentialApprove(bytes32 _noteHash, address _spender, bool _status, bytes _signature) public;
+    function confidentialTransfer(bytes _aztecProof) public;
+    function confidentialTransferFrom(uint16 _aztecProofId, bytes _aztecProof) public;
 
-    event ConfidentialNoteCreated(address indexed owner, bytes metadata);
-    event ConfidentialNoteDestroyed(address indexed owner, bytes32 noteHash);
+    event LogCreateConfidentialNote(address indexed _owner, bytes _metadata);
+    event LogDestroyConfidentialNote(address indexed _owner, bytes32 _noteHash);
 }
 ```  
 
-The token contract must implement the above interface to be compatible with the standard. The implementation must follow the specifications described below.
+The token contract MUST implement the above interface to be compatible with the standard. The implementation MUST follow the specifications described below.
 
 ### The AZTEC `noteRegistry`
 
@@ -68,20 +68,20 @@ An example implementation of ERCZ20 represents this as a mapping from `noteHash`
 
 ### View functions
 
-### ```aztecCryptographyEngine``` function
+### ```aztecCryptographyEngine```
 
 ```
-function aztecCryptographyEngine() public view returns (address)
+function aztecCryptographyEngine() view returns (address)
 ```
 
 This function returns the address of the smart contract that validates this token's zero-knowledge proofs. For the specification of the AZTEC cryptography engine please see (TODO).
 
 > <small>**returns:** address of the AZTEC cryptography engine that validates this token's zero-knowledge proofs</small>
 
-### ```publicToken``` function
+### ```publicToken```
 
 ```
-function publicToken() public view returns (address)
+function publicToken() view returns (address)
 ```
 
 This function returns the address of the public token that this confidential token is attached to. The public token should conform to the ERC20 token standard. This link enables a user to convert between an ERC20 token balance and confidential ERCZ20 notes.  
@@ -90,32 +90,35 @@ If the token has no public analogue (i.e. it is a purely confidential token) thi
 
 > <small>**returns:** address of attached ERC20 token</small>
 
-### ```supportsProof``` function
+### ```supportsProof```
 
 ```
-function supportsProof(uint16 proofId) public view returns (bool);
+function supportsProof(uint16 _proofId) view returns (bool);
 ```
 
 This function returns whether this token supports a specific AZTEC zero-knowledge proof ID. The AZTEC cryptography engine supports a number of zero-knowledge proofs. The token creator may wish to only support a subset of these proofs.  
 
-The rationale behind using a `uint16` variable is twofold - the total number of proofs supported by the engine will never grow to be larger than 65535 - the purpose of the engine is to define a 'grammar' of composable zero-knowledge proofs that can be used to define the semantics of confidential transactions and the total set will be quite small. Using an integer as a proofID allows for a simple bit-filter to validate whether a proof is supported or not (TODO put somewhere else).
+The rationale behind using a `uint16` variable is twofold:
+
+1. The total number of proofs supported by the engine will never grow to be larger than 65535
+2. The purpose of the engine is to define a 'grammar' of composable zero-knowledge proofs that can be used to define the semantics of confidential transactions and the total set will be quite small. Using an integer as a proofID allows for a simple bit-filter to validate whether a proof is supported or not (TODO put somewhere else).
 
 > <small>**returns:** boolean that defines whether a proof is supported by the token</small>
 
-### ```confidentialTotalSupply``` function
+### ```confidentialTotalSupply```
 
 ```
-function confidentialTotalSupply() public view returns (uint256);
+function confidentialTotalSupply() view returns (uint256);
 ```
 
 This function returns the total sum of tokens that are currently represented in zero-knowledge note form by the contract. This value MUST be equal to the sum of the values of all unspent notes, which is validated by the AZTEC cryptography engine.
 
 > <small>**returns:** the combined value of all confidential tokens</small>
 
-### ```scalingFactor``` function
+### ```scalingFactor```
 
 ```
-function scalingFactor() public view returns (uint256);
+function scalingFactor() view returns (uint256);
 ```
 
 This function returns the token `scalingFactor`. The range of integers that can be represented in an AZTEC note is smaller than the native word size of the EVM (~30 bits vs 256 bits). As a result, a scaling factor is applied when converting between public tokens and confidential note form. An ERC20 token value of `1` corresponds to an ERCZ20 value of `scalingFactor`.
@@ -128,19 +131,19 @@ For confidential transactions to become truly useful, it must be possible for sm
 
 To this end, a `confidentialApprove` method is required to delegate 
 
-### ```confidentialApprove``` function
+### ```confidentialApprove```
 
 ```
-function confidentialApprove(bytes32 noteHash, address approved, bool status, bytes signature) public;
+function confidentialApprove(bytes32 _noteHash, address _spender, bool _status, bytes _signature);
 ```  
 
 This function allows a note owner to approve the address `approved` to 'spend' an AZTEC note in a ```confidentialTransferFrom``` transaction.
 
 > <small>**parameters**</small>  
-> <small>`noteHash`: the hash of the AZTEC note being approved</small>  
-> <small>`approved`: the address of the entity being approved</small>  
-> <small>`status`: defines whether `approved` is being given permission to spend a note, or if permission is being revoked</small>  
-> <small>`signature`: ECDSA signature from the note owner that validates the `confidentialApprove` instruction</small>  
+> <small>`_noteHash`: the hash of the AZTEC note being approved</small>  
+> <small>`_sender`: the address of the entity being approved</small>  
+> <small>`_status`: defines whether `approved` is being given permission to spend a note, or if permission is being revoked</small>  
+> <small>`_signature`: ECDSA signature from the note owner that validates the `confidentialApprove` instruction</small>  
 
 ## Confidential Transfers
 
@@ -179,9 +182,9 @@ function confidentialTransfer(bytes proofData) public;
 
 This function is designed as an analogue to the ERC20 `transfer` method.  
 
-To enact a `confidentialTransfer` method call, the token contract must perform the following validation steps:
+To enact a `confidentialTransfer` method call, the token contract must check and perform the following:
 
-1. Validate that `cryptographyEngine.validateProof(1, proofData)` does not throw
+1. Successfully execute `cryptographyEngine.validateProof(1, proofData)`
    * If this proof is valid, then for every note being consumed in the transaction, the note owner has provided a satisfying ECDSA signature
 2. Examine the output of `cryptographyEngine.validateProof` `(createdNotes, destroyedNotes, publicOwner, publicValue)` and validate the following:
    1. Every `Note` in `destroyedNotes` exists in the token's note registry
@@ -192,27 +195,27 @@ If the above conditions are satisfied, the following steps must be performed:
 1. If `publicValue < 0`, call `erc20Token.transferFrom(publicOwner, this, uint256(-publicValue))`. If this call fails, abort the transaction
 2. If `publicValue > 0`, call `erc20Token.transfer(publicOwner, uint256(publicValue))`
 3. Update the token's total confidential supply to reflect the above transfers
-4. For every `Note` in `destroyedNotes`, remove `Note` from the token's note registry and emit `ConfidentialNoteDestroyed(Note.owner, Note.noteHash)`
-5. For every `Note` in `createdNotes`, add `Note` to the token's note registry and emit `ConfidentialNoteCreated(Note.owner, Note.metadata)`
+4. For every `Note` in `destroyedNotes`, remove `Note` from the token's note registry and emit `LogDestroyConfidentialNote(Note.owner, Note.noteHash)`
+5. For every `Note` in `createdNotes`, add `Note` to the token's note registry and emit `LogCreateConfidentialNote(Note.owner, Note.metadata)`
 6. Emit the `ConfidentialTransfer` event.
 
 ### Transacting confidential notes on behalf of a note owner
 
 For more exotic forms of transfers, mediated by smart contracts, the `confidentialTransferFrom` method is used.  
 
-### ```confidentialTransferFrom``` function
+### ```confidentialTransferFrom```
 
 ```
-confidentialTransferFrom(uint16 proofId, bytes proofData) public;
+confidentialTransferFrom(uint16 _proofId, bytes _proofData);
 ```
 
 This function enacts a confidential transfer of AZTEC notes. This function is designed as an analogue to the ERC20 `transferFrom` method, to be called by smart contracts that enact confidential transfers.  
 
-To enact `confidentialTransferFrom`, the token contract must perform the following validation steps:
+To enact a `confidentialTransferFrom` method call, the token contract must check and perform the following:
 
-1. Validate that the `proofId` corresponds to a proof supported by the token
-2. Validate that `cryptographyEngine.validateProof(proofId, proofData)` does not throw
-3. Examine the output of `cryptographyEngine.validateProof` and validate the following:
+1. The `proofId` must correspond to a proof supported by the token
+2. Successfully execute `cryptographyEngine.validateProof(proofId, proofData)`
+3. Examine the output of `cryptographyEngine.validateProof` `(createdNotes, destroyedNotes, publicOwner, publicValue)` and validate the following:
    1. Every `Note` in `destroyedNotes` exists in the token's note registry
    2. Every `Note` in `createdNotes` does *not* exist in the token's note registry
    3. For every `Note` in `destroyedNotes`, `confidentialIsApproved(noteHash, msg.sender)` returns `true`
@@ -222,35 +225,35 @@ If the above conditions are satisfied, the following steps must be performed:
 1. If `publicValue < 0`, call `erc20Token.transferFrom(publicOwner, this, uint256(-publicValue))`. If this call fails, abort the transaction
 2. If `publicValue > 0`, call `erc20Token.transfer(publicOwner, uint256(publicValue))`
 3. Update the token's total confidential supply to reflect the above transfers
-4. For every `Note` in `destroyedNotes`, remove `Note` from the token's note registry and emit `ConfidentialNoteDestroyed(Note.owner, Note.noteHash)`
-5. For every `Note` in `createdNotes`, add `Note` to the token's note registry and emit `ConfidentialNoteCreated(Note.owner, Note.metadata)`
-6. Emit the `ConfidentialTransfer` event.
+4. For every `Note` in `destroyedNotes`, remove `Note` from the token's note registry and emit `LogDestroyConfidentialNote(Note.owner, Note.noteHash)`
+5. For every `Note` in `createdNotes`, add `Note` to the token's note registry and emit `LogCreateConfidentialNote(Note.owner, Note.metadata)`
+6. Emit the `LogConfidentialTransfer` event.
 
 ### Events
 
-### ```ConfidentialNoteCreated``` event
+### ```LogCreateConfidentialNote```
 
 ```
-event ConfidentialNoteCreated(address indexed owner, bytes metadata)
+event LogCreateConfidentialNote(address indexed _owner, bytes_metadata)
 ```  
 
 An event that logs the creation of a note against the note owner and the note metadata.  
 
 > <small>**parameters**</small>  
-> <small>`owner`: The Ethereum address of the note owner</small>  
-> <small>`metadata`: Data required by the note owner to recover and decrypt their note</small>
+> <small>`_owner`: The Ethereum address of the note owner</small>  
+> <small>`_metadata`: Data required by the note owner to recover and decrypt their note</small>
 
-### ```ConfidentialNoteDestroyed``` event
+### ```LogDestroyConfidentialNote```
 
 ```
-event ConfidentialNoteDestroyed(address indexed owner)
+event LogDestroyConfidentialNote(address indexed owner)
 ```  
 
 An event that logs the destruction of a note against the note owner and the note metadata.  
 
 > <small>**parameters**</small>  
-> <small>`owner`: The ethereum address of the note owner</small>  
-> <small>`noteHash`: The hash of the note. Note `metadata` can be recovered from the `ConfidentialNoteCreated` event that created this note</small>
+> <small>`_owner`: The ethereum address of the note owner</small>  
+> <small>`_noteHash`: The hash of the note. Note `metadata` can be recovered from the `LogDestroyConfidentialNote` event that created this note</small>
 
 ## Implementation
 <!--The implementations must be completed before any EIP is given status "Final", but it need not be completed before the EIP is accepted. While there is merit to the approach of reaching consensus on the specification and rationale before writing code, the principle of "rough consensus and running code" is still useful when it comes to resolving many discussions of API details.-->
