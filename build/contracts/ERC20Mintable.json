@@ -838,15 +838,15 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {
-    "7923": {
+    "4": {
       "events": {},
       "links": {},
-      "address": "0xC1233a47DC93E1D5C3B16f561Ce2445A594cD7A3",
-      "transactionHash": "0x6cbee13a52a56d937a373a4261f7d159e451e46e18534ab020f874a64160d0d7"
+      "address": "0x34aB5a912abf2014EE2E9EdC0Ac29A02DD613712",
+      "transactionHash": "0x2880082deed1471d80297bf31f5fa343a53596de2a501316d5754fd332e9ba6f"
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-03T15:28:17.909Z",
+  "updatedAt": "2019-01-03T20:38:59.973Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

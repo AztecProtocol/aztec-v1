@@ -13963,7 +13963,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-03T15:28:10.496Z",
+  "updatedAt": "2019-01-03T20:36:30.450Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

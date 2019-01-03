@@ -932,20 +932,20 @@
                 {
                   "externalReferences": [
                     {
-                      "_domainHash": {
-                        "declaration": 107,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "2657:11:1",
-                        "valueSize": 1
-                      }
-                    },
-                    {
                       "_chainId": {
                         "declaration": 89,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "2567:8:1",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_domainHash": {
+                        "declaration": 107,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "2657:11:1",
                         "valueSize": 1
                       }
                     }
@@ -5927,20 +5927,20 @@
                 {
                   "externalReferences": [
                     {
-                      "_domainHash": {
-                        "declaration": 107,
-                        "isOffset": false,
-                        "isSlot": false,
-                        "src": "2657:11:1",
-                        "valueSize": 1
-                      }
-                    },
-                    {
                       "_chainId": {
                         "declaration": 89,
                         "isOffset": false,
                         "isSlot": false,
                         "src": "2567:8:1",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_domainHash": {
+                        "declaration": 107,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "2657:11:1",
                         "valueSize": 1
                       }
                     }
@@ -10054,7 +10054,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-03T15:28:10.493Z",
+  "updatedAt": "2019-01-03T20:36:30.448Z",
   "devdoc": {
     "methods": {},
     "title": "ERC20 interface"

@@ -1,26 +1,16 @@
-const Wallet = require('ethereumjs-wallet');
+require('dotenv').config();
 const { toWei, toHex } = require('web3-utils');
-const NonceTrackerSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
-const WalletProvider = require('truffle-wallet-provider');
-
-// when deploying to a non-development network, add the private key of wallet being used into 'accounts.json'
-const accounts = require('./accounts');
-
-const keys = accounts.keys || [{ public: '', private: '' }];
-
-const wallet = Wallet.fromPrivateKey(Buffer.from(keys[0].private.slice(2), 'hex'));
+const HDWalletProvider = require('truffle-hdwallet-provider');
 
 function createProvider(infuraUrl) {
+    if (!process.env.MNEMONIC || !process.env.INFURA_API_KEY) {
+        console.log('Please load your MNEMONIC and INFURA_API_KEY in a .env file');
+        process.exit(1);
+    }
     return () => {
-        const hdWallet = new WalletProvider(wallet, infuraUrl);
-        const nonceTracker = new NonceTrackerSubprovider();
-        // eslint-disable-next-line no-underscore-dangle
-        hdWallet.engine._providers.unshift(nonceTracker);
-        nonceTracker.setEngine(hdWallet.engine);
-        return hdWallet;
+        return new HDWalletProvider(process.env.MNEMONIC, infuraUrl + process.env.INFURA_API_KEY);
     };
 }
-
 
 module.exports = {
     // See <http://truffleframework.com/docs/advanced/configuration>
@@ -43,20 +33,20 @@ module.exports = {
             network_id: '*', // Match any network id
         },
         kovan: {
-            provider: createProvider('https://kovan.infura.io'),
+            provider: createProvider('https://kovan.infura.io/'),
             gas: 4600000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '42',
         },
         mainnet: {
-            provider: createProvider('https://mainnet.infura.io'),
+            provider: createProvider('https://mainnet.infura.io/'),
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
         },
         rinkeby: {
-            provider: createProvider('https://rinkeby.infura.io'),
-            gas: 4600000,
+            provider: createProvider('https://rinkeby.infura.io/'),
+            gas: 4700000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
         },
