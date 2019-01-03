@@ -593,15 +593,15 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {
-    "4": {
+    "7923": {
       "events": {},
       "links": {},
-      "address": "0x54563FedAd738B3E26cBE48cA47dBE334f5C12d9",
-      "transactionHash": "0xe7b92041977ba9ecb40aa7e91535ebe8235760856fd60a89459b31da0059a874"
+      "address": "0xFF08511c8f10789B266effaf26bf0C33EBA06B2B",
+      "transactionHash": "0x8db580d2170c4012561543d650f9f3e52bade97df127c3d5c48fdd2051331368"
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-03T20:39:30.071Z",
+  "updatedAt": "2019-01-03T21:18:47.564Z",
   "devdoc": {
     "author": "Tom Waite",
     "methods": {
