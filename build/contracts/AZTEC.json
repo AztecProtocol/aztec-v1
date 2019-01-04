@@ -684,6 +684,12 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {
+    "4": {
+      "events": {},
+      "links": {},
+      "address": "0xd4aB8a2507B1B5Ba4c936b07A5a783147cfF704C",
+      "transactionHash": "0x1f896ba610da0234462f77daff0c82322c90caf890c9ce5c6228c0d3846c6a84"
+    },
     "7923": {
       "events": {},
       "links": {},
@@ -692,7 +698,7 @@
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-03T21:18:47.296Z",
+  "updatedAt": "2019-01-04T13:23:06.602Z",
   "devdoc": {
     "author": "Zachary Williamson, AZTEC",
     "methods": {},

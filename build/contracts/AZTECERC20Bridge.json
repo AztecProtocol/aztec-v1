@@ -10122,6 +10122,40 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {
+    "4": {
+      "events": {
+        "0xfc823e830d9b24db06997c3fc70e7e94abbdfebfaad33b6e911ca347118e77f6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "domainHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "contractAddress",
+              "type": "address"
+            }
+          ],
+          "name": "LogCreate",
+          "type": "event",
+          "signature": "0xfc823e830d9b24db06997c3fc70e7e94abbdfebfaad33b6e911ca347118e77f6"
+        },
+        "0x58758e7bac6aec2d7ec4a6f9e81122e5d59e44caecb6f3c549f6fc8cdb92c82b": {
+          "anonymous": false,
+          "inputs": [],
+          "name": "LogConfidentialTransfer",
+          "type": "event",
+          "signature": "0x58758e7bac6aec2d7ec4a6f9e81122e5d59e44caecb6f3c549f6fc8cdb92c82b"
+        }
+      },
+      "links": {
+        "AZTEC": "0xd4aB8a2507B1B5Ba4c936b07A5a783147cfF704C"
+      },
+      "address": "0x873e6283eaC4d180Ccc409a0E6DBB44a22e6F1eD",
+      "transactionHash": "0x57fcfb6fe8d67d9190032f7fcb3ddf5f3607306fcb1be69d74241c5cbc596783"
+    },
     "7923": {
       "events": {
         "0xfc823e830d9b24db06997c3fc70e7e94abbdfebfaad33b6e911ca347118e77f6": {
@@ -10158,7 +10192,7 @@
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-03T21:18:47.303Z",
+  "updatedAt": "2019-01-04T13:23:06.612Z",
   "devdoc": {
     "author": "Zachary Williamson, AZTEC Copyright Spilsbury Holdings Ltd 2018. All rights reserved. We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum. Our full vision of the protocol includes confidential cross-asset interactions via our family of AZTEC zero-knowledge proofs and the AZTEC token standard, stay tuned for updates!*",
     "methods": {
