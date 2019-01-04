@@ -48,7 +48,7 @@
     "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
     "test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec",
     "test:coverage": "NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec",
-    "doorbell:test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./extractPublicKey --trace-warnings --exit --colors --recursive --reporter spec",
+    "test:doorbell": "NODE_ENV=TEST ./node_modules/.bin/mocha ./extractPublicKey --trace-warnings --exit --colors --recursive --reporter spec",
     "demo:rinkeby": "NODE_ENV=RINKEBY node ./demo/demoTransactions.js",
     "demo:ropsten": "NODE_ENV=ROPSTEN node ./demo/demoTransactions.js",
     "demo:kovan": "NODE_ENV=KOVAN node ./demo/demoTransactions.js",

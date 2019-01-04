@@ -602,12 +602,12 @@
     "7923": {
       "events": {},
       "links": {},
-      "address": "0xFF08511c8f10789B266effaf26bf0C33EBA06B2B",
-      "transactionHash": "0x8db580d2170c4012561543d650f9f3e52bade97df127c3d5c48fdd2051331368"
+      "address": "0x301354D1E382f33b04f4B52Ce7D5100a2b7E2d79",
+      "transactionHash": "0xd1f97c7c6f3b4e46013d991ed4d74640b82e5d7408f4acf571cde68cb405414c"
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-04T13:23:37.125Z",
+  "updatedAt": "2019-01-04T13:47:40.431Z",
   "devdoc": {
     "author": "Tom Waite",
     "methods": {

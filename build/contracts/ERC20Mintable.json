@@ -847,12 +847,12 @@
     "7923": {
       "events": {},
       "links": {},
-      "address": "0x1FE87Cc75caEA5503c932D01994A36245F467433",
-      "transactionHash": "0xd898d1a6b0da9626d1fd0047a79898843dd1b7d764291044f818a7ca250690bc"
+      "address": "0xC1233a47DC93E1D5C3B16f561Ce2445A594cD7A3",
+      "transactionHash": "0x6cbee13a52a56d937a373a4261f7d159e451e46e18534ab020f874a64160d0d7"
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-04T13:23:06.600Z",
+  "updatedAt": "2019-01-04T13:47:40.205Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

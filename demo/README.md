@@ -19,28 +19,25 @@ If you're running this script on a local test-net, run ```truffle migrate``` to 
 
 ## API Docs
 
-API documentation can be found on our [github pages site](https://aztecprotocol.github.io/AZTEC/)  
+API documentation can be found on our [github pages site](https://aztecprotocol.github.io/AZTEC/).
 
 ## Usage
 
-clone this repo to your desired directory
+Clone this repo to your desired directory:
 
-run ```git submodule update --init --recursive```  
+1. run ```git submodule update --init --recursive```  
+2. followed by ```npm install``` && ```npm install ./aztec-crypto-js```  
 
-followed by ```npm install``` && ```npm install ./aztec-crypto-js```  
+Then, to run a test net and deploy contracts: 
 
-to run a test net and deploy contracts, run  
+1. ```node ./node_modules/ganache-cli/cli.js``` && ```truffle migrate```  
+2. run truffle tests with ```truffle test```  
+3. run javascript tests with ```npm run test```  
 
-```node ./node_modules/ganache-cli/cli.js``` && ```truffle migrate```  
+Finally, run the demo transactions script (to the appropriate network) with the following:
 
-run truffle tests with ```truffle test```  
-
-run javascript tests with ```npm run test```  
-
-run the demo transactions script (to the appropriate network) with the following:
-
-```npm run demoDevelopment``` (to a network running on port 8545)  
-```npm run demoRinkeby```  
-```npm run demoKovan```  
-```npm run demoRopsten```  
-```npm run demoMainnet```  
+```npm run demo:development``` (to a network running on port 8545)  
+```npm run demo:rinkeby```  
+```npm run demo:kovan```  
+```npm run demo:ropsten```  
+```npm run demo:mainnet```  

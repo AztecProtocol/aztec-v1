@@ -10185,14 +10185,14 @@
         }
       },
       "links": {
-        "AZTEC": "0x7F054Ee9Ad74767326468049D70d135266d93ba8"
+        "AZTEC": "0xAc2aEEc1043Af0946e4f11ec9fA36ccC74061a1A"
       },
-      "address": "0x32c96d2D9aB285388D99C1a35533546d60955737",
-      "transactionHash": "0x908477c819c06e5e087edb86ce1a8caf9dcc1978b85feb291223f4378292c462"
+      "address": "0x419944C01f3404cc78Ca177736618Cc7986D4430",
+      "transactionHash": "0xe1226e0ceeea7f0ae03a5d3b37ded61dee96a2e69294b1b43104450b0273e492"
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-04T13:23:06.612Z",
+  "updatedAt": "2019-01-04T13:47:40.214Z",
   "devdoc": {
     "author": "Zachary Williamson, AZTEC Copyright Spilsbury Holdings Ltd 2018. All rights reserved. We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum. Our full vision of the protocol includes confidential cross-asset interactions via our family of AZTEC zero-knowledge proofs and the AZTEC token standard, stay tuned for updates!*",
     "methods": {
