@@ -68,7 +68,7 @@ template <getP2Location,p,2p>
 /// The first point in our table is affine (subsequent point's have their z-coordinate rescaled by the previous table output)
 /// So we use affine addition formulae to handle this case and squeeze a couple of mulmod opcodes out
 template <mx2,my2,p,2p>
-#define ADD_AFFINE = takes(4) returns(11) {   
+#define ADD_AFFINE = takes(2) returns(11) {   
     <p> <my2> mload dup3 add
     // t2 p y x
     <mx2> mload dup5 add

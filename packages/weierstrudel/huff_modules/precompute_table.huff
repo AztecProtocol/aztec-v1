@@ -7,8 +7,8 @@
 // initial stack state is: dz3 dz2 y x p
 // final stack is dz3 dz2 p
 template <x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define RESCALE_15_TRANSITION = takes(5) returns(0) {
-    // TODO, could rewrite macros to remove these 2 swap ops
+#define RESCALE_15_TRANSITION = takes(5) returns(3) {
+    // TODO, could rewrite PRECOMPUTE_ADD_AND_RESCALE to remove these 2 swap ops
     swap2   // y dz2 dz3 x p
     dup5 swap1  // y p dz2 dz3 x p
     dup4 mulmod // y' dz2 dz3 x p
@@ -51,9 +51,8 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
 /// dz2 and dz3 after scaling the relevant x/y coordinates.
 /// So this algorithm consumes these stack variables.
 // expected stack state = dz3 dz2 p dz2' p p dz3' p y x
-// final stack state    = dz3'' dz2''
 template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define RESCALE_END = takes(10) returns(2) {
+#define RESCALE_END = takes(10) returns(0) {
     swap9 mulmod                // x' dz2' p p dz3' p y dz3
     mulmod                      // x p dz3' p y dz3
     dup2 sub                    // -x p dz3' p y dz3
@@ -96,20 +95,20 @@ template <p1,p2>
 }
 
 template <p1>
-#define PRECOMPUTE_RESCALE_INPUT = takes(4) returns(6) {
-    dup1 <p1> dup1 dup1             // p p p z z -y x B p
-    dup4 dup1 mulmod                // zz p p z z -y x B p
-    dup2 dup2                       // zz p zz p p z z -y x B p
+#define PRECOMPUTE_RESCALE_INPUT = takes(4) returns(5) {
+    dup1 <p1> dup1 dup1             // p p p z z -y x p?
+    dup4 dup1 mulmod                // zz p p z z -y x
+    dup2 dup2                       // zz p zz p p z z -y x
     PRECOMPUTE_ITERATOR() mload 
-    calldataload mulmod             // x' zz p p z z -y x B p
-    swap4 mulmod                    // zzz p x' z -y x B p
+    calldataload mulmod             // x' zz p p z z -y x
+    swap4 mulmod                    // zzz p x' z -y x
     PRECOMPUTE_ITERATOR() mload 0x20 add
-    calldataload mulmod             // y' x' z -y x B p 
+    calldataload mulmod             // y' x' z -y x
 }
 
 
 template <m,p1,p2>
-#define RESCALE_SLICE = takes(0) returns(0) {
+#define RESCALE_SLICE = takes(64) returns(2) {
     RESCALE_15_TRANSITION<m+0x1c0,m+0x1e0,m+0x200,m+0x220,m+0x5c0,m+0x5e0,m+0x600,m+0x620>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
     RESCALE<p1,m+0x180,m+0x1a0,m+0x240,m+0x260,m+0x580,m+0x5a0,m+0x640,m+0x660>()
@@ -132,7 +131,7 @@ template <m,p1,p2>
 }
 
 template <m,p1,p2>
-#define RESCALE_SLICE_END = takes(0) returns(0) {
+#define RESCALE_SLICE_END = takes(64) returns(0) {
     RESCALE_15_TRANSITION<m+0x1c0,m+0x1e0,m+0x200,m+0x220,m+0x5c0,m+0x5e0,m+0x600,m+0x620>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
     RESCALE<p1,m+0x180,m+0x1a0,m+0x240,m+0x260,m+0x580,m+0x5a0,m+0x640,m+0x660>()
@@ -152,7 +151,7 @@ template <m,p1,p2>
 }
 
 // We expect the following stack state: p 2p 3p
-#define PRECOMPUTE_TABLE_FULL = takes(0) returns(0) {
+#define PRECOMPUTE_TABLE_FULL = takes(3) returns(3) {
 // first iteration. This point is affine, so we can use affine doubling and addition formulae to start with.
 // Saves about 100 gas because we can cut out a few mulmod ops
     0x40 3 calldatasize div dup1 add sub calldataload
