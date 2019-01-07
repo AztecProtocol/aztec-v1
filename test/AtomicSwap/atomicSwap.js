@@ -28,10 +28,10 @@ Outline of test:
 */
 
 contract('AtomicSwap', (accounts) => {
-    let atomicSwap;
-    let testNotes;
-
     describe('success states', () => {
+        let atomicSwap;
+        let testNotes;
+
         beforeEach(async () => {
             atomicSwap = await AtomicSwap.new(accounts[0]);
 
@@ -79,6 +79,73 @@ contract('AtomicSwap', (accounts) => {
             console.log('gas used = ', gasUsed);
 
             expect(result).to.equal(true);
+        });
+    });
+
+    describe('failure cases', () => {
+        let testNotes;
+        let atomicSwap;
+
+        beforeEach(async () => {
+            atomicSwap = await AtomicSwap.new(accounts[0]);
+
+            const spendingKeys = [
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+            ];
+
+            const noteValues = [10, 20, 10, 20];
+
+            testNotes = {
+                makerNotes: {
+                    bidNote: notes.create(`0x${spendingKeys[0].getPublic(true, 'hex')}`, noteValues[0]),
+                    askNote: notes.create(`0x${spendingKeys[1].getPublic(true, 'hex')}`, noteValues[1]),
+                },
+                takerNotes: {
+                    bidNote: notes.create(`0x${spendingKeys[2].getPublic(true, 'hex')}`, noteValues[2]),
+                    askNote: notes.create(`0x${spendingKeys[3].getPublic(true, 'hex')}`, noteValues[3]),
+                },
+            };
+        });
+
+        it.only('Validate failure for incorrect number of input notes', async () => {
+            const noteValues = [10, 20, 30, 10, 20, 30];
+
+            const spendingKeys = [
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+            ];
+
+            const tooManyNotes = {
+                makerNotes: {
+                    bidNote: notes.create(`0x${spendingKeys[0].getPublic(true, 'hex')}`, noteValues[0]),
+                    askNote: notes.create(`0x${spendingKeys[1].getPublic(true, 'hex')}`, noteValues[1]),
+                    extraNote: notes.create(`0x${spendingKeys[2].getPublic(true, 'hex')}`, noteValues[2]),
+
+                },
+                takerNotes: {
+                    bidNote: notes.create(`0x${spendingKeys[3].getPublic(true, 'hex')}`, noteValues[3]),
+                    askNote: notes.create(`0x${spendingKeys[4].getPublic(true, 'hex')}`, noteValues[4]),
+                    extraNote: notes.create(`0x${spendingKeys[5].getPublic(true, 'hex')}`, noteValues[5]),
+                },
+            };
+            
+            const { proofData, challenge } = atomicProof.constructIncorrectAtomicSwap(tooManyNotes, accounts[0]);
+            console.log('proof data: ', proofData);
+
+            const result = await atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+
+            console.log('result: ', result);
+            expect(result).to.equal(false);
         });
     });
 });
