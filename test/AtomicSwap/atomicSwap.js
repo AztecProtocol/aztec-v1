@@ -5,7 +5,6 @@ const { padLeft, sha3 } = require('web3-utils');
 const crypto = require('crypto');
 
 // ### Internal Dependencies
-const atomicSwapProof = require('../../aztec-crypto-js/proof/atomicSwapProof');
 const { t2, GROUP_MODULUS } = require('../../aztec-crypto-js/params');
 const secp256k1 = require('../../aztec-crypto-js/secp256k1/secp256k1');
 const notes = require('../../aztec-crypto-js/note/note');
@@ -34,7 +33,7 @@ contract('AtomicSwap', (accounts) => {
 
     describe('success states', () => {
         beforeEach(async () => {
-            atomicSwap = await AtomicSwap.new(accounts[0]); 
+            atomicSwap = await AtomicSwap.new(accounts[0]);
 
             const spendingKeys = [
                 secp256k1.keyFromPrivate(crypto.randomBytes(32)),
@@ -59,29 +58,20 @@ contract('AtomicSwap', (accounts) => {
 
 
         it('validate that the Javascript proof is constructed correctly', () => {
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes);
-            const result = atomicProof.verifyAtomicSwap(proofData, challenge);
-            expect(result).to.equal(1);
+            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
+            const result = atomicProof.verifyAtomicSwap(proofData, challenge, accounts[0]);
+            expect(result).to.equal(true);
         });
-     
+
         it('validate that the smart contract can verify the atomic swap proof', async () => {
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes);
+            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
             
-            // Just need a placeholder m - not actually used for anything
-            const m = 2;
-
-            const result = await atomicSwap.validateAtomicSwap(proofData, m, challenge, t2, {
+            const result = await atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             });
 
-            const gasUsed = await atomicSwap.validateAtomicSwap.estimateGas(proofData, m, challenge, t2, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-
-            console.log('gas used: ', gasUsed);
-            expect(result).to.equal(1);
+            expect(result).to.equal(true);
         });
     });
 });
