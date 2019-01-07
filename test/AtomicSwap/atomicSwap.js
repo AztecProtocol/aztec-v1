@@ -1,8 +1,11 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
+// ### External Dependencies
+const BN = require('bn.js');
+const crypto = require('crypto');
 
 // ### Internal Dependencies
 const exceptions = require('../exceptions');
-const { t2 } = require('../../aztec-crypto-js/params');
+const { t2, GROUP_MODULUS } = require('../../aztec-crypto-js/params');
 const atomicProof = require('../../aztec-crypto-js/proof/atomicSwapProof');
 const atomicSwapHelpers = require('../../aztec-crypto-js/proof/atomicSwapHelpers');
 
@@ -59,23 +62,19 @@ contract('AtomicSwap tests', (accounts) => {
         });
     });
 
-    describe('failure cases', () => {
-        let testNotes;
+    describe.only('failure cases', () => {
         let atomicSwap;
 
         beforeEach(async () => {
             atomicSwap = await AtomicSwap.new(accounts[0]);
-            const makerNoteValues = [10, 20];
-            const takerNoteValues = [10, 20];
-            testNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
         });
 
         it('Validate failure for incorrect input note values (k1 != k3, k2 != k4)', async () => {
             const makerNoteValues = [10, 50];
             const takerNoteValues = [20, 20];
-            const unbalancedNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            const testNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(unbalancedNotes, accounts[0]);
+            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
 
             await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
                 from: accounts[0],
@@ -86,14 +85,49 @@ contract('AtomicSwap tests', (accounts) => {
         it('Validate failure for incorrect number of input notes', async () => {
             const makerNoteValues = [10, 20, 30];
             const takerNoteValues = [10, 20, 30];
-            const tooManyNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            const testNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(tooManyNotes, accounts[0]);
+            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
 
             await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
+        });
+
+        it('Validate failure for a bid note of zero value', async () => {
+            const makerNoteValues = [0, 20];
+            const takerNoteValues = [10, 20];
+            const testNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            
+            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
+
+            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
+
+        it.only('Validate failure for using a fake challenge', async () => {
+            const makerNoteValues = [10, 20];
+            const takerNoteValues = [10, 20];
+            const testNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            const { proofData } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
+
+            const fakeChallenge = new BN(crypto.randomBytes(32), 16).umod(GROUP_MODULUS).toString(10);
+
+            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, fakeChallenge, t2, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
+
+        it('Validate failure for using fake proof data', async () => {
+
+        });
+
+        it('Validate failure when points not on curve', async () => {
+
         });
     });
 });
