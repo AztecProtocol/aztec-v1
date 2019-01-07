@@ -1,7 +1,8 @@
 pragma solidity ^0.4.24;
 
 library AtomicSwapInterface {
-    function validateAtomicSwap(bytes32[6][], uint, uint, bytes32[4]) external pure returns (bool) {}
+    function validateAtomicSwap(bytes32[6][], uint, bytes32[4]) external pure returns (bool) {}
+                                // 6 pieces of data per note, unspecified number of notes
 }
 
 /**
@@ -11,6 +12,7 @@ library AtomicSwapInterface {
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
  * The intended use case is to call this externally via `staticcall`. External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no storage and makes no external calls (other than to precompiles)
  * Copyright Spilbury Holdings Ltd 2018. All rights reserved.
+ * Note: Elements of the memory map are currently unpopulated. This is deliberate - to keep the memory maps consistent across different use case of the AZTEC protocol
  **/
 contract AtomicSwap {
     /**
@@ -24,7 +26,7 @@ contract AtomicSwap {
 
             // We don't check for function signatures, there's only one function that ever gets called: validateJoinSplit()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract through a compatible ABI
-            validateJoinSplit()
+            validateAtomicSwap()
 
             // should not get here
             mstore(0x00, 404)
@@ -34,10 +36,9 @@ contract AtomicSwap {
              * @dev Validate an AZTEC protocol JoinSplit zero-knowledge proof
              * Calldata Map is
              * 0x04:0x24       = calldata location of start of ```note``` dynamic array
-             * 0x24:0x44       = m, which defines the index separator between input notes ando utput notes
-             * 0x44:0x64       = Fiat-Shamir heuristicified random challenge
-             * 0x64:0xe4       = G2 element t2, the trusted setup public key
-             * 0xe4:0x104      = start of ```note``` dynamic array, contains the size of the array (```n```)
+             * 0x24:0x44       = Fiat-Shamir heuristicified random challenge
+             * 0x44:0xc4       = G2 element t2, the trusted setup public key
+             * 0xc4:0xe4      = start of ```note``` dynamic array, contains the size of the array (```n```)
              * Subsequent calldata arranged in 0xc0 sized blocks of data, each representing an AZTEC commitment and zero-knowledge proof variables
              *
              * Note data map (uint[6]) is
@@ -45,14 +46,6 @@ contract AtomicSwap {
              * 0x20:0x40       = Z_p element \bar{a}_i
              * 0x40:0x80       = G1 element \gamma_i
              * 0x80:0xc0       = G1 element \sigma_i
-             *
-             * The last element in the note array is special and contains the following:
-             * 0x00:0x20       = Z_p element k_{public}
-             * 0x20:0x40       = Z_p element \bar{a}_i
-             * 0x40:0x60       = G1 element \gamma_i
-             * 0x60-0x80       = G1 element \sigma_i
-             * We can recover \bar{k}_{n-1} from the homomorphic sum condition \sum_{i=0}^{m-1}\bar{k}_i = \sum_{i=m}^{n-1}\bar{k}_i + k_{public}
-             * So we use the empty slot to store k_{public}, which represents any public 'value' being blinded into zero-knowledge notes
              *
              * We use a hard-coded memory map to reduce gas costs - if this is not called as an external contract then terrible things will happen!
              * 0x00:0x20       = scratch data to store result of keccak256 calls
@@ -63,16 +56,13 @@ contract AtomicSwap {
              * 0x100:0x160     = scratch data to store \sigma_i and a multiplication scalar
              * 0x160:0x1a0     = stratch data to store result of G1 point additions
              * 0x1a0:0x1c0     = scratch data to store result of \sigma_i^{-cx_{i-m-1}}
-             * 0x1c0:0x200     = location of pairing accumulator \sigma_{acc}, where \sigma_{acc} = \prod_{i=m}^{n-1}\sigma_i^{cx_{i-m-1}}
              * 0x220:0x260     = scratch data to store \gamma_i^{cx_{i-m-1}}
-             * 0x260:0x2a0     = location of pairing accumulator \gamma_{acc}, where \gamma_{acc} = \prod_{i=m}^{n-1}\gamma_i^{cx_{i-m-1}}
-             * 0x2a0:0x2c0     = msg.sender (contract should be called via delegatecall/staticcall)
-             * 0x2c0:0x2e0     = kn (memory used to reconstruct hash starts here)
-             * 0x2e0:0x300     = m
+             * 0x2e0:0x300     = msg.sender (contract should be called via delegatecall/staticcall)
              * 0x300:???       = block of memory that contains (\gamma_i, \sigma_i)_{i=0}^{n-1} concatenated with (B_i)_{i=0}^{n-1}
              **/
-            function validateJoinSplit() {
-
+            function validateAtomicSwap() {
+                // calldatacopy(0x00, 0x04, sub(calldatasize, 0x04))
+                // return(0x00, sub(calldatasize, 0x04))
                 /*
                 ///////////////////////////////////////////  SETUP  //////////////////////////////////////////////
                 */
@@ -81,34 +71,39 @@ contract AtomicSwap {
                 mstore(0xa0, 8489654445897228341090914135473290831551238522473825886865492707826370766375) // h_y
                 let notes := add(0x04, calldataload(0x04))
                 let n := calldataload(notes)
+
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
-                let challenge := mod(calldataload(0x44), gen_order)
+                let challenge := mod(calldataload(0x24), gen_order)
 
-                // recover k_{public} and calculate k_{public}
-                let kn := calldataload(sub(calldatasize, 0xc0))
+                mstore(0x2e0, caller) // store the msg.sender, to be hashed later
 
-                // add kn to final hash table
-                mstore(0x2a0, caller)
-                mstore(0x2c0, kn)
-                kn := mulmod(sub(gen_order, kn), challenge, gen_order) // we actually want c*k_{public}
                 hashCommitments(notes, n)
-                let b := add(0x300, mul(n, 0x80))
-
+                let b := add(0x300, mul(n, 0x80)) // setting the pointer to the point in memory where the commitments end
 
                 /*
-                ///////////////////////////  For loop to calculate blinding factors  /////////////////////////////////////
+                ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
                 */
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
 
-                    // Get the calldata index of this note
+                    // Get the calldata index of this note and associated parameters
                     let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
-                    let k
+                    let k   // value will be assigned later, depending on whether it's a maker or taker note
                     let a := calldataload(add(noteIndex, 0x20))
                     let c := challenge
 
-                    // Check this commitment is well formed...
+                    switch gt(i, 1) // i (an indexer) > 1 denotes a taker note
+                    case 1 { // if it's a taker note
+                        k := calldataload(sub(noteIndex, add(0xc0, 0xc0)))
+                    } 
+                        
+                    case 0 { // if it's a maker note
+                        k := calldataload(noteIndex)
+                    }
+
+
+                    // Check this commitment is well formed
                     validateCommitment(noteIndex, k, a)
                     
                     // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
@@ -148,24 +143,26 @@ contract AtomicSwap {
                     // Store resulting point B at memory index b - storing the calculated blinding factor
                     result := and(result, staticcall(gas, 6, 0x160, 0x80, b, 0x40))
 
+
                     // throw transaction if any calls to precompiled contracts failed
                     if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
-
+                // return (add(0x300, mul(n, 0x80)), mul(0x40, 4))
                 // Both bid notes already exist in their revelant AZTEC note registries - so can inductively infer that the ask notes are in the required range
                 // Therefore, don't need a range proof
 
 
                 /*
-                ////////////////////  Reconstruct the intiial challenge and validate a match  ////////////////////////////////
+                ////////////////////  RECONSTRUCT INITIAL CHALLENGE AND VERIFY A MATCH  ////////////////////////////////
                 */
-                
+
 
                 // We now have the note commitments and the calculated blinding factors in a block of memory
-                // starting at 0x2a0, of size (b - 0x2a0).
+                // starting at 0x2e0, of size (b - 0x2a0).
                 // Hash this block to reconstruct the initial challenge and validate that they match
-                let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
+                let expected := mod(keccak256(0x2e0, sub(b, 0x2e0)), gen_order)
+
                 if iszero(eq(expected, challenge)) {
 
                     // No! Bad! No soup for you!
@@ -229,8 +226,18 @@ contract AtomicSwap {
             function hashCommitments(notes, n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
                     let index := add(add(notes, mul(i, 0xc0)), 0x60)
+
+                    // Storing in memory 
+                    /*
+                    Storing 128 bytes from position index in call data to the position in memory where the notes hashed commitments 
+                    should be stored
+
+                    Think the commitments are 128 bytes big
+                    */
+
                     calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
+                // storing at position 0x00 in memory, the kecca hash of everything from start of the commitments to the end
                 mstore(0x00, keccak256(0x300, mul(n, 0x80)))
             }
         }
