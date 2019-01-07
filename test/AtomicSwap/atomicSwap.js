@@ -71,6 +71,13 @@ contract('AtomicSwap', (accounts) => {
                 gas: 4000000,
             });
 
+            const gasUsed = await atomicSwap.validateAtomicSwap.estimateGas(proofData, challenge, t2, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+
+            console.log('gas used = ', gasUsed);
+
             expect(result).to.equal(true);
         });
     });
