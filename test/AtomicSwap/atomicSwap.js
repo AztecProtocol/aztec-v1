@@ -110,7 +110,37 @@ contract('AtomicSwap', (accounts) => {
             };
         });
 
-        it.only('Validate failure for incorrect number of input notes', async () => {
+        it.only('Validate failure for incorrect input note values (k1 != k3, k2 != k4)', async () => {
+            const incorrectNoteValues = [10, 50, 20, 20];
+
+            const spendingKeys = [
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+                secp256k1.keyFromPrivate(crypto.randomBytes(32)),
+            ];
+
+            const unbalancedNotes = {
+                makerNotes: {
+                    bidNote: notes.create(`0x${spendingKeys[0].getPublic(true, 'hex')}`, incorrectNoteValues[0]),
+                    askNote: notes.create(`0x${spendingKeys[1].getPublic(true, 'hex')}`, incorrectNoteValues[1]),
+                },
+                takerNotes: {
+                    bidNote: notes.create(`0x${spendingKeys[2].getPublic(true, 'hex')}`, incorrectNoteValues[2]),
+                    askNote: notes.create(`0x${spendingKeys[3].getPublic(true, 'hex')}`, incorrectNoteValues[3]),
+                },
+            };
+
+            const { proofData, challenge } = atomicProof.constructAtomicSwap(unbalancedNotes, accounts[0]);
+
+            const result = await atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+            expect(result).to.equal(false);
+        });
+
+        it('Validate failure for incorrect number of input notes', async () => {
             const noteValues = [10, 20, 30, 10, 20, 30];
 
             const spendingKeys = [
