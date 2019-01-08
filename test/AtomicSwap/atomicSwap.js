@@ -136,7 +136,7 @@ contract('AtomicSwap tests', (accounts) => {
             }));
         });
 
-        it.only('Validate failure when points not on curve', async () => {
+        it('Validate failure when points not on curve', async () => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = `${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}`;
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
