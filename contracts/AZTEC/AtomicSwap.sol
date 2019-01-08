@@ -70,13 +70,12 @@ contract AtomicSwap {
                 let n := calldataload(notes)
 
 
-                if eq(eq(n, 0x04), 0) { // eq(n, 4) will resolve to 0 if n != 4
+                if iszero(eq(n, 0x04)) { // eq(n, 4) will resolve to 0 if n != 4
 
-                    mstore(0x00, 404) // 400 error code - due to incorrect number of notes supplied
+                    mstore(0x00, 400) // 400 error code - due to incorrect number of notes supplied
                     revert(0x00, 0x20)
 
                 }
-
 
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x24), gen_order)
