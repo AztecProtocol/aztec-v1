@@ -59,6 +59,7 @@ function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = []) {
             code: Buffer.from(bytecode, 'hex'),
             gasLimit: Buffer.from('ffffffff', 'hex'),
             data: calldata ? processMemory(calldata) : null,
+            value: new BN(2),
         }, (err, results) => {
             if (err) {
                 console.log(results.runState.programCounter);
@@ -78,10 +79,10 @@ function Runtime(filename, path) {
         const initCode = `${memoryCode}${stackCode}`;
         const initGasEstimate = (memory.length * 9) + (stack.length * 3);
         const offset = initCode.length / 2;
-        const { bytecode: macroCode, sourcemap } = newParser.processMacro(macroName, offset, [], macros, inputMap);
+        const { data: { bytecode: macroCode, sourcemap } } = newParser.processMacro(macroName, offset, [], macros, inputMap);
         console.log('code size = ', macroCode.length / 2);
         const bytecode = `${initCode}${macroCode}`;
-        const vm = new VM();
+        const vm = new VM({ hardfork: 'constantinople' });
         const results = await runCode(vm, bytecode, calldata, offset, sourcemap);
         const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).sub(new BN(initGasEstimate)).toString(10);
         console.log('gas consumed = ', gasSpent);

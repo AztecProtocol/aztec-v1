@@ -72,16 +72,18 @@
     // point lookup tables take 32 words of memory per point (excluding endomorphism)
     // which equals precisely 1kb (0x400)
     swap1 // w x
-    dup2 0x400 mul // o w x
+    dup2 0x0a shl // mul // o w x
+    // dup2 0x400 mul // o w x
     swap2 byte 0x8a add // points start at 0x1060, so we need to add 0x1040 into result
 
-    0x20 mul add // o_x
+    0x05 shl add // o_x
 
     dup1 0x20 add // o_y o_x
 }
-
+// (+2 not skip)
+// (-13 if skip)
 template <wnafLocation>
-#define MAIN_LOOP_SLICE = takes(6) returns(0) {
+#define MAIN_LOOP_SLICE_ALT = takes(10) returns(10) {
     DOUBLE_MAIN<dup5, dup6>()
     <wnafLocation> mload dup1 add_points_start jumpi
     pop add_skip jump
@@ -94,6 +96,179 @@ jumpdest
 add_skip:
 }
 
+template <wnafLocation>
+#define MAIN_LOOP_SLICE = takes(10) returns(10) {
+    DOUBLE_MAIN<dup5, dup6>()
+    <wnafLocation> mload iszero add_skip jumpi
+    <wnafLocation> mload dup10 and returndatasize mstore
+add_points_next:
+    ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
+jumpdest
+    returndatasize mload add_points_next jumpi
+add_skip:
+}
+
+/*
+// z y x i p 2p 3p table wnafmask
+template <wnafLocation, additionJumpdest>
+#define MAIN_LOOP_SLICE_SMALL = takes(10) returns(10) {
+
+    DOUBLE_MAIN<dup5, dup6>()
+    finished_addition 0x20 mstore
+    <wnafLocation> mload dup1 <additionJumpdest> jumpi
+    pop
+finished_addition:
+}
+
+#define ADDITION_FUNCTION = takes(0) returns(0) {
+    dup10 and returndatasize mstore
+    add_next:
+        ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
+        returndatasize mload add_next jumpi
+    0x20 mload jump
+}
+
+template <w>
+#define MAIN_LOOP_STATIC_SMALL = takes(0) returns(0) {
+    start jump
+addition:
+    ADDITION_FUNCTION()
+start:
+    0x20 dup5 0x1140 sub div    // delta z y x i p 2p 3p
+    __codesize(MAIN_LOOP_SLICE_SMALL<0x1000>) mul // skip z y x i p 2p 3p
+    hmm add 0x20 mstore
+    dup4 ADDITION_FUNCTION()
+
+hmm:
+    MAIN_LOOP_SLICE_SMALL<w+0xfc, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xfa, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xf8, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xf6, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xf4, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xf2, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xf0, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xee, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xec, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xea, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xe8, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xe6, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xe4, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xe2, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xe0, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xde, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xdc, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xda, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xd8, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xd6, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xd4, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xd2, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xd0, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xce, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xcc, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xca, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xc8, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xc6, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xc4, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xc2, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xc0, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xbe, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xbc, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xba, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xb8, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xb6, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xb4, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xb2, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xb0, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xae, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xac, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xaa, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xa8, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xa6, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xa4, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xa2, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xa0, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x9e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x9c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x9a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x98, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x96, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x94, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x92, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x90, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x8e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x8c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x8a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x88, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x86, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x84, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x82, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x80, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x7e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x7c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x7a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x78, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x76, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x74, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x72, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x70, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x6e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x6c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x6a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x68, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x66, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x64, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x62, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x60, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x5e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x5c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x5a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x58, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x56, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x54, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x52, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x50, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x4e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x4c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x4a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x48, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x46, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x44, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x42, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x40, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x3e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x3c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x3a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x38, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x36, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x34, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x32, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x30, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x2e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x2c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x2a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x28, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x26, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x24, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x22, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x20, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x1e, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x1c, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x1a, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x18, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x16, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x14, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x12, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0x10, addition>()
+    MAIN_LOOP_SLICE_SMALL<w+0xe0, addition()
+    MAIN_LOOP_SLICE_SMALL<w+0xc0, addition()
+    MAIN_LOOP_SLICE_SMALL<w+0xa0, addition()
+    MAIN_LOOP_SLICE_SMALL<w+0x80, addition()
+    MAIN_LOOP_SLICE_SMALL<w+0x60, addition()
+    MAIN_LOOP_SLICE_SMALL<w+0x40, addition()
+    MAIN_LOOP_SLICE_SMALL<w+0x20, addition()
+    MAIN_LOOP_SLICE_SMALL<w+0x00, addition()
+}
+*/
 template <w>
 #define MAIN_LOOP_STATIC = takes(0) returns(0) {
     // now let's figure out where we need to jump to
@@ -260,13 +435,13 @@ jumpdest
     0x20 dup5 sub swap4 // i z y x i' p 2p 3p
     mload               // w z y x i' p 2p 3p
     dup1 add_points_start jumpi
-// nothing to add       // w z y x i' p 2p 3p
+// nothing to add       // w z y x i' p 2p 3p table wnafmask
         pop
         // note, using 'sub' instead of eq iszero. TODO: check if this can cause problems!
         dup4 0x140 sub main_loop_start jumpi
         main_loop_end jump
 add_points_start:       // w z y x i' p 2p 3p table wnafMask
-    dup10 and returndatasize mstore         // z y x i' p 2p 3p
+    dup10 and returndatasize mstore         // z y x i' p 2p 3p table wnafmask
 add_points_next:
     ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
     returndatasize mload add_points_next jumpi // z y x w i' p 2p 3p

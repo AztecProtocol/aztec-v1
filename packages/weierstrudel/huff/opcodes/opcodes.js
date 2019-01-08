@@ -26,6 +26,11 @@ opcodes.reverseOpcodes = {
     '18': 'XOR',
     '19': 'NOT',
     '1a': 'BYTE',
+    '1b': 'SHL',
+    '1c': 'SHR',
+    '1d': 'SAR',
+    '1e': 'ROL',
+    '1f': 'ROR',
     '20': 'SHA3',
     '30': 'ADDRESS',
     '31': 'BALANCE',
@@ -279,6 +284,11 @@ opcodes.opcodes = {
     swap14: '9d',
     swap15: '9e',
     swap16: '9f',
+    shl: '1b',
+    shr: '1c',
+    sar: '1d',
+    rol: '1e',
+    ror: '1f',
 };
 
 module.exports = opcodes;
