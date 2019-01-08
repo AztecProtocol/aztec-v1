@@ -155,7 +155,7 @@ wnaf_end:
     // compute calldata and memory offsets
     0x60 calldatasize div // n
     dup1 dup1 add 0x15e add       // m n
-    swap1 0x40 mul        // s m 269 0x1fe0 16 mask b
+    swap1 0x06 shl        // s m 269 0x1fe0 16 mask b
 }
 
 #define FIND_FIRST_ENTRY = takes(0) returns(1) {

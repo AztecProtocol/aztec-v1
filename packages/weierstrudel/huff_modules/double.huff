@@ -8,7 +8,7 @@ template <p1,p2>
     // stack state: t1 z y x
     <p2> dup2
     // stack state: t1 p t1 z y x
-    4 mul
+    callvalue shl
     // stack state: t2 p t1 z y x
     dup2 dup1 dup1
     // stack state: p p p t2 p t1 z y x
@@ -22,7 +22,7 @@ template <p1,p2>
     // stack state: x p p t2 p t1 z y t3
     dup1 mulmod
     // stack state: x^2 p t2 p t1 z y t3
-    3 mul
+    0x03 mul
     // stack state: t4 p t2 p t1 z y t3 (t4 = 3x overloaded)
     dup2 dup2 dup1
     // stack state: t4 t4 p t4 p t2 p t1 z y t3
@@ -81,7 +81,7 @@ template <mx2,my2,mz2,p1,p2,p3,3p>
 #define DOUBLE_AFFINE = takes(2) returns(2) {
     <p1> dup2 dup1 mulmod
     // stack state: t1 y x
-    <p2> dup2 4 mul
+    <p2> dup2 callvalue shl
     // stack state: t2 p t1 y x p (t2 = 4x overloaded)
     dup2 dup1 dup1 dup4 dup9 mulmod
     // stack state: zzx p p t2 p t1 y x
@@ -120,7 +120,7 @@ template <p1,p2,mx2,my2,mz2>
     // stack state: t1 y x z
     <p2> dup2
     // stack state: t1 p t1 y x z
-    4 mul
+    callvalue shl
     // stack state: t2 p t1 y x z
     dup2 dup1
     // stack state: p p t2 p t1 y x z
@@ -131,7 +131,7 @@ template <p1,p2,mx2,my2,mz2>
     dup2
     sub
     // stack state: t3 p t2 p t1 y x z
-    dup2 dup8 dup1 mulmod 3 mul
+    dup2 dup8 dup1 mulmod 0x03 mul
     // stack state: t4 t3 p t2 p t1 y x z
     swap1
     // stack state: t3 t4 p t2 p t1 y x z
