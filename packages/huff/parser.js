@@ -144,10 +144,29 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
             },
         };
     }
+    if (macros[templateName]) {
+        return {
+            macros,
+            templateName,
+        };
+    }
     return {
-        macros,
-        templateName,
+        templateName: `inline-${templateName}-${macroId}`,
+        macros: {
+            ...macros,
+            [`inline-${templateName}-${macroId}`]: {
+                name: templateName,
+                ops: [{
+                    type: TYPES.PUSH_JUMP_LABEL,
+                    value: templateName,
+                    args: [],
+                    index,
+                }],
+                templateParams: [],
+            },
+        },
     };
+    // TODO templates that have templates
 };
 
 parser.processMacro = (
@@ -173,14 +192,15 @@ parser.processMacro = (
         return { pattern, value };
     });
 
-    const jumptable = [];
+    let jumptable = [];
     const jumpindices = {};
     let offset = startingBytecodeIndex;
     const codes = ops.map((op, index) => {
         switch (op.type) {
             case TYPES.MACRO: {
                 const args = parser.substituteTemplateArguments(op.args, templateRegExps);
-                const result = parser.processMacro(op.value, offset, args, macros, map);
+                const { data: result, unmatchedJumps } = parser.processMacro(op.value, offset, args, macros, map);
+                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeOffset }) => ({ label, bytecodeOffset: bytecodeOffset + offset * 2 }))];
                 offset += (result.bytecode.length / 2);
                 return result;
             }
@@ -190,14 +210,15 @@ parser.processMacro = (
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
                 ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
-                const result = parser.processMacro(templateName, offset, [], macros, map);
+                const { data: result, unmatchedJumps } = parser.processMacro(templateName, offset, [], macros, map);
+                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeOffset }) => ({ label, bytecodeOffset: bytecodeOffset + offset * 2 }))];
                 offset += (result.bytecode.length / 2);
                 return result;
             }
             case TYPES.CODESIZE: {
                 check(index !== -1, `cannot find macro ${op.value}`);
                 // const fakeTemplateParams = [regex.sliceCommas(op.args[0]).map(arg => '00'.repeat(arg)).join(',')];
-                const result = parser.processMacro(op.value, offset, op.args, macros, map);
+                const { data: result } = parser.processMacro(op.value, offset, op.args, macros, map);
                 const hex = formatEvenBytes((result.bytecode.length / 2).toString(16));
                 const opcode = toHex(95 + (hex.length / 2));
                 const bytecode = `${opcode}${hex}`;
@@ -225,10 +246,7 @@ parser.processMacro = (
                 };
             }
             case TYPES.PUSH_JUMP_LABEL: {
-                if (op.value === 'DOUBLE_AFFINE<X2,Y2,Z2>()') {
-                    throw new Error('hey?');
-                }
-                jumptable[index] = op.value;
+                jumptable[index] = { label: op.value, bytecodeIndex: 0 };
                 const sourcemap = inputMaps.getFileLine(op.index, map);
                 offset += 3;
                 return {
@@ -256,9 +274,29 @@ parser.processMacro = (
         runningIndex += bytecode.length / 2;
         return old;
     });
-
+    const unmatchedJumps = [];
     const data = codes.reduce((acc, { bytecode, sourcemap }, index) => {
-        if (bytecode === `${opcodes.push2}xxxx`) {
+        if (jumptable[index]) {
+            const { label: jumplabel, bytecodeIndex } = jumptable[index];
+            if (jumpindices[jumplabel]) {
+                // check(jumpindices[jumplabel] !== undefined, `expected jump label ${jumptable[index]} to exist`);
+                const jumpindex = jumpindices[jumplabel];
+                const jumpvalue = padNBytes(toHex(codeIndices[jumpindex]), 2);
+                const jumpcode = `${bytecode.slice(0, bytecodeIndex + 2)}${jumpvalue}${bytecode.slice(bytecodeIndex + 6)}`;
+                // filteredJumptable = jumptable.filter(j => j !== index);
+                return {
+                    bytecode: acc.bytecode + jumpcode,
+                    sourcemap: [...acc.sourcemap, ...sourcemap],
+                };
+            }
+            unmatchedJumps.push({ label: jumplabel, bytecodeIndex: codeIndices[index] * 2 });
+            return {
+                bytecode: acc.bytecode + `${opcodes.push2}xxxx`,
+                sourcemap: [...acc.sourcemap, ...sourcemap],
+            };
+            // some kind of label is needed!
+        }
+        /* if (bytecode === `${opcodes.push2}xxxx`) {
             const jumplabel = jumptable[index];
             check(jumpindices[jumplabel] !== undefined, `expected jump label ${jumptable[index]} to exist`);
             const jumpindex = jumpindices[jumplabel];
@@ -267,17 +305,18 @@ parser.processMacro = (
                 bytecode: acc.bytecode + `${opcodes.push2}${jumpvalue}`,
                 sourcemap: [...acc.sourcemap, ...sourcemap],
             };
-        }
+        } */
         return {
             bytecode: acc.bytecode + bytecode,
             sourcemap: [...acc.sourcemap, ...sourcemap],
         };
     });
-    const keys = Object.keys(jumpindices);
+    // TODO. If jump label
+    /* const keys = Object.keys(jumpindices);
     keys.forEach((key) => {
         check(jumptable.find(i => i === key), `jump label ${key} is not used anywhere!`);
-    });
-    return data;
+    }); */
+    return { data, unmatchedJumps };
 };
 
 parser.parseMacro = (body, macros, startingIndex = 0) => {
