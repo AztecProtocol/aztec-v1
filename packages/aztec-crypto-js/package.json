@@ -28,11 +28,15 @@
     "ethereumjs-util": "^6.0.0",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
+    "rimraf": "^2.6.3",
     "sinon": "^7.2.2"
   },
   "scripts": {
-    "testCoverage": "NODE_ENV=TEST nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "test": "NODE_ENV=TEST mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
+    "clean": "./node_modules/.bin/rimraf -rf ./coverage.json ./build ./coverage ./coverageEnv ./.nyc-output",
+    "lint": "./node_modules/.bin/eslint .",
+    "lint:fix": "./node_modules/.bin/eslint . --fix",
+    "test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "test:coverage": "NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
   },
   "repository": {
     "type": "git",
