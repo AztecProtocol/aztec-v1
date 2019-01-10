@@ -2,7 +2,7 @@ const BN = require('bn.js');
 const web3Utils = require('web3-utils');
 const crypto = require('crypto');
 
-const secp256k1 = require('../secp256k1/index');
+const secp256k1 = require('../secp256k1');
 const bn128 = require('../bn128');
 const setup = require('../setup');
 const { getSharedSecret, getNoteHash } = require('./utils');
