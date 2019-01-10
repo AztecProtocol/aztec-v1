@@ -6,7 +6,7 @@ const { clear } = require('../../db');
 
 const notes = require('./controller');
 const wallets = require('../wallets');
-const aztecNotes = require('../../../aztec-crypto-js/note/note');
+const aztecNotes = require('../../../aztec-crypto-js/note');
 
 const { NOTE_STATUS } = require('../../config');
 

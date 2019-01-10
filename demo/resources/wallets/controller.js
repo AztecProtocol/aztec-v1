@@ -11,7 +11,7 @@ const web3Utils = require('web3-utils');
 const accounts = require('../../../accounts');
 const db = require('./db');
 const web3 = require('../../web3Listener');
-const secp256k1 = require('../../../aztec-crypto-js/secp256k1/secp256k1');
+const secp256k1 = require('../../../aztec-crypto-js/secp256k1');
 
 const walletController = {};
 

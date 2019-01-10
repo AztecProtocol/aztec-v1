@@ -13,7 +13,7 @@ const deployer = require('../../../deployer');
 const transactionsController = require('../../transactions');
 const noteController = require('../../notes');
 
-const proof = require('../../../../aztec-crypto-js/proof/proof');
+const proof = require('../../../../aztec-crypto-js/proof');
 const { t2 } = require('../../../../aztec-crypto-js/params');
 const { erc20ScalingFactor: scalingFactor, TX_STATUS, NOTE_STATUS } = require('../../../config');
 

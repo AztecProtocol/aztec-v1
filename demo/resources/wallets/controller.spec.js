@@ -6,7 +6,7 @@ const { clear } = require('../../db');
 
 const keystore = require('../../../accounts.json');
 const basicWallet = require('./controller');
-const secp256k1 = require('../../../aztec-crypto-js/secp256k1/secp256k1');
+const secp256k1 = require('../../../aztec-crypto-js/secp256k1');
 const web3 = require('../../web3Listener');
 
 const { expect } = chai;
