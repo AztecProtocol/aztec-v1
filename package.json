@@ -39,7 +39,7 @@
     "solidity-coverage": "^0.5.11"
   },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf -rf ./coverage.json ./build ./coverage ./coverageEnv",
+    "clean": "./node_modules/.bin/rimraf -rf ./coverage.json ./build ./coverage ./coverageEnv ./.nyc-output",
     "lint:js": "./node_modules/.bin/eslint .",
     "lint:js:fix": "./node_modules/.bin/eslint . --fix",
     "lint:sol": "./node_modules/.bin/solium -d .",
