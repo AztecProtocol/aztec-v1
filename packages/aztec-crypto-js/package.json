@@ -1,8 +1,8 @@
 {
   "name": "aztec-crypto-js",
   "version": "0.1.1",
-  "description": "AZTEC javascript cryptography libarary",
-  "main": "truffle-config.js",
+  "description": "AZTEC javascript cryptography library",
+  "main": "index.js",
   "engines": {
     "npm": ">=4"
   },

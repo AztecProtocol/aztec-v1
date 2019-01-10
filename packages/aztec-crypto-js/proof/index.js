@@ -5,8 +5,8 @@
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const Keccak = require('../keccak/keccak');
-const bn128 = require('../bn128/bn128');
+const Keccak = require('../keccak');
+const bn128 = require('../bn128');
 const { K_MAX } = require('../params');
 
 const { groupReduction } = bn128;

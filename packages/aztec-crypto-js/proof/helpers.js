@@ -8,9 +8,9 @@
 const BN = require('bn.js');
 const crypto = require('crypto');
 const { padLeft, toHex } = require('web3-utils');
-const aztecNote = require('../note/note');
-const bn128 = require('../bn128/bn128');
-const secp256k1 = require('../secp256k1/secp256k1');
+const aztecNote = require('../note');
+const bn128 = require('../bn128');
+const secp256k1 = require('../secp256k1');
 
 const helpers = {};
 

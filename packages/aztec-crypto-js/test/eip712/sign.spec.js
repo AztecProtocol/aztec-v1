@@ -1,6 +1,6 @@
 const chai = require('chai');
 const { padLeft, sha3 } = require('web3-utils');
-const eip712 = require('../../eip712/eip712');
+const eip712 = require('../../eip712');
 
 const { expect } = chai;
 

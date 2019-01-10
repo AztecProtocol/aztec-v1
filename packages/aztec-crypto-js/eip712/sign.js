@@ -7,7 +7,7 @@
  */
 
 const ecdsa = require('../secp256k1/ecdsa');
-const eip712 = require('./eip712');
+const eip712 = require('.');
 const { AZTEC_NOTE_SIGNATURE, AZTEC_MAINNET_DOMAIN_PARAMS } = require('../params');
 
 const sign = {};

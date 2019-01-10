@@ -9,7 +9,7 @@ const BN = require('bn.js');
 const web3Utils = require('web3-utils');
 const Web3EthAccounts = require('web3-eth-accounts');
 
-const secp256k1 = require('./secp256k1');
+const secp256k1 = require('./');
 
 const web3EthAccounts = new Web3EthAccounts();
 

@@ -6,8 +6,8 @@
  */
 const BN = require('bn.js');
 
-const bn128 = require('../bn128/bn128');
-const Keccak = require('../keccak/keccak');
+const bn128 = require('../bn128');
+const Keccak = require('../keccak');
 
 const { groupReduction } = bn128;
 const zero = new BN(0).toRed(groupReduction);
