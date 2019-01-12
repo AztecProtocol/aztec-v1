@@ -176,6 +176,20 @@ parser.processMacro = (
     startingMacros = {},
     map = {}
 ) => {
+    const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
+    if (result.unmatchedJumps.length > 0) {
+        throw new Error(`unmatched jump labels ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
+    }
+    return result;
+};
+
+parser.processMacroInternal = (
+    name,
+    startingBytecodeIndex = 0,
+    templateArgumentsRaw = [],
+    startingMacros = {},
+    map = {}
+) => {
     let macros = startingMacros;
     const macro = macros[name];
     check(macro, `expected ${name} to exist!`);
@@ -310,6 +324,9 @@ parser.processMacro = (
             bytecode: acc.bytecode + bytecode,
             sourcemap: [...acc.sourcemap, ...sourcemap],
         };
+    }, {
+        bytecode: '',
+        sourcemap: [],
     });
     // TODO. If jump label
     /* const keys = Object.keys(jumpindices);
