@@ -37,7 +37,7 @@ const referenceCurve = new EC.curve.short({
 });
 
 
-describe.only('bn128 main loop', function describe() {
+describe('bn128 main loop', function describe() {
     this.timeout(10000);
     let main;
     let pointTableOffset;

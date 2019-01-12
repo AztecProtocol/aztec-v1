@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 const chai = require('chai');
 const BN = require('bn.js');
 const path = require('path');
@@ -30,7 +31,7 @@ const testHelper = `
 }
 `;
 
-describe('sparse wnaf', function describe() {
+describe.only('sparse wnaf', function describe() {
     this.timeout(5000);
     let wnaf;
     let thirtyTwo;
@@ -262,5 +263,64 @@ describe('sparse wnaf', function describe() {
 
         const size = new BN(memory.slice(256, 256 + 32), 16);
         expect(size.toString(16)).to.equal(new BN(offset.toNumber() + (maxEntry * 32)).toString(16));
+    });
+
+
+    it.only('macro ALTERNATE_STRANGE_WNAF will correctly calculate w=5 endo split wnafs for multiple scalars', async () => {
+        const scalars = [
+            bn128Reference.randomScalar(),
+            bn128Reference.randomScalar(),
+            bn128Reference.randomScalar(),
+            bn128Reference.randomScalar(),
+        ];
+        const points = [
+            bn128Reference.randomPoint(),
+            bn128Reference.randomPoint(),
+            bn128Reference.randomPoint(),
+            bn128Reference.randomPoint(),
+        ];
+
+        const calldata = [
+            { index: 0, value: points[0].x },
+            { index: 32 * 1, value: points[0].y },
+            { index: 32 * 2, value: points[1].x },
+            { index: 32 * 3, value: points[1].y },
+            { index: 32 * 4, value: points[2].x },
+            { index: 32 * 5, value: points[2].y },
+            { index: 32 * 6, value: points[3].x },
+            { index: 32 * 7, value: points[3].y },
+            { index: 32 * 8, value: scalars[0] },
+            { index: 32 * 9, value: scalars[1] },
+            { index: 32 * 10, value: scalars[2] },
+            { index: 32 * 11, value: scalars[3] },
+        ];
+        const { memory } = await wnaf('ALTERNATE_STRANGE_WNAF', [], [], calldata);
+        const endoScalars = scalars.reduce((acc, s) => {
+            const { k1, k2 } = endomorphism.endoSplit(s);
+            return [...acc, k1, k2];
+        }, []);
+
+        const referenceWnafs = endoScalars.map(s => referenceWnaf.wnaf(s));
+
+        // let maxEntry = 0;
+        for (let i = 0; i < 128; i += 1) {
+            const baseOffset = wnafStartLocation + (i * 0x40);
+            const count = memory[baseOffset + 31] || 0;
+            const referenceCount = referenceWnafs.filter(w => (w[i] && w[i].gt(new BN(0)))).length;
+            expect(count / 2).to.equal(referenceCount);
+
+            for (let j = 0; j < referenceCount; j += 1) {
+                const offset = baseOffset - (j * 2);
+                // the '2' here represents a hardcoded offset in the macro
+                // TODO make a variable
+                const tableOffset = memory[offset - 2] - 2;
+                const referenceIndex = tableOffset;
+                const result = (memory[offset - 1] || 0) >> 3;
+
+                const reference = referenceWnafs[referenceIndex] ? referenceWnafs[referenceIndex][i].toNumber() : 0;
+                expect(result).to.equal(reference);
+                expect(result > 0).to.equal(true);
+            }
+        }
     });
 });
