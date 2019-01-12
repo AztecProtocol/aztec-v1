@@ -35,9 +35,9 @@
     // which equals precisely 1kb (0x400)
     swap1 // w x
     dup2 0x400 mul // o w x
-    swap2 byte 0x8a add // points start at 0x1060, so we need to add 0x1040 into result
+    swap2 byte // points start at 0x1060, so we need to add 0x1040 into result
 
-    0x20 mul add // o_x
+    0x20 mul add POINT_TABLE_START_LOCATION_MINUS_32() add // o_x
 
     dup1 0x20 add // o_y o_x
 }
@@ -74,9 +74,9 @@
     swap1 // w x
     dup2 0x0a shl // mul // o w x
     // dup2 0x400 mul // o w x
-    swap2 byte 0x8a add // points start at 0x1060, so we need to add 0x1040 into result
+    swap2 byte // points start at 0x1060, so we need to add 0x1040 into result
 
-    0x05 shl add // o_x
+    0x05 shl add POINT_TABLE_START_LOCATION_MINUS_32() add // o_x
 
     dup1 0x20 add // o_y o_x
 }
@@ -276,7 +276,7 @@ template <w>
     // and if i = 0x160 we skip straight to the end
     // z y x i p 2p 3p
     // dup4 0x00 mstore 0x20 0x00 return
-    0x20 dup5 0x1140 sub div   // jump distance
+    0x20 dup5 WNAF_END_LOCATION() sub div   // jump distance
     // 0x00 mstore 0x20 0x00 return
     // 0x00 mstore 0x20 0x00 return
     // __codesize(MAIN_LOOP_SLICE<0x1000>) 0x00 mstore 0x20 0x00 return
@@ -492,7 +492,7 @@ main_loop_end:  // looks like we've finished
     dup4 sub            // y x i p 2p 3p
     0x01                // z y x i p 2p 3p
 
-    MAIN_LOOP_STATIC<0x160>()
+    MAIN_LOOP_STATIC<WNAF_START_LOCATION>()
     /*
     0x00 mload get_first_entry jumpi
         begin_festivities jump

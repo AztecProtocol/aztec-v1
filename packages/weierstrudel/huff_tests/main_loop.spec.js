@@ -40,8 +40,11 @@ const referenceCurve = new EC.curve.short({
 describe.only('bn128 main loop', function describe() {
     this.timeout(10000);
     let main;
-    before(() => {
+    let pointTableOffset;
+    before(async () => {
         main = new Runtime('main_loop.huff', pathToTestData);
+        const { stack } = await main('POINT_TABLE_START_LOCATION_MINUS_32', [], []);
+        pointTableOffset = stack[0].toNumber();
     });
     it('macro GET_P2_LOCATION correctly calculates point location from a wnaf', async () => {
         const wnaf = new BN('1f00000000000000050000000001000000000b00000000000000000000000000', 16);
@@ -55,7 +58,7 @@ describe.only('bn128 main loop', function describe() {
         const expectedOffset = 18;
         const expectedBaseOffset = 1024 * expectedOffset;
         const expectedWnaf = 11;
-        const expectedFinalOffset = 4416 + expectedBaseOffset + (expectedWnaf * 32);
+        const expectedFinalOffset = pointTableOffset + expectedBaseOffset + (expectedWnaf * 32);
         expect(oX.eq(new BN(expectedFinalOffset))).to.equal(true);
         expect(oY.eq(new BN(expectedFinalOffset + 32))).to.equal(true);
     });
