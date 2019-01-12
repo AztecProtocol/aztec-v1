@@ -11,3 +11,33 @@
 #define BETA_LOCATION = takes(0) returns(1) { 0xc0 }
 #define 2P_LOCATION = takes(0) returns(1) { 0x80 }
 #define 3P_LOCATION = takes(0) returns(1) { 0xa0 }
+
+template <t>
+#define LITERAL = takes(0) returns(1) {
+<t>
+}
+
+#define WNAF_START_LOCATION = takes(0) returns(1) { 0x460 }
+#define WNAF_START_LOCATION_MINUS_TWO = takes(0) returns(1) {
+    LITERAL<WNAF_START_LOCATION-0x02>()
+}
+#define WNAF_END_LOCATION = takes(0) returns(1) {
+    LITERAL<WNAF_START_LOCATION+0xfe0>()
+}
+#define WNAF_END_LOCATION_PLUS_32 = takes(0) returns(1) {
+    LITERAL<WNAF_START_LOCATION+0x1000>()
+}
+
+#define POINT_TABLE_START_LOCATION = takes(0) returns(1) { 0x1460 }
+#define POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
+    LITERAL<POINT_TABLE_START_LOCATION-0x20>()
+}
+
+#define WNAF_TABLE_BITS = takes(0) returns(1) { 4 }
+#define WNAF_SIZE = takes(0) returns(1) { 5 }
+#define WNAF_TABLE_MASK = takes(0) returns(1) { 0x1e0 }
+
+#define GET_NUMBER_OF_POINTS = takes(0) returns(1) {
+    0x60 calldatasize div
+}
+

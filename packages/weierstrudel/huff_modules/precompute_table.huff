@@ -203,24 +203,24 @@ precompute_table_start:
 
     1 1 // add in dz^2 and dz^3 onto stack
     // 0x60 calldatasize div 15 sub 0x00 mstore 0x20 0x00 return
-    0x60 calldatasize div 15 sub __codesize(RESCALE_SLICE<0x1020,dup4,dup6>) mul rescale_start add jump
+    0x60 calldatasize div 15 sub __codesize(RESCALE_SLICE<POINT_TABLE_START_LOCATION,dup4,dup6>) mul rescale_start add jump
 
 rescale_start:
-    RESCALE_SLICE<0x8160, dup4, dup6>()
-    RESCALE_SLICE<0x7960, dup4, dup6>()
-    RESCALE_SLICE<0x7160, dup4, dup6>()
-    RESCALE_SLICE<0x6960, dup4, dup6>()
-    RESCALE_SLICE<0x6160, dup4, dup6>()
-    RESCALE_SLICE<0x5960, dup4, dup6>()
-    RESCALE_SLICE<0x5160, dup4, dup6>()
-    RESCALE_SLICE<0x4960, dup4, dup6>()
-    RESCALE_SLICE<0x4160, dup4, dup6>()
-    RESCALE_SLICE<0x3960, dup4, dup6>()
-    RESCALE_SLICE<0x3160, dup4, dup6>()
-    RESCALE_SLICE<0x2960, dup4, dup6>()
-    RESCALE_SLICE<0x2160, dup4, dup6>()
-    RESCALE_SLICE<0x1960, dup4, dup6>()
-    RESCALE_SLICE_END<0x1160, dup4, dup2>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x7000, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x6800, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x6000, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x5800, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x5000, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x4800, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x4000, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x3800, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x3000, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x2800, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x2000, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x1800, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x1000, dup4, dup6>()
+    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x800, dup4, dup6>()
+    RESCALE_SLICE_END<POINT_TABLE_START_LOCATION, dup4, dup2>()
 }
 
 

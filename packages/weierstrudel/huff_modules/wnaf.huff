@@ -1,5 +1,61 @@
 #include "endomorphism.huff"
+#include "constants.huff"
 
+// starting stack state w o v 260 0x1fe0 16 mask
+#define WNAF_SLICE_B = takes(6) returns(6) {
+    dup1 dup1 returndatasize sub and
+    // w' w o v 269 0x1fe0 16 mask
+    dup9 dup2 mod
+    // (w' % 269) w' w o v 269 0x1fe0 16 mask
+    mload dup11 and
+    // x w' w o v
+    swap2
+    // w w' x o v
+    div
+    // w" x o v
+    swap2
+    // o x w"
+    add
+    // o' w" v x x x 269 0x1fe0 16 mask
+    dup2 dup11 add dup12 and
+    // w''' o' w"
+    swap2
+    // w" o' w''' v
+    0xff and dup4 add
+    // w" o' w''' v
+    dup2
+    // o' w" o' w'''
+    dup1 mload
+    // f o' w'' o' w'''
+    0x10000000000000000000000000000000000000000000000000000000000000000 add
+    // f' o' w'' o' w'''
+    dup1 dup3 mstore
+    // f' o' w'' o' w'''
+    returndatasize byte add
+    // o'' w'' o' w'''
+    mstore8
+    // o' w'''
+    swap1
+}
+
+#define WNAF_SLICE_EXPERIMENTAL = takes(6) returns(6) {
+    dup1 dup1 returndatasize sub and // w' w o v
+    swap1                            // w w' o v
+    dup9 dup2 mod                    // (w' % 269) w' w o v 269 0x1fe0 16 mask
+    mload dup11 and                  // x w' w o v
+    dup4 dup2 add swap4 pop          // x w' w o' v (TODO REFACTOR)
+    dup1 mload                       // f x w' w v
+    0x10000000000000000000000000000000000000000000000000000000000000000 add // f' x o w' w v
+    dup1 dup3 mstore                 // f' x w' w v
+    0 byte                           // a x w' w o v
+    add                              // b w' w o v
+    dup4 add                         // b w' w o v
+    swap2 div                        // w b o v
+    swap1                            // b w o v
+    dup2 dup5 add                    // w b w o v
+    swap1 mstore8                    // w o v 269 0x1fe0 16 mask
+    dup6 add
+}
 // starting stack state o w 260 0x1fe0 16 mask
 /**
  * @title single iteration of width-non-adjacent-form algorithm
@@ -98,7 +154,7 @@
     // o' w" o' w'''
     mstore8
     // o' w'''
-}
+} // 72 gas
 
 #define SET_WNAF_TABLE = takes(0) returns(0) {
     0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
@@ -153,20 +209,20 @@ wnaf_end:
     269 // 269 0x1fe0 16 mask b
 
     // compute calldata and memory offsets
-    0x60 calldatasize div // n
-    dup1 dup1 add 0x15e add       // m n
+    GET_NUMBER_OF_POINTS() // n
+    dup1 dup1 add WNAF_START_LOCATION_MINUS_TWO() add       // m n
     swap1 0x06 shl        // s m 269 0x1fe0 16 mask b
 }
 
 #define FIND_FIRST_ENTRY = takes(0) returns(1) {
-    0x1160  // m
+    WNAF_END_LOCATION_PLUS_32()  // m
 search_next:
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
     dup1 mload iszero search_next jumpi
 }
 
 
-#define COMPUTE_WNAFS = takes(0) returns(0) {
+#define COMPUTE_WNAFS_HMM = takes(0) returns(0) {
     WNAF_INIT()
 wnaf_start:
     0x01
@@ -185,4 +241,120 @@ wnaf_continue:
     swap1 0x02 swap1 sub swap1 // s' m' // TODO optimize this
     dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
     pop pop pop pop pop pop pop
+}
+
+// alternative WNAF using a jump table.
+#define COMPUTE_WNAFS = takes(0) returns(0) {
+    // what on earth?
+    lsb_0 0x00 mstore // 0 00000
+    lsb_1 0x20 mstore // 1 00001
+    lsb_2 0x40 mstore // 2 00010
+    lsb_1 0x60 mstore // 3 00011
+    lsb_3 0x80 mstore // 4 00100
+    lsb_1 0xa0 mstore // 5 00101
+    lsb_2 0xc0 mstore // 6 00110
+    lsb_1 0xe0 mstore // 7 00111
+    lsb_4 0x100 mstore // 8 01000
+    lsb_1 0x120 mstore // 9 01001
+    lsb_2 0x140 mstore // 10 01010
+    lsb_1 0x160 mstore // 11 01011
+    lsb_3 0x180 mstore // 12 01100
+    lsb_1 0x1a0 mstore // 13 01101
+    lsb_2 0x1c0 mstore // 14 01110
+    lsb_1 0x1e0 mstore // 15 01111
+    /* lsb_5 0x200 mstore // 16 10000
+    lsb_1 0x220 mstore // 17 10001
+    lsb_2 0x240 mstore // 18 10010
+    lsb_1 0x260 mstore // 19 10011
+    lsb_3 0x280 mstore // 20 10100
+    lsb_1 0x2a0 mstore // 21 10101
+    lsb_2 0x2c0 mstore // 22 10110
+    lsb_1 0x2e0 mstore // 23 10111
+    lsb_4 0x300 mstore // 24 11000
+    lsb_1 0x320 mstore // 25 11001
+    lsb_2 0x340 mstore // 26 11010
+    lsb_1 0x360 mstore // 27 11011
+    lsb_3 0x380 mstore // 28 11100
+    lsb_1 0x3a0 mstore // 29 11101
+    lsb_2 0x3c0 mstore // 30 11110
+    lsb_1 0x3e0 mstore // 31 11111 */
+
+        GET_NUMBER_OF_POINTS()         // n
+        dup1 dup1 add WNAF_START_LOCATION_MINUS_TWO() add       // m n
+        swap1 0x06 shl                // s m
+    strange_wnaf_start:
+        0x01
+        dup2 calldataload ENDOMORPHISM() // k1 k2 v s m
+        5 shl
+        swap1 5 shl // k2 k1 v s m 269
+    strange_wnaf_continue:
+        dup5 dup4 add     // get wnaf memory offset, and add 'v'
+        swap1
+
+        // (if k2, v = 1, increasing mem index by 1. if k1, v = 0)
+        dup1 WNAF_TABLE_MASK() and mload jump // and away we go?
+
+    lsb_5:  // w o
+        LITERAL<WNAF_SIZE+4>() shr               // w o
+        swap1 LITERAL<WNAF_SIZE*0x20+0x80>() add      // o w
+        dup2 LITERAL<WNAF_SIZE*0x20>() dup3 sub mstore8   // o w
+        swap1               // w o
+        0x10 add
+        dup1 WNAF_TABLE_MASK() and mload jump
+        
+    lsb_4:  // w o
+        LITERAL<WNAF_SIZE+3>() shr
+        swap1 LITERAL<WNAF_SIZE*0x20+0x60>() add
+        dup2 LITERAL<WNAF_SIZE*0x20>() dup3 sub mstore8
+        swap1
+        0x10 add
+        dup1 WNAF_TABLE_MASK() and mload jump
+        
+    lsb_3:
+        LITERAL<WNAF_SIZE+2>() shr
+        swap1 LITERAL<WNAF_SIZE*0x20+0x40>() add
+        dup2 LITERAL<WNAF_SIZE*0x20>() dup3 sub mstore8
+        swap1
+        0x10 add
+        dup1 WNAF_TABLE_MASK() and mload jump
+
+    lsb_2:
+        LITERAL<WNAF_SIZE+1>() shr
+        swap1 LITERAL<WNAF_SIZE*0x20+0x20>() add
+        dup2 LITERAL<WNAF_SIZE*0x20>() dup3 sub mstore8
+        swap1
+        0x10 add
+        dup1 WNAF_TABLE_MASK() and mload jump
+
+    lsb_1:
+        WNAF_SIZE() shr
+        swap1 LITERAL<WNAF_SIZE*0x20>() add
+        dup2 LITERAL<WNAF_SIZE*0x20>() dup3 sub mstore8
+        swap1
+        0x10 add
+        dup1 WNAF_TABLE_MASK() and mload jump
+
+    lsb_0:
+        swap1 LITERAL<WNAF_TABLE_BITS*0x20>() add swap1
+        0x1f dup2 gt strange_wnaf_not_finished jumpi
+
+
+    // end of one WNAF loop.
+        pop swap1                  // k1 o v s m 269 0x1fe0 16 mas kb
+        0x01 dup4 sub swap3 strange_wnaf_continue jumpi
+        // x x x v s m 269 0x1fe0 16 mask b
+
+        pop pop pop
+        0x20 add    // s' m
+        swap1 0x02 swap1 sub swap1 // s' m' // TODO optimize this
+        dup1 calldatasize sub strange_wnaf_start jumpi // s' m'
+        pop pop
+        wnaf_end jump
+
+
+    strange_wnaf_not_finished:  // w o
+        WNAF_TABLE_BITS() shr       // w o
+        dup1 WNAF_TABLE_MASK() and mload jump
+
+    wnaf_end:
 }

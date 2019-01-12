@@ -35,7 +35,8 @@ describe('sparse wnaf', function describe() {
     let wnaf;
     let thirtyTwo;
     let wnafStartingStack;
-    before(() => {
+    let wnafStartLocation;
+    before(async () => {
         wnaf = new Runtime(testHelper, pathToTestData);
         thirtyTwo = new BN(32);
 
@@ -47,6 +48,9 @@ describe('sparse wnaf', function describe() {
             new BN(0),
             new BN(0),
         ];
+
+        const { stack } = await wnaf('WNAF_START_LOCATION', [], [], []);
+        wnafStartLocation = stack[0].toNumber();
     });
 
     it('macro WNAF_SLICE_A correctly calclates a wnaf slice', async () => {
@@ -185,16 +189,14 @@ describe('sparse wnaf', function describe() {
             { index: 32 * 11, value: scalars[3] },
         ];
         const { memory } = await wnaf('COMPUTE_WNAFS', [], [], calldata);
-
-
         const endoScalars = scalars.reduce((acc, s) => {
             const { k1, k2 } = endomorphism.endoSplit(s);
             return [...acc, k1, k2];
         }, []);
 
         const referenceWnafs = endoScalars.map(s => referenceWnaf.wnaf(s));
-
-        const offset = new BN('160', 16);
+        console.log('wnaf start location = ', wnafStartLocation);
+        const offset = new BN(wnafStartLocation);
         const startingOffset = offset.add(new BN((points.length - 1) * 2));
         let maxEntry = 0;
         for (let j = 0; j < referenceWnafs.length; j += 1) {
@@ -210,8 +212,6 @@ describe('sparse wnaf', function describe() {
                 }
             }
         }
-        const size = new BN(memory.slice(256, 256 + 32), 16);
-        expect(size.toString(16)).to.equal(new BN(offset.toNumber() + (maxEntry * 32)).toString(16));
     });
 
 
