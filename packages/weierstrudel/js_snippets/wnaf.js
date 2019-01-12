@@ -13,7 +13,7 @@ wnafReference.countNonzeroEntries = (wnaf) => {
 // performs standard window NAF method of dividing-by-2 until least significant bit is high
 wnafReference.wnaf = (scalar) => {
     let next = scalar;
-    const wnaf = [];
+    const wnaf = [...new Array(128)];
     let o = 0;
     while (!next.eq(new BN(0))) {
         const i = next.zeroBits();
