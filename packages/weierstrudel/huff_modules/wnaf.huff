@@ -308,19 +308,22 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
         // dup1 dup1 add WNAF_START_LOCATION_MINUS_TWO() add       // m n
         // this is... 2 + (n  * 2)
         // dup1 dup1 add 0x02 add
-        0x01
+        // STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET()
+        dup1 dup1 add STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET() add 0x01 add
         // 0x04                        // init m
         // NOTE: THIS CORRESPONDS TO A STARTING POINT TABLE AT X << 10
+        // Point at start of calldatamap stored at end of memory table
+        // (order is reversed)
         swap1 0x06 shl                // s m
     strange_wnaf_start:
         0x01
         dup2 calldataload ENDOMORPHISM() // k1 k2 v s m
         5 shl
         swap1 5 shl // k2 k1 v s m 269
-        swap1
+        // swap1
     strange_wnaf_continue:    // k k' v s m
   
-        0x01 dup6 add swap5 pop // todo refactor
+        0x01 dup6 sub swap5 pop // todo refactor
         WNAF_START_LOCATION()
         // 0x3000 mload iszero skip_debug_thing jumpi
         /* 0x00 mstore

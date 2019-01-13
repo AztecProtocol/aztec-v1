@@ -16,7 +16,7 @@ template <t>
 #define LITERAL = takes(0) returns(1) {
 <t>
 }
-
+/*
 #define WNAF_START_LOCATION = takes(0) returns(1) { 0x460 }
 #define WNAF_START_LOCATION_MINUS_TWO = takes(0) returns(1) {
     LITERAL<WNAF_START_LOCATION-0x02>()
@@ -28,7 +28,26 @@ template <t>
     LITERAL<WNAF_START_LOCATION+0x1000>()
 }
 
+
 #define POINT_TABLE_START_LOCATION = takes(0) returns(1) { 0x1460 }
+#define POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
+    LITERAL<POINT_TABLE_START_LOCATION-0x20>()
+} */
+
+
+#define WNAF_START_LOCATION = takes(0) returns(1) { 0x500 }
+#define WNAF_START_LOCATION_MINUS_TWO = takes(0) returns(1) {
+    LITERAL<WNAF_START_LOCATION-0x02>()
+}
+#define WNAF_END_LOCATION = takes(0) returns(1) {
+    LITERAL<WNAF_START_LOCATION+0xfe0>()
+}
+#define WNAF_END_LOCATION_PLUS_32 = takes(0) returns(1) {
+    LITERAL<WNAF_START_LOCATION+0x1000>()
+}
+
+
+#define POINT_TABLE_START_LOCATION = takes(0) returns(1) { 0x2820 }
 #define POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
     LITERAL<POINT_TABLE_START_LOCATION-0x20>()
 }
@@ -41,3 +60,14 @@ template <t>
     0x60 calldatasize div
 }
 
+#define STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET = takes(0) returns(1) {
+    0x09
+}
+
+#define STRANGE_WNAF_TABLE_OFFSET = takes(0) returns(1) {
+    0x2800
+}
+
+#define STRANGE_WNAF_END_LOCATION_PLUS_64 = takes(0) returns(1) {
+    LITERAL<WNAF_START_LOCATION+0x2040>()
+}
