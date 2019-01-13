@@ -31,12 +31,13 @@ const testHelper = `
 }
 `;
 
-describe.only('sparse wnaf', function describe() {
+describe('sparse wnaf', function describe() {
     this.timeout(5000);
     let wnaf;
     let thirtyTwo;
     let wnafStartingStack;
     let wnafStartLocation;
+    let alternativeWnafOffset;
     before(async () => {
         wnaf = new Runtime(testHelper, pathToTestData);
         thirtyTwo = new BN(32);
@@ -50,8 +51,12 @@ describe.only('sparse wnaf', function describe() {
             new BN(0),
         ];
 
-        const { stack } = await wnaf('WNAF_START_LOCATION', [], [], []);
+        let { stack } = await wnaf('WNAF_START_LOCATION', [], [], []);
         wnafStartLocation = stack[0].toNumber();
+
+        ({ stack } = await wnaf('STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET', [], [], []));
+        alternativeWnafOffset = stack[0].toNumber() + 1;
+        console.log('alternativewnafoffset = ', alternativeWnafOffset);
     });
 
     it('macro WNAF_SLICE_A correctly calclates a wnaf slice', async () => {
@@ -266,7 +271,7 @@ describe.only('sparse wnaf', function describe() {
     });
 
 
-    it.only('macro ALTERNATE_STRANGE_WNAF will correctly calculate w=5 endo split wnafs for multiple scalars', async () => {
+    it('macro ALTERNATE_STRANGE_WNAF will correctly calculate w=5 endo split wnafs for multiple scalars', async () => {
         const scalars = [
             bn128Reference.randomScalar(),
             bn128Reference.randomScalar(),
@@ -311,9 +316,8 @@ describe.only('sparse wnaf', function describe() {
 
             for (let j = 0; j < referenceCount; j += 1) {
                 const offset = baseOffset - (j * 2);
-                // the '2' here represents a hardcoded offset in the macro
-                // TODO make a variable
-                const tableOffset = memory[offset - 2] - 2;
+
+                const tableOffset = memory[offset - 2] - alternativeWnafOffset;
                 const referenceIndex = tableOffset;
                 const result = (memory[offset - 1] || 0) >> 3;
 
