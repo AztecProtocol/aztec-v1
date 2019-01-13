@@ -1,8 +1,6 @@
 #include "constants.huff"
 #include "add.huff"
 #include "double.huff"
-// TODO put these all in one place
-#define GLOBAL_Z = takes(0) returns(1) { 0x00 }
 
 // initial stack state is: dz3 dz2 y x p
 // final stack is dz3 dz2 p
@@ -198,7 +196,7 @@ precompute_table_start:
     // We want every point in each lookup table to have the same Z-coordinate.
     // If this is the case, all points can be treated as affine and we can use mixed addition formulae in our main loop
     // The global z coordinate is the first item on the stack, so store it at 0x00.
-    returndatasize mstore // TODO hardcode?
+    GLOBAL_Z_LOCATION() mstore // store our global Z coordinate, we'll need it later
 
 
     1 1 // add in dz^2 and dz^3 onto stack
@@ -222,9 +220,3 @@ rescale_start:
     RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x800, dup4, dup6>()
     RESCALE_SLICE_END<POINT_TABLE_START_LOCATION, dup4, dup2>()
 }
-
-
-
-// what is the memory map?
-// P  3P  5P  7P  9P  11P  13P  15P  -15P  -13P  -11P -9P -7P -5P -3P -P
-// 0  40  80  c0 100  140  180  1c0  200   240   280  2c0 300 340 380 3c0

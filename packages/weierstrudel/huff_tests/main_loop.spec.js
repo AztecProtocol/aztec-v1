@@ -93,37 +93,6 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ONE point', async () => {
-        const numPoints = 1;
-        const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
-        const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
-        const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
-                ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
-        }, []);
-        const expected = points.reduce((acc, { x, y }, i) => {
-            if (!acc) {
-                return referenceCurve.point(x, y).mul(scalars[i]);
-            }
-            return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
-        }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
-        const returnWords = sliceMemory(returnValue);
-        console.log(returnWords);
-        const x = returnWords[0].toRed(pRed);
-        const y = returnWords[1].toRed(pRed);
-        const z = returnWords[2].toRed(pRed);
-        const result = bn128Reference.toAffine({ x, y, z });
-        expect(returnWords.length).to.equal(3);
-        expect(stack.length).to.equal(0);
-        expect(result.x.fromRed().eq(expected.x.fromRed())).to.equal(true);
-        expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
-    });
-
     it('macro MAIN_FULL calculates scalar multiplication of TWO points', async () => {
         const numPoints = 2;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());

@@ -4,110 +4,6 @@
 #include "double.huff"
 #include "add.huff"
 
-// w i p t1 p z1 -y1 x1 p 2p 3p table
-/// @dev use wnaf table to get the memory location of a point, and update wnaf table
-#define GET_P2_LOCATION = takes(0) returns(0) {
-    returndatasize mload      // w
-    // we want to get a byte index of our wnaf table that is non-zero
-    // we don't want to iterate over every byte, because that's slow!
-    // instead we isolate the least significant set bit of t.
-    // We know that non-zero wnaf entries are aligned at byte boundaries because we stored them via mstore8
-    // we also know that every wnaf entry is odd. Ipso facto, if we isolate the least significant bit of w
-    // then that bit corresponds to the first bit in a byte that contains a non-zero wnaf entry
-
-    dup1 returndatasize sub               // -w w
-    dup2 and                    // b w
-    // next up, is to calculate the index of the byte in 'b' that is nonzero.
-    // In WNAF, we used a lookup table to calculate this, but because we are testing the byte index here and not the bit index we can be more efficient.
-    // (credit to Recmo Bloemen for showing me this trick).
-    // use b as the divisor against literal 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f.
-    // because b only has one bit set, and that bit is the 1st bit of a byte, this acts like a bit-shift operation on the literal.
-    // which will place our desired byte index in the least significant byte, which we can mask off
-    0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f div 0xff and // x w
-
-    // we want to clear the wnaf entry at byte index 'b' (for future iterations)
-    returndatasize dup2 mstore8 // that'll do it.
-
-    // now what we have our wnaf byte index, we can use it for two purposes
-    // 1: access the relevant byte in 'w' that contains our wnaf entry
-    // 2: calculate the memory offset where our point is stored
-    // point lookup tables take 32 words of memory per point (excluding endomorphism)
-    // which equals precisely 1kb (0x400)
-    swap1 // w x
-    dup2 0x400 mul // o w x
-    swap2 byte // points start at 0x1060, so we need to add 0x1040 into result
-
-    0x20 mul add POINT_TABLE_START_LOCATION_MINUS_32() add // o_x
-
-    dup1 0x20 add // o_y o_x
-}
-
-// b w p t1 p z1 -y1 x1 p 2p 3p table
-/// @dev use wnaf table to get the memory location of a point, and update wnaf table
-#define GET_P2_LOCATION_LOOP = takes(0) returns(0) {
-    returndatasize mload      // w
-    // we want to get a byte index of our wnaf table that is non-zero
-    // we don't want to iterate over every byte, because that's slow!
-    // instead we isolate the least significant set bit of t.
-    // We know that non-zero wnaf entries are aligned at byte boundaries because we stored them via mstore8
-    // we also know that every wnaf entry is odd. Ipso facto, if we isolate the least significant bit of w
-    // then that bit corresponds to the first bit in a byte that contains a non-zero wnaf entry
-
-    dup1 returndatasize sub               // -w w
-    dup2 and                    // b w
-    // next up, is to calculate the index of the byte in 'b' that is nonzero.
-    // In WNAF, we used a lookup table to calculate this, but because we are testing the byte index here and not the bit index we can be more efficient.
-    // (credit to Recmo Bloemen for showing me this trick).
-    // use b as the divisor against literal 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f.
-    // because b only has one bit set, and that bit is the 1st bit of a byte, this acts like a bit-shift operation on the literal.
-    // which will place our desired byte index in the least significant byte, which we can mask off
-    dup13 div 0xff and // x w
-
-    // we want to clear the wnaf entry at byte index 'b' (for future iterations)
-    returndatasize dup2 mstore8 // that'll do it.
-
-    // now what we have our wnaf byte index, we can use it for two purposes
-    // 1: access the relevant byte in 'w' that contains our wnaf entry
-    // 2: calculate the memory offset where our point is stored
-    // point lookup tables take 32 words of memory per point (excluding endomorphism)
-    // which equals precisely 1kb (0x400)
-    swap1 // w x
-    dup2 0x0a shl // mul // o w x
-    // dup2 0x400 mul // o w x
-    swap2 byte // points start at 0x1060, so we need to add 0x1040 into result
-
-    0x05 shl add POINT_TABLE_START_LOCATION_MINUS_32() add // o_x
-
-    dup1 0x20 add // o_y o_x
-}
-// (+2 not skip)
-// (-13 if skip)
-template <wnafLocation>
-#define MAIN_LOOP_SLICE_ALT = takes(10) returns(10) {
-    DOUBLE_MAIN<dup5, dup6>()
-    <wnafLocation> mload dup1 add_points_start jumpi
-    pop add_skip jump
-add_points_start:
-    dup10 and returndatasize mstore
-add_points_next:
-    ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
-jumpdest
-    returndatasize mload add_points_next jumpi
-add_skip:
-}
-
-template <wnafLocation>
-#define MAIN_LOOP_SLICE = takes(10) returns(10) {
-    DOUBLE_MAIN<dup5, dup6>()
-    <wnafLocation> mload iszero add_skip jumpi
-    <wnafLocation> mload dup10 and returndatasize mstore
-add_points_next:
-    ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
-jumpdest
-    returndatasize mload add_points_next jumpi
-add_skip:
-}
-
 
 // p t1 p z1 -y1 x1 i
 #define GET_P_16 = takes(0) returns(0) {
@@ -190,121 +86,49 @@ add_skip:
     dup1 0x20 add
 }
 
+// start here
+//          |
+//          v
 #define ALTERNATIVE_MAIN_LOOP = takes(0) returns(0) {
-
-    begin_shenanigans jump
-
-    alt_add_16:
-        ADD_MAIN<GET_P_16, dup6, dup7>()
-    alt_add_15:
-        ADD_MAIN<GET_P_15, dup6, dup7>()
-    alt_add_14:
-        ADD_MAIN<GET_P_14, dup6, dup7>()
-    alt_add_13:
-        ADD_MAIN<GET_P_13, dup6, dup7>()
-    alt_add_12:
-        ADD_MAIN<GET_P_12, dup6, dup7>()
-    alt_add_11:
-        ADD_MAIN<GET_P_11, dup6, dup7>()
-    alt_add_10:
-        ADD_MAIN<GET_P_10, dup6, dup7>()
-    alt_add_9:
-        ADD_MAIN<GET_P_9, dup6, dup7>()
-    alt_add_8:
-        ADD_MAIN<GET_P_8, dup6, dup7>()
-    alt_add_7:
-        ADD_MAIN<GET_P_7, dup6, dup7>()
-    alt_add_6:
-        ADD_MAIN<GET_P_6, dup6, dup7>()
-    alt_add_5:
-        ADD_MAIN<GET_P_5, dup6, dup7>()
-    alt_add_4:
-        ADD_MAIN<GET_P_4, dup6, dup7>()
-    alt_add_3:
-        ADD_MAIN<GET_P_3, dup6, dup7>()
-    alt_add_2:
-        ADD_MAIN<GET_P_2, dup6, dup7>()
-    alt_add_1:
-        ADD_MAIN<GET_P_1, dup6, dup7>()
-    alt_add_0:
-        DOUBLE_MAIN<dup6, dup7>()
-        // z y x i Z p 2p 3p
-        0x20 0x40 dup6 sub swap5
-        sub mload 0x04 shl mload jump
-
-    alt_add_final_16:
-        ADD_MAIN<GET_P_16, dup6, dup7>()
-    alt_add_final_15:
-        ADD_MAIN<GET_P_15, dup6, dup7>()
-    alt_add_final_14:
-        ADD_MAIN<GET_P_14, dup6, dup7>()
-    alt_add_final_13:
-        ADD_MAIN<GET_P_13, dup6, dup7>()
-    alt_add_final_12:
-        ADD_MAIN<GET_P_12, dup6, dup7>()
-    alt_add_final_11:
-        ADD_MAIN<GET_P_11, dup6, dup7>()
-    alt_add_final_10:
-        ADD_MAIN<GET_P_10, dup6, dup7>()
-    alt_add_final_9:
-        ADD_MAIN<GET_P_9, dup6, dup7>()
-    alt_add_final_8:
-        ADD_MAIN<GET_P_8, dup6, dup7>()
-    alt_add_final_7:
-        ADD_MAIN<GET_P_7, dup6, dup7>()
-    alt_add_final_6:
-        ADD_MAIN<GET_P_6, dup6, dup7>()
-    alt_add_final_5:
-        ADD_MAIN<GET_P_5, dup6, dup7>()
-    alt_add_final_4:
-        ADD_MAIN<GET_P_4, dup6, dup7>()
-    alt_add_final_3:
-        ADD_MAIN<GET_P_3, dup6, dup7>()
-    alt_add_final_2:
-        ADD_MAIN<GET_P_2, dup6, dup7>()
-    alt_add_final_1:
-        ADD_MAIN<GET_P_1, dup6, dup7>()
-    alt_add_final_0:
-
-        dup5                    // z zf yf xf i Z p 2p 3p 
-        dup7 swap2 mulmod       // z'' yf xf i Z p 2p 3p
-        0x40 mstore             // yf xf i Z p 2p 3p
-        dup5 swap1 mod          // yf xf i Z p 2p 3p
-        dup5 sub                // y xf i Z p 2p 3p
-        0x20 mstore             // xf i Z p 2p 3p
-        dup4 swap1 mod          // x i Z p 2p 3p
-        returndatasize mstore   // i Z p 2p 3p
-        pop pop pop pop pop
-        0x60 returndatasize return
+    // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
+    // Get this out of the way first so we can free up the memory this thing needs for its jump table
+    WNAF_GREEDY__COMPUTE()
 
 
+    // Set up our stack state. We need the order of the group that the bn128 curve's point coordinates are members of.
+    // (this is p)
+    // We also need 2p and 3p, because we avoid performing a modular reduction in intermediate sums when the result
+    // still fits into an evm word. When we compute inversions of these 'overloaded' points we need to scale p by
+    // an equivalent amount.
+    3P()
+    2P()
+    P()
+    // Stack state: p 2p 3p
 
-    begin_shenanigans:
-        ALTERNATE_STRANGE_WNAF()
+    // Set up our memory state. The precomputed lookup table requires 'beta', the cube root of unity mod p.
+    // Because we need this value when the state of our stack is somewhat undefined (hon hon), we keep it in memory.
+    // We do the same with 2p, 3p for the same reasons
+    BETA() BETA_LOCATION() mstore // p 2p 3p
+    dup3 3P_LOCATION() mstore
+    dup2 2P_LOCATION() mstore
 
-        3P()
-        2P()
-        P()
+    // Next, let's compute our point lookup table.
+    PRECOMPUTE_TABLE_FULL()
 
-        BETA() BETA_LOCATION() mstore // p 2p 3p
-        dup3 3P_LOCATION() mstore
-        dup2 2P_LOCATION() mstore
-        // calculate precomputed table
-        PRECOMPUTE_TABLE_FULL()
+    // Nice. now, put the global-z coordinate on the stack, we want to re-use that memory
+    // ...(TODO, optimize memory map)
+    GLOBAL_Z_LOCATION() mload
 
-        returndatasize mload          // get globalZ
-        STRANGE_WNAF_END_LOCATION_PLUS_64()
-    alternate_search_next:
-        0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc0 add
-        dup1 mload iszero alternate_search_next jumpi
-
-    // i z p 2p 3p
+    // we also want the pointer to the most significant non-zero wnaf entry on the stack
+    WNAF_GREEDY__FIND_FIRST_ENTRY()
+    
+    // The next step is to fiddle with the *least* significant wnaf entry. 
+    // We want this entry to point to a location in the jump table that will terminate
+    // the algorithm. We can do this by adding 34 (max number of points *2 + 2) to the entry
     WNAF_START_LOCATION() mload 0x22 add WNAF_START_LOCATION() mstore
 
-    // 1020 stores the location we called mstore8 on, for the largest wnaf index (m)
-    // 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
-    // returndatasize mload 0x440 mstore // store globalZ in 0x2e0
-
+    // Next, we set up our jump table.
+    // TODO: upgrade Huff parser so that we can store this in bytecode and just use codecopy
     alt_add_0 0x00 mstore
     alt_add_1 0x20 mstore
     alt_add_2 0x40 mstore
@@ -340,8 +164,10 @@ add_skip:
     alt_add_final_15 0x400 mstore
     alt_add_final_16 0x420 mstore
 
-    // this should be i - the memory index with the largest nonzero wnaf
-    dup1 mload                  // n i z p 2p 3p table wnafmask
+    // The stack state is now: i Z p 2p 3p
+    // We now want to get the first point in our wnaf entry and set that as our
+    // initial point
+    dup1 mload                  // n i z p 2p 3p
     dup2 sub                    // o i z p 2p 3p
     mload                       // o'
     // entry should now be in most significant 2 bytes
@@ -352,183 +178,218 @@ add_skip:
     dup5 sub                    // y x i z p 2p 3p
     0x01                        // z y x i p 2p 3p
 
+    // the next step is to update i to point to the next (offset) index,
     0x20                        // 32 z y x i z p 2p 3p
     0x20 dup6                   // i 64 32 z y x i z p 2p 3p
     sub                         // i' 32 z y x i z p 2p 3p
     swap5                       // i 32 z y x i' z p 2p 3p
-    mload 0x04 shl sub mload jump
+    // next, we want to use the number of entries at this wnaf index as
+    // an index to our lookup table, but offset by 1 (0x20) because we have already
+    // fished a point out of the wnaf entry.
+    mload 0x04 shl sub
+    // and finally we can load up this jump entry and jump into our main loop
+    mload jump
 
+    // jump destinations for our main loop. Each destination 'falls through' to the next
+    // destination, so we only need 16 copies of the 'add' algorithm
+    alt_add_16:
+        ADD_MAIN<GET_P_16, dup6, dup7>()
+    alt_add_15:
+        ADD_MAIN<GET_P_15, dup6, dup7>()
+    alt_add_14:
+        ADD_MAIN<GET_P_14, dup6, dup7>()
+    alt_add_13:
+        ADD_MAIN<GET_P_13, dup6, dup7>()
+    alt_add_12:
+        ADD_MAIN<GET_P_12, dup6, dup7>()
+    alt_add_11:
+        ADD_MAIN<GET_P_11, dup6, dup7>()
+    alt_add_10:
+        ADD_MAIN<GET_P_10, dup6, dup7>()
+    alt_add_9:
+        ADD_MAIN<GET_P_9, dup6, dup7>()
+    alt_add_8:
+        ADD_MAIN<GET_P_8, dup6, dup7>()
+    alt_add_7:
+        ADD_MAIN<GET_P_7, dup6, dup7>()
+    alt_add_6:
+        ADD_MAIN<GET_P_6, dup6, dup7>()
+    alt_add_5:
+        ADD_MAIN<GET_P_5, dup6, dup7>()
+    alt_add_4:
+        ADD_MAIN<GET_P_4, dup6, dup7>()
+    alt_add_3:
+        ADD_MAIN<GET_P_3, dup6, dup7>()
+    alt_add_2:
+        ADD_MAIN<GET_P_2, dup6, dup7>()
+    alt_add_1:
+        ADD_MAIN<GET_P_1, dup6, dup7>()
+    alt_add_0:
+        // double the accumulator once there's nothing left to add
+        DOUBLE_MAIN<dup6, dup7>()
+        // stack state: z y x i Z p 2p 3p
+        // Next up, we want to decrease i by the size of a wnaf entry in memory.
+        // We then want to load up the next wnaf index and jump.
+        // (the pointer i points to the next wnaf entry, so we're decreasing
+        //    the *next* wnaf pointer, not the current one. This saves a swap op)
+        0x20 0x40 dup6 sub swap5
+        sub mload
+        // Once we have the wnaf entry, we need to convert to a jump index.
+        // The entry is equal to the number of points * 2 (to shave two opcodes from the wnaf algo).
+        // So we can shift this by 4 bits to turn into a memory index.
+        // (there are a lot of different ways to do this, still trying to find the most efficient,
+        //    storing the jump table as packed 2-byte values saves no opcodes because
+        //    we replace a bit shift with a mask, but it does make the raw table a lot smaller)
+        0x04 shl mload jump
 
-    // so. i has already been decreased by 40
-    // i will get us to n
-    // we know that i - 32 gets us the whole word
-    // which is also what we need here. Nice
-    // z y x i p 2p 3p
-
-
+    // We have a separate instantiation of the 'loop' for the final entry in our wnaf. This is because
+    // we don't want to double the accumulator at the end of this section.
+    alt_add_final_16:
+        ADD_MAIN<GET_P_16, dup6, dup7>()
+    alt_add_final_15:
+        ADD_MAIN<GET_P_15, dup6, dup7>()
+    alt_add_final_14:
+        ADD_MAIN<GET_P_14, dup6, dup7>()
+    alt_add_final_13:
+        ADD_MAIN<GET_P_13, dup6, dup7>()
+    alt_add_final_12:
+        ADD_MAIN<GET_P_12, dup6, dup7>()
+    alt_add_final_11:
+        ADD_MAIN<GET_P_11, dup6, dup7>()
+    alt_add_final_10:
+        ADD_MAIN<GET_P_10, dup6, dup7>()
+    alt_add_final_9:
+        ADD_MAIN<GET_P_9, dup6, dup7>()
+    alt_add_final_8:
+        ADD_MAIN<GET_P_8, dup6, dup7>()
+    alt_add_final_7:
+        ADD_MAIN<GET_P_7, dup6, dup7>()
+    alt_add_final_6:
+        ADD_MAIN<GET_P_6, dup6, dup7>()
+    alt_add_final_5:
+        ADD_MAIN<GET_P_5, dup6, dup7>()
+    alt_add_final_4:
+        ADD_MAIN<GET_P_4, dup6, dup7>()
+    alt_add_final_3:
+        ADD_MAIN<GET_P_3, dup6, dup7>()
+    alt_add_final_2:
+        ADD_MAIN<GET_P_2, dup6, dup7>()
+    alt_add_final_1:
+        ADD_MAIN<GET_P_1, dup6, dup7>()
+    alt_add_final_0:
+    // We're almost done now. We have our result, but we need to scale the final
+    // point's Z-coordinate by the globalZ coordinate, as we performed the
+    // entire scalar multiplication algorithm on an isomorphism of the bn128 curve
+    // where globalZ is considered affine.
+    // Our accumulator also represents the y-coordinate in its inverse form,
+    // so we need to invert it.
+    // Finally, both x and y are probably overloaded so we need to perform a modular reduction
+        dup5                    // z zf yf xf i Z p 2p 3p 
+        dup7 swap2 mulmod       // z'' yf xf i Z p 2p 3p
+        0x40 mstore             // yf xf i Z p 2p 3p
+        dup5 swap1 mod          // yf xf i Z p 2p 3p
+        dup5 sub                // y xf i Z p 2p 3p
+        0x20 mstore             // xf i Z p 2p 3p
+        dup4 swap1 mod          // x i Z p 2p 3p
+        returndatasize mstore   // i Z p 2p 3p
+    // Might as well clean up the stack, it's only 10 gas.
+        pop pop pop pop pop
+    // and we're done! Let's get out of here...
+        0x60 returndatasize return
 }
 
-/*
-// z y x i p 2p 3p table wnafmask
-template <wnafLocation, additionJumpdest>
-#define MAIN_LOOP_SLICE_SMALL = takes(10) returns(10) {
+// w i p t1 p z1 -y1 x1 p 2p 3p table
+/// @dev use wnaf table to get the memory location of a point, and update wnaf table
+#define GET_P2_LOCATION = takes(0) returns(0) {
+    returndatasize mload      // w
+    // we want to get a byte index of our wnaf table that is non-zero
+    // we don't want to iterate over every byte, because that's slow!
+    // instead we isolate the least significant set bit of t.
+    // We know that non-zero wnaf entries are aligned at byte boundaries because we stored them via mstore8
+    // we also know that every wnaf entry is odd. Ipso facto, if we isolate the least significant bit of w
+    // then that bit corresponds to the first bit in a byte that contains a non-zero wnaf entry
 
+    dup1 returndatasize sub               // -w w
+    dup2 and                    // b w
+    // next up, is to calculate the index of the byte in 'b' that is nonzero.
+    // In WNAF, we used a lookup table to calculate this, but because we are testing the byte index here and not the bit index we can be more efficient.
+    // (credit to Recmo Bloemen for showing me this trick).
+    // use b as the divisor against literal 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f.
+    // because b only has one bit set, and that bit is the 1st bit of a byte, this acts like a bit-shift operation on the literal.
+    // which will place our desired byte index in the least significant byte, which we can mask off
+    0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f div 0xff and // x w
+
+    // we want to clear the wnaf entry at byte index 'b' (for future iterations)
+    returndatasize dup2 mstore8 // that'll do it.
+
+    // now what we have our wnaf byte index, we can use it for two purposes
+    // 1: access the relevant byte in 'w' that contains our wnaf entry
+    // 2: calculate the memory offset where our point is stored
+    // point lookup tables take 32 words of memory per point (excluding endomorphism)
+    // which equals precisely 1kb (0x400)
+    swap1 // w x
+    dup2 0x400 mul // o w x
+    swap2 byte // points start at 0x1060, so we need to add 0x1040 into result
+
+    0x20 mul add POINT_TABLE_START_LOCATION_MINUS_32() add // o_x
+
+    dup1 0x20 add // o_y o_x
+}
+
+// b w p t1 p z1 -y1 x1 p 2p 3p table
+/// @dev use wnaf table to get the memory location of a point, and update wnaf table
+#define GET_P2_LOCATION_LOOP = takes(0) returns(0) {
+    returndatasize mload      // w
+    // we want to get a byte index of our wnaf table that is non-zero
+    // we don't want to iterate over every byte, because that's slow!
+    // instead we isolate the least significant set bit of t.
+    // We know that non-zero wnaf entries are aligned at byte boundaries because we stored them via mstore8
+    // we also know that every wnaf entry is odd. Ipso facto, if we isolate the least significant bit of w
+    // then that bit corresponds to the first bit in a byte that contains a non-zero wnaf entry
+
+    dup1 returndatasize sub               // -w w
+    dup2 and                    // b w
+    // next up, is to calculate the index of the byte in 'b' that is nonzero.
+    // In WNAF, we used a lookup table to calculate this, but because we are testing the byte index here and not the bit index we can be more efficient.
+    // (credit to Recmo Bloemen for showing me this trick).
+    // use b as the divisor against literal 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f.
+    // because b only has one bit set, and that bit is the 1st bit of a byte, this acts like a bit-shift operation on the literal.
+    // which will place our desired byte index in the least significant byte, which we can mask off
+    dup13 div 0xff and // x w
+
+    // we want to clear the wnaf entry at byte index 'b' (for future iterations)
+    returndatasize dup2 mstore8 // that'll do it.
+
+    // now what we have our wnaf byte index, we can use it for two purposes
+    // 1: access the relevant byte in 'w' that contains our wnaf entry
+    // 2: calculate the memory offset where our point is stored
+    // point lookup tables take 32 words of memory per point (excluding endomorphism)
+    // which equals precisely 1kb (0x400)
+    swap1 // w x
+    dup2 0x0a shl // mul // o w x
+    // dup2 0x400 mul // o w x
+    swap2 byte // points start at 0x1060, so we need to add 0x1040 into result
+
+    0x05 shl add POINT_TABLE_START_LOCATION_MINUS_32() add // o_x
+
+    dup1 0x20 add // o_y o_x
+}
+
+template <wnafLocation>
+#define MAIN_LOOP_SLICE = takes(10) returns(10) {
     DOUBLE_MAIN<dup5, dup6>()
-    finished_addition 0x20 mstore
-    <wnafLocation> mload dup1 <additionJumpdest> jumpi
-    pop
-finished_addition:
+    <wnafLocation> mload iszero add_skip jumpi
+    <wnafLocation> mload dup10 and returndatasize mstore
+add_points_next:
+    ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
+jumpdest
+    returndatasize mload add_points_next jumpi
+add_skip:
 }
 
-#define ADDITION_FUNCTION = takes(0) returns(0) {
-    dup10 and returndatasize mstore
-    add_next:
-        ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
-        returndatasize mload add_next jumpi
-    0x20 mload jump
-}
-
-template <w>
-#define MAIN_LOOP_STATIC_SMALL = takes(0) returns(0) {
-    start jump
-addition:
-    ADDITION_FUNCTION()
-start:
-    0x20 dup5 0x1140 sub div    // delta z y x i p 2p 3p
-    __codesize(MAIN_LOOP_SLICE_SMALL<0x1000>) mul // skip z y x i p 2p 3p
-    hmm add 0x20 mstore
-    dup4 ADDITION_FUNCTION()
-
-hmm:
-    MAIN_LOOP_SLICE_SMALL<w+0xfc, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xfa, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xf8, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xf6, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xf4, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xf2, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xf0, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xee, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xec, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xea, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xe8, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xe6, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xe4, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xe2, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xe0, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xde, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xdc, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xda, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xd8, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xd6, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xd4, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xd2, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xd0, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xce, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xcc, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xca, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xc8, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xc6, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xc4, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xc2, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xc0, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xbe, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xbc, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xba, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xb8, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xb6, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xb4, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xb2, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xb0, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xae, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xac, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xaa, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xa8, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xa6, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xa4, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xa2, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xa0, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x9e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x9c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x9a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x98, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x96, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x94, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x92, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x90, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x8e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x8c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x8a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x88, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x86, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x84, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x82, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x80, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x7e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x7c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x7a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x78, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x76, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x74, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x72, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x70, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x6e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x6c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x6a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x68, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x66, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x64, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x62, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x60, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x5e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x5c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x5a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x58, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x56, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x54, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x52, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x50, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x4e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x4c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x4a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x48, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x46, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x44, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x42, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x40, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x3e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x3c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x3a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x38, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x36, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x34, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x32, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x30, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x2e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x2c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x2a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x28, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x26, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x24, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x22, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x20, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x1e, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x1c, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x1a, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x18, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x16, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x14, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x12, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0x10, addition>()
-    MAIN_LOOP_SLICE_SMALL<w+0xe0, addition()
-    MAIN_LOOP_SLICE_SMALL<w+0xc0, addition()
-    MAIN_LOOP_SLICE_SMALL<w+0xa0, addition()
-    MAIN_LOOP_SLICE_SMALL<w+0x80, addition()
-    MAIN_LOOP_SLICE_SMALL<w+0x60, addition()
-    MAIN_LOOP_SLICE_SMALL<w+0x40, addition()
-    MAIN_LOOP_SLICE_SMALL<w+0x20, addition()
-    MAIN_LOOP_SLICE_SMALL<w+0x00, addition()
-}
-*/
+// original algorithm. A bit less efficient and the bytecode size is about 7kb too big.
+// Could fix in a few ways but the greedy algorithm is faster anyways. Leaving it around
+// for testing and comparison purposes.
 template <w>
 #define MAIN_LOOP_STATIC = takes(0) returns(0) {
     // now let's figure out where we need to jump to
@@ -722,7 +583,7 @@ main_loop_end:  // looks like we've finished
     // 0x40 - 0x80 = P2
     // 0x80 - 0xa0 = s1
     // 0xa0 - 0xc0 = s2
-    COMPUTE_WNAFS()
+    WNAF_JUMP_TABLE__COMPUTE()
 
     WNAF_MASK()
     0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
@@ -753,19 +614,7 @@ main_loop_end:  // looks like we've finished
     0x01                // z y x i p 2p 3p
 
     MAIN_LOOP_STATIC<WNAF_START_LOCATION>()
-    /*
-    0x00 mload get_first_entry jumpi
-        begin_festivities jump
-get_first_entry:
-    ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
-    0x00 mload get_first_entry jumpi // z y x w i' p 2p 3p
-    // (this assumes we have two wnaf entries for each point respectively)
-begin_festivities:
-    swap3 0x20 swap1 sub swap3
-    dup4 0x140 eq skip_main_loop jumpi
-    MAIN_LOOP()             // zf yf xf i p 2p 3p 
-skip_main_loop:
-*/
+
 // Finished with main loop. Final thing to do is scale the point's z-coordinate by the precomputed table's globalZ coordinate
     0x100 mload            // z zf yf xf i p 2p 3p 
     dup6 swap2 mulmod       // z'' yf xf i p 2p 3p
@@ -778,64 +627,3 @@ skip_main_loop:
     pop pop pop pop pop pop
     0x60 returndatasize return
 }
-
-/*
-/// @dev performs scalar multiplication for two affine points
-#define MAIN_FULL = takes(0) returns(0) {
-    // point table starts at 0x20
-    // for two points, table will end at 0x1020
-    // store globalZ at 0x1020
-    // wnaf table starts at 0x1040
-    // 0x00 - 0x40 = P1
-    // 0x40 - 0x80 = P2
-    // 0x80 - 0xa0 = s1
-    // 0xa0 - 0xc0 = s2
-    COMPUTE_WNAFS()
-
-    WNAF_MASK()
-    0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
-    3P()
-    2P()
-    P()
-
-    // calculate precomputed table
-    PRECOMPUTE_TABLE_FULL()
-    FIND_FIRST_ENTRY()
-    // 1020 stores the location we called mstore8 on, for the largest wnaf index (m)
-    // 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
-    0x00 mload 0x100 mstore // store globalZ in 0x100
-
-    // this should be i - the memory index with the largest nonzero wnaf
-    dup1 mload                  // w i p 2p 3p table wnafmask
-    dup7 and
-    // get coordinates of first point
-    0x00 mstore
-    GET_P2_LOCATION()   // o_y o_x i p 2p 3p
-    mload swap1 mload   // x y i p 2p 3p
-    dup4 sub swap1      // y x i p 2p 3p
-    dup4 sub            // y x i p 2p 3p
-    0x01                // z y x i p 2p 3p
-    0x00 mload get_first_entry jumpi
-        begin_festivities jump
-get_first_entry:
-    ADD_MAIN<GET_P2_LOCATION_LOOP,dup5,dup6>()
-    0x00 mload get_first_entry jumpi // z y x w i' p 2p 3p
-    // (this assumes we have two wnaf entries for each point respectively)
-begin_festivities:
-    swap3 0x20 swap1 sub swap3
-    dup4 0x140 eq skip_main_loop jumpi
-    MAIN_LOOP()             // zf yf xf i p 2p 3p 
-skip_main_loop:
-
-// Finished with main loop. Final thing to do is scale the point's z-coordinate by the precomputed table's globalZ coordinate
-    0x100 mload            // z zf yf xf i p 2p 3p 
-    dup6 swap2 mulmod       // z'' yf xf i p 2p 3p
-    0x40 mstore             // yf xf i p 2p 3p
-    dup4 swap1 mod          // yf xf i p 2p 3p
-    dup4 sub                // y xf i p 2p 3p
-    0x20 mstore             // xf i p 2p 3p
-    dup3 swap1 mod          // x i p 2p 3p
-    0x00 mstore             // i p 2p 3p
-    pop pop pop pop pop pop
-    0x60 0x00 return
-}*/
