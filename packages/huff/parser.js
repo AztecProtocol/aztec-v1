@@ -105,7 +105,6 @@ parser.processTemplateLiteral = (literal, macros) => {
 
 parser.parseTemplate = (templateName, macros = {}, index = 0) => {
     const macroId = parser.getId();
-    // TODO: adopt parseExpression to support inline template compilation
     if (regex.isLiteral(templateName)) {
         const hex = formatEvenBytes(parser.processTemplateLiteral(templateName, macros).toString(16));
         const opcode = toHex(95 + (hex.length / 2));
@@ -178,7 +177,7 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        throw new Error(`unmatched jump labels ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
+        throw new Error(`macro ${name}, unmatched jump labels ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
     }
     return result;
 };
@@ -213,8 +212,8 @@ parser.processMacroInternal = (
         switch (op.type) {
             case TYPES.MACRO: {
                 const args = parser.substituteTemplateArguments(op.args, templateRegExps);
-                const { data: result, unmatchedJumps } = parser.processMacro(op.value, offset, args, macros, map);
-                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeOffset }) => ({ label, bytecodeOffset: bytecodeOffset + offset * 2 }))];
+                const { data: result, unmatchedJumps } = parser.processMacroInternal(op.value, offset, args, macros, map);
+                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeIndex }) => ({ label, bytecodeIndex: bytecodeIndex + (offset * 2) }))];
                 offset += (result.bytecode.length / 2);
                 return result;
             }
@@ -224,15 +223,14 @@ parser.processMacroInternal = (
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
                 ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
-                const { data: result, unmatchedJumps } = parser.processMacro(templateName, offset, [], macros, map);
-                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeOffset }) => ({ label, bytecodeOffset: bytecodeOffset + offset * 2 }))];
+                const { data: result, unmatchedJumps } = parser.processMacroInternal(templateName, offset, [], macros, map);
+                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeIndex }) => ({ label, bytecodeIndex: bytecodeIndex + (offset * 2) }))];
                 offset += (result.bytecode.length / 2);
                 return result;
             }
             case TYPES.CODESIZE: {
                 check(index !== -1, `cannot find macro ${op.value}`);
-                // const fakeTemplateParams = [regex.sliceCommas(op.args[0]).map(arg => '00'.repeat(arg)).join(',')];
-                const { data: result } = parser.processMacro(op.value, offset, op.args, macros, map);
+                const { data: result } = parser.processMacroInternal(op.value, offset, op.args, macros, map);
                 const hex = formatEvenBytes((result.bytecode.length / 2).toString(16));
                 const opcode = toHex(95 + (hex.length / 2));
                 const bytecode = `${opcode}${hex}`;
@@ -289,26 +287,26 @@ parser.processMacroInternal = (
         return old;
     });
     const unmatchedJumps = [];
+
+    // TODO: refactor unmatched jumps because this doesn't work.
+    // If a macro returns unmatched jumps, we need to map from one code index to multiple jump entries
     const data = codes.reduce((acc, { bytecode, sourcemap }, index) => {
         if (jumptable[index]) {
             const { label: jumplabel, bytecodeIndex } = jumptable[index];
             if (jumpindices[jumplabel]) {
-                // check(jumpindices[jumplabel] !== undefined, `expected jump label ${jumptable[index]} to exist`);
                 const jumpindex = jumpindices[jumplabel];
                 const jumpvalue = padNBytes(toHex(codeIndices[jumpindex]), 2);
                 const jumpcode = `${bytecode.slice(0, bytecodeIndex + 2)}${jumpvalue}${bytecode.slice(bytecodeIndex + 6)}`;
-                // filteredJumptable = jumptable.filter(j => j !== index);
                 return {
                     bytecode: acc.bytecode + jumpcode,
                     sourcemap: [...acc.sourcemap, ...sourcemap],
                 };
             }
-            unmatchedJumps.push({ label: jumplabel, bytecodeIndex: codeIndices[index] * 2 });
+            unmatchedJumps.push({ label: jumplabel, bytecodeIndex: codeIndices[index] - startingBytecodeIndex });
             return {
                 bytecode: acc.bytecode + `${opcodes.push2}xxxx`,
                 sourcemap: [...acc.sourcemap, ...sourcemap],
             };
-            // some kind of label is needed!
         }
         /* if (bytecode === `${opcodes.push2}xxxx`) {
             const jumplabel = jumptable[index];
