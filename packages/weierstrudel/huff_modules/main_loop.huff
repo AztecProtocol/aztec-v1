@@ -111,82 +111,82 @@ add_skip:
 
 // p t1 p z1 -y1 x1 i
 #define GET_P_16 = takes(0) returns(0) {
-    dup7 0x20 add mload 238 shr 0x02ffe0 and
+    dup7 mload 238 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_15 = takes(0) returns(0) {
-    dup7 0x20 add mload 222 shr 0x02ffe0 and
+    dup7 mload 222 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_14 = takes(0) returns(0) {
-    dup7 0x20 add mload 206 shr 0x02ffe0 and
+    dup7 mload 206 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_13 = takes(0) returns(0) {
-    dup7 0x20 add mload 190 shr 0x02ffe0 and
+    dup7 mload 190 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_12 = takes(0) returns(0) {
-    dup7 0x20 add mload 174 shr 0x02ffe0 and
+    dup7 mload 174 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_11 = takes(0) returns(0) {
-    dup7 0x20 add mload 158 shr 0x02ffe0 and
+    dup7 mload 158 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_10 = takes(0) returns(0) {
-    dup7 0x20 add mload 142 shr 0x02ffe0 and
+    dup7 mload 142 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_9 = takes(0) returns(0) {
-    dup7 0x20 add mload 126 shr 0x02ffe0 and
+    dup7 mload 126 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_8 = takes(0) returns(0) {
-    dup7 0x20 add mload 110 shr 0x02ffe0 and
+    dup7 mload 110 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_7 = takes(0) returns(0) {
-    dup7 0x20 add mload 94 shr 0x02ffe0 and
+    dup7 mload 94 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_6 = takes(0) returns(0) {
-    dup7 0x20 add mload 78 shr 0x02ffe0 and
+    dup7 mload 78 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_5 = takes(0) returns(0) {
-    dup7 0x20 add mload 62 shr 0x02ffe0 and
+    dup7 mload 62 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_4 = takes(0) returns(0) {
-    dup7 0x20 add mload 46 shr 0x02ffe0 and
+    dup7 mload 46 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_3 = takes(0) returns(0) {
-    dup7 0x20 add mload 30 shr 0x02ffe0 and
+    dup7 mload 30 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_2 = takes(0) returns(0) {
-    dup7 0x20 add mload 14 shr 0x02ffe0 and
+    dup7 mload 14 shr 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_1 = takes(0) returns(0) {
-    dup7 0x20 add mload 2 shl 0x02ffe0 and
+    dup7 mload 2 shl 0x02ffe0 and
     dup1 0x20 add
 }
 
@@ -195,86 +195,86 @@ add_skip:
     begin_shenanigans jump
 
     alt_add_16:
-        ADD_MAIN<GET_P_16, dup5, dup6>()
+        ADD_MAIN<GET_P_16, dup6, dup7>()
     alt_add_15:
-        ADD_MAIN<GET_P_15, dup5, dup6>()
+        ADD_MAIN<GET_P_15, dup6, dup7>()
     alt_add_14:
-        ADD_MAIN<GET_P_14, dup5, dup6>()
+        ADD_MAIN<GET_P_14, dup6, dup7>()
     alt_add_13:
-        ADD_MAIN<GET_P_13, dup5, dup6>()
+        ADD_MAIN<GET_P_13, dup6, dup7>()
     alt_add_12:
-        ADD_MAIN<GET_P_12, dup5, dup6>()
+        ADD_MAIN<GET_P_12, dup6, dup7>()
     alt_add_11:
-        ADD_MAIN<GET_P_11, dup5, dup6>()
+        ADD_MAIN<GET_P_11, dup6, dup7>()
     alt_add_10:
-        ADD_MAIN<GET_P_10, dup5, dup6>()
+        ADD_MAIN<GET_P_10, dup6, dup7>()
     alt_add_9:
-        ADD_MAIN<GET_P_9, dup5, dup6>()
+        ADD_MAIN<GET_P_9, dup6, dup7>()
     alt_add_8:
-        ADD_MAIN<GET_P_8, dup5, dup6>()
+        ADD_MAIN<GET_P_8, dup6, dup7>()
     alt_add_7:
-        ADD_MAIN<GET_P_7, dup5, dup6>()
+        ADD_MAIN<GET_P_7, dup6, dup7>()
     alt_add_6:
-        ADD_MAIN<GET_P_6, dup5, dup6>()
+        ADD_MAIN<GET_P_6, dup6, dup7>()
     alt_add_5:
-        ADD_MAIN<GET_P_5, dup5, dup6>()
+        ADD_MAIN<GET_P_5, dup6, dup7>()
     alt_add_4:
-        ADD_MAIN<GET_P_4, dup5, dup6>()
+        ADD_MAIN<GET_P_4, dup6, dup7>()
     alt_add_3:
-        ADD_MAIN<GET_P_3, dup5, dup6>()
+        ADD_MAIN<GET_P_3, dup6, dup7>()
     alt_add_2:
-        ADD_MAIN<GET_P_2, dup5, dup6>()
+        ADD_MAIN<GET_P_2, dup6, dup7>()
     alt_add_1:
-        ADD_MAIN<GET_P_1, dup5, dup6>()
+        ADD_MAIN<GET_P_1, dup6, dup7>()
     alt_add_0:
-        DOUBLE_MAIN<dup5, dup6>()
-        // z y x i p 2p 3p
-        0x40 dup5 sub swap4
-        mload 0x04 shl mload jump
+        DOUBLE_MAIN<dup6, dup7>()
+        // z y x i Z p 2p 3p
+        0x20 0x40 dup6 sub swap5
+        sub mload 0x04 shl mload jump
 
     alt_add_final_16:
-        ADD_MAIN<GET_P_16, dup5, dup6>()
+        ADD_MAIN<GET_P_16, dup6, dup7>()
     alt_add_final_15:
-        ADD_MAIN<GET_P_15, dup5, dup6>()
+        ADD_MAIN<GET_P_15, dup6, dup7>()
     alt_add_final_14:
-        ADD_MAIN<GET_P_14, dup5, dup6>()
+        ADD_MAIN<GET_P_14, dup6, dup7>()
     alt_add_final_13:
-        ADD_MAIN<GET_P_13, dup5, dup6>()
+        ADD_MAIN<GET_P_13, dup6, dup7>()
     alt_add_final_12:
-        ADD_MAIN<GET_P_12, dup5, dup6>()
+        ADD_MAIN<GET_P_12, dup6, dup7>()
     alt_add_final_11:
-        ADD_MAIN<GET_P_11, dup5, dup6>()
+        ADD_MAIN<GET_P_11, dup6, dup7>()
     alt_add_final_10:
-        ADD_MAIN<GET_P_10, dup5, dup6>()
+        ADD_MAIN<GET_P_10, dup6, dup7>()
     alt_add_final_9:
-        ADD_MAIN<GET_P_9, dup5, dup6>()
+        ADD_MAIN<GET_P_9, dup6, dup7>()
     alt_add_final_8:
-        ADD_MAIN<GET_P_8, dup5, dup6>()
+        ADD_MAIN<GET_P_8, dup6, dup7>()
     alt_add_final_7:
-        ADD_MAIN<GET_P_7, dup5, dup6>()
+        ADD_MAIN<GET_P_7, dup6, dup7>()
     alt_add_final_6:
-        ADD_MAIN<GET_P_6, dup5, dup6>()
+        ADD_MAIN<GET_P_6, dup6, dup7>()
     alt_add_final_5:
-        ADD_MAIN<GET_P_5, dup5, dup6>()
+        ADD_MAIN<GET_P_5, dup6, dup7>()
     alt_add_final_4:
-        ADD_MAIN<GET_P_4, dup5, dup6>()
+        ADD_MAIN<GET_P_4, dup6, dup7>()
     alt_add_final_3:
-        ADD_MAIN<GET_P_3, dup5, dup6>()
+        ADD_MAIN<GET_P_3, dup6, dup7>()
     alt_add_final_2:
-        ADD_MAIN<GET_P_2, dup5, dup6>()
+        ADD_MAIN<GET_P_2, dup6, dup7>()
     alt_add_final_1:
-        ADD_MAIN<GET_P_1, dup5, dup6>()
+        ADD_MAIN<GET_P_1, dup6, dup7>()
     alt_add_final_0:
 
-        0x440 mload            // z zf yf xf i p 2p 3p 
-        dup6 swap2 mulmod       // z'' yf xf i p 2p 3p
-        0x40 mstore             // yf xf i p 2p 3p
-        dup4 swap1 mod          // yf xf i p 2p 3p
-        dup4 sub                // y xf i p 2p 3p
-        0x20 mstore             // xf i p 2p 3p
-        dup3 swap1 mod          // x i p 2p 3p
-        returndatasize mstore             // i p 2p 3p
-        pop pop pop pop
+        dup5                    // z zf yf xf i Z p 2p 3p 
+        dup7 swap2 mulmod       // z'' yf xf i Z p 2p 3p
+        0x40 mstore             // yf xf i Z p 2p 3p
+        dup5 swap1 mod          // yf xf i Z p 2p 3p
+        dup5 sub                // y xf i Z p 2p 3p
+        0x20 mstore             // xf i Z p 2p 3p
+        dup4 swap1 mod          // x i Z p 2p 3p
+        returndatasize mstore   // i Z p 2p 3p
+        pop pop pop pop pop
         0x60 returndatasize return
 
 
@@ -292,17 +292,18 @@ add_skip:
         // calculate precomputed table
         PRECOMPUTE_TABLE_FULL()
 
+        returndatasize mload          // get globalZ
         STRANGE_WNAF_END_LOCATION_PLUS_64()
     alternate_search_next:
         0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc0 add
         dup1 mload iszero alternate_search_next jumpi
 
-    // i p 2p 3p
+    // i z p 2p 3p
     WNAF_START_LOCATION() mload 0x22 add WNAF_START_LOCATION() mstore
 
     // 1020 stores the location we called mstore8 on, for the largest wnaf index (m)
     // 0x1020 mload div 0x20 mul // (m / 0x20) * 0x20
-    returndatasize mload 0x440 mstore // store globalZ in 0x2e0
+    // returndatasize mload 0x440 mstore // store globalZ in 0x2e0
 
     alt_add_0 0x00 mstore
     alt_add_1 0x20 mstore
@@ -340,21 +341,21 @@ add_skip:
     alt_add_final_16 0x420 mstore
 
     // this should be i - the memory index with the largest nonzero wnaf
-    dup1 mload                  // n i p 2p 3p table wnafmask
-    dup2 sub                    // o i p 2p 3p
+    dup1 mload                  // n i z p 2p 3p table wnafmask
+    dup2 sub                    // o i z p 2p 3p
     mload                       // o'
     // entry should now be in most significant 2 bytes
     238 shr 0x02ffe0 and        // o_x
-    dup1 mload                  // -x o_x i p 2p 3p
-    dup4 sub                    // x o_x i p 2p 3p
-    swap1 0x20 add mload        // -y x i p 2p 3p
-    dup4 sub                    // y x i p 2p 3p
+    dup1 mload                  // -x o_x i z p 2p 3p
+    dup5 sub                    // x o_x i z p 2p 3p
+    swap1 0x20 add mload        // -y x i z p 2p 3p
+    dup5 sub                    // y x i z p 2p 3p
     0x01                        // z y x i p 2p 3p
 
-    0x20                        // 32 z y x i p 2p 3p
-    0x40 dup6                   // i 64 32 z y x i p 2p 3p
-    sub                         // i' 32 z y x i p 2p 3p
-    swap5                       // i 32 z y x i' p 2p 3p
+    0x20                        // 32 z y x i z p 2p 3p
+    0x20 dup6                   // i 64 32 z y x i z p 2p 3p
+    sub                         // i' 32 z y x i z p 2p 3p
+    swap5                       // i 32 z y x i' z p 2p 3p
     mload 0x04 shl sub mload jump
 
 
