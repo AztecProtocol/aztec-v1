@@ -9,7 +9,7 @@ const { padLeft, sha3 } = require('web3-utils');
 const exceptions = require('../exceptions');
 const { t2, GROUP_MODULUS } = require('../../aztec-crypto-js/params');
 const atomicProof = require('../../aztec-crypto-js/proof/atomicSwapProof');
-const atomicSwapHelpers = require('../../aztec-crypto-js/proof/atomicSwapHelpers');
+const helpers = require('../../aztec-crypto-js/proof/helpers');
 
 // ### Artifacts
 const AtomicSwap = artifacts.require('../../contracts/AZTEC/AtomicSwap');
@@ -37,7 +37,7 @@ contract('AtomicSwap tests', (accounts) => {
             atomicSwap = await AtomicSwap.new(accounts[0]);
             const makerNoteValues = [10, 20];
             const takerNoteValues = [10, 20];
-            testNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            testNotes = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
         });
 
         it('validate that the Javascript proof is constructed correctly', () => {
@@ -72,13 +72,13 @@ contract('AtomicSwap tests', (accounts) => {
             atomicSwap = await AtomicSwap.new(accounts[0]);
             const makerNoteValues = [10, 20];
             const takerNoteValues = [10, 20];
-            testNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            testNotes = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
         });
 
         it('Validate failure for incorrect input note values (k1 != k3, k2 != k4)', async () => {
             const makerNoteValues = [10, 50];
             const takerNoteValues = [20, 20];
-            const incorrectTestNoteValues = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            const incorrectTestNoteValues = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
             const { proofData, challenge } = atomicProof.constructAtomicSwap(incorrectTestNoteValues, accounts[0]);
 
@@ -91,7 +91,7 @@ contract('AtomicSwap tests', (accounts) => {
         it('Validate failure for incorrect number of input notes', async () => {
             const makerNoteValues = [10, 20, 30];
             const takerNoteValues = [10, 20, 30];
-            const incorrectNumberOfNotes = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            const incorrectNumberOfNotes = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
             const { proofData, challenge } = atomicProof.constructAtomicSwap(incorrectNumberOfNotes, accounts[0]);
 
@@ -104,7 +104,7 @@ contract('AtomicSwap tests', (accounts) => {
         it('Validate failure for a bid note of zero value', async () => {
             const makerNoteValues = [0, 20];
             const takerNoteValues = [10, 20];
-            const NotesWithAZero = atomicSwapHelpers.makeTestNotes(makerNoteValues, takerNoteValues);
+            const NotesWithAZero = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
             const { proofData, challenge } = atomicProof.constructAtomicSwap(NotesWithAZero, accounts[0]);
 
