@@ -31,6 +31,21 @@ ecdsa.accountFromPublicKey = (publicKey) => {
     return address;
 };
 
+
+/**
+ * Convert an Ethereum public key into an address
+ *
+ * @method accountFromPublicKey
+ * @memberof module:secp256k1.ecdsa
+ * @param {string} publicKey hex-string formatted public key (uncompressed)
+ * @returns {string} address
+ */
+ecdsa.accountFromPublicKeyHex = (publicKeyHex) => {
+    const publicHash = web3Utils.sha3(publicKeyHex.slice(2));
+    const address = web3Utils.toChecksumAddress(`0x${publicHash.slice(-40)}`);
+    return address;
+};
+
 /**
  * Sign a message hash with a given private key
  *
