@@ -17,6 +17,8 @@ const {
     K_MAX,
 } = require('../params');
 
+const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
+
 const bn128 = {};
 
 /**
@@ -104,4 +106,68 @@ bn128.recoverMessage = function recoverMessage(gamma, gammaK) {
     return k;
 };
 
+/**
+ * Decompress a 256-bit representation of a bn128 G1 element.
+ *   The first 254 bits define the x-coordinate. The most significant bit defines whether the
+ *   y-coordinate is odd
+ *
+ * @method decompress
+ * @param {BN} compressed 256-bit compressed coordinate in BN form
+ * @returns {Object.<BN, BN>} x and y coordinates of point, in BN form
+ */
+bn128.decompress = (compressed) => {
+    const yBit = compressed.testn(255);
+    const x = compressed.maskn(255).toRed(bn128.curve.red);
+    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
+    const yRoot = y2.redSqrt();
+    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+        throw new Error('x^3 + 3 not a square, malformed input');
+    }
+    let y = yRoot.fromRed();
+    if (Boolean(y.isOdd()) !== Boolean(yBit)) {
+        y = bn128.curve.p.sub(y);
+    }
+    return { x: x.fromRed(), y };
+};
+
+/**
+ * Decompress a 256-bit representation of a bn128 G1 element.
+ *   The first 254 bits define the x-coordinate. The most significant bit defines whether the
+ *   y-coordinate is odd
+ *
+ * @method decompressHex
+ * @param {string} compressed 256-bit compressed coordinate in string form
+ * @returns {Point} coordinates of point, in elliptic.js Point form
+ */
+bn128.decompressHex = (compressedHex) => {
+    const compressed = new BN(compressedHex, 16);
+    const yBit = compressed.testn(255);
+    const x = compressed.maskn(255).toRed(bn128.curve.red);
+    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
+    const yRoot = y2.redSqrt();
+    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+        throw new Error('x^3 + 3 not a square, malformed input');
+    }
+    let y = yRoot.fromRed();
+    if (Boolean(y.isOdd()) !== Boolean(yBit)) {
+        y = bn128.curve.p.sub(y);
+    }
+    return bn128.curve.point(x.fromRed(), y);
+};
+
+/**
+ * Compress a bn128 point into 256 bits.
+ *
+ * @method compress
+ * @param {BN} x x coordinate
+ * @param {BN} y y coordinate
+ * @returns {BN} 256-bit compressed coordinate, in BN form
+ */
+bn128.compress = (x, y) => {
+    let compressed = x;
+    if (y.testn(0)) {
+        compressed = compressed.or(compressionMask);
+    }
+    return compressed;
+};
 module.exports = bn128;
