@@ -4,8 +4,8 @@ const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
 
 const bn128 = require('../../bn128');
-const proof = require('../../proof');
-const proofHelpers = require('../../proof/helpers');
+const proof = require('../../proof/joinSplit1/proof');
+const proofHelpers = require('../../proof/joinSplit1/helpers');
 const { K_MAX } = require('../../params');
 
 const { expect } = chai;

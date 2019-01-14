@@ -6,9 +6,9 @@ const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
 
 const bn128 = require('../../bn128');
-const proof = require('../../proof');
-const verifier = require('../../proof/verifier');
-const proofHelpers = require('../../proof/helpers');
+const proof = require('../../proof/joinSplit1/proof');
+const verifier = require('../../proof/joinSplit1/verifier');
+const proofHelpers = require('../../proof/joinSplit1/helpers');
 const { K_MAX } = require('../../params');
 
 const { expect } = chai;
