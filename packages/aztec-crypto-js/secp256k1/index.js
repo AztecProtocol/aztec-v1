@@ -73,4 +73,72 @@ secp256k1.randomPoint = function randomPoint() {
     return recurse();
 };
 
+
+/**
+ * Decompress a 256-bit representation of a secp256k1 G1 element.
+ *   The first variable defines the x-coordinate. The most significant bit defines whether the
+ *   y-coordinate is odd
+ *
+ * @method decompress
+ * @param {BN} compressed 256-bit compressed coordinate in BN form
+ * @returns {Object.<BN, BN>} x and y coordinates of point, in BN form
+ */
+secp256k1.decompress = (compressed, yBit) => {
+    const x = compressed.maskn(255).toRed(secp256k1.curve.red);
+    const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.curve.b);
+    const yRoot = y2.redSqrt();
+    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+        throw new Error('x^3 + 3 not a square, malformed input');
+    }
+    let y = yRoot.fromRed();
+    if (Boolean(y.isOdd()) !== Boolean(yBit.eq(new BN(1)))) {
+        y = secp256k1.curve.p.sub(y);
+    }
+    return { x: x.fromRed(), y };
+};
+
+
+/**
+ * Decompress a 256-bit representation of a secp256k1 G1 element.
+ *   The first variable defines the x-coordinate. The most significant bit defines whether the
+ *   y-coordinate is odd
+ *
+ * @method decompress
+ * @param {BN} compressed 256-bit compressed coordinate in BN form
+ * @returns {Object.<BN, BN>} x and y coordinates of point, in BN form
+ */
+secp256k1.decompressHex = (compressed) => {
+    if (compressed.length !== 66) {
+        throw new Error(`expected compressed secp256k1 element ${compressed} to have length 66`);
+    }
+    const x = new BN(compressed.slice(0, 64), 16).toRed(secp256k1.curve.red);
+    const yBit = new BN(compressed.slice(64, 66), 16);
+    const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.curve.b);
+    const yRoot = y2.redSqrt();
+    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+        throw new Error('x^3 + 3 not a square, malformed input');
+    }
+    let y = yRoot.fromRed();
+    if (Boolean(y.isOdd()) !== Boolean(yBit.eq(new BN(1)))) {
+        y = secp256k1.curve.p.sub(y);
+    }
+    return secp256k1.curve.point(x.fromRed(), y);
+};
+
+
+/**
+ * Compress a secp256k1 point into 33 bytes.
+ *
+ * @method compress
+ * @param {Point} point secp256k1 group element
+ * @returns {string} hex-formatted compressed point
+ */
+secp256k1.compress = (point) => {
+    const compressed = web3Utils.padLeft(point.x.fromRed().toString(16), 64);
+    if (point.y.fromRed().testn(0)) {
+        return `0x${compressed}01`;
+    }
+    return `0x${compressed}00`;
+};
+
 module.exports = secp256k1;
