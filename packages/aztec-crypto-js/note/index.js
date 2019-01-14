@@ -2,6 +2,7 @@ const BN = require('bn.js');
 const web3Utils = require('web3-utils');
 const crypto = require('crypto');
 
+const ecdsa = require('../secp256k1/ecdsa');
 const secp256k1 = require('../secp256k1');
 const bn128 = require('../bn128');
 const setup = require('../setup');
@@ -37,14 +38,20 @@ function createSharedSecret(publicKeyHex) {
  * @class
  * @param {string} publicKey hex-formatted public key
  * @param {string} viewingKey hex-formatted viewing key
+ * @param {string} owner Ethereum address of note owner
  * @classdesc A class for AZTEC zero-knowledge notes.
  *   Notes have public keys and viewing keys.  
  *   The viewing key is required to use note in an AZTEC zero-knowledge proof
  */
-function Note(publicKey, viewingKey) {
+function Note(publicKey, viewingKey, owner = '0x') {
     if (publicKey && viewingKey) {
         throw new Error('expected one of publicKey or viewingKey, not both');
     }
+    /**
+     * Ethereum address of note's owner
+     * @member {string}
+     */
+    this.owner = owner;
     if (publicKey) {
         if (typeof (publicKey) !== 'string') {
             throw new Error(`expected key type ${typeof (publicKey)} to be of type string`);
@@ -244,7 +251,8 @@ note.create = (spendingPublicKey, value) => {
     const k = padLeft(web3Utils.toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;
-    return new Note(null, viewingKey);
+    const owner = ecdsa.accountFromPublicKeyHex(spendingPublicKey);
+    return new Note(null, viewingKey, owner);
 };
 
 /**
