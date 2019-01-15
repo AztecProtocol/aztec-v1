@@ -1,7 +1,7 @@
 // from https://ethereum.stackexchange.com/questions/48627/how-to-catch-revert-error-in-truffle-test-javascript
 const { expect } = require('chai');
 
-const PREFIX = 'VM Exception while processing transaction: ';
+const PREFIX = 'Returned error: VM Exception while processing transaction: ';
 
 async function tryCatch(promise, message) {
     try {

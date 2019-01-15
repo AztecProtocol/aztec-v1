@@ -20,6 +20,7 @@ const eip712 = require('../../aztec-crypto-js/eip712/eip712');
 const exceptions = require('../exceptions');
 
 const { t2, GROUP_MODULUS } = require('../../aztec-crypto-js/params');
+const { ZERO_ADDRESS } = require('../constants');
 
 const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'));
 
@@ -151,7 +152,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             ).to.equal(true);
             expect(
                 contractBalance
-                    .eq(scalingFactor.mul(balance))
+                    .eq(scalingFactor.mul(web3.utils.toBN(balance)))
             ).to.equal(true);
             console.log('gas spent = ', result.receipt.gasUsed);
         });
@@ -211,7 +212,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
         it('invalid signatures cannot be used to spend non-existant notes', async () => {
             await token.transfer(
                 aztecToken.address,
-                scalingFactor.mul(200),
+                scalingFactor.mul(new BN(200)),
                 { from: accounts[4], gas: 5000000 }
             );
             const { commitments } = await proofHelpers.generateCommitmentSet({ kIn: [100], kOut: [] });
@@ -238,7 +239,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             const kPublic = GROUP_MODULUS.sub(tokensTransferred);
             const { proofData, challenge } = aztecProof.constructJoinSplit(commitments, m, accounts[4], kPublic);
             outputOwners = aztecAccounts.slice(0, 4).map(account => account.address);
-            outputOwners.push('0x0');
+            outputOwners.push(ZERO_ADDRESS);
             await exceptions.catchRevert(aztecToken.confidentialTransfer(
                 proofData,
                 m,
