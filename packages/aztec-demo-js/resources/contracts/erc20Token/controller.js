@@ -11,7 +11,7 @@ const deployer = require('../../../deployer');
 const wallets = require('../../wallets');
 const transactions = require('../../transactions');
 const config = require('../../../config');
-const ERC20Mintable = require('../../../../build/contracts/ERC20Mintable.json');
+const ERC20Mintable = require('../../../contracts/ERC20Mintable.json');
 
 const { web3 } = deployer;
 const { TX_TYPES } = config;

@@ -13,7 +13,7 @@ const { TX_STATUS } = require('../../../config');
 const web3 = require('../../../web3Listener');
 const deployer = require('../../../deployer');
 
-const Doorbell = require('../../../../build/contracts/Doorbell');
+const Doorbell = require('../../../contracts/Doorbell');
 
 const { expect } = chai;
 

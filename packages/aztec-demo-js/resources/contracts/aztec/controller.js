@@ -10,8 +10,8 @@ const transactions = require('../../transactions');
 const { t2 } = require('../../../../aztec-crypto-js/params');
 const { TX_TYPES } = require('../../../config');
 
-const AZTEC = require('../../../../build/contracts/AZTEC.json');
-const AZTECInterface = require('../../../../build/contracts/AZTECInterface.json');
+const AZTEC = require('../../../contracts/AZTEC.json');
+const AZTECInterface = require('../../../contracts/AZTECInterface.json');
 
 const { web3 } = deployer;
 AZTEC.abi = AZTECInterface.abi; // hon hon hon

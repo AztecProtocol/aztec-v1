@@ -1,0 +1,617 @@
+{
+  "contractName": "Doorbell",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "addressBlockMap",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "signature": "0xd7413969"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "setBlock",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0xfe5afe51"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060f08061001f6000396000f30060806040526004361060485763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663d74139698114604d578063fe5afe5114608a575b600080fd5b348015605857600080fd5b50607873ffffffffffffffffffffffffffffffffffffffff60043516609e565b60408051918252519081900360200190f35b348015609557600080fd5b50609c60b0565b005b60006020819052908152604090205481565b3360009081526020819052604090204390555600a165627a7a72305820593a1a822c5c395d861e10b2858edf4283f7009a9722f09d263c89cb490714160029",
+  "deployedBytecode": "0x60806040526004361060485763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663d74139698114604d578063fe5afe5114608a575b600080fd5b348015605857600080fd5b50607873ffffffffffffffffffffffffffffffffffffffff60043516609e565b60408051918252519081900360200190f35b348015609557600080fd5b50609c60b0565b005b60006020819052908152604090205481565b3360009081526020819052604090204390555600a165627a7a72305820593a1a822c5c395d861e10b2858edf4283f7009a9722f09d263c89cb490714160029",
+  "sourceMap": "375:286:2:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;375:286:2;;;;;;;",
+  "deployedSourceMap": "375:286:2:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;398:47;;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;398:47:2;;;;;;;;;;;;;;;;;;;;;;;542:117;;8:9:-1;5:2;;;30:1;27;20:12;5:2;542:117:2;;;;;;398:47;;;;;;;;;;;;;;:::o;542:117::-;626:10;577:11;610:27;;;;;;;;;;591:12;610:36;;542:117::o",
+  "source": "pragma solidity ^0.4.24;\n\n/**\n * @title Maps a user's Ethereum address to the block number of a block that contains a transaction sent by the address\n * @author Tom Waite\n * @dev Purpose of this contract is to enable an AZTEC Dapp to get a user's public key from their Ethereum address.\n *      The public key is required in order to generate AZTEC note shared secrets.\n **/\ncontract Doorbell {\n\n  mapping(address => uint) public addressBlockMap;\n\n  /**\n  * @dev Writes to ```addressBlockMap``` to map from msg.sender to block.number\n  **/\n  function setBlock() external {\n    uint number = block.number; \n    addressBlockMap[msg.sender] = number;        \n  }\n}\n",
+  "sourcePath": "/Users/paulrberg/Documents/Work/AZTEC/Coding/AZTEC/contracts/AZTEC/Doorbell.sol",
+  "ast": {
+    "absolutePath": "/Users/paulrberg/Documents/Work/AZTEC/Coding/AZTEC/contracts/AZTEC/Doorbell.sol",
+    "exportedSymbols": {
+      "Doorbell": [
+        403
+      ]
+    },
+    "id": 404,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 382,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:2"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Maps a user's Ethereum address to the block number of a block that contains a transaction sent by the address\n@author Tom Waite\n@dev Purpose of this contract is to enable an AZTEC Dapp to get a user's public key from their Ethereum address.\n     The public key is required in order to generate AZTEC note shared secrets.*",
+        "fullyImplemented": true,
+        "id": 403,
+        "linearizedBaseContracts": [
+          403
+        ],
+        "name": "Doorbell",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 386,
+            "name": "addressBlockMap",
+            "nodeType": "VariableDeclaration",
+            "scope": 403,
+            "src": "398:47:2",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 385,
+              "keyType": {
+                "id": 383,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "406:7:2",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "398:24:2",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 384,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "417:4:2",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 401,
+              "nodeType": "Block",
+              "src": "571:88:2",
+              "statements": [
+                {
+                  "assignments": [
+                    390
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 390,
+                      "name": "number",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 402,
+                      "src": "577:11:2",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 389,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "577:4:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 393,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "expression": {
+                      "argumentTypes": null,
+                      "id": 391,
+                      "name": "block",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1130,
+                      "src": "591:5:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_magic_block",
+                        "typeString": "block"
+                      }
+                    },
+                    "id": 392,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberName": "number",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": null,
+                    "src": "591:12:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "577:26:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 399,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "baseExpression": {
+                        "argumentTypes": null,
+                        "id": 394,
+                        "name": "addressBlockMap",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 386,
+                        "src": "610:15:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                          "typeString": "mapping(address => uint256)"
+                        }
+                      },
+                      "id": 397,
+                      "indexExpression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 395,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 1140,
+                          "src": "626:3:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 396,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "sender",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "626:10:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "610:27:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 398,
+                      "name": "number",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 390,
+                      "src": "640:6:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "610:36:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 400,
+                  "nodeType": "ExpressionStatement",
+                  "src": "610:36:2"
+                }
+              ]
+            },
+            "documentation": "@dev Writes to ```addressBlockMap``` to map from msg.sender to block.number*",
+            "id": 402,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "setBlock",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 387,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "559:2:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 388,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "571:0:2"
+            },
+            "scope": 403,
+            "src": "542:117:2",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 404,
+        "src": "375:286:2"
+      }
+    ],
+    "src": "0:662:2"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/paulrberg/Documents/Work/AZTEC/Coding/AZTEC/contracts/AZTEC/Doorbell.sol",
+    "exportedSymbols": {
+      "Doorbell": [
+        403
+      ]
+    },
+    "id": 404,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 382,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:2"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Maps a user's Ethereum address to the block number of a block that contains a transaction sent by the address\n@author Tom Waite\n@dev Purpose of this contract is to enable an AZTEC Dapp to get a user's public key from their Ethereum address.\n     The public key is required in order to generate AZTEC note shared secrets.*",
+        "fullyImplemented": true,
+        "id": 403,
+        "linearizedBaseContracts": [
+          403
+        ],
+        "name": "Doorbell",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 386,
+            "name": "addressBlockMap",
+            "nodeType": "VariableDeclaration",
+            "scope": 403,
+            "src": "398:47:2",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 385,
+              "keyType": {
+                "id": 383,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "406:7:2",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "398:24:2",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 384,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "417:4:2",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 401,
+              "nodeType": "Block",
+              "src": "571:88:2",
+              "statements": [
+                {
+                  "assignments": [
+                    390
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 390,
+                      "name": "number",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 402,
+                      "src": "577:11:2",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 389,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "577:4:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 393,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "expression": {
+                      "argumentTypes": null,
+                      "id": 391,
+                      "name": "block",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1130,
+                      "src": "591:5:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_magic_block",
+                        "typeString": "block"
+                      }
+                    },
+                    "id": 392,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberName": "number",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": null,
+                    "src": "591:12:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "577:26:2"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 399,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "baseExpression": {
+                        "argumentTypes": null,
+                        "id": 394,
+                        "name": "addressBlockMap",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 386,
+                        "src": "610:15:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                          "typeString": "mapping(address => uint256)"
+                        }
+                      },
+                      "id": 397,
+                      "indexExpression": {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 395,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 1140,
+                          "src": "626:3:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 396,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "sender",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "626:10:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "610:27:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 398,
+                      "name": "number",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 390,
+                      "src": "640:6:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "610:36:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 400,
+                  "nodeType": "ExpressionStatement",
+                  "src": "610:36:2"
+                }
+              ]
+            },
+            "documentation": "@dev Writes to ```addressBlockMap``` to map from msg.sender to block.number*",
+            "id": 402,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "setBlock",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 387,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "559:2:2"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 388,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "571:0:2"
+            },
+            "scope": 403,
+            "src": "542:117:2",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 404,
+        "src": "375:286:2"
+      }
+    ],
+    "src": "0:662:2"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {
+    "7923": {
+      "events": {},
+      "links": {},
+      "address": "0x301354D1E382f33b04f4B52Ce7D5100a2b7E2d79",
+      "transactionHash": "0xe78e9015d59e8660fd011ba6cdb526927b03ef100902badad5f9a10d60b635ba"
+    }
+  },
+  "schemaVersion": "3.0.1",
+  "updatedAt": "2019-01-15T14:33:33.583Z",
+  "devdoc": {
+    "author": "Tom Waite",
+    "methods": {
+      "setBlock()": {
+        "details": "Writes to ```addressBlockMap``` to map from msg.sender to block.number*"
+      }
+    },
+    "title": "Maps a user's Ethereum address to the block number of a block that contains a transaction sent by the address"
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

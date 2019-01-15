@@ -12,7 +12,7 @@ const wallets = require('../../wallets');
 const transactions = require('../../transactions');
 const { TX_TYPES, NOTE_STATUS } = require('../../../config');
 
-const AZTECERC20Bridge = require('../../../../build/contracts/AZTECERC20Bridge.json');
+const AZTECERC20Bridge = require('../../../contracts/AZTECERC20Bridge.json');
 
 const { web3 } = deployer;
 const { padLeft } = web3Utils;

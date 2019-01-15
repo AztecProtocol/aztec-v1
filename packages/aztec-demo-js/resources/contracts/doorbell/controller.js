@@ -3,7 +3,7 @@ const transactions = require('../../transactions');
 const wallets = require('../../wallets');
 const { TX_TYPES } = require('../../../config');
 
-const Doorbell = require('../../../../build/contracts/Doorbell.json');
+const Doorbell = require('../../../contracts/Doorbell.json');
 
 const { web3 } = deployer;
 

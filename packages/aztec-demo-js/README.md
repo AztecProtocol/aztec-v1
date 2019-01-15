@@ -31,7 +31,8 @@ Then, to run a test net and deploy contracts:
 
 1. ```node ./node_modules/ganache-cli/cli.js``` && ```truffle migrate```
 2. run truffle tests with ```truffle test```
-3. run javascript tests with ```cd aztec-demo-js && npm run test```
+3. copy contracts over to the demo submodule ```cp -r build/contracts/ aztec-demo-js/contracts/ && cd aztec-demo-js```
+4. run javascript tests with ```npm run test```
 
 Finally, run the demo transactions script (to the appropriate network) with the following:
 

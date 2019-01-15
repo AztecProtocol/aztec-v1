@@ -13,7 +13,7 @@ const { TX_STATUS } = require('../../../config');
 const deployer = require('../../../deployer');
 const web3 = require('../../../web3Listener');
 
-const AZTEC = require('../../../../build/contracts/AZTEC');
+const AZTEC = require('../../../contracts/AZTEC');
 
 const { expect } = chai;
 

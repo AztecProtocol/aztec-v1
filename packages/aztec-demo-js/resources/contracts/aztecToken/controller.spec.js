@@ -19,7 +19,7 @@ const { erc20ScalingFactor: scalingFactor, TX_STATUS, NOTE_STATUS } = require('.
 
 const web3 = require('../../../web3Listener');
 
-const AZTECERC20Bridge = require('../../../../build/contracts/AZTECERC20Bridge');
+const AZTECERC20Bridge = require('../../../contracts/AZTECERC20Bridge');
 
 const { expect } = chai;
 

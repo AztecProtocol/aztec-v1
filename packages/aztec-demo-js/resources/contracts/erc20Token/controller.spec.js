@@ -12,7 +12,7 @@ const web3 = require('../../../web3Listener');
 const { TX_STATUS } = require('../../../config');
 const deployer = require('../../../deployer');
 
-const ERC20Mintable = require('../../../../build/contracts/ERC20Mintable');
+const ERC20Mintable = require('../../../contracts/ERC20Mintable');
 
 const { expect } = chai;
 
