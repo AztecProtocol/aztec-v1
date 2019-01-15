@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "coveralls": "^3.0.2",
     "dotenv": "^6.2.0",
     "eslint": "^5.8.0",
     "eslint-config-airbnb": "^17.1.0",
@@ -45,9 +46,8 @@
     "lint:sol:fix": "./node_modules/.bin/solium -d . --fix",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
-    "test": "./node_modules/.bin/truffle test",
-    "test:doorbell": "NODE_ENV=TEST ./node_modules/.bin/mocha ./extractPublicKey --exclude docs/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "deploy:s3": "aws s3 sync build/contracts/ s3://paulrberg/aztec/contracts --delete"
+    "test": "scripts/test.sh",
+    "test:coverage": "scripts/coverage.sh"
   },
   "repository": {
     "type": "git",
