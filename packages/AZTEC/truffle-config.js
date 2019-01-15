@@ -4,7 +4,7 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 
 // You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file
 // Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
-function createProvider(infuraUrl) {
+function createProvider(network) {
     if (!process.env.PRIVATE_KEY || !process.env.MNEMONIC) {
         console.log('Please set either your PRIVATE_KEY or MNEMONIC');
         process.exit(1);
@@ -14,13 +14,30 @@ function createProvider(infuraUrl) {
         process.exit(1);
     }
     return () => {
-        return new HDWalletProvider(process.env.PRIVATE_KEY || process.env.MNEMONIC, infuraUrl + process.env.INFURA_API_KEY);
+        return new HDWalletProvider(
+            process.env.PRIVATE_KEY || process.env.MNEMONIC,
+            `https://${network}.infura.io/` + process.env.INFURA_API_KEY
+        );
     };
 }
 
+const kovanProvider = process.env.SOLIDITY_COVERAGE
+    ? undefined
+    : createProvider('kovan');
+
+const rinkebyProvider = process.env.SOLIDITY_COVERAGE
+    ? undefined
+    : createProvider('rinkeby');
+
+const mainnetProvider = process.env.SOLIDITY_COVERAGE
+    ? undefined
+    : createProvider('mainnet');
+
+const ropstenProvider = process.env.SOLIDITY_COVERAGE
+    ? undefined
+    : createProvider('ropsten');
+
 module.exports = {
-    // See <http://truffleframework.com/docs/advanced/configuration>
-    // to customize your Truffle configuration!
     compilers: {
         solc: {
             version: '0.4.24',
@@ -32,32 +49,43 @@ module.exports = {
             },
         },
     },
+    mocha: {
+        enableTimeouts: false,
+        reporter: 'spec',
+    },
     networks: {
         development: {
-            host: '127.0.0.1',
-            port: 8545, // default port for ganachi-cli
-            network_id: '*', // Match any network id
+            host: 'localhost',
+            port: 8545,
+            network_id: '*', // eslint-disable-line camelcase
+        },
+        coverage: {
+            host: 'localhost',
+            port: 8555,
+            network_id: '*', // eslint-disable-line camelcase
+            gas: 0xfffffffffff,
+            gasPrice: 0x01,
         },
         kovan: {
-            provider: createProvider('https://kovan.infura.io/'),
+            provider: kovanProvider,
             gas: 4600000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '42',
         },
         mainnet: {
-            provider: createProvider('https://mainnet.infura.io/'),
+            provider: mainnetProvider,
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
         },
         rinkeby: {
-            provider: createProvider('https://rinkeby.infura.io/'),
+            provider: rinkebyProvider,
             gas: 4700000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
         },
         ropsten: {
-            provider: createProvider('https://ropsten.infura.io/'),
+            provider: ropstenProvider,
             gas: 4600000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
