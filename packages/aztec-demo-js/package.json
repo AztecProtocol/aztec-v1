@@ -12,10 +12,12 @@
     "web3-utils": "^1.0.0-beta.37"
   },
   "devDependencies": {
+    "braintree-jsdoc-template": "^3.3.0",
     "eslint": "^5.8.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0"
   },
@@ -28,7 +30,8 @@
     "demo:ropsten": "NODE_ENV=ROPSTEN node ./scripts/demoTransactions.js",
     "demo:kovan": "NODE_ENV=KOVAN node ./scripts/demoTransactions.js",
     "demo:development": "NODE_ENV=DEVELOPMENT node ./scripts/demoTransactions.js",
-    "demo:mainnet": "NODE_ENV=MAINNET node ./scripts/demoTransactions.js"
+    "demo:mainnet": "NODE_ENV=MAINNET node ./scripts/demoTransactions.js",
+    "docs": "./node_modules/.bin/jsdoc -c jsdocConf.json"
   },
   "repository": {
     "type": "git",

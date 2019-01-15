@@ -1,0 +1,28 @@
+{
+    "plugins": ["plugins/markdown"],
+    "recurseDepth": 10,
+    "source": {
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_",
+        "include": ["./"],
+        "exclude": ["node_modules/"]
+    },
+    "sourceType": "module",
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc","closure"]
+    },
+    "templates": {
+        "referenceTitle": "AZTEC demonstration scripts",
+        "disableSort": false,
+        "collapse": true
+    },
+    "opts": {
+        "private": true,
+        "recurse": true,
+        "encoding": "utf-8",
+        "destination": "./docs/",
+        "readme": "./README.md",
+        "template": "node_modules/braintree-jsdoc-template"
+    }
+}
