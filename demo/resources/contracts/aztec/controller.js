@@ -28,7 +28,8 @@ aztec.getContractAddress = async () => {
     if (!AZTEC.networks[networkId] || !AZTEC.networks[networkId].address) {
         throw new Error(`AZTEC.sol not deployed to network ${networkId}`);
     }
-    return AZTEC.networks[networkId].address;
+    // truffle ^5.0 returns a checksummed addresses and this messes up with the bytecode comparison tests
+    return AZTEC.networks[networkId].address.toLowerCase();
 };
 
 /**

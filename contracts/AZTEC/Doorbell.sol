@@ -8,13 +8,13 @@ pragma solidity ^0.4.24;
  **/
 contract Doorbell {
 
-    mapping(address => uint) public addressBlockMap;
+  mapping(address => uint) public addressBlockMap;
 
-    /**
-    * @dev Writes to ```addressBlockMap``` to map from msg.sender to block.number
-    **/
-    function setBlock() external {
-        uint number = block.number; 
-        addressBlockMap[msg.sender] = number;        
-    }
+  /**
+  * @dev Writes to ```addressBlockMap``` to map from msg.sender to block.number
+  **/
+  function setBlock() external {
+    uint number = block.number; 
+    addressBlockMap[msg.sender] = number;        
+  }
 }
