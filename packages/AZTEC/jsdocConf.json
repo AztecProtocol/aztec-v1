@@ -4,7 +4,7 @@
     "source": {
         "includePattern": ".+\\.js(doc|x)?$",
         "excludePattern": "(^|\\/|\\\\)_",
-        "include": ["demo"]
+        "include": ["aztec-demo-js"]
     },
     "sourceType": "module",
     "tags": {
@@ -21,7 +21,7 @@
         "recurse": true,
         "encoding": "utf-8",
         "destination": "./docs/",
-        "readme": "./demo/README.md",
+        "readme": "./aztec-demo-js/README.md",
         "template": "node_modules/braintree-jsdoc-template"
     }
 }

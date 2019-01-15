@@ -4,7 +4,7 @@ const AZTEC = artifacts.require('./AZTEC.sol');
 const AZTECERC20Bridge = artifacts.require('./AZTECERC20Bridge.sol');
 
 const { t2 } = require('../aztec-crypto-js/params');
-const { daiAddress, erc20ScalingFactor } = require('../demo/config');
+const { daiAddress, erc20ScalingFactor } = require('../aztec-demo-js/config');
 
 module.exports = (deployer, network) => {
     // just a bytecode switcheroo, nothing to see here...

@@ -5,7 +5,7 @@ const { padLeft, sha3 } = require('web3-utils');
 const crypto = require('crypto');
 
 // ### Internal Dependencies
-const aztecProof = require('../../aztec-crypto-js/proof/proof');
+const aztecProof = require('../../aztec-crypto-js/proof');
 const proofHelpers = require('../../aztec-crypto-js/proof/helpers');
 const exceptions = require('../exceptions');
 const { t2, GROUP_MODULUS } = require('../../aztec-crypto-js/params');
