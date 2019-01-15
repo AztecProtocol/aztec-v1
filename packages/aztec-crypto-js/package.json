@@ -40,12 +40,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CreditMint/aztec-crypto-js.git"
+    "url": "git+https://github.com/AztecProtocol/aztec-crypto-js.git"
   },
   "author": "AZTEC",
   "license": "LGPL-3.0",
   "bugs": {
-    "url": "https://github.com/CreditMint/aztec-crypto-js/issues"
+    "url": "https://github.com/AztecProtocol/aztec-crypto-js/issues"
   },
-  "homepage": "https://github.com/CreditMint/aztec-crypto-js#readme"
+  "homepage": "https://github.com/AztecProtocol/aztec-crypto-js#readme"
 }
