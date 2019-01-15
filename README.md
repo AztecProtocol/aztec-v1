@@ -12,7 +12,7 @@ The AZTEC protocol enables confidential transactions on the Ethereum network, wi
 
 ## Running the demonstration scripts
 
-Please view the README.md in the [demo](https://github.com/AztecProtocol/AZTEC/tree/master/demo) directory.  
+Please view the README.md in the [aztec-demo-js](https://github.com/AztecProtocol/aztec-demo-js) repo.  
 
 ## What is the AZTEC Protocol?
 

@@ -12,11 +12,11 @@ const { sha3 } = require('web3-utils'); // TODO REMOVE
 
 AZTEC.abi = AZTECInterface.abi; // hon hon hon
 
-const aztecProof = require('../../aztec-crypto-js/proof/proof');
+const aztecProof = require('../../aztec-crypto-js/proof/');
 const proofHelpers = require('../../aztec-crypto-js/proof/helpers');
-const secp256k1 = require('../../aztec-crypto-js/secp256k1/secp256k1');
+const secp256k1 = require('../../aztec-crypto-js/secp256k1');
 const sign = require('../../aztec-crypto-js/eip712/sign');
-const eip712 = require('../../aztec-crypto-js/eip712/eip712');
+const eip712 = require('../../aztec-crypto-js/eip712');
 const exceptions = require('../exceptions');
 
 const { t2, GROUP_MODULUS } = require('../../aztec-crypto-js/params');
