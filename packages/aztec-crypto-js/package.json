@@ -13,6 +13,8 @@
   "dependencies": {
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.1",
+    "ethereumjs-abi": "^0.6.5",
+    "ethereumjs-util": "^6.0.0",
     "web3-eth-abi": "^1.0.0-beta.36",
     "web3-eth-accounts": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36"
@@ -24,8 +26,6 @@
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
-    "ethereumjs-abi": "^0.6.5",
-    "ethereumjs-util": "^6.0.0",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
     "rimraf": "^2.6.3",
