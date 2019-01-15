@@ -23,7 +23,7 @@ API documentation can be found on our [github pages site](https://aztecprotocol.
 
 ## Usage
 
-1. run ```git clone git@github.com:AztecProtocol/AZTEC.git`
+1. run ```git clone git@github.com:AztecProtocol/AZTEC.git```
 2. run ```git submodule update --init --recursive```  
 3. followed by ```npm install``` && ```npm install ./aztec-crypto-js``` && ```npm install ./aztec-demo-js```  
 
@@ -31,7 +31,7 @@ Then, to run a test net and deploy contracts:
 
 1. ```node ./node_modules/ganache-cli/cli.js``` && ```truffle migrate```
 2. run truffle tests with ```truffle test```
-3. copy contracts over to the demo submodule ```cp -r build/contracts/ aztec-demo-js/contracts/ && cd aztec-demo-js```
+3. copy contracts to the demo submodule ```cd aztec-demo-js && cp -r ../build/contracts/ ./contracts/```
 4. run javascript tests with ```npm run test```
 
 Finally, run the demo transactions script (to the appropriate network) with the following:
