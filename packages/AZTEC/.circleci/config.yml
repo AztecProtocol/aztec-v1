@@ -31,10 +31,12 @@ jobs: # a collection of steps
             - ./node_modules
       - run: # run ethereum node
           name: "Start Ethereum Node"
-          command: ./node_modules/.bin/ganache-cli
+          command: |
+            ./node_modules/.bin/ganache-cli -p 8545 -i 7923 > /dev/null &
+            sleep 2
       - run: # deploy contracts
           name: "Deploy Contracts"
-          command: truffle migrate
+          command: ./node_modules/.bin/truffle migrate --network development
       - run: # run tests
           name: "Test AZTEC"
           command: INFURA_API_KEY=$INFURA_API_KEY PRIVATE_KEY=$PRIVATE_KEY MNEMONIC=$MNEMONIC npm run test
