@@ -1,12 +1,15 @@
 version: 2.0
 
 jobs:
-  main:
-    steps:
-      - run: npm install
-      - run: npm run test
+  build:
+    docker:
+      - image: circleci/node:10.15.0-browsers
     filters:
       branches:
         only:
           - master
           - develop
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm run test
