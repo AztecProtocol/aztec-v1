@@ -1,10 +1,12 @@
-version: 2.1
+version: 2.0
 
-orbs:
-  hello: circleci/hello-build@0.0.7
-
-workflows:
-  "Hello Workflow":
-    jobs:
-      - hello/hello-build
-
+jobs:
+  main:
+    steps:
+      - run: npm install
+      - run: npm run test
+    filters:
+      branches:
+        only:
+          - master
+          - develop
