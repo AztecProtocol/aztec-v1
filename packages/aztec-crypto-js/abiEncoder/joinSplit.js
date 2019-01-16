@@ -1,15 +1,18 @@
 const { padLeft } = require('web3-utils');
 
+const secp256k1 = require('../secp256k1/secp256k1');
+
 const abiEncoder = {};
 
 const abi = {
     M: 0,
     CHALLENGE: 1,
-    PROOF_DATA: 2,
-    INPUT_SIGNATURES: 3,
-    OUTPUT_OWNERS: 4,
-    METADATA: 5,
-    START_DATA: 6,
+    PUBLIC_OWNER: 2,
+    PROOF_DATA: 3,
+    INPUT_SIGNATURES: 4,
+    OUTPUT_OWNERS: 5,
+    METADATA: 6,
+    START_DATA: 7,
 };
 
 function encodeNote(notes) {
@@ -48,30 +51,34 @@ function encodeOutputOwners(outputOwners) {
     };
 }
 
-function encodeMetadata(metadata) {
+abiEncoder.encodeMetadata = (notes) => {
+    const metadata = notes
+        .map(n => secp256k1.compress(n.ephemeral.getPublic()))
+        .map(m => `${padLeft('21', 64)}${m.slice(2)}`);
     const { length } = metadata;
-    const metadatas = metadata.map(data => data.slice(2));
-    const offsets = metadatas.reduce((acc, data) => {
+    const offsets = metadata.reduce((acc, data) => {
         return [
             ...acc,
-            acc[acc.length - 1] + data.length / 2,
+            acc[acc.length - 1] + (data.length / 2),
         ];
-    }, [32]).slice(0, -1);
+    }, [0x40 + (length * 0x20)]).slice(0, -1);
     const data = [
+        padLeft(offsets.slice(-1)[0].toString(16), 64),
         padLeft(Number(length).toString(16), 64),
-        ...offsets,
+        ...offsets.map(o => padLeft(o.toString(16), 64)),
         ...metadata,
     ].join('');
     return {
         data,
         length: Number(data.length / 2),
     };
-}
+};
 
-abiEncoder.encode = (proofData, m, challenge, inputSignatures, outputOwners, metadata) => {
+abiEncoder.encode = (proofData, m, challenge, publicOwner, inputSignatures, outputOwners, metadata) => {
     const parameters = [];
     parameters[abi.M] = padLeft(Number(m).toString(16), 64);
     parameters[abi.CHALLENGE] = challenge.slice(2);
+    parameters[abi.PUBLIC_OWNER] = padLeft(publicOwner.slice(2), 64);
     parameters[abi.PROOF_DATA] = '';
     parameters[abi.INPUT_SIGNATURES] = '';
     parameters[abi.OUTPUT_OWNERS] = '';
@@ -86,7 +93,7 @@ abiEncoder.encode = (proofData, m, challenge, inputSignatures, outputOwners, met
     const formattedOutputOwners = encodeOutputOwners(outputOwners);
     parameters[abi.OUTPUT_OWNERS] = padLeft(offset.toString(16), 64);
     offset += formattedOutputOwners.length;
-    const formattedMetadata = encodeMetadata(metadata);
+    const formattedMetadata = abiEncoder.encodeMetadata(metadata);
     parameters[abi.METADATA] = padLeft(offset.toString(16), 64);
 
     parameters.push(formattedProofData.data);
@@ -97,47 +104,3 @@ abiEncoder.encode = (proofData, m, challenge, inputSignatures, outputOwners, met
 };
 
 module.exports = abiEncoder;
-
-/*
-
-function encode(proofData, m, challenge, inputSignatures, outputOwners, metadata) {
-    const byteArray = [
-        `0x${padLeft(Number(m).toString(16), 64)}`,
-        padLeft(challenge.slice(2), 64),
-        '',
-        '',
-        '',
-        '',
-    ];
-    let currentOffset = 32 * 7;
-    let noteString = padLeft(Number(proofData.length).toString(16), 64);
-    noteString += proofData.reduce((acc, notes) => `${acc}${(notes.reduce((a, n) => `${a}${padLeft(n.slice(2), 64)}`, ''))}`, '');
-    byteArray.push(noteString);
-    byteArray[2] = padLeft(currentOffset.toString(16), 64);
-    currentOffset += (noteString.length / 2);
-    let signatureString = padLeft(inputSignatures.length.toString(16), 64);
-    signatureString += inputSignatures
-        .map(([v, r, s]) => `${padLeft(v.slice(2), 64)}${padLeft(r.slice(2), 64)}${padLeft(s.slice(2), 64)}`)
-        .reduce((acc, s) => `${acc}${s}`, '');
-    byteArray.push(signatureString);
-    byteArray[3] = padLeft(currentOffset.toString(16), 64);
-    currentOffset += (signatureString.length / 2);
-    let ownersString = padLeft(outputOwners.length.toString(16), 64);
-    ownersString += outputOwners.reduce((acc, o) => `${acc}${padLeft(o.slice(2), 64)}`, '');
-    byteArray.push(ownersString);
-    byteArray[4] = padLeft(currentOffset.toString(16), 64);
-    currentOffset += (ownersString.length / 2);
-    byteArray[5] = padLeft(currentOffset.toString(16), 64);
-    currentOffset += (32 + (metadata.length * 32));
-
-    const metadataBody = metadata.map(md => md.slice(2));
-    const metadataPtr = metadataBody.reduce((acc, body) => [...acc, acc[acc.length - 1] + (body.length / 2)], [currentOffset]).slice(0, -1);
-    const metadataArray = [
-        padLeft(metadata.length.toString(16), 64),
-        ...metadataPtr,
-        ...metadataBody,
-    ];
-    byteArray.push(metadataArray.join(''));
-    return byteArray.join('');
-}
-*/
