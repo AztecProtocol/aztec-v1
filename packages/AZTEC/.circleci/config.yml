@@ -8,24 +8,46 @@ jobs: # a collection of steps
     steps: # a collection of executable commands
       - checkout # special step to check out source code to working directory
       - run:
-          name: update-npm
+          name: "Update NPM"
           command: 'sudo npm install -g npm@5.6.0'
       - restore_cache: # special step to restore the dependency cache
           # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
-          name: pull-submodules
+          name: "Pull Submodules"
           command: git submodule update --init --recursive
-      # - run:
-      #     name: remove-package-lock
-      #     command: rm -f package-lock.json
       - run:
-          name: install-npm-wee
-          command: npm install
+          name: "Remove Package Lock"
+          command: rm -f package-lock.json
+      - run:
+          name: "Install Node Modules"
+          command: |
+            npm install
+            npm install ./aztec-crypto-js
+            npm install ./aztec-demo-js 
       - save_cache: # special step to save the dependency cache
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
+      - run: # run ethereum node
+          name: "Start Ethereum Node"
+          command: ./node_modules/.bin/ganache-cli
+      - run: # deploy contracts
+          name: "Deploy Contracts"
+          command: truffle migrate
       - run: # run tests
-          name: test
+          name: "Test AZTEC"
           command: INFURA_API_KEY=$INFURA_API_KEY PRIVATE_KEY=$PRIVATE_KEY MNEMONIC=$MNEMONIC npm run test
+      - run: # run crypto tests
+          name: "Test Crypto"
+          command: |
+            cd aztec-crypto-js
+            npm run test
+            cd ../
+      - run: # run demo tests
+          name: "Test Demo"
+          command: |
+            cd aztec-demo-js
+            cp -r ../build/contracts/ ./contracts/
+            npm run test
+            cd ../
