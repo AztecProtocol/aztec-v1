@@ -17,6 +17,9 @@ jobs: # a collection of steps
           name: pull-submodules
           command: git submodule update --init --recursive
       - run:
+          name: remove-package-lock
+          command: rm -f package-lock.json
+      - run:
           name: install-npm-wee
           command: npm install
       - save_cache: # special step to save the dependency cache
