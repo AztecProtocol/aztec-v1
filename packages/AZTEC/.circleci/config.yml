@@ -16,9 +16,9 @@ jobs: # a collection of steps
       - run:
           name: pull-submodules
           command: git submodule update --init --recursive
-      - run:
-          name: remove-package-lock
-          command: rm -f package-lock.json
+      # - run:
+      #     name: remove-package-lock
+      #     command: rm -f package-lock.json
       - run:
           name: install-npm-wee
           command: npm install
@@ -28,4 +28,4 @@ jobs: # a collection of steps
             - ./node_modules
       - run: # run tests
           name: test
-          command: npm run test
+          command: INFURA_API_KEY=$INFURA_API_KEY PRIVATE_KEY=$PRIVATE_KEY MNEMONIC=$MNEMONIC npm run test
