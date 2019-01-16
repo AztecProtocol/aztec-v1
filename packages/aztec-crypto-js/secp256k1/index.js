@@ -129,7 +129,7 @@ secp256k1.decompressHex = (compressed) => {
 /**
  * Compress a secp256k1 point into 33 bytes.
  *
- * @method compress
+* @method compress
  * @param {Point} point secp256k1 group element
  * @returns {string} hex-formatted compressed point
  */
