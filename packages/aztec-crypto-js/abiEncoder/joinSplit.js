@@ -29,7 +29,7 @@ function encodeProofData(proofData) {
     };
 }
 
-function encodeInputSignatures(inputSignatures) {
+abiEncoder.encodeInputSignatures = (inputSignatures) => {
     const { length } = inputSignatures;
     const signatureString = inputSignatures.map(([v, r, s]) => {
         return `${v.slice(2)}${r.slice(2)}${s.slice(2)}`;
@@ -39,11 +39,11 @@ function encodeInputSignatures(inputSignatures) {
         data,
         length: Number(data.length / 2),
     };
-}
+};
 
 function encodeOutputOwners(outputOwners) {
     const { length } = outputOwners;
-    const ownerStrings = outputOwners.map(o => padLeft(o.slice(2), 32));
+    const ownerStrings = outputOwners.map(o => padLeft(o.slice(2), 64));
     const data = [padLeft(Number(length).toString(16), 64), ...ownerStrings].join('');
     return {
         data,
@@ -61,11 +61,11 @@ abiEncoder.encodeMetadata = (notes) => {
             ...acc,
             acc[acc.length - 1] + (data.length / 2),
         ];
-    }, [0x40 + (length * 0x20)]).slice(0, -1);
+    }, [0x40 + (length * 0x20)]);
     const data = [
-        padLeft(offsets.slice(-1)[0].toString(16), 64),
+        padLeft((offsets.slice(-1)[0] - 0x20).toString(16), 64),
         padLeft(Number(length).toString(16), 64),
-        ...offsets.map(o => padLeft(o.toString(16), 64)),
+        ...offsets.slice(0, -1).map(o => padLeft(o.toString(16), 64)),
         ...metadata,
     ].join('');
     return {
@@ -87,7 +87,7 @@ abiEncoder.encode = (proofData, m, challenge, publicOwner, inputSignatures, outp
     const formattedProofData = encodeProofData(proofData);
     parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64);
     offset += formattedProofData.length;
-    const formattedInputSignatures = encodeInputSignatures(inputSignatures);
+    const formattedInputSignatures = abiEncoder.encodeInputSignatures(inputSignatures);
     parameters[abi.INPUT_SIGNATURES] = padLeft(offset.toString(16), 64);
     offset += formattedInputSignatures.length;
     const formattedOutputOwners = encodeOutputOwners(outputOwners);
@@ -100,7 +100,7 @@ abiEncoder.encode = (proofData, m, challenge, publicOwner, inputSignatures, outp
     parameters.push(formattedInputSignatures.data);
     parameters.push(formattedOutputOwners.data);
     parameters.push(formattedMetadata.data);
-    return `0x${parameters.join('')}`;
+    return `0x${parameters.join('')}`.toLowerCase();
 };
 
 module.exports = abiEncoder;
