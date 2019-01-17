@@ -5,6 +5,12 @@ jobs: # a collection of steps
     working_directory: ~/AZTEC # directory where steps will run
     docker: # run the steps with Docker
       - image: circleci/node:8.11.3
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/mongo:3.4.4
+      - image: trufflesuite/ganache-cli
+        command: ganache-cli -i 1234 -e 1000000000000000000000000 -l 4700000
     steps: # a collection of executable commands
       - checkout # special step to check out source code to working directory
       - run:
@@ -29,11 +35,6 @@ jobs: # a collection of steps
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
-      - run: # run ethereum node
-          name: "Start Ethereum Node"
-          command: |
-            ./node_modules/.bin/ganache-cli -i 1234 -p 8545 &
-            sleep 10
       - run: # deploy contracts
           name: "Deploy Contracts"
           command: ./node_modules/.bin/truffle migrate --network development
