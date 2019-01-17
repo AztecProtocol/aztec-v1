@@ -264,7 +264,7 @@ proof.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
         };
     });
 
-    const challenge = proof.computeChallenge(sender, kPublicBn, publicOwner, m, notes, blindingFactors);
+    const challenge = proof.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
