@@ -36,7 +36,7 @@ function encodeJoinSplitTransaction({
     const {
         proofData: proofDataRaw,
         challenge,
-    } = aztecProof.constructJoinSplit([...inputNotes, ...outputNotes], m, senderAddress, kPublic);
+    } = aztecProof.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
 
     const inputSignatures = inputNotes.map((inputNote, index) => {
         const { privateKey } = inputNoteOwners[index];
@@ -439,7 +439,7 @@ contract('AZTEC', (accounts) => {
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = aztecProof.constructJoinSplit([...inputNotes, ...outputNotes], m, senderAddress, kPublic);
+            } = aztecProof.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
@@ -486,7 +486,7 @@ contract('AZTEC', (accounts) => {
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = aztecProof.constructJoinSplit([...inputNotes, ...outputNotes], m, senderAddress, kPublic);
+            } = aztecProof.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
@@ -530,7 +530,7 @@ contract('AZTEC', (accounts) => {
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = aztecProof.constructJoinSplit([...inputNotes, ...outputNotes], m, senderAddress, kPublic);
+            } = aztecProof.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
@@ -574,7 +574,7 @@ contract('AZTEC', (accounts) => {
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = aztecProof.constructJoinSplit(commitments, m, accounts[0], 0);
+            } = aztecProof.constructJoinSplitModified(commitments, m, accounts[0], 0, publicOwner);
 
             const inputSignatures = commitments.slice(0, 2).map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
