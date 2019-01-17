@@ -19,21 +19,22 @@ jobs: # a collection of steps
           name: "Update NPM"
           command: 'sudo npm install -g npm@5.6.0'
       - restore_cache: # special step to restore the dependency cache
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
           key: dependency-cache-{{ checksum "package.json" }}
-      - run:
+      - run: # pull the submodule repos
           name: "Pull Submodules"
           command: git submodule update --init --recursive
-      - run:
+      - run: # weird bug when installing modules otherwise
           name: "Remove Package Lock"
           command: rm -f package-lock.json
-      - run:
+      - run: # simply installing the modules
           name: "Install Node Modules"
           command: npm install
       - save_cache: # special step to save the dependency cache
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
+            - ./aztec-crypto-js/node_modules
+            - ./aztec-demo-js/node_modules
       - run: # deploy contracts
           name: "Deploy Contracts"
           command: ./node_modules/.bin/truffle migrate --network development
@@ -51,7 +52,7 @@ jobs: # a collection of steps
           name: "Test Demo"
           command: |
             cd aztec-demo-js
+            ln -s ../build/contracts/ ./contracts/
             npm install
-            cp -r ../build/contracts/ ./contracts/
             npm run test
             cd ../
