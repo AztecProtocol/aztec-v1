@@ -8,7 +8,13 @@
 
 const ecdsa = require('../secp256k1/ecdsa');
 const eip712 = require('./index');
-const { AZTEC_NOTE_SIGNATURE } = require('../params');
+const { AZTEC_NOTE_SIGNATURE, ACE_NOTE_SIGNATURE, ACE_DOMAIN_PARAMS } = require('../params');
+
+// For backwards compatibility. TODO: remove
+const defaultDomainParams = {
+    name: 'AZTECERC20BRIDGE_DOMAIN',
+    version: '0.1.1',
+};
 
 const sign = {};
 
@@ -20,10 +26,14 @@ const sign = {};
  * @param {number} chainId the network ID
  * @returns {Object} EIP712 Domain type object
  */
-sign.generateAZTECDomainParams = function generateAZTECDomainParams(verifyingContract, chainId) {
+sign.generateAZTECDomainParams = function generateAZTECDomainParams(
+    verifyingContract,
+    chainId,
+    domainParams = defaultDomainParams
+) {
     return {
-        name: 'AZTECERC20BRIDGE_DOMAIN',
-        version: '0.1.1',
+        name: domainParams.name,
+        version: domainParams.version,
         chainId,
         verifyingContract,
     };
@@ -46,6 +56,34 @@ sign.signNote = function signNote(note, challenge, senderAddress, verifyingContr
         ...AZTEC_NOTE_SIGNATURE,
         domain: sign.generateAZTECDomainParams(verifyingContract, chainId),
         message: {
+            note: [note[2], note[3], note[4], note[5]],
+            challenge,
+            sender: senderAddress,
+        },
+    };
+    const message = eip712.encodeTypedData(messageBase);
+    const signature = ecdsa.signMessage(message, privateKey);
+    return signature;
+};
+
+/**
+ * create an EIP712 ECDSA signature over an AZTEC note according to AZTEC Cryptography Engine Spec
+ * @method signACENote
+ * @memberof module:eip712.sign
+ * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
+ * @param {string} challenge AZTEC zero-knowledge proof challenge variable
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
+ * @param {string} verifyingContract address of target contract
+ * @param {string} privateKey the private key of message signer
+ * @param {number} chainId the network ID
+ * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ */
+sign.signACENote = function signACENote(note, challenge, senderAddress, verifyingContract, privateKey, chainId) {
+    const messageBase = {
+        ...ACE_NOTE_SIGNATURE,
+        domain: sign.generateAZTECDomainParams(verifyingContract, chainId, ACE_DOMAIN_PARAMS),
+        message: {
+            proofId: 1,
             note: [note[2], note[3], note[4], note[5]],
             challenge,
             sender: senderAddress,

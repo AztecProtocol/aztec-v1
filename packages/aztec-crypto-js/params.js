@@ -91,4 +91,25 @@ module.exports = {
         },
         primaryType: 'AZTEC_NOTE_SIGNATURE',
     },
+    ACE_NOTE_SIGNATURE: {
+        types: {
+            ACE_NOTE_SIGNATURE: [
+                { name: 'proofId', type: 'uint16' },
+                { name: 'note', type: 'bytes32[4]' },
+                { name: 'challenge', type: 'uint256' },
+                { name: 'sender', type: 'address' },
+            ],
+            EIP712Domain: [
+                { name: 'name', type: 'string' },
+                { name: 'version', type: 'string' },
+                { name: 'chainId', type: 'uint256' },
+                { name: 'verifyingContract', type: 'address' },
+            ],
+        },
+        primaryType: 'ACE_NOTE_SIGNATURE',
+    },
+    ACE_DOMAIN_PARAMS: {
+        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
+        version: '0.1.0',
+    },
 };
