@@ -32,8 +32,8 @@ jobs: # a collection of steps
       - run: # run ethereum node
           name: "Start Ethereum Node"
           command: |
-            ./node_modules/.bin/ganache-cli -p 8545 -i 7923 > /dev/null &
-            sleep 2
+            ./node_modules/.bin/ganache-cli -i 1234 -p 8545 &
+            sleep 10
       - run: # deploy contracts
           name: "Deploy Contracts"
           command: ./node_modules/.bin/truffle migrate --network development
