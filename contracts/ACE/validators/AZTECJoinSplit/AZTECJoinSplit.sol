@@ -98,6 +98,7 @@ contract AZTECJoinSplit {
                 mstore(0x2a0, calldataload(0x24))
                 mstore(0x2c0, kn)
                 mstore(0x2e0, m)
+                mstore(0x300, calldataload(0x164))
                 /* mstore(0x00, m)
                 mstore(0x20, n)
                 mstore(0x40, kn)
@@ -105,7 +106,7 @@ contract AZTECJoinSplit {
                 return(0x00, 0x80) */
                 kn := mulmod(sub(gen_order, kn), challenge, gen_order) // we actually want c*k_{public}
                 hashCommitments(notes, n)
-                let b := add(0x300, mul(n, 0x80))
+                let b := add(0x320, mul(n, 0x80))
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
@@ -389,9 +390,9 @@ contract AZTECJoinSplit {
             function hashCommitments(notes, n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
                     let index := add(add(notes, mul(i, 0xc0)), 0x60)
-                    calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
+                    calldatacopy(add(0x320, mul(i, 0x80)), index, 0x80)
                 }
-                mstore(0x00, keccak256(0x300, mul(n, 0x80)))
+                mstore(0x00, keccak256(0x320, mul(n, 0x80)))
             }
         }
 
