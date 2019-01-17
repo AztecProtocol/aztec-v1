@@ -8,7 +8,7 @@
 
 const ecdsa = require('../secp256k1/ecdsa');
 const eip712 = require('./index');
-const { AZTEC_NOTE_SIGNATURE, AZTEC_MAINNET_DOMAIN_PARAMS } = require('../params');
+const { AZTEC_NOTE_SIGNATURE } = require('../params');
 
 const sign = {};
 
@@ -67,13 +67,10 @@ sign.signNote = function signNote(note, challenge, senderAddress, verifyingContr
  * @param {string[]} signature ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  * @returns {string} Ethereum address of signer
  */
-sign.recoverAddress = function recoverAddress(note, challenge, senderAddress, verifyingContract, signature) {
+sign.recoverAddress = function recoverAddress(note, challenge, senderAddress, verifyingContract, signature, chainId) {
     const messageBase = {
         ...AZTEC_NOTE_SIGNATURE,
-        domain: {
-            ...AZTEC_MAINNET_DOMAIN_PARAMS,
-            verifyingContract,
-        },
+        domain: sign.generateAZTECDomainParams(verifyingContract, chainId),
         message: {
             note: [note[2], note[3], note[4], note[5]],
             challenge,
