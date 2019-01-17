@@ -10,7 +10,7 @@ jobs: # a collection of steps
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/mongo:3.4.4
       - image: trufflesuite/ganache-cli
-        command: ganache-cli -i 1234 -e 1000000000000000000000000 -l 4700000
+        command: ganache-cli -i 1234 -p 8545 -e 100000000000 -l 4700000
     steps: # a collection of executable commands
       - checkout # special step to check out source code to working directory
       - run:
