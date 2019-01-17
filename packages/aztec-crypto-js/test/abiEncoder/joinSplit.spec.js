@@ -39,7 +39,7 @@ function fakeSignature() {
     ];
 }
 
-describe.only('abiEncioder.joinSplit tests', () => {
+describe('abiEncioder.joinSplit tests', () => {
     let accounts = [];
     let notes = [];
     beforeEach(() => {
@@ -114,7 +114,7 @@ describe.only('abiEncioder.joinSplit tests', () => {
         ).slice(2));
         expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(2);
         expect(result.slice(0x20, 0x40)).to.equal(padLeft(challenge.slice(2), 64));
-        expect(result.slice(0x40, 0x60)).to.equal(padLeft(publicOwner.slice(2), 64));
+        expect(result.slice(0x40, 0x60)).to.equal(padLeft(publicOwner.slice(2).toLowerCase(), 64));
 
         const offsetToProofData = parseInt(result.slice(0x60, 0x80), 16);
         expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(4);
@@ -135,8 +135,8 @@ describe.only('abiEncioder.joinSplit tests', () => {
         const offsetToOwners = parseInt(result.slice(0xa0, 0xc0), 16);
         expect(parseInt(result.slice(offsetToOwners - 0x20, offsetToOwners), 16)).to.equal(2);
         const recoveredOwners = new HexString(result.slice(offsetToOwners, offsetToOwners + (2 * 0x20)));
-        expect(recoveredOwners.slice(0x00, 0x20)).to.equal(padLeft(outputOwners[0].slice(2), 64));
-        expect(recoveredOwners.slice(0x20, 0x40)).to.equal(padLeft(outputOwners[1].slice(2), 64));
+        expect(recoveredOwners.slice(0x00, 0x20)).to.equal(padLeft(outputOwners[0].slice(2).toLowerCase(), 64));
+        expect(recoveredOwners.slice(0x20, 0x40)).to.equal(padLeft(outputOwners[1].slice(2).toLowerCase(), 64));
 
         const offsetToMetadata = parseInt(result.slice(0xc0, 0xe0), 16);
         const metadataLength = parseInt(result.slice(offsetToMetadata - 0x20, offsetToMetadata), 16);
