@@ -32,7 +32,7 @@ Then, to test and deploy the contracts:
 1. ```node ./node_modules/ganache-cli/cli.js``` && ```truffle migrate```
 2. set your private key or mnemonic in a `.env` file
 3. run truffle tests with ```truffle test```
-4. copy contracts to the demo submodule ```cd aztec-demo-js && cp -r ../build/contracts/ ./contracts/```
+4. link contracts to the demo submodule ```cd aztec-demo-js && ln -s ../build/contracts/```
 5. run javascript tests with ```npm run test```
 
 Finally, run the demo transactions script (to the appropriate network) with the following:

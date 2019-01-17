@@ -1,10 +1,11 @@
+contracts
 dbDevelopment.json
 dbRinkeby.json
 dbMainNet.json
 dbKovan.json
 dbRopsten.json
 dbTest.json
-wallets.json
 testWallets.json
+wallets.json
 
 contracts/

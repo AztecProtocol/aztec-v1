@@ -82,7 +82,6 @@ aztecToken.updateConfidentialTransferTransaction = async (transactionHash) => {
         inputs,
         `0x${transactionData.input.slice(10)}`
     );
-
     const inputNoteHashes = notes.slice(0, m).map((note) => {
         const noteString = note.slice(2).reduce((acc, s) => `${acc}${padLeft(s.slice(2), 64)}`, '0x');
         return web3Utils.sha3(noteString, 'hex');

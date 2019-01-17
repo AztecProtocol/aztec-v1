@@ -24,8 +24,8 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix",
-    "test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./resources --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:coverage": "NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./resources --trace-warnings --exit --colors --recursive --reporter spec",
+    "test": "scripts/test.sh",
+    "test:coverage": "scripts/coverage.sh",
     "demo:rinkeby": "NODE_ENV=RINKEBY node ./scripts/demoTransactions.js",
     "demo:ropsten": "NODE_ENV=ROPSTEN node ./scripts/demoTransactions.js",
     "demo:kovan": "NODE_ENV=KOVAN node ./scripts/demoTransactions.js",
