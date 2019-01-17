@@ -48,7 +48,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             AZTECERC20Bridge.link('AZTECInterface', aztec.address);
             aztecToken = await AZTECERC20Bridge.new(t2, token.address, 100000, fakeNetworkId, {
                 from: accounts[0],
-                gas: 5000000,
+                gas: 4700000,
             });
             scalingFactor = await aztecToken.scalingFactor();
 
@@ -58,12 +58,12 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             await Promise.all(accounts.map(account => token.mint(
                 account,
                 scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 5000000 }
+                { from: accounts[0], gas: 4700000 }
             )));
             await Promise.all(accounts.map(account => token.approve(
                 aztecToken.address,
                 scalingFactor.mul(tokensTransferred),
-                { from: account, gas: 5000000 }
+                { from: account, gas: 4700000 }
             ))); // approving tokens
         });
 
@@ -140,7 +140,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
                 signatures,
                 [aztecAccounts[0].address],
                 '0x',
-                { from: accounts[3], gas: 5000000 }
+                { from: accounts[3], gas: 4700000 }
             );
             const userBalance = await token.balanceOf(accounts[3]);
             const contractBalance = await token.balanceOf(aztecToken.address);
@@ -174,7 +174,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             AZTECERC20Bridge.link('AZTECInterface', aztec.address);
             aztecToken = await AZTECERC20Bridge.new(t2, token.address, 100000, fakeNetworkId, {
                 from: accounts[0],
-                gas: 5000000,
+                gas: 4700000,
             });
             scalingFactor = await aztecToken.scalingFactor();
             const receipt = await web3.eth.getTransactionReceipt(aztecToken.transactionHash);
@@ -184,12 +184,12 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             await Promise.all(accounts.map(account => token.mint(
                 account,
                 scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 5000000 }
+                { from: accounts[0], gas: 4700000 }
             )));
             await Promise.all(accounts.map(account => token.approve(
                 aztecToken.address,
                 scalingFactor.mul(tokensTransferred),
-                { from: account, gas: 5000000 }
+                { from: account, gas: 4700000 }
             ))); // approving tokens
 
             const { commitments, m } = await proofHelpers.generateCommitmentSet({
@@ -213,7 +213,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             await token.transfer(
                 aztecToken.address,
                 scalingFactor.mul(new BN(200)),
-                { from: accounts[4], gas: 5000000 }
+                { from: accounts[4], gas: 4700000 }
             );
             const { commitments } = await proofHelpers.generateCommitmentSet({ kIn: [100], kOut: [] });
             const { proofData, challenge } = aztecProof.constructJoinSplit(commitments, 1, accounts[3], 100);
@@ -226,7 +226,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
                 signatures,
                 [],
                 '0x',
-                { from: accounts[3], gas: 5000000 }
+                { from: accounts[3], gas: 4700000 }
             ));
         });
 
@@ -247,7 +247,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
                 [],
                 outputOwners,
                 '0x',
-                { from: accounts[4], gas: 5000000 }
+                { from: accounts[4], gas: 4700000 }
             ));
         });
 
@@ -270,7 +270,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
                 signatures,
                 [],
                 '0x',
-                { from: accounts[0], gas: 5000000 }
+                { from: accounts[0], gas: 4700000 }
             ));
         });
 

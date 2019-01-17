@@ -10,7 +10,7 @@ jobs: # a collection of steps
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/mongo:3.4.4
       - image: trufflesuite/ganache-cli
-        command: ganache-cli -i 1234 -p 8545 -e 100000000000 -l 4700000
+        command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
     steps: # a collection of executable commands
       - checkout # special step to check out source code to working directory
       - run:
@@ -27,10 +27,7 @@ jobs: # a collection of steps
           command: rm -f package-lock.json
       - run:
           name: "Install Node Modules"
-          command: |
-            npm install
-            npm install ./aztec-crypto-js
-            npm install ./aztec-demo-js 
+          command: npm install
       - save_cache: # special step to save the dependency cache
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
@@ -45,12 +42,14 @@ jobs: # a collection of steps
           name: "Test Crypto"
           command: |
             cd aztec-crypto-js
+            npm install
             npm run test
             cd ../
       - run: # run demo tests
           name: "Test Demo"
           command: |
             cd aztec-demo-js
+            npm install
             cp -r ../build/contracts/ ./contracts/
             npm run test
             cd ../
