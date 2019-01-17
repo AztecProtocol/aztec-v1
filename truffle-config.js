@@ -56,17 +56,17 @@ module.exports = {
     networks: {
         development: {
             host: '127.0.0.1',
-            port: 8545,
-            network_id: 1234, // eslint-disable-line camelcase
-            gas: 0xfffffffffff,
+            gas: 4700000,
             gasPrice: toHex(toWei('1', 'gwei')),
+            network_id: 1234, // eslint-disable-line camelcase
+            port: 8545,
         },
         coverage: {
             host: '127.0.0.1',
-            port: 8555,
-            network_id: '*', // eslint-disable-line camelcase
             gas: 0xfffffffffff,
             gasPrice: toHex(toWei('1', 'gwei')),
+            network_id: '*', // eslint-disable-line camelcase
+            port: 8555,
         },
         kovan: {
             provider: kovanProvider,
