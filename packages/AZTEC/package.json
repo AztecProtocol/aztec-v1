@@ -32,10 +32,12 @@
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "ethlint": "^1.2.2",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
     "rimraf": "^2.6.3",
     "sinon": "^7.2.2",
+    "solc": "^0.4.24",
     "solidity-coverage": "^0.5.11"
   },
   "scripts": {
