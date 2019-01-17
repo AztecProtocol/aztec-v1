@@ -251,7 +251,7 @@ note.create = (spendingPublicKey, value) => {
     const k = padLeft(web3Utils.toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;
-    const owner = ecdsa.accountFromPublicKeyHex(spendingPublicKey);
+    const owner = ecdsa.accountFromPublicKey(spendingPublicKey);
     return new Note(null, viewingKey, owner);
 };
 
