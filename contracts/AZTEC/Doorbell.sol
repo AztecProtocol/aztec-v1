@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 /**
  * @title Maps a user's Ethereum address to the block number of a block that contains a transaction sent by the address

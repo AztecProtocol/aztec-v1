@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "./AZTEC.sol";
 
@@ -44,7 +44,7 @@ contract AZTECERC20Bridge {
     * so we don't want to directly map note value : token value
     **/
   constructor(
-    bytes32[4] _setupPubKey, 
+    bytes32[4] memory _setupPubKey, 
     address _token, 
     uint256 _scalingFactor, 
     uint256 _chainId
@@ -65,7 +65,7 @@ contract AZTECERC20Bridge {
         _domainHash := keccak256(m, 0xa0)
     }
     domainHash = _domainHash;
-    emit LogCreate(_domainHash, this);
+    emit LogCreate(_domainHash, address(this));
   }
 
 /**
@@ -76,57 +76,57 @@ contract AZTECERC20Bridge {
   * notes[6][] contains value ```kPublic```  at notes[notes.length - 1][0].
   * If ```kPublic``` is negative, this represents ```(GROUP_MODULUS - kPublic) * SCALING_FACTOR``` ERC20 tokens being converted into confidential note form.
   * If ```kPublic``` is positive, this represents ```kPublic * SCALING_FACTOR``` worth of AZTEC notes being converted into ERC20 form
-  * @param notes defines AZTEC input notes and output notes. notes[0,...,m-1] = input notes. notes[m,...,notes.length-1] = output notes
-  * @param m where notes[0,..., m - 1] = input notes. notes[m,...,notes.length - 1] = output notes
-  * @param challenge AZTEC zero-knowledge proof challenge variable
-  * @param inputSignatures array of ECDSA signatures, one for each input note
-  * @param outputOwners addresses of owners, one for each output note
+  * @param _notes defines AZTEC input notes and output notes. notes[0,...,m-1] = input notes. notes[m,...,notes.length-1] = output notes
+  * @param _m where notes[0,..., m - 1] = input notes. notes[m,...,notes.length - 1] = output notes
+  * @param _challenge AZTEC zero-knowledge proof challenge variable
+  * @param _inputSignatures array of ECDSA signatures, one for each input note
+  * @param _outputOwners addresses of owners, one for each output note
   * Unnamed param is metadata: if AZTEC notes are assigned to stealth addresses, metadata should contain the ephemeral keys required for note owner to identify their note
   */
   function confidentialTransfer(
-    bytes32[6][] notes, 
-    uint256 m, 
-    uint256 challenge, 
-    bytes32[3][] inputSignatures, 
-    address[] outputOwners, 
-    bytes
+    bytes32[6][] calldata _notes, 
+    uint256 _m, 
+    uint256 _challenge, 
+    bytes32[3][] calldata _inputSignatures, 
+    address[] calldata _outputOwners, 
+    bytes calldata
   ) 
     external 
   {
-    require(inputSignatures.length == m, "input signature length invalid");
+    require(_inputSignatures.length == _m, "input signature length invalid");
     require(
-      inputSignatures.length + outputOwners.length == notes.length, 
+      _inputSignatures.length + _outputOwners.length == _notes.length, 
       "array length mismatch"
     );
 
     // validate AZTEC zero-knowledge proof
     require(
       AZTECInterface.validateJoinSplit(
-        notes, 
-        m, 
-        challenge, 
+        _notes, 
+        _m, 
+        _challenge, 
         setupPubKey
       ), 
       "proof not valid!"
     );
 
     // extract variable kPublic from proof
-    uint256 kPublic = uint(notes[notes.length - 1][0]);
+    uint256 kPublic = uint(_notes[_notes.length - 1][0]);
     require(kPublic < groupModulus, "invalid value of kPublic");
 
     // iterate over the notes array and validate each input/output note
-    for (uint256 i = 0; i < notes.length; i++) {
+    for (uint256 i = 0; i < _notes.length; i++) {
 
-      // if i < m this is an input note
-      if (i < m) {
+      // if i < _m this is an input note
+      if (i < _m) {
 
         // call validateInputNote to check that the note exists and that we have a matching signature over the note.
         // pass domainHash in as a function parameter to prevent multiple sloads
         // this will remove the input notes from noteRegistry
         validateInputNote(
-          notes[i], 
-          inputSignatures[i], 
-          challenge, 
+          _notes[i], 
+          _inputSignatures[i], 
+          _challenge, 
           domainHash
         );
       } else {
@@ -134,7 +134,7 @@ contract AZTECERC20Bridge {
         // if i >= m this is an output note
         // validate that output notes, attached to the specified owners do not exist in noteRegistry.
         // if all checks pass, add notes into note registry
-        validateOutputNote(notes[i], outputOwners[i - m]);
+        validateOutputNote(_notes[i], _outputOwners[i - _m]);
       }
     }
 
@@ -148,7 +148,7 @@ contract AZTECERC20Bridge {
 
         // if value > group modulus boundary, this represents a commitment of a public value into confidential note form.
         // only proceed if the required transferFrom call from msg.sender to this contract succeeds
-        require(token.transferFrom(msg.sender, this, (groupModulus - kPublic) * scalingFactor), "token transfer from user failed!");
+        require(token.transferFrom(msg.sender, address(this), (groupModulus - kPublic) * scalingFactor), "token transfer from user failed!");
       }
     }
 
@@ -167,16 +167,16 @@ contract AZTECERC20Bridge {
   *     uint256 challenge;
   *     address sender;    
   * };
-  * @param note AZTEC confidential note being destroyed
-  * @param signature ECDSA signature from note owner
-  * @param challenge AZTEC zero-knowledge proof challenge
-  * @param domainHashT Temporary holding ```domainHash``` (to minimize # of sload ops)
+  * @param _note AZTEC confidential note being destroyed
+  * @param _signature ECDSA signature from note owner
+  * @param _challenge AZTEC zero-knowledge proof challenge
+  * @param _domainHashT Temporary holding ```domainHash``` (to minimize # of sload ops)
   **/
   function validateInputNote(
-    bytes32[6] note, 
-    bytes32[3] signature, 
-    uint challenge, 
-    bytes32 domainHashT
+    bytes32[6] memory _note, 
+    bytes32[3] memory _signature, 
+    uint _challenge,
+    bytes32 _domainHashT
   ) 
     internal 
   {
@@ -184,55 +184,87 @@ contract AZTECERC20Bridge {
     bytes32 signatureMessage;
     assembly {
         let m := mload(0x40)
-        mstore(m, mload(add(note, 0x40)))
-        mstore(add(m, 0x20), mload(add(note, 0x60)))
-        mstore(add(m, 0x40), mload(add(note, 0x80)))
-        mstore(add(m, 0x60), mload(add(note, 0xa0)))
+        mstore(m, mload(add(_note, 0x40)))
+        mstore(add(m, 0x20), mload(add(_note, 0x60)))
+        mstore(add(m, 0x40), mload(add(_note, 0x80)))
+        mstore(add(m, 0x60), mload(add(_note, 0xa0)))
         noteHash := keccak256(m, 0x80)
         mstore(m, 0x0f1ea84c0ceb3ad2f38123d94a164612e1a0c14a694dc5bfa16bc86ea1f3eabd) // keccak256 hash of "AZTEC_NOTE_SIGNATURE(bytes32[4] note,uint256 challenge,address sender)"
         mstore(add(m, 0x20), noteHash)
-        mstore(add(m, 0x40), challenge)
+        mstore(add(m, 0x40), _challenge)
         mstore(add(m, 0x60), caller)
         mstore(add(m, 0x40), keccak256(m, 0x80))
-        mstore(add(m, 0x20), domainHashT)
+        mstore(add(m, 0x20), _domainHashT)
         mstore(m, 0x1901)
         signatureMessage := keccak256(add(m, 0x1e), 0x42)
     }
+    uint8 v;
+    if (_signature[0] == 0x000000000000000000000000000000000000000000000000000000000000001b)
+      v = 27;
+    else if (_signature[0] == 0x000000000000000000000000000000000000000000000000000000000000001c)
+      v = 28;
+    else
+      revert("signature invalid");
     address owner = ecrecover(
       signatureMessage, 
-      uint8(signature[0]), 
-      signature[1], 
-      signature[2]
+      v,
+      _signature[1],
+      _signature[2]
     );
-    require(owner != address(0), "signature invalid");
+    require(owner != address(0x0), "signature invalid");
     require(
       noteRegistry[noteHash] == owner, 
       "expected input note to exist in registry"
     );
-    noteRegistry[noteHash] = 0;
+    noteRegistry[noteHash] = address(0x0);
   }
 
   /**
   * @dev Validate an output note from an AZTEC confidential transaction
   * If the note does not already exist in ```noteRegistry```, create it
-  * @param note AZTEC confidential note to be created
-  * @param owner The address of the note owner
+  * @param _note AZTEC confidential note to be created
+  * @param _owner The address of the note owner
   **/
-  function validateOutputNote(bytes32[6] note, address owner) internal {
+  function validateOutputNote(bytes32[6] memory _note, address _owner) internal {
     bytes32 noteHash; // Construct a keccak256 hash of the note coordinates.
     assembly {
         let m := mload(0x40)
-        mstore(m, mload(add(note, 0x40)))
-        mstore(add(m, 0x20), mload(add(note, 0x60)))
-        mstore(add(m, 0x40), mload(add(note, 0x80)))
-        mstore(add(m, 0x60), mload(add(note, 0xa0)))
+        mstore(m, mload(add(_note, 0x40)))
+        mstore(add(m, 0x20), mload(add(_note, 0x60)))
+        mstore(add(m, 0x40), mload(add(_note, 0x80)))
+        mstore(add(m, 0x60), mload(add(_note, 0xa0)))
         noteHash := keccak256(m, 0x80)
     }
-    require(owner != address(0), "owner must be valid Ethereum address");
+    require(_owner != address(0x0), "owner must be valid Ethereum address");
     require(
-      noteRegistry[noteHash] == 0, 
+      noteRegistry[noteHash] == address(0x0), 
       "expected output note to not exist in registry"
     );
-    noteRegistry[noteHash] = owner;
+    noteRegistry[noteHash] = _owner;
+  }
+
+  /// @dev Converts a numeric string to it's unsigned integer representation.
+  /// @param v The string to be converted.
+  function bytesToUInt(bytes32 v)
+    public
+    pure
+    returns (uint ret) 
+  {
+    require(v != 0x0);
+
+    uint digit;
+
+    for (uint i = 0; i < 32; i++) {
+      digit = uint((uint(v) / (2 ** (8 * (31 - i)))) & 0xff);
+      if (digit == 0) {
+          break;
+      }
+      else if (digit < 48 || digit > 57) {
+          revert();
+      }
+      ret *= 10;
+      ret += (digit - 48);
+    }
+    return ret;
   }
 }

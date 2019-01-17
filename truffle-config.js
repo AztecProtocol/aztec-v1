@@ -40,7 +40,7 @@ const ropstenProvider = process.env.SOLIDITY_COVERAGE
 module.exports = {
     compilers: {
         solc: {
-            version: '0.4.24',
+            version: '0.5.2',
             settings: {
                 optimizer: {
                     enabled: true,
