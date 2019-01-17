@@ -55,20 +55,22 @@ module.exports = {
     },
     networks: {
         development: {
-            host: 'localhost',
+            host: '127.0.0.1',
             port: 8545,
-            network_id: '*', // eslint-disable-line camelcase
+            network_id: 1234, // eslint-disable-line camelcase
+            gas: 0xfffffffffff,
+            gasPrice: toHex(toWei('1', 'gwei')),
         },
         coverage: {
-            host: 'localhost',
+            host: '127.0.0.1',
             port: 8555,
             network_id: '*', // eslint-disable-line camelcase
             gas: 0xfffffffffff,
-            gasPrice: 0x01,
+            gasPrice: toHex(toWei('1', 'gwei')),
         },
         kovan: {
             provider: kovanProvider,
-            gas: 4600000,
+            gas: 4700000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '42',
         },
@@ -86,7 +88,7 @@ module.exports = {
         },
         ropsten: {
             provider: ropstenProvider,
-            gas: 4600000,
+            gas: 4700000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
         },
