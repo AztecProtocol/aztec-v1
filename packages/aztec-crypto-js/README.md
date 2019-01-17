@@ -17,7 +17,7 @@ clone this repo to your desired directory and run ```npm install```
 
 ```
 const note = require('./note/note');
-const proof = require('./proof/proof');
+const proof = require('./proof/joinSplit/proof');
 const secp256k1 = require('./secp256k1/secp256k1');
 const sign = require('./eip712/sign');
 

@@ -55,18 +55,31 @@ proof.generateBlindingScalars = (n, m) => {
  * @param {Object[]} notes array of AZTEC notes
  * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
  */
-proof.computeChallenge = (sender, kPublic, m, notes, blindingFactors) => {
+proof.computeChallenge = (...challengeVariables) => {
     const hash = new Keccak();
-    hash.appendBN(new BN(sender.slice(2), 16)); // add message sender to hash
-    hash.appendBN(kPublic.umod(bn128.curve.n)); // add kPublic to hash
-    hash.appendBN(new BN(m)); // add input note variable to hash
-    notes.forEach((note) => {
-        hash.append(note.gamma);
-        hash.append(note.sigma);
-    });
-    blindingFactors.forEach(({ B }) => {
-        hash.append(B);
-    });
+
+    const recurse = (inputs) => {
+        inputs.forEach((challengeVar) => {
+            if (typeof (challengeVar) === 'string') {
+                hash.appendBN(new BN(challengeVar.slice(2), 16));
+            } else if (typeof (challengeVar) === 'number') {
+                hash.appendBN(new BN(challengeVar));
+            } else if (BN.isBN(challengeVar)) {
+                hash.appendBN(challengeVar.umod(bn128.curve.n));
+            } else if (Array.isArray(challengeVar)) {
+                recurse(challengeVar);
+            } else if (challengeVar.gamma) {
+                hash.append(challengeVar.gamma);
+                hash.append(challengeVar.sigma);
+            } else if (challengeVar.B) {
+                hash.append(challengeVar.B);
+            } else {
+                throw new Error(`I don't know how to add ${challengeVar} to hash`);
+            }
+        });
+    };
+    recurse(challengeVariables);
+
     return hash.keccak(groupReduction);
 };
 
@@ -169,6 +182,89 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
     });
 
     const challenge = proof.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
+
+    const proofData = blindingFactors.map((blindingFactor, i) => {
+        let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
+        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+        if (i === (notes.length - 1)) {
+            kBar = kPublicBn;
+        }
+        return [
+            `0x${padLeft(kBar.toString(16), 64)}`,
+            `0x${padLeft(aBar.toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.y.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.y.fromRed().toString(16), 64)}`,
+        ];
+    });
+    return {
+        proofData,
+        challenge: `0x${padLeft(challenge.toString(16), 64)}`,
+    };
+};
+
+
+/**
+ * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
+ *
+ * @method constructJoinSplit
+ * @param {Object[]} notes array of AZTEC notes
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ * @returns {Object} proof data and challenge
+ */
+proof.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
+    // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
+    const rollingHash = new Keccak();
+    // convert kPublic into a BN instance if it is not one
+    let kPublicBn;
+    if (BN.isBN(kPublic)) {
+        kPublicBn = kPublic;
+    } else if (kPublic < 0) {
+        kPublicBn = bn128.curve.n.sub(new BN(-kPublic));
+    } else {
+        kPublicBn = new BN(kPublic);
+    }
+    proof.parseInputs(notes, m, sender, kPublicBn);
+
+    // construct initial hash of note commitments
+    notes.forEach((note) => {
+        rollingHash.append(note.gamma);
+        rollingHash.append(note.sigma);
+    });
+    // finalHash is used to create final proof challenge
+
+    // define 'running' blinding factor for the k-parameter in final note
+    let runningBk = new BN(0).toRed(groupReduction);
+
+    const blindingScalars = proof.generateBlindingScalars(notes.length, m);
+
+    const blindingFactors = notes.map((note, i) => {
+        let B;
+        let x = new BN(0).toRed(groupReduction);
+        const { bk, ba } = blindingScalars[i];
+        if ((i + 1) > m) {
+            // get next iteration of our rolling hash
+            x = rollingHash.keccak(groupReduction);
+            const xbk = bk.redMul(x);
+            const xba = ba.redMul(x);
+            runningBk = runningBk.redSub(bk);
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+        } else {
+            runningBk = runningBk.redAdd(bk);
+            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+        }
+        return {
+            bk,
+            ba,
+            B,
+            x,
+        };
+    });
+
+    const challenge = proof.computeChallenge(sender, kPublicBn, publicOwner, m, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
