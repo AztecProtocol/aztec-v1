@@ -18,9 +18,17 @@ template <t>
 <t>
 }
 
-#define WNAF_START_LOCATION = takes(0) returns(1) { 0x500 }
+#define GET_NUMBER_OF_POINTS = takes(0) returns(1) {
+    0x60 calldatasize div
+}
+
+#define WNAF_START_LOCATION = takes(0) returns(1) {
+    // 0x500
+    GET_NUMBER_OF_POINTS() 0x800 mul 0x900 add
+}
 #define WNAF_START_LOCATION_MINUS_TWO = takes(0) returns(1) {
-    LITERAL<WNAF_START_LOCATION-0x02>()
+    // LITERAL<WNAF_START_LOCATION-0x02>()
+    GET_NUMBER_OF_POINTS() 0x800 mul 0x8fe add
 }
 #define WNAF_END_LOCATION = takes(0) returns(1) {
     LITERAL<WNAF_START_LOCATION+0xfe0>()
@@ -30,7 +38,13 @@ template <t>
 }
 
 
-#define POINT_TABLE_START_LOCATION = takes(0) returns(1) { 0x2820 }
+#define STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET = takes(0) returns(1) {
+    0x1
+}
+
+#define POINT_TABLE_START_LOCATION = takes(0) returns(1) {
+    0x820
+} // 0x2820
 #define POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
     LITERAL<POINT_TABLE_START_LOCATION-0x20>()
 }
@@ -39,26 +53,17 @@ template <t>
 #define WNAF_SIZE = takes(0) returns(1) { 5 }
 #define WNAF_TABLE_MASK = takes(0) returns(1) { 0x1e0 }
 
-#define GET_NUMBER_OF_POINTS = takes(0) returns(1) {
-    0x60 calldatasize div
-}
-
-#define STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET = takes(0) returns(1) {
-    0x09
-}
-
-#define STRANGE_WNAF_TABLE_OFFSET = takes(0) returns(1) {
-    0x2800
-}
-
-#define STRANGE_WNAF_END_LOCATION_PLUS_64 = takes(0) returns(1) {
-    LITERAL<WNAF_START_LOCATION+0x2040>()
-}
 
 // TODO make this dynamic
 #define GREEDY_WNAF__SIZE_OF_ENTRY = takes(0) returns(1) {
-    0x40
+    0x42
 }
-#define GREEDY_WNAF__TOTAL_SIZE = takes(0) returns(1) {
-    LITERAL<GREEDY_WNAF__SIZE_OF_ENTRY*128>()
+
+#define GREEDY_WNAF__OFFSET_TO_POINTS = takes(0) returns(1) {
+    0x22
+}
+
+#define GREEDY_WNAF__SIZE_OF_ENTRY_NEGATIVE = takes(0) returns(1) {
+    GREEDY_WNAF__SIZE_OF_ENTRY() 0 sub
+    // 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc0
 }
