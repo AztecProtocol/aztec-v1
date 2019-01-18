@@ -1,9 +1,9 @@
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
-const bn128 = require('../../bn128/bn128');
-const secp256k1 = require('../../secp256k1/secp256k1');
-const note = require('../../note/note');
+const bn128 = require('../../bn128');
+const secp256k1 = require('../../secp256k1');
+const note = require('../../note');
 const outputCoder = require('../../abiEncoder/outputCoder');
 const { K_MAX } = require('../../params');
 

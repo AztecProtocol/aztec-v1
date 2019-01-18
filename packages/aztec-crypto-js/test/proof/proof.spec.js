@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
 
 const bn128 = require('../../bn128');
-const proof = require('../../proof/joinSplit/proof');
+const proof = require('../../proof/joinSplit');
 const proofHelpers = require('../../proof/joinSplit/helpers');
 const { K_MAX } = require('../../params');
 

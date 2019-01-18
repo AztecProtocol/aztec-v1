@@ -1,10 +1,10 @@
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
-const aztecProof = require('../../proof/joinSplit/proof');
-const secp256k1 = require('../../secp256k1/secp256k1');
+const aztecProof = require('../../proof/joinSplit');
+const secp256k1 = require('../../secp256k1');
 const sign = require('../../eip712/sign');
-const note = require('../../note/note');
+const note = require('../../note');
 const abiEncoder = require('../../abiEncoder/joinSplit');
 const { K_MAX } = require('../../params');
 

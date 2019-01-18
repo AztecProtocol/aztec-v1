@@ -1,8 +1,8 @@
 const { padLeft } = require('web3-utils');
 const BN = require('bn.js');
 
-const bn128 = require('../bn128/bn128');
-const secp256k1 = require('../secp256k1/secp256k1');
+const bn128 = require('../bn128');
+const secp256k1 = require('../secp256k1');
 
 const outputCoder = {};
 
