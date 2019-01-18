@@ -100,7 +100,9 @@ contract AtomicSwap {
 
                     switch gt(i, 1) // i (an indexer) > 1 denotes a taker note
                     case 1 { // if it's a taker note
-                        k := calldataload(sub(noteIndex, add(0xc0, 0xc0)))
+
+                        // indexing the k value of the note that is 2 indices behind the current note
+                        k := calldataload(sub(noteIndex, 0x180))
                     } 
                         
                     case 0 { // if it's a maker note
