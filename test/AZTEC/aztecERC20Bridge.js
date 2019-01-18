@@ -12,7 +12,7 @@ const { sha3 } = require('web3-utils'); // TODO REMOVE
 
 AZTEC.abi = AZTECInterface.abi; // hon hon hon
 
-const aztecProof = require('../../aztec-crypto-js/proof/joinSplit/proof');
+const aztecProof = require('../../aztec-crypto-js/proof/joinSplit');
 const proofHelpers = require('../../aztec-crypto-js/proof/joinSplit/helpers');
 const secp256k1 = require('../../aztec-crypto-js/secp256k1');
 const sign = require('../../aztec-crypto-js/eip712/sign');

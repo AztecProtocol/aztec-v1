@@ -4,7 +4,7 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const aztecProof = require('../../../aztec-crypto-js/proof/joinSplit/proof');
+const aztecProof = require('../../../aztec-crypto-js/proof/joinSplit');
 const abiEncoder = require('../../../aztec-crypto-js/abiEncoder');
 const { t2, K_MAX } = require('../../../aztec-crypto-js/params');
 const secp256k1 = require('../../../aztec-crypto-js/secp256k1/secp256k1');

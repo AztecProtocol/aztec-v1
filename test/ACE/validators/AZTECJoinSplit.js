@@ -6,7 +6,7 @@ const { padLeft, sha3 } = require('web3-utils');
 
 // ### Internal Dependencies
 const proofHelpers = require('../../../aztec-crypto-js/proof/joinSplit/helpers');
-const aztecProof = require('../../../aztec-crypto-js/proof/joinSplit/proof');
+const aztecProof = require('../../../aztec-crypto-js/proof/joinSplit');
 const abiEncoder = require('../../../aztec-crypto-js/abiEncoder');
 const { t2 } = require('../../../aztec-crypto-js/params');
 const secp256k1 = require('../../../aztec-crypto-js/secp256k1/secp256k1');
