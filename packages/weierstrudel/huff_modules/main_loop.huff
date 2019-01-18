@@ -106,6 +106,7 @@
     // Stack state: p 2p 3p
 
     // Set up our memory state. The precomputed lookup table requires 'beta', the cube root of unity mod p.
+ 
     // Because we need this value when the state of our stack is somewhat undefined (hon hon), we keep it in memory.
     // We do the same with 2p, 3p for the same reasons
     BETA() BETA_LOCATION() mstore // p 2p 3p
@@ -126,7 +127,6 @@
     // We want this entry to point to a location in the jump table that will terminate
     // the algorithm. We can do this by adding 34 (max number of points *2 + 2) to the entry
     WNAF_START_LOCATION() mload 0x22 add WNAF_START_LOCATION() mstore
-
     // Next, we set up our jump table.
     // TODO: upgrade Huff parser so that we can store this in bytecode and just use codecopy
     alt_add_0 0x00 mstore
@@ -180,7 +180,8 @@
 
     // the next step is to update i to point to the next (offset) index,
     0x20                        // 32 z y x i z p 2p 3p
-    0x20 dup6                   // i 64 32 z y x i z p 2p 3p
+    // 0x20 dup6                   // i 32 32 z y x i z p 2p 3p
+    0x20 dup6
     sub                         // i' 32 z y x i z p 2p 3p
     swap5                       // i 32 z y x i' z p 2p 3p
     // next, we want to use the number of entries at this wnaf index as
@@ -232,7 +233,9 @@
         // We then want to load up the next wnaf index and jump.
         // (the pointer i points to the next wnaf entry, so we're decreasing
         //    the *next* wnaf pointer, not the current one. This saves a swap op)
-        0x20 0x40 dup6 sub swap5
+        // 0x20
+        GREEDY_WNAF__OFFSET_TO_POINTS()
+        GREEDY_WNAF__SIZE_OF_ENTRY() dup6 sub swap5
         sub mload
         // Once we have the wnaf entry, we need to convert to a jump index.
         // The entry is equal to the number of points * 2 (to shave two opcodes from the wnaf algo).

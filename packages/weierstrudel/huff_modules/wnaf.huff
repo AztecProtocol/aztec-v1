@@ -250,9 +250,9 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
 }
 
 #define WNAF_GREEDY__FIND_FIRST_ENTRY = takes(0) returns(1) {
-    GREEDY_WNAF__SIZE_OF_ENTRY() 128 mul 0x40 add WNAF_START_LOCATION() add
+    GREEDY_WNAF__SIZE_OF_ENTRY() 128 mul GREEDY_WNAF__SIZE_OF_ENTRY() add WNAF_START_LOCATION() add
     alternate_search_next:
-        0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc0 add
+        GREEDY_WNAF__SIZE_OF_ENTRY_NEGATIVE() add
         dup1 mload iszero alternate_search_next jumpi
 }
 
@@ -318,10 +318,18 @@ template<num_shifted_bits, wnaf_pointer_total_increase>
     // set up our initial stack state...
     // LITERAL<WNAF_SIZE*0x40+0x100>() 0x100   // 5_base 5_total
     WNAF_TABLE_BITS() GREEDY_WNAF__SIZE_OF_ENTRY() mul // d_b
-    LITERAL<WNAF_SIZE*0x40+0xc0>() 0xc0     // 3_base 3_total
+    GREEDY_WNAF__SIZE_OF_ENTRY() 3 mul GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul add // 3_total
+    GREEDY_WNAF__SIZE_OF_ENTRY() 3 mul                                      // 3_base
+    GREEDY_WNAF__SIZE_OF_ENTRY() 2 mul GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul add // 2_total
+    GREEDY_WNAF__SIZE_OF_ENTRY() 2 mul                                      // 2_base
+    GREEDY_WNAF__SIZE_OF_ENTRY() GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul add       // 1_total
+    GREEDY_WNAF__SIZE_OF_ENTRY()                                            // 1_base
+    GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul
+
+    /* LITERAL<WNAF_SIZE*0x40+0xc0>() 0xc0     // 3_base 3_total
     LITERAL<WNAF_SIZE*0x40+0x80>() 0x80     // 2_base 2_total 3_b 3_t
     LITERAL<WNAF_SIZE*0x40+0x40>() 0x40     // 1_base 1_total 2_b 2_t 3_b 3_t
-    LITERAL<WNAF_SIZE*0x40>()               // 0_t 1_base 1_total 2_b 2_t 3_b 3_t
+    LITERAL<WNAF_SIZE*0x40>()               // 0_t 1_base 1_total 2_b 2_t 3_b 3_t */
     // stack state: 1_b 1_t 2_b 2_t 3_b 3_t 4_b 4_t 5_b 5_t
     // Let's start by getting the number of scalars we have
     GET_NUMBER_OF_POINTS()         // n
