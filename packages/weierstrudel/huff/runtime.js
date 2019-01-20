@@ -72,15 +72,16 @@ function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = []) {
 }
 
 function Runtime(filename, path) {
-    const { inputMap, macros } = newParser.parseFile(filename, path);
+    const { inputMap, macros, jumptables } = newParser.parseFile(filename, path);
     return async function runMacro(macroName, stack = [], memory = [], calldata = null) {
         const memoryCode = encodeMemory(memory);
         const stackCode = encodeStack(stack);
         const initCode = `${memoryCode}${stackCode}`;
         const initGasEstimate = (memory.length * 9) + (stack.length * 3);
         const offset = initCode.length / 2;
-        const { data: { bytecode: macroCode, sourcemap } } = newParser.processMacro(macroName, offset, [], macros, inputMap);
-        console.log('code size = ', macroCode.length / 2);
+        const {
+            data: { bytecode: macroCode, sourcemap },
+        } = newParser.processMacro(macroName, offset, [], macros, inputMap, jumptables);
         const bytecode = `${initCode}${macroCode}`;
         const vm = new VM({ hardfork: 'constantinople' });
         const results = await runCode(vm, bytecode, calldata, offset, sourcemap);

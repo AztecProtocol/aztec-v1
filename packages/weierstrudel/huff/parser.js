@@ -23,6 +23,7 @@ const TYPES = {
     MACRO: 'MACRO',
     TEMPLATE: 'TEMPLATE',
     CODESIZE: 'CODESIZE',
+    TABLE_START_POSITION: 'TABLE_START_POSITION',
 };
 
 const CONTEXT = {
@@ -173,13 +174,54 @@ parser.processMacro = (
     startingBytecodeIndex = 0,
     templateArgumentsRaw = [],
     startingMacros = {},
-    map = {}
+    map = {},
+    jumptables
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
         throw new Error(`macro ${name}, unmatched jump labels ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
     }
-    return result;
+
+    let tableOffset = (result.data.bytecode.length / 2);
+    let { bytecode } = result.data;
+    const jumpkeys = Object.keys(jumptables);
+    const tableOffsets = {};
+    jumpkeys.forEach((jumpkey) => {
+        const jumptable = jumptables[jumpkey];
+        tableOffsets[jumptable.name] = tableOffset;
+        tableOffset += jumptable.size;
+        const tablecode = jumptable.table.jumps.map((jumplabel) => {
+            if (!result.jumpindices[jumplabel]) {
+                throw new Error(`could not find ${jumplabel} in ${result.jumpindices}`);
+            }
+            const { offset } = result.jumpindices[jumplabel];
+            let hex = formatEvenBytes(toHex(offset));
+            if (!jumptable.table.compressed) {
+                hex = `000000000000000000000000000000000000000000000000000000000000${hex}`;
+            }
+            return hex;
+        }).join('');
+        bytecode += tablecode;
+    });
+    result.tableInstances.forEach((tableInstance) => {
+        if (!tableOffsets[tableInstance.label]) {
+            throw new Error(`expected to find ${tableInstance.label} in ${tableOffsets}`);
+        }
+        const { offset } = tableInstance;
+        if (bytecode.slice((offset * 2) + 2, (offset * 2) + 6) !== 'xxxx') {
+            throw new Error(`expected ${tableInstance.offset} to be xxxx`);
+        }
+        const pre = bytecode.slice(0, (offset * 2) + 2);
+        const post = bytecode.slice((offset * 2) + 6);
+        bytecode = `${pre}${formatEvenBytes(toHex(tableOffsets[tableInstance.label]))}${post}`;
+    });
+    return {
+        ...result,
+        data: {
+            ...result.data,
+            bytecode,
+        },
+    };
 };
 
 parser.processMacroInternal = (
@@ -187,7 +229,9 @@ parser.processMacroInternal = (
     startingBytecodeIndex = 0,
     templateArgumentsRaw = [],
     startingMacros = {},
-    map = {}
+    map = {},
+    jumpindicesInitial = {},
+    tableInstancesInitial = []
 ) => {
     let macros = startingMacros;
     const macro = macros[name];
@@ -207,15 +251,17 @@ parser.processMacroInternal = (
 
     const jumptable = [];
     const jumpindices = {};
+    let tableInstances = [...tableInstancesInitial];
     let offset = startingBytecodeIndex;
     const codes = ops.map((op, index) => {
         switch (op.type) {
             case TYPES.MACRO: {
                 const args = parser.substituteTemplateArguments(op.args, templateRegExps);
-                const { data: result, unmatchedJumps } = parser.processMacroInternal(op.value, offset, args, macros, map);
-                jumptable[index] = unmatchedJumps;
-                offset += (result.bytecode.length / 2);
-                return result;
+                const result = parser.processMacroInternal(op.value, offset, args, macros, map, jumpindicesInitial, []);
+                tableInstances = [...tableInstances, ...result.tableInstances];
+                jumptable[index] = result.unmatchedJumps;
+                offset += (result.data.bytecode.length / 2);
+                return result.data;
             }
             case TYPES.TEMPLATE: {
                 const macroNameIndex = templateParams.indexOf(op.value);
@@ -223,17 +269,19 @@ parser.processMacroInternal = (
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
                 ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
-                const { data: result, unmatchedJumps } = parser.processMacroInternal(templateName, offset, [], macros, map);
-                jumptable[index] = unmatchedJumps;
-                offset += (result.bytecode.length / 2);
-                return result;
+                const result = parser.processMacroInternal(templateName, offset, [], macros, map, jumpindicesInitial, []);
+                tableInstances = [...tableInstances, ...result.tableInstances];
+                jumptable[index] = result.unmatchedJumps;
+                offset += (result.data.bytecode.length / 2);
+                return result.data;
             }
             case TYPES.CODESIZE: {
                 check(index !== -1, `cannot find macro ${op.value}`);
-                const { data: result } = parser.processMacroInternal(op.value, offset, op.args, macros, map);
-                const hex = formatEvenBytes((result.bytecode.length / 2).toString(16));
+                const result = parser.processMacroInternal(op.value, offset, op.args, macros, map, jumpindicesInitial, []);
+                const hex = formatEvenBytes((result.data.bytecode.length / 2).toString(16));
                 const opcode = toHex(95 + (hex.length / 2));
                 const bytecode = `${opcode}${hex}`;
+                tableInstances = [...tableInstances, ...result.tableInstances];
                 offset += (bytecode.length / 2);
                 return {
                     bytecode: `${opcode}${hex}`,
@@ -266,8 +314,21 @@ parser.processMacroInternal = (
                     sourcemap: [sourcemap, sourcemap, sourcemap],
                 };
             }
+            case TYPES.TABLE_START_POSITION: {
+                console.log('found table start? ', op.value);
+                tableInstances.push({ label: op.value, offset });
+                const sourcemap = inputMaps.getFileLine(op.index, map);
+                offset += 3;
+                return {
+                    bytecode: `${opcodes.push2}xxxx`,
+                    sourcemap: [sourcemap, sourcemap, sourcemap],
+                };
+            }
             case TYPES.JUMPDEST: {
-                jumpindices[op.value] = index;
+                jumpindices[op.value] = {
+                    index,
+                    offset,
+                };
                 offset += 1;
                 return {
                     bytecode: opcodes.jumpdest,
@@ -287,9 +348,8 @@ parser.processMacroInternal = (
         return old;
     });
     const unmatchedJumps = [];
-
-    // TODO: refactor unmatched jumps because this doesn't work.
-    // If a macro returns unmatched jumps, we need to map from one code index to multiple jump entries
+    // so what do I need to do???
+    // for every jump label, I need to get the absolute bytecode index
     const data = codes.reduce((acc, { bytecode, sourcemap }, index) => {
         let formattedBytecode = bytecode;
         if (jumptable[index]) {
@@ -297,7 +357,7 @@ parser.processMacroInternal = (
             // eslint-disable-next-line no-restricted-syntax
             for (const { label: jumplabel, bytecodeIndex } of jumps) {
                 if (jumpindices[jumplabel]) {
-                    const jumpindex = jumpindices[jumplabel];
+                    const jumpindex = jumpindices[jumplabel].index;
                     const jumpvalue = padNBytes(toHex(codeIndices[jumpindex]), 2);
                     const pre = formattedBytecode.slice(0, bytecodeIndex + 2);
                     const post = formattedBytecode.slice(bytecodeIndex + 6);
@@ -317,6 +377,7 @@ parser.processMacroInternal = (
         return {
             bytecode: acc.bytecode + formattedBytecode,
             sourcemap: [...acc.sourcemap, ...sourcemap],
+            jumpindices: { ...jumpindicesInitial, ...jumpindices },
         };
     }, {
         bytecode: '',
@@ -327,10 +388,25 @@ parser.processMacroInternal = (
     keys.forEach((key) => {
         check(jumptable.find(i => i === key), `jump label ${key} is not used anywhere!`);
     }); */
-    return { data, unmatchedJumps };
+    return {
+        data,
+        unmatchedJumps,
+        jumpindices,
+        tableInstances,
+    };
 };
 
-parser.parseMacro = (body, macros, startingIndex = 0) => {
+parser.parseJumpTable = (body, compressed = false) => {
+    const jumps = body.match(grammar.jumpTable.JUMPS).map(j => j.replace(/(\r\n\t|\n|\r\t|\s)/gm, ''));
+    const size = jumps.length * 0x20;
+    return {
+        jumps,
+        size,
+        compressed,
+    };
+};
+
+parser.parseMacro = (body, macros, jumptables, startingIndex = 0) => {
     let input = body;
     let index = 0;
     const ops = [];
@@ -364,6 +440,29 @@ parser.parseMacro = (body, macros, startingIndex = 0) => {
                 type: TYPES.CODESIZE,
                 value: token[1],
                 args: templateParams,
+                index: startingIndex + index + regex.countEmptyChars(token[0]),
+            });
+            index += token[0].length;
+        } else if (input.match(grammar.macro.TABLE_SIZE)) {
+            const token = input.match(grammar.macro.TABLE_SIZE);
+            const table = token[1];
+            if (!jumptables[table]) {
+                throw new Error(`could not find jumptable ${table} in ${jumptables}`);
+            }
+            const hex = formatEvenBytes(toHex(jumptables[table].table.size));
+            ops.push({
+                type: TYPES.PUSH,
+                value: toHex(95 + (hex.length / 2)),
+                args: [hex],
+                index: startingIndex + index + regex.countEmptyChars(token[0]),
+            });
+            index += token[0].length;
+        } else if (input.match(grammar.macro.TABLE_START)) {
+            const token = input.match(grammar.macro.TABLE_START);
+            ops.push({
+                type: TYPES.TABLE_START_POSITION,
+                value: token[1],
+                args: [],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
             });
             index += token[0].length;
@@ -429,6 +528,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
     let currentContext = CONTEXT.NONE;
 
     let macros = {};
+    let jumptables = {};
     let currentExpression = { templateParams: [] };
     let index = startingIndex;
     while (!regex.endOfData(input)) {
@@ -441,11 +541,10 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 templateParams,
             };
             currentContext = CONTEXT.MACRO;
-        } else if ((currentContext & (CONTEXT.NONE | CONTEXT.MACRO)) && grammar.topLevel.DEFINE.test(input)) {
-            const macro = input.match(grammar.topLevel.DEFINE);
+        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && grammar.topLevel.MACRO.test(input)) {
+            const macro = input.match(grammar.topLevel.MACRO);
             const type = macro[1];
             if (type !== 'macro') {
-                console.log(macro);
                 throw new Error(`expected ${macro} to define a macro`);
             }
             const body = macro[5];
@@ -455,20 +554,50 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                     ...currentExpression,
                     name: macro[2],
                     takes: macro[3],
-                    ops: parser.parseMacro(body, macros, index),
+                    ops: parser.parseMacro(body, macros, jumptables, index),
                     body: macro[5],
                 },
             };
             index += macro[0].length;
             currentContext = CONTEXT.NONE;
             currentExpression = { templateParams: [] };
+        } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE_PACKED.test(input)) {
+            const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
+            const type = jumptable[1];
+            if (type !== 'jumptable') {
+                throw new Error(`expected ${jumptable} to define a macro`);
+            }
+            const body = jumptable[3];
+            jumptables = {
+                ...jumptables,
+                [jumptable[2]]: {
+                    name: jumptable[2],
+                    table: parser.parseJumpTable(body, true),
+                },
+            };
+            index += jumptable[0].length;
+        } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE.test(input)) {
+            const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
+            const type = jumptable[1];
+            if (type !== 'jumptable') {
+                throw new Error(`expected ${jumptable} to define a macro`);
+            }
+            const body = jumptable[3];
+            jumptables = {
+                ...jumptables,
+                [jumptable[2]]: {
+                    name: jumptable[2],
+                    table: parser.parseJumpTable(body, false),
+                },
+            };
+            index += jumptable[0].length;
         } else {
             const { filename, lineNumber, line } = inputMaps.getFileLine(index, inputMap);
             throw new Error(`could not process line ${lineNumber} in ${filename}: ${line}`);
         }
         input = raw.slice(index);
     }
-    return macros;
+    return { macros, jumptables };
 };
 
 parser.removeComments = (string) => {
@@ -543,15 +672,15 @@ parser.getFileContents = (originalFilename, partialPath) => {
 parser.parseFile = (filename, partialPath) => {
     const { filedata, raw } = parser.getFileContents(filename, partialPath);
     const map = inputMaps.createInputMap(filedata);
-    const macros = parser.parseTopLevel(raw, 0, map);
-    return { inputMap: map, macros };
+    const { macros, jumptables } = parser.parseTopLevel(raw, 0, map);
+    return { inputMap: map, macros, jumptables };
 };
 
 parser.compileMacro = (macroName, filename, partialPath) => {
     const { filedata, raw } = parser.getFileContents(filename, partialPath);
     const map = inputMaps.createInputMap(filedata);
-    const macros = parser.parseTopLevel(raw, 0, map);
-    const { bytecode, sourcemap } = parser.processMacro(macroName, 0, [], macros, map);
+    const { macros, jumptables } = parser.parseTopLevel(raw, 0, map);
+    const { bytecode, sourcemap } = parser.processMacro(macroName, 0, [], macros, map, jumptables);
     return { bytecode, sourcemap };
 };
 

@@ -44,7 +44,7 @@ describe.only('bn128 alternative main loop', function describe() {
         main = new Runtime('main_loop.huff', pathToTestData);
     });
 
-    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ONE point', async () => {
+    it.only('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ONE point', async () => {
         const numPoints = 1;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
