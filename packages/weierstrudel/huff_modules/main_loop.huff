@@ -155,6 +155,42 @@
     dup1 0x20 add
 }
 
+#define MAIN__INIT_JUMP_TABLE = takes(0) returns(0) {
+    alt_add_0 0x00 mstore
+    alt_add_1 0x20 mstore
+    alt_add_2 0x40 mstore
+    alt_add_3 0x60 mstore
+    alt_add_4 0x80 mstore
+    alt_add_5 0xa0 mstore
+    alt_add_6 0xc0 mstore
+    alt_add_7 0xe0 mstore
+    alt_add_8 0x100 mstore
+    alt_add_9 0x120 mstore
+    alt_add_10 0x140 mstore
+    alt_add_11 0x160 mstore
+    alt_add_12 0x180 mstore
+    alt_add_13 0x1a0 mstore
+    alt_add_14 0x1c0 mstore
+    alt_add_15 0x1e0 mstore
+    alt_add_16 0x200 mstore
+    alt_add_final_0 0x220 mstore
+    alt_add_final_1 0x240 mstore
+    alt_add_final_2 0x260 mstore
+    alt_add_final_3 0x280 mstore
+    alt_add_final_4 0x2a0 mstore
+    alt_add_final_5 0x2c0 mstore
+    alt_add_final_6 0x2e0 mstore
+    alt_add_final_7 0x300 mstore
+    alt_add_final_8 0x320 mstore
+    alt_add_final_9 0x340 mstore
+    alt_add_final_10 0x360 mstore
+    alt_add_final_11 0x380 mstore
+    alt_add_final_12 0x3a0 mstore
+    alt_add_final_13 0x3c0 mstore
+    alt_add_final_14 0x3e0 mstore
+    alt_add_final_15 0x400 mstore
+    alt_add_final_16 0x420 mstore
+}
 // start here
 //          |
 //          v
@@ -203,41 +239,8 @@
     WNAF_START_LOCATION() mload 0x22 add WNAF_START_LOCATION() mstore
     // Next, we set up our jump table.
     // TODO: upgrade Huff parser so that we can store this in bytecode and just use codecopy
-    alt_add_0 0x00 mstore
-    alt_add_1 0x20 mstore
-    alt_add_2 0x40 mstore
-    alt_add_3 0x60 mstore
-    alt_add_4 0x80 mstore
-    alt_add_5 0xa0 mstore
-    alt_add_6 0xc0 mstore
-    alt_add_7 0xe0 mstore
-    alt_add_8 0x100 mstore
-    alt_add_9 0x120 mstore
-    alt_add_10 0x140 mstore
-    alt_add_11 0x160 mstore
-    alt_add_12 0x180 mstore
-    alt_add_13 0x1a0 mstore
-    alt_add_14 0x1c0 mstore
-    alt_add_15 0x1e0 mstore
-    alt_add_16 0x200 mstore
-    alt_add_final_0 0x220 mstore
-    alt_add_final_1 0x240 mstore
-    alt_add_final_2 0x260 mstore
-    alt_add_final_3 0x280 mstore
-    alt_add_final_4 0x2a0 mstore
-    alt_add_final_5 0x2c0 mstore
-    alt_add_final_6 0x2e0 mstore
-    alt_add_final_7 0x300 mstore
-    alt_add_final_8 0x320 mstore
-    alt_add_final_9 0x340 mstore
-    alt_add_final_10 0x360 mstore
-    alt_add_final_11 0x380 mstore
-    alt_add_final_12 0x3a0 mstore
-    alt_add_final_13 0x3c0 mstore
-    alt_add_final_14 0x3e0 mstore
-    alt_add_final_15 0x400 mstore
-    alt_add_final_16 0x420 mstore
 
+    MAIN__INIT_JUMP_TABLE()
     // The stack state is now: i Z p 2p 3p
     // We now want to get the first point in our wnaf entry and set that as our
     // initial point
