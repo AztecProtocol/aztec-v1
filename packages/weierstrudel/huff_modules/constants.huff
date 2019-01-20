@@ -39,7 +39,7 @@ template <t>
 
 
 #define STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET = takes(0) returns(1) {
-    0x1
+    0x800
 }
 
 #define POINT_TABLE_START_LOCATION = takes(0) returns(1) {
@@ -54,16 +54,12 @@ template <t>
 #define WNAF_TABLE_MASK = takes(0) returns(1) { 0x1e0 }
 
 
-// TODO make this dynamic
-#define GREEDY_WNAF__SIZE_OF_ENTRY = takes(0) returns(1) {
-    0x42
-}
+// // TODO make this dynamic
+// #define WNAF_GREEDY__SIZE_OF_ENTRY = takes(0) returns(1) {
+//     GET_NUMBER_OF_POINTS() 0x04 mul 0x3e add
+//     // 0x42
+// }
 
 #define GREEDY_WNAF__OFFSET_TO_POINTS = takes(0) returns(1) {
-    0x22
-}
-
-#define GREEDY_WNAF__SIZE_OF_ENTRY_NEGATIVE = takes(0) returns(1) {
-    GREEDY_WNAF__SIZE_OF_ENTRY() 0 sub
-    // 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc0
+    GET_NUMBER_OF_POINTS() 0x04 mul 0x1e add
 }

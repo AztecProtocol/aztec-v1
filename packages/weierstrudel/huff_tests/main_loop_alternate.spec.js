@@ -40,27 +40,8 @@ const referenceCurve = new EC.curve.short({
 describe.only('bn128 alternative main loop', function describe() {
     this.timeout(10000);
     let main;
-    let pointTableOffset;
     before(async () => {
         main = new Runtime('main_loop.huff', pathToTestData);
-        const { stack } = await main('POINT_TABLE_START_LOCATION_MINUS_32', [], []);
-        pointTableOffset = stack[0].toNumber();
-    });
-    it('macro GET_P2_LOCATION correctly calculates point location from a wnaf', async () => {
-        const wnaf = new BN('1f00000000000000050000000001000000000b00000000000000000000000000', 16);
-        const initialMemory = [{
-            index: 0,
-            value: wnaf,
-        }];
-        const { stack } = await main('GET_P2_LOCATION', [], initialMemory);
-        expect(stack.length).to.equal(2);
-        const [oX, oY] = stack;
-        const expectedOffset = 18;
-        const expectedBaseOffset = 1024 * expectedOffset;
-        const expectedWnaf = 11;
-        const expectedFinalOffset = pointTableOffset + expectedBaseOffset + (expectedWnaf * 32);
-        expect(oX.eq(new BN(expectedFinalOffset))).to.equal(true);
-        expect(oY.eq(new BN(expectedFinalOffset + 32))).to.equal(true);
     });
 
     it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ONE point', async () => {
@@ -83,6 +64,7 @@ describe.only('bn128 alternative main loop', function describe() {
         }, null);
         const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
+        console.log('return words = ', returnWords);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
         const z = returnWords[2].toRed(pRed);
