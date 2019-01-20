@@ -205,7 +205,7 @@ parser.processMacroInternal = (
         return { pattern, value };
     });
 
-    let jumptable = [];
+    const jumptable = [];
     const jumpindices = {};
     let offset = startingBytecodeIndex;
     const codes = ops.map((op, index) => {
@@ -213,7 +213,7 @@ parser.processMacroInternal = (
             case TYPES.MACRO: {
                 const args = parser.substituteTemplateArguments(op.args, templateRegExps);
                 const { data: result, unmatchedJumps } = parser.processMacroInternal(op.value, offset, args, macros, map);
-                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeIndex }) => ({ label, bytecodeIndex: bytecodeIndex + (offset * 2) }))];
+                jumptable[index] = unmatchedJumps;
                 offset += (result.bytecode.length / 2);
                 return result;
             }
@@ -224,7 +224,7 @@ parser.processMacroInternal = (
                 let templateName = templateArguments[macroNameIndex];
                 ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
                 const { data: result, unmatchedJumps } = parser.processMacroInternal(templateName, offset, [], macros, map);
-                jumptable = [...jumptable, ...unmatchedJumps.map(({ label, bytecodeIndex }) => ({ label, bytecodeIndex: bytecodeIndex + (offset * 2) }))];
+                jumptable[index] = unmatchedJumps;
                 offset += (result.bytecode.length / 2);
                 return result;
             }
@@ -258,7 +258,7 @@ parser.processMacroInternal = (
                 };
             }
             case TYPES.PUSH_JUMP_LABEL: {
-                jumptable[index] = { label: op.value, bytecodeIndex: 0 };
+                jumptable[index] = [{ label: op.value, bytecodeIndex: 0 }];
                 const sourcemap = inputMaps.getFileLine(op.index, map);
                 offset += 3;
                 return {
@@ -291,35 +291,31 @@ parser.processMacroInternal = (
     // TODO: refactor unmatched jumps because this doesn't work.
     // If a macro returns unmatched jumps, we need to map from one code index to multiple jump entries
     const data = codes.reduce((acc, { bytecode, sourcemap }, index) => {
+        let formattedBytecode = bytecode;
         if (jumptable[index]) {
-            const { label: jumplabel, bytecodeIndex } = jumptable[index];
-            if (jumpindices[jumplabel]) {
-                const jumpindex = jumpindices[jumplabel];
-                const jumpvalue = padNBytes(toHex(codeIndices[jumpindex]), 2);
-                const jumpcode = `${bytecode.slice(0, bytecodeIndex + 2)}${jumpvalue}${bytecode.slice(bytecodeIndex + 6)}`;
-                return {
-                    bytecode: acc.bytecode + jumpcode,
-                    sourcemap: [...acc.sourcemap, ...sourcemap],
-                };
+            const jumps = jumptable[index];
+            // eslint-disable-next-line no-restricted-syntax
+            for (const { label: jumplabel, bytecodeIndex } of jumps) {
+                if (jumpindices[jumplabel]) {
+                    const jumpindex = jumpindices[jumplabel];
+                    const jumpvalue = padNBytes(toHex(codeIndices[jumpindex]), 2);
+                    const pre = formattedBytecode.slice(0, bytecodeIndex + 2);
+                    const post = formattedBytecode.slice(bytecodeIndex + 6);
+                    if (formattedBytecode.slice(bytecodeIndex + 2, bytecodeIndex + 6) !== 'xxxx') {
+                        throw new Error(
+                            `expected indicies ${bytecodeIndex + 2} to ${bytecodeIndex + 6} to be jump location, of
+                            ${formattedBytecode}`
+                        );
+                    }
+                    formattedBytecode = `${pre}${jumpvalue}${post}`;
+                } else {
+                    const jumpOffset = (codeIndices[index] - startingBytecodeIndex) * 2;
+                    unmatchedJumps.push({ label: jumplabel, bytecodeIndex: jumpOffset + bytecodeIndex });
+                }
             }
-            unmatchedJumps.push({ label: jumplabel, bytecodeIndex: codeIndices[index] - startingBytecodeIndex });
-            return {
-                bytecode: acc.bytecode + `${opcodes.push2}xxxx`,
-                sourcemap: [...acc.sourcemap, ...sourcemap],
-            };
         }
-        /* if (bytecode === `${opcodes.push2}xxxx`) {
-            const jumplabel = jumptable[index];
-            check(jumpindices[jumplabel] !== undefined, `expected jump label ${jumptable[index]} to exist`);
-            const jumpindex = jumpindices[jumplabel];
-            const jumpvalue = padNBytes(toHex(codeIndices[jumpindex]), 2);
-            return {
-                bytecode: acc.bytecode + `${opcodes.push2}${jumpvalue}`,
-                sourcemap: [...acc.sourcemap, ...sourcemap],
-            };
-        } */
         return {
-            bytecode: acc.bytecode + bytecode,
+            bytecode: acc.bytecode + formattedBytecode,
             sourcemap: [...acc.sourcemap, ...sourcemap],
         };
     }, {
