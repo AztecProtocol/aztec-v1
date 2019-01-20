@@ -59,7 +59,7 @@ function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = []) {
             code: Buffer.from(bytecode, 'hex'),
             gasLimit: Buffer.from('ffffffff', 'hex'),
             data: calldata ? processMemory(calldata) : null,
-            value: new BN(2),
+            value: new BN(1),
         }, (err, results) => {
             if (err) {
                 console.log(results.runState.programCounter);

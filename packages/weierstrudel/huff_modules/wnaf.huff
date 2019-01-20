@@ -218,7 +218,7 @@ wnaf_continue:
     // x x x v s m 269 0x1fe0 16 mask b
     pop pop pop
     0x20 add    // s' m
-    swap1 callvalue swap1 sub swap1 // s' m' // TODO optimize this
+    swap1 0x02 swap1 sub swap1 // s' m' // TODO optimize this
     dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
     pop pop pop pop pop pop pop
 }
@@ -550,7 +550,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
         // x x x v s m 269 0x1fe0 16 mask b
         pop pop pop
         0x20 add    // s' m
-        swap1 callvalue swap1 sub swap1 // s' m' // TODO optimize this
+        swap1 0x02 swap1 sub swap1 // s' m' // TODO optimize this
         dup1 calldatasize sub strange_wnaf_start jumpi // s' m'
         pop pop
         wnaf_end jump

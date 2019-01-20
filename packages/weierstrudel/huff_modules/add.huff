@@ -45,7 +45,8 @@ template <getP2Location,p,2p>
     dup2 dup10              // t4 p -y1 p t1 p t2 p z1 t3 t4
     dup2 dup8 dup1          // t2 t2 p t4 p -y1 p t1 p t2 p z1 t3 t4
     mulmod                  // x3 t4 p -y1 p t1 p t2 p z1 t3 t4
-    dup11 dup1 add
+    // dup11 dup1 add
+    dup11 callvalue shl
     add
     addmod                  // x3 -y1 p t1 p t2 p z1 t3 t4
     swap9                   // t4 -y1 p t1 p t2 p z1 t3 x3
@@ -86,7 +87,8 @@ template <mx2,my2,p,2p>
     // t5 t2 t3 p t1 t4 p y x
     dup4 sub dup4 dup1 dup1 dup5 dup1 mulmod
     // x3 p p t5 t2 t3 p t1 t4 p y x
-    dup4 dup1 add add dup9 addmod
+    // dup4 dup1 add add dup9 addmod
+    dup4 callvalue shl add dup9 addmod
     // x3 p t5 t2 t3 p t1 t4 p y x
     swap2
     // t5 p x3 t2 t3 p t1 t4 p y x
@@ -152,7 +154,8 @@ template <p1,p2,p3,mx2,my2>
     dup4 sub
     dup4 dup1 dup1 dup5 dup1 mulmod
     // x3 p p t5 t2 t3 p t1 t4 z y x
-    dup4 dup1 add add
+    // dup4 dup1 add add
+    dup4 callvalue shl add
     dup9 addmod
     // x3 p t5 t2 t3 p t1 t4 z y x
     swap2
@@ -214,7 +217,8 @@ template <p1,p2,p3,mx2,my2,mz2>
     dup4 sub
     dup4 dup1 dup1 dup5 dup1 mulmod
     // x3 p p t5 t2 t3 p t1 t4 z y x
-    dup4 dup1 add add
+    // dup4 dup1 add add
+    dup4 callvalue shl add
     dup9 addmod
     // x3 p t5 t2 t3 p t1 t4 z y x
     swap2
