@@ -44,7 +44,7 @@ describe.only('bn128 alternative main loop', function describe() {
         main = new Runtime('main_loop.huff', pathToTestData);
     });
 
-    it.only('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ONE point', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ONE point', async () => {
         const numPoints = 1;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -64,7 +64,6 @@ describe.only('bn128 alternative main loop', function describe() {
         }, null);
         const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
-        console.log('return words = ', returnWords);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
         const z = returnWords[2].toRed(pRed);
