@@ -8,7 +8,7 @@ template <p1,p2>
     // stack state: t1 z y x
     <p2> dup2
     // stack state: t1 p t1 z y x
-    callvalue shl
+    0x02 shl
     // stack state: t2 p t1 z y x
     dup2 dup1 dup1
     // stack state: p p p t2 p t1 z y x
@@ -28,7 +28,8 @@ template <p1,p2>
     // stack state: t4 t4 p t4 p t2 p t1 z y t3
     mulmod
     // stack state: (t4^2) t4 p t2 p t1 z y t3
-    dup9 dup1 add
+    // dup9 dup1 add
+    dup9 callvalue shl
     // stack state: 2t3 (t4^2) t4 p t2 p t1 z y t3
     add
     // x3 is 3x overloaded
@@ -44,7 +45,8 @@ template <p1,p2>
     // stack state: t1 t2 p y3' z y x3
     mulmod
     // stack state: t1 y3' z y x3
-    dup1 add
+    // dup1 add
+    callvalue shl
     // stack state: 2t1 y3' z y x3
     add
     // stack state: y3 z y x3
@@ -55,7 +57,8 @@ template <p1,p2>
     // stack state: p y z -y3 x3
     swap2
     // stack state: z y p -y3 x3
-    dup1 add
+    // dup1 add
+    callvalue shl
     // stack state: 2z y p -y3 x3
     mulmod
     // stack state: -z3 -y3 x3
@@ -81,7 +84,7 @@ template <mx2,my2,mz2,p1,p2,p3,3p>
 #define macro DOUBLE_AFFINE = takes(2) returns(2) {
     <p1> dup2 dup1 mulmod
     // stack state: t1 y x
-    <p2> dup2 callvalue shl
+    <p2> dup2 0x02 shl
     // stack state: t2 p t1 y x p (t2 = 4x overloaded)
     dup2 dup1 dup1 dup4 dup9 mulmod
     // stack state: zzx p p t2 p t1 y x
@@ -91,7 +94,8 @@ template <mx2,my2,mz2,p1,p2,p3,3p>
     // stack state: t4 p t2 p t1 y zzx (t4 = 3x overloaded)
     dup2 dup2 dup1 mulmod
     // stack state: (t4^2) t4 p t2 p t1 y zzx
-    dup8 dup4 sub dup1 add add
+    // dup8 dup4 sub dup1 add add
+    dup8 dup4 sub callvalue shl add
     // stack state: x3 t4 p t2 p t1 y t3 (x3 = 3x overloaded)
     <3p> sub
     dup1 <mx2> mstore
@@ -100,11 +104,13 @@ template <mx2,my2,mz2,p1,p2,p3,3p>
     // stack state: y3' t2 p t1 y zzx (x3 = 3x overloaded)
     swap3 mulmod
     // stack state: zzzy y3' y zzx
-    <p3> sub dup1 add
+    // <p3> sub dup1 add
+    <p3> sub callvalue shl
     // stack state: zzzy y3' y zzx (x3 = 3x overloaded)
     swap2
     // stack state: y y3' zzzy zzx
-    dup1 add
+    // dup1 add
+    callvalue shl
     // stack state: z3 y3' zzzy zzx
     <mz2> mstore
     // stack state: y3' zzzy zzx
@@ -120,7 +126,7 @@ template <p1,p2,mx2,my2,mz2>
     // stack state: t1 y x z
     <p2> dup2
     // stack state: t1 p t1 y x z
-    callvalue shl
+    0x02 shl
     // stack state: t2 p t1 y x z
     dup2 dup1
     // stack state: p p t2 p t1 y x z
@@ -137,7 +143,8 @@ template <p1,p2,mx2,my2,mz2>
     // stack state: t3 t4 p t2 p t1 y x z
     dup3 dup3 dup1 mulmod
     // stack state: t4^2 t3 t4 p t2 p t1 y x z
-    dup2 dup1 add
+    // dup2 dup1 add
+    dup2 callvalue shl
     // stack state: 2t3 t4^2 t3 t4 p t2 p t1 y x z
     add
     // stack state: x3 t3 t4 p t2 p t1 y x z
@@ -152,14 +159,16 @@ template <p1,p2,mx2,my2,mz2>
     // stack state: t1 t2 p y3' y x z
     mulmod
     // stack state: t1 y3' y x z
-    dup1 add
+    // dup1 add
+    callvalue shl
     // stack state: 2t1 y3' y x z
     add
     // stack state: y3 p y x z
     3P_LOCATION() mload sub
     <my2> mstore // (storing y3)
     // stack state: y x z
-    <p1> dup4 dup1 add
+    // <p1> dup4 dup1 add
+    <p1> dup4 callvalue shl
     // 2z p y x z
     dup3 mulmod
     // z3 y x z
