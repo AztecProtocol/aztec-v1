@@ -23,12 +23,10 @@ template <t>
 }
 
 #define macro WNAF_START_LOCATION = takes(0) returns(1) {
-    // 0x500
-    GET_NUMBER_OF_POINTS() 0x800 mul 0x900 add
+    GET_NUMBER_OF_POINTS() 0x800 mul 0x180 add
 }
 #define macro WNAF_START_LOCATION_MINUS_TWO = takes(0) returns(1) {
-    // LITERAL<WNAF_START_LOCATION-0x02>()
-    GET_NUMBER_OF_POINTS() 0x800 mul 0x8fe add
+    GET_NUMBER_OF_POINTS() 0x800 mul 0x17e add
 }
 #define macro WNAF_END_LOCATION = takes(0) returns(1) {
     LITERAL<WNAF_START_LOCATION+0xfe0>()
@@ -38,13 +36,13 @@ template <t>
 }
 
 
-#define macro STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET = takes(0) returns(1) {
-    0x800
+#define macro POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
+    0xe0
 }
 
 #define macro POINT_TABLE_START_LOCATION = takes(0) returns(1) {
-    0x820
-} // 0x2820
+    0x100
+}
 #define macro POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
     LITERAL<POINT_TABLE_START_LOCATION-0x20>()
 }

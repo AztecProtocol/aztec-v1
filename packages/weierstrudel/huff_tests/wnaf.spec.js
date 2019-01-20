@@ -54,7 +54,7 @@ describe('sparse wnaf', function describe() {
         let { stack } = await wnaf('WNAF_START_LOCATION', [], [], []);
         wnafStartLocation = stack[0].toNumber();
 
-        ({ stack } = await wnaf('STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET', [], [], []));
+        ({ stack } = await wnaf('POINT_TABLE_START_LOCATION_MINUS_32', [], [], []));
         alternativeWnafOffset = stack[0].toNumber() + 1;
         console.log('alternativewnafoffset = ', alternativeWnafOffset);
     });

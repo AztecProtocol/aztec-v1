@@ -155,11 +155,15 @@
     dup1 0x20 add
 }
 
-#define jumptable MAIN__JUMP_TABLE {
-    alt_add_0 alt_add_1 alt_add_2 alt_add_3 alt_add_4 alt_add_5 alt_add_6 alt_add_7
-    alt_add_8 alt_add_9 alt_add_10 alt_add_11 alt_add_12 alt_add_13 alt_add_14 alt_add_15 alt_add_16
-    alt_add_final_0 alt_add_final_1 alt_add_final_2 alt_add_final_3 alt_add_final_4 alt_add_final_5 alt_add_final_6 alt_add_final_7
-    alt_add_final_8 alt_add_final_9 alt_add_final_10 alt_add_final_11 alt_add_final_12 alt_add_final_13 alt_add_final_14 alt_add_final_15 alt_add_final_16
+#define jumptable__packed MAIN__JUMP_TABLE {
+    alt_add_0 alt_add_1 alt_add_2 alt_add_3
+    alt_add_4 alt_add_5 alt_add_6 alt_add_7
+    alt_add_8 alt_add_9 alt_add_10 alt_add_11
+    alt_add_12 alt_add_13 alt_add_14 alt_add_15 alt_add_16
+    alt_add_final_0 alt_add_final_1 alt_add_final_2 alt_add_final_3
+    alt_add_final_4 alt_add_final_5 alt_add_final_6 alt_add_final_7
+    alt_add_final_8 alt_add_final_9 alt_add_final_10 alt_add_final_11
+    alt_add_final_12 alt_add_final_13 alt_add_final_14 alt_add_final_15 alt_add_final_16
 }
 
 // start here
@@ -210,7 +214,7 @@
     WNAF_START_LOCATION() mload 0x22 add WNAF_START_LOCATION() mstore
 
     // Next, we set up our jump table.
-    __tablesize(MAIN__JUMP_TABLE) __tablestart(MAIN__JUMP_TABLE) 0x00 codecopy
+    __tablesize(MAIN__JUMP_TABLE) __tablestart(MAIN__JUMP_TABLE) 0x1e codecopy
     // The stack state is now: i Z p 2p 3p
     // We now want to get the first point in our wnaf entry and set that as our
     // initial point
@@ -227,24 +231,18 @@
     dup5 sub                    // y x i z p 2p 3p
     0x01                        // z y x i p 2p 3p
 
-    // the next step is to update i to point to the next (offset) index,
-                                // z y x i z p 2p 3p
-    0x20                        // 32 z y x i z p 2p 3p d
+    // next, we want to use the number of entries at this wnaf index as
+    // an index to our lookup table, but offset by 1 (0x02) because we have already
+    // fished a point out of the wnaf entry.
+    // z y x i z p 2p 3p
+    0x02
     dup5                        // i 32 z y x i z p 2p 3p d
     dup11 add
     swap5
     mload
-    0x04 shl
     sub
-    mload jump
-
-    /*
-    // next, we want to use the number of entries at this wnaf index as
-    // an index to our lookup table, but offset by 1 (0x20) because we have already
-    // fished a point out of the wnaf entry.
-    mload 0x04 shl sub
     // and finally we can load up this jump entry and jump into our main loop
-    mload jump */
+    mload 0xffff and jump
 
     // jump destinations for our main loop. Each destination 'falls through' to the next
     // destination, so we only need 16 copies of the 'add' algorithm
@@ -296,8 +294,9 @@
         // (there are a lot of different ways to do this, still trying to find the most efficient,
         //    storing the jump table as packed 2-byte values saves no opcodes because
         //    we replace a bit shift with a mask, but it does make the raw table a lot smaller)
-        0x04 shl
+        // 0x04 shl
         mload
+        0xffff and
         jump
 
     // We have a separate instantiation of the 'loop' for the final entry in our wnaf. This is because
