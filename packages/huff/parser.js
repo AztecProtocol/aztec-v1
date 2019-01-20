@@ -441,17 +441,22 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 templateParams,
             };
             currentContext = CONTEXT.MACRO;
-        } else if ((currentContext & (CONTEXT.NONE | CONTEXT.MACRO)) && grammar.topLevel.MACRO.test(input)) {
-            const macro = input.match(grammar.topLevel.MACRO);
-            const body = macro[4];
+        } else if ((currentContext & (CONTEXT.NONE | CONTEXT.MACRO)) && grammar.topLevel.DEFINE.test(input)) {
+            const macro = input.match(grammar.topLevel.DEFINE);
+            const type = macro[1];
+            if (type !== 'macro') {
+                console.log(macro);
+                throw new Error(`expected ${macro} to define a macro`);
+            }
+            const body = macro[5];
             macros = {
                 ...macros,
-                [macro[1]]: {
+                [macro[2]]: {
                     ...currentExpression,
-                    name: macro[1],
-                    takes: macro[2],
+                    name: macro[2],
+                    takes: macro[3],
                     ops: parser.parseMacro(body, macros, index),
-                    body: macro[4],
+                    body: macro[5],
                 },
             };
             index += macro[0].length;
