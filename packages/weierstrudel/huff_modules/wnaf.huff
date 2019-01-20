@@ -223,6 +223,22 @@ wnaf_continue:
     pop pop pop pop pop pop pop
 }
 
+
+
+
+#define WNAF_GREEDY__SIZE_OF_ENTRY = takes(0) returns(1) {
+    GET_NUMBER_OF_POINTS() 0x04 mul 0x3e add
+}
+
+template<size_of_wnaf_entry_negated_1,size_of_wnaf_entry_negated_2>
+#define WNAF_GREEDY__FIND_FIRST_ENTRY = takes(1) returns(1) {
+    // starting pointer = start location + (127 * size of a wnaf entry)
+    <size_of_wnaf_entry_negated_1> 0x07 shl WNAF_START_LOCATION() sub
+    alternate_search_next:
+        <size_of_wnaf_entry_negated_2> add
+        dup1 mload iszero alternate_search_next jumpi
+}
+
 // (todo add more detail here)
 // We want to, for a given bit index in our scalar multiplication, determine the following things:
 // 1: How many points are we adding?
@@ -231,50 +247,45 @@ wnaf_continue:
 // which is significantly more efficient than rote iteration
 // i.e. instead of testing if each wnaf entry for a given bit index contains something and then add it into the sum,
 // we can directly jump to a macro that will add every nonzero wnaf entry into the sum
-template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
+
+// so...what if 'wnaf_pointer_total_increase' points 'o' to the current entry?
+template<num_shifted_bits, num_shifted_bits_2, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
 #define WNAF_GREEDY__SLICE = takes(0) returns(0) {
-    <num_shifted_bits> shr                          // w o
-    dup1 3 shl                                      // w' w o
-    dup3 <wnaf_pointer_total_increase> add          // o' w' w o
-    swap3 <wnaf_pointer_base_increase> add          // o" w' w o'
-    dup1 mload callvalue add                             // n o" w w o'
-    dup1 dup3 mstore                                // n o" w w o' k v s m
-    swap1 sub                                       // o" w' w o' k v s m
+    // w o k v s m
+    dup1 <num_shifted_bits_2> shr 0x3e0 and dup7 add // w' w o k v s m
+    dup3                                             // o w' w o k v s m 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t 4_b 4_t
+    <wnaf_pointer_total_increase> add swap3    // o w' w o'
+    dup4 mload 0x02 add                             // n o w' w o'
 
-    dup8 dup2 mstore8                               // o" w' w o'
+    dup1 dup6 mstore                                // n o w' w o' k v s m 0_b 0_t 1_b 1_t
+    <wnaf_pointer_base_increase>
+    sub add            // o" w' w o'
 
-    0x01 add mstore8                                // w o'
-    0x10 add
+    mstore                                          // w o
+    <num_shifted_bits> shr 0x10 add                 // w" o
     dup1 WNAF_TABLE_MASK() and mload
-    jump
-}
-
-#define WNAF_GREEDY__FIND_FIRST_ENTRY = takes(0) returns(1) {
-    GREEDY_WNAF__SIZE_OF_ENTRY() 128 mul GREEDY_WNAF__SIZE_OF_ENTRY() add WNAF_START_LOCATION() add
-    alternate_search_next:
-        GREEDY_WNAF__SIZE_OF_ENTRY_NEGATIVE() add
-        dup1 mload iszero alternate_search_next jumpi
+    jump           //
 }
 
 // for odd wnaf entries we can get away with not adding wnaf_pointer_base_increase because it's zero
-template<num_shifted_bits, wnaf_pointer_total_increase>
+template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
 #define WNAF_GREEDY__SLICE_DEFAULT = takes(0) returns(0) {
-    <num_shifted_bits> shr                          // w o
-    dup1 3 shl                                      // w' w o
-    dup3 <wnaf_pointer_total_increase> add          // o' w' w o
-    swap3                                           // o" w' w o'
-    dup1 mload callvalue add                        // n o" w w o'
-    dup1 dup3 mstore                                // n o" w w o' k v s m
-    swap1 sub                                       // o" w' w o' k v s m
-    dup8 dup2 mstore8                               // o" w' w o'
-    0x01 add mstore8                                // w o'
-    0x10 add
-    dup1 WNAF_TABLE_MASK() and mload
-    jump
+    // w w o k v s m
+    dup1 0x3e0 and dup7 add                         // w' w o
+    dup3 <wnaf_pointer_total_increase> add swap3    // o w' w o'
+    dup4 mload
+    0x02 add                             // n o w' w o'
+    dup1 dup6 mstore
+    <wnaf_pointer_base_increase> sub add
+
+    mstore                                          // w o'
+    <num_shifted_bits> shr 0x10 add                 // w' o'
+    dup1 WNAF_TABLE_MASK() and mload jump
 }
 
-#define WNAF_GREEDY__COMPUTE = takes(0) returns(0) {
-    // hmm
+// We expect the size of a WNAF entry to be the first item on the stack at this point
+#define WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
+
     lsb_0 0x00 mstore // 0 00000
     lsb_1 0x20 mstore // 1 00001
     lsb_2 0x40 mstore // 2 00010
@@ -317,24 +328,22 @@ template<num_shifted_bits, wnaf_pointer_total_increase>
 
     // set up our initial stack state...
     // LITERAL<WNAF_SIZE*0x40+0x100>() 0x100   // 5_base 5_total
-    WNAF_TABLE_BITS() GREEDY_WNAF__SIZE_OF_ENTRY() mul // d_b
-    GREEDY_WNAF__SIZE_OF_ENTRY() 3 mul GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul add // 3_total
-    GREEDY_WNAF__SIZE_OF_ENTRY() 3 mul                                      // 3_base
-    GREEDY_WNAF__SIZE_OF_ENTRY() 2 mul GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul add // 2_total
-    GREEDY_WNAF__SIZE_OF_ENTRY() 2 mul                                      // 2_base
-    GREEDY_WNAF__SIZE_OF_ENTRY() GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul add       // 1_total
-    GREEDY_WNAF__SIZE_OF_ENTRY()                                            // 1_base
-    GREEDY_WNAF__SIZE_OF_ENTRY() WNAF_SIZE() mul
-
-    /* LITERAL<WNAF_SIZE*0x40+0xc0>() 0xc0     // 3_base 3_total
-    LITERAL<WNAF_SIZE*0x40+0x80>() 0x80     // 2_base 2_total 3_b 3_t
-    LITERAL<WNAF_SIZE*0x40+0x40>() 0x40     // 1_base 1_total 2_b 2_t 3_b 3_t
-    LITERAL<WNAF_SIZE*0x40>()               // 0_t 1_base 1_total 2_b 2_t 3_b 3_t */
-    // stack state: 1_b 1_t 2_b 2_t 3_b 3_t 4_b 4_t 5_b 5_t
+    WNAF_TABLE_BITS() dup2 mul                 // d_b d
+    dup2 3 mul dup3 WNAF_SIZE() mul add        // 3_t d_b d
+    dup3 0x1e add dup2 sub                     // 3_b 3_t d_b d
+    dup4 dup3 sub                              // 2_t 3_b 3_t d_b d
+    dup5 dup3 sub                              // 2_b 2_t 3_b 3_t d_b d
+    dup6 dup3 sub
+    dup7 dup3 sub                              // 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+    dup8 dup3 sub                              // 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+    dup9 dup3 sub                              // 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+    // stack state: 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t
     // Let's start by getting the number of scalars we have
     GET_NUMBER_OF_POINTS()         // n
     // Get offset to first entry of last point in precomputed lookup table
-    dup1 dup1 add STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET() add 0x01 add
+    dup1 dup1 add
+    0x400 mul STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET() add // 0x400 add (TODO: bit shifts?)
+
     // Point at start of calldatamap stored at end of memory table
     // (order is reversed)
     swap1 0x06 shl                // s m
@@ -346,30 +355,32 @@ template<num_shifted_bits, wnaf_pointer_total_increase>
     strange_wnaf_continue:    // k k' v s m
         // we need to subtract 1 from 'm' to reflect the fact that this point maps to a lookup table that is
         // directly preceding the previous point's lookup table in memory
-        // (adding -1 saves us a swap opcode vs subtracting 1)
-        swap4 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff add swap4
-        WNAF_START_LOCATION()
-        swap1
+        // (adding -400 saves us a swap opcode vs subtracting 1)
+        // k k v s m 0_t 0_b 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+        swap4 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc00 add swap4
+        dup15 WNAF_SIZE() mul WNAF_START_LOCATION() sub   // o k k v s m
+        swap1                   // w o k v s m
         dup1 WNAF_TABLE_MASK() and mload jump // and away we go?
     strange_wnaf_not_finished:  // w o k v s m 
         // we get here from lsb_0, so we just hit a patch of zeroes and still have more work to do.
         // Update our memory offset pointer to reflect the bits we're about to cleave away
-        // w o k' v s m 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b
-        swap1 dup14 add swap1
+        // w o k' v s m 0_t 0_b 1_b 1_t 2_b 2_t 3_b 3_t d_b
+        swap1 dup15 add swap1
         // now let's clear away those zeroes and try again
         WNAF_TABLE_BITS() shr       // w o
-        dup1 WNAF_TABLE_MASK() and mload jump
+        dup1 WNAF_TABLE_MASK() and mload
+        jump
     // lsb_5:
     //     WNAF_GREEDY__SLICE<WNAF_SIZE+4,dup16,dup15>()
     lsb_4:  // w o x v s m 0_t 1_b 1_t 2_b 2_t 3_b 3_t
-        WNAF_GREEDY__SLICE<WNAF_SIZE+3,dup15,dup14>()
+        WNAF_GREEDY__SLICE<WNAF_SIZE+3,3,dup16,dup16>()
     lsb_3:
         // WNAF_GREEDY__SLICE<WNAF_SIZE+2,dup12,dup11>()
-        WNAF_GREEDY__SLICE<WNAF_SIZE+2,dup13,dup12>()
+        WNAF_GREEDY__SLICE<WNAF_SIZE+2,2,dup14,dup14>()
     lsb_2:
-        WNAF_GREEDY__SLICE<WNAF_SIZE+1,dup11,dup10>()
+        WNAF_GREEDY__SLICE<WNAF_SIZE+1,1,dup12,dup12>()
     lsb_1: 
-        WNAF_GREEDY__SLICE_DEFAULT<WNAF_SIZE,dup9>()
+        WNAF_GREEDY__SLICE_DEFAULT<WNAF_SIZE,dup10,dup10>()
     lsb_0:
         // if we hit this location, our bit sequence is all zeroes.
         // This means 1 of two things:
@@ -378,12 +389,13 @@ template<num_shifted_bits, wnaf_pointer_total_increase>
         // So let's test for option 1. The least significant 5 bits are gunk at this point, so
         // we have work to do if the scalar is > 31 (0x1f)
         0x1f dup2 gt strange_wnaf_not_finished jumpi
-
+        // 0x20 lt strange_wnaf_not_finished jumpi
         // If we hit this point, we're done with this scalar,
         // we check to see if we need to process another endomorphism scalar,
         // if not we jump back to the start of our loop to grab another scalar from calldata
         // we do this by decreasing 'v' by 0x01 and checking to see if original value is nonzero
         pop swap1                  // k1 o v s m
+
         0x01 dup4 sub swap3 strange_wnaf_continue jumpi
         // stack state: x x v s m
         // (clear away old wnaf junk and 'v')
@@ -392,6 +404,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase>
         dup1 calldatasize sub strange_wnaf_start jumpi // s' m'
         pop pop
         pop pop pop pop pop pop pop pop
+        pop
         // if we reach this point we can fall through to exit the macro
 }
 

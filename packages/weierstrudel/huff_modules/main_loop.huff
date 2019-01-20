@@ -7,82 +7,82 @@
 
 // p t1 p z1 -y1 x1 i
 #define GET_P_16 = takes(0) returns(0) {
-    dup7 mload 238 shr 0x02ffe0 and
+    0x3e dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_15 = takes(0) returns(0) {
-    dup7 mload 222 shr 0x02ffe0 and
+    0x3c dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_14 = takes(0) returns(0) {
-    dup7 mload 206 shr 0x02ffe0 and
+    0x3a dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_13 = takes(0) returns(0) {
-    dup7 mload 190 shr 0x02ffe0 and
+    0x38 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_12 = takes(0) returns(0) {
-    dup7 mload 174 shr 0x02ffe0 and
+    0x36 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_11 = takes(0) returns(0) {
-    dup7 mload 158 shr 0x02ffe0 and
+    0x34 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_10 = takes(0) returns(0) {
-    dup7 mload 142 shr 0x02ffe0 and
+    0x32 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_9 = takes(0) returns(0) {
-    dup7 mload 126 shr 0x02ffe0 and
+    0x30 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_8 = takes(0) returns(0) {
-    dup7 mload 110 shr 0x02ffe0 and
+    0x2e dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_7 = takes(0) returns(0) {
-    dup7 mload 94 shr 0x02ffe0 and
+    0x2c dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_6 = takes(0) returns(0) {
-    dup7 mload 78 shr 0x02ffe0 and
+    0x2a dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_5 = takes(0) returns(0) {
-    dup7 mload 62 shr 0x02ffe0 and
+    0x28 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_4 = takes(0) returns(0) {
-    dup7 mload 46 shr 0x02ffe0 and
+    0x26 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_3 = takes(0) returns(0) {
-    dup7 mload 30 shr 0x02ffe0 and
+    0x24 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 #define GET_P_2 = takes(0) returns(0) {
-    dup7 mload 14 shr 0x02ffe0 and
+    0x22 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
-
+// ? ? ? z y x i
 #define GET_P_1 = takes(0) returns(0) {
-    dup7 mload 2 shl 0x02ffe0 and
+    0x20 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
@@ -92,24 +92,29 @@
 #define ALTERNATIVE_MAIN_LOOP = takes(0) returns(0) {
     // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
     // Get this out of the way first so we can free up the memory this thing needs for its jump table
+    WNAF_GREEDY__SIZE_OF_ENTRY()
     WNAF_GREEDY__COMPUTE()
-
-
     // Set up our stack state. We need the order of the group that the bn128 curve's point coordinates are members of.
     // (this is p)
     // We also need 2p and 3p, because we avoid performing a modular reduction in intermediate sums when the result
     // still fits into an evm word. When we compute inversions of these 'overloaded' points we need to scale p by
     // an equivalent amount.
+    // start by negating the size of our wnaf entry, it's more useful in this form
+    // because we'll be subtracting it from our pointer to the next wnaf entry.
+    // (the `add` opcode doesn't care about variable ordering on the stack, `sub` does.
+    //    so whenever possible it's usually more efficient to add negative values than
+    //    subtract positive ones)
+    0 sub
     3P()
     2P()
     P()
-    // Stack state: p 2p 3p
+    // Stack state: p 2p 3p d
 
     // Set up our memory state. The precomputed lookup table requires 'beta', the cube root of unity mod p.
  
     // Because we need this value when the state of our stack is somewhat undefined (hon hon), we keep it in memory.
     // We do the same with 2p, 3p for the same reasons
-    BETA() BETA_LOCATION() mstore // p 2p 3p
+    BETA() BETA_LOCATION() mstore // p 2p 3p d
     dup3 3P_LOCATION() mstore
     dup2 2P_LOCATION() mstore
 
@@ -118,10 +123,10 @@
 
     // Nice. now, put the global-z coordinate on the stack, we want to re-use that memory
     // ...(TODO, optimize memory map)
-    GLOBAL_Z_LOCATION() mload
+    GLOBAL_Z_LOCATION() mload // z p 2p 3p d
 
     // we also want the pointer to the most significant non-zero wnaf entry on the stack
-    WNAF_GREEDY__FIND_FIRST_ENTRY()
+    WNAF_GREEDY__FIND_FIRST_ENTRY<dup5,dup6>()
     
     // The next step is to fiddle with the *least* significant wnaf entry. 
     // We want this entry to point to a location in the jump table that will terminate
@@ -168,10 +173,12 @@
     // We now want to get the first point in our wnaf entry and set that as our
     // initial point
     dup1 mload                  // n i z p 2p 3p
-    dup2 sub                    // o i z p 2p 3p
-    mload                       // o'
-    // entry should now be in most significant 2 bytes
-    238 shr 0x02ffe0 and        // o_x
+    dup2 sub                    // o i z p 2p 3p d
+    // the wnaf entries are located 30 + (size of wnaf) bytes behind the location of 'n'
+    0x1e dup8 sub add           // o' i z p 2p 3p d
+    mload
+    // entry should now be in least significant 2 bytes
+    0x02ffe0 and                // o_x
     dup1 mload                  // -x o_x i z p 2p 3p
     dup5 sub                    // x o_x i z p 2p 3p
     swap1 0x20 add mload        // -y x i z p 2p 3p
@@ -179,17 +186,23 @@
     0x01                        // z y x i p 2p 3p
 
     // the next step is to update i to point to the next (offset) index,
-    0x20                        // 32 z y x i z p 2p 3p
-    // 0x20 dup6                   // i 32 32 z y x i z p 2p 3p
-    0x20 dup6
-    sub                         // i' 32 z y x i z p 2p 3p
-    swap5                       // i 32 z y x i' z p 2p 3p
+                                // z y x i z p 2p 3p
+    0x20                        // 32 z y x i z p 2p 3p d
+    dup5                        // i 32 z y x i z p 2p 3p d
+    dup11 add
+    swap5
+    mload
+    0x04 shl
+    sub
+    mload jump
+
+    /*
     // next, we want to use the number of entries at this wnaf index as
     // an index to our lookup table, but offset by 1 (0x20) because we have already
     // fished a point out of the wnaf entry.
     mload 0x04 shl sub
     // and finally we can load up this jump entry and jump into our main loop
-    mload jump
+    mload jump */
 
     // jump destinations for our main loop. Each destination 'falls through' to the next
     // destination, so we only need 16 copies of the 'add' algorithm
@@ -228,22 +241,22 @@
     alt_add_0:
         // double the accumulator once there's nothing left to add
         DOUBLE_MAIN<dup6, dup7>()
-        // stack state: z y x i Z p 2p 3p
+        // stack state: z y x i Z p 2p 3p d
         // Next up, we want to decrease i by the size of a wnaf entry in memory.
         // We then want to load up the next wnaf index and jump.
         // (the pointer i points to the next wnaf entry, so we're decreasing
         //    the *next* wnaf pointer, not the current one. This saves a swap op)
-        // 0x20
-        GREEDY_WNAF__OFFSET_TO_POINTS()
-        GREEDY_WNAF__SIZE_OF_ENTRY() dup6 sub swap5
-        sub mload
+        dup9 dup5 add swap4
+        mload
         // Once we have the wnaf entry, we need to convert to a jump index.
         // The entry is equal to the number of points * 2 (to shave two opcodes from the wnaf algo).
         // So we can shift this by 4 bits to turn into a memory index.
         // (there are a lot of different ways to do this, still trying to find the most efficient,
         //    storing the jump table as packed 2-byte values saves no opcodes because
         //    we replace a bit shift with a mask, but it does make the raw table a lot smaller)
-        0x04 shl mload jump
+        0x04 shl
+        mload
+        jump
 
     // We have a separate instantiation of the 'loop' for the final entry in our wnaf. This is because
     // we don't want to double the accumulator at the end of this section.
@@ -295,8 +308,8 @@
         0x20 mstore             // xf i Z p 2p 3p
         dup4 swap1 mod          // x i Z p 2p 3p
         returndatasize mstore   // i Z p 2p 3p
-    // Might as well clean up the stack, it's only 10 gas.
-        pop pop pop pop pop
+    // Might as well clean up the stack, it's only 12 gas.
+        pop pop pop pop pop pop
     // and we're done! Let's get out of here...
         0x60 returndatasize return
 }
@@ -399,11 +412,7 @@ template <w>
     // so if i = 0x1140 then we start at the very top
     // and if i = 0x160 we skip straight to the end
     // z y x i p 2p 3p
-    // dup4 0x00 mstore 0x20 0x00 return
     0x20 dup5 WNAF_END_LOCATION() sub div   // jump distance
-    // 0x00 mstore 0x20 0x00 return
-    // 0x00 mstore 0x20 0x00 return
-    // __codesize(MAIN_LOOP_SLICE<0x1000>) 0x00 mstore 0x20 0x00 return
     __codesize(MAIN_LOOP_SLICE<0x1000>) mul
     hmm add jump
     // // first loop iteration
