@@ -10,15 +10,27 @@ grammar.topLevel = {
         '^(?:[\\s\\n]*)template',
         '\\<(.*)\\>',
     ]),
-    DEFINE: regex([
+    MACRO: regex([
         '^(?:[\\s\\n]*#[\\s\\n]*define)',
-        '([A-Za-z0-9_]\\w*)',
+        '\\b(macro)\\b',
         '([A-Za-z0-9_]\\w*)',
         '=',
         'takes',
         '\\((\\d+)\\)',
         'returns',
         '\\((\\d+)\\)',
+        '\\{((?:[^\\}])*)\\}',
+    ]),
+    JUMP_TABLE: regex([
+        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '\\b(jumptable)\\b',
+        '([A-Za-z0-9_]\\w*)',
+        '\\{((?:[^\\}])*)\\}',
+    ]),
+    JUMP_TABLE_PACKED: regex([
+        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '\\b(jumptable__packed)\\b',
+        '([A-Za-z0-9_]\\w*)',
         '\\{((?:[^\\}])*)\\}',
     ]),
     IMPORT: regex([
@@ -28,6 +40,10 @@ grammar.topLevel = {
         '(.*)',
         '(?:\\"|\\\')',
     ]),
+};
+
+grammar.jumpTable = {
+    JUMPS: new RegExp('(?:[\\s\\n]*)[a-zA-Z_0-9\\-]+(?:$|\\s+)', 'g'),
 };
 
 // ^(?:\s*\n*)*__codesize\(([a-zA-Z0-9_\-]+)(?:<([a-zA-Z0-9_\-\+,\s\n]+)>)?\)
@@ -44,6 +60,20 @@ grammar.macro = {
     ]),
     CODE_SIZE: regex([
         '^(?:[\\s\\n]*)__codesize',
+        '\\(',
+        '([a-zA-Z0-9_\\-]+)',
+        '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
+        '\\)\\s*\\n*',
+    ]),
+    TABLE_SIZE: regex([
+        '^(?:[\\s\\n]*)__tablesize',
+        '\\(',
+        '([a-zA-Z0-9_\\-]+)',
+        '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
+        '\\)\\s*\\n*',
+    ]),
+    TABLE_START: regex([
+        '^(?:[\\s\\n]*)__tablestart',
         '\\(',
         '([a-zA-Z0-9_\\-]+)',
         '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
