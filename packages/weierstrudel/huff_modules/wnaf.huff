@@ -368,7 +368,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     // (order is reversed)
     swap1 0x06 shl                // s m
     strange_wnaf_start:
-        0x01
+        callvalue
         dup2 calldataload ENDOMORPHISM() // k1 k2 v s m
         5 shl
         swap1 5 shl // k2 k1 v s m
@@ -416,7 +416,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
         // we do this by decreasing 'v' by 0x01 and checking to see if original value is nonzero
         pop swap1                  // k1 o v s m
 
-        0x01 dup4 sub swap3 strange_wnaf_continue jumpi
+        callvalue dup4 sub swap3 strange_wnaf_continue jumpi
         // stack state: x x v s m
         // (clear away old wnaf junk and 'v')
         pop pop pop

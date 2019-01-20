@@ -229,7 +229,7 @@
     dup5 sub                    // x o_x i z p 2p 3p
     swap1 0x20 add mload        // -y x i z p 2p 3p
     dup5 sub                    // y x i z p 2p 3p
-    0x01                        // z y x i p 2p 3p
+    callvalue                        // z y x i p 2p 3p
 
     // next, we want to use the number of entries at this wnaf index as
     // an index to our lookup table, but offset by 1 (0x02) because we have already
