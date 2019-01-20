@@ -51,7 +51,7 @@
  * @param c_16 the integer '16' (base 10), used to mutate ```w``` for next iteration cycle
  * @param c_mask 256-bit integer with all bits set high, except the least significant 5 bits
  **/
-#define WNAF_CONSTANT__SLICE_A = takes(6) returns(6) {
+#define macro WNAF_CONSTANT__SLICE_A = takes(6) returns(6) {
     // Step 1: we need to isolate the least significant high bit of w
     // Can do this by taking w & -w
     // Instead of pushing '0' onto the stack (3 gas), we can get the 'return data size' of this EVM execution context.
@@ -111,7 +111,7 @@
 }
 
 // starting stack state w o 260 0x1fe0 16 mask
-#define WNAF_CONSTANT__SLICE_B = takes(6) returns(6) {
+#define macro WNAF_CONSTANT__SLICE_B = takes(6) returns(6) {
     dup1 dup1 returndatasize sub and
     // w' w o x x 269 0x1fe0 16 mask
     dup8 dup2 mod
@@ -136,7 +136,7 @@
     // o' w'''
 } // 72 gas
 
-#define WNAF_CONSTANT__SET_TABLE = takes(0) returns(0) {
+#define macro WNAF_CONSTANT__SET_TABLE = takes(0) returns(0) {
     0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
     0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
     0xca49108d623c85fbb5c7201c3f3f83da95193d7045bfe39d2353f4364c84346e 0x5f mstore
@@ -148,7 +148,7 @@
     0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
 }
 
-#define WNAF_CONSTANT__COMPUTE_SLICES = takes(2) returns(2) {
+#define macro WNAF_CONSTANT__COMPUTE_SLICES = takes(2) returns(2) {
     WNAF_CONSTANT__SLICE_A()
     WNAF_CONSTANT__SLICE_B()
     WNAF_CONSTANT__SLICE_A()
@@ -178,7 +178,7 @@ loop:
 wnaf_end:
 }
 
-#define WNAF_CONSTANT__INIT = takes(0) returns(6) {
+#define macro WNAF_CONSTANT__INIT = takes(0) returns(6) {
     // add wnaf table to memory
     WNAF_CONSTANT__SET_TABLE()
     // set up constants
@@ -194,7 +194,7 @@ wnaf_end:
     swap1 0x06 shl        // s m 269 0x1fe0 16 mask b
 }
 
-#define FIND_FIRST_ENTRY = takes(0) returns(1) {
+#define macro FIND_FIRST_ENTRY = takes(0) returns(1) {
     WNAF_END_LOCATION_PLUS_32()  // m
 search_next:
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
@@ -202,7 +202,7 @@ search_next:
 }
 
 
-#define WNAF_CONSTANT__COMPUTE = takes(0) returns(0) {
+#define macro WNAF_CONSTANT__COMPUTE = takes(0) returns(0) {
     WNAF_CONSTANT__INIT()
 wnaf_start:
     0x01
@@ -226,12 +226,12 @@ wnaf_continue:
 
 
 
-#define WNAF_GREEDY__SIZE_OF_ENTRY = takes(0) returns(1) {
+#define macro WNAF_GREEDY__SIZE_OF_ENTRY = takes(0) returns(1) {
     GET_NUMBER_OF_POINTS() 0x04 mul 0x3e add
 }
 
 template<size_of_wnaf_entry_negated_1,size_of_wnaf_entry_negated_2>
-#define WNAF_GREEDY__FIND_FIRST_ENTRY = takes(1) returns(1) {
+#define macro WNAF_GREEDY__FIND_FIRST_ENTRY = takes(1) returns(1) {
     // starting pointer = start location + (127 * size of a wnaf entry)
     <size_of_wnaf_entry_negated_1> 0x07 shl WNAF_START_LOCATION() sub
     alternate_search_next:
@@ -250,7 +250,7 @@ template<size_of_wnaf_entry_negated_1,size_of_wnaf_entry_negated_2>
 
 // so...what if 'wnaf_pointer_total_increase' points 'o' to the current entry?
 template<num_shifted_bits, num_shifted_bits_2, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
-#define WNAF_GREEDY__SLICE = takes(0) returns(0) {
+#define macro WNAF_GREEDY__SLICE = takes(0) returns(0) {
     // w o k v s m
     dup1 <num_shifted_bits_2> shr 0x3e0 and dup7 add // w' w o k v s m
     dup3                                             // o w' w o k v s m 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t 4_b 4_t
@@ -269,7 +269,7 @@ template<num_shifted_bits, num_shifted_bits_2, wnaf_pointer_total_increase, wnaf
 
 // for odd wnaf entries we can get away with not adding wnaf_pointer_base_increase because it's zero
 template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
-#define WNAF_GREEDY__SLICE_DEFAULT = takes(0) returns(0) {
+#define macro WNAF_GREEDY__SLICE_DEFAULT = takes(0) returns(0) {
     // w w o k v s m
     dup1 0x3e0 and dup7 add                         // w' w o
     dup3 <wnaf_pointer_total_increase> add swap3    // o w' w o'
@@ -284,7 +284,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
 }
 
 // We expect the size of a WNAF entry to be the first item on the stack at this point
-#define WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
+#define macro WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
 
     lsb_0 0x00 mstore // 0 00000
     lsb_1 0x20 mstore // 1 00001
@@ -409,7 +409,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
 }
 
 template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
-#define WNAF_JUMP_TABLE__SLICE = takes(0) returns(0) {
+#define macro WNAF_JUMP_TABLE__SLICE = takes(0) returns(0) {
     // we reach this point via a jump table which maps the number of trailing zeroes in the wnaf
     // to a 'slice'. So we know how many bits we need to shift our wnaf down by.
     <num_shifted_bits> shr                      // w o
@@ -445,7 +445,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
 }
 
 // alternative WNAF using a jump table.
-#define WNAF_JUMP_TABLE__COMPUTE = takes(0) returns(0) {
+#define macro WNAF_JUMP_TABLE__COMPUTE = takes(0) returns(0) {
     // what on earth?
     lsb_0 0x00 mstore // 0 00000
     lsb_1 0x20 mstore // 1 00001

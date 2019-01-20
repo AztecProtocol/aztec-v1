@@ -5,7 +5,7 @@
 /// <getP2Location> should push o_y o_x onto stack
 /// where o_y = mem offset of y2, o_x = mem offset of -x2
 template <getP2Location,p,2p>
-#define ADD_MAIN = takes(3) returns(3) {
+#define macro ADD_MAIN = takes(3) returns(3) {
     <p>             // p z1 -y1 x1
     dup1            // p p z1 -y1 x1
     dup3            // z1 p p z1 -y1 x1
@@ -68,7 +68,7 @@ template <getP2Location,p,2p>
 /// The first point in our table is affine (subsequent point's have their z-coordinate rescaled by the previous table output)
 /// So we use affine addition formulae to handle this case and squeeze a couple of mulmod opcodes out
 template <mx2,my2,p,2p>
-#define ADD_AFFINE = takes(2) returns(11) {   
+#define macro ADD_AFFINE = takes(2) returns(11) {   
     <p> <my2> mload dup3 add
     // t2 p y x
     <mx2> mload dup5 add
@@ -113,7 +113,7 @@ template <mx2,my2,p,2p>
 /// (sometimes there's one lurking further down the stack we can grab)
 /// initial stack state: z y x
 template <p1,p2,p3,mx2,my2>
-#define PRECOMPUTE_TABLE_ADD = takes(3) returns(11) {
+#define macro PRECOMPUTE_TABLE_ADD = takes(3) returns(11) {
     <p1>
     dup2 dup1 mulmod
     // zz z y x
@@ -182,7 +182,7 @@ template <p1,p2,p3,mx2,my2>
 }
 
 template <p1,p2,p3,mx2,my2,mz2>
-#define PRECOMPUTE_TABLE_ADD_AND_RESCALE = takes(3) returns(11) {
+#define macro PRECOMPUTE_TABLE_ADD_AND_RESCALE = takes(3) returns(11) {
     <p1> // p z y x
     dup2 dup1 mulmod
     <p2> // zz z y x

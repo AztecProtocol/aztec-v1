@@ -15,17 +15,17 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 const testHelper = `
 #include "wnaf.huff"
 
-#define ENDO_WNAF_FIXED_IMPL = takes(8) returns(1) {
+#define macro ENDO_WNAF_FIXED_IMPL = takes(8) returns(1) {
     SET_WNAF_TABLE()
     ENDO_WNAF_FIXED()
 }
 
-#define WNAF_SLICE_A_IMPL = takes(8) returns(1) {
+#define macro WNAF_SLICE_A_IMPL = takes(8) returns(1) {
     SET_WNAF_TABLE()
     WNAF_SLICE_A()
 }
 
-#define WNAF_SLICE_B_IMPL = takes(8) returns(1) {
+#define macro WNAF_SLICE_B_IMPL = takes(8) returns(1) {
     SET_WNAF_TABLE()
     WNAF_SLICE_B()
 }

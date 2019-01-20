@@ -8,14 +8,14 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 const testHelper = `
 template <b>
-#define COMPILER_ADD_TEST_INNER = takes(0) returns(0) {
+#define macro COMPILER_ADD_TEST_INNER = takes(0) returns(0) {
     <b>
 }
 
-#define A = takes(0) returns(0) { 0x10 }
+#define macro A = takes(0) returns(0) { 0x10 }
 
 template <x>
-#define COMPILER_ADD_TEST = takes(0) returns(0) {
+#define macro COMPILER_ADD_TEST = takes(0) returns(0) {
     COMPILER_ADD_TEST_INNER<0x01>()
     COMPILER_ADD_TEST_INNER<0x01+0x02>()
     COMPILER_ADD_TEST_INNER<x+0x03>()
@@ -25,7 +25,7 @@ template <x>
     COMPILER_ADD_TEST_INNER<0x01+10>()
 }
 
-#define COMPILER_ADD_TEST_ENTRY = takes(0) returns(0) {
+#define macro COMPILER_ADD_TEST_ENTRY = takes(0) returns(0) {
     COMPILER_ADD_TEST<0x10>()
 }
 `;

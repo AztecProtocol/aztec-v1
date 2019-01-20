@@ -13,15 +13,15 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 const testHelper = `
 #include "double.huff"
 #include "constants.huff"
-#define DOUBLE_MAIN_IMPL = takes(3) returns(3) {
+#define macro DOUBLE_MAIN_IMPL = takes(3) returns(3) {
     DOUBLE_MAIN<P,P>()
 }
 
-#define PRECOMPUTE_TABLE_DOUBLE_IMPL = takes(3) returns(3) {
+#define macro PRECOMPUTE_TABLE_DOUBLE_IMPL = takes(3) returns(3) {
     PRECOMPUTE_TABLE_DOUBLE<dup4,dup5,X2,Y2,Z2>()
 }
 
-#define DOUBLE_AFFINE_IMPL = takes(3) returns(3) {
+#define macro DOUBLE_AFFINE_IMPL = takes(3) returns(3) {
     DOUBLE_AFFINE<0x00,0x20,0x40,dup3,dup4,dup5,dup10>()
 }
 `;

@@ -4,158 +4,167 @@
 #include "double.huff"
 #include "add.huff"
 
-#define GET_P_30 = takes(0) returns(0) {
+#define macro GET_P_30 = takes(0) returns(0) {
     0x5a dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_29 = takes(0) returns(0) {
+#define macro GET_P_29 = takes(0) returns(0) {
     0x58 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_28 = takes(0) returns(0) {
+#define macro GET_P_28 = takes(0) returns(0) {
     0x56 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_27 = takes(0) returns(0) {
+#define macro GET_P_27 = takes(0) returns(0) {
     0x54 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_26 = takes(0) returns(0) {
+#define macro GET_P_26 = takes(0) returns(0) {
     0x52 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_25 = takes(0) returns(0) {
+#define macro GET_P_25 = takes(0) returns(0) {
     0x50 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_24 = takes(0) returns(0) {
+#define macro GET_P_24 = takes(0) returns(0) {
     0x4e dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_23 = takes(0) returns(0) {
+#define macro GET_P_23 = takes(0) returns(0) {
     0x4c dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_22 = takes(0) returns(0) {
+#define macro GET_P_22 = takes(0) returns(0) {
     0x4a dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
 
-#define GET_P_21 = takes(0) returns(0) {
+#define macro GET_P_21 = takes(0) returns(0) {
     0x48 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_20 = takes(0) returns(0) {
+#define macro GET_P_20 = takes(0) returns(0) {
     0x46 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_19 = takes(0) returns(0) {
+#define macro GET_P_19 = takes(0) returns(0) {
     0x44 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_18 = takes(0) returns(0) {
+#define macro GET_P_18 = takes(0) returns(0) {
     0x42 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_17 = takes(0) returns(0) {
+#define macro GET_P_17 = takes(0) returns(0) {
     0x40 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 // p t1 p z1 -y1 x1 i
-#define GET_P_16 = takes(0) returns(0) {
+#define macro GET_P_16 = takes(0) returns(0) {
     0x3e dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_15 = takes(0) returns(0) {
+#define macro GET_P_15 = takes(0) returns(0) {
     0x3c dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_14 = takes(0) returns(0) {
+#define macro GET_P_14 = takes(0) returns(0) {
     0x3a dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_13 = takes(0) returns(0) {
+#define macro GET_P_13 = takes(0) returns(0) {
     0x38 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_12 = takes(0) returns(0) {
+#define macro GET_P_12 = takes(0) returns(0) {
     0x36 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_11 = takes(0) returns(0) {
+#define macro GET_P_11 = takes(0) returns(0) {
     0x34 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_10 = takes(0) returns(0) {
+#define macro GET_P_10 = takes(0) returns(0) {
     0x32 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_9 = takes(0) returns(0) {
+#define macro GET_P_9 = takes(0) returns(0) {
     0x30 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_8 = takes(0) returns(0) {
+#define macro GET_P_8 = takes(0) returns(0) {
     0x2e dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_7 = takes(0) returns(0) {
+#define macro GET_P_7 = takes(0) returns(0) {
     0x2c dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_6 = takes(0) returns(0) {
+#define macro GET_P_6 = takes(0) returns(0) {
     0x2a dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_5 = takes(0) returns(0) {
+#define macro GET_P_5 = takes(0) returns(0) {
     0x28 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_4 = takes(0) returns(0) {
+#define macro GET_P_4 = takes(0) returns(0) {
     0x26 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_3 = takes(0) returns(0) {
+#define macro GET_P_3 = takes(0) returns(0) {
     0x24 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define GET_P_2 = takes(0) returns(0) {
+#define macro GET_P_2 = takes(0) returns(0) {
     0x22 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 // ? ? ? z y x i
-#define GET_P_1 = takes(0) returns(0) {
+#define macro GET_P_1 = takes(0) returns(0) {
     0x20 dup8 sub mload 0x02ffe0 and
     dup1 0x20 add
 }
 
-#define MAIN__INIT_JUMP_TABLE = takes(0) returns(0) {
+// #define macro jumptable MAIN__JUMP_TABLE {
+//     alt_add_0 alt_add_1 alt_add_2 alt_add_3 alt_add_4 alt_add_5 alt_add_6 alt_add_7
+//     alt_add_8 alt_add_9 alt_add_10 alt_add_11 alt_add_12 alt_add_13 alt_add_14 alt_add_15
+//     alt_add_final_0 alt_add_final_1 alt_add_final_2 alt_add_final_3 alt_add_final_4 alt_add_final_5 alt_add_final_6 alt_add_final_7
+//     alt_add_final_8 alt_add_final_9 alt_add_final_10 alt_add_final_11 alt_add_final_12 alt_add_final_13 alt_add_final_14 alt_add_final_15
+// }
+
+#define macro MAIN__INIT_JUMP_TABLE = takes(0) returns(0) {
+    // __tableStart(MAIN__JUMP_TABLE)
+    // __tableSize(MAIN_JUMP_TABLE)
     alt_add_0 0x00 mstore
     alt_add_1 0x20 mstore
     alt_add_2 0x40 mstore
@@ -194,7 +203,7 @@
 // start here
 //          |
 //          v
-#define ALTERNATIVE_MAIN_LOOP = takes(0) returns(0) {
+#define macro ALTERNATIVE_MAIN_LOOP = takes(0) returns(0) {
     // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
     // Get this out of the way first so we can free up the memory this thing needs for its jump table
     WNAF_GREEDY__SIZE_OF_ENTRY()
@@ -388,7 +397,7 @@
 
 // w i p t1 p z1 -y1 x1 p 2p 3p table
 /// @dev use wnaf table to get the memory location of a point, and update wnaf table
-#define GET_P2_LOCATION = takes(0) returns(0) {
+#define macro GET_P2_LOCATION = takes(0) returns(0) {
     returndatasize mload      // w
     // we want to get a byte index of our wnaf table that is non-zero
     // we don't want to iterate over every byte, because that's slow!
@@ -426,7 +435,7 @@
 
 // b w p t1 p z1 -y1 x1 p 2p 3p table
 /// @dev use wnaf table to get the memory location of a point, and update wnaf table
-#define GET_P2_LOCATION_LOOP = takes(0) returns(0) {
+#define macro GET_P2_LOCATION_LOOP = takes(0) returns(0) {
     returndatasize mload      // w
     // we want to get a byte index of our wnaf table that is non-zero
     // we don't want to iterate over every byte, because that's slow!
@@ -464,7 +473,7 @@
 }
 
 template <wnafLocation>
-#define MAIN_LOOP_SLICE = takes(10) returns(10) {
+#define macro MAIN_LOOP_SLICE = takes(10) returns(10) {
     DOUBLE_MAIN<dup5, dup6>()
     <wnafLocation> mload iszero add_skip jumpi
     <wnafLocation> mload dup10 and returndatasize mstore
@@ -479,7 +488,7 @@ add_skip:
 // Could fix in a few ways but the greedy algorithm is faster anyways. Leaving it around
 // for testing and comparison purposes.
 template <w>
-#define MAIN_LOOP_STATIC = takes(0) returns(0) {
+#define macro MAIN_LOOP_STATIC = takes(0) returns(0) {
     // now let's figure out where we need to jump to
     // so if i = 0x1140 then we start at the very top
     // and if i = 0x160 we skip straight to the end
@@ -627,7 +636,7 @@ jumpdest
     MAIN_LOOP_SLICE<w+0x20>()
     MAIN_LOOP_SLICE<w+0x00>()
 }
-#define MAIN_LOOP = takes(6) returns(0) {
+#define macro MAIN_LOOP = takes(6) returns(0) {
     // on the stack we will have.....
     // z y x w i p 2p 3p table wnafMask
     // i = iterator that points to memory of current wnaf entry
@@ -658,7 +667,7 @@ main_loop_end:  // looks like we've finished
 
 
 /// @dev performs scalar multiplication for two affine points
-#define MAIN_FULL = takes(0) returns(0) {
+#define macro MAIN_FULL = takes(0) returns(0) {
     // point table starts at 0x20
     // for two points, table will end at 0x1020
     // store globalZ at 0x1020

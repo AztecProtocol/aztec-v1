@@ -11,20 +11,20 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 const testHelper = `
 #include "add.huff"
 #include "constants.huff"
-#define PRECOMPUTE_TABLE_ADD_IMPL = takes(3) returns(11) {
+#define macro PRECOMPUTE_TABLE_ADD_IMPL = takes(3) returns(11) {
     PRECOMPUTE_TABLE_ADD<P,P,P,X2,Y2>()
 }
 
-#define P2_LOCATION_TEST = takes(0) returns(3) {
+#define macro P2_LOCATION_TEST = takes(0) returns(3) {
     0x00
     0x20
 }
 
-#define ADD_MAIN_IMPL = takes(3) returns(3) {
+#define macro ADD_MAIN_IMPL = takes(3) returns(3) {
     ADD_MAIN<P2_LOCATION_TEST,P,2P>()
 }
 
-#define ADD_AFFINE_IMPL = takes(5) returns(11) {
+#define macro ADD_AFFINE_IMPL = takes(5) returns(11) {
     ADD_AFFINE<X2,Y2,dup3,dup12>()
 } 
 `;
