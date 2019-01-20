@@ -4,7 +4,76 @@
 #include "double.huff"
 #include "add.huff"
 
+#define GET_P_30 = takes(0) returns(0) {
+    0x5a dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
 
+#define GET_P_29 = takes(0) returns(0) {
+    0x58 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_28 = takes(0) returns(0) {
+    0x56 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_27 = takes(0) returns(0) {
+    0x54 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_26 = takes(0) returns(0) {
+    0x52 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_25 = takes(0) returns(0) {
+    0x50 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_24 = takes(0) returns(0) {
+    0x4e dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_23 = takes(0) returns(0) {
+    0x4c dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_22 = takes(0) returns(0) {
+    0x4a dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+
+#define GET_P_21 = takes(0) returns(0) {
+    0x48 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_20 = takes(0) returns(0) {
+    0x46 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_19 = takes(0) returns(0) {
+    0x44 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_18 = takes(0) returns(0) {
+    0x42 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define GET_P_17 = takes(0) returns(0) {
+    0x40 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
 // p t1 p z1 -y1 x1 i
 #define GET_P_16 = takes(0) returns(0) {
     0x3e dup8 sub mload 0x02ffe0 and
