@@ -398,7 +398,12 @@ parser.processMacroInternal = (
 
 parser.parseJumpTable = (body, compressed = false) => {
     const jumps = body.match(grammar.jumpTable.JUMPS).map(j => j.replace(/(\r\n\t|\n|\r\t|\s)/gm, ''));
-    const size = jumps.length * 0x20;
+    let size;
+    if (compressed) {
+        size = jumps.length * 0x02;
+    } else {
+        size = jumps.length * 0x20;
+    }
     return {
         jumps,
         size,
@@ -564,8 +569,8 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE_PACKED.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
             const type = jumptable[1];
-            if (type !== 'jumptable') {
-                throw new Error(`expected ${jumptable} to define a macro`);
+            if (type !== 'jumptable__packed') {
+                throw new Error(`expected ${jumptable} to define a packed jump table`);
             }
             const body = jumptable[3];
             jumptables = {
@@ -580,7 +585,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
             const type = jumptable[1];
             if (type !== 'jumptable') {
-                throw new Error(`expected ${jumptable} to define a macro`);
+                throw new Error(`expected ${jumptable} to define a jump table`);
             }
             const body = jumptable[3];
             jumptables = {
