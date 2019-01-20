@@ -127,23 +127,23 @@ const helperMacros = `
 #include "constants.huff"
 #include "precompute_table.huff"
 
-#define NORMALIZE_TEST = takes(4) returns(7) {
+#define macro NORMALIZE_TEST = takes(4) returns(7) {
     PRECOMPUTE_TABLE_NORMALIZE<P,P>()
 }
 
-#define RESCALE_SLICE_IMPL = takes(100) returns(0) {
+#define macro RESCALE_SLICE_IMPL = takes(100) returns(0) {
     RESCALE_SLICE<0x1020,gas,gas>()
 }
 
-#define RESCALE_SLICE_CODESIZE = takes(0) returns(1) {
+#define macro RESCALE_SLICE_CODESIZE = takes(0) returns(1) {
     __codesize(RESCALE_SLICE<0x1020,gas,gas>)
 }
 
-#define RESCALE_WRAPPER = takes(11) returns(0) {
+#define macro RESCALE_WRAPPER = takes(11) returns(0) {
     RESCALE<dup4,0x00,0x20,0x40,0x60,0x80,0xa0,0xc0,0xe0>()
 }
 
-#define RESCALE_15_TRANSITION_WRAPPER = takes(5) returns(0) {
+#define macro RESCALE_15_TRANSITION_WRAPPER = takes(5) returns(0) {
     RESCALE_15_TRANSITION<0x00,0x20,0x40,0x60,0x80,0xa0,0xc0,0xe0>()
 }
 `;

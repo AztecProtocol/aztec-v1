@@ -2,7 +2,7 @@
 
 // dup4 dup5
 template <p1,p2>
-#define DOUBLE_MAIN = takes(3) returns(3) {
+#define macro DOUBLE_MAIN = takes(3) returns(3) {
     <p1> dup3 dup1
     mulmod
     // stack state: t1 z y x
@@ -78,7 +78,7 @@ template <p1,p2>
 /// So this algorithm computes a point doubling, shoves the result in <mx2> and <my2> (with the x-coordinate inverted)
 /// and ALSO leaves y1 = 8y^{4} and x1 = 4xy^{2} on the stack.
 template <mx2,my2,mz2,p1,p2,p3,3p>
-#define DOUBLE_AFFINE = takes(2) returns(2) {
+#define macro DOUBLE_AFFINE = takes(2) returns(2) {
     <p1> dup2 dup1 mulmod
     // stack state: t1 y x
     <p2> dup2 callvalue shl
@@ -114,7 +114,7 @@ template <mx2,my2,mz2,p1,p2,p3,3p>
 
 // stack state y x z
 template <p1,p2,mx2,my2,mz2>
-#define PRECOMPUTE_TABLE_DOUBLE = takes(3) returns(4) {
+#define macro PRECOMPUTE_TABLE_DOUBLE = takes(3) returns(4) {
     <p1> dup2 dup1
     mulmod
     // stack state: t1 y x z

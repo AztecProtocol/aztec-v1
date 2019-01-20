@@ -10,8 +10,9 @@ grammar.topLevel = {
         '^(?:[\\s\\n]*)template',
         '\\<(.*)\\>',
     ]),
-    MACRO: regex([
+    DEFINE: regex([
         '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '([A-Za-z0-9_]\\w*)',
         '([A-Za-z0-9_]\\w*)',
         '=',
         'takes',

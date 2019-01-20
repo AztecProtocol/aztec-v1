@@ -1,6 +1,6 @@
 /// @dev Macro to split a 254 scalar k (mod n) into two ~127 bit scalars k1, k2
 /// where k = k1 + k2\lambda and \lambda = cube root of unity modulo n
-#define ENDOMORPHISM = takes(1) returns(2) {
+#define macro ENDOMORPHISM = takes(1) returns(2) {
     // One way of extracting short scalars k1, k2 is through lattice reduction
     // Calculate short basis scalars b1, b2 via the extended Euclidean algorithm
     // where b1 = a1.n + x and b2 = a2.n + y
