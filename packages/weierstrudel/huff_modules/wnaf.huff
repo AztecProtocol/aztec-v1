@@ -362,7 +362,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     GET_NUMBER_OF_POINTS()         // n
     // Get offset to first entry of last point in precomputed lookup table
     dup1 dup1 add
-    0x400 mul STRANGE_WNAF_SHIFTED_POINT_TABLE_OFFSET() add // 0x400 add (TODO: bit shifts?)
+    0x400 mul POINT_TABLE_START_LOCATION_MINUS_32() add // 0x400 add (TODO: bit shifts?)
 
     // Point at start of calldatamap stored at end of memory table
     // (order is reversed)
