@@ -189,10 +189,10 @@ parser.processMacro = (
     jumpkeys.forEach((jumpkey) => {
         const jumptable = jumptables[jumpkey];
         tableOffsets[jumptable.name] = tableOffset;
-        tableOffset += jumptable.size;
+        tableOffset += jumptable.table.size;
         const tablecode = jumptable.table.jumps.map((jumplabel) => {
             if (!result.jumpindices[jumplabel]) {
-                throw new Error(`could not find ${jumplabel} in ${result.jumpindices}`);
+                throw new Error(`could not find ${jumplabel} in ${JSON.stringify(result.jumpindices)}`);
             }
             const { offset } = result.jumpindices[jumplabel];
             let hex = formatEvenBytes(toHex(offset));
@@ -205,7 +205,7 @@ parser.processMacro = (
     });
     result.tableInstances.forEach((tableInstance) => {
         if (!tableOffsets[tableInstance.label]) {
-            throw new Error(`expected to find ${tableInstance.label} in ${tableOffsets}`);
+            throw new Error(`expected to find ${tableInstance.label} in ${JSON.stringify(tableOffsets)}`);
         }
         const { offset } = tableInstance;
         if (bytecode.slice((offset * 2) + 2, (offset * 2) + 6) !== 'xxxx') {
@@ -250,7 +250,7 @@ parser.processMacroInternal = (
     });
 
     const jumptable = [];
-    const jumpindices = {};
+    let jumpindices = {};
     let tableInstances = [...tableInstancesInitial];
     let offset = startingBytecodeIndex;
     const codes = ops.map((op, index) => {
@@ -260,6 +260,7 @@ parser.processMacroInternal = (
                 const result = parser.processMacroInternal(op.value, offset, args, macros, map, jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
                 jumptable[index] = result.unmatchedJumps;
+                jumpindices = { ...jumpindices, ...result.jumpindices };
                 offset += (result.data.bytecode.length / 2);
                 return result.data;
             }
@@ -272,6 +273,7 @@ parser.processMacroInternal = (
                 const result = parser.processMacroInternal(templateName, offset, [], macros, map, jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
                 jumptable[index] = result.unmatchedJumps;
+                jumpindices = { ...jumpindices, ...result.jumpindices };
                 offset += (result.data.bytecode.length / 2);
                 return result.data;
             }
@@ -281,7 +283,6 @@ parser.processMacroInternal = (
                 const hex = formatEvenBytes((result.data.bytecode.length / 2).toString(16));
                 const opcode = toHex(95 + (hex.length / 2));
                 const bytecode = `${opcode}${hex}`;
-                tableInstances = [...tableInstances, ...result.tableInstances];
                 offset += (bytecode.length / 2);
                 return {
                     bytecode: `${opcode}${hex}`,
@@ -315,7 +316,6 @@ parser.processMacroInternal = (
                 };
             }
             case TYPES.TABLE_START_POSITION: {
-                console.log('found table start? ', op.value);
                 tableInstances.push({ label: op.value, offset });
                 const sourcemap = inputMaps.getFileLine(op.index, map);
                 offset += 3;

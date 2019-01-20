@@ -283,10 +283,30 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     dup1 WNAF_TABLE_MASK() and mload jump
 }
 
+#define jumptable WNAF_GREEDY__JUMP_TABLE {
+    lsb_0 // 0 00000
+    lsb_1 // 1 00001
+    lsb_2 // 2 00010
+    lsb_1 // 3 00011
+    lsb_3 // 4 00100
+    lsb_1 // 5 00101
+    lsb_2 // 6 00110
+    lsb_1 // 7 00111
+    lsb_4  // 8 01000
+    lsb_1  // 9 01001
+    lsb_2  // 10 01010
+    lsb_1  // 11 01011
+    lsb_3  // 12 01100
+    lsb_1  // 13 01101
+    lsb_2  // 14 01110
+    lsb_1  // 15 01111
+}
 // We expect the size of a WNAF entry to be the first item on the stack at this point
 #define macro WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
 
-    lsb_0 0x00 mstore // 0 00000
+    __tablesize(WNAF_GREEDY__JUMP_TABLE) __tablestart(WNAF_GREEDY__JUMP_TABLE) 0x00 codecopy
+
+    /* lsb_0 0x00 mstore // 0 00000
     lsb_1 0x20 mstore // 1 00001
     lsb_2 0x40 mstore // 2 00010
     lsb_1 0x60 mstore // 3 00011
@@ -301,7 +321,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     lsb_3 0x180 mstore // 12 01100
     lsb_1 0x1a0 mstore // 13 01101
     lsb_2 0x1c0 mstore // 14 01110
-    lsb_1 0x1e0 mstore // 15 01111
+    lsb_1 0x1e0 mstore // 15 01111 */
     /* lsb_5 0x200 mstore // 16 10000
     lsb_1 0x220 mstore // 17 10001
     lsb_2 0x240 mstore // 18 10010
