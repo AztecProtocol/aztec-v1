@@ -19,7 +19,7 @@ jobs: # a collection of steps
           key: dependency-cache-{{ checksum "package.json" }}
       - run: # weird bug when installing modules otherwise
           name: "Remove Package Lock"
-          command: rm -f package-lock.json
+          command: rm package-lock.json || true
       - run: # simply installing the modules
           name: "Install Node Modules"
           command: |
@@ -44,3 +44,56 @@ jobs: # a collection of steps
             cd aztec-demo-js
             npm run test
             cd ../
+  lint:
+    working_directory: ~/AZTEC # directory where steps will run
+    docker: # run the steps with Docker
+      - image: circleci/node:8.11.3
+    steps: # a collection of executable commands
+      - checkout # special step to check out source code to working directory
+      - run:
+          name: "Update NPM"
+          command: sudo npm install -g npm@5.6.0
+      - run: # pull the submodule repos
+          name: "Pull Submodules"
+          command: git submodule update --init --recursive
+      - restore_cache: # special step to restore the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run: # weird bug when installing modules otherwise
+          name: "Remove Package Lock"
+          command: rm package-lock.json || true
+      - run: # simply installing the modules
+          name: "Install Node Modules"
+          command: |
+            npm install eslint ethlint truffle
+            cd aztec-demo-js
+            npm install eslint
+            cd ../
+      - save_cache: # special step to save the dependency cache
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+            - ./aztec-demo-js/node_modules
+      - run: # compile contracts and link them in aztec-demo-js
+          name: "Compile Contracts"
+          command: |
+            ./node_modules/.bin/truffle compile
+            cd aztec-demo-js
+            ln -s ../build/contracts
+            cd ../
+      - run: # lint js
+          name: "Lint JavaScript"
+          command: |
+            npm run lint:js
+            cd aztec-demo-js
+            npm run lint
+            cd ../
+      - run: # lint sol
+          name: "Lint Solidity"
+          command: npm run lint:sol
+
+workflows:
+  version: 2
+  build_and_lint:
+    jobs:
+      - build
+      - lint
