@@ -2,6 +2,10 @@
 #include "add.huff"
 #include "double.huff"
 
+// TODO. Add ability to force a constant-length PUSH opcode instead of
+// using smallest-possible size (so that we can gaurantee a macro will have
+// a constant length)
+
 // initial stack state is: dz3 dz2 y x p
 // final stack is dz3 dz2 p
 template <x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
@@ -199,9 +203,20 @@ precompute_table_start:
     GLOBAL_Z_LOCATION() mstore // store our global Z coordinate, we'll need it later
 
 
-    1 1 // add in dz^2 and dz^3 onto stack
-    // 0x60 calldatasize div 15 sub 0x00 mstore 0x20 0x00 return
-    0x60 calldatasize div 15 sub __codesize(RESCALE_SLICE<POINT_TABLE_START_LOCATION,dup4,dup6>) mul rescale_start add jump
+    callvalue callvalue // add in dz^2 and dz^3 onto stack
+    // we've positioned our 'rescale a point in the point table' code so that each rescale macro
+    // cascades into the next macro (starting at P15, then P14, P13 etc).
+    // We want to jump to the bytecode index that corresponds to the start of the rescaling macro that
+    // maps to the total number of points in calldata.
+    // e.g. if we have 3 points, we want to jump to the 3rd-last RESCALE_SLICE macro.
+    // if we have 14 points, we want to jump to the 14th-last RESCALE_SLICE macro.
+    // This avoids pesky, expensive conditional jumps.
+    // N.B. POINT_TABLE_START_LOCATION and (POINT_TABLE_START_LOCATION + 0x7000) must have the
+    // same byte length or this won't work, as eacy RESCALE_SLICE macro won't be constant-length.
+    // (this is because some macros will have a 'PUSH1' opcode and some will have a 'PUSH2' opcode.
+    //    i.e. POINT_TABLE_START_LOCATION must be at least 0x100)
+    0x60 calldatasize div 15 sub __codesize(RESCALE_SLICE<POINT_TABLE_START_LOCATION,dup4,dup6>) mul
+    rescale_start add jump
 
 rescale_start:
     RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x7000, dup4, dup6>()

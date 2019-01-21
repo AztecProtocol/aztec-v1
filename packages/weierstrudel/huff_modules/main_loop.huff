@@ -289,15 +289,8 @@
         dup9 dup5 add swap4
         mload
         // Once we have the wnaf entry, we need to convert to a jump index.
-        // The entry is equal to the number of points * 2 (to shave two opcodes from the wnaf algo).
-        // So we can shift this by 4 bits to turn into a memory index.
-        // (there are a lot of different ways to do this, still trying to find the most efficient,
-        //    storing the jump table as packed 2-byte values saves no opcodes because
-        //    we replace a bit shift with a mask, but it does make the raw table a lot smaller)
-        // 0x04 shl
-        mload
-        0xffff and
-        jump
+        mload 0xffff and
+        jump // *jazz hands*
 
     // We have a separate instantiation of the 'loop' for the final entry in our wnaf. This is because
     // we don't want to double the accumulator at the end of this section.
@@ -339,8 +332,8 @@
     // entire scalar multiplication algorithm on an isomorphism of the bn128 curve
     // where globalZ is considered affine.
     // Our accumulator also represents the y-coordinate in its inverse form,
-    // so we need to invert it.
-    // Finally, both x and y are probably overloaded so we need to perform a modular reduction
+    // so we need to negate it.
+    // Finally, both x and y are probably overloaded so we perform a modular reduction
         dup5                    // z zf yf xf i Z p 2p 3p 
         dup7 swap2 mulmod       // z'' yf xf i Z p 2p 3p
         0x40 mstore             // yf xf i Z p 2p 3p
