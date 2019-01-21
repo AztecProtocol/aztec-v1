@@ -255,7 +255,6 @@ describe.only('bn128 alternative main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    /*
     it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of EIGHT points', async () => {
         const numPoints = 8;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
@@ -496,5 +495,4 @@ describe.only('bn128 alternative main loop', function describe() {
         expect(result.x.fromRed().eq(expected.x.fromRed())).to.equal(true);
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
-    */
 });
