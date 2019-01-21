@@ -24,9 +24,6 @@ jobs: # a collection of steps
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
-      - run: # deploy contracts
-          name: "Deploy Contracts"
-          command: ./node_modules/.bin/truffle migrate --network development
       - run: # run tests
           name: "Test AZTEC"
           command: npm run test
