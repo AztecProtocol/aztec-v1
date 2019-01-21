@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 /**
  * @title Maps a user's Ethereum address to the block number of a block that contains a transaction sent by the address
- * @author Tom Waite
+ * @author AZTEC
  * @dev Purpose of this contract is to enable an AZTEC Dapp to get a user's public key from their Ethereum address.
  *      The public key is required in order to generate AZTEC note shared secrets.
  **/
