@@ -1,38 +1,38 @@
 pragma solidity ^0.4.24;
 
-library AtomicSwapInterface {
-    function validateAtomicSwap(bytes32[6][], uint, bytes32[4]) external pure returns (bool) {}
+library BilateralSwapInterface {
+    function validateBilateralSwap(bytes32[6][], uint, bytes32[4]) external pure returns (bool) {}
                                 // 6 pieces of data per note, unspecified number of notes
 }
 
 /**
- * @title Library to validate AZTEC Atomic Swap zero-knowledge proofs
+ * @title Library to validate AZTEC Bilateral Swap zero-knowledge proofs
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses a static memory table to cache elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
  * The intended use case is to call this externally via `staticcall`. External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no storage and makes no external calls (other than to precompiles)
  * Copyright Spilbury Holdings Ltd 2018. All rights reserved.
  **/
-contract AtomicSwap {
+contract BilateralSwap {
     /**
-     * @dev AtomicSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
+     * @dev BilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
      * @notice See AZTECInterface for how method calls should be constructed.
-     * AtomicSwap is written in YUL to enable manual memory management and for other efficiency savings.
+     * BilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     function() external payable {
         assembly {
 
-            // We don't check for function signatures, there's only one function that ever gets called: validateAtomicSwap()
+            // We don't check for function signatures, there's only one function that ever gets called: validateBilateralSwap()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract through a compatible ABI
-            validateAtomicSwap()
+            validateBilateralSwap()
 
             // should not get here
             mstore(0x00, 404)
             revert(0x00, 0x20)
 
             /**
-             * @dev Validate an AZTEC protocol atomic-swap zero-knowledge proof
+             * @dev Validate an AZTEC protocol bilateral-swap zero-knowledge proof
              * Calldata Map is
              * 0x04:0x24       = calldata location of start of ```note``` dynamic array
              * 0x24:0x44       = Fiat-Shamir heuristicified random challenge
@@ -59,7 +59,7 @@ contract AtomicSwap {
              * 0x2e0:0x300     = msg.sender (contract should be called via delegatecall/staticcall)
              * 0x300:???       = block of memory that contains (\gamma_i, \sigma_i)_{i=0}^{n-1} concatenated with (B_i)_{i=0}^{n-1}
              **/
-            function validateAtomicSwap() {
+            function validateBilateralSwap() {
                 /*
                 ///////////////////////////////////////////  SETUP  //////////////////////////////////////////////
                 */

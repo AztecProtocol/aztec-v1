@@ -8,53 +8,53 @@ const { padLeft, sha3 } = require('web3-utils');
 // ### Internal Dependencies
 const exceptions = require('../exceptions');
 const { t2, GROUP_MODULUS } = require('../../aztec-crypto-js/params');
-const atomicProof = require('../../aztec-crypto-js/proof/atomicSwapProof');
+const bilateralProof = require('../../aztec-crypto-js/proof/bilateralProof');
 const helpers = require('../../aztec-crypto-js/proof/helpers');
 
 // ### Artifacts
-const AtomicSwap = artifacts.require('../../contracts/AZTEC/AtomicSwap');
-const AtomicSwapInterface = artifacts.require('../../contracts/AZTEC/AtomicSwapInterface');
+const BilateralSwap = artifacts.require('../../contracts/AZTEC/BilateralSwap');
+const BilateralSwapInterface = artifacts.require('../../contracts/AZTEC/BilateralSwapInterface');
 
 const { toBytes32 } = require('../../aztec-crypto-js/utils/utils');
 
-AtomicSwap.abi = AtomicSwapInterface.abi;
+BilateralSwap.abi = BilateralSwapInterface.abi;
 
 /*
 Outline of test:
 - This needs to be able to run on Truffle - to test the smart contract feature
 - Construct success states
-- Generate a proof using the AtomicSwap javascript proof generation code
+- Generate a proof using the BilateralSwap javascript proof generation code
 - Validate that it works, first using the javascript proof verification code
-- Validate that it works, using the atomic swap smart construct
+- Validate that it works, using the bilateral swap smart construct
 */
 
-contract('AtomicSwap tests', (accounts) => {
+contract('BilateralSwap tests', (accounts) => {
     describe('success states', () => {
-        let atomicSwap;
+        let BilateralSwap;
         let testNotes;
 
         beforeEach(async () => {
-            atomicSwap = await AtomicSwap.new(accounts[0]);
+            BilateralSwap = await BilateralSwap.new(accounts[0]);
             const makerNoteValues = [10, 20];
             const takerNoteValues = [10, 20];
             testNotes = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
         });
 
         it('validate that the Javascript proof is constructed correctly', () => {
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
-            const result = atomicProof.verifyAtomicSwap(proofData, challenge, accounts[0]);
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(testNotes, accounts[0]);
+            const result = bilateralProof.verifyBilateralSwap(proofData, challenge, accounts[0]);
             expect(result).to.equal(true);
         });
 
-        it('validate that the smart contract can verify the atomic swap proof', async () => {
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
+        it('validate that the smart contract can verify the bilateral swap proof', async () => {
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(testNotes, accounts[0]);
 
-            const result = await atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+            const result = await BilateralSwap.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             });
 
-            const gasUsed = await atomicSwap.validateAtomicSwap.estimateGas(proofData, challenge, t2, {
+            const gasUsed = await BilateralSwap.validateBilateralSwap.estimateGas(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -65,11 +65,11 @@ contract('AtomicSwap tests', (accounts) => {
     });
 
     describe('failure cases', () => {
-        let atomicSwap;
+        let BilateralSwap;
         let testNotes;
 
         beforeEach(async () => {
-            atomicSwap = await AtomicSwap.new(accounts[0]);
+            BilateralSwap = await BilateralSwap.new(accounts[0]);
             const makerNoteValues = [10, 20];
             const takerNoteValues = [10, 20];
             testNotes = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
@@ -80,9 +80,9 @@ contract('AtomicSwap tests', (accounts) => {
             const takerNoteValues = [20, 20];
             const incorrectTestNoteValues = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(incorrectTestNoteValues, accounts[0]);
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(incorrectTestNoteValues, accounts[0]);
 
-            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+            await exceptions.catchRevert(BilateralSwap.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
@@ -93,9 +93,9 @@ contract('AtomicSwap tests', (accounts) => {
             const takerNoteValues = [10, 20, 30];
             const incorrectNumberOfNotes = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(incorrectNumberOfNotes, accounts[0]);
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(incorrectNumberOfNotes, accounts[0]);
 
-            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+            await exceptions.catchRevert(BilateralSwap.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
@@ -106,31 +106,31 @@ contract('AtomicSwap tests', (accounts) => {
             const takerNoteValues = [10, 20];
             const NotesWithAZero = helpers.makeTestNotes(makerNoteValues, takerNoteValues);
             
-            const { proofData, challenge } = atomicProof.constructAtomicSwap(NotesWithAZero, accounts[0]);
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(NotesWithAZero, accounts[0]);
 
-            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+            await exceptions.catchRevert(BilateralSwap.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
         });
 
         it('Validate failure for using a fake challenge', async () => {
-            const { proofData } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
+            const { proofData } = bilateralProof.constructBilateralSwap(testNotes, accounts[0]);
 
             const fakeChallenge = new BN(crypto.randomBytes(32), 16).umod(GROUP_MODULUS).toString(10);
 
-            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, fakeChallenge, t2, {
+            await exceptions.catchRevert(BilateralSwap.validateBilateralSwap(proofData, fakeChallenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
         });
 
         it('Validate failure for using fake proof data', async () => {
-            const { challenge } = atomicProof.constructAtomicSwap(testNotes, accounts[0]);
+            const { challenge } = bilateralProof.constructBilateralSwap(testNotes, accounts[0]);
      
             const fakeProofData = new Array(4).map(() => new Array(6).map(() => toBytes32.randomBytes32()));
 
-            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(fakeProofData, challenge, t2, {
+            await exceptions.catchRevert(BilateralSwap.validateBilateralSwap(fakeProofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
@@ -143,7 +143,7 @@ contract('AtomicSwap tests', (accounts) => {
             const challenge = sha3(challengeString, 'hex');
             const proofData = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
 
-            await exceptions.catchRevert(atomicSwap.validateAtomicSwap(proofData, challenge, t2, {
+            await exceptions.catchRevert(BilateralSwap.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
