@@ -96,34 +96,17 @@ template <p1,p2>
     // z -y' x' p zz' p zzz'
 }
 
-// template <p1>
-// #define macro PRECOMPUTE_RESCALE_INPUT = takes(4) returns(5) {
-//     dup1 <p1> dup1 dup1             // p p p z z -y x p?
-//     dup4 dup1 mulmod                // zz p p z z -y x
-//     dup2 dup2                       // zz p zz p p z z -y x
-//     PRECOMPUTE_ITERATOR() mload 
-//     calldataload mulmod             // x' zz p p z z -y x
-//     swap4 mulmod                    // zzz p x' z -y x
-//     PRECOMPUTE_ITERATOR() mload 0x20 add
-//     calldataload mulmod             // y' x' z -y x
-// }
-
 #define macro VALIDATE_POINT_ON_CURVE = takes(3) returns(3) {
     // expect stack state y x p
     dup3 dup1 dup1              // p p p y x p
     dup5 dup1 mulmod            // xx p p y x
     dup5 mulmod                 // xxx p y x
     0x03 addmod                 // xxx+3 y x p
-    // N.B. can save 8 gas by using `0x03 add` instead of `0x03 addmod`.
-    // Chances of a point where:
-    //   a: point satisfies the bn128 curve equation
-    //   b: x^3 < p but x^3 + 3 >= p
-    // is about zero. But then again 8 gas is piddly and we might as well be 100% accurate
     dup4                        // p xxx+3 y x p
     dup3 dup1 mulmod            // yy xxx+3 y x p
     eq point_is_on_curve jumpi  // y x p
     // if we fall through to here, the point coordinates do not satisfy the short Weierstrass curve equation
-    //   y^2 = x^3 + 3
+    //   y^2 = x^3 + 3 mod p
     // Cheeky! Throw an error and exit.
         400 0x00 mstore
         0x20 0x00 return

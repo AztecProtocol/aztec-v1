@@ -2,21 +2,49 @@
 #include "constants.huff"
 
 /**
- * @title windowed non-adjacent form macros
+ * @title Windowed Non-Adjacent form macros
  *
- * Blah. I have two main algorithms to compute this and I'm leaving all of them in for now,
- * because I'm not sure which one is going to be the most efficient once I've optimized them.
- * The algos differ in how they determine how many 'bits' of the scalar to slice off when computing
- * a wnaf entry.
+ * This algorithm has gone through quite a few iterations but I think I've got something fairly optimal now.
+ * The purpose of this algorithm is to convert a binary scalar into a 'windowed non-adjacent form' equivalent.
  *
- * The first (WNAF_CONSTANT__COMPUTE) uses bit-twiddling hacks to deterministically cleave off the optimal number of bits per cycle.
- * This seems quite elegant to me, but is a bit slow.
+ * Non-Adjacent-Form (NaF) numbers are a kind of trinary - every bit position can contain 0, 1 or -1. A correctly
+ * constructed NaF will never have two non-zero entries in successive bit positions
+ * (e.g. consider the bit sequence 0,1,1, this can instead be represented as 1,0,-1)
  *
- * The second (WNAF_JUMP_TABLE__COMPUTE) uses a jump table to directly jump to a subroutine that will *probably* identify the
- * optimal number of bits to cleave off from the scalar.
- * It's about 16 gas-per-wnaf-entry more efficient.
+ * The *reason* NaF numbers are valuable is because when multiplying an elliptic curve point by a scalar, we want
+ * to reduce the Hamming weight of the scalar - i.e. we want to minimize the number of non-zero entries in our scalar's bit sequence.
+ * This is because we perform our multiplication by the 'double-and-add' method - every non-zero entry corresponds to an
+ * elliptic point addition operation. Which is expensive, so we want to avoid doing them.
  *
- * On top of this madness I've implemented an alternative wnaf algorithm (COMPUTE_WNAFS_GREEDY) using the latter technique.
+ * Non-Adjacent-Form numbers are useful in this context because it's trivially easy to compute the negation of an elliptic curve point.
+ * All we do is invert the y-coordinate modulo the curve's prime field (6 gas).
+ * By using a NaF, the average number of additions for a given scalar is 1/3 of the scalar's bit length, instead of 1/2 for a binary number.
+ *
+ * But we can do better than that. In a Windowed-Non-Adjacent-Form representation, each entry in a bit position can contain a range of integers.
+ * This range is defined by the window size, w. A bit position can contain 2^{-(w - 1)}, ..., -1, 1, ..., 2^{(w - 1)}.
+ *
+ * This reduces the Hamming weight of the scalar to (1/(w + 1)). For a 254-bit scalar and a window size of 5, the average number
+ * of elliptic curve point additions required drops to ~43, compared to 128 if we just used binary form.
+ *
+ * This has several consequences. First, we need to precompute a **lookup table** for every point in our scalar multiplication algorithm.
+ * For a given point, P, we now need -15P, -13P, -11P, -9P, -7P, -5P, -3P, -P, P, 3P, 5P, 7P, 9P, 11P, 13P, 15P.
+ * (most algorithms don't store the negative points but instead derive them on the fly.
+ *    We store them because conditional jumps are more expensive than storing the negative points but we'll get to that later)
+ *
+ * Secondly, we actually need to compute the WNAF, which is annoying because it's crazy expensive to do so.
+ * But elliptic curve point addition is even more expensive, so we'll embrace our Faustian pact and compute WNAFs for each scalar.
+ *
+ * A WNAF window size of 5 is optimal for us. The larger w, the bigger the precomputed lookup table required so there are diminishing returns.
+ *   (e.g. a window size of 6 will reduce the number of point additions required by ~6 in our main loop, but adds 8 additions to the lookup table!)
+ *
+ * So, the big question is HOW do we compute a WNAF and how do we do it without blowing up the gas costs?
+ * I used to have a few implementations in here but I've removed all but the most efficient.
+ * We use a **jump table** to efficiently compute our WNAF, for a given scalar. Effectively, we transform the scalar we're converting
+ * into an index for a jump table, which takes us to a macro that will directly convert 'scalar bits' to 'WNAF bits' without
+ * having to worry about which 'scalar bits' should map to 'wnaf bits' and at what bit index.
+ * See GREEDY_WNAF__COMPUTE_WNAFS for more information!
+ *
+ * The final question is how do we **format** our WNAF?
  * Instead of just identifying, for a given scalar, what each wnaf entry will be for a given bit index,
  * the algorithm will do the following:
  * 1. store the number of points that have non-zero wnaf entries for a given bit index
@@ -32,202 +60,16 @@
  * (we know the memory location of the start of the lookup table. In the main loop, 
  *   we don't know what point we're working with so we need to compute this)
  *
- * This latter algorithm is still unoptimized (or at least, it feels unoptimized. Quite frankly it feels ugly),
- * so there's probably some more scope for improvements
+ *
+ * N.B. I'm aware that this file is ~90% comments. I'm also aware of the rule that well-written code ought to
+ * be self-doumenting.
+ * Rules, however, are for languages with well-reasoned semantics and sweet syntactic sugar, not Huff.
+ * It is far beyond my ken to write self-documenting Huff code.
  **/
-
-
-/**
- * @title single iteration of width-non-adjacent-form algorithm
- * @dev Starting stack state = o w c_269 c_0x1fe0 c_16 c_mask
- * We have two 'slice' macros that do the same thing, but variables 'o' and 'w'
- * have reversed stack positions. This is to reduce the number of swap ops we use.
- * We use 4 constants in this macro, which we require on the stack instead of using PUSH ops.
- * This is to reduce the code size of this macro (PUSH is at least 2 bytes, other opcodes are a single byte)
- * @param o current memory offset to latest wnaf entry
- * @param w the scalar we're creating our wnaf from
- * @param c_269 the integer '269' (base 10), used in a lookup table
- * @param c_0x1fe0 the integer '1fe0' (base 16), used as a mask in our lookup table
- * @param c_16 the integer '16' (base 10), used to mutate ```w``` for next iteration cycle
- * @param c_mask 256-bit integer with all bits set high, except the least significant 5 bits
- **/
-#define macro WNAF_CONSTANT__SLICE_A = takes(6) returns(6) {
-    // Step 1: we need to isolate the least significant high bit of w
-    // Can do this by taking w & -w
-    // Instead of pushing '0' onto the stack (3 gas), we can get the 'return data size' of this EVM execution context.
-    // As this contract doesn't call external contracts this will always be 0, and the opcode costs 2 gas.
-    dup2 dup1 returndatasize sub and // stack state: w' o w
-
-    // Step 2: use w' and the lookup table to calculate the bit index of the high bit in w'
-    // We want to add this offset to 'o', which is our accumulated memory offset
-    // So swap 'o' to the front of the stak in preparation
-    swap1 // stack state: o w' w 269 0x1fe0 16 mask
-
-    // We want to calculate w' mod 269; the literal needs to preceed w' so push it onto the stack
-    // before duplicating w' (we don't consume w' as we need it later) and taking the modulus
-    dup8 dup3 mod // stack state: (w' % 269) o w' w 269 0x1fe0 16 mask
-
-    // use the result to byte-address the lookup table we stored
-    // and mask off the byte corresponding to the bit index,
-    // we use 0x1fe0 instead of 0xff because the table entry is shifted by 5 bits
-    // this is because we use this value to address words in memory, so '1' needs to be '32'
-    mload dup10 and // stack state: x o w' w
-
-    // Tadaa, we have our index, no conditional branching in sight
-    // We need this value to find the current byte-offset to store our wnaf, so add it straight to 'o'
-    add // stack state: o' w' w
-
-    // Now we know *where* to store the next wnaf section, we need to figure out *what* to store
-    // Our scalar has an abritrary amount of leading 0 bits we need to remove, we can use w' as
-    // our divisor without explicitly figuring out how many bits need to be culled
-    swap2 // stack state: w w' o'
-    div  // stack state: w o'
-
-    // We want to store our wnaf entry at byte position 'o'.
-    // We've divided w by the least significant bit in w, so we know that
-    // our wnaf entry is in the least significant 5 bits of 'w'.
-    // Instead of masking off the higher order bits, we can use mstore8
-    // to store the least significant byte of 'w' at position 'o'.
-    // We're storing multiple wnaf entries in a single EVM word, so it's cheaper
-    // to mask off the unwanted 3 high bits per-evm-word, which we can do in the main loop
-    dup1 dup3 mstore8 // stack state: w o' 269 0x1fe0 16 mask
-
-    // We need to prepare our scalar for the next round of iteration
-    // We've already stored the next 5 bits of the wnaf in our fragment at memory offset 'o'
-    // So we need to zero out the 5 least significant bits of w so we don't double-count.
-
-    // i.e. we calculate  w = (w & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0)
-    // (the literal has every bit set high except the least significant 5)
-
-    // There is one catch. If our wnaf fragment is negative (> 15), we need to add 2^{w} (32) to the scalar w.
-    // This is because we're subtracting (32 - m) at this bit position.
-    // So we need to add in 32 at the adjacent wnaf entry, but as that entry represents a value that is 2^{5} greater than this one,
-    // we actually need to add 1, not 32. Clear as mud, yes?
-
-    // The easiest way of doing this is by adding 16 into w.
-    // If m > 15 then the 5th bit will be high w. So adding 16 will trigger an
-    // overflow and add into the 6th bit. All lower order bits don't matter because we're about to mask them off
-    dup9 add dup10 and // stack state: w o
-}
-
-// starting stack state w o 260 0x1fe0 16 mask
-#define macro WNAF_CONSTANT__SLICE_B = takes(6) returns(6) {
-    dup1 dup1 returndatasize sub and
-    // w' w o x x 269 0x1fe0 16 mask
-    dup8 dup2 mod
-    // (w' % 269) w' w o 269 0x1fe0 16 mask
-    mload dup10 and
-    // x w' w o
-    swap2
-    // w w' x o
-    div
-    // w" x o
-    swap2
-    // o x w"
-    add
-    // o' w" 269 0x1fe0 16 mask
-    dup2 dup10 add dup11 and
-    // w''' o' w"
-    swap2
-    // w" o' w'''
-    dup2
-    // o' w" o' w'''
-    mstore8
-    // o' w'''
-} // 72 gas
-
-#define macro WNAF_CONSTANT__SET_TABLE = takes(0) returns(0) {
-    0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
-    0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
-    0xca49108d623c85fbb5c7201c3f3f83da95193d7045bfe39d2353f4364c84346e 0x5f mstore
-    0x4f44f692c01aecd22898a467a9f574a2eee82e97ab998f869801a5200b1dd6c0 0x7f mstore
-    0xebea73093e50a00d99e25b3cb1a60d1bcff5f267574008dc46ff58ffb3a3e4ba 0x9f mstore
-    0xb87527f9417d8a306205d5a01f03b4fd458363340c744f36600ca86449d48ece 0xbf mstore
-    0x6b6f77e50af6abd2fe2019db118cefd25728a6d8d3849847c14a01f59ef4c563 0xdf mstore
-    0x0c4f000849aeab57cacbbe19b16fb706b3782121dec54c20098b2abdf156f341 0xff mstore
-    0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
-}
-
-#define macro WNAF_CONSTANT__COMPUTE_SLICES = takes(2) returns(2) {
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-    WNAF_CONSTANT__SLICE_B()
-    WNAF_CONSTANT__SLICE_A()
-loop:
-    WNAF_CONSTANT__SLICE_B()
-    33 dup3 lt wnaf_end jumpi
-    WNAF_CONSTANT__SLICE_A()
-    dup1 32 lt loop jumpi
-wnaf_end:
-}
-
-#define macro WNAF_CONSTANT__INIT = takes(0) returns(6) {
-    // add wnaf table to memory
-    WNAF_CONSTANT__SET_TABLE()
-    // set up constants
-    0x1000000000000000000000000000000000 // b
-    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 // mask b
-    16 // 16 mask b
-    0x1fe0 // 0x1fe0 16 mask b
-    269 // 269 0x1fe0 16 mask b
-
-    // compute calldata and memory offsets
-    GET_NUMBER_OF_POINTS() // n
-    dup1 dup1 add WNAF_START_LOCATION_MINUS_TWO() add       // m n
-    swap1 0x06 shl        // s m 269 0x1fe0 16 mask b
-}
-
-#define macro FIND_FIRST_ENTRY = takes(0) returns(1) {
-    WNAF_END_LOCATION_PLUS_32()  // m
-search_next:
-    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
-    dup1 mload iszero search_next jumpi
-}
-
-
-#define macro WNAF_CONSTANT__COMPUTE = takes(0) returns(0) {
-    WNAF_CONSTANT__INIT()
-wnaf_start:
-    0x01
-    dup2 calldataload ENDOMORPHISM() // k1 k2 v s m 269 0x1fe0 16 mask b
-    dup10 or
-    swap1 dup10 or // k2 k1 v s m 269
-wnaf_continue:
-    dup5 dup4 add     // get wnaf memory offset, and add 'v'
-                      // (if k2, v = 1, increasing mem index by 1. if k1, v = 0)
-    WNAF_CONSTANT__COMPUTE_SLICES() // w o k1 v s m 269 0x1fe0 16 mask b
-    pop swap1                  // k1 o v s m 269 0x1fe0 16 mas kb
-    0x01 dup4 sub swap3 wnaf_continue jumpi
-    // x x x v s m 269 0x1fe0 16 mask b
-    pop pop pop
-    0x20 add    // s' m
-    swap1 0x02 swap1 sub swap1 // s' m' // TODO optimize this
-    dup1 calldatasize sub wnaf_start jumpi // s' m' 269 0x1fe0 16 mask b
-    pop pop pop pop pop pop pop
-}
-
-
 
 
 #define macro WNAF_GREEDY__SIZE_OF_ENTRY = takes(0) returns(1) {
-    GET_NUMBER_OF_POINTS() 0x04 mul 0x3e add
+    GET_NUMBER_OF_POINTS() 0x02 shl 0x3e add
 }
 
 template<size_of_wnaf_entry_negated_1,size_of_wnaf_entry_negated_2>
@@ -239,35 +81,96 @@ template<size_of_wnaf_entry_negated_1,size_of_wnaf_entry_negated_2>
         dup1 mload iszero alternate_search_next jumpi
 }
 
-// (todo add more detail here)
-// We want to, for a given bit index in our scalar multiplication, determine the following things:
-// 1: How many points are we adding?
-// 2: Where is the memory location of these points in our precomputed lookup table?
-// Answering (1) adds a significant gas overhead, but allows us to use jump tables in our main loop,
-// which is significantly more efficient than rote iteration
-// i.e. instead of testing if each wnaf entry for a given bit index contains something and then add it into the sum,
-// we can directly jump to a macro that will add every nonzero wnaf entry into the sum
-
-// so...what if 'wnaf_pointer_total_increase' points 'o' to the current entry?
+/**
+ * @title It's a greedy wnaf slice! This is where we do the nitty-gritty of converting a scalar into a WNAF entry.
+ * @dev We want to do the following here:
+ *    1. compute the offset required to index the bit position that corresponds to this WNAF entry
+ *    2. increase the 'number of non-zero WNAF entries' counter for this bit position by 2
+ *       (we multiply the counter by 2 so that it serves as a memory offset - each WNAF pointer is 2 bytes long)
+ *    3. compute the offset required to index the memory reserved for this point's WNAF pointer
+ *    4. compute the memory location in our precomputed point lookup table that maps to this WNAF entry
+ *    5. store the result of 4. at the location computed in 3.
+ *    6. reduce our scalar by the sum of the number of bits we cleaved off for this WNAF entry, combined
+ *         with the number of subsequent bits we know will be 0 because of the Hamming weight of a WNAF.
+ *    7. if this WNAF entry is negative, we must update the scalar to reflect this
+ *        (i.e. instead of subtracting the WNAF entry from the scalar, we add it)
+ *    8. index our jump table and jump to the macro that will convert the next WNAF entry
+ *
+ *    We achieve this all for less than 100 gas. If we were to perform a simple iteration over our scalar
+ *    and simply identify whether a WNAF entry should be 0 or not, that would be more expensive. Hence the greediness.
+ **/
 template<num_shifted_bits, num_shifted_bits_2, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
 #define macro WNAF_GREEDY__SLICE = takes(0) returns(0) {
     // w o k v s m
-    dup1 <num_shifted_bits_2> shr 0x3e0 and dup7 add // w' w o k v s m
-    dup3                                             // o w' w o k v s m 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t 4_b 4_t
-    <wnaf_pointer_total_increase> add swap3    // o w' w o'
+    // <num_shifted_bits_2> represents the number of bits we must shift `w` down by in order to
+    // position the WNAF entry at the 5th-10th least-significant bits of `w`
+    dup1 <num_shifted_bits_2> shr
+
+    // We now mask off all but those 5 bits
+    0x3e0 and
+
+    // The resulting value directly maps to the internal offset required to index the WNAF point in our precomputed lookup table,
+    // plus 32 bytes.
+    // For example, if w = 3, We want the memory location of 3P.
+    // 3P is directly adjacent to P, so if P is at 0x00 - 0x40, then 3P will be at 0x40 - 0x60.
+    // 3 << 5 is equal to 0x80. Tadaa.
+    // We must now convert this relative offset into an absolute offset, but adding in `m`.
+    // `m` points to the start of the point table in memory, minus 32 bytes. Add them together and we have our memory offset.
+    dup7 add
+    
+    // stack state: w' w o k v s m
+    // Next up, we want to identify how many non-zero WNAF entries are currently at this bit index, and increase this counter by 0x02.
+    // Step 1: get our offset to the previous WNAF bit sequence
+    dup3
+
+    // Now add in <wnaf_pointer_total_increase> to get to the current WNAF bit sequence.
+    <wnaf_pointer_total_increase> add               // o' w' w o
+
+    // swap positions with o' and o. We'll consume `o` in a bit.
+    swap3                                           // o w' w o'
+
+    // now load up the value of `n` at position `o'` and add 0x02 to it
     dup4 mload 0x02 add                             // n o w' w o'
 
+    // next, store our updated `n` at position `o'`
     dup1 dup6 mstore                                // n o w' w o' k v s m 0_b 0_t 1_b 1_t
+
+    // now that we have `n`, we can subtract `n` from <wnaf_pointer_base_increase> to compute
+    // the relative difference between the pointer to the previous WNAF bit sequence (`o`) and
+    // the location of our current WNAF point pointer
     <wnaf_pointer_base_increase>
     sub add            // o" w' w o'
 
-    mstore                                          // w o
-    <num_shifted_bits> shr 0x10 add                 // w" o
+    // now that we know where the WNAF pointer should be stored, and what to store there,
+    // we call `mstore` - we've already positioned our variables on the stack correctly
+    mstore                                          // w o'
+
+    // we're now left with our scalar `w` and the memory location of the current WNAF bit sequence.
+    // all that's left to do is reduce `w` down by 5 bits + the number of bits we reduced `w` down by to get `w'`.
+    // We can get away with this because we know that, for any non-zero WNAF entry, the adjacent `w` bits MUST be zero.
+    <num_shifted_bits> shr
+
+    // Finally, we must account for the situation where our WNAF entry is negative.
+    // If `w'` corresponds to a wnaf entry that is >16, it's a negative WNAF entry.
+    // We still indexed the correct point, because we store negative points after positive points in our lookup table.
+    // However we're about to mask off the current WNAF entry's bits from `w` (i.e. subtracting the entry).
+    // If the WNAF entry is negative, we need to increase `w` by 32. This is the same as adding the WNAF entry into `w`, because
+    // any bits that are less significant than the 6th bit are irrelevant because of `w`'s Hamming weight.
+    // We achieve this by adding 16 into `w`. If the WNAF entry is > 16, then the 5th bit is high, so adding 16 will trigger
+    // and overflow and add 1 to the 6th bit. If the WNAF entry is < 16, then there is no overflow, and we don't mind mutating the WNAF's
+    // least-significant 5 bits because we're about to mask them off.
+    0x10 add                 // w" o
+    // Finally, now that we've reduced down our WNAF, let's convert `w` into a jump index and jump away to the next WNAF_GREEDY__SLICE
     dup1 WNAF_TABLE_MASK() and mload
-    jump           //
+    jump
 }
 
-// for odd wnaf entries we can get away with not adding wnaf_pointer_base_increase because it's zero
+/**
+ * @title It's a default greedy wnaf slice! For documentation see WNAF_GREEDY_SLICE
+ * @dev if the scalar `w`'s least-significant set bit is in position 1, then we don't need to perform an initial bit shift.
+ *          this macro is the same as WNAF_GREEDY__SLICE, except we don't have `<num_shifted_bits_2> shr`.
+ *          So really it's just a more greedy version of the above, as we do less work for the same effect.
+ */
 template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
 #define macro WNAF_GREEDY__SLICE_DEFAULT = takes(0) returns(0) {
     // w w o k v s m
@@ -283,6 +186,11 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     dup1 WNAF_TABLE_MASK() and mload jump
 }
 
+/**
+ * @title This is our jump table. We store this directly inside the contract bytecode to save on gas
+ *          (we can use `codecopy` to initialize our table instead of a bunch of `mstore8` opcodes)
+ * @dev We don't use a packed jump table, because that would require us to apply a mask after loading our jump label from memory
+ **/
 #define jumptable WNAF_GREEDY__JUMP_TABLE {
     lsb_0 // 0 00000
     lsb_1 // 1 00001
@@ -301,8 +209,71 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     lsb_2  // 14 01110
     lsb_1  // 15 01111
 }
-// We expect the size of a WNAF entry to be the first item on the stack at this point
-#define macro WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
+
+/**
+ * @title WNAF_GREEDY__COMPUTE will compute an endomorphism-split WNAF representation of every scalar present in calldata
+ * @notice The layout of a WNAF entry in memory is guided by the following requirements:
+ *      1. For a given bit index, we want to load from memory the number of points we need to add
+ *      2. We don't want to have to apply a mask to get this value - so we must reserve 0x20 bytes of memory for this
+ *      3. For each WNAF entry, we want the pointer to the **memory location** of the point in our lookup table that
+ *              corresponds to the required WNAF entry
+ *      4. For each WNAF entry, we want these pointers to be located linearly in a block of memory
+ *      5. Each WNAF pointer will occupy 2 bytes of data (we have a big table)
+ *      6. Each WNAF pointer must be able to be stored via a single `mstore` instruction, where the pointer is located
+ *              in the 2 least-significant bytes of the variable we're storing
+ *      7. Each WNAF pointer must be accessible by applying a **constant** offset to the pointer that points to the
+ *              number of points we need to add for the bit position that is **one point less significant** than the
+ *              current bit position.
+ *              * This is because in our main loop, we only store the pointer to the **next** entry on the stack.
+ *                      This in turn is to reduce the number of `swap` opcodes required in our main loop from 2 to 1.
+ *      8. Given these constraints, we want to use as little memory as possible.
+ *
+ *  Clear as mud, right? So, with all of that in mind, the amount of memory required tp all WNAF entries for a given bit position is the following:
+ *      * The number of non-zero WNAF entries at this bit position: 0x20 bytes
+ *      * The set of pointers that point to points in the lookup table for every non-zero WNAF: 0x02 * (number of points)
+ *          For this latter part, we must reserve as much space as is required if **every** point had a non-zero WNAF entry for a given bit index.
+ *          This is because we require the size of a given 'bit position' to be constant so that we can cleanly iterate over the table.
+ *          So, this requires 0x04 * (number of points) bytes. We double the amount because one 'input point' maps to two 'actual' points, because
+ *          of our use of the bn128 curve endomorphism to split scalars into two half-length scalars.
+ *      * Finally, we need 0x1e bytes of empty space. Consider what happens when we write the final WNAF pointer into memory for a given bit index.
+ *      * We're storing a 32-byte word, where the 2 least significant bits contain the WNAF pointer. We cannot have this word over-write a preceding
+ *      * WNAF entry, so we must gaurantee that the preceding WNAF entry is located at least 0x1e bytes away from the WNAF pointer location.
+ *
+ *  To try and sum this up, imagine we have two input points. This maps to 4 points in our algorithm because of endomorphism shenanigans, with 4 WNAFs.
+ *  For a given bit index, the set of potential WNAF pointers occupies 8 bytes of memory.
+ *  The number of points with non-zero WNAF entries (`n`) occupies 32 bytes. We also add 30 bytes of padding.
+ *  The total size of a bit index is therefore 70 bytes.
+ *  As for how we lay this out...
+ *  Consider, in memory, the `n_{i+1}` variable for bit index `{i+1}`.
+ *  We want to be able to access the WNAF pointers for index `i` with this pointer alone.
+ *  32 bytes **prior** to `n_{i+1}` in memory, we store the WNAF pointer for the first potential WNAF entry for bit index `i`.
+ *  Subsequent WNAF pointers are located 2 bytes prior to the previous WNAF pointer.
+ *  We have this odd structure so that writing a WNAF pointer into memory does not over-write previously written WNAF pointers.
+ *  For example, for two input points, the memory map for the start of the bit sequence would look like this
+ *  (starting at an arbitrary memory position of 0x32):
+ *
+ *  0x32 - 0x34: w_{0, 3}
+ *  0x34 - 0x36: w_{0, 2}
+ *  0x36 - 0x38: w_{0, 1}
+ *  0x38 - 0x3a: w_{0, 0}
+ *  0x3a - 0x5a: (nothing, as n_{-1} does not exist)
+ *  0x5a - 0x78: empty space
+ *  0x78 - 0x7a: w_{1, 3}
+ *  0x7a - 0x7c: w_{1, 2}
+ *  0x7c - 0x7e: w_{1, 1}
+ *  0x7e - 0x80: w_{1, 0}
+ *  0x80 - 0xa0: n_{0}
+ *  0xa0 - 0xbe: empty space
+ *  0xbe - 0xc0: w_{2, 3}
+ *  0xc0 - 0xc2: w_{2, 2}
+ *  0xc2 - 0xc4: w_{2, 1}
+ *  0xc4 - 0xc6: w_{2, 0}
+ *  0xc6 - 0xa6: n_{1}
+ *
+ * ... and on it goes, up to n_{127}. The funamental value of this structure is that we can write WNAF pointers and `n` values into memory without
+ * ever over-writing other values already in memory.
+ **/
+ #define macro WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
     // This macro uses a jump table; copy table from code into memory
     __tablesize(WNAF_GREEDY__JUMP_TABLE) __tablestart(WNAF_GREEDY__JUMP_TABLE) 0x00 codecopy
 
@@ -312,7 +283,9 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     // Once we have these two half-length scalars we need to compute their
     // windowed-non-adjacent-form representations.
 
-    // set up our initial stack state...
+    // set up our initial stack state. The offsets we add to map between bit indices depend on the number of input points.
+    // To maximize efficiency we can't calculate these on the fly and we can't store in memory (too expensive).
+    // So we leave these offsets on the stack, so we can recall them with a `dup` opcode
     WNAF_TABLE_BITS() dup2 mul                 // d_b d
     dup2 3 mul dup3 WNAF_SIZE() mul add        // 3_t d_b d
     dup3 0x1e add dup2 sub                     // 3_b 3_t d_b d
@@ -322,217 +295,129 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     dup7 dup3 sub                              // 1_b 1_t 2_b 2_t 3_b 3_t d_b d
     dup8 dup3 sub                              // 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
     dup9 dup3 sub                              // 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
-    // stack state: 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t
-    // Let's start by getting the number of scalars we have
-    GET_NUMBER_OF_POINTS()         // n
-    // Get offset to first entry of last point in precomputed lookup table
-    dup1 dup1 add
-    0x400 mul POINT_TABLE_START_LOCATION_MINUS_32() add // 0x400 add (TODO: bit shifts?)
 
-    // Point at start of calldatamap stored at end of memory table
-    // (order is reversed)
+    // stack state: 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t
+    // Next, we need to figure out how many scalars we have
+    GET_NUMBER_OF_POINTS()         // n
+
+    // We now need to compute the location, in memory, of the first entry of the LAST point in our lookup table.
+    // This is because the first point in calldata corresponds to the LAST entry in our point table.
+    // This value is double the number of points, multiplied by the byte-size of a lookup table (0x400 bytes), plus the initial offset to the first point, minus 0x400.
+    // (instead of multiplying by 0x400 we shift left by 0x0a, saves 2 gas...)
+    // We don't subtract the 0x400 here, we do it later in our main loop
+    // Let's call this variable 'm'
+    // We use POINT_TABLE_START_LOCATION_MINUS_32 instead of POINT_TABLE_START_LOCATION because we're going to be mapping WNAF entries to indices in the lookup table.
+    // We know ahead of time that every WNAF entry is going to be odd. If we multiply the WNAF entry by 32, we conveniently get the current memory offset within an individual
+    // entry into our lookup table, offset by 32 bytes. (a point entry is 64 bytes). So we subtract that 32 from the start instead of performing the subtraction for each WNAF pointer.
+    dup1 dup1 add
+    0x0a shl POINT_TABLE_START_LOCATION_MINUS_32() add // 0x400 add (TODO: bit shifts?)
+
+    // Next up, we need to get the location, in calldata, of the first scalar the user wants to multiply.
+    // The calldata map contains points, followed by scalars. So we must point to the calldata location that is directly after the block of point data.
+    // Which is (number of points * 0x40). We can do this with a bit shift to save some gas.
     swap1 0x06 shl                // s m
+
+    // Ok, now we can start our 'loop'.
     strange_wnaf_start:
+
+        // For a given scalar, we need TWO WNAFs, one for each endomorphism-split scalar. We push 0x01 onto the stack to serve as our iterator (`v`)
         callvalue
-        dup2 calldataload ENDOMORPHISM() // k1 k2 v s m
-        // We start by shifting up the endomorphism-split scalars by 5 bits.
-        // If we now mask off the <WNAF_TABLE_BITS> least significant wnaf bits (pre scaling),
-        // we end up with a value that we can use to index a jump table
-        // (i.e. each wnaf value maps to a word in memory).
+
+        // Next up, we load the scalar from calldata and split it into two half-length scalars using a bn128 curve endomorphism.
+        // (see ENDOMORPHISM for details, this endomorphism is present for any short Weierstrass curve where a = 0)
+        dup2 calldataload ENDOMORPHISM()
+
+        // stack state: k1 k2 v s m
+
+        // Next up, we want to left-shift our endomorphism-split scalars by 5 bits.
+        // i.e. multiply by 32.
+        // This is because we want to be able to identify the bit position of the least significant **odd** bit in this scalar.
+        // Any zero-value bits to the right of this bit will be zero in our WNAF, so we can ignore them.
+        // If we multiply the scalar by 32, and mask off <WNAF_TABLE_BITS>, then we directly get an index into our jump table.
+        // We can then just jump to a hard-coded macro that will reduce the scalar down by however many bits we need.
+        // Because of this, the entire algorithm is run on scalars that are shifted up by 5 bits.
         // Normally bn128 scalars can be up to 254 bits, but our 
         // split scalars have a maximum bitlength of 127 bits, so we aren't
-        // going to overflow by shifting by 5 bits. Convenient.
+        // going to overflow by shifting by 5 bits. Convenient, yes?
         5 shl
         swap1 5 shl // k2 k1 v s m
-    strange_wnaf_continue:    // k k' v s m
+
+    // We jump back to `strange_wnaf_continue` when we've converted one of the endomorphism-split scalars and need to convert the second one
+    strange_wnaf_continue:
+    
+        // stack state: w k(other) v s m
+        // We call the current scalar we're working on `w`.
         // we need to subtract 1 from 'm' to reflect the fact that this point maps to a lookup table that is
         // directly preceding the previous point's lookup table in memory
         // (adding -400 saves us a swap opcode vs subtracting 1)
-        // k k v s m 0_t 0_b 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+        // w k v s m 0_t 0_b 1_b 1_t 2_b 2_t 3_b 3_t d_b d
         swap4 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc00 add swap4
-        dup15 WNAF_SIZE() mul WNAF_START_LOCATION() sub   // o k k v s m
+        // Next, we to point to the start of our WNAF table, offset by the memory taken up by WNAF_SIZE() bit entries.
+        // This is because 'o' points to the location of the bit entry from the previous iteration of this loop.
+        // In WNAF_GREEDY__SLICE, we then add in the offset required to map to the relevant bit entry. So we need to take off that offset to start.
+        dup15 WNAF_SIZE() mul WNAF_START_LOCATION() sub   // o w k v s m
+        
+        // We want the stack state to position the scalar we're working on, `w`, in front of `o`, to save on swap opcodes.
         swap1                   // w o k v s m
-        dup1 WNAF_TABLE_MASK() and mload jump // and away we go?
+        
+        // Now, convert the scalar into an index into our jump table, and jump away to...somewhere.
+        // The execution flow for every scalar is different, but we do know that we'll end up precisely where we need to be, which is nice.
+        // We'll end up at either `lsb_4`, `lsb_3`, `lsb_2`, `lsb_1` or `lsb_0`.
+        dup1 WNAF_TABLE_MASK() and mload jump
+
+    // This code is reached by a jump from lsb_0.
     strange_wnaf_not_finished:  // w o k v s m 
-        // we get here from lsb_0, so we just hit a patch of zeroes and still have more work to do.
+        // We get here from lsb_0; we have hit a patch of zeroes and still have more work to do to convert `w` into a WNAF.
         // Update our memory offset pointer to reflect the bits we're about to cleave away
-        // w o k' v s m 0_t 0_b 1_b 1_t 2_b 2_t 3_b 3_t d_b
+        // stack state: w o k' v s m 0_t 0_b 1_b 1_t 2_b 2_t 3_b 3_t d_b
         swap1 dup15 add swap1
         // now let's clear away those zeroes and try again
-        WNAF_TABLE_BITS() shr       // w o
+        WNAF_TABLE_BITS() shr  // w o
         dup1 WNAF_TABLE_MASK() and mload
-        jump
-    // lsb_5:
-    //     WNAF_GREEDY__SLICE<WNAF_SIZE+4,dup16,dup15>()
+        jump // wheee....
+
+    // we hit `lsb_4` if the scalar `w`'s least-significant set bit is in bit position 4 (after accounting for the 5-bit offset on `w`)
     lsb_4:  // w o x v s m 0_t 1_b 1_t 2_b 2_t 3_b 3_t
         WNAF_GREEDY__SLICE<WNAF_SIZE+3,3,dup16,dup16>()
+    
+    // and similarly, `lsb_3` if `w` has a least significant set bit in bit position 3. These macros don't 'fall through' to one another - they are terminated by a jump instruction.
     lsb_3:
-        // WNAF_GREEDY__SLICE<WNAF_SIZE+2,dup12,dup11>()
         WNAF_GREEDY__SLICE<WNAF_SIZE+2,2,dup14,dup14>()
     lsb_2:
         WNAF_GREEDY__SLICE<WNAF_SIZE+1,1,dup12,dup12>()
     lsb_1: 
         WNAF_GREEDY__SLICE_DEFAULT<WNAF_SIZE,dup10,dup10>()
     lsb_0:
+
         // if we hit this location, our bit sequence is all zeroes.
         // This means 1 of two things:
         //   1. our scalar is empty, so we've converted everything into wnaf form
         //   2. we just hit a patch of zeroes, and we still have more higher-order bits to convert
-        // So let's test for option 1. The least significant 5 bits are gunk at this point, so
+        // So let's test for option 1. The least significant 5 bits are meaningless gunk at this point, so
         // we have work to do if the scalar is > 31 (0x1f)
         0x1f dup2 gt strange_wnaf_not_finished jumpi
+
         // If we hit this point, we're done with this scalar,
         // we check to see if we need to process another endomorphism scalar,
         // if not we jump back to the start of our loop to grab another scalar from calldata
         // we do this by decreasing 'v' by 0x01 and checking to see if original value is nonzero
-        pop swap1                  // k1 o v s m
-
+        // stack state: // k1 o k2? v s m
+        pop swap1 // k2? o v s m
         callvalue dup4 sub swap3 strange_wnaf_continue jumpi
-        // stack state: x x v s m
+
+        // stack state: ?? ?? v s m
+        // We hit this fall-through if we've converted both endomorphism-split scalars into WNAFs.
         // (clear away old wnaf junk and 'v')
-        pop pop pop
-        0x20 add    // s' m
-        dup1 calldatasize sub strange_wnaf_start jumpi // s' m'
-        // if we've reached this point, we've finished with our wnaf algorithm.
+        pop pop pop // stack state: s m
+
+        // increase s by 0x20 to index another point in calldata.
+        0x20 add    // s m
+
+        // next, identify if we have more scalars we need to convert by comparing `s` against `calldatasize`
+        dup1 calldatasize sub strange_wnaf_start jumpi // s m
+
+        // if we've reached this point, we've finished with our wnaf algorithm and have converted every scalar
+        // into endomorphism-split WNAF form.
         // clear away all of the junk on the stack and exit the macro
         pop pop pop pop pop pop pop pop pop pop pop
-}
-
-template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
-#define macro WNAF_JUMP_TABLE__SLICE = takes(0) returns(0) {
-    // we reach this point via a jump table which maps the number of trailing zeroes in the wnaf
-    // to a 'slice'. So we know how many bits we need to shift our wnaf down by.
-    <num_shifted_bits> shr                      // w o
-    // The wnaf now has the next bit sequence to be processed in the 6th bit index of the word.
-    // This is so that we can directly address the jump table in memory
-    // (each index occupies an evm word in memory, so if the next bit sequence is '101' this maps to '10100000',
-    // which is 0xa0, which stores the jump label corresponding to wnaf bit sequence '101'.
-    // This also neatly puts the *current* wnaf entry into the 5 least significant bits of the word.
-    // This is the bit sequence that this macro needs to store in our wnaf table.
-    // As for *where* to store that bit sequence, our offset variable 'o' contains the memory location of the current wnaf entry,
-    // assuming that the bit sequence we're examining has no trailing zeroes.
-    // Because we know how many bits we're reducing down by, we know the precise amount we need to add to this offset.
-
-    // First, update the offset to point to the index of the next bit sequence
-    dup1 dup3 <wnaf_pointer_total_increase> add // o' w w o
-    // Then swap this with the old offset, and update the old offset to factor in the number of trailing zeroes in this bit sequence
-    swap3 <wnaf_pointer_base_increase> add      // o'' w w o'
-    // We can now directly call mstore8 using our wnaf word, as the wnaf entry is in the 5 least significant bits of the word.
-    // (we can clean out the other 3 bits later in our main loop, where we can operate on one word at a time instead of one byte at a time)
-    mstore8
-    // Finally we need to update our wnaf. If the current bit sequence (m) is >= 16, it represents a negative entry.
-    // i.e if m > 16, then we're subtracting (32 - m) at this bit index.
-    // Our scalar is now off by a factor of 32, so we need to increase the next bit sequence by 1 to accomodate this
-    // (the next bit sequence will represent a scalar that is 2^5 larger than this one, so 32 at this level equals 1 at the next level).
-    // We can do this by adding 16 into our wnaf. If m >= 16 then the 5th bit will be high, so this will trigger
-    // an integer overflow into the 6th bit
-    // (which is actually the 1st bit of the next sequence because everything is shifted by 5 bits so we can use the wnaf as a lookup table index)
-    0x10 add
-    // Finally, mask off the next wnaf bit sequence and index our jump table
-    dup1 WNAF_TABLE_MASK() and mload
-    // and away we go again...
-    jump
-}
-
-// alternative WNAF using a jump table.
-#define macro WNAF_JUMP_TABLE__COMPUTE = takes(0) returns(0) {
-    // what on earth?
-    lsb_0 0x00 mstore // 0 00000
-    lsb_1 0x20 mstore // 1 00001
-    lsb_2 0x40 mstore // 2 00010
-    lsb_1 0x60 mstore // 3 00011
-    lsb_3 0x80 mstore // 4 00100
-    lsb_1 0xa0 mstore // 5 00101
-    lsb_2 0xc0 mstore // 6 00110
-    lsb_1 0xe0 mstore // 7 00111
-    lsb_4 0x100 mstore // 8 01000
-    lsb_1 0x120 mstore // 9 01001
-    lsb_2 0x140 mstore // 10 01010
-    lsb_1 0x160 mstore // 11 01011
-    lsb_3 0x180 mstore // 12 01100
-    lsb_1 0x1a0 mstore // 13 01101
-    lsb_2 0x1c0 mstore // 14 01110
-    lsb_1 0x1e0 mstore // 15 01111
-    lsb_5 0x200 mstore // 16 10000
-    lsb_1 0x220 mstore // 17 10001
-    lsb_2 0x240 mstore // 18 10010
-    lsb_1 0x260 mstore // 19 10011
-    lsb_3 0x280 mstore // 20 10100
-    lsb_1 0x2a0 mstore // 21 10101
-    lsb_2 0x2c0 mstore // 22 10110
-    lsb_1 0x2e0 mstore // 23 10111
-    lsb_4 0x300 mstore // 24 11000
-    lsb_1 0x320 mstore // 25 11001
-    lsb_2 0x340 mstore // 26 11010
-    lsb_1 0x360 mstore // 27 11011
-    lsb_3 0x380 mstore // 28 11100
-    lsb_1 0x3a0 mstore // 29 11101
-    lsb_2 0x3c0 mstore // 30 11110
-    lsb_1 0x3e0 mstore // 31 11111
-    // TODO: upgrade Huff compiler to support tables grafted into bytecode
-
-    // Ok, wnaf algorithm. For every scalar multiplier we have, we want to 
-    // convert to two half-length scalars by utilizing a curve endomorphism
-    // (see ENDOMORPHISM for more details).
-    // Once we have these two half-length scalars we need to compute their
-    // windowed-non-adjacent-form representations.
-
-    // So let's start by getting the number of scalars we have
-        GET_NUMBER_OF_POINTS()         // n
-        dup1 dup1 add WNAF_START_LOCATION_MINUS_TWO() add       // m n
-        swap1 0x06 shl                // s m
-    strange_wnaf_start:
-        0x01
-        dup2 calldataload ENDOMORPHISM() // k1 k2 v s m
-        5 shl
-        swap1 5 shl // k2 k1 v s m 269
-    strange_wnaf_continue:
-        dup5 dup4 add     // get wnaf memory offset, and add 'v' (1 or 0)
-        swap1
-
-        // (if k2, v = 1, increasing mem index by 1. if k1, v = 0)
-        dup1 WNAF_TABLE_MASK() and mload jump // and away we go?
-
-    lsb_5:  // w o
-        WNAF_JUMP_TABLE__SLICE<WNAF_SIZE+4,WNAF_SIZE*0x20+0x80,0x80>()
-    lsb_4:  // w o
-        WNAF_JUMP_TABLE__SLICE<WNAF_SIZE+3,WNAF_SIZE*0x20+0x60,0x60>()
-    lsb_3:
-        WNAF_JUMP_TABLE__SLICE<WNAF_SIZE+2,WNAF_SIZE*0x20+0x40,0x40>()
-    lsb_2:
-        WNAF_JUMP_TABLE__SLICE<WNAF_SIZE+1,WNAF_SIZE*0x20+0x20,0x20>()
-    lsb_1:
-        WNAF_JUMP_TABLE__SLICE<WNAF_SIZE,WNAF_SIZE*0x20,0x00>()
-    lsb_0:
-        // if we hit this location, our bit sequence is all zeroes.
-        // This means 1 of two things:
-        //   1. our scalar is empty, so we've converted everything into wnaf form
-        //   2. we just hit a patch of zeroes, and we still have more higher-order bits to convert
-        // So let's test for option 1. The least significant 5 bits are gunk at this point, so
-        // we have work to do if the scalar is > 31 (0x1f)
-        0x1f dup2 gt strange_wnaf_not_finished jumpi
-
-        // If we hit this point, we're done with this scalar,
-        // we check to see if we need to process another endomorphism scalar,
-        // if not we jump back to the start of our loop to grab another scalar from calldata
-        pop swap1                  // k1 o v s m 269 0x1fe0 16 mas kb
-        0x01 dup4 sub swap3 strange_wnaf_continue jumpi
-        // x x x v s m 269 0x1fe0 16 mask b
-        pop pop pop
-        0x20 add    // s' m
-        swap1 0x02 swap1 sub swap1 // s' m' // TODO optimize this
-        dup1 calldatasize sub strange_wnaf_start jumpi // s' m'
-        pop pop
-        wnaf_end jump
-
-
-    strange_wnaf_not_finished:  // w o
-        // we get here from lsb_0, so we just hit a patch of zeroes and still have more work to do.
-        // Update our memory offset pointer to reflect the bits we're about to cleave away
-        swap1 LITERAL<WNAF_TABLE_BITS*0x20>() add swap1
-        // now let's clear away those zeroes and try again
-        WNAF_TABLE_BITS() shr       // w o
-        dup1 WNAF_TABLE_MASK() and mload jump
-
-    wnaf_end:
 }

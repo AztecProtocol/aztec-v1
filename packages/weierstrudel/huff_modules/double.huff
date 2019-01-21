@@ -3,13 +3,19 @@
 // dup4 dup5
 template <p1,p2>
 #define macro DOUBLE_MAIN = takes(3) returns(3) {
-    <p1> dup3 dup1
-    mulmod
-    // stack state: t1 z y x
-    <p2> dup2
-    // stack state: t1 p t1 z y x
-    0x02 shl
-    // stack state: t2 p t1 z y x
+    // stack state: z y x
+    <p1>
+    // stack state: p z y x
+    dup3 callvalue shl
+    // stack state: 2y p z y x
+    swap3 // TODO: I'm sure I can optimize this out
+    // stack state: y p z 2y x
+    dup4 mulmod
+    // stack state: t1 z 2y x
+    <p2>
+    // stack state: p t1 p z 2y x
+    dup2 callvalue shl
+    // stack state: t2 p t1 z 2y x
     dup2 dup1 dup1
     // stack state: p p p t2 p t1 z y x
     dup4 dup10
@@ -28,13 +34,11 @@ template <p1,p2>
     // stack state: t4 t4 p t4 p t2 p t1 z y t3
     mulmod
     // stack state: (t4^2) t4 p t2 p t1 z y t3
-    // dup9 dup1 add
     dup9 callvalue shl
     // stack state: 2t3 (t4^2) t4 p t2 p t1 z y t3
     add
     // x3 is 3x overloaded
     // stack state: x3 t4 p t2 p t1 z y t3 (x3 = 3x overloaded)
-    
     swap8
     // stack state: t3 t4 p t2 p t1 z y x3
     dup9 add
@@ -45,21 +49,15 @@ template <p1,p2>
     // stack state: t1 t2 p y3' z y x3
     mulmod
     // stack state: t1 y3' z y x3
-    // dup1 add
-    callvalue shl
-    // stack state: 2t1 y3' z y x3
     add
-    // stack state: y3 z y x3
+    // stack state: y3 z 2y x3
     // y3 is 3x overloaded
     swap2
-    // stack state: y z y3 x3
+    // stack state: 2y z y3 x3
     <p2>
-    // stack state: p y z -y3 x3
+    // stack state: p 2y z -y3 x3
     swap2
-    // stack state: z y p -y3 x3
-    // dup1 add
-    callvalue shl
-    // stack state: 2z y p -y3 x3
+    // stack state: z 2y p -y3 x3
     mulmod
     // stack state: -z3 -y3 x3
     <p1> sub
