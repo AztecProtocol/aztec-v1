@@ -170,6 +170,15 @@
 //          |
 //          v
 #define macro ALTERNATIVE_MAIN_LOOP = takes(0) returns(0) {
+    // Step 1, validate integrity of inputs.
+    // `callvalue` must be exactly 1 wei. No more or less.
+    // calldatasize must be a clean multiple of 0x60
+    callvalue 0x01 eq
+    0x60 calldatasize div 0x60 mul calldatasize eq
+    and sensible_inputs jumpi
+    400 0x00 mstore
+    0x20 0x00 revert
+sensible_inputs:
     // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
     // Get this out of the way first so we can free up the memory this thing needs for its jump table
     WNAF_GREEDY__SIZE_OF_ENTRY()
@@ -284,7 +293,7 @@
         // stack state: z y x i Z p 2p 3p d
         // Next up, we want to decrease i by the size of a wnaf entry in memory.
         // We then want to load up the next wnaf index and jump.
-        // (the pointer i points to the next wnaf entry, so we're decreasing
+        // (the pointer i points to the next wnaf entry, so we're pointing to
         //    the *next* wnaf pointer, not the current one. This saves a swap op)
         dup9 dup5 add swap4
         mload

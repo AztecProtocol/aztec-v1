@@ -303,51 +303,16 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
 }
 // We expect the size of a WNAF entry to be the first item on the stack at this point
 #define macro WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
-
+    // This macro uses a jump table; copy table from code into memory
     __tablesize(WNAF_GREEDY__JUMP_TABLE) __tablestart(WNAF_GREEDY__JUMP_TABLE) 0x00 codecopy
 
-    /* lsb_0 0x00 mstore // 0 00000
-    lsb_1 0x20 mstore // 1 00001
-    lsb_2 0x40 mstore // 2 00010
-    lsb_1 0x60 mstore // 3 00011
-    lsb_3 0x80 mstore // 4 00100
-    lsb_1 0xa0 mstore // 5 00101
-    lsb_2 0xc0 mstore // 6 00110
-    lsb_1 0xe0 mstore // 7 00111
-    lsb_4 0x100 mstore // 8 01000
-    lsb_1 0x120 mstore // 9 01001
-    lsb_2 0x140 mstore // 10 01010
-    lsb_1 0x160 mstore // 11 01011
-    lsb_3 0x180 mstore // 12 01100
-    lsb_1 0x1a0 mstore // 13 01101
-    lsb_2 0x1c0 mstore // 14 01110
-    lsb_1 0x1e0 mstore // 15 01111 */
-    /* lsb_5 0x200 mstore // 16 10000
-    lsb_1 0x220 mstore // 17 10001
-    lsb_2 0x240 mstore // 18 10010
-    lsb_1 0x260 mstore // 19 10011
-    lsb_3 0x280 mstore // 20 10100
-    lsb_1 0x2a0 mstore // 21 10101
-    lsb_2 0x2c0 mstore // 22 10110
-    lsb_1 0x2e0 mstore // 23 10111
-    lsb_4 0x300 mstore // 24 11000
-    lsb_1 0x320 mstore // 25 11001
-    lsb_2 0x340 mstore // 26 11010
-    lsb_1 0x360 mstore // 27 11011
-    lsb_3 0x380 mstore // 28 11100
-    lsb_1 0x3a0 mstore // 29 11101
-    lsb_2 0x3c0 mstore // 30 11110
-    lsb_1 0x3e0 mstore // 31 11111 */
-    // TODO: upgrade Huff compiler to support tables grafted into bytecode
-
     // Ok, wnaf algorithm. For every scalar multiplier we have, we want to 
-    // convert to two half-length scalars by utilizing a curve endomorphism
+    // convert to two half-length scalars by utilizing one of the bn128 curve's endomorphisms
     // (see ENDOMORPHISM for more details).
     // Once we have these two half-length scalars we need to compute their
     // windowed-non-adjacent-form representations.
 
     // set up our initial stack state...
-    // LITERAL<WNAF_SIZE*0x40+0x100>() 0x100   // 5_base 5_total
     WNAF_TABLE_BITS() dup2 mul                 // d_b d
     dup2 3 mul dup3 WNAF_SIZE() mul add        // 3_t d_b d
     dup3 0x1e add dup2 sub                     // 3_b 3_t d_b d
@@ -370,6 +335,13 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     strange_wnaf_start:
         callvalue
         dup2 calldataload ENDOMORPHISM() // k1 k2 v s m
+        // We start by shifting up the endomorphism-split scalars by 5 bits.
+        // If we now mask off the <WNAF_TABLE_BITS> least significant wnaf bits (pre scaling),
+        // we end up with a value that we can use to index a jump table
+        // (i.e. each wnaf value maps to a word in memory).
+        // Normally bn128 scalars can be up to 254 bits, but our 
+        // split scalars have a maximum bitlength of 127 bits, so we aren't
+        // going to overflow by shifting by 5 bits. Convenient.
         5 shl
         swap1 5 shl // k2 k1 v s m
     strange_wnaf_continue:    // k k' v s m
@@ -409,7 +381,6 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
         // So let's test for option 1. The least significant 5 bits are gunk at this point, so
         // we have work to do if the scalar is > 31 (0x1f)
         0x1f dup2 gt strange_wnaf_not_finished jumpi
-        // 0x20 lt strange_wnaf_not_finished jumpi
         // If we hit this point, we're done with this scalar,
         // we check to see if we need to process another endomorphism scalar,
         // if not we jump back to the start of our loop to grab another scalar from calldata
@@ -422,10 +393,9 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
         pop pop pop
         0x20 add    // s' m
         dup1 calldatasize sub strange_wnaf_start jumpi // s' m'
-        pop pop
-        pop pop pop pop pop pop pop pop
-        pop
-        // if we reach this point we can fall through to exit the macro
+        // if we've reached this point, we've finished with our wnaf algorithm.
+        // clear away all of the junk on the stack and exit the macro
+        pop pop pop pop pop pop pop pop pop pop pop
 }
 
 template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
