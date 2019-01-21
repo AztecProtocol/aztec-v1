@@ -85,6 +85,7 @@ function Runtime(filename, path) {
         const bytecode = `${initCode}${macroCode}`;
         const vm = new VM({ hardfork: 'constantinople' });
         const results = await runCode(vm, bytecode, calldata, offset, sourcemap);
+        console.log('code size = ', macroCode.length / 2);
         const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).sub(new BN(initGasEstimate)).toString(10);
         console.log('gas consumed = ', gasSpent);
         return {
