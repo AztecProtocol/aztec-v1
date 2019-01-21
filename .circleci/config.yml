@@ -24,16 +24,13 @@ jobs: # a collection of steps
           name: "Install Node Modules"
           command: |
             npm install
-            cd aztec-crypto-js
-            npm install
-            cd ../aztec-demo-js
+            cd aztec-demo-js
             npm install
             cd ../
       - save_cache: # special step to save the dependency cache
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
-            - ./aztec-crypto-js/node_modules
             - ./aztec-demo-js/node_modules
       - run: # deploy contracts
           name: "Deploy Contracts"
@@ -41,16 +38,9 @@ jobs: # a collection of steps
       - run: # run tests
           name: "Test AZTEC"
           command: INFURA_API_KEY=$INFURA_API_KEY PRIVATE_KEY=$PRIVATE_KEY MNEMONIC=$MNEMONIC npm run test
-      - run: # run crypto tests
-          name: "Test Crypto"
-          command: |
-            cd aztec-crypto-js
-            npm run test
-            cd ../
       - run: # run demo tests
           name: "Test Demo"
           command: |
             cd aztec-demo-js
-            ln -s ../build/contracts/
             npm run test
             cd ../
