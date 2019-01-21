@@ -7,7 +7,7 @@
 const db = require('./db');
 const wallets = require('../wallets');
 const notes = require('../../../aztec-crypto-js/note');
-const proof = require('../../../aztec-crypto-js/proof');
+const proof = require('../../../aztec-crypto-js/proof/joinSplit');
 const sign = require('../../../aztec-crypto-js/eip712/sign');
 const { NOTE_STATUS } = require('../../config');
 
