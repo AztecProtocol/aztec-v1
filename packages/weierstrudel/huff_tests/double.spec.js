@@ -66,7 +66,7 @@ describe('bn128 double', () => {
     });
 
 
-    it('macro DOUBLE_MAIN correctly calculates point doubling (inverted y)', async () => {
+    it.only('macro DOUBLE_MAIN correctly calculates point doubling (inverted y)', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();
         const yNeg = bn128Reference.p.sub(y);
         const { stack } = await double('DOUBLE_MAIN_IMPL', [x, yNeg, z]);
