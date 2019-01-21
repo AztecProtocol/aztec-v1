@@ -17,7 +17,7 @@
     "ethereumjs-util": "^6.0.0",
     "web3-eth-abi": "^1.0.0-beta.37",
     "web3-eth-accounts": "^1.0.0-beta.37",
-    "web3-utils": "^1.0.0-beta.36"
+    "web3-utils": "^1.0.0-beta.37"
   },
   "devDependencies": {
     "braintree-jsdoc-template": "^3.3.0",
