@@ -1,0 +1,17 @@
+{
+  "extends": "default",
+  "rules": {
+    "indent": [
+      "error",
+      4
+    ],
+    "bracket-align": false,
+    "compiler-fixed": false,
+    "function-max-lines": false,
+    "no-complex-fallback": false,
+    "no-empty-blocks": false,
+    "no-inline-assembly": false,
+    "no-simple-event-func-name": false,
+    "two-lines-top-level-separator": false
+  }
+}
