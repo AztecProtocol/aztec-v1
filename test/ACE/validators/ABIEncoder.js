@@ -7,9 +7,9 @@ const { padLeft } = require('web3-utils');
 const aztecProof = require('../../../aztec-crypto-js/proof/joinSplit');
 const abiEncoder = require('../../../aztec-crypto-js/abiEncoder');
 const { t2, K_MAX } = require('../../../aztec-crypto-js/params');
-const secp256k1 = require('../../../aztec-crypto-js/secp256k1/secp256k1');
+const secp256k1 = require('../../../aztec-crypto-js/secp256k1');
 const sign = require('../../../aztec-crypto-js/eip712/sign');
-const note = require('../../../aztec-crypto-js/note/note');
+const note = require('../../../aztec-crypto-js/note');
 
 // ### Artifacts
 const ABIEncoder = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit/JoinSplitABIEncoderTest');
