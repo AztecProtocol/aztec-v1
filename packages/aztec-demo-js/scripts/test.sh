@@ -21,7 +21,7 @@ fi
 
 echo "Using Mocha $(./node_modules/.bin/mocha --version)"
 
-rm ./contracts
+rm ./contracts || true
 ln -s ../build/contracts
 
 NODE_ENV=TEST ./node_modules/.bin/mocha ./resources --trace-warnings --exit --colors --recursive --reporter spec
