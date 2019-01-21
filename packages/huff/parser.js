@@ -69,7 +69,8 @@ parser.processMacroLiteral = (op, macros) => {
 
 parser.processTemplateLiteral = (literal, macros) => {
     if (literal.includes('-')) {
-        return normalize(literal.split('-').map((op) => {
+        return normalize(literal.split('-').map((rawOp) => {
+            const op = regex.removeSpacesAndLines(rawOp);
             if (regex.containsOperators(op)) {
                 return parser.processTemplateLiteral(op, macros);
             }
@@ -80,7 +81,8 @@ parser.processTemplateLiteral = (literal, macros) => {
         }, null));
     }
     if (literal.includes('+')) {
-        return normalize(literal.split('+').map((op) => {
+        return normalize(literal.split('+').map((rawOp) => {
+            const op = regex.removeSpacesAndLines(rawOp);
             if (regex.containsOperators(op)) {
                 return parser.processTemplateLiteral(op, macros);
             }
@@ -91,7 +93,8 @@ parser.processTemplateLiteral = (literal, macros) => {
         }, null));
     }
     if (literal.includes('*')) {
-        return normalize(literal.split('*').map((op) => {
+        return normalize(literal.split('*').map((rawOp) => {
+            const op = regex.removeSpacesAndLines(rawOp);
             if (regex.containsOperators(op)) {
                 return parser.processTemplateLiteral(op, macros);
             }
@@ -194,10 +197,10 @@ parser.processMacro = (
             if (!result.jumpindices[jumplabel]) {
                 throw new Error(`could not find ${jumplabel} in ${JSON.stringify(result.jumpindices)}`);
             }
-            const { offset } = result.jumpindices[jumplabel];
-            let hex = formatEvenBytes(toHex(offset));
+            const offset = result.jumpindices[jumplabel];
+            const hex = formatEvenBytes(toHex(offset));
             if (!jumptable.table.compressed) {
-                hex = `000000000000000000000000000000000000000000000000000000000000${hex}`;
+                return padNBytes(hex, 0x20);
             }
             return hex;
         }).join('');
@@ -325,10 +328,7 @@ parser.processMacroInternal = (
                 };
             }
             case TYPES.JUMPDEST: {
-                jumpindices[op.value] = {
-                    index,
-                    offset,
-                };
+                jumpindices[op.value] = offset;
                 offset += 1;
                 return {
                     bytecode: opcodes.jumpdest,
@@ -357,8 +357,7 @@ parser.processMacroInternal = (
             // eslint-disable-next-line no-restricted-syntax
             for (const { label: jumplabel, bytecodeIndex } of jumps) {
                 if (jumpindices[jumplabel]) {
-                    const jumpindex = jumpindices[jumplabel].index;
-                    const jumpvalue = padNBytes(toHex(codeIndices[jumpindex]), 2);
+                    const jumpvalue = padNBytes(toHex(jumpindices[jumplabel]), 2);
                     const pre = formattedBytecode.slice(0, bytecodeIndex + 2);
                     const post = formattedBytecode.slice(bytecodeIndex + 6);
                     if (formattedBytecode.slice(bytecodeIndex + 2, bytecodeIndex + 6) !== 'xxxx') {
@@ -397,7 +396,7 @@ parser.processMacroInternal = (
 };
 
 parser.parseJumpTable = (body, compressed = false) => {
-    const jumps = body.match(grammar.jumpTable.JUMPS).map(j => j.replace(/(\r\n\t|\n|\r\t|\s)/gm, ''));
+    const jumps = body.match(grammar.jumpTable.JUMPS).map(j => regex.removeSpacesAndLines(j));
     let size;
     if (compressed) {
         size = jumps.length * 0x02;
