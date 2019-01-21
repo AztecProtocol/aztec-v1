@@ -52,4 +52,8 @@ regex.isLiteral = (input) => {
     return false;
 };
 
+regex.removeSpacesAndLines = (input) => {
+    return input.replace(/(\r\n\t|\n|\r\t|\s)/gm, '');
+};
+
 module.exports = regex;
