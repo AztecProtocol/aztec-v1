@@ -382,11 +382,7 @@ parser.processMacroInternal = (
         bytecode: '',
         sourcemap: [],
     });
-    // TODO. If jump label
-    /* const keys = Object.keys(jumpindices);
-    keys.forEach((key) => {
-        check(jumptable.find(i => i === key), `jump label ${key} is not used anywhere!`);
-    }); */
+
     return {
         data,
         unmatchedJumps,

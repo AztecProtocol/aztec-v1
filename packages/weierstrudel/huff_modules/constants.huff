@@ -23,10 +23,10 @@ template <t>
 }
 
 #define macro WNAF_START_LOCATION = takes(0) returns(1) {
-    GET_NUMBER_OF_POINTS() 0x800 mul 0x180 add
+    GET_NUMBER_OF_POINTS() 0x800 mul 0x200 add
 }
 #define macro WNAF_START_LOCATION_MINUS_TWO = takes(0) returns(1) {
-    GET_NUMBER_OF_POINTS() 0x800 mul 0x17e add
+    GET_NUMBER_OF_POINTS() 0x800 mul 0x1fe add
 }
 #define macro WNAF_END_LOCATION = takes(0) returns(1) {
     LITERAL<WNAF_START_LOCATION+0xfe0>()

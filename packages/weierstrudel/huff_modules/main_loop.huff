@@ -156,14 +156,14 @@
 }
 
 #define jumptable__packed MAIN__JUMP_TABLE {
-    alt_add_0 alt_add_1 alt_add_2 alt_add_3
-    alt_add_4 alt_add_5 alt_add_6 alt_add_7
-    alt_add_8 alt_add_9 alt_add_10 alt_add_11
-    alt_add_12 alt_add_13 alt_add_14 alt_add_15 alt_add_16
-    alt_add_final_0 alt_add_final_1 alt_add_final_2 alt_add_final_3
-    alt_add_final_4 alt_add_final_5 alt_add_final_6 alt_add_final_7
-    alt_add_final_8 alt_add_final_9 alt_add_final_10 alt_add_final_11
-    alt_add_final_12 alt_add_final_13 alt_add_final_14 alt_add_final_15 alt_add_final_16
+    main__add_00 main__add_01 main__add_02 main__add_03 main__add_04 main__add_05 main__add_06 main__add_07
+    main__add_08 main__add_09 main__add_10 main__add_11 main__add_12 main__add_13 main__add_14 main__add_15
+    main__add_16 main__add_17 main__add_18 main__add_19 main__add_20 main__add_21 main__add_22 main__add_23
+    main__add_24 main__add_25 main__add_26 main__add_27 main__add_28 main__add_29 main__add_30
+    main__add_f_00 main__add_f_01 main__add_f_02 main__add_f_03 main__add_f_04 main__add_f_05 main__add_f_06 main__add_f_07
+    main__add_f_08 main__add_f_09 main__add_f_10 main__add_f_11 main__add_f_12 main__add_f_13 main__add_f_14 main__add_f_15
+    main__add_f_16 main__add_f_17 main__add_f_18 main__add_f_19 main__add_f_20 main__add_f_21 main__add_f_22 main__add_f_23
+    main__add_f_24 main__add_f_25 main__add_f_26 main__add_f_27 main__add_f_28 main__add_f_29 main__add_f_30
 }
 
 // start here
@@ -222,8 +222,8 @@ sensible_inputs:
     
     // The next step is to fiddle with the *least* significant wnaf entry. 
     // We want this entry to point to a location in the jump table that will terminate
-    // the algorithm. We can do this by adding 34 (max number of points *2 + 2) to the entry
-    WNAF_START_LOCATION() mload 0x22 add WNAF_START_LOCATION() mstore
+    // the algorithm. We can do this by adding 62 (max number of points *2 + 2) to the entry
+    WNAF_START_LOCATION() mload 0x3e add WNAF_START_LOCATION() mstore
 
     // Next, we set up our jump table.
     __tablesize(MAIN__JUMP_TABLE) __tablestart(MAIN__JUMP_TABLE) 0x1e codecopy
@@ -258,39 +258,67 @@ sensible_inputs:
 
     // jump destinations for our main loop. Each destination 'falls through' to the next
     // destination, so we only need 16 copies of the 'add' algorithm
-    alt_add_16:
+    main__add_30:
+        ADD_MAIN<GET_P_30, dup6, dup7>()
+    main__add_29:
+        ADD_MAIN<GET_P_29, dup6, dup7>()
+    main__add_28:
+        ADD_MAIN<GET_P_28, dup6, dup7>()
+    main__add_27:
+        ADD_MAIN<GET_P_27, dup6, dup7>()
+    main__add_26:
+        ADD_MAIN<GET_P_26, dup6, dup7>()
+    main__add_25:
+        ADD_MAIN<GET_P_25, dup6, dup7>()
+    main__add_24:
+        ADD_MAIN<GET_P_24, dup6, dup7>()
+    main__add_23:
+        ADD_MAIN<GET_P_23, dup6, dup7>()
+    main__add_22:
+        ADD_MAIN<GET_P_22, dup6, dup7>()
+    main__add_21:
+        ADD_MAIN<GET_P_21, dup6, dup7>()
+    main__add_20:
+        ADD_MAIN<GET_P_20, dup6, dup7>()
+    main__add_19:
+        ADD_MAIN<GET_P_19, dup6, dup7>()
+    main__add_18:
+        ADD_MAIN<GET_P_18, dup6, dup7>()
+    main__add_17:
+        ADD_MAIN<GET_P_17, dup6, dup7>()
+    main__add_16:
         ADD_MAIN<GET_P_16, dup6, dup7>()
-    alt_add_15:
+    main__add_15:
         ADD_MAIN<GET_P_15, dup6, dup7>()
-    alt_add_14:
+    main__add_14:
         ADD_MAIN<GET_P_14, dup6, dup7>()
-    alt_add_13:
+    main__add_13:
         ADD_MAIN<GET_P_13, dup6, dup7>()
-    alt_add_12:
+    main__add_12:
         ADD_MAIN<GET_P_12, dup6, dup7>()
-    alt_add_11:
+    main__add_11:
         ADD_MAIN<GET_P_11, dup6, dup7>()
-    alt_add_10:
+    main__add_10:
         ADD_MAIN<GET_P_10, dup6, dup7>()
-    alt_add_9:
+    main__add_09:
         ADD_MAIN<GET_P_9, dup6, dup7>()
-    alt_add_8:
+    main__add_08:
         ADD_MAIN<GET_P_8, dup6, dup7>()
-    alt_add_7:
+    main__add_07:
         ADD_MAIN<GET_P_7, dup6, dup7>()
-    alt_add_6:
+    main__add_06:
         ADD_MAIN<GET_P_6, dup6, dup7>()
-    alt_add_5:
+    main__add_05:
         ADD_MAIN<GET_P_5, dup6, dup7>()
-    alt_add_4:
+    main__add_04:
         ADD_MAIN<GET_P_4, dup6, dup7>()
-    alt_add_3:
+    main__add_03:
         ADD_MAIN<GET_P_3, dup6, dup7>()
-    alt_add_2:
+    main__add_02:
         ADD_MAIN<GET_P_2, dup6, dup7>()
-    alt_add_1:
+    main__add_01:
         ADD_MAIN<GET_P_1, dup6, dup7>()
-    alt_add_0:
+    main__add_00:
         // double the accumulator once there's nothing left to add
         DOUBLE_MAIN<dup6, dup7>()
         // stack state: z y x i Z p 2p 3p d
@@ -306,39 +334,67 @@ sensible_inputs:
 
     // We have a separate instantiation of the 'loop' for the final entry in our wnaf. This is because
     // we don't want to double the accumulator at the end of this section.
-    alt_add_final_16:
+    main__add_f_30:
+        ADD_MAIN<GET_P_30, dup6, dup7>()
+    main__add_f_29:
+        ADD_MAIN<GET_P_29, dup6, dup7>()
+    main__add_f_28:
+        ADD_MAIN<GET_P_28, dup6, dup7>()
+    main__add_f_27:
+        ADD_MAIN<GET_P_27, dup6, dup7>()
+    main__add_f_26:
+        ADD_MAIN<GET_P_26, dup6, dup7>()
+    main__add_f_25:
+        ADD_MAIN<GET_P_25, dup6, dup7>()
+    main__add_f_24:
+        ADD_MAIN<GET_P_24, dup6, dup7>()
+    main__add_f_23:
+        ADD_MAIN<GET_P_23, dup6, dup7>()
+    main__add_f_22:
+        ADD_MAIN<GET_P_22, dup6, dup7>()
+    main__add_f_21:
+        ADD_MAIN<GET_P_21, dup6, dup7>()
+    main__add_f_20:
+        ADD_MAIN<GET_P_20, dup6, dup7>()
+    main__add_f_19:
+        ADD_MAIN<GET_P_19, dup6, dup7>()
+    main__add_f_18:
+        ADD_MAIN<GET_P_18, dup6, dup7>()
+    main__add_f_17:
+        ADD_MAIN<GET_P_17, dup6, dup7>()
+    main__add_f_16:
         ADD_MAIN<GET_P_16, dup6, dup7>()
-    alt_add_final_15:
+    main__add_f_15:
         ADD_MAIN<GET_P_15, dup6, dup7>()
-    alt_add_final_14:
+    main__add_f_14:
         ADD_MAIN<GET_P_14, dup6, dup7>()
-    alt_add_final_13:
+    main__add_f_13:
         ADD_MAIN<GET_P_13, dup6, dup7>()
-    alt_add_final_12:
+    main__add_f_12:
         ADD_MAIN<GET_P_12, dup6, dup7>()
-    alt_add_final_11:
+    main__add_f_11:
         ADD_MAIN<GET_P_11, dup6, dup7>()
-    alt_add_final_10:
+    main__add_f_10:
         ADD_MAIN<GET_P_10, dup6, dup7>()
-    alt_add_final_9:
+    main__add_f_09:
         ADD_MAIN<GET_P_9, dup6, dup7>()
-    alt_add_final_8:
+    main__add_f_08:
         ADD_MAIN<GET_P_8, dup6, dup7>()
-    alt_add_final_7:
+    main__add_f_07:
         ADD_MAIN<GET_P_7, dup6, dup7>()
-    alt_add_final_6:
+    main__add_f_06:
         ADD_MAIN<GET_P_6, dup6, dup7>()
-    alt_add_final_5:
+    main__add_f_05:
         ADD_MAIN<GET_P_5, dup6, dup7>()
-    alt_add_final_4:
+    main__add_f_04:
         ADD_MAIN<GET_P_4, dup6, dup7>()
-    alt_add_final_3:
+    main__add_f_03:
         ADD_MAIN<GET_P_3, dup6, dup7>()
-    alt_add_final_2:
+    main__add_f_02:
         ADD_MAIN<GET_P_2, dup6, dup7>()
-    alt_add_final_1:
+    main__add_f_01:
         ADD_MAIN<GET_P_1, dup6, dup7>()
-    alt_add_final_0:
+    main__add_f_00:
     // We're almost done now. We have our result, but we need to scale the final
     // point's Z-coordinate by the globalZ coordinate, as we performed the
     // entire scalar multiplication algorithm on an isomorphism of the bn128 curve
