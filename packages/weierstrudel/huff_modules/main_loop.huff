@@ -179,6 +179,9 @@
     400 0x00 mstore
     0x20 0x00 revert
 sensible_inputs:
+
+
+    // p 2p 3p
     // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
     // Get this out of the way first so we can free up the memory this thing needs for its jump table
     WNAF_GREEDY__SIZE_OF_ENTRY()
