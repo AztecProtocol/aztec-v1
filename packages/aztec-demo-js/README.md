@@ -29,7 +29,7 @@ API documentation can be found on our [github pages site](https://aztecprotocol.
 
 Then, to test and deploy the contracts:
 
-1. ```node ./node_modules/ganache-cli/cli.js``` && ```truffle migrate```
+1. ```./node_modules/.bin/ganache-cli``` && ```truffle migrate```
 2. set your private key or mnemonic in a `.env` file
 3. run truffle tests with ```truffle test```
 4. go the demo submodule ```cd aztec-demo-js```
