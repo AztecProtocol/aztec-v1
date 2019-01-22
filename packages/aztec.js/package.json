@@ -5,11 +5,22 @@
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
   "main": "index.js",
+  "files": [
+    "lib",
+    "src"
+  ],
   "directories": {
     "doc": "docs",
     "test": "test"
   },
   "homepage": "https://github.com/AztecProtocol/aztec-monorepo#readme",
+  "keywords": [
+    "aztec",
+    "cryptography",
+    "privacy",
+    "ethereum",
+    "blockchain"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AztecProtocol/aztec-monorepo.git"
@@ -30,23 +41,31 @@
     "web3-utils": "^1.0.0-beta.37"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-add-module-exports": "^1.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-minify": "^0.5.0",
     "braintree-jsdoc-template": "^3.3.0",
     "chai": "^4.2.0",
+    "cross-env": "^5.2.0",
     "eslint": "^5.12.1",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
     "rimraf": "^2.6.3",
     "sinon": "^7.2.3"
   },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf -rf ./build ./coverage.json ./coverage ./coverageEnv ./.nyc-output",
+    "clean": "./node_modules/.bin/rimraf -rf ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./lib || true",
     "lint": "./node_modules/.bin/eslint --ignore-pattern docs/ .",
     "lint:fix": "./node_modules/.bin/eslint --ignore-pattern docs/ . --fix",
     "test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
     "test:coverage": "NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "docs": "./node_modules/.bin/jsdoc -c .jsdoc.json"
+    "build": "cross-env BABEL_ENV=production ./node_modules/.bin/babel src --out-dir lib",
+    "build:docs": "./node_modules/.bin/jsdoc -c .jsdoc.json"
   }
 }
