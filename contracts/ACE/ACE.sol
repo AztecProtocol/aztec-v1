@@ -51,31 +51,64 @@ library NoteUtilities {
 /**
  * @title The AZTEC Cryptography Engine
  * @author AZTEC
- * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs,
- * which allows digital asset builders to construct fungible confidential digital assets
- * according to the AZTEC token standard.
+ * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
+ * digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
  **/
 contract ACE {
+    // the commonReferenceString contains one G1 group element and one G2 group element,
+    // that are created via the AZTEC protocol's trusted setup. All zero-knowledge proofs supported
+    // by ACE use the same common reference string.
     bytes32[6] private commonReferenceString;
+
+    // TODO: add a consensus mechanism! This contract is for testing purposes only until then
     address public owner;
+
+    // `validators` contains the validator smart contracts that validate specific proof types
     mapping(uint16 => address) public validators;
+
+    // `balancedProofs` identifies whether a proof type satisfies a balancing relationship.
+    // Proofs are split into two categories - those that prove a balancing relationship and those that don't
+    //      The latter are 'utility' proofs that can be used by developers to add some requirements on top of
+    //      a proof that satisfies a balancing relationship.
+    //      e.g. for a given asset, one might want to only process a join-split transaction if the transaction
+    //      sender can prove that the new note owners do not own > 50% of the total supply of an asset.
+    //
+    //      For the former category, ACE will record that a given proof has satisfied a balancing relationship in
+    //      `validatedProofs`. This proof can then be queried by confidential assets without having to re-validate
+    //      the proof.
+    //      For example, in a bilateral swap proof - a balancing relationship is satisfied for two confidential assets.
+    //      If a DApp validates this proof, it can then send transfer instructions
+    //          to the relevant confidential digital assets.
+    //      These assets can directly query ACE, which will attest to the cryptographic legitimacy of the
+    //          transfer instruction without having to validate another zero-knowledge proof.
     mapping(uint16 => bool) public balancedProofs;
     mapping(bytes32 => bool) private validatedProofs;
 
     event LogSetProof(uint16 _proofType, address _validatorAddress, bool _isBalanced);
     event LogSetCommonReferenceString(bytes32[6] _commonReferenceString);
 
+    /**
+    * @dev contract constructor. Sets the owner of ACE.
+    **/
     constructor() public {
         owner = msg.sender;
     }
 
-    // create our calldata map. The validator smart contract must have the following interface:
-    /*
-        *  function validate(
-        *      bytes _proofData,
-        *      address _sender,
-        *      bytes32[6] _commonReferenceString
-        *  ) public returns (bytes)
+    /**
+    * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
+    *       linked to `_proofType`. The validator smart contract will have the following interface:
+    *       ```
+    *           function validate(
+    *               bytes _proofData,
+    *               address _sender,
+    *               bytes32[6] _commonReferenceString
+    *           ) public returns (bytes)
+    *       ```
+    * @param _proofType the AZTEC proof type
+    * @param _sender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *   an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return a `bytes proofOutputs` variable formatted according to the Cryptography Engine standard
     */
     function validateProof(
         uint16 _proofType,
@@ -132,6 +165,18 @@ contract ACE {
         }
     }
 
+    /**
+    * @dev Clear storage variables set when validating zero-knowledge proofs.
+    *      The only address that can clear data from `validatedProofs` is the address that created the proof.
+    *      Function is designed to utilize [EIP-1283](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1283.md)
+    *      to reduce gas costs. It is highly likely that any storage variables set by `validateProof`
+    *      are only required for the duration of a single transaction.
+    *      E.g. a decentralized exchange validating a swap proof and sending transfer instructions to
+    *      two confidential assets.
+    *      This method allows the calling smart contract to recover most of the gas spent by setting `validatedProofs`
+    * @param _proofType the AZTEC proof type
+    * Unnamed param is a dynamic array of proof hashes
+    */
     function clearProofByHashes(uint16 _proofType, bytes32[]) external {
         assembly {
             let m := mload(0x40)
@@ -154,6 +199,15 @@ contract ACE {
         }
     }
 
+    /**
+    * @dev Validate a previously validated AZTEC proof via its hash
+    *      This enables confidential assets to receive transfer instructions from a Dapp that
+    *      has already validated an AZTEC proof that satisfies a balancing relationship.
+    * @param _proofType the AZTEC proof type
+    * @param _proofHash the hash of the `proofOutput` received by the asset
+    * @param _sender the Ethereum address of the contract issuing the transfer instruction
+    * @return a boolean that signifies whether the corresponding AZTEC proof has been validated
+    */
     function validateProofByHash(
         uint16 _proofType,
         bytes32 _proofHash,
@@ -171,12 +225,24 @@ contract ACE {
         }
     }
 
+    /**
+    * @dev Set the common reference string
+    *      If the trusted setup is re-run, we will need to be able to change the crs
+    * @param _commonReferenceString the new commonReferenceString
+    */
     function setCommonReferenceString(bytes32[6] memory _commonReferenceString) public {
         require(msg.sender == owner, "only the owner can set the common reference string!");
         commonReferenceString = _commonReferenceString;
         emit LogSetCommonReferenceString(_commonReferenceString);
     }
 
+    /**
+    * @dev Adds or modifies a proofType into the Cryptography Engine.
+    *      This method links a given `_proofType` to a smart contract validator.
+    * @param _proofType the AZTEC proof type
+    * @param _validatorAddress the address of the smart contract validator
+    * @param _isBalanced does this proof satisfy a balancing relationship?
+    */
     function setProof(
         uint16 _proofType,
         address _validatorAddress,
@@ -188,8 +254,11 @@ contract ACE {
         emit LogSetProof(_proofType, _validatorAddress, _isBalanced);
     }
     
-    // we use a custom getter for `commonReferenceString` - the default getter created by making this
-    // variable public indexes individual elements of the array and we want to return the whole array
+    /**
+    * @dev Returns the common reference string.
+    * we use a custom getter for `commonReferenceString` - the default getter created by making the storage
+    * variable public indexes individual elements of the array, and we want to return the whole array
+    */
     function getCommonReferenceString() public view returns (bytes32[6]) {
         return commonReferenceString;
     }
