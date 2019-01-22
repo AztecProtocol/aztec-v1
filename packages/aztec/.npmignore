@@ -1,0 +1,7 @@
+.*
+
+jsdocConf.json
+
+/docs/
+/src/
+test/

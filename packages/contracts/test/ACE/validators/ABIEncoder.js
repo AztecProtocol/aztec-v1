@@ -4,12 +4,8 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const aztecProof = require('../../../aztec-crypto-js/proof/joinSplit');
-const abiEncoder = require('../../../aztec-crypto-js/abiEncoder');
-const { t2, K_MAX } = require('../../../aztec-crypto-js/params');
-const secp256k1 = require('../../../aztec-crypto-js/secp256k1');
-const sign = require('../../../aztec-crypto-js/eip712/sign');
-const note = require('../../../aztec-crypto-js/note');
+const aztec = require('aztec.js');
+const { params: { t2, K_MAX } } = require('aztec.js');
 
 // ### Artifacts
 const ABIEncoder = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit/JoinSplitABIEncoderTest');
@@ -29,9 +25,9 @@ contract('ABI Encoder', (accounts) => {
     describe('success states', () => {
         let crs;
         beforeEach(async () => {
-            aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
+            aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
             notes = aztecAccounts.map(({ publicKey }) => {
-                return note.create(publicKey, randomNoteValue());
+                return aztec.note.create(publicKey, randomNoteValue());
             });
 
             aztecAbiEncoder = await ABIEncoder.new(fakeNetworkId, {
@@ -54,10 +50,10 @@ contract('ABI Encoder', (accounts) => {
             const {
                 proofData,
                 challenge,
-            } = aztecProof.constructJoinSplit([...inputNotes, ...outputNotes], m, accounts[0], 0);
+            } = aztec.proof.joinSplit.constructJoinSplit([...inputNotes, ...outputNotes], m, accounts[0], 0);
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
-                return sign.signACENote(
+                return aztec.sign.signACENote(
                     proofData[index],
                     challenge,
                     senderAddress,
@@ -68,7 +64,7 @@ contract('ABI Encoder', (accounts) => {
             });
             const publicOwner = aztecAccounts[0].address;
             const outputOwners = outputNotes.map(n => n.owner);
-            const data = abiEncoder.joinSplit.encode(
+            const data = aztec.abiEncoder.joinSplit.encode(
                 proofData,
                 m,
                 challenge,
@@ -83,14 +79,14 @@ contract('ABI Encoder', (accounts) => {
                 gas: 4000000,
             });
 
-            const expected = abiEncoder.outputCoder.encodeProofOutputs([{
+            const expected = aztec.abiEncoder.outputCoder.encodeProofOutputs([{
                 inputNotes,
                 outputNotes,
                 publicOwner,
                 publicValue: 0,
             }]);
 
-            const decoded = abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);

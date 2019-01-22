@@ -1,10 +1,10 @@
 .DS_Store
 .nyc_output/
 
+accounts.json
+coverage.json
+
 build/
 coverage/
 coverageEnv/
 node_modules/
-
-accounts.json
-coverage.json
