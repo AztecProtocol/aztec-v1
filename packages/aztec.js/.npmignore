@@ -1,7 +1,5 @@
 .*
 
-jsdocConf.json
-
-/docs/
-/src/
+docs/
+src/
 test/

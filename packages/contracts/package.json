@@ -3,11 +3,18 @@
   "version": "0.2.0",
   "author": "AZTEC",
   "description": "AZTEC Smart Contract Repository",
-  "license": "© Copyright Spilsbury Holdings Ltd 2018, All Right Reserved",
+  "license": "LGPL-3.0",
   "directories": {
     "test": "test"
   },
   "homepage": "https://github.com/AztecProtocol/aztec-monorepo#readme",
+  "keywords": [
+    "aztec",
+    "cryptography",
+    "privacy",
+    "ethereum",
+    "blockchain"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AztecProtocol/aztec-monorepo.git"
@@ -16,6 +23,7 @@
     "url": "https://github.com/AztecProtocol/aztec-monorepo/issues"
   },
   "dependencies": {
+    "aztec.js": "file:../aztec.js",
     "bn.js": "^4.11.8",
     "ganache-cli": "^6.2.5",
     "openzeppelin-solidity": "2.0.0",
@@ -32,7 +40,6 @@
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.12.4",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
@@ -42,7 +49,7 @@
     "solidity-coverage": "^0.5.11"
   },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf -rf ./build ./coverage.json ./coverage ./coverageEnv ./.nyc-output",
+    "clean": "./node_modules/.bin/rimraf -rf ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json || true",
     "lint:js": "./node_modules/.bin/eslint .",
     "lint:js:fix": "./node_modules/.bin/eslint . --fix",
     "lint:sol": "./node_modules/.bin/solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",

@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const aztec = require('aztec.js');
 const { params: { t2, GROUP_MODULUS } } = require('aztec.js');
 
-const exceptions = require('../exceptions');
+const exceptions = require('../../utils/exceptions');
 
 // ### Artifacts
 const AZTEC = artifacts.require('./contracts/AZTEC/AZTEC');

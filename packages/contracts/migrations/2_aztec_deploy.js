@@ -4,7 +4,7 @@ const AZTEC = artifacts.require('./AZTEC.sol');
 const AZTECERC20Bridge = artifacts.require('./AZTECERC20Bridge.sol');
 
 const { params: { t2 } } = require('aztec.js');
-const { config: { daiAddress, erc20ScalingFactor } } = require('@aztec/demo');
+const { DAI_ADDRESS, ERC20_SCALING_FACTOR } = require('../utils/constants');
 
 module.exports = (deployer, network) => {
     // just a bytecode switcheroo, nothing to see here...
@@ -14,10 +14,10 @@ module.exports = (deployer, network) => {
         .then(() => deployer.link(AZTEC, AZTECERC20Bridge))
         .then(() => {
             if (network === 'mainnet') {
-                return Promise.resolve({ address: daiAddress });
+                return Promise.resolve({ address: DAI_ADDRESS });
             }
             return deployer.deploy(ERC20Mintable);
         })
         .then(({ address: erc20Address }) => deployer
-            .deploy(AZTECERC20Bridge, t2, erc20Address, erc20ScalingFactor, deployer.network_id));
+            .deploy(AZTECERC20Bridge, t2, erc20Address, ERC20_SCALING_FACTOR, deployer.network_id));
 };

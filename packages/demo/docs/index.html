@@ -111,11 +111,12 @@
 <li>run <code>git submodule update --init --recursive</code>  </li>
 <li>followed by <code>npm install</code> &amp;&amp; <code>npm install ./aztec-crypto-js</code> &amp;&amp; <code>npm install ./aztec-demo-js</code>  </li>
 </ol>
-<p>Then, to run a test net and deploy contracts:</p>
+<p>Then, to test and deploy the contracts:</p>
 <ol>
-<li><code>node ./node_modules/ganache-cli/cli.js</code> &amp;&amp; <code>truffle migrate</code></li>
+<li><code>./node_modules/.bin/ganache-cli</code> &amp;&amp; <code>truffle migrate</code></li>
+<li>set your private key or mnemonic in a <code>.env</code> file</li>
 <li>run truffle tests with <code>truffle test</code></li>
-<li>copy contracts to the demo submodule <code>cd aztec-demo-js &amp;&amp; cp -r ../build/contracts/ ./contracts/</code></li>
+<li>go the demo submodule <code>cd aztec-demo-js</code></li>
 <li>run javascript tests with <code>npm run test</code></li>
 </ol>
 <p>Finally, run the demo transactions script (to the appropriate network) with the following:</p>

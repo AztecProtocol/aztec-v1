@@ -13,7 +13,7 @@
         "dictionaries": ["jsdoc","closure"]
     },
     "templates": {
-        "referenceTitle": "aztec-crypto-js",
+        "referenceTitle": "aztec-js",
         "disableSort": false,
         "collapse": true
     },

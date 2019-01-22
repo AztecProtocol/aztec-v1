@@ -16,8 +16,8 @@ const aztec = require('aztec.js');
 const { params: { t2, GROUP_MODULUS } } = require('aztec.js');
 const { proof: { joinSplit } } = require('aztec.js');
 
-const { ZERO_ADDRESS } = require('../constants');
-const exceptions = require('../exceptions');
+const { ZERO_ADDRESS } = require('../../utils/constants');
+const exceptions = require('../../utils/exceptions');
 
 const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'));
 

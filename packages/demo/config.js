@@ -4,8 +4,6 @@
  * @module config
  */
 
-const BN = require('bn.js');
-
 const environment = {
     TEST: {
         db: 'dbTest.json',
@@ -82,10 +80,6 @@ const config = {
         UNSPENT: 'UNSPENT',
         SPENT: 'SPENT',
     },
-    daiAddress: '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359', // address of the mainNet DAI smart contract
-    // generic scaling factor that maps between AZTEC note values and ERC20 token balances.
-    // when used for DAI token, 1 AZTEC note value = 0.1 DAI
-    erc20ScalingFactor: new BN('100000000000000000', 10),
 };
 
 function getConfig() {

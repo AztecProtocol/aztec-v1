@@ -4,7 +4,15 @@
   "author": "AZTEC",
   "description": "AZTEC javascript demos",
   "license": "LGPL-3.0",
+  "main": "index.js",
   "homepage": "https://github.com/AztecProtocol/aztec-monorepo#readme",
+  "keywords": [
+    "aztec",
+    "cryptography",
+    "privacy",
+    "ethereum",
+    "blockchain"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AztecProtocol/aztec-monorepo.git"
@@ -44,6 +52,6 @@
     "demo:kovan": "NODE_ENV=KOVAN node ./scripts/demoTransactions.js",
     "demo:development": "NODE_ENV=DEVELOPMENT node ./scripts/demoTransactions.js",
     "demo:mainnet": "NODE_ENV=MAINNET node ./scripts/demoTransactions.js",
-    "docs": "./node_modules/.bin/jsdoc -c .jsdoc.json"
+    "build:docs": "./node_modules/.bin/jsdoc -c .jsdoc.json"
   }
 }

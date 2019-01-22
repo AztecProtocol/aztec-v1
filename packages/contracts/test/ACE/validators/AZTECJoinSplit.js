@@ -9,7 +9,7 @@ const aztec = require('aztec.js');
 const { params: { t2 } } = require('aztec.js');
 const { proof: { joinSplit } } = require('aztec.js');
 
-const exceptions = require('../../exceptions');
+const exceptions = require('../../../utils/exceptions');
 
 // ### Artifacts
 const AZTEC = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');

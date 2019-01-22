@@ -1,0 +1,161 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      lib/proof/joinSplit/index.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+  <link type="text/css" rel="stylesheet" href="styles/collapse.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      aztec-js
+    </h3>
+
+    
+
+    <h3>Classes</h3><ul><li id="Keccak-nav"><a href="Keccak.html">Keccak</a><ul class='methods'><li data-type="method" id="Keccak-append-nav"><a href="Keccak.html#append">append</a></li><li data-type="method" id="Keccak-append-nav"><a href="Keccak.html#append">append</a></li><li data-type="method" id="Keccak-appendBN-nav"><a href="Keccak.html#appendBN">appendBN</a></li><li data-type="method" id="Keccak-appendBN-nav"><a href="Keccak.html#appendBN">appendBN</a></li><li data-type="method" id="Keccak-appendBN-nav"><a href="Keccak.html#appendBN">appendBN</a></li><li data-type="method" id="Keccak-appendBN-nav"><a href="Keccak.html#appendBN">appendBN</a></li></ul></li><li id="Note-nav"><a href="Note.html">Note</a><ul class='methods'><li data-type="method" id="Note-derive-nav"><a href="Note.html#derive">derive</a></li><li data-type="method" id="Note-exportMetadata-nav"><a href="Note.html#exportMetadata">exportMetadata</a></li><li data-type="method" id="Note-exportNote-nav"><a href="Note.html#exportNote">exportNote</a></li><li data-type="method" id="Note-getPublic-nav"><a href="Note.html#getPublic">getPublic</a></li><li data-type="method" id="Note-getPublic-nav"><a href="Note.html#getPublic">getPublic</a></li><li data-type="method" id="Note-getView-nav"><a href="Note.html#getView">getView</a></li></ul></li></ul><h3>Modules</h3><ul><li id="bn128-nav"><a href="module-bn128.html">bn128</a><ul class='methods'><li data-type="method" id="bn128-randomGroupScalar-nav"><a href="module-bn128.html#.randomGroupScalar">randomGroupScalar</a></li><li data-type="method" id="bn128-randomGroupScalar-nav"><a href="module-bn128.html#.randomGroupScalar">randomGroupScalar</a></li><li data-type="method" id="bn128-randomPoint-nav"><a href="module-bn128.html#.randomPoint">randomPoint</a></li><li data-type="method" id="bn128-randomPoint-nav"><a href="module-bn128.html#.randomPoint">randomPoint</a></li><li data-type="method" id="bn128-recoverMessage-nav"><a href="module-bn128.html#.recoverMessage">recoverMessage</a></li><li data-type="method" id="bn128-recoverMessage-nav"><a href="module-bn128.html#.recoverMessage">recoverMessage</a></li><li data-type="method" id="bn128-compress-nav"><a href="module-bn128.html#~compress">compress</a></li><li data-type="method" id="bn128-decompress-nav"><a href="module-bn128.html#~decompress">decompress</a></li><li data-type="method" id="bn128-decompressHex-nav"><a href="module-bn128.html#~decompressHex">decompressHex</a></li></ul></li><li id="eip712-nav"><a href="module-eip712.html">eip712</a><ul class='methods'><li data-type="method" id="eip712-encodeMessageData-nav"><a href="module-eip712.html#~encodeMessageData">encodeMessageData</a></li><li data-type="method" id="eip712-encodeMessageData-nav"><a href="module-eip712.html#~encodeMessageData">encodeMessageData</a></li><li data-type="method" id="eip712-encodeStruct-nav"><a href="module-eip712.html#~encodeStruct">encodeStruct</a></li><li data-type="method" id="eip712-encodeStruct-nav"><a href="module-eip712.html#~encodeStruct">encodeStruct</a></li><li data-type="method" id="eip712-encodeTypedData-nav"><a href="module-eip712.html#~encodeTypedData">encodeTypedData</a></li><li data-type="method" id="eip712-encodeTypedData-nav"><a href="module-eip712.html#~encodeTypedData">encodeTypedData</a></li></ul></li><li id="note-nav"><a href="module-note.html">note</a><ul class='methods'><li data-type="method" id="note-createSharedSecret-nav"><a href="module-note.html#.createSharedSecret">createSharedSecret</a></li><li data-type="method" id="note-createSharedSecret-nav"><a href="module-note.html#.createSharedSecret">createSharedSecret</a></li><li data-type="method" id="note-derive-nav"><a href="module-note.html#~derive">derive</a></li><li data-type="method" id="note-derive-nav"><a href="module-note.html#~derive">derive</a></li><li data-type="method" id="note-fromPublicKey-nav"><a href="module-note.html#~fromPublicKey">fromPublicKey</a></li><li data-type="method" id="note-fromPublicKey-nav"><a href="module-note.html#~fromPublicKey">fromPublicKey</a></li><li data-type="method" id="note-fromValue-nav"><a href="module-note.html#~fromValue">fromValue</a></li><li data-type="method" id="note-fromValue-nav"><a href="module-note.html#~fromValue">fromValue</a></li><li data-type="method" id="note-fromValue-nav"><a href="module-note.html#~fromValue">fromValue</a></li><li data-type="method" id="note-fromValue-nav"><a href="module-note.html#~fromValue">fromValue</a></li><li data-type="method" id="note-fromViewKey-nav"><a href="module-note.html#~fromViewKey">fromViewKey</a></li><li data-type="method" id="note-fromViewKey-nav"><a href="module-note.html#~fromViewKey">fromViewKey</a></li></ul></li><li id="params-nav"><a href="module-params.html">params</a></li><li id="proof-nav"><a href="module-proof.html">proof</a><ul class='methods'><li data-type="method" id="proof-computeChallenge-nav"><a href="module-proof.html#~computeChallenge">computeChallenge</a></li><li data-type="method" id="proof-constructJoinSplit-nav"><a href="module-proof.html#~constructJoinSplit">constructJoinSplit</a></li><li data-type="method" id="proof-constructJoinSplit-nav"><a href="module-proof.html#~constructJoinSplit">constructJoinSplit</a></li><li data-type="method" id="proof-constructJoinSplit-nav"><a href="module-proof.html#~constructJoinSplit">constructJoinSplit</a></li><li data-type="method" id="proof-constructJoinSplit-nav"><a href="module-proof.html#~constructJoinSplit">constructJoinSplit</a></li><li data-type="method" id="proof-generateBlindingScalars-nav"><a href="module-proof.html#~generateBlindingScalars">generateBlindingScalars</a></li><li data-type="method" id="proof-generateBlindingScalars-nav"><a href="module-proof.html#~generateBlindingScalars">generateBlindingScalars</a></li><li data-type="method" id="proof-parseInputs-nav"><a href="module-proof.html#~parseInputs">parseInputs</a></li><li data-type="method" id="proof-parseInputs-nav"><a href="module-proof.html#~parseInputs">parseInputs</a></li></ul></li><li id="secp256k1-nav"><a href="module-secp256k1.html">secp256k1</a><ul class='methods'><li data-type="method" id="secp256k1-accountFromPrivateKey-nav"><a href="module-secp256k1.html#.accountFromPrivateKey">accountFromPrivateKey</a></li><li data-type="method" id="secp256k1-accountFromPrivateKey-nav"><a href="module-secp256k1.html#.accountFromPrivateKey">accountFromPrivateKey</a></li><li data-type="method" id="secp256k1-generateAccount-nav"><a href="module-secp256k1.html#.generateAccount">generateAccount</a></li><li data-type="method" id="secp256k1-generateAccount-nav"><a href="module-secp256k1.html#.generateAccount">generateAccount</a></li><li data-type="method" id="secp256k1-randomPoint-nav"><a href="module-secp256k1.html#.randomPoint">randomPoint</a></li><li data-type="method" id="secp256k1-randomPoint-nav"><a href="module-secp256k1.html#.randomPoint">randomPoint</a></li><li data-type="method" id="secp256k1-compress-nav"><a href="module-secp256k1.html#~compress">compress</a></li><li data-type="method" id="secp256k1-compress-nav"><a href="module-secp256k1.html#~compress">compress</a></li><li data-type="method" id="secp256k1-decompress-nav"><a href="module-secp256k1.html#~decompress">decompress</a></li><li data-type="method" id="secp256k1-decompress-nav"><a href="module-secp256k1.html#~decompress">decompress</a></li><li data-type="method" id="secp256k1-decompress-nav"><a href="module-secp256k1.html#~decompress">decompress</a></li><li data-type="method" id="secp256k1-decompress-nav"><a href="module-secp256k1.html#~decompress">decompress</a></li></ul></li><li id="setup-nav"><a href="module-setup.html">setup</a><ul class='methods'><li data-type="method" id="setup-compress-nav"><a href="module-setup.html#~compress">compress</a></li><li data-type="method" id="setup-compress-nav"><a href="module-setup.html#~compress">compress</a></li><li data-type="method" id="setup-decompress-nav"><a href="module-setup.html#~decompress">decompress</a></li><li data-type="method" id="setup-decompress-nav"><a href="module-setup.html#~decompress">decompress</a></li><li data-type="method" id="setup-readSignature-nav"><a href="module-setup.html#~readSignature">readSignature</a></li><li data-type="method" id="setup-readSignature-nav"><a href="module-setup.html#~readSignature">readSignature</a></li><li data-type="method" id="setup-readSignatureSync-nav"><a href="module-setup.html#~readSignatureSync">readSignatureSync</a></li><li data-type="method" id="setup-readSignatureSync-nav"><a href="module-setup.html#~readSignatureSync">readSignatureSync</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#compress">compress</a></li><li><a href="global.html#decompress">decompress</a></li><li><a href="global.html#decompressHex">decompressHex</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        lib/proof/joinSplit/index.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>'use strict';function _toConsumableArray(a){if(Array.isArray(a)){for(var b=0,c=Array(a.length);b&lt;a.length;b++)c[b]=a[b];return c}return Array.from(a)}/**
+ * Constructs AZTEC join-split zero-knowledge proofs
+ *
+ * @module proof
+ */var BN=require('bn.js'),_require=require('web3-utils'),padLeft=_require.padLeft,Keccak=require('../../keccak'),bn128=require('../../bn128'),_require2=require('../../params'),K_MAX=_require2.K_MAX,groupReduction=bn128.groupReduction,proof={};/**
+ * Generate random blinding scalars, conditional on the AZTEC join-split proof statement
+ *   Separated out into a distinct method so that we can stub this for extractor tests
+ *
+ * @method generateBlindingScalars
+ * @param {number} n number of notes
+ * @param {number} m number of input notes
+ */proof.generateBlindingScalars=function(a,b){var c=new BN(0).toRed(groupReduction),d=[].concat(_toConsumableArray(Array(a))).map(function(d,e){var f=bn128.randomGroupScalar(),g=bn128.randomGroupScalar();return e===a-1&amp;&amp;(a===b?f=new BN(0).toRed(groupReduction).redSub(c):f=c),c=e+1>b?c.redSub(f):c.redAdd(f),{bk:f,ba:g}});return d},proof.computeChallenge=function(){for(var a=arguments.length,b=Array(a),c=0;c&lt;a;c++)b[c]=arguments[c];var d=new Keccak,e=function(a){a.forEach(function(a){if('string'==typeof a)d.appendBN(new BN(a.slice(2),16));else if('number'==typeof a)d.appendBN(new BN(a));else if(BN.isBN(a))d.appendBN(a.umod(bn128.curve.n));else if(Array.isArray(a))e(a);else if(a.gamma)d.append(a.gamma),d.append(a.sigma);else if(a.B)d.append(a.B);else throw new Error('I don\'t know how to add '+a+' to hash')})};return e(b),d.keccak(groupReduction)};function isOnCurve(a){var b=a.y.redSqr(),c=a.x.redSqr().redMul(a.x).redAdd(bn128.curve.b);return b.fromRed().eq(c.fromRed())}/**
+ * Validate proof inputs are well formed
+ *
+ * @method parseInputs
+ * @param {Object[]} notes array of AZTEC notes
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ *//**
+ * Construct AZTEC join-split proof transcript
+ *
+ * @method constructJoinSplit
+ * @param {Object[]} notes array of AZTEC notes
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ * @returns {Object} proof data and challenge
+ *//**
+ * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
+ *
+ * @method constructJoinSplit
+ * @param {Object[]} notes array of AZTEC notes
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ * @returns {Object} proof data and challenge
+ */proof.parseInputs=function(a,b,c,d){if(a.forEach(function(a){if(!a.a.fromRed().lt(bn128.curve.n)||a.a.fromRed().eq(new BN(0)))throw new Error('viewing key malformed');if(!a.k.fromRed().lt(new BN(K_MAX)))throw new Error('note value malformed');if(a.gamma.isInfinity()||a.sigma.isInfinity())throw new Error('point at infinity');if(!isOnCurve(a.gamma)||!isOnCurve(a.sigma))throw new Error('point not on curve')}),!d.lt(bn128.curve.n))throw new Error('kPublic value malformed');if(b>a.length)throw new Error('m is greater than note array length')},proof.constructJoinSplit=function(a,b,c,d){// rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
+var e=new Keccak,f=void 0;// convert kPublic into a BN instance if it is not one
+f=BN.isBN(d)?d:0>d?bn128.curve.n.sub(new BN(-d)):new BN(d),proof.parseInputs(a,b,c,f),a.forEach(function(a){e.append(a.gamma),e.append(a.sigma)});// finalHash is used to create final proof challenge
+// define 'running' blinding factor for the k-parameter in final note
+var g=new BN(0).toRed(groupReduction),h=proof.generateBlindingScalars(a.length,b),i=a.map(function(a,c){var d=void 0,f=new BN(0).toRed(groupReduction),i=h[c],j=i.bk,k=i.ba;if(c+1>b){f=e.keccak(groupReduction);var l=j.redMul(f),m=k.redMul(f);g=g.redSub(j),d=a.gamma.mul(l).add(bn128.h.mul(m))}else g=g.redAdd(j),d=a.gamma.mul(j).add(bn128.h.mul(k));return{bk:j,ba:k,B:d,x:f}}),j=proof.computeChallenge(c,f,b,a,i),k=i.map(function(b,c){var d=a[c].k.redMul(j).redAdd(b.bk).fromRed(),e=a[c].a.redMul(j).redAdd(b.ba).fromRed();return c===a.length-1&amp;&amp;(d=f),['0x'+padLeft(d.toString(16),64),'0x'+padLeft(e.toString(16),64),'0x'+padLeft(a[c].gamma.x.fromRed().toString(16),64),'0x'+padLeft(a[c].gamma.y.fromRed().toString(16),64),'0x'+padLeft(a[c].sigma.x.fromRed().toString(16),64),'0x'+padLeft(a[c].sigma.y.fromRed().toString(16),64)]});return{proofData:k,challenge:'0x'+padLeft(j.toString(16),64)}},proof.constructJoinSplitModified=function(a,b,c,d,e){// rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
+var f=new Keccak,g=void 0;// convert kPublic into a BN instance if it is not one
+g=BN.isBN(d)?d:0>d?bn128.curve.n.sub(new BN(-d)):new BN(d),proof.parseInputs(a,b,c,g),a.forEach(function(a){f.append(a.gamma),f.append(a.sigma)});// finalHash is used to create final proof challenge
+// define 'running' blinding factor for the k-parameter in final note
+var h=new BN(0).toRed(groupReduction),j=proof.generateBlindingScalars(a.length,b),k=a.map(function(a,c){var d=void 0,e=new BN(0).toRed(groupReduction),g=j[c],i=g.bk,k=g.ba;if(c+1>b){e=f.keccak(groupReduction);var l=i.redMul(e),m=k.redMul(e);h=h.redSub(i),d=a.gamma.mul(l).add(bn128.h.mul(m))}else h=h.redAdd(i),d=a.gamma.mul(i).add(bn128.h.mul(k));return{bk:i,ba:k,B:d,x:e}}),l=proof.computeChallenge(c,g,b,e,a,k),m=k.map(function(b,c){var d=a[c].k.redMul(l).redAdd(b.bk).fromRed(),e=a[c].a.redMul(l).redAdd(b.ba).fromRed();return c===a.length-1&amp;&amp;(d=g),['0x'+padLeft(d.toString(16),64),'0x'+padLeft(e.toString(16),64),'0x'+padLeft(a[c].gamma.x.fromRed().toString(16),64),'0x'+padLeft(a[c].gamma.y.fromRed().toString(16),64),'0x'+padLeft(a[c].sigma.x.fromRed().toString(16),64),'0x'+padLeft(a[c].sigma.y.fromRed().toString(16),64)]});return{proofData:m,challenge:'0x'+padLeft(l.toString(16),64)}},module.exports=proof;</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>
