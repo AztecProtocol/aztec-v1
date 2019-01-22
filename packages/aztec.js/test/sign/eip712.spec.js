@@ -5,7 +5,7 @@ const ethUtil = require('ethereumjs-util');
 
 const { expect } = chai;
 
-const eip712 = require('../../src/eip712');
+const eip712 = require('../../src/sign/eip712');
 
 describe('eip712.js tests', () => {
     let simple;

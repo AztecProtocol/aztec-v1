@@ -9,7 +9,7 @@ const notes = require('./resources/notes');
 const transactions = require('./resources/transactions');
 const wallets = require('./resources/wallets');
 const web3 = require('./web3Listener');
-const keystore = require('../accounts');
+const keystore = require('./accounts');
 
 const { erc20ScalingFactor: scalingFactor } = config;
 

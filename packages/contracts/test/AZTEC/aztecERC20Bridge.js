@@ -79,7 +79,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
                 ],
             };
             const message = aztec.sign.generateAZTECDomainParams(aztecToken.address, fakeNetworkId);
-            const domainHash = sha3(`0x${aztec.eip712.encodeMessageData(domainTypes, 'EIP712Domain', message)}`);
+            const domainHash = sha3(`0x${aztec.sign.eip712.encodeMessageData(domainTypes, 'EIP712Domain', message)}`);
             expect(domainHash).to.equal(storage[4]);
         });
 
@@ -254,7 +254,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             const m = 1;
 
             const kPublic = 9001;
-            const { proofData, challenge } = joinSplit.helpers.constructJoinSplit(commitment, m, accounts[0], kPublic);
+            const { proofData, challenge } = joinSplit.constructJoinSplit(commitment, m, accounts[0], kPublic);
             const { address } = aztecToken;
             const signatures = [
                 aztec.sign.signNote(proofData[0], challenge, accounts[0], address, aztecAccounts[0].privateKey, fakeNetworkId),

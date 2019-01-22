@@ -1,10 +1,10 @@
 const chai = require('chai');
 const { padLeft, sha3 } = require('web3-utils');
-const eip712 = require('../../src/eip712');
 
 const { expect } = chai;
 
-const sign = require('../../src/eip712/sign');
+const sign = require('../../src/sign');
+const eip712 = require('../../src/sign/eip712');
 
 describe('sign tests', () => {
     const domainTypes = {

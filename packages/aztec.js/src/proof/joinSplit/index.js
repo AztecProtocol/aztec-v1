@@ -5,13 +5,20 @@
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
+const Keccak = require('../../keccak');
 const { K_MAX } = require('../../params');
+
+const extractor = require('./extractor');
+const helpers = require('./helpers');
+const verifier = require('./verifier');
 
 const { groupReduction } = bn128;
 
-const proof = {};
+const joinSplit = {};
+joinSplit.extractor = extractor;
+joinSplit.helpers = helpers;
+joinSplit.verifier = verifier;
 
 /**
  * Generate random blinding scalars, conditional on the AZTEC join-split proof statement
@@ -21,7 +28,7 @@ const proof = {};
  * @param {number} n number of notes
  * @param {number} m number of input notes
  */
-proof.generateBlindingScalars = (n, m) => {
+joinSplit.generateBlindingScalars = (n, m) => {
     let runningBk = new BN(0).toRed(groupReduction);
     const scalars = [...Array(n)].map((v, i) => {
         let bk = bn128.randomGroupScalar();
@@ -55,7 +62,7 @@ proof.generateBlindingScalars = (n, m) => {
  * @param {Object[]} notes array of AZTEC notes
  * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
  */
-proof.computeChallenge = (...challengeVariables) => {
+joinSplit.computeChallenge = (...challengeVariables) => {
     const hash = new Keccak();
 
     const recurse = (inputs) => {
@@ -98,7 +105,7 @@ function isOnCurve(point) {
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
  */
-proof.parseInputs = (notes, m, sender, kPublic) => {
+joinSplit.parseInputs = (notes, m, sender, kPublic) => {
     notes.forEach((note) => {
         if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
             throw new Error('viewing key malformed');
@@ -132,7 +139,7 @@ proof.parseInputs = (notes, m, sender, kPublic) => {
  * @param {string} kPublic public commitment being added to proof
  * @returns {Object} proof data and challenge
  */
-proof.constructJoinSplit = (notes, m, sender, kPublic) => {
+joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
     // convert kPublic into a BN instance if it is not one
@@ -144,7 +151,7 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
     } else {
         kPublicBn = new BN(kPublic);
     }
-    proof.parseInputs(notes, m, sender, kPublicBn);
+    joinSplit.parseInputs(notes, m, sender, kPublicBn);
 
     // construct initial hash of note commitments
     notes.forEach((note) => {
@@ -156,7 +163,7 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
     // define 'running' blinding factor for the k-parameter in final note
     let runningBk = new BN(0).toRed(groupReduction);
 
-    const blindingScalars = proof.generateBlindingScalars(notes.length, m);
+    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
 
     const blindingFactors = notes.map((note, i) => {
         let B;
@@ -181,7 +188,7 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
         };
     });
 
-    const challenge = proof.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
+    const challenge = joinSplit.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
@@ -215,7 +222,7 @@ proof.constructJoinSplit = (notes, m, sender, kPublic) => {
  * @param {string} kPublic public commitment being added to proof
  * @returns {Object} proof data and challenge
  */
-proof.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
+joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
     // convert kPublic into a BN instance if it is not one
@@ -227,7 +234,7 @@ proof.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
     } else {
         kPublicBn = new BN(kPublic);
     }
-    proof.parseInputs(notes, m, sender, kPublicBn);
+    joinSplit.parseInputs(notes, m, sender, kPublicBn);
 
     // construct initial hash of note commitments
     notes.forEach((note) => {
@@ -239,7 +246,7 @@ proof.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
     // define 'running' blinding factor for the k-parameter in final note
     let runningBk = new BN(0).toRed(groupReduction);
 
-    const blindingScalars = proof.generateBlindingScalars(notes.length, m);
+    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
 
     const blindingFactors = notes.map((note, i) => {
         let B;
@@ -264,7 +271,7 @@ proof.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
         };
     });
 
-    const challenge = proof.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
+    const challenge = joinSplit.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
@@ -287,4 +294,4 @@ proof.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
     };
 };
 
-module.exports = proof;
+module.exports = joinSplit;

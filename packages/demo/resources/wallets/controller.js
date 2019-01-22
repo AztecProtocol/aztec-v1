@@ -6,12 +6,12 @@
  * @module walletController
  */
 
+const aztec = require('aztec.js');
 const web3Utils = require('web3-utils');
 
-const accounts = require('../../../accounts');
+const accounts = require('../../accounts');
 const db = require('./db');
 const web3 = require('../../web3Listener');
-const secp256k1 = require('../../../aztec-crypto-js/secp256k1');
 
 const walletController = {};
 
@@ -41,7 +41,7 @@ walletController.createFromPublicKey = function createFromPublicKey(publicKey, n
  * @param {string} name the name of this wallet
  */
 walletController.createFromPrivateKey = function createFromPrivateKey(privateKey, name) {
-    const { publicKey, address } = secp256k1.accountFromPrivateKey(privateKey);
+    const { publicKey, address } = aztec.secp256k1.accountFromPrivateKey(privateKey);
     const wallet = {
         name,
         privateKey,

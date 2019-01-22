@@ -1,12 +1,12 @@
+const aztec = require('aztec.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const Tx = require('ethereumjs-tx');
 
 const { clear } = require('../../db');
 
-const keystore = require('../../../accounts.json');
+const keystore = require('../../accounts.json');
 const basicWallet = require('./controller');
-const secp256k1 = require('../../../aztec-crypto-js/secp256k1');
 const web3 = require('../../web3Listener');
 
 const { expect } = chai;
@@ -43,8 +43,8 @@ describe('basicWallet controller tests', () => {
         it('address and public key are expected to be well-formed', () => {
             const privateKey = `0x${crypto.randomBytes(32).toString('hex')}`;
             const wallet = basicWallet.createFromPrivateKey(privateKey);
-            const publicKey = secp256k1.ec.keyFromPublic(wallet.publicKey.slice(2), 'hex');
-            const expected = secp256k1.curve.g.mul(Buffer.from(privateKey.slice(2), 'hex'));
+            const publicKey = aztec.secp256k1.ec.keyFromPublic(wallet.publicKey.slice(2), 'hex');
+            const expected = aztec.secp256k1.curve.g.mul(Buffer.from(privateKey.slice(2), 'hex'));
             expect(publicKey.getPublic().eq(expected)).to.equal(true);
         });
 

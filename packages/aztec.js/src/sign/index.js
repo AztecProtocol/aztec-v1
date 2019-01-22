@@ -7,7 +7,7 @@
  */
 
 const ecdsa = require('../secp256k1/ecdsa');
-const eip712 = require('./index');
+const eip712 = require('./eip712');
 const { AZTEC_NOTE_SIGNATURE, ACE_NOTE_SIGNATURE, ACE_DOMAIN_PARAMS } = require('../params');
 
 // For backwards compatibility. TODO: remove
@@ -17,6 +17,7 @@ const defaultDomainParams = {
 };
 
 const sign = {};
+sign.eip712 = eip712;
 
 /**
  * generate EIP712 domain parameters for AZTECERC20Bridge.sol

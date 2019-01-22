@@ -1,3 +1,4 @@
+const aztec = require('aztec.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
@@ -6,7 +7,6 @@ const { clear } = require('../../db');
 
 const notes = require('./controller');
 const wallets = require('../wallets');
-const aztecNotes = require('../../../aztec-crypto-js/note');
 
 const { NOTE_STATUS } = require('../../config');
 
@@ -39,7 +39,7 @@ describe('notes controller tests', () => {
         let create;
         beforeEach(() => {
             clear();
-            create = sinon.stub(aztecNotes, 'create').callsFake(() => ({
+            create = sinon.stub(aztec.note, 'create').callsFake(() => ({
                 exportNote: () => ({ noteHash: 'foo' }),
             }));
         });
