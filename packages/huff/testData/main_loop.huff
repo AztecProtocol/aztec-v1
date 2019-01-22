@@ -4,7 +4,7 @@
 #include "constants.huff"
 
 /// @dev use wnaf table to get the memory location of a point, and update wnaf table
-#define GET_P2_LOCATION = takes(0) returns(0) {
+#define macro GET_P2_LOCATION = takes(0) returns(0) {
     0x00 mload      // w
     // we want to get a byte index of our wnaf table that is non-zero
     // we don't want to iterate over every byte, because that's slow!
@@ -41,7 +41,7 @@
 }
 
 /// @dev perform one iteration of the main loop
-#define MAIN_LOOP = takes(6) returns(0) {
+#define macro MAIN_LOOP = takes(6) returns(0) {
     // on the stack we will have.....
     // z y x w i p 2p
     // i = iterator that points to memory of current wnaf entry
@@ -71,7 +71,7 @@ main_loop_end:  // looks like we've finished
 }
 
 /// @dev performs scalar multiplication for two affine points
-#define MAIN_TWO_ENDO_MOD = takes(0) returns(0) {
+#define macro MAIN_TWO_ENDO_MOD = takes(0) returns(0) {
     // point table starts at 0x20
     // for two points, table will end at 0x1020
     // store globalZ at 0x1020

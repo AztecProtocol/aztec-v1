@@ -178,7 +178,7 @@ parser.processMacro = (
     templateArgumentsRaw = [],
     startingMacros = {},
     map = {},
-    jumptables
+    jumptables = {},
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
@@ -348,7 +348,7 @@ parser.processMacroInternal = (
         return old;
     });
     const unmatchedJumps = [];
-    // so what do I need to do???
+
     // for every jump label, I need to get the absolute bytecode index
     const data = codes.reduce((acc, { bytecode, sourcemap }, index) => {
         let formattedBytecode = bytecode;
@@ -356,7 +356,7 @@ parser.processMacroInternal = (
             const jumps = jumptable[index];
             // eslint-disable-next-line no-restricted-syntax
             for (const { label: jumplabel, bytecodeIndex } of jumps) {
-                if (jumpindices[jumplabel]) {
+                if (jumpindices.hasOwnProperty(jumplabel)) {
                     const jumpvalue = padNBytes(toHex(jumpindices[jumplabel]), 2);
                     const pre = formattedBytecode.slice(0, bytecodeIndex + 2);
                     const post = formattedBytecode.slice(bytecodeIndex + 6);
@@ -680,7 +680,8 @@ parser.compileMacro = (macroName, filename, partialPath) => {
     const { filedata, raw } = parser.getFileContents(filename, partialPath);
     const map = inputMaps.createInputMap(filedata);
     const { macros, jumptables } = parser.parseTopLevel(raw, 0, map);
-    const { bytecode, sourcemap } = parser.processMacro(macroName, 0, [], macros, map, jumptables);
+    const { data: { bytecode, sourcemap } } = parser.processMacro(macroName, 0, [], macros, map, jumptables);
+
     return { bytecode, sourcemap };
 };
 

@@ -15,7 +15,7 @@
  * @param c_16 the integer '16' (base 10), used to mutate ```w``` for next iteration cycle
  * @param c_mask 256-bit integer with all bits set high, except the least significant 5 bits
  **/
-#define WNAF_SLICE_A = takes(6) returns(1) {
+#define macro WNAF_SLICE_A = takes(6) returns(1) {
     // Step 1: we need to isolate the least significant high bit of w
     // Can do this by taking w & -w
     // Instead of pushing '0' onto the stack (3 gas), we can get the 'return data size' of this EVM execution context.
@@ -75,7 +75,7 @@
 }
 
 // starting stack state w o 260 0x1fe0 16 mask
-#define WNAF_SLICE_B = takes(6) returns(1) {
+#define macro WNAF_SLICE_B = takes(6) returns(1) {
     dup1 dup1 returndatasize sub and
     // w' w o 269 0x1fe0 16 mask
     dup6 dup2 mod
@@ -100,7 +100,7 @@
     // o' w'''
 }
 
-#define SET_WNAF_TABLE = takes(0) returns(0) {
+#define macro SET_WNAF_TABLE = takes(0) returns(0) {
     0x00002da05a0dc2607b5a3ccdf1c286208d3b7bfa501cf60e1291e762b7664000 0x1f mstore
     0xa8ed5c7b871c1f7a79103fdd13d6240e24d2bad218879542c817996661801da0 0x3f mstore
     0xca49108d623c85fbb5c7201c3f3f83da95193d7045bfe39d2353f4364c84346e 0x5f mstore
@@ -112,7 +112,7 @@
     0x1eac096a91333e89511e70f0c000000000000000000000000000000000000000 0x11f mstore
 }
 
-#define ENDO_WNAF_FIXED = takes(2) returns(1) {
+#define macro ENDO_WNAF_FIXED = takes(2) returns(1) {
     WNAF_SLICE_A()
     WNAF_SLICE_B()
     WNAF_SLICE_A()
@@ -142,7 +142,7 @@ loop:
 wnaf_end:
 }
 
-#define WNAF_INIT = takes(0) returns(1) {
+#define macro WNAF_INIT = takes(0) returns(1) {
     // add wnaf table to memory
     SET_WNAF_TABLE()
     // set up constants
@@ -159,7 +159,7 @@ wnaf_end:
 }
 
 
-#define FIND_FIRST_ENTRY = takes(0) returns(1) {
+#define macro FIND_FIRST_ENTRY = takes(0) returns(1) {
     0x2040  // m
 search_next:
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0 add
@@ -169,7 +169,7 @@ search_next:
 // starting stack state = s m
 // m = memory location of start of next wnaf
 // s = calldata location of start of wnaf
-#define COMPUTE_WNAFS = takes(0) returns(1) {
+#define macro COMPUTE_WNAFS = takes(0) returns(1) {
     WNAF_INIT()
 wnaf_start:
     dup1 calldataload ENDOMORPHISM()

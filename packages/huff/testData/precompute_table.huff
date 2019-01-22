@@ -3,12 +3,12 @@
 #include "add.huff"
 #include "double.huff"
 // TODO put these all in one place
-#define GLOBAL_Z = takes(0) returns(1) { 0x00 }
+#define macro GLOBAL_Z = takes(0) returns(1) { 0x00 }
 
 // initial stack state is: dz3 dz2 y x p
 // final stack is dz3 dz2 p
 template <x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define RESCALE_15_TRANSITION = takes(5) returns(0) {
+#define macro RESCALE_15_TRANSITION = takes(5) returns(0) {
     // TODO, could rewrite macros to remove these 2 swap ops
     swap2   // y dz2 dz3 x p
     dup5 swap1  // y p dz2 dz3 x p
@@ -30,7 +30,7 @@ template <x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
 // expected stack state is: y x
 // final stack state is null
 template <p1,p2,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define RESCALE_15 = takes(3) returns(0) {
+#define macro RESCALE_15 = takes(3) returns(0) {
     <p1> swap1 mod
     dup1 <yNeg> mstore
     dup1 <yEndo> mstore
@@ -58,7 +58,7 @@ template <p1,p2,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
 // expected stack state = dz2 p dz3 p y x
 // final stack state    = dz3 dz2
 template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define RESCALE_13 = takes(7) returns(0) {
+#define macro RESCALE_13 = takes(7) returns(0) {
     swap5
     // x p dz3 p y dx2
     dup6
@@ -92,7 +92,7 @@ p dz_15^2 p p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)
 // old was dz2 p dz3 p y x
 // final stack state    = dz3 dz2
 template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define RESCALE_13_B = takes(7) returns(0) {
+#define macro RESCALE_13_B = takes(7) returns(0) {
     pop
     // dz2 p p dz3 p -y x
     swap6
@@ -120,7 +120,7 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
 // expected stack state = dz3 dz2 p dz2' p p dz3' p y x
 // final stack state    = dz3'' dz2''
 template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define RESCALE = takes(10) returns(2) {
+#define macro RESCALE = takes(10) returns(2) {
     swap3 mulmod                // dz2'' dz3 p p dz3' p y x
     swap4 mulmod                // dz3'' p dz2'' p y x
     swap4 dup5 mulmod           // y' dz2'' p dz3'' x
@@ -138,9 +138,9 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     <xNeg> mstore               // dz3'' dz2''
 }
 
-#define PRECOMPUTE_ITERATOR = takes(0) returns(0) { 0x60 }
+#define macro PRECOMPUTE_ITERATOR = takes(0) returns(0) { 0x60 }
 
-#define PRECOMPUTE_RESCALE_INPUT = takes(4) returns(6) {
+#define macro PRECOMPUTE_RESCALE_INPUT = takes(4) returns(6) {
     dup1 dup5 dup1 dup1             // p p p z z -y x p
     dup4 dup1 mulmod                // zz p p z z -y x p
     dup2 dup2                       // zz p zz p p z z -y x p
@@ -151,7 +151,7 @@ template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
     calldataload mulmod     
 }
 
-#define PRECOMPUTE_TABLE_FULL = takes(0) returns(0) {
+#define macro PRECOMPUTE_TABLE_FULL = takes(0) returns(0) {
 // first iteration. This point is affine, so we can use affine doubling and addition formulae to start with.
 // Saves about 100 gas because we can cut out a few mulmod ops
     

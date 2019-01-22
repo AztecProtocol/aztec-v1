@@ -11,7 +11,7 @@ const { opcodes } = require('./opcodes/opcodes');
 
 const { expect } = chai;
 
-const pathToTestData = path.posix.resolve(__dirname, './testData');
+const pathToTestData = path.posix.resolve(__dirname, '../testData');
 
 describe('parser tests', () => {
     describe('templates', () => {
@@ -24,19 +24,6 @@ describe('parser tests', () => {
         afterEach(() => {
             getId.restore();
         });
-        // it('splitTemplateCalls will isolate recursive templates', () => {
-        //     const source = 'foo<A+0x10,bar<baz>, bip>';
-        //     expect(parser.splitTemplateCalls(source)).to.deep.equal(
-        //         {
-        //             name: 'foo',
-        //             params: [
-        //                 { name: 'A+0x10', params: [] },
-        //                 { name: 'bar', params: [{ name: 'baz', params: [] }] },
-        //                 { name: 'bip', params: [{}] },
-        //             ],
-        //         }
-        //     );
-        // });
 
         it('processMacroLiteral will convert literals to BN form', () => {
             let source = '0x2234';
@@ -69,8 +56,6 @@ describe('parser tests', () => {
         });
 
         it('parseTemplate will convert template call into macro ops', () => {
-            expect(parser.parseTemplate('A', {})).to.deep.equal({ templateName: 'A', macros: {} });
-
             let result = parser.parseTemplate('dup4', {});
             const keys = Object.keys(result.macros);
             expect(keys.length).to.equal(1);
@@ -139,7 +124,7 @@ describe('parser tests', () => {
                 '0000',
                 opcodes.jumpi,
             ].join('');
-            expect(output.bytecode).to.equal(expected);
+            expect(output.data.bytecode).to.equal(expected);
         });
     });
 
@@ -239,12 +224,12 @@ describe('parser tests', () => {
         it('parser will currectly identify templates and macros', () => {
             const source = `
 
-            #define FIRST = takes(0) returns(1) {
+            #define macro FIRST = takes(0) returns(1) {
                 0x20 dup1 swap1 add
             }
 
             template <p1, p2>
-            #define SECOND = takes(0) returns(1) {
+            #define macro SECOND = takes(0) returns(1) {
                 <p1> <p2> add
             }
         `;
@@ -252,7 +237,7 @@ describe('parser tests', () => {
             const map = inputMap.createInputMap([{
                 filename: 'test', data: source,
             }]);
-            const macros = parser.parseTopLevel(source, 0, map);
+            const { macros } = parser.parseTopLevel(source, 0, map);
             const keys = Object.keys(macros);
             expect(keys.length).to.equal(2);
             expect(keys[0]).to.equal('FIRST');
@@ -297,16 +282,16 @@ describe('parser tests', () => {
         it('can process codesize macro', () => {
             const source = `
             template <p, q>
-            #define FOO = takes(0) returns (4) {
+            #define macro FOO = takes(0) returns (4) {
                 dup4 0x1234aae <p> <q> swap5
             }
             
-            #define BAR = takes(0) returns (1) {
+            #define macro BAR = takes(0) returns (1) {
                 __codesize(FOO<1,2>)
             }`;
 
             const { bytecode } = parser.compileMacro('BAR', source, '');
-            expect(bytecode).to.equal('600a');
+            expect(bytecode).to.equal('600b');
         });
     });
 });

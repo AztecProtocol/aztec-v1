@@ -1,6 +1,6 @@
 #include "foo.huff"
 
-#define FIRST = takes(0) returns(1) {
+#define macro FIRST = takes(0) returns(1) {
     0x04 calldataload
     0x00 mstore
     0x24 calldataload

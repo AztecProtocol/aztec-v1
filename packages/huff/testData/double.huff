@@ -2,7 +2,7 @@
 
 // dup4 dup5
 template <p1,p2>
-#define DOUBLE_MAIN = takes(3) returns(3) {
+#define macro DOUBLE_MAIN = takes(3) returns(3) {
     <p1> dup3 dup1
     mulmod
     // stack state: t1 z y x
@@ -63,7 +63,7 @@ template <p1,p2>
     // stack state: z3 -y3 x3
 }
 
-#define DOUBLE = takes(4) returns(4) {
+#define macro DOUBLE = takes(4) returns(4) {
     dup4 dup3 dup1
     mulmod
     // stack state: t1 z y x
@@ -124,7 +124,7 @@ template <p1,p2>
 }
 
 template <mx2,my2,mz2>
-#define DOUBLE_AFFINE = takes(2) returns(2) {
+#define macro DOUBLE_AFFINE = takes(2) returns(2) {
     P() dup2 dup1 mulmod
     // stack state: t1 y x
     P() dup2 4 mul
@@ -159,7 +159,7 @@ template <mx2,my2,mz2>
 
 // stack state y p x z
 template <mx2,my2,mz2>
-#define PRECOMPUTE_TABLE_DOUBLE = takes(4) returns(3) {
+#define macro PRECOMPUTE_TABLE_DOUBLE = takes(4) returns(3) {
     dup2
     dup1
     dup3 dup1// stack state: y y p p z y x p
@@ -216,7 +216,7 @@ template <mx2,my2,mz2>
 
 // stack state y x z
 template <p1,p2,mx2,my2,mz2>
-#define PRECOMPUTE_TABLE_DOUBLE_B = takes(4) returns(3) {
+#define macro PRECOMPUTE_TABLE_DOUBLE_B = takes(4) returns(3) {
     <p1> dup2 dup1
     mulmod
     // stack state: t1 y x z
