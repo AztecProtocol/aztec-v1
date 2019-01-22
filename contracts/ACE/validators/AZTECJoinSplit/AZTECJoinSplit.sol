@@ -164,31 +164,29 @@ contract AZTECJoinSplit {
                     if eq(m, n) {
                         k := sub(gen_order, k)
                     }
+    
+                    // throw transaction if any calls to precompiled contracts failed
+                    if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
+                    b := add(b, 0x40) // increase B pointer by 2 words
                 }
-                case 0 { k := calldataload(noteIndex) }
-
-                // Check this commitment is well formed...
-                validateCommitment(noteIndex, k, a)
-
-                // If i > m then this is an output note.
-                // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-                switch gt(add(i, 0x01), m)
-                case 1 {
-
-                    // before we update k, update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
-                    kn := addmod(kn, sub(gen_order, k), gen_order)
-                    let x := mod(mload(0x00), gen_order)
-                    k := mulmod(k, x, gen_order)
-                    a := mulmod(a, x, gen_order)
-                    c := mulmod(challenge, x, gen_order)
-
-                    // calculate x_{j+1}
-                    mstore(0x00, keccak256(0x00, 0x20))
+    
+                // If the AZTEC protocol is implemented correctly then any input notes were previously outputs of
+                // a JoinSplit transaction. We can inductively assume that all input notes
+                // are well-formed AZTEC commitments and do not need to validate the implicit range proof
+                // This is not the case for any output commitments, so if (m < n) call validatePairing()
+                if lt(m, n) {
+                    validatePairing(0x84)
                 }
-                case 0 {
-
-                    // nothing to do here except update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
-                    kn := addmod(kn, k, gen_order)
+    
+                // We now have the note commitments and the calculated blinding factors in a block of memory
+                // starting at 0x2a0, of size (b - 0x2a0).
+                // Hash this block to reconstruct the initial challenge and validate that they match
+                let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
+                if iszero(eq(expected, challenge)) {
+                
+                    // No! Bad! No soup for you!
+                    mstore(0x00, 404)
+                    revert(0x00, 0x20)
                 }
             
                 // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
@@ -236,19 +234,30 @@ contract AZTECJoinSplit {
                     mstore(0x1e0, mload(0xe0))
                     mstore(0x200, sub(0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47, mload(0x100)))
                 }
-
-                // If i > m + 1 (i.e. subsequent output notes)
-                // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
-                // we then calculate \gamma^{cx} and add into \gamma_{acc}
-                if gt(i, m) {
-                    mstore(0x60, c)
-                    result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
-
-                    // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
-                    result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
-
-                    // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
-                    result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40))
+    
+                // store coords in memory
+                // indices are a bit off, scipr lab's libff limb ordering (c0, c1) is opposite
+                // to what precompile expects
+                // We can overwrite the memory we used previously as this function is called at the
+                // end of the validation routine.
+                mstore(0x20, mload(0x1e0)) // sigma accumulator x
+                mstore(0x40, mload(0x200)) // sigma accumulator y
+                mstore(0x80, 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed)
+                mstore(0x60, 0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2)
+                mstore(0xc0, 0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa)
+                mstore(0xa0, 0x90689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b)
+                mstore(0xe0, mload(0x260)) // gamma accumulator x
+                mstore(0x100, mload(0x280)) // gamma accumulator y
+                mstore(0x140, t2_x_1)
+                mstore(0x120, t2_x_2)
+                mstore(0x180, t2_y_1)
+                mstore(0x160, t2_y_2)
+    
+                let success := staticcall(gas, 8, 0x20, 0x180, 0x20, 0x20)
+    
+                if or(iszero(success), iszero(mload(0x20))) {
+                    mstore(0x00, 400)
+                    revert(0x00, 0x20)
                 }
 
                 // throw transaction if any calls to precompiled contracts failed
@@ -364,15 +373,28 @@ contract AZTECJoinSplit {
                                 3,
                                 field_order
                             ),
-                            mulmod(sigmaY, sigmaY, field_order)
+                            and(
+                                eq(mod(k, gen_order), k), // k is modulo generator order?
+                                gt(k, 1)                  // and not 0 or 1
+                            )
                         ),
-                        eq( // y^2 ?= x^3 + 3
-                            addmod(
-                                mulmod(mulmod(gammaX, gammaX, field_order), gammaX, field_order),
-                                3,
-                                field_order
+                        and(
+                            eq( // y^2 ?= x^3 + 3
+                                addmod(
+                                    mulmod(mulmod(sigmaX, sigmaX, field_order), sigmaX, field_order),
+                                    3,
+                                    field_order
+                                ),
+                                mulmod(sigmaY, sigmaY, field_order)
                             ),
-                            mulmod(gammaY, gammaY, field_order)
+                            eq( // y^2 ?= x^3 + 3
+                                addmod(
+                                    mulmod(mulmod(gammaX, gammaX, field_order), gammaX, field_order),
+                                    3,
+                                    field_order
+                                ),
+                                mulmod(gammaY, gammaY, field_order)
+                            )
                         )
                         )
                     )
