@@ -1,0 +1,13 @@
+{
+  "name": "aztec-mono-repo",
+  "private": true,
+  "engines": {
+    "node": ">=4"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "lerna": "^3.10.6"
+  }
+}
