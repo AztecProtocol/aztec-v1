@@ -1,0 +1,254 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      resources/notes/controller.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+  <link type="text/css" rel="stylesheet" href="styles/collapse.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      AZTEC demonstration scripts
+    </h3>
+
+    
+
+    <h3>Modules</h3><ul><li id="aztecController-nav"><a href="module-aztecController.html">aztecController</a><ul class='methods'><li data-type="method" id="aztecController-getContractAddress-nav"><a href="module-aztecController.html#~getContractAddress">getContractAddress</a></li><li data-type="method" id="aztecController-joinSplit-nav"><a href="module-aztecController.html#~joinSplit">joinSplit</a></li></ul></li><li id="aztecTokenController-nav"><a href="module-aztecTokenController.html">aztecTokenController</a><ul class='methods'><li data-type="method" id="aztecTokenController-contract-nav"><a href="module-aztecTokenController.html#~contract">contract</a></li><li data-type="method" id="aztecTokenController-getContractAddress-nav"><a href="module-aztecTokenController.html#~getContractAddress">getContractAddress</a></li><li data-type="method" id="aztecTokenController-updateConfidentialTransferTransaction-nav"><a href="module-aztecTokenController.html#~updateConfidentialTransferTransaction">updateConfidentialTransferTransaction</a></li><li data-type="method" id="aztecTokenController-updateConfidentialTransferTransaction-nav"><a href="module-aztecTokenController.html#~updateConfidentialTransferTransaction">updateConfidentialTransferTransaction</a></li></ul></li><li id="config-nav"><a href="module-config.html">config</a></li><li id="db-nav"><a href="module-db.html">db</a><ul class='methods'><li data-type="method" id="db-clear-nav"><a href="module-db.html#~clear">clear</a></li><li data-type="method" id="db-database-nav"><a href="module-db.html#~database">database</a></li><li data-type="method" id="db-walletsDatabase-nav"><a href="module-db.html#~walletsDatabase">walletsDatabase</a></li></ul></li><li id="deployer-nav"><a href="module-deployer.html">deployer</a><ul class='methods'><li data-type="method" id="deployer-broadcastSignedTransaction-nav"><a href="module-deployer.html#~broadcastSignedTransaction">broadcastSignedTransaction</a></li><li data-type="method" id="deployer-getNetwork-nav"><a href="module-deployer.html#~getNetwork">getNetwork</a></li><li data-type="method" id="deployer-getTransaction-nav"><a href="module-deployer.html#~getTransaction">getTransaction</a></li><li data-type="method" id="deployer-getTransactionReceipt-nav"><a href="module-deployer.html#~getTransactionReceipt">getTransactionReceipt</a></li><li data-type="method" id="deployer-methodCall-nav"><a href="module-deployer.html#~methodCall">methodCall</a></li><li data-type="method" id="deployer-methodWrapper-nav"><a href="module-deployer.html#~methodWrapper">methodWrapper</a></li></ul></li><li id="erc20Controller-nav"><a href="module-erc20Controller.html">erc20Controller</a><ul class='methods'><li data-type="method" id="erc20Controller-approve-nav"><a href="module-erc20Controller.html#~approve">approve</a></li><li data-type="method" id="erc20Controller-contract-nav"><a href="module-erc20Controller.html#~contract">contract</a></li><li data-type="method" id="erc20Controller-getContractAddress-nav"><a href="module-erc20Controller.html#~getContractAddress">getContractAddress</a></li><li data-type="method" id="erc20Controller-mint-nav"><a href="module-erc20Controller.html#~mint">mint</a></li></ul></li><li id="notesController-nav"><a href="module-notesController.html">notesController</a><ul class='methods'><li data-type="method" id="notesController-createConfidentialTransfer-nav"><a href="module-notesController.html#~createConfidentialTransfer">createConfidentialTransfer</a></li><li data-type="method" id="notesController-createNote-nav"><a href="module-notesController.html#~createNote">createNote</a></li><li data-type="method" id="notesController-createNote-nav"><a href="module-notesController.html#~createNote">createNote</a></li><li data-type="method" id="notesController-encodeMetadata-nav"><a href="module-notesController.html#~encodeMetadata">encodeMetadata</a></li><li data-type="method" id="notesController-get-nav"><a href="module-notesController.html#~get">get</a></li></ul></li><li id="transactionsController-nav"><a href="module-transactionsController.html">transactionsController</a><ul class='methods'><li data-type="method" id="transactionsController-get-nav"><a href="module-transactionsController.html#~get">get</a></li><li data-type="method" id="transactionsController-getTransactionReceipt-nav"><a href="module-transactionsController.html#~getTransactionReceipt">getTransactionReceipt</a></li><li data-type="method" id="transactionsController-newTransaction-nav"><a href="module-transactionsController.html#~newTransaction">newTransaction</a></li><li data-type="method" id="transactionsController-updateMinedTransaction-nav"><a href="module-transactionsController.html#~updateMinedTransaction">updateMinedTransaction</a></li></ul></li><li id="walletController-nav"><a href="module-walletController.html">walletController</a><ul class='methods'><li data-type="method" id="walletController-createFromPrivateKey-nav"><a href="module-walletController.html#~createFromPrivateKey">createFromPrivateKey</a></li><li data-type="method" id="walletController-createFromPrivateKey-nav"><a href="module-walletController.html#~createFromPrivateKey">createFromPrivateKey</a></li><li data-type="method" id="walletController-createFromPublicKey-nav"><a href="module-walletController.html#~createFromPublicKey">createFromPublicKey</a></li><li data-type="method" id="walletController-init-nav"><a href="module-walletController.html#~init">init</a></li><li data-type="method" id="walletController-update-nav"><a href="module-walletController.html#~update">update</a></li></ul></li><li id="web3Listener-nav"><a href="module-web3Listener.html">web3Listener</a></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#demoTransactions">demoTransactions</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        resources/notes/controller.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>/**
+ * Exposes an interface to create AZTEC notes and construct AZTEC zero-knowledge proofs
+ *
+ * @module notesController
+ */
+
+const db = require('./db');
+const wallets = require('../wallets');
+const notes = require('../../../aztec-crypto-js/note');
+const proof = require('../../../aztec-crypto-js/proof');
+const sign = require('../../../aztec-crypto-js/eip712/sign');
+const { NOTE_STATUS } = require('../../config');
+
+const deployer = require('../../deployer.js');
+
+const noteController = {};
+
+/**
+ * Get a transaction by its note hash
+ * @method get
+ * @param {string} noteHash the keccak256 hash of the note coordinates
+ * @returns {Object} the note object
+ */
+noteController.get = (noteHash) => {
+    const rawNote = db.get(noteHash);
+    if (!rawNote) {
+        throw new Error(`could not find note at ${noteHash}`);
+    }
+    return {
+        note: notes.fromViewKey(rawNote.viewingKey),
+        ...rawNote,
+    };
+};
+
+/**
+ * Create an AZTEC note. Wallet database must know note owner's public key
+ * @method createNote
+ * @param {string} owner the hex-formatted Ethereum address of note owner
+ * @param {number} value the value of the note
+ * @returns {Object} the note object
+ */
+noteController.createNote = (owner, value) => {
+    const wallet = wallets.get(owner);
+    const note = notes.create(wallet.publicKey, value);
+    const exported = {
+        ...note.exportNote(),
+        owner,
+        status: NOTE_STATUS.OFF_CHAIN,
+    };
+    db.create(exported);
+    return note;
+};
+
+/**
+ * Set an AZTEC note's status to one of {@link module:config.NOTE_STATUS}
+ * @method createNote
+ * @param {string} noteHash the keccak256 hash of the note coordinates
+ * @param {@module:config.NOTE_STATUS} status the new status of the note
+ * @returns {Object} the updated note object
+ */
+noteController.setNoteStatus = (noteHash, status) => {
+    if (!NOTE_STATUS[status]) {
+        throw new Error(`status ${status} is not a valid AZTEC note status`);
+    }
+    const note = db.get(noteHash);
+    return db.update(noteHash, {
+        ...note,
+        status,
+    });
+};
+
+/**
+ * Construct a hex-formatted string containing the ephemeral keys for an array of notes.  
+ *   The ephemeral key can be used by a note's owner to recover the viewing key
+ * @method encodeMetadata
+ * @param {Array} noteArray an array of AZTEC notes
+ * @returns {string} the hex-formatted string concatenation of the compressed ephemeral keys
+ */
+noteController.encodeMetadata = (noteArray) => {
+    return notes.encodeMetadata(noteArray);
+};
+
+/**
+ * @typedef {Object} Proof
+ * @property {string[]} proofData The zero-knowledge proof data
+ * @property {string} m The number of input notes (abi encoded to a 32-byte string)
+ * @property {string} challenge The zero-knowledge proof challenge variable
+ * @property {string[]} inputSignatures ECDSA signatures for every input note, signed by the note owner
+ * @property {string[]} outputOwners The Ethereum addresses of the owners of each output note
+ * @property {string} metadata The metadata required for note owners to recover their viewing key
+ * @property {string[]} noteHashes Array of the hashes of the notes used in this proof
+ */
+
+/**
+ * Construct a confidentialTransfer AZTEC zero-knowledge proof.
+ * @method createConfidentialTransfer
+ * @param {string[]} inputNoteHashes array of the hashes of the input notes
+ * @param {Object[]} outputNoteData array of output note data
+ * @param {string} outputNoteData[].owner Ethereum address of the output note owner
+ * @param {number} outputNoteData[].value the value of the output note
+ * @param {number} v the 'public commitment' - the number of tokens being converted into/out of AZTEC note form
+ * @param {string} senderAddress the Ethereum address of the transaction sender
+ * @param {string} aztecTokenAddress the Ethereum address of the AZTEC token smart contract
+ * @returns {module:notesController~Proof} The zero-knowledge proof data required to broadcast an AZTEC transaction
+ */
+noteController.createConfidentialTransfer = async (inputNoteHashes, outputNoteData, v, senderAddress, aztecTokenAddress) => {
+    const chainId = await deployer.getNetwork();
+
+    const inputNotes = inputNoteHashes.map(noteHash => noteController.get(noteHash));
+    const outputNotes = outputNoteData.map(([owner, value]) => noteController.createNote(owner, value));
+    const m = inputNotes.length;
+    const noteData = [...inputNotes.map(n => n.note), ...outputNotes];
+
+    const { proofData, challenge } = proof.constructJoinSplit(noteData, m, senderAddress, v);
+    const metadata = noteController.encodeMetadata(inputNotes.map(n => n.note));
+
+    const outputOwners = outputNoteData.map(([owner]) => owner);
+
+    const inputSignatures = inputNotes.map((inputNote, index) => {
+        const { owner } = inputNote;
+        const wallet = wallets.get(owner);
+        return sign.signNote(proofData[index], challenge, senderAddress, aztecTokenAddress, wallet.privateKey, chainId);
+    });
+
+    const noteHashes = noteData.map(n => n.noteHash);
+
+    return {
+        proofData,
+        m,
+        challenge,
+        inputSignatures,
+        outputOwners,
+        metadata,
+        noteHashes,
+    };
+};
+
+module.exports = noteController;
+</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>
