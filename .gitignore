@@ -1,7 +1,6 @@
 .DS_Store
 .nyc_output/
 
-accounts.json
 coverage.json
 
 build/

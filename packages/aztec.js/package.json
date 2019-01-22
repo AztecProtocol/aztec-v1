@@ -67,7 +67,7 @@
     "lint:fix": "./node_modules/.bin/eslint . --fix",
     "test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
     "test:coverage": "NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "build": "cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
+    "build": "./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
     "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
   }
 }
