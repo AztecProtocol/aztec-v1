@@ -1,15 +1,21 @@
 {
-  "name": "aztec",
-  "version": "0.1.1",
+  "name": "@aztec/contracts",
+  "version": "0.2.0",
+  "author": "AZTEC",
   "description": "AZTEC Smart Contract Repository",
-  "main": "truffle-config.js",
+  "license": "© Copyright Spilsbury Holdings Ltd 2018, All Right Reserved",
   "directories": {
-    "doc": "docs",
     "test": "test"
   },
+  "homepage": "https://github.com/AztecProtocol/aztec-monorepo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/aztec-monorepo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AztecProtocol/aztec-monorepo/issues"
+  },
   "dependencies": {
-    "aztec-crypto-js": "file:aztec-crypto-js",
-    "aztec-demo-js": "file:aztec-demo-js",
     "bn.js": "^4.11.8",
     "ganache-cli": "^6.2.5",
     "openzeppelin-solidity": "2.0.0",
@@ -39,20 +45,10 @@
     "clean": "./node_modules/.bin/rimraf -rf ./build ./coverage.json ./coverage ./coverageEnv ./.nyc-output",
     "lint:js": "./node_modules/.bin/eslint .",
     "lint:js:fix": "./node_modules/.bin/eslint . --fix",
-    "lint:sol": "./node_modules/.bin/solhint --max-warnings 0 \"contracts/**/*.sol\"",
+    "lint:sol": "./node_modules/.bin/solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
     "test": "scripts/test.sh",
     "test:coverage": "scripts/coverage.sh"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
-  },
-  "author": "",
-  "license": "copyright Spilsbury Holdings Ltd 2018, all rights reserved",
-  "bugs": {
-    "url": "https://github.com/AztecProtocol/AZTEC/issues"
-  },
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme"
+  }
 }

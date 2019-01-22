@@ -1,6 +1,0 @@
-[submodule "aztec-crypto-js"]
-	path = aztec-crypto-js
-	url = git@github.com:AztecProtocol/aztec-crypto-js
-[submodule "aztec-demo-js"]
-	path = aztec-demo-js
-	url = git@github.com:AztecProtocol/aztec-demo-js.git
