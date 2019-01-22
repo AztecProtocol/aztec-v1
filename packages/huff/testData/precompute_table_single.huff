@@ -1,15 +1,15 @@
 #include "constants.huff"
 #include "add.huff"
 #include "double.huff"
-#define X2 = takes(0) returns(1) { 0x00 }
-#define Y2 = takes(0) returns(1) { 0x20 }
-#define Z2 = takes(0) returns(1) { 0x40 }
+#define macro X2 = takes(0) returns(1) { 0x00 }
+#define macro Y2 = takes(0) returns(1) { 0x20 }
+#define macro Z2 = takes(0) returns(1) { 0x40 }
 
 // When calculating our precomputed table, the first point will always be affine
 // take advantage of that to remove scaling some opcodes!
 // initial stack state: y x
 // final stack state  : z15 (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=15}^{n=3} y_1 x_1
-#define PRECOMPUTE_TABLE_SINGLE_AFFINE = takes(2) returns(59) {
+#define macro PRECOMPUTE_TABLE_SINGLE_AFFINE = takes(2) returns(59) {
     DOUBLE_AFFINE<X2,Y2,Z2>()
     // DOUBLE_AFFINE rescales X1 and Y1 by dz^2 and dz^3.
     // Because P is affine, dz = 2Y
@@ -26,7 +26,7 @@
 // to be in slightly different positions, to reduce the number of swap ops
 // initial stack state: y x
 // final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1  p d.z^2 p d.z^3
-#define PRECOMPUTE_TABLE_SINGLE_AFFINE_FINAL = takes(2) returns(59) {
+#define macro PRECOMPUTE_TABLE_SINGLE_AFFINE_FINAL = takes(2) returns(59) {
     DOUBLE_AFFINE<X2,Y2,Z2>()
     // DOUBLE_AFFINE rescales X1 and Y1 by dz^2 and dz^3.
     // Because P is affine, dz = 2Y
@@ -43,7 +43,7 @@
 // scales y and x by z'
 // returns: z -y' x' p zz' p zzz'
 template <p1,p2>
-#define PRECOMPUTE_TABLE_NORMALIZE = takes(4) returns(7) {
+#define macro PRECOMPUTE_TABLE_NORMALIZE = takes(4) returns(7) {
     // z' y x z
     swap1 swap2 swap3
     // z z' y x
@@ -67,7 +67,7 @@ template <p1,p2>
 // to be in slightly different positions, to reduce the number of swap ops
 // initial stack state y x z (-yold, -xold, pold)
 // final stack state  : z15 (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=15}^{n=3} y_1 x_1 p d.z^2 p d.z^3
-#define PRECOMPUTE_TABLE_SINGLE_B = takes(6) returns(59) {
+#define macro PRECOMPUTE_TABLE_SINGLE_B = takes(6) returns(59) {
     PRECOMPUTE_TABLE_DOUBLE_B<dup6,dup7,X2,Y2,Z2>()
     // we normalize x and y as if they were scaled by 'zd', without changing 'z'
     // i.e. x' = x(zd^{2}) , y' = y(zd^{3})
@@ -88,7 +88,7 @@ template <p1,p2>
 
 // initial stack state y x z (-yold, -xold, pold)
 // final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1
-#define PRECOMPUTE_TABLE_SINGLE_FINAL_B = takes(6) returns(59) {
+#define macro PRECOMPUTE_TABLE_SINGLE_FINAL_B = takes(6) returns(59) {
     PRECOMPUTE_TABLE_DOUBLE_B<dup6,dup7,X2,Y2,Z2>()
     // we normalize x and y as if they were scaled by 'zd', without changing 'z'
     // i.e. x' = x(zd^{2}) , y' = y(zd^{3})
@@ -111,7 +111,7 @@ template <p1,p2>
 // to be in slightly different positions, to reduce the number of swap ops
 // initial stack state y p x z
 // final stack state  : z_15 p -y_15 x_15 dz_15^2 p dz_15^3 p (-y_i x_i p dz_i^2 p p dz_i^3 p)_{i=13}^{n=3} y_1 x_1
-#define PRECOMPUTE_TABLE_SINGLE_FINAL = takes(2) returns(59) {
+#define macro PRECOMPUTE_TABLE_SINGLE_FINAL = takes(2) returns(59) {
     PRECOMPUTE_TABLE_DOUBLE<X2,Y2,Z2>()
     // we normalize x and y as if they were scaled by 'zd', without changing 'z'
     // i.e. x' = x(zd^{2}) , y' = y(zd^{3})

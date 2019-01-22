@@ -10,7 +10,7 @@ describe('grammar tests', () => {
             const template = `
             template <first, second,third >`;
             const source = `${template}
-            #define TEST = takes(3) returns(2) {
+            #define macro TEST = takes(3) returns(2) {
                 <first> <second>
                 <third>
                 mulmod
@@ -27,7 +27,7 @@ describe('grammar tests', () => {
                 mulmod
             `;
             const macro = `
-            #define TEST = takes(3) returns(2) {${macroBody}}`;
+            #define macro TEST = takes(3) returns(2) {${macroBody}}`;
             let source = `
             template <first, second,third >${macro}
             `;
@@ -36,6 +36,7 @@ describe('grammar tests', () => {
             const result = source.match(grammar.topLevel.MACRO);
             expect(result).to.deep.equal([
                 macro,
+                'macro',
                 'TEST',
                 '3',
                 '2',
@@ -107,14 +108,6 @@ describe('grammar tests', () => {
             const result = source.match(grammar.macro.CODE_SIZE);
             expect(result[1]).to.equal('FOO_BAR');
             expect(result[2]).to.equal(undefined);
-        });
-
-        it('__codesize() will not match if template parameters are not decimal numbers', () => {
-            const source = `
-              __codesize(FOO_BAR<1,3,a>) foo bar
-              xx`;
-            const result = source.match(grammar.macro.CODE_SIZE);
-            expect(result).to.equal(null);
         });
 
         it('can identify template invocation', () => {
