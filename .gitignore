@@ -8,3 +8,4 @@ node_modules/
 
 accounts.json
 coverage.json
+package-lock.json
