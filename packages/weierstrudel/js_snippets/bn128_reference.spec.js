@@ -153,7 +153,7 @@ describe('bn128 table test', () => {
         }
     });
 
-    it('rescaleMultiTable correctly rescales a multi-table', () => {
+    it('PRECOMPUTE_TABLE__RESCALEMultiTable correctly PRECOMPUTE_TABLE__RESCALEs a multi-table', () => {
         const points = [
             bn128.randomPointInternal(),
             bn128.randomPointInternal(),
@@ -162,7 +162,7 @@ describe('bn128 table test', () => {
         ];
         const { tables, globalZ } = bn128.generateTable(points);
         const comparisonTables = points.map(point => getComparisonTable(point.x, point.y, new BN(1).toRed(pRed)));
-        const scaledTables = bn128.rescaleMultiTable(tables, globalZ);
+        const scaledTables = bn128.PRECOMPUTE_TABLE__RESCALEMultiTable(tables, globalZ);
         for (let i = scaledTables.length - 1; i >= 0; i -= 1) {
             const table = scaledTables[i];
             const comparison = comparisonTables[i];
