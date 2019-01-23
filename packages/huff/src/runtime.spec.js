@@ -10,28 +10,18 @@ const pathToTestData = path.posix.resolve(__dirname, '../testData');
 const testHelper = `
 #include "double.huff"
 #include "constants.huff"
-#define macro DOUBLE_MAIN_IMPL = takes(3) returns(3) {
-    DOUBLE_MAIN<P,P>()
+#define macro DOUBLE__MAIN_IMPL = takes(3) returns(3) {
+    DOUBLE__MAIN<P,P>()
 }
 
 #define macro X2 = takes(0) returns(1) { 0x00 }
 #define macro Y2 = takes(0) returns(1) { 0x20 }
 #define macro Z2 = takes(0) returns(1) { 0x40 }
 
-#define macro PRECOMPUTE_TABLE_DOUBLE_B_IMPL = takes(3) returns(3) {
-    PRECOMPUTE_TABLE_DOUBLE_B<P,P,X2,Y2,Z2>()
+#define macro DOUBLE__PRECOMPUTE_TABLE_B_IMPL = takes(3) returns(3) {
+    DOUBLE__PRECOMPUTE_TABLE_B<P,P,X2,Y2,Z2>()
 }
 `;
-
-
-function sliceMemory(memArray) {
-    const numWords = Math.ceil(memArray.length / 32);
-    const result = [];
-    for (let i = 0; i < numWords * 32; i += 32) {
-        result.push(new BN(memArray.slice(i, i + 32), 16));
-    }
-    return result;
-}
 
 describe('runtime tests using double algorithm', () => {
     let double;
@@ -60,8 +50,8 @@ describe('runtime tests using double algorithm', () => {
         expect(stack[3].eq(expected[3])).to.equal(true);
     });
 
-    it('macro DOUBLE_MAIN correctly calculates point doubling (inverted y)', async () => {
-        const { stack } = await double('DOUBLE_MAIN_IMPL', inputStack.slice(1));
+    it('macro DOUBLE__MAIN correctly calculates point doubling (inverted y)', async () => {
+        const { stack } = await double('DOUBLE__MAIN_IMPL', inputStack.slice(1));
         expected = [
             new BN('55f8cabad8ae94c14c1482e3e20f7ce889e3143949181f404b04da8df02029ba', 16),
             new BN('4dc6bb6ed2a4e4b4a6eb59d2e90fb4745f2c0f99ea678a14ce43360f0a27b16e', 16),
