@@ -12,7 +12,7 @@ weierstrudel is written entirely in [Huff](https://github.com/AztecProtocol/huff
 
 * Using the GLV technique to exploit a curve endomorphism and reduce the number of 'point doubling' operations in half.  
 * Using Shamir's trick to combine multiple scalar multiplications into a single algorithm, fixing the number of 'point doubling' operations to ~127  
-* Using Windowed-Non-Adjacent-Form representations for scalar multipliers, reducing the number of 'point addition' operations to ~44 per point  
+* Using Windowed-Non-Adjacent-Form representations for scalar multipliers, reducing the number of 'point addition' operations to ~50 per point  
 * Using the difference between the bn254 curve's 254-bit field modulus and the EVM's 256 word size to defer modular reductions until absolutely neccessary  
 
 `weierstrudel` makes extensive use of bit-shift opcodes and is only compatible with Ethereum once the Constantinople hard-fork has been activated.  
