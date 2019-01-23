@@ -60,8 +60,8 @@ template <p1,p2>
     0x02 // y
     0x01 // z
     POINT_DOUBLE<dup4, dup5>()
-    POINT_DOUBLE<P(), P()>()
-    POINT_DOUBLE<GET_P(), P()>()
+    POINT_DOUBLE<P, P>()
+    POINT_DOUBLE<GET_P, P>()
 }
 ```
 
