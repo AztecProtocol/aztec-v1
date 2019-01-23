@@ -236,7 +236,7 @@ describe('bn128 precompute table full', () => {
         expect(stack[2].eq(dz3[0].mul(dz3[1]).umod(p))).to.equal(true);
     });
 
-    it('macro PRECOMPUTE_TABLE__RESCALE_15_TRANSITION correctly PRECOMPUTE_TABLE__RESCALEs x,y coordinates of new table entry on stack', async () => {
+    it('macro PRECOMPUTE_TABLE__RESCALE_15_TRANSITION correctly rescales x,y coordinates of table entry', async () => {
         const p1 = bn128Reference.randomPoint();
         const dz = bn128Reference.randomPoint(); // mock up some random dz factors
         const dz2 = [dz.x.mul(dz.x).umod(p), dz.y.mul(dz.y).umod(p)];
