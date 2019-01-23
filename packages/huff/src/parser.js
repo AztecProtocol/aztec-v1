@@ -178,7 +178,7 @@ parser.processMacro = (
     templateArgumentsRaw = [],
     startingMacros = {},
     map = {},
-    jumptables = {},
+    jumptables = {}
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
@@ -195,7 +195,7 @@ parser.processMacro = (
         tableOffset += jumptable.table.size;
         const tablecode = jumptable.table.jumps.map((jumplabel) => {
             if (!result.jumpindices[jumplabel]) {
-                throw new Error(`could not find ${jumplabel} in ${JSON.stringify(result.jumpindices)}`);
+                return '';
             }
             const offset = result.jumpindices[jumplabel];
             const hex = formatEvenBytes(toHex(offset));
@@ -356,6 +356,7 @@ parser.processMacroInternal = (
             const jumps = jumptable[index];
             // eslint-disable-next-line no-restricted-syntax
             for (const { label: jumplabel, bytecodeIndex } of jumps) {
+                // eslint-disable-next-line no-prototype-builtins
                 if (jumpindices.hasOwnProperty(jumplabel)) {
                     const jumpvalue = padNBytes(toHex(jumpindices[jumplabel]), 2);
                     const pre = formattedBytecode.slice(0, bytecodeIndex + 2);
