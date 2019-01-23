@@ -2,6 +2,8 @@
 
 `weierstrudel` is a highly optimized smart contract that performs elliptic curve scalar multiplication on the short Weierstrass 254-bit Barreto-Naehrig curve, formerly used by ZCash and currently available as a precompile smart-contract in the Ethereum protocol.  
 
+The contract will multiply up to 15 elliptic curve points with up to 15 different scalars.  
+
 The current gas schedule for Ethereum's scalar multiplication precompile smart contract is `40,000` gas. When multiplying more than one point, weierstrudel is **substantially more efficient than the precompile contract** (see [Benchmarks](#benchmarks)).
 
 ### **"Wait...what?"**  
