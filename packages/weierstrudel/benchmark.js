@@ -20,7 +20,7 @@ async function runMainLoop(numPoints, numIterations) {
                 { index: (numPoints * 64) + (i * 32), value: scalars[i] },
             ]);
         }, []);
-        return main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        return main('MAIN__SCALAR_MUL', [], [], calldata);
     });
     const results = await Promise.all(iterations);
     const cumulativeGas = results.reduce((acc, { gas }) => {
