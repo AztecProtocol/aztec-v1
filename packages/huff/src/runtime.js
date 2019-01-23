@@ -53,13 +53,13 @@ function encodeStack(stack) {
     }, '');
 }
 
-function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = []) {
+function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = [], callvalue = 0) {
     return new Promise((resolve, reject) => {
         vm.runCode({
             code: Buffer.from(bytecode, 'hex'),
             gasLimit: Buffer.from('ffffffff', 'hex'),
             data: calldata ? processMemory(calldata) : null,
-            value: new BN(1),
+            value: new BN(callvalue),
         }, (err, results) => {
             if (err) {
                 console.log(results.runState.programCounter);
@@ -71,9 +71,9 @@ function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = []) {
     });
 }
 
-function Runtime(filename, path) {
+function Runtime(filename, path, debug = false) {
     const { inputMap, macros, jumptables } = newParser.parseFile(filename, path);
-    return async function runMacro(macroName, stack = [], memory = [], calldata = null) {
+    return async function runMacro(macroName, stack = [], memory = [], calldata = null, callvalue = 0) {
         const memoryCode = encodeMemory(memory);
         const stackCode = encodeStack(stack);
         const initCode = `${memoryCode}${stackCode}`;
@@ -84,10 +84,12 @@ function Runtime(filename, path) {
         } = newParser.processMacro(macroName, offset, [], macros, inputMap, jumptables);
         const bytecode = `${initCode}${macroCode}`;
         const vm = new VM({ hardfork: 'constantinople' });
-        const results = await runCode(vm, bytecode, calldata, offset, sourcemap);
-        console.log('code size = ', macroCode.length / 2);
+        const results = await runCode(vm, bytecode, calldata, offset, sourcemap, callvalue);
         const gasSpent = results.runState.gasLimit.sub(results.runState.gasLeft).sub(new BN(initGasEstimate)).toString(10);
-        console.log('gas consumed = ', gasSpent);
+        if (debug) {
+            console.log('code size = ', macroCode.length / 2);
+            console.log('gas consumed = ', gasSpent);
+        }
         return {
             gas: gasSpent,
             stack: results.runState.stack,
