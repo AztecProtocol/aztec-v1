@@ -97,15 +97,15 @@
  *
  * @module aztecController
  */
+const { params: { t2 } } = require('aztec.js');
 
 const deployer = require('../../../deployer');
 const wallets = require('../../wallets');
 const transactions = require('../../transactions');
-const { t2 } = require('../../../../aztec-crypto-js/params');
 const { TX_TYPES } = require('../../../config');
 
-const AZTEC = require('../../../contracts/AZTEC.json');
-const AZTECInterface = require('../../../contracts/AZTECInterface.json');
+const AZTEC = require('../../../../contracts/build/contracts/AZTEC.json');
+const AZTECInterface = require('../../../../contracts/build/contracts/AZTECInterface.json');
 
 const { web3 } = deployer;
 AZTEC.abi = AZTECInterface.abi; // hon hon hon
