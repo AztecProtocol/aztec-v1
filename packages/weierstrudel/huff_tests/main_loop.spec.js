@@ -4,7 +4,7 @@ const BN = require('bn.js');
 const EC = require('elliptic');
 const path = require('path');
 
-const Runtime = require('../huff/runtime');
+const Runtime = require('../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
@@ -40,30 +40,11 @@ const referenceCurve = new EC.curve.short({
 describe('bn128 main loop', function describe() {
     this.timeout(10000);
     let main;
-    let pointTableOffset;
     before(async () => {
         main = new Runtime('main_loop.huff', pathToTestData);
-        const { stack } = await main('POINT_TABLE_START_LOCATION_MINUS_32', [], []);
-        pointTableOffset = stack[0].toNumber();
-    });
-    it('macro GET_P2_LOCATION correctly calculates point location from a wnaf', async () => {
-        const wnaf = new BN('1f00000000000000050000000001000000000b00000000000000000000000000', 16);
-        const initialMemory = [{
-            index: 0,
-            value: wnaf,
-        }];
-        const { stack } = await main('GET_P2_LOCATION', [], initialMemory);
-        expect(stack.length).to.equal(2);
-        const [oX, oY] = stack;
-        const expectedOffset = 18;
-        const expectedBaseOffset = 1024 * expectedOffset;
-        const expectedWnaf = 11;
-        const expectedFinalOffset = pointTableOffset + expectedBaseOffset + (expectedWnaf * 32);
-        expect(oX.eq(new BN(expectedFinalOffset))).to.equal(true);
-        expect(oY.eq(new BN(expectedFinalOffset + 32))).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of ONE point', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ONE point', async () => {
         const numPoints = 1;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -81,7 +62,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -93,7 +74,8 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of TWO points', async () => {
+
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of TWO points', async () => {
         const numPoints = 2;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -111,7 +93,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -123,7 +105,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of THREE points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of THREE points', async () => {
         const numPoints = 3;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -141,7 +123,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -153,7 +135,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of FOUR points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of FOUR points', async () => {
         const numPoints = 4;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -171,7 +153,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -183,7 +165,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of FIVE points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of FIVE points', async () => {
         const numPoints = 5;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -201,7 +183,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -213,7 +195,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of SIX points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of SIX points', async () => {
         const numPoints = 6;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -231,7 +213,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -243,7 +225,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of SEVEN points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of SEVEN points', async () => {
         const numPoints = 7;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -261,7 +243,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -273,7 +255,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of EIGHT points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of EIGHT points', async () => {
         const numPoints = 8;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -291,7 +273,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -303,7 +285,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of NINE points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of NINE points', async () => {
         const numPoints = 9;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -321,7 +303,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -333,7 +315,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of TEN points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of TEN points', async () => {
         const numPoints = 10;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -351,7 +333,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -363,7 +345,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of ELEVEN points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of ELEVEN points', async () => {
         const numPoints = 11;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -381,7 +363,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -394,7 +376,7 @@ describe('bn128 main loop', function describe() {
     });
 
 
-    it('macro MAIN_FULL calculates scalar multiplication of TWLEVE points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of TWLEVE points', async () => {
         const numPoints = 12;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -412,7 +394,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -424,7 +406,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of THIRTEEN points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of THIRTEEN points', async () => {
         const numPoints = 13;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -442,7 +424,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -454,7 +436,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of FOURTEEN points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of FOURTEEN points', async () => {
         const numPoints = 14;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -472,7 +454,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -484,7 +466,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN_FULL calculates scalar multiplication of FIFTEEN points', async () => {
+    it('macro ALTERNATIVE_MAIN_LOOP calculates scalar multiplication of FIFTEEN points', async () => {
         const numPoints = 15;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
@@ -502,7 +484,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN_FULL', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);

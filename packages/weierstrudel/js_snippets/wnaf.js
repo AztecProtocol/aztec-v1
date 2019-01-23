@@ -8,9 +8,6 @@ wnafReference.countNonzeroEntries = (wnaf) => {
     }, 0);
 };
 
-// TODO: Change wnaf implementation to this
-// reference wnaf implenentation to test smart contract against.
-// performs standard window NAF method of dividing-by-2 until least significant bit is high
 wnafReference.wnaf = (scalar) => {
     let next = scalar;
     const wnaf = [...new Array(128)];

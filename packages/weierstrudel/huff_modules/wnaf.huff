@@ -210,6 +210,28 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     lsb_1  // 15 01111
 }
 
+#define macro WNAF_GREEDY__INIT_JUMP_TABLE = takes(0) returns(1) {
+    __tablesize(WNAF_GREEDY__JUMP_TABLE) __tablestart(WNAF_GREEDY__JUMP_TABLE) 0x00 codecopy
+}
+
+#define macro WNAF_GREEDY__INIT_STACK_OFFSETS = takes(0) returns(10) {
+    WNAF_TABLE_BITS() dup2 mul                 // d_b d
+    dup2 3 mul dup3 WNAF_SIZE() mul add        // 3_t d_b d
+    dup3 0x1e add dup2 sub                     // 3_b 3_t d_b d
+    dup4 dup3 sub                              // 2_t 3_b 3_t d_b d
+    dup5 dup3 sub                              // 2_b 2_t 3_b 3_t d_b d
+    dup6 dup3 sub
+    dup7 dup3 sub                              // 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+    dup8 dup3 sub                              // 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+    dup9 dup3 sub                              // 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+}
+
+template<number_of_points>
+#define macro WNAF_GREEDY__GET_POINTER_TO_FINAL_PRECOMPUTE_TABLE = takes(0) returns(1) {
+    <number_of_points> dup1 add
+    0x0a shl POINT_TABLE_START_LOCATION_MINUS_32() add
+}
+
 /**
  * @title WNAF_GREEDY__COMPUTE will compute an endomorphism-split WNAF representation of every scalar present in calldata
  * @notice The layout of a WNAF entry in memory is guided by the following requirements:
@@ -275,8 +297,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
  **/
  #define macro WNAF_GREEDY__COMPUTE = takes(1) returns(0) {
     // This macro uses a jump table; copy table from code into memory
-    __tablesize(WNAF_GREEDY__JUMP_TABLE) __tablestart(WNAF_GREEDY__JUMP_TABLE) 0x00 codecopy
-
+    WNAF_GREEDY__INIT_JUMP_TABLE()
     // Ok, wnaf algorithm. For every scalar multiplier we have, we want to 
     // convert to two half-length scalars by utilizing one of the bn128 curve's endomorphisms
     // (see ENDOMORPHISM for more details).
@@ -286,15 +307,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     // set up our initial stack state. The offsets we add to map between bit indices depend on the number of input points.
     // To maximize efficiency we can't calculate these on the fly and we can't store in memory (too expensive).
     // So we leave these offsets on the stack, so we can recall them with a `dup` opcode
-    WNAF_TABLE_BITS() dup2 mul                 // d_b d
-    dup2 3 mul dup3 WNAF_SIZE() mul add        // 3_t d_b d
-    dup3 0x1e add dup2 sub                     // 3_b 3_t d_b d
-    dup4 dup3 sub                              // 2_t 3_b 3_t d_b d
-    dup5 dup3 sub                              // 2_b 2_t 3_b 3_t d_b d
-    dup6 dup3 sub
-    dup7 dup3 sub                              // 1_b 1_t 2_b 2_t 3_b 3_t d_b d
-    dup8 dup3 sub                              // 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
-    dup9 dup3 sub                              // 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t d_b d
+    WNAF_GREEDY__INIT_STACK_OFFSETS()
 
     // stack state: 0_b 0_t 1_b 1_t 2_b 2_t 3_b 3_t
     // Next, we need to figure out how many scalars we have
@@ -309,8 +322,7 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     // We use POINT_TABLE_START_LOCATION_MINUS_32 instead of POINT_TABLE_START_LOCATION because we're going to be mapping WNAF entries to indices in the lookup table.
     // We know ahead of time that every WNAF entry is going to be odd. If we multiply the WNAF entry by 32, we conveniently get the current memory offset within an individual
     // entry into our lookup table, offset by 32 bytes. (a point entry is 64 bytes). So we subtract that 32 from the start instead of performing the subtraction for each WNAF pointer.
-    dup1 dup1 add
-    0x0a shl POINT_TABLE_START_LOCATION_MINUS_32() add // 0x400 add (TODO: bit shifts?)
+    WNAF_GREEDY__GET_POINTER_TO_FINAL_PRECOMPUTE_TABLE<dup1>()
 
     // Next up, we need to get the location, in calldata, of the first scalar the user wants to multiply.
     // The calldata map contains points, followed by scalars. So we must point to the calldata location that is directly after the block of point data.

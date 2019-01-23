@@ -12,6 +12,8 @@
 #define macro 2P_LOCATION = takes(0) returns(1) { 0x80 }
 #define macro 3P_LOCATION = takes(0) returns(1) { 0xa0 }
 #define macro GLOBAL_Z_LOCATION = takes(0) returns(1) { returndatasize }
+#define macro GET_2P = takes(0) returns(1) { 2P_LOCATION() mload }
+#define macro GET_3P = takes(0) returns(1) { 3P_LOCATION() mload }
 
 template <t>
 #define macro LITERAL = takes(0) returns(1) {

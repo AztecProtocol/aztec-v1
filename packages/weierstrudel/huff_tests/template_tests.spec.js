@@ -1,7 +1,7 @@
 const chai = require('chai');
 const path = require('path');
 
-const Runtime = require('../huff/runtime');
+const Runtime = require('../huff');
 
 const { expect } = chai;
 const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
