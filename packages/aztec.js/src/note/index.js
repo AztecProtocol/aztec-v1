@@ -6,8 +6,9 @@ const bn128 = require('../bn128');
 const secp256k1 = require('../secp256k1');
 const ecdsa = require('../secp256k1/ecdsa');
 const setup = require('../setup');
-const { getSharedSecret, getNoteHash } = require('./utils');
+const utils = require('./utils');
 
+const { getSharedSecret, getNoteHash } = utils;
 const { padLeft } = web3Utils;
 
 /**
@@ -199,6 +200,7 @@ Note.prototype.exportMetadata = function exportMetadata() {
  * @module note
  */
 const note = {};
+note.utils = utils;
 
 /**
  * Create Note instance from a Note public key
