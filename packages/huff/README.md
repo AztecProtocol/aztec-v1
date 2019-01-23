@@ -1,5 +1,7 @@
 ## **Huff**: a programming language for the Ethereum Virtual Machine  
 
+<p align="center"><img src="https://i.imgur.com/SVRjUhU.png" width="640px"/></p>
+
 Huff is a domain-specific language created for the purposes of writing highly optimized Ethereum Virtual Machine program code and, ultimately, smart contracts.  
 
 Huff enables the construction of EVM assembly macros - blocks of bytecode that can be rigorously tested and evaluated. Macros can themselves be composed of Huff macros.
