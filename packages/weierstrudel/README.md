@@ -4,7 +4,7 @@
 
 The current gas schedule for Ethereum's scalar multiplication precompile smart contract is `40,000` gas. When multiplying more than one point, weierstrudel is **substantially more efficient than the precompile contract** (see [Benchmarks](#benchmarks)).
 
-### **Wait...what?**  
+### **"Wait...what?"**  
 
 weierstrudel is written entirely in [Huff](https://github.com/AztecProtocol/huff), a low-level domain-specific language that compiles to Ethereum Virtual Machine opcodes. In addition, the following techniques are used to minimize gas costs:  
 
@@ -15,21 +15,21 @@ weierstrudel is written entirely in [Huff](https://github.com/AztecProtocol/huff
 
 `weierstrudel` makes extensive use of bit-shift opcodes and is only compatible with Ethereum once the Constantinople hard-fork has been activated.  
 
-### **Hang on...what is Huff?**
+### **"Hang on...what is Huff?"**
 
 Huff enables the construction of composable, EVM assembly macros. Huff also supports a crude form of templating - macros can accept template arguments, which in turn are also Huff macros. This allows for highly optimized, customizable blocks of assembly code.  
 
 See the [Huff repository](https://github.com/AztecProtocol/huff) for more details.
 
-### **What are the implications of weierstrudel?**
+### **"What are the implications of weierstrudel?"**
 
 Until the gas schedule for Ethereum's precompile contracts changes, `weierstrudel` makes zero-knowledge cryptosystems that utilize the bn254 curve, such as the [AZTEC protocol](https://github.com/AztecProtocol/AZTEC/) substantially cheaper.
 
-### **Is there a catch?**  
+### **"Is there a catch?"**  
 
 The `weierstrudel` smart contract requires precisely `1` wei to be sent to it or it will refuse to perform elliptic curve scalar multiplication. No more, no less.  
 
-### **...really?**  
+### **"...really?"**  
 
 Yes. Doing so saves approximately 500 gas per contract call.
 
@@ -45,7 +45,7 @@ Not yet! We're in the process of applying more rigorous testing to ensure the co
 3. Precomputed point lookup tables for generator points
     * There are substantial gas optimizations to be claimed by integrating a lookup table for bn254's fixed generator point
 
-### **Can I use weierstrudel in my project?**  
+### **"Can I use weierstrudel in my project?"**  
 
 Of course! `weierstrudel` is open-source software, licensed under LGPL-3.0. However we would urge caution until we've finished thoroughly validating `weierstrudel`'s Huff macros.
 
