@@ -289,7 +289,7 @@ bn128.generateSingleTable = (x, y, z) => {
     };
 };
 
-bn128.rescale = (point, zIn) => {
+bn128.PRECOMPUTE_TABLE__RESCALE = (point, zIn) => {
     const { x, y } = setRed(point);
     const z = zIn.red ? zIn : zIn.toRed(pRed);
     const zz = z.redSqr();
@@ -305,7 +305,7 @@ bn128.generateTable = (inputPoints) => {
     const points = inputPoints.map(i => setRed(i));
     let globalZ = new BN(1).toRed(pRed);
     const tables = points.map((point) => {
-        const scaled = bn128.rescale(point, globalZ);
+        const scaled = bn128.PRECOMPUTE_TABLE__RESCALE(point, globalZ);
         const table = bn128.generateSingleTable(scaled.x, scaled.y, scaled.z);
         globalZ = table.tableZ;
         return table;
@@ -314,7 +314,7 @@ bn128.generateTable = (inputPoints) => {
     return { tables, globalZ };
 };
 
-bn128.rescaleMultiTable = (tables, globalZ) => {
+bn128.PRECOMPUTE_TABLE__RESCALEMultiTable = (tables, globalZ) => {
     let runningZ = new BN(1).toRed(pRed);
     const normalized = [];
     for (let i = tables.length - 1; i >= 0; i -= 1) {
@@ -322,7 +322,7 @@ bn128.rescaleMultiTable = (tables, globalZ) => {
         const scaled = [];
         let j = table.length - 1;
         while (j >= 0) {
-            const scaledPoint = bn128.rescale(table[j], runningZ);
+            const scaledPoint = bn128.PRECOMPUTE_TABLE__RESCALE(table[j], runningZ);
             scaled[j] = { ...scaledPoint, z: globalZ };
             if (j !== 0) {
                 runningZ = runningZ.redMul(zFactors[j - 1]);

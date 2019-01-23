@@ -9,112 +9,80 @@
 // initial stack state is: dz3 dz2 y x p
 // final stack is dz3 dz2 p
 template <x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define macro RESCALE_15_TRANSITION = takes(5) returns(3) {
-    // TODO, could rewrite PRECOMPUTE_ADD_AND_RESCALE to remove these 2 swap ops
-    swap2   // y dz2 dz3 x p
-    dup5 swap1  // y p dz2 dz3 x p
-    dup4 mulmod // y' dz2 dz3 x p
-    dup1 <yNeg> mstore
-    dup1 <yEndo> mstore
-    dup5 sub dup1 <y> mstore
-    <yEndoNeg> mstore // dz2 dz3 x p
-    swap2 dup4 swap1 // x p dz3 dz2 p
-    dup4 mulmod // x' dz3 dz2 p
-    dup4 sub    // -x' dz3 dz2 p
+#define macro PRECOMPUTE_TABLE__RESCALE_15_TRANSITION = takes(5) returns(3) {
+    // TODO, could rewrite PRECOMPUTE_ADD_AND_PRECOMPUTE_TABLE__RESCALE to remove these 2 swap ops
+    swap2                                       // y dz2 dz3 x p
+    dup5 swap1                                  // y p dz2 dz3 x p
+    dup4 mulmod                                 // y' dz2 dz3 x p
+    dup1 <yNeg> mstore dup1 <yEndo> mstore
+    dup5 sub dup1 <y> mstore <yEndoNeg> mstore  // dz2 dz3 x p
+    swap2 dup4 swap1                            // x p dz3 dz2 p
+    dup4 mulmod dup4 sub                        // -x' dz3 dz2 p
     dup4 dup2 BETA_LOCATION() mload mulmod
-    dup1 <xEndo> mstore
-    <xEndoNeg> mstore
-    dup1 <x> mstore
-    <xNeg> mstore
+    dup1 <xEndo> mstore <xEndoNeg> mstore
+    dup1 <x> mstore <xNeg> mstore
 }
 
 // expected stack state = dz3 dz2 p dz2' p p dz3' p y x
 // final stack state    = dz3'' dz2''
 template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define macro RESCALE = takes(10) returns(2) {
-    swap3 mulmod                // dz2'' dz3 p p dz3' p y x
-    swap4 mulmod                // dz3'' p dz2'' p y x
-    swap4 dup5 mulmod           // y' dz2'' p dz3'' x
-    dup1 <yNeg> mstore
-    dup1 <yEndo> mstore
-    dup3 sub
-    dup1 <y> mstore
-    <yEndoNeg> mstore           // dz2'' p dz3'' x
-    swap3 dup4 mulmod           // x' dz3'' dz2''
-    <p1> sub                    // -x' dz3'' dz2''
-    <p1> BETA_LOCATION() mload dup3 mulmod     // -betax -x dz3'' dz2''
-    dup1 <xEndo> mstore
-    <xEndoNeg> mstore
-    dup1 <x> mstore
-    <xNeg> mstore               // dz3'' dz2''
+#define macro PRECOMPUTE_TABLE__RESCALE = takes(10) returns(2) {
+    swap3 mulmod                                // dz2'' dz3 p p dz3' p y x
+    swap4 mulmod                                // dz3'' p dz2'' p y x
+    swap4 dup5 mulmod                           // y' dz2'' p dz3'' x
+    dup1 <yNeg> mstore dup1 <yEndo> mstore
+    dup3 sub dup1 <y> mstore <yEndoNeg> mstore  // dz2'' p dz3'' x
+    swap3 dup4 mulmod <p1> sub                  // -x' dz3'' dz2''
+    <p1> BETA_LOCATION() mload dup3 mulmod      // -betax -x dz3'' dz2''
+    dup1 <xEndo> mstore <xEndoNeg> mstore
+    dup1 <x> mstore <xNeg> mstore               // dz3'' dz2''
 }
 
-/// @dev the final iteration 'rescale' doesn't need to propagate
+/// @dev the final iteration 'PRECOMPUTE_TABLE__RESCALE' doesn't need to propagate
 /// dz2 and dz3 after scaling the relevant x/y coordinates.
 /// So this algorithm consumes these stack variables.
 // expected stack state = dz3 dz2 p dz2' p p dz3' p y x
 template <p1,x,y,xNeg,yNeg,xEndo,yEndo,xEndoNeg,yEndoNeg>
-#define macro RESCALE_END = takes(10) returns(0) {
-    swap9 mulmod                // x' dz2' p p dz3' p y dz3
-    mulmod                      // x p dz3' p y dz3
-    dup2 sub                    // -x p dz3' p y dz3
-    dup2 BETA_LOCATION() mload dup3 mulmod     // -betax -x p dz3' p y dz3
-    dup1 <xEndo> mstore
-    <xEndoNeg> mstore           // -x p dz3' p y dz3
-    dup1 <x> mstore
-    <xNeg> mstore
-    swap4                       // dz3 dz3' p y p
-    mulmod mulmod               // y
-    dup1 <yNeg> mstore
-    dup1 <yEndo> mstore
-    <p1> sub
-    dup1 <y> mstore
-    <yEndoNeg> mstore
+#define macro PRECOMPUTE_TABLE__RESCALE_END = takes(10) returns(0) {
+    swap9 mulmod                                    // x' dz2' p p dz3' p y dz3
+    mulmod dup2 sub                                 // -x p dz3' p y dz3
+    dup2 BETA_LOCATION() mload dup3 mulmod          // -betax -x p dz3' p y dz3
+    dup1 <xEndo> mstore <xEndoNeg> mstore           // -x p dz3' p y dz3
+    dup1 <x> mstore <xNeg> mstore                   // p dz3' p y dz3
+    swap4 mulmod mulmod                             // y
+    dup1 <yNeg> mstore dup1 <yEndo> mstore <p1> sub
+    dup1 <y> mstore <yEndoNeg> mstore
 }
 
 // starts with: z' y x z
 // scales y and x by z'
 // returns: z -y' x' p zz' p zzz'
 template <p1,p2>
-#define macro PRECOMPUTE_TABLE_NORMALIZE = takes(4) returns(7) {
-    // z' y x z
-    swap1 swap2 swap3
-    // z z' y x
-    <p1> dup1
-    // p p z z' y x
-    dup1 dup5 dup1 mulmod
-    // zz' p p z z' y x
-    swap4 dup5 mulmod
-    // zzz' p z zz' y x
-    swap5 dup4 mulmod
-    // x' z zz' y zzz'
-    <p2> dup1
-    // p p x' z zz' y zzz'
-    swap5 dup7 mulmod
-    // y' x' z zz' p zzz'
-    dup5 sub dup5 swap3
-    // z -y' x' p zz' p zzz'
+#define macro PRECOMPUTE_TABLE__NORMALIZE = takes(4) returns(7) {
+    swap1 swap2 swap3               // z z' y x
+    <p1> dup1 dup1 dup5 dup1 mulmod // zz' p p z z' y x
+    swap4 dup5 mulmod               // zzz' p z zz' y x
+    swap5 dup4 mulmod               // x' z zz' y zzz'
+    <p2> dup1 swap5 dup7 mulmod     // y' x' z zz' p zzz'
+    dup5 sub dup5 swap3             // z -y' x' p zz' p zzz'
 }
 
-#define macro VALIDATE_POINT_ON_CURVE = takes(3) returns(3) {
+#define macro PRECOMPUTE_TABLE__VALIDATE_POINT_ON_CURVE = takes(3) returns(3) {
     // expect stack state y x p
-    dup3 dup1 dup1              // p p p y x p
-    dup5 dup1 mulmod            // xx p p y x
-    dup5 mulmod                 // xxx p y x
-    0x03 addmod                 // xxx+3 y x p
-    dup4                        // p xxx+3 y x p
-    dup3 dup1 mulmod            // yy xxx+3 y x p
-    eq point_is_on_curve jumpi  // y x p
+    dup3 dup1 dup1 dup5 dup1 mulmod  // xx p p y x
+    dup5 mulmod 0x03 addmod          // xxx+3 y x p
+    dup4 dup3 dup1 mulmod            // yy xxx+3 y x p
+    eq point_is_on_curve jumpi       // y x p
     // if we fall through to here, the point coordinates do not satisfy the short Weierstrass curve equation
     //   y^2 = x^3 + 3 mod p
     // Cheeky! Throw an error and exit.
         400 0x00 mstore
         0x20 0x00 return
-    point_is_on_curve:          // y x p
+    point_is_on_curve:               // y x p
 }
 
 template <p1>
-#define macro PRECOMPUTE_RESCALE_INPUT = takes(4) returns(5) {
+#define macro PRECOMPUTE_TABLE__RESCALE_INPUT = takes(4) returns(5) {
     dup1 <p1> dup1 dup1                                 // p p p z z -y_old x_old p?
     dup4 dup1 mulmod                                    // zz p p z z -y_old x_old
     dup1 swap4                                          // z zz p p zz z -y_old x_old
@@ -122,7 +90,7 @@ template <p1>
     dup2                                                // p zzz p zz z -y_old x_old
     PRECOMPUTE_ITERATOR() mload calldataload            // x p zzz p zz z -y_old x_old
     PRECOMPUTE_ITERATOR() mload 0x20 add calldataload   // y x p zzz p zz z -y_old x_old
-    VALIDATE_POINT_ON_CURVE()                           // y x p zzz p zz z -y_old x_old
+    PRECOMPUTE_TABLE__VALIDATE_POINT_ON_CURVE()                           // y x p zzz p zz z -y_old x_old
     swap5                                               // zz x p zzz p y z -y_old x_old
     mulmod                                              // x' zzz p y z -y_old x_old
     swap3                                               // y zzz p x' z -y_old x_old
@@ -131,22 +99,22 @@ template <p1>
 
 
 template <m,p1,p2>
-#define macro RESCALE_SLICE = takes(64) returns(2) {
-    RESCALE_15_TRANSITION<m+0x1c0,m+0x1e0,m+0x200,m+0x220,m+0x5c0,m+0x5e0,m+0x600,m+0x620>()
+#define macro PRECOMPUTE_TABLE__RESCALE_SLICE = takes(64) returns(2) {
+    PRECOMPUTE_TABLE__RESCALE_15_TRANSITION<m+0x1c0,m+0x1e0,m+0x200,m+0x220,m+0x5c0,m+0x5e0,m+0x600,m+0x620>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
-    RESCALE<p1,m+0x180,m+0x1a0,m+0x240,m+0x260,m+0x580,m+0x5a0,m+0x640,m+0x660>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x180,m+0x1a0,m+0x240,m+0x260,m+0x580,m+0x5a0,m+0x640,m+0x660>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
-    RESCALE<p1,m+0x140,m+0x160,m+0x280,m+0x2a0,m+0x540,m+0x560,m+0x680,m+0x6a0>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x140,m+0x160,m+0x280,m+0x2a0,m+0x540,m+0x560,m+0x680,m+0x6a0>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
-    RESCALE<p1,m+0x100,m+0x120,m+0x2c0,m+0x2e0,m+0x500,m+0x520,m+0x6c0,m+0x6e0>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x100,m+0x120,m+0x2c0,m+0x2e0,m+0x500,m+0x520,m+0x6c0,m+0x6e0>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
-    RESCALE<p1,m+0xc0,m+0xe0,m+0x300,m+0x320,m+0x4c0,m+0x4e0,m+0x700,m+0x720>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0xc0,m+0xe0,m+0x300,m+0x320,m+0x4c0,m+0x4e0,m+0x700,m+0x720>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
-    RESCALE<p1,m+0x80,m+0xa0,m+0x340,m+0x360,m+0x480,m+0x4a0,m+0x740,m+0x760>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x80,m+0xa0,m+0x340,m+0x360,m+0x480,m+0x4a0,m+0x740,m+0x760>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
-    RESCALE<p1,m+0x40,m+0x60,m+0x380,m+0x3a0,m+0x440,m+0x460,m+0x780,m+0x7a0>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x40,m+0x60,m+0x380,m+0x3a0,m+0x440,m+0x460,m+0x780,m+0x7a0>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
-    RESCALE<p2,m,m+0x20,m+0x3c0,m+0x3e0,m+0x400,m+0x420,m+0x7c0,m+0x7e0>()
+    PRECOMPUTE_TABLE__RESCALE<p2,m,m+0x20,m+0x3c0,m+0x3e0,m+0x400,m+0x420,m+0x7c0,m+0x7e0>()
     // dz^3' dz^2'
     swap3 mulmod // dz^2 dz^3' p d.z^3
     swap3 mulmod // dz^3 dz^2 -y_15 x_15
@@ -154,40 +122,40 @@ template <m,p1,p2>
 }
 
 template <m,p1,p2>
-#define macro RESCALE_SLICE_END = takes(64) returns(0) {
-    RESCALE_15_TRANSITION<m+0x1c0,m+0x1e0,m+0x200,m+0x220,m+0x5c0,m+0x5e0,m+0x600,m+0x620>()
+#define macro PRECOMPUTE_TABLE__RESCALE_SLICE_END = takes(64) returns(0) {
+    PRECOMPUTE_TABLE__RESCALE_15_TRANSITION<m+0x1c0,m+0x1e0,m+0x200,m+0x220,m+0x5c0,m+0x5e0,m+0x600,m+0x620>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=13}^{n=3}
-    RESCALE<p1,m+0x180,m+0x1a0,m+0x240,m+0x260,m+0x580,m+0x5a0,m+0x640,m+0x660>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x180,m+0x1a0,m+0x240,m+0x260,m+0x580,m+0x5a0,m+0x640,m+0x660>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=11}^{n=3}
-    RESCALE<p1,m+0x140,m+0x160,m+0x280,m+0x2a0,m+0x540,m+0x560,m+0x680,m+0x6a0>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x140,m+0x160,m+0x280,m+0x2a0,m+0x540,m+0x560,m+0x680,m+0x6a0>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=9}^{n=3}
-    RESCALE<p1,m+0x100,m+0x120,m+0x2c0,m+0x2e0,m+0x500,m+0x520,m+0x6c0,m+0x6e0>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x100,m+0x120,m+0x2c0,m+0x2e0,m+0x500,m+0x520,m+0x6c0,m+0x6e0>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=7}^{n=3}
-    RESCALE<p1,m+0xc0,m+0xe0,m+0x300,m+0x320,m+0x4c0,m+0x4e0,m+0x700,m+0x720>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0xc0,m+0xe0,m+0x300,m+0x320,m+0x4c0,m+0x4e0,m+0x700,m+0x720>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=5}^{n=3}
-    RESCALE<p1,m+0x80,m+0xa0,m+0x340,m+0x360,m+0x480,m+0x4a0,m+0x740,m+0x760>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x80,m+0xa0,m+0x340,m+0x360,m+0x480,m+0x4a0,m+0x740,m+0x760>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=3}^{n=3}
-    RESCALE<p1,m+0x40,m+0x60,m+0x380,m+0x3a0,m+0x440,m+0x460,m+0x780,m+0x7a0>()
+    PRECOMPUTE_TABLE__RESCALE<p1,m+0x40,m+0x60,m+0x380,m+0x3a0,m+0x440,m+0x460,m+0x780,m+0x7a0>()
     // stack state  : dz^3' dz^2' (p dz_i^2 p p dzi^3 p -y_(i-1) x_(i-1))_{i=1}^{n=3}
-    RESCALE_END<p2,m,m+0x20,m+0x3c0,m+0x3e0,m+0x400,m+0x420,m+0x7c0,m+0x7e0>()
+    PRECOMPUTE_TABLE__RESCALE_END<p2,m,m+0x20,m+0x3c0,m+0x3e0,m+0x400,m+0x420,m+0x7c0,m+0x7e0>()
     // dz^3' dz^2'
 }
 
 // We expect the following stack state: p 2p 3p
-#define macro PRECOMPUTE_TABLE_FULL = takes(3) returns(3) {
-// first iteration. This point is affine, so we can use affine doubling and addition formulae to start with.
-// Saves about 100 gas because we can cut out a few mulmod ops
+#define macro PRECOMPUTE_TABLE__COMPUTE = takes(3) returns(3) {
+    // first iteration. This point is affine, so we can use affine doubling and addition formulae to start with.
+    // Saves about 100 gas because we can cut out a few mulmod ops
     0x40 3 calldatasize div dup1 add sub calldataload
     0x20 3 calldatasize div dup1 add sub calldataload // y x p 2p 3p
-    VALIDATE_POINT_ON_CURVE()
+    PRECOMPUTE_TABLE__VALIDATE_POINT_ON_CURVE()
     DOUBLE__AFFINE<X2,Y2,Z2,dup3,dup4,dup5,dup11>()
     ADD__AFFINE<X2,Y2,dup3,dup12>()
-// we want to keep track of the number of points we're iterating over.
-// can't store on stack because our stack size is a function of the number of loop iterations
-// store at memory location PRECOMPUTE_ITERATOR()
-// we store a calldata pointer to next point
+    // we want to keep track of the number of points we're iterating over.
+    // can't store on stack because our stack size is a function of the number of loop iterations
+    // store at memory location PRECOMPUTE_ITERATOR()
+    // we store a calldata pointer to next point
     0x40 3 calldatasize div dup1 add sub PRECOMPUTE_ITERATOR() mstore
-// we want to insert ourselves halfway through a loop iteration to reduce number of conditional jumps
+    // we want to insert ourselves halfway through a loop iteration to reduce number of conditional jumps
     precompute_table_start jump
 
 precompute_table_repeat:
@@ -195,13 +163,13 @@ precompute_table_repeat:
     // first off, decrease the calldatapointer to point to the new point
     0x40 PRECOMPUTE_ITERATOR() mload sub PRECOMPUTE_ITERATOR() mstore
     // we want to bring this input point to the same z-coordinate as our current global-z coordinate.
-    PRECOMPUTE_RESCALE_INPUT<dup5>()
+    PRECOMPUTE_TABLE__RESCALE_INPUT<dup5>()
     // compute 2P
     DOUBLE__PRECOMPUTE_TABLE<GET_3P,dup6,dup7,X2,Y2,Z2>()
-    // rescale original point's x/y coords to same z-coordinate as 2P, without scaling z-coordinate.
+    // PRECOMPUTE_TABLE__RESCALE original point's x/y coords to same z-coordinate as 2P, without scaling z-coordinate.
     // calculate each point entry on isomorphism where 2P.Z = 1 (rephrase?)
     // this way we can use mixed addition formulae
-    PRECOMPUTE_TABLE_NORMALIZE<dup7,dup8>()
+    PRECOMPUTE_TABLE__NORMALIZE<dup7,dup8>()
     ADD__PRECOMPUTE_TABLE<GET_2P,dup4,dup5,dup6,X2,Y2>()
 precompute_table_start:
     // at this point, we have performed a point doubling and a point addition. So we have P and 3P
@@ -211,14 +179,14 @@ precompute_table_start:
     ADD__PRECOMPUTE_TABLE<GET_2P,dup4,dup5,dup6,X2,Y2>()
     ADD__PRECOMPUTE_TABLE<GET_2P,dup4,dup5,dup6,X2,Y2>()
     ADD__PRECOMPUTE_TABLE<GET_2P,dup4,dup5,dup6,X2,Y2>()
-    ADD__PRECOMPUTE_TABLE_AND_RESCALE<GET_2P,dup4,dup5,dup6,X2,Y2,Z2>()
+    ADD__PRECOMPUTE_TABLE_AND_PRECOMPUTE_TABLE__RESCALE<GET_2P,dup4,dup5,dup6,X2,Y2,Z2>()
 
     // we have calculated the table required for one point, with the arguments left on the stack.
     // we need to determine if there are any more points to calculate
     PRECOMPUTE_ITERATOR() mload precompute_table_repeat jumpi
 
     // if we've fallen through to this point, our loop has finished.
-    // now for the next part - we have our points lying around on the stack so that we can efficiently rescale them
+    // now for the next part - we have our points lying around on the stack so that we can efficiently PRECOMPUTE_TABLE__RESCALE them
     // We want every point in each lookup table to have the same Z-coordinate.
     // If this is the case, all points can be treated as affine and we can use mixed addition formulae in our main loop
     // The global z coordinate is the first item on the stack, so store it at 0x00.
@@ -226,34 +194,34 @@ precompute_table_start:
 
 
     callvalue callvalue // add in dz^2 and dz^3 onto stack
-    // we've positioned our 'rescale a point in the point table' code so that each rescale macro
+    // we've positioned our 'PRECOMPUTE_TABLE__RESCALE a point in the point table' code so that each PRECOMPUTE_TABLE__RESCALE macro
     // cascades into the next macro (starting at P15, then P14, P13 etc).
     // We want to jump to the bytecode index that corresponds to the start of the rescaling macro that
     // maps to the total number of points in calldata.
-    // e.g. if we have 3 points, we want to jump to the 3rd-last RESCALE_SLICE macro.
-    // if we have 14 points, we want to jump to the 14th-last RESCALE_SLICE macro.
+    // e.g. if we have 3 points, we want to jump to the 3rd-last PRECOMPUTE_TABLE__RESCALE_SLICE macro.
+    // if we have 14 points, we want to jump to the 14th-last PRECOMPUTE_TABLE__RESCALE_SLICE macro.
     // This avoids pesky, expensive conditional jumps.
     // N.B. POINT_TABLE_START_LOCATION and (POINT_TABLE_START_LOCATION + 0x7000) must have the
-    // same byte length or this won't work, as eacy RESCALE_SLICE macro won't be constant-length.
+    // same byte length or this won't work, as eacy PRECOMPUTE_TABLE__RESCALE_SLICE macro won't be constant-length.
     // (this is because some macros will have a 'PUSH1' opcode and some will have a 'PUSH2' opcode.
     //    i.e. POINT_TABLE_START_LOCATION must be at least 0x100)
-    0x60 calldatasize div 15 sub __codesize(RESCALE_SLICE<POINT_TABLE_START_LOCATION,dup4,dup6>) mul
-    rescale_start add jump
+    0x60 calldatasize div 15 sub __codesize(PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION,dup4,dup6>) mul
+    PRECOMPUTE_TABLE__RESCALE_start add jump
 
-rescale_start:
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x7000, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x6800, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x6000, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x5800, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x5000, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x4800, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x4000, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x3800, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x3000, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x2800, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x2000, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x1800, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x1000, dup4, dup6>()
-    RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x800, dup4, dup6>()
-    RESCALE_SLICE_END<POINT_TABLE_START_LOCATION, dup4, dup2>()
+PRECOMPUTE_TABLE__RESCALE_start:
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x7000, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x6800, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x6000, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x5800, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x5000, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x4800, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x4000, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x3800, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x3000, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x2800, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x2000, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x1800, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x1000, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION+0x800, dup4, dup6>()
+    PRECOMPUTE_TABLE__RESCALE_SLICE_END<POINT_TABLE_START_LOCATION, dup4, dup2>()
 }

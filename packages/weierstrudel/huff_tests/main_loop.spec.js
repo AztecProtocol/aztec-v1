@@ -15,7 +15,7 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 // NOTE: potential areas to improve
 // 1: main loop is garbage, too many special case tests
 // 2: P macro used too often, huge bytecode bload
-// 3: not sure we need to use 'mod' in RESCALE_15, just subtract from 4p when we need to negate?
+// 3: not sure we need to use 'mod' in PRECOMPUTE_TABLE__RESCALE_15, just subtract from 4p when we need to negate?
 
 function sliceMemory(memArray) {
     const numWords = Math.ceil(memArray.length / 32);

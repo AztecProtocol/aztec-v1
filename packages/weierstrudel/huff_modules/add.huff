@@ -66,7 +66,7 @@ template <getP2Location,p,2p>
 // first p, stack size 2 = 3rd (probably?)
 // 2p, stack size = 10 = 12th?
 /// @dev Brief documentation: this macro is using in our precomputed table algorithm, for the very first point.
-/// The first point in our table is affine (subsequent point's have their z-coordinate rescaled by the previous table output)
+/// The first point in our table is affine (subsequent point's have their z-coordinate PRECOMPUTE_TABLE__RESCALEd by the previous table output)
 /// So we use affine addition formulae to handle this case and squeeze a couple of mulmod opcodes out
 template <mx2,my2,p,2p>
 #define macro ADD__AFFINE = takes(2) returns(11) {   
@@ -185,7 +185,7 @@ template <2p,p1,p2,p3,mx2,my2>
 }
 
 template <2p,p1,p2,p3,mx2,my2,mz2>
-#define macro ADD__PRECOMPUTE_TABLE_AND_RESCALE = takes(3) returns(11) {
+#define macro ADD__PRECOMPUTE_TABLE_AND_PRECOMPUTE_TABLE__RESCALE = takes(3) returns(11) {
     <p1> // p z y x
     dup2 dup1 mulmod
     <p2> // zz z y x

@@ -211,7 +211,7 @@ sensible_inputs:
     dup2 2P_LOCATION() mstore
 
     // Next, let's compute our point lookup table.
-    PRECOMPUTE_TABLE_FULL()
+    PRECOMPUTE_TABLE__COMPUTE()
 
     // Nice. now, put the global-z coordinate on the stack, we want to re-use that memory
     // ...(TODO, optimize memory map)
