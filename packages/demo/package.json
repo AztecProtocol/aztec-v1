@@ -38,6 +38,7 @@
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "ganache-cli": "^6.2.5",
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",

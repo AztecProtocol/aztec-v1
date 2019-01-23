@@ -25,43 +25,6 @@ jobs:
                 key: repo-{{ .Environment.CIRCLE_SHA1 }}
                 paths:
                     - ~/repo
-    test_aztec:
-        working_directory: ~/repo
-        docker:
-            - image: circleci/node:9
-        steps:
-            - restore_cache:
-                keys: 
-                    - repo-{{ .Environment.CIRCLE_SHA1 }}
-            - run: cd packages/aztec.js && npm run test
-    test_contracts:
-        working_directory: ~/repo
-        docker:
-            - image: circleci/node:9
-            - image: trufflesuite/ganache-cli:v6.2.5
-              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
-        steps:
-            - restore_cache:
-                keys: 
-                    - repo-{{ .Environment.CIRCLE_SHA1 }}
-            - run:
-                name: "Test Contracts"
-                command: |
-                    cd packages/contracts
-                    INFURA_API_KEY=$INFURA_API_KEY MNEMONIC=$MNEMONIC npm run test
-    test_demo:
-        working_directory: ~/repo
-        docker:
-            - image: circleci/node:9
-            - image: trufflesuite/ganache-cli:v6.2.5
-              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
-        steps:
-            - restore_cache:
-                keys: 
-                    - repo-{{ .Environment.CIRCLE_SHA1 }}
-            - run:
-                name: "Test Demo"
-                command: cd packages/contracts && npm run test
     lint:
         working_directory: ~/repo
         docker:
@@ -73,20 +36,27 @@ jobs:
             - run:
                 name: "Lint Packages"
                 command: ./node_modules/.bin/lerna run lint
+    test:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:9
+            - image: trufflesuite/ganache-cli:v6.2.5
+              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
+        steps:
+            - restore_cache:
+                keys: 
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Test Packages"
+                command: ./node_modules/.bin/lerna run test
 workflows:
     version: 2
     main:
         jobs:
             - build
-            - test_aztec:
-                requires:
-                    - build
-            - test_contracts:
-                requires:
-                    - build
-            - test_demo:
-                requires:
-                    - build
             - lint:
+                requires:
+                    - build
+            - test:
                 requires:
                     - build

@@ -39,9 +39,9 @@ start_ganache() {
   )
 
   if [ "$SOLIDITY_COVERAGE" = true ]; then
-    node_modules/.bin/testrpc-sc --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" "${accounts[@]}" > /dev/null &
+    ./node_modules/.bin/testrpc-sc --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" "${accounts[@]}" > /dev/null &
   else
-    node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff "${accounts[@]}" > /dev/null &
+    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff "${accounts[@]}" > /dev/null &
   fi
 
   ganache_pid=$!
@@ -62,11 +62,11 @@ fi
 truffle version
 
 if [ "$SOLIDITY_COVERAGE" = true ]; then
-  node_modules/.bin/solidity-coverage
+  ./node_modules/.bin/solidity-coverage
 
   if [ "$CONTINUOUS_INTEGRATION" = true ]; then
-    cat coverage/lcov.info | node_modules/.bin/coveralls
+    cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
   fi
 else
-  node_modules/.bin/truffle test "$@"
+  ./node_modules/.bin/truffle test "$@"
 fi
