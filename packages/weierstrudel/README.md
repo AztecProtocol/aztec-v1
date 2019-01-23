@@ -51,7 +51,7 @@ Of course! `weierstrudel` is open-source software, licensed under LGPL-3.0. Howe
 
 ### **Benchmarks**
 
-Gas estimates can be obtained by running `npm benchmark`. For reference, the scalar multiplication precompile costs `40,000` gas per point. This is excluding the overheads of making a contract call per point, as well as calling the point addition precompile to combine points into a single sum.
+Gas estimates can be obtained by running `npm benchmark`. For reference, the scalar multiplication precompile costs `40,000` gas per point. This is excluding the overheads of having to make a contract call per point when using the precompiles, as well as calling the point addition precompile to combine points into a single sum.
 
 Number of points | Approximate gas cost (average of 10 runs) | Cost per point
 --- | --- | ---
