@@ -49,7 +49,7 @@ describe('bn128 add', () => {
             value: y2,
         }];
         const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
-        const { stack } = await add('PRECOMPUTE_TABLE_ADD_IMPL', [x1, bn128Reference.p.sub(y1), z1], initialMemory);
+        const { stack } = await add('PRECOMPUTE_TABLE_ADD_IMPL', [x1, bn128Reference.p.sub(y1), z1], initialMemory, [], 1);
         expect(stack.length).to.equal(11);
         const [x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
         expect(pA.eq(bn128Reference.p)).to.equal(true);
@@ -78,7 +78,7 @@ describe('bn128 add', () => {
             index: 32,
             value: y2,
         }];
-        const { stack } = await add('ADD_MAIN_IMPL', [x1, y1Neg, z1], initialMemory);
+        const { stack } = await add('ADD_MAIN_IMPL', [x1, y1Neg, z1], initialMemory, [], 1);
 
         expect(stack.length).to.equal(3);
         const [x3, y3, z3] = stack;
@@ -102,7 +102,7 @@ describe('bn128 add', () => {
             index: 32,
             value: y2,
         }];
-        const { stack } = await add('ADD_AFFINE_IMPL', [x1, p.sub(y1)], initialMemory);
+        const { stack } = await add('ADD_AFFINE_IMPL', [x1, p.sub(y1)], initialMemory, [], 1);
         const [x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
 
         expect(stack.length).to.equal(11);
