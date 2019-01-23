@@ -37,11 +37,11 @@ const referenceCurve = new EC.curve.short({
 });
 
 
-describe('bn128 main loop', function describe() {
+describe.only('bn128 main loop', function describe() {
     this.timeout(10000);
     let main;
     before(async () => {
-        main = new Runtime('main_loop.huff', pathToTestData);
+        main = new Runtime('main_loop.huff', pathToTestData, true);
     });
 
     it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of ONE point', async () => {
