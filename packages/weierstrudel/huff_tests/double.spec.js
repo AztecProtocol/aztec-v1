@@ -13,16 +13,16 @@ const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 const testHelper = `
 #include "double.huff"
 #include "constants.huff"
-#define macro DOUBLE_MAIN_IMPL = takes(3) returns(3) {
-    DOUBLE_MAIN<P,P>()
+#define macro DOUBLE__MAIN_IMPL = takes(3) returns(3) {
+    DOUBLE__MAIN<P,P>()
 }
 
-#define macro PRECOMPUTE_TABLE_DOUBLE_IMPL = takes(3) returns(3) {
-    PRECOMPUTE_TABLE_DOUBLE<3P,P,P,X2,Y2,Z2>()
+#define macro DOUBLE__PRECOMPUTE_TABLE_IMPL = takes(3) returns(3) {
+    DOUBLE__PRECOMPUTE_TABLE<3P,P,P,X2,Y2,Z2>()
 }
 
-#define macro DOUBLE_AFFINE_IMPL = takes(3) returns(3) {
-    DOUBLE_AFFINE<0x00,0x20,0x40,P,P,P,3P>()
+#define macro DOUBLE__AFFINE_IMPL = takes(3) returns(3) {
+    DOUBLE__AFFINE<0x00,0x20,0x40,P,P,P,3P>()
 }
 `;
 
@@ -42,10 +42,10 @@ describe('bn128 double', () => {
         double = new Runtime(testHelper, pathToTestData);
     });
 
-    it('macro PRECOMPUTE_TABLE_DOUBLE correctly calculates point doubling', async () => {
+    it('macro DOUBLE__PRECOMPUTE_TABLE correctly calculates point doubling', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();
         const reference = bn128Reference.double(x, y, z);
-        const { stack, memory } = await double('PRECOMPUTE_TABLE_DOUBLE_IMPL', [z, x, y], [], [], 1);
+        const { stack, memory } = await double('DOUBLE__PRECOMPUTE_TABLE_IMPL', [z, x, y], [], [], 1);
         const slicedMemory = sliceMemory(memory);
         expect(slicedMemory.length).to.equal(3);
         expect(stack.length).to.equal(4);
@@ -62,10 +62,10 @@ describe('bn128 double', () => {
     });
 
 
-    it('macro DOUBLE_MAIN correctly calculates point doubling (inverted y)', async () => {
+    it('macro DOUBLE__MAIN correctly calculates point doubling (inverted y)', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();
         const yNeg = bn128Reference.p.sub(y);
-        const { stack } = await double('DOUBLE_MAIN_IMPL', [x, yNeg, z], [], [], 1);
+        const { stack } = await double('DOUBLE__MAIN_IMPL', [x, yNeg, z], [], [], 1);
         const reference = bn128Reference.double(x, y, z);
         const [xOut, yOut, zOut] = stack;
 
@@ -75,9 +75,9 @@ describe('bn128 double', () => {
         expect(zOut.umod(bn128Reference.p).eq(reference.z)).to.equal(true);
     });
 
-    it('macro DOUBLE_AFFINE_SHORT correctly calculates point doubling', async () => {
+    it('macro DOUBLE__AFFINE_SHORT correctly calculates point doubling', async () => {
         const { x, y } = bn128Reference.randomPoint();
-        const { stack, memory } = await double('DOUBLE_AFFINE_IMPL', [x, y], [], [], 1);
+        const { stack, memory } = await double('DOUBLE__AFFINE_IMPL', [x, y], [], [], 1);
         const reference = bn128Reference.double(x, y, new BN(1));
         const slicedMemory = sliceMemory(memory);
         expect(slicedMemory.length).to.equal(3);
