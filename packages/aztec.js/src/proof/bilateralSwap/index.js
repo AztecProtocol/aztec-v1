@@ -146,7 +146,6 @@ bilateralSwap.verifyBilateralSwap = (proofData, challenge, sender) => {
             B,
         };
     });
-
     const recoveredChallenge = finalHash.keccak(groupReduction);
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
 

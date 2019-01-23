@@ -162,7 +162,6 @@ helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, f
             B,
         };
     });
-
     const recoveredChallenge = finalHash.keccak(groupReduction);
     return { recoveredBlindingFactors, recoveredChallenge };
 };
