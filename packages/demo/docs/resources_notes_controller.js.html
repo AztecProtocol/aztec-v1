@@ -98,11 +98,9 @@
  * @module notesController
  */
 
+const aztec = require('aztec.js');
 const db = require('./db');
 const wallets = require('../wallets');
-const notes = require('../../../aztec-crypto-js/note');
-const proof = require('../../../aztec-crypto-js/proof/joinSplit');
-const sign = require('../../../aztec-crypto-js/eip712/sign');
 const { NOTE_STATUS } = require('../../config');
 
 const deployer = require('../../deployer.js');
@@ -121,7 +119,7 @@ noteController.get = (noteHash) => {
         throw new Error(`could not find note at ${noteHash}`);
     }
     return {
-        note: notes.fromViewKey(rawNote.viewingKey),
+        note: aztec.note.fromViewKey(rawNote.viewingKey),
         ...rawNote,
     };
 };
@@ -135,7 +133,7 @@ noteController.get = (noteHash) => {
  */
 noteController.createNote = (owner, value) => {
     const wallet = wallets.get(owner);
-    const note = notes.create(wallet.publicKey, value);
+    const note = aztec.note.create(wallet.publicKey, value);
     const exported = {
         ...note.exportNote(),
         owner,
@@ -171,7 +169,7 @@ noteController.setNoteStatus = (noteHash, status) => {
  * @returns {string} the hex-formatted string concatenation of the compressed ephemeral keys
  */
 noteController.encodeMetadata = (noteArray) => {
-    return notes.encodeMetadata(noteArray);
+    return aztec.note.encodeMetadata(noteArray);
 };
 
 /**
@@ -205,7 +203,7 @@ noteController.createConfidentialTransfer = async (inputNoteHashes, outputNoteDa
     const m = inputNotes.length;
     const noteData = [...inputNotes.map(n => n.note), ...outputNotes];
 
-    const { proofData, challenge } = proof.constructJoinSplit(noteData, m, senderAddress, v);
+    const { proofData, challenge } = aztec.proof.joinSplit.constructJoinSplit(noteData, m, senderAddress, v);
     const metadata = noteController.encodeMetadata(inputNotes.map(n => n.note));
 
     const outputOwners = outputNoteData.map(([owner]) => owner);
@@ -213,7 +211,7 @@ noteController.createConfidentialTransfer = async (inputNoteHashes, outputNoteDa
     const inputSignatures = inputNotes.map((inputNote, index) => {
         const { owner } = inputNote;
         const wallet = wallets.get(owner);
-        return sign.signNote(proofData[index], challenge, senderAddress, aztecTokenAddress, wallet.privateKey, chainId);
+        return aztec.sign.signNote(proofData[index], challenge, senderAddress, aztecTokenAddress, wallet.privateKey, chainId);
     });
 
     const noteHashes = noteData.map(n => n.noteHash);

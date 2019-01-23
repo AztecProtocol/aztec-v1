@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      setup/index.js - Documentation
+      sign/index.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -83,7 +83,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        setup/index.js
+        sign/index.js
       </h1>
     
 
@@ -93,123 +93,130 @@
 <section>
   <article>
     <pre class="prettyprint source linenums"><code>/**
- * Read in points from the trusted setup points database.
- * NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY AZTEC ON A SINGLE DEVICE AND
- *   IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY.
- *   We will be launching our multiparty computation trusted setup protocol shortly, where mulitple entities
- *   create the trusted setup database and only one of them must act honestly in order for the setup database to be secure.
- *   If you wish to participate please let us know at hello@aztecprotocol.com
+ * Module to ECDSA signatures over structured data,  
+ *   following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
- * @module setup
+ * @namespace sign
+ * @memberof module:eip712
  */
 
-const BN = require('bn.js');
-const fs = require('fs');
-const path = require('path');
+const ecdsa = require('../secp256k1/ecdsa');
+const eip712 = require('./eip712');
+const { AZTEC_NOTE_SIGNATURE, ACE_NOTE_SIGNATURE, ACE_DOMAIN_PARAMS } = require('../params');
 
-const setup = {};
-const { SIGNATURES_PER_FILE } = require('../params');
-const bn128 = require('../bn128');
+// For backwards compatibility. TODO: remove
+const defaultDomainParams = {
+    name: 'AZTECERC20BRIDGE_DOMAIN',
+    version: '0.1.1',
+};
 
-const partialPath = path.posix.resolve(__dirname, '../setupDatabase');
-const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
+const sign = {};
+sign.eip712 = eip712;
 
 /**
- * Decompress a 256-bit representation of a bn128 G1 element.
- *   The first 254 bits define the x-coordinate. The most significant bit defines whether the
- *   y-coordinate is odd
- *
- * @method decompress
- * @param {BN} compressed 256-bit compressed coordinate in BN form
- * @returns {Object.&lt;BN, BN>} x and y coordinates of point, in BN form
+ * generate EIP712 domain parameters for AZTECERC20Bridge.sol
+ * @method generateAZTECDomainParams
+ * @memberof module:eip712.sign
+ * @param {string} verifyingContract address of target contract
+ * @param {number} chainId the network ID
+ * @returns {Object} EIP712 Domain type object
  */
-setup.decompress = (compressed) => {
-    const yBit = compressed.testn(255);
-    const x = compressed.maskn(255).toRed(bn128.curve.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
-    const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
-        throw new Error('x^3 + 3 not a square, malformed input');
-    }
-    let y = yRoot.fromRed();
-    if (Boolean(y.isOdd()) !== Boolean(yBit)) {
-        y = bn128.curve.p.sub(y);
-    }
-    return { x: x.fromRed(), y };
+sign.generateAZTECDomainParams = function generateAZTECDomainParams(
+    verifyingContract,
+    chainId,
+    domainParams = defaultDomainParams
+) {
+    return {
+        name: domainParams.name,
+        version: domainParams.version,
+        chainId,
+        verifyingContract,
+    };
 };
 
 /**
- * Compress a bn128 point into 256 bits.
- *
- * @method compress
- * @param {BN} x x coordinate
- * @param {BN} y y coordinate
- * @returns {BN} 256-bit compressed coordinate, in BN form
+ * create an EIP712 ECDSA signature over an AZTEC note
+ * @method signNote
+ * @memberof module:eip712.sign
+ * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
+ * @param {string} challenge AZTEC zero-knowledge proof challenge variable
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
+ * @param {string} verifyingContract address of target contract
+ * @param {string} privateKey the private key of message signer
+ * @param {number} chainId the network ID
+ * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
-setup.compress = (x, y) => {
-    let compressed = x;
-    if (y.testn(0)) {
-        compressed = compressed.or(compressionMask);
-    }
-    return compressed;
+sign.signNote = function signNote(note, challenge, senderAddress, verifyingContract, privateKey, chainId) {
+    const messageBase = {
+        ...AZTEC_NOTE_SIGNATURE,
+        domain: sign.generateAZTECDomainParams(verifyingContract, chainId),
+        message: {
+            note: [note[2], note[3], note[4], note[5]],
+            challenge,
+            sender: senderAddress,
+        },
+    };
+    const message = eip712.encodeTypedData(messageBase);
+    const signature = ecdsa.signMessage(message, privateKey);
+    return signature;
 };
 
 /**
- * Load a trusted setup signature point h^{\frac{1}{y - k}}, y = setup key, k = input value
- *
- * @method readSignature
- * @param {number} inputValue the integer whose negation was signed by the trusted setup key
- * @returns {Object.&lt;BN, BN>} x and y coordinates of signature point, in BN form
+ * create an EIP712 ECDSA signature over an AZTEC note according to AZTEC Cryptography Engine Spec
+ * @method signACENote
+ * @memberof module:eip712.sign
+ * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
+ * @param {string} challenge AZTEC zero-knowledge proof challenge variable
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
+ * @param {string} verifyingContract address of target contract
+ * @param {string} privateKey the private key of message signer
+ * @param {number} chainId the network ID
+ * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
-setup.readSignature = (inputValue) => {
-    const value = Number(inputValue);
-    return new Promise((resolve, reject) => {
-        const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
-
-        const fileName = path.posix.resolve(partialPath, `data${(((fileNum) * SIGNATURES_PER_FILE) - 1)}.dat`);
-        fs.readFile(fileName, (err, data) => {
-            if (err) {
-                return reject(err);
-            }
-            // each file starts at 0 (0, 1024, 2048 etc)
-            const min = ((fileNum - 1) * SIGNATURES_PER_FILE);
-            const bytePosition = ((value - min) * 32);
-            // eslint-disable-next-line new-cap
-            const signatureBuf = new Buffer.alloc(32);
-            data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
-
-            const x = new BN(signatureBuf);
-            return resolve(setup.decompress(x));
-        });
-    });
+sign.signACENote = function signACENote(note, challenge, senderAddress, verifyingContract, privateKey, chainId) {
+    const messageBase = {
+        ...ACE_NOTE_SIGNATURE,
+        domain: sign.generateAZTECDomainParams(verifyingContract, chainId, ACE_DOMAIN_PARAMS),
+        message: {
+            proofId: 1,
+            note: [note[2], note[3], note[4], note[5]],
+            challenge,
+            sender: senderAddress,
+        },
+    };
+    const message = eip712.encodeTypedData(messageBase);
+    const signature = ecdsa.signMessage(message, privateKey);
+    return signature;
 };
 
 /**
- * Load a trusted setup signature, using synchronous file loading methods (see: {@link module:setup~readSignature})
- *
- * @method readSignatureSync
- * @param {number} inputValue the integer whose negation was signed by the trusted setup key
- * @returns {Object.&lt;BN, BN>} x and y coordinates of signature point, in BN form
+ * recover the Ethereum address of an EIP712 AZTEC note signature
+ * @method recoverAddress
+ * @memberof module:eip712.sign
+ * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
+ * @param {string} challenge AZTEC zero-knowledge proof challenge variable
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
+ * @param {string} verifyingContract address of target contract
+ * @param {string[]} signature ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ * @returns {string} Ethereum address of signer
  */
-setup.readSignatureSync = (inputValue) => {
-    const value = Number(inputValue);
-    const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
-
-    const fileName = path.posix.resolve(partialPath, `data${(((fileNum) * SIGNATURES_PER_FILE) - 1)}.dat`);
-    const data = fs.readFileSync(fileName);
-
-    // each file starts at 0 (0, 1024, 2048 etc)
-    const min = ((fileNum - 1) * SIGNATURES_PER_FILE);
-    const bytePosition = ((value - min) * 32);
-    // eslint-disable-next-line new-cap
-    const signatureBuf = new Buffer.alloc(32);
-    data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
-
-    const x = new BN(signatureBuf);
-    return setup.decompress(x);
+sign.recoverAddress = function recoverAddress(note, challenge, senderAddress, verifyingContract, signature, chainId) {
+    const messageBase = {
+        ...AZTEC_NOTE_SIGNATURE,
+        domain: sign.generateAZTECDomainParams(verifyingContract, chainId),
+        message: {
+            note: [note[2], note[3], note[4], note[5]],
+            challenge,
+            sender: senderAddress,
+        },
+    };
+    const message = eip712.encodeTypedData(messageBase);
+    const publicKey = ecdsa.recoverPublicKey(message, signature[1], signature[2], signature[0]);
+    const address = ecdsa.accountFromPublicKey(publicKey);
+    return address;
 };
 
-module.exports = setup;
+module.exports = sign;
 </code></pre>
   </article>
 </section>
