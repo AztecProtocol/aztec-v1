@@ -39,36 +39,3 @@ wnafReference.recoverWnaf = (wnaf) => {
 };
 
 module.exports = wnafReference;
-
-/*
-module.exports = function calculateWnaf(scalar) {
-    // assume 'scalar' is a BN
-    // phew what a mess
-    const zero = new BN('0', 10);
-    const one = new BN('1', 10);
-    const two = new BN('2', 10);
-    const fifteen = new BN('15', 10);
-    const thirtyOne = new BN('31', 10);
-    const thirtyTwo = new BN('32', 10);
-
-    function recurse(currentScalar, iterator = 0, wnafArray = []) {
-        if (currentScalar.eq(zero)) {
-            return wnafArray;
-        }
-        if (currentScalar.and(one).eq(one)) {
-            const m = currentScalar.and(thirtyOne);
-            const newWnafArray = [...wnafArray];
-
-            newWnafArray[iterator] = m;
-            let newScalar = currentScalar.sub(m.and(thirtyOne));
-            if (m.and(thirtyOne).gt(fifteen)) {
-                newScalar = newScalar.add(thirtyTwo);
-            }
-            return recurse(newScalar.div(two), iterator + 1, newWnafArray);
-        }
-        return recurse(currentScalar.div(two), iterator + 1, [...wnafArray, new BN('0', 10)]);
-    }
-    const wnafData = recurse(scalar);
-    return wnafData;
-};
-*/

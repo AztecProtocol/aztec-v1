@@ -99,7 +99,6 @@ describe('wnaf tests', () => {
         });
         const targetCost = Math.min(...costTable);
         const targetIndex = costTable.indexOf(targetCost);
-        console.log(costTable);
         console.log('minima with conditional test at j = ', targetIndex);
         console.log('expected gas cost (sans memory costs) = ', targetCost);
         expect(targetIndex).to.equal(21);
