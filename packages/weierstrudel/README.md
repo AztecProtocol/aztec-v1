@@ -6,7 +6,7 @@ The current gas schedule for Ethereum's scalar multiplication precompile smart c
 
 ### **Wait...what?**  
 
-weierstrudel is written entirely in Huff, a low-level domain-specific language that compiles to Ethereum Virtual Machine opcodes. In addition, the following techniques are used to minimize gas costs:  
+weierstrudel is written entirely in [Huff](https://github.com/AztecProtocol/huff), a low-level domain-specific language that compiles to Ethereum Virtual Machine opcodes. In addition, the following techniques are used to minimize gas costs:  
 
 * Using the GLV technique to exploit a curve endomorphism and reduce the number of 'point doubling' operations in half.  
 * Using Shamir's trick to combine multiple scalar multiplications into a single algorithm, fixing the number of 'point doubling' operations to ~127  
@@ -19,11 +19,11 @@ weierstrudel is written entirely in Huff, a low-level domain-specific language t
 
 Huff enables the construction of composable, EVM assembly macros. Huff also supports a crude form of templating - macros can accept template arguments, which in turn are also Huff macros. This allows for highly optimized, customizable blocks of assembly code.  
 
-See the [Huff repository]() for more details.
+See the [Huff repository](https://github.com/AztecProtocol/huff) for more details.
 
 ### **What are the implications of weierstrudel?**
 
-Until the gas schedule for Ethereum's precompile contracts changes, `weierstrudel` makes zero-knowledge cryptosystems that utilize the bn254 curve, such as the [AZTEC protocol]() substantially cheaper.
+Until the gas schedule for Ethereum's precompile contracts changes, `weierstrudel` makes zero-knowledge cryptosystems that utilize the bn254 curve, such as the [AZTEC protocol](https://github.com/AztecProtocol/AZTEC/) substantially cheaper.
 
 ### **Is there a catch?**  
 
