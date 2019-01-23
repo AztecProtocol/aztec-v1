@@ -37,7 +37,7 @@ Some example macros:
     0x20
 }
 
-#define macro GET_P = takes(0) reutrns(1) {
+#define macro GET_P = takes(0) returns(1) {
     P_LOCATION() mload
 }
 
