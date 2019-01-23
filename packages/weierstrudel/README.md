@@ -25,6 +25,14 @@ See the [Huff repository]() for more details.
 
 Until the gas schedule for Ethereum's precompile contracts changes, `weierstrudel` makes zero-knowledge cryptosystems that utilize the bn254 curve, such as the [AZTEC protocol]() substantially cheaper.
 
+### **Is there a catch?**  
+
+The `weierstrudel` smart contract requires precisely `1` wei to be sent to it or it will refuse to perform elliptic curve scalar multiplication. No more, no less.  
+
+### **...really?**  
+
+Yes. Doing so saves approximately 500 gas per contract call.
+
 ### **Is weierstrudel production ready?**
 
 Not yet! We're in the process of applying more rigorous testing to ensure the correctness of `weierstrudel`'s algorithms. In addition we still need to implement the following:  
