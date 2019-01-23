@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "benchmark": "node ./benchmark.js",
     "jstest": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
     "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec"
   },

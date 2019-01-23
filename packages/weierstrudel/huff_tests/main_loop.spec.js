@@ -62,7 +62,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -93,7 +93,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -123,7 +123,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -153,7 +153,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -183,7 +183,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -213,7 +213,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -243,7 +243,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -273,7 +273,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -303,7 +303,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -333,7 +333,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -363,7 +363,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -394,7 +394,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -424,7 +424,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -454,7 +454,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -484,7 +484,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata);
+        const { stack, returnValue } = await main('ALTERNATIVE_MAIN_LOOP', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);

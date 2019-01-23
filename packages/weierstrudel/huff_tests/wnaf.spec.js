@@ -61,16 +61,16 @@ describe('wnaf', function describe() {
         ];
 
 
-        let { stack } = await wnaf('WNAF_START_LOCATION', [], [], calldata);
+        let { stack } = await wnaf('WNAF_START_LOCATION', [], [], calldata, 1);
         const wnafStartLocation = stack[0].toNumber();
 
-        ({ stack } = await wnaf('POINT_TABLE_START_LOCATION', [], [], calldata));
+        ({ stack } = await wnaf('POINT_TABLE_START_LOCATION', [], [], calldata, 1));
         const pointTableStartLocation = stack[0].toNumber();
 
-        ({ stack } = await wnaf('WNAF_GREEDY__SIZE_OF_ENTRY', [], [], calldata));
+        ({ stack } = await wnaf('WNAF_GREEDY__SIZE_OF_ENTRY', [], [], calldata, 1));
         const wnafSizeOfEntry = stack[0].toNumber();
 
-        const { memory } = await wnaf('WNAF_GREEDY__COMPUTE_IMPL', [], [], calldata);
+        const { memory } = await wnaf('WNAF_GREEDY__COMPUTE_IMPL', [], [], calldata, 1);
         const endoScalars = scalars.reduce((acc, s) => {
             const { k1, k2 } = endomorphism.endoSplit(s);
             return [...acc, k2, k1];
