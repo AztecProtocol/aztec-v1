@@ -169,7 +169,7 @@
 // start here
 //          |
 //          v
-#define macro MAIN__SCALAR_MUL = takes(0) returns(0) {
+#define macro MAIN__WEIERSTRUDEL = takes(0) returns(0) {
     // Step 1, validate integrity of inputs.
     // `callvalue` must be exactly 1 wei. No more or less.
     // calldatasize must be a clean multiple of 0x60
@@ -180,8 +180,6 @@
     0x20 0x00 revert
 sensible_inputs:
 
-
-    // p 2p 3p
     // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
     // Get this out of the way first so we can free up the memory this thing needs for its jump table
     WNAF_GREEDY__SIZE_OF_ENTRY()
@@ -241,7 +239,7 @@ sensible_inputs:
     dup5 sub                    // x o_x i z p 2p 3p
     swap1 0x20 add mload        // -y x i z p 2p 3p
     dup5 sub                    // y x i z p 2p 3p
-    callvalue                        // z y x i p 2p 3p
+    callvalue                   // z y x i p 2p 3p
 
     // next, we want to use the number of entries at this wnaf index as
     // an index to our lookup table, but offset by 1 (0x02) because we have already
@@ -414,4 +412,18 @@ sensible_inputs:
         pop pop pop pop pop pop
     // and we're done! Let's get out of here...
         0x60 returndatasize return
+}
+
+#define macro MAIN__CONSTRUCTOR_SHALLOW = takes(0) returns(0) {
+    __codesize(MAIN__WEIERSTRUDEL)
+    __tablesize(MAIN__JUMP_TABLE)
+    __tablesize(WNAF_GREEDY__JUMP_TABLE)
+    add add dup1 0x01 0x00 codecopy 0x00 return
+}
+
+#define macro MAIN__CONSTRUCTOR = takes(0) returns(0) {
+    __codesize(MAIN__WEIERSTRUDEL)
+    __tablesize(MAIN__JUMP_TABLE)
+    __tablesize(WNAF_GREEDY__JUMP_TABLE)
+    add add dup1 __codesize(MAIN__CONSTRUCTOR_SHALLOW) 0x00 codecopy 0x00 return
 }

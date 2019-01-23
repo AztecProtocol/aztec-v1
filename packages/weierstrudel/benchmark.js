@@ -11,7 +11,10 @@ const main = new Runtime('main_loop.huff', pathToTestData);
 async function runMainLoop(numPoints, numIterations) {
     const iterations = [...new Array(numIterations)].map(() => {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
+        console.log('points = ', points);
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
+        console.log('scalars = ', scalars);
+
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
             return ([
                 ...acc,
@@ -20,7 +23,7 @@ async function runMainLoop(numPoints, numIterations) {
                 { index: (numPoints * 64) + (i * 32), value: scalars[i] },
             ]);
         }, []);
-        return main('MAIN__SCALAR_MUL', [], [], calldata);
+        return main('MAIN__WEIERSTRUDEL', [], [], calldata);
     });
     const results = await Promise.all(iterations);
     const cumulativeGas = results.reduce((acc, { gas }) => {
