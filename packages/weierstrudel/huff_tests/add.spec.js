@@ -2,7 +2,7 @@ const chai = require('chai');
 const path = require('path');
 const BN = require('bn.js');
 
-const Runtime = require('../huff/runtime');
+const Runtime = require('../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
@@ -12,7 +12,7 @@ const testHelper = `
 #include "add.huff"
 #include "constants.huff"
 #define macro PRECOMPUTE_TABLE_ADD_IMPL = takes(3) returns(11) {
-    PRECOMPUTE_TABLE_ADD<P,P,P,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<2P,P,P,P,X2,Y2>()
 }
 
 #define macro P2_LOCATION_TEST = takes(0) returns(3) {
@@ -25,7 +25,7 @@ const testHelper = `
 }
 
 #define macro ADD_AFFINE_IMPL = takes(5) returns(11) {
-    ADD_AFFINE<X2,Y2,dup3,dup12>()
+    ADD_AFFINE<X2,Y2,P,2P>()
 } 
 `;
 
@@ -102,13 +102,10 @@ describe('bn128 add', () => {
             index: 32,
             value: y2,
         }];
-        const pp = p.add(p);
-        const { stack } = await add('ADD_AFFINE_IMPL', [pp, p, x1, p.sub(y1)], initialMemory);
-        const [ppOut, pOut, x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
+        const { stack } = await add('ADD_AFFINE_IMPL', [x1, p.sub(y1)], initialMemory);
+        const [x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
 
-        expect(stack.length).to.equal(13);
-        expect(ppOut.eq(pp)).to.equal(true);
-        expect(pOut.eq(p)).to.equal(true);
+        expect(stack.length).to.equal(11);
         expect(pA.eq(bn128Reference.p)).to.equal(true);
         expect(pB.eq(bn128Reference.p)).to.equal(true);
         expect(pC.eq(bn128Reference.p)).to.equal(true);

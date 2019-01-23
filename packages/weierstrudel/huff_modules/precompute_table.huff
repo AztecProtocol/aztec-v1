@@ -197,21 +197,21 @@ precompute_table_repeat:
     // we want to bring this input point to the same z-coordinate as our current global-z coordinate.
     PRECOMPUTE_RESCALE_INPUT<dup5>()
     // compute 2P
-    PRECOMPUTE_TABLE_DOUBLE<dup6,dup7,X2,Y2,Z2>()
+    PRECOMPUTE_TABLE_DOUBLE<GET_3P,dup6,dup7,X2,Y2,Z2>()
     // rescale original point's x/y coords to same z-coordinate as 2P, without scaling z-coordinate.
     // calculate each point entry on isomorphism where 2P.Z = 1 (rephrase?)
     // this way we can use mixed addition formulae
     PRECOMPUTE_TABLE_NORMALIZE<dup7,dup8>()
-    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<GET_2P,dup4,dup5,dup6,X2,Y2>()
 precompute_table_start:
     // at this point, we have performed a point doubling and a point addition. So we have P and 3P
     // we need to construct 5P, 7P, 9P, 11P, 13P, 15P
-    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
-    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
-    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
-    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
-    PRECOMPUTE_TABLE_ADD<dup4,dup5,dup6,X2,Y2>()
-    PRECOMPUTE_TABLE_ADD_AND_RESCALE<dup4,dup5,dup6,X2,Y2,Z2>()
+    PRECOMPUTE_TABLE_ADD<GET_2P,dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<GET_2P,dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<GET_2P,dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<GET_2P,dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD<GET_2P,dup4,dup5,dup6,X2,Y2>()
+    PRECOMPUTE_TABLE_ADD_AND_RESCALE<GET_2P,dup4,dup5,dup6,X2,Y2,Z2>()
 
     // we have calculated the table required for one point, with the arguments left on the stack.
     // we need to determine if there are any more points to calculate
