@@ -3,6 +3,7 @@ const chai = require('chai');
 const web3Utils = require('web3-utils');
 
 const dividendComputation = require('../../src/proof/dividendComputation');
+const { K_MAX } = require('../../src/params');
 
 const { expect } = chai;
 
@@ -95,7 +96,7 @@ describe('Validating dividend computation swap proof construction and verificati
         });
 
         it('validate failure for z_a > k_max', () => {
-            const zaLarge = 33554432 + 1;
+            const zaLarge = K_MAX + za;
             try {
                 dividendComputation.constructProof(testNotes, zaLarge, zb, sender);
             } catch (err) {
@@ -104,7 +105,7 @@ describe('Validating dividend computation swap proof construction and verificati
         });
 
         it('validate failure for z_b > k_max', () => {
-            const zbLarge = 33554432 + 1;
+            const zbLarge = K_MAX + zb;
             try {
                 dividendComputation.constructProof(testNotes, za, zbLarge, sender);
             } catch (err) {

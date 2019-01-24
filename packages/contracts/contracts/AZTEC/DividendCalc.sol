@@ -88,14 +88,14 @@ contract DividendCalc {
                 let challenge := mod(calldataload(0x244), gen_order)
 
 
-                // Check that za < kMax, kMax = 2^225 = 33554432
-                if gt(calldataload(0x264), 33554432) {
+                // Check that za < kMax
+                if gt(calldataload(0x264), 1048576) {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
 
                 // Check that zb < kMax
-                if gt(calldataload(0x284), 33554432) {
+                if gt(calldataload(0x284), 1048576) {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
