@@ -77,8 +77,11 @@ contract('BilateralSwap', (accounts) => {
             const makerNoteValues = [10, 50];
             const takerNoteValues = [20, 20];
             const incorrectTestNoteValues = aztec.proof.bilateralSwap.helpers.makeTestNotes(makerNoteValues, takerNoteValues);
-            
-            const { proofData, challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(incorrectTestNoteValues, accounts[0]);
+
+            const { proofData, challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(
+                incorrectTestNoteValues,
+                accounts[0]
+            );
 
             await exceptions.catchRevert(bilateralSwapContract.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
@@ -90,8 +93,11 @@ contract('BilateralSwap', (accounts) => {
             const makerNoteValues = [10, 20, 30];
             const takerNoteValues = [10, 20, 30];
             const incorrectNumberOfNotes = aztec.proof.bilateralSwap.helpers.makeTestNotes(makerNoteValues, takerNoteValues);
-            
-            const { proofData, challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(incorrectNumberOfNotes, accounts[0]);
+
+            const { proofData, challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(
+                incorrectNumberOfNotes,
+                accounts[0]
+            );
 
             await exceptions.catchRevert(bilateralSwapContract.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
@@ -103,7 +109,7 @@ contract('BilateralSwap', (accounts) => {
             const makerNoteValues = [0, 20];
             const takerNoteValues = [10, 20];
             const NotesWithAZero = aztec.proof.bilateralSwap.helpers.makeTestNotes(makerNoteValues, takerNoteValues);
-            
+
             const { proofData, challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(NotesWithAZero, accounts[0]);
 
             await exceptions.catchRevert(bilateralSwapContract.validateBilateralSwap(proofData, challenge, t2, {
@@ -125,7 +131,7 @@ contract('BilateralSwap', (accounts) => {
 
         it('Validate failure for using fake proof data', async () => {
             const { challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(testNotes, accounts[0]);
-     
+
             const fakeProofData = new Array(4).map(() => new Array(6).map(() => toBytes32.randomBytes32()));
 
             await exceptions.catchRevert(bilateralSwapContract.validateBilateralSwap(fakeProofData, challenge, t2, {

@@ -78,7 +78,7 @@ helpers.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
         if (i <= 1) {
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         } else { // taker notes
-            bk = bkArray[i-2];
+            bk = bkArray[i - 2];
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         }
         finalHash.append(B);
@@ -125,7 +125,7 @@ helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, f
     const kBarArray = [];
 
     // Validate that the commitments lie on the bn128 curve
-    proofDataBn.map((proofElement) => {
+    proofDataBn.forEach((proofElement) => {
         helpers.validateOnCurve(proofElement[2], proofElement[3]); // checking gamma point
         helpers.validateOnCurve(proofElement[4], proofElement[5]); // checking sigma point
     });
@@ -150,7 +150,7 @@ helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, f
         if (i <= 1) {
             B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
         } else { // taker notes
-            kBar = kBarArray[i-2];
+            kBar = kBarArray[i - 2];
             B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
         }
 
@@ -162,7 +162,7 @@ helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, f
             B,
         };
     });
-    
+
     const recoveredChallenge = finalHash.keccak(groupReduction);
     return { recoveredBlindingFactors, recoveredChallenge };
 };

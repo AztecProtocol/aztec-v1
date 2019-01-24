@@ -52,7 +52,7 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
         if (i <= 1) {
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         } else { // taker notes
-            bk = bkArray[i-2];
+            bk = bkArray[i - 2];
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         }
         finalHash.append(B);
@@ -69,7 +69,7 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
-        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();     
+        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
         return [
             `0x${padLeft(kBar.toString(16), 64)}`,
             `0x${padLeft(aBar.toString(16), 64)}`,
@@ -109,7 +109,7 @@ bilateralSwap.verifyBilateralSwap = (proofData, challenge, sender) => {
     const kBarArray = [];
 
     // Validate that the commitments lie on the bn128 curve
-    proofDataBn.map((proofElement, i) => {
+    proofDataBn.forEach((proofElement) => {
         helpers.validateOnCurve(proofElement[2], proofElement[3]); // checking gamma point
         helpers.validateOnCurve(proofElement[4], proofElement[5]); // checking sigma point
     });
@@ -134,7 +134,7 @@ bilateralSwap.verifyBilateralSwap = (proofData, challenge, sender) => {
         if (i <= 1) {
             B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
         } else { // taker notes
-            kBar = kBarArray[i-2];
+            kBar = kBarArray[i - 2];
             B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
         }
 
@@ -146,7 +146,7 @@ bilateralSwap.verifyBilateralSwap = (proofData, challenge, sender) => {
             B,
         };
     });
-    
+
     const recoveredChallenge = finalHash.keccak(groupReduction);
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
 
