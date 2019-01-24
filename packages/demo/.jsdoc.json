@@ -5,7 +5,7 @@
         "includePattern": ".+\\.js(doc|x)?$",
         "excludePattern": "(^|\\/|\\\\)_",
         "include": ["./"],
-        "exclude": ["node_modules/"]
+        "exclude": ["./node_modules/"]
     },
     "sourceType": "module",
     "tags": {
@@ -23,6 +23,6 @@
         "encoding": "utf-8",
         "destination": "./docs/",
         "readme": "./README.md",
-        "template": "node_modules/braintree-jsdoc-template"
+        "template": "./node_modules/braintree-jsdoc-template"
     }
 }
