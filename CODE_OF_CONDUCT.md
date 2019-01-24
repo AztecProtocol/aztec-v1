@@ -6,7 +6,7 @@ We are committed to making participation in this projects a harassment-free expe
 
 ## Our Standards
 
-Examples of behavior that contributes to creating a positive environment include:
+Examples of behaviour that contributes to creating a positive environment include:
 
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints and experiences
@@ -30,6 +30,6 @@ By adopting this Code of Conduct, project maintainers commit themselves to fairl
 
 This code of conduct applies both within project spaces and in public spaces when an individual is representing the project or its community (like our mailing list, Google Groups, in Twitter, Facebook, etc.).
 
-Instances of abusive, harassing, or otherwise unacceptable behaviour may be reported by contacting a project maintainer at conduct@taiga.io. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. Maintainers are obligated to maintain confidentiality with regard to the reporter of an incident.
+Instances of abusive, harassing, or otherwise unacceptable behaviour may be reported by contacting a project maintainer at hello@aztecprotocol.com. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. Maintainers are obligated to maintain confidentiality with regard to the reporter of an incident.
 
 This Code of Conduct is adapted from the Contributor Covenant, version 1.4.1, available at https://www.contributor-covenant.org/version/1/4/code-of-conduct

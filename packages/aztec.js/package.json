@@ -58,6 +58,7 @@
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
+    "push-dir": "^0.4.1",
     "rimraf": "^2.6.3",
     "sinon": "^7.2.3"
   },
@@ -68,6 +69,7 @@
     "test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
     "test:coverage": "NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
     "build": "./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
-    "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
+    "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",
+    "publish:docs": "npm run build:docs && ./node_modules/.bin/push-dir --dir ./docs --branch gh-pages --remote origin --cleanup"
   }
 }
