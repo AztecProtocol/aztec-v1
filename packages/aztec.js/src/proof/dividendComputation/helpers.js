@@ -127,7 +127,7 @@ helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, f
     const kBarArray = [];
 
     // Validate that the commitments lie on the bn128 curve
-    proofDataBn.map((proofElement) => {
+    proofDataBn.forEach((proofElement) => {
         helpers.validateOnCurve(proofElement[2], proofElement[3]); // checking gamma point
         helpers.validateOnCurve(proofElement[4], proofElement[5]); // checking sigma point
     });

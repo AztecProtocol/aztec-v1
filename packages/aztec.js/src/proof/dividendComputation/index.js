@@ -155,7 +155,7 @@ dividendComputation.verifyProof = (proofData, challenge, sender, za, zb) => {
     const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
 
     // Check that proof data lies on the bn128 curve
-    proofDataBn.map((proofElement) => {
+    proofDataBn.forEach((proofElement) => {
         helpers.validateOnCurve(proofElement[2], proofElement[3]); // checking gamma point
         helpers.validateOnCurve(proofElement[4], proofElement[5]); // checking sigma point
     });

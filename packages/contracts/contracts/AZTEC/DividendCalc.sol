@@ -7,9 +7,12 @@ library DividendCalcInterface {
 /**
  * @title Library to validate AZTEC dividend computation proofs
  * @author AZTEC
- * @dev Don't include this as an internal library. This contract uses a static memory table to cache elliptic curve primitives and hashes.
+ * @dev Don't include this as an internal library. This contract uses a static memory table 
+ * to cache elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
- * The intended use case is to call this externally via `staticcall`. External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no storage and makes no external calls (other than to precompiles)
+ * The intended use case is to call this externally via `staticcall`. External calls to OptimizedAZTEC 
+ * can be treated as pure functions as this contract contains no storage and makes no external calls 
+ * (other than to precompiles).
  * Copyright Spilbury Holdings Ltd 2018. All rights reserved.
  **/
 contract DividendCalc {
@@ -22,8 +25,10 @@ contract DividendCalc {
     function() external payable {
         assembly {
 
-            // We don't check for function signatures, there's only one function that ever gets called: validateDividendCalc()
-            // We still assume calldata is offset by 4 bytes so that we can represent this contract through a compatible ABI
+            // We don't check for function signatures, there's only one function 
+            // that ever gets called: validateDividendCalc()
+            // We still assume calldata is offset by 4 bytes so that we can 
+            // represent this contract through a compatible ABI
             validateDividendCalc()
 
             // should not get here
@@ -37,7 +42,7 @@ contract DividendCalc {
              * 0x244:0x264      = Fiat-Shamir heuristicified random challenge
              * 0x264:0x284      = z_a
              * 0x284:0x2a4      = z_b
-             * 0x2a4:0x324      = G2 element t2, the trusted setup public key - needed to do a bilinear comparison check                *
+             * 0x2a4:0x324      = G2 element t2, the trusted setup public key
              * 
              * Note data map (uint[6]) is
              * 0x00:0x20       = Z_p element \bar{k}_i
@@ -45,7 +50,8 @@ contract DividendCalc {
              * 0x40:0x80       = G1 element \gamma_i
              * 0x80:0xc0       = G1 element \sigma_i
              *
-             * We use a hard-coded memory map to reduce gas costs - if this is not called as an external contract then terrible things will happen!
+             * We use a hard-coded memory map to reduce gas costs - if this is not called 
+             * as an external contract then terrible things will happen!
              * 0x00:0x20       = scratch data to store result of keccak256 calls
              * 0x20:0x80       = scratch data to store \gamma_i and a multiplication scalar
              * 0x80:0xc0       = x-coordinate of generator h
@@ -54,13 +60,16 @@ contract DividendCalc {
              * 0x100:0x160     = scratch data to store \sigma_i and a multiplication scalar
              * 0x160:0x1a0     = stratch data to store result of G1 point additions
              * 0x1a0:0x1c0     = scratch data to store result of \sigma_i^{-cx_{i-m-1}}
-             * 0x1c0:0x200     = location of pairing accumulator \sigma_{acc}, where \sigma_{acc} = \prod_{i=m}^{n-1}\sigma_i^{cx_{i-m-1}}
+             * 0x1c0:0x200     = location of pairing accumulator \sigma_{acc}, 
+             *                   where \sigma_{acc} = \prod_{i=m}^{n-1}\sigma_i^{cx_{i-m-1}}
              * 0x220:0x260     = scratch data to store \gamma_i^{cx_{i-m-1}}
-             * 0x260:0x2a0     = location of pairing accumulator \gamma_{acc}, where \gamma_{acc} = \prod_{i=m}^{n-1}\gamma_i^{cx_{i-m-1}}
+             * 0x260:0x2a0     = location of pairing accumulator \gamma_{acc}, 
+             *                    where \gamma_{acc} = \prod_{i=m}^{n-1}\gamma_i^{cx_{i-m-1}}
              * 0x2a0:0x2c0     = msg.sender (contract should be called via delegatecall/staticcall)
              * 0x2c0:0x2e0     = z_a (memory used to reconstruct hash starts here)
              * 0x2e0:0x300     = z_b
-             * 0x300:???       = block of memory that contains (\gamma_i, \sigma_i)_{i=0}^{n-1} concatenated with (B_i)_{i=0}^{n-1}
+             * 0x300:???       = block of memory that contains (\gamma_i, \sigma_i)_{i=0}^{n-1} 
+             *                   concatenated with (B_i)_{i=0}^{n-1}
              **/
 
 
@@ -96,7 +105,8 @@ contract DividendCalc {
                 let zb := mod(calldataload(0x284), gen_order)
 
                 /*
-                m is the deliminator between input and output notes. We only have one input note, and then the next two are output notes.
+                m is the deliminator between input and output notes. 
+                We only have one input note, and then the next two are output notes.
 
                 m = 0 and n = 3
 
@@ -115,7 +125,8 @@ contract DividendCalc {
                 */
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
-                // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1, which adds some minor alterations
+                // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1.
+                // This adds some minor alterations
                 for { let i := 0 } lt(i, 3) { i := add(i, 0x01) } {
 
                     // Get the calldata index of this note - call data location of start of note
@@ -136,7 +147,8 @@ contract DividendCalc {
                     // all other x_{j} = keccak256(x_{j-1})
                     // The reason for doing this is that the point  \sigma_i^{-cx_j} can be re-used in the pairing check
                     // Instead of validating e(\gamma_i, t_2) == e(\sigma_i, g_2) for all i = [m+1,\ldots,n]
-                    // We instead validate e(\Pi_{i=m+1}^{n}\gamma_i^{-cx_j}, t_2) == e(\Pi_{i=m+1}^{n}\sigma_i^{cx_j}, g_2).
+                    // We instead validate:
+                    // e(\Pi_{i=m+1}^{n}\gamma_i^{-cx_j}, t_2) == e(\Pi_{i=m+1}^{n}\sigma_i^{cx_j}, g_2).
                     // x_j is a pseudorandom variable whose entropy source is the input string, allowing for
                     // a sum of commitment points to be evaluated in one pairing comparison
 
@@ -150,8 +162,14 @@ contract DividendCalc {
                         Enforce the condition k_3 = (k_1)(z_b) - (k_2)(z_a)
                         */
                         k := addmod(
-                                    mulmod(calldataload(sub(noteIndex, add(0xc0, 0xc0))), zb, gen_order), // k_1 * z_b
-                                    mulmod(sub(gen_order, calldataload(sub(noteIndex, 0xc0))), za, gen_order), // - (k_2 * z_a)
+                                    mulmod(
+                                        calldataload(sub(noteIndex, add(0xc0, 0xc0))),
+                                        zb,
+                                        gen_order), // k_1 * z_b
+                                    mulmod(
+                                        sub(gen_order, calldataload(sub(noteIndex, 0xc0))),
+                                        za,
+                                        gen_order), //-(k_2 * z_a)
                                     gen_order)       
                     }
 
@@ -248,7 +266,10 @@ contract DividendCalc {
                         mstore(0x260, mload(0x20))
                         mstore(0x280, mload(0x40))
                         mstore(0x1e0, mload(0xe0))
-                        mstore(0x200, sub(0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47, mload(0x100)))
+                        mstore(
+                            0x200,
+                            sub(0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47, mload(0x100))
+                            )
                     }
 
                     // If i > m + 1 (i.e. subsequent output notes)
@@ -271,16 +292,17 @@ contract DividendCalc {
                 }
 
                 // If the AZTEC protocol is implemented correctly then any input notes were previously outputs of
-                // a JoinSplit transaction. We can inductively assume that all input notes are well-formed AZTEC commitments 
-                // and do not need to validate the implicit range proof. This is not the case for any output commitments, so if (m < n) call validatePairing()
+                // a JoinSplit transaction. We can inductively assume that all input notes 
+                // are well-formed AZTEC commitments and do not need to validate the implicit range proof. 
+                // This is not the case for any output commitments, so if (m < n) call validatePairing()
                 if lt(0, 3) { // m = 0, n = 3
                     validatePairing(0x2a4) // argument is just a hexadecimal number here. Used in the 
                                          //  function to give the call data location of the trusted setup
                                          //  public key
                 }
 
-                // We now have the message sender, z_a, z_b, note commitments and the calculated blinding factors in a block of memory
-                // starting at 0x2a0, of size (b - 0x2a0).
+                // We now have the message sender, z_a, z_b, note commitments and the 
+                // calculated blinding factors in a block of memory starting at 0x2a0, of size (b - 0x2a0).
                 // Hash this block to reconstruct the initial challenge and validate that they match
                 let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
 
@@ -323,8 +345,9 @@ contract DividendCalc {
                 }
 
                 // store coords in memory
-                // indices are a bit off, scipr lab's libff limb ordering (c0, c1) is opposite to what precompile expects
-                // We can overwrite the memory we used previously as this function is called at the end of the validation routine.
+                // indices are a bit off, scipr lab's libff limb ordering (c0, c1) is opposite
+                // to what precompile expects. We can overwrite the memory we used previously as this function
+                // is called at the end of the validation routine.
                 mstore(0x20, mload(0x1e0)) // sigma accumulator x
                 mstore(0x40, mload(0x200)) // sigma accumulator y
                 mstore(0x80, 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed)
@@ -348,7 +371,8 @@ contract DividendCalc {
 
             /**
              * @dev check that this note's points are on the altbn128 curve(y^2 = x^3 + 3)
-             * and that signatures 'k' and 'a' are modulo the order of the curve. Transaction will throw if this is not the case.
+             * and that signatures 'k' and 'a' are modulo the order of the curve. 
+             * Transaction will throw if this is not the case.
              * @param note the calldata loation of the note
              **/
             function validateCommitment(note, k, a) {
@@ -372,11 +396,17 @@ contract DividendCalc {
                         ),
                         and(
                             eq( // y^2 ?= x^3 + 3
-                                addmod(mulmod(mulmod(sigmaX, sigmaX, field_order), sigmaX, field_order), 3, field_order),
+                                addmod(
+                                    mulmod(mulmod(sigmaX, sigmaX, field_order), sigmaX, field_order), 
+                                    3, 
+                                    field_order),
                                 mulmod(sigmaY, sigmaY, field_order)
                             ),
                             eq( // y^2 ?= x^3 + 3
-                                addmod(mulmod(mulmod(gammaX, gammaX, field_order), gammaX, field_order), 3, field_order),
+                                addmod(
+                                    mulmod(mulmod(gammaX, gammaX, field_order), gammaX, field_order),
+                                    3,
+                                    field_order),
                                 mulmod(gammaY, gammaY, field_order)
                             )
                         )
@@ -389,14 +419,16 @@ contract DividendCalc {
 
             /**
              * @dev Calculate the keccak256 hash of the commitments for both input notes and output notes.
-             * This is used both as an input to validate the challenge `c` and also to generate pseudorandom relationships
-             * between commitments for different outputNotes, so that we can combine them into a single multi-exponentiation for the purposes of validating the bilinear pairing relationships.
+             * This is used both as an input to validate the challenge `c` and also 
+             * to generate pseudorandom relationships between commitments for different outputNotes, so 
+             * that we can combine them into a single multi-exponentiation for the purposes of 
+             * validating the bilinear pairing relationships.
              * @param notes calldata location of notes
              * @param n number of notes
              * 
              * @notice
-             * This is iterating through each note. It first calculates an index for each note - the memory location in calldata
-             * where xyz is stored. 
+             * This is iterating through each note. It first calculates an index 
+             * for each note - the memory location in calldata where note data is stored. 
              *   
              * It then copies the next 128 bytes worth of data from the note, into the appropriate memory location
              *
@@ -409,7 +441,8 @@ contract DividendCalc {
                     // goes to the start of the appropriate note, then steps in by 0x60 (96 bytes)
                     let index := add(add(notes, mul(i, 0xc0)), 0x40) 
 
-                    // copy 0x80 (128 bytes) from call data at position index to memory location (0x300 + note_number * 0x80)
+                    // copy 0x80 (128 bytes) from call data at position index to 
+                    // memory location (0x300 + note_number * 0x80)
                     calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
                 mstore(0x00, keccak256(0x300, mul(n, 0x80)))
