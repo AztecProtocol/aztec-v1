@@ -4,9 +4,9 @@ We appreciate your desire to contribute to the AZTEC protocol and welcome anyone
 
 ## Getting Started
 
-- Fork AztecProtocol/aztec-monorepo
+- Fork AztecProtocol/AZTEC
 - Clone your fork
-- Follow the [installation & build steps](https://github.com/AztecProtocol/aztec-monorepo#contributing) in the repo's top-level README.
+- Follow the [installation & build steps](https://github.com/AztecProtocol/AZTEC#contributing) in the repo's top-level README.
 - Open a PR against the `develop` branch and describe the change you are intending to undertake in the PR description using the provided template.
 
 ## Code Quality
