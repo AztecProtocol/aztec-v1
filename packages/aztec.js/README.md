@@ -81,10 +81,10 @@ const outputNotes = [
 const kPublic = -10; // input notes contain 10 fewer than output notes = deposit of 10 public tokens
 const sender = accounts[0].address; // address of transaction sender
 
-// proofData and challenge are ABI-encoded and ready to beused as inputs to an AZTEC smart contract
+// proofData and challenge are ABI-encoded and ready to be used as inputs to an AZTEC smart contract
 const { proofData, challenge } = proof.constructJoinSplit([...inputNotes, ...outputNotes], inputNotes.length, sender, kPublic);
 
-// construct EIP712-compatible ECDSA sigantures over input notes, required to spend input notes
+// construct EIP712-compatible ECDSA signatures over input notes, required to spend input notes
 const inputSignatures = [
     sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
     sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
