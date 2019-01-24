@@ -54,7 +54,6 @@
     "lint:js:fix": "./node_modules/.bin/eslint . --fix",
     "lint:sol": "./node_modules/.bin/solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint": "npm run lint:js && npm run lint:sol",
-    "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
     "test": "scripts/test.sh",
     "test:coverage": "scripts/coverage.sh"
   }
