@@ -1,7 +1,7 @@
 dbDevelopment.json
-dbRinkeby.json
-dbMainNet.json
 dbKovan.json
+dbMainNet.json
+dbRinkeby.json
 dbRopsten.json
 dbTest.json
 testWallets.json
