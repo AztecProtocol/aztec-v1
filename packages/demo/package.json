@@ -49,11 +49,11 @@
     "lint:fix": "./node_modules/.bin/eslint . --fix",
     "test": "scripts/test.sh",
     "test:coverage": "scripts/coverage.sh",
-    "demo:rinkeby": "NODE_ENV=RINKEBY node ./scripts/demoTransactions.js",
-    "demo:ropsten": "NODE_ENV=ROPSTEN node ./scripts/demoTransactions.js",
-    "demo:kovan": "NODE_ENV=KOVAN node ./scripts/demoTransactions.js",
-    "demo:development": "NODE_ENV=DEVELOPMENT node ./scripts/demoTransactions.js",
-    "demo:mainnet": "NODE_ENV=MAINNET node ./scripts/demoTransactions.js",
+    "demo:rinkeby": "NODE_ENV=RINKEBY node ./demoTransactions.js",
+    "demo:ropsten": "NODE_ENV=ROPSTEN node ./demoTransactions.js",
+    "demo:kovan": "NODE_ENV=KOVAN node ./demoTransactions.js",
+    "demo:development": "NODE_ENV=DEVELOPMENT node ./demoTransactions.js",
+    "demo:mainnet": "NODE_ENV=MAINNET node ./demoTransactions.js",
     "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
   }
 }

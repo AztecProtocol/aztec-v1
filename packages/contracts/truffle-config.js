@@ -6,7 +6,7 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 // Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
 function createProvider(network) {
     if (!process.env.PRIVATE_KEY && !process.env.MNEMONIC) {
-        console.log('Please set either your PRIVATE_KEY or MNEMONIC');
+        console.log('Please set either your PRIVATE_KEY or MNEMONIC in a .env file');
         process.exit(1);
     }
     if (!process.env.INFURA_API_KEY) {
