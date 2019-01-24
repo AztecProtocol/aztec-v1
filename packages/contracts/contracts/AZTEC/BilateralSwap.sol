@@ -104,7 +104,7 @@ contract BilateralSwap {
 
                     // Get the calldata index of this note and associated parameters
                     let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
-                    let k   // value will be assigned later, depending on whether it's a maker or taker note
+                    let k
                     let a := calldataload(add(noteIndex, 0x20))
                     let c := challenge
 
@@ -135,7 +135,7 @@ contract BilateralSwap {
                     // 0x100: \sigma_iY
                     // 0x120: -c
 
-                    // loading into memory, to work on it
+                    // loading into memory
                     calldatacopy(0xe0, add(noteIndex, 0x80), 0x40)
                     calldatacopy(0x20, add(noteIndex, 0x40), 0x40)
                     mstore(0x120, sub(gen_order, c)) 
