@@ -63,10 +63,11 @@ describe('Validating bilateral swap proof construction and verification algos', 
             // Should then fail to be validated, as points aren't on the curve
             const zeroes = `${web3Utils.padLeft('0', 64)}`;
             const noteString = `${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}`;
-            const challengeString = `0x${web3Utils.padLeft(sender.slice(2), 64)}${web3Utils.padLeft('132', 64)}${web3Utils.padLeft('1', 64)}${noteString}`;
+            const challengeString = `0x${web3Utils.padLeft(sender.slice(2), 64)}${web3Utils.padLeft('132', 64)}
+                                        ${web3Utils.padLeft('1', 64)}${noteString}`;
             const challenge = web3Utils.sha3(challengeString, 'hex');
             const proofData = [[`0x${web3Utils.padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
-       
+
             try {
                 bilateralProof.verifyBilateralSwap(proofData, challenge, sender);
             } catch (err) {
@@ -100,7 +101,9 @@ describe('Validating bilateral swap proof construction and verification algos', 
                 finalHash.append(proofElement[7]);
             });
 
-            const { recoveredBlindingFactors } = helpers.recoverBlindingFactorsAndChallenge(proofDataBn, formattedChallenge, finalHash);
+            const { recoveredBlindingFactors } = helpers.recoverBlindingFactorsAndChallenge(proofDataBn,
+                formattedChallenge,
+                finalHash);
 
             const testkBar1 = (recoveredBlindingFactors[0].kBar).toString(16);
             const testkBar2 = (recoveredBlindingFactors[1].kBar).toString(16);
