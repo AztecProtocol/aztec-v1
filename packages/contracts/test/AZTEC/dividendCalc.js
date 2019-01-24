@@ -6,7 +6,7 @@ const web3Utils = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2, GROUP_MODULUS } } = require('aztec.js');
+const { params: { t2, GROUP_MODULUS, K_MAX } } = require('aztec.js');
 
 const exceptions = require('../../utils/exceptions');
 
@@ -179,9 +179,8 @@ contract('DividendCalc', (accounts) => {
         });
 
         it('validates failure for z_a, z_b > kMax', async () => {
-            const kMax = 33554432;
-            const zaHigh = kMax + za;
-            const zbHigh = kMax + zb;
+            const zaHigh = K_MAX + za;
+            const zbHigh = K_MAX + zb;
 
             const { proofData, challenge } = aztec.proof.dividendComputation.constructProof(
                 testNotes,
