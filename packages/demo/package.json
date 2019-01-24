@@ -2,10 +2,10 @@
   "name": "@aztec/demo",
   "version": "0.2.0",
   "author": "AZTEC",
-  "description": "AZTEC javascript demos",
+  "description": "AZTEC javascript demo",
   "license": "LGPL-3.0",
   "main": "index.js",
-  "homepage": "https://github.com/AztecProtocol/aztec-monorepo#readme",
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
   "keywords": [
     "aztec",
     "cryptography",
@@ -15,10 +15,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AztecProtocol/aztec-monorepo.git"
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "bugs": {
-    "url": "https://github.com/AztecProtocol/aztec-monorepo/issues"
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "engines": {
     "npm": ">=4"
@@ -42,18 +42,20 @@
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
+    "rimraf": "^2.6.3",
     "sinon": "^7.2.3"
   },
   "scripts": {
+    "clean": "./node_modules/.bin/rimraf ./dbDevelopment.json ./dbKovan.json ./dbMainNet.json ./dbRinkeby.json ./dbRopsten.json ./dbTest.json ./testWallets.json ./wallets.json",
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix",
     "test": "scripts/test.sh",
     "test:coverage": "scripts/coverage.sh",
-    "demo:rinkeby": "NODE_ENV=RINKEBY node ./scripts/demoTransactions.js",
-    "demo:ropsten": "NODE_ENV=ROPSTEN node ./scripts/demoTransactions.js",
-    "demo:kovan": "NODE_ENV=KOVAN node ./scripts/demoTransactions.js",
-    "demo:development": "NODE_ENV=DEVELOPMENT node ./scripts/demoTransactions.js",
-    "demo:mainnet": "NODE_ENV=MAINNET node ./scripts/demoTransactions.js",
+    "demo:rinkeby": "NODE_ENV=RINKEBY node ./demoTransactions.js",
+    "demo:ropsten": "NODE_ENV=ROPSTEN node ./demoTransactions.js",
+    "demo:kovan": "NODE_ENV=KOVAN node ./demoTransactions.js",
+    "demo:development": "NODE_ENV=DEVELOPMENT node ./demoTransactions.js",
+    "demo:mainnet": "NODE_ENV=MAINNET node ./demoTransactions.js",
     "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
   }
 }
