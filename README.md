@@ -4,7 +4,7 @@
 
 <p align="center">
  <a href="https://circleci.com/gh/AztecProtocol/AZTEC">
-    <img src="https://circleci.com/gh/AztecProtocol/aztecrepo.svg?style=svg&circle-token=12d232f83d560e96efe05c6cb106933a75bf07f5" alt="CircleCI"/>
+    <img src="https://circleci.com/gh/AztecProtocol/AZTEC.svg?style=svg&circle-token=bb8aa4415af9d373eab3ee130a284e0c4874f65c" alt="CircleCI"/>
   </a>
   <a href="https://lernajs.io/">
     <img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg" alt="Lerna"/>
