@@ -10,10 +10,10 @@
     "sourceType": "module",
     "tags": {
         "allowUnknownTags": true,
-        "dictionaries": ["jsdoc","closure"]
+        "dictionaries": ["jsdoc", "closure"]
     },
     "templates": {
-        "referenceTitle": "aztec-js",
+        "referenceTitle": "aztec.js",
         "disableSort": false,
         "collapse": true
     },
@@ -23,6 +23,6 @@
         "encoding": "utf-8",
         "destination": "./docs/",
         "readme": "./README.md",
-        "template": "node_modules/braintree-jsdoc-template"
+        "template": "./node_modules/braintree-jsdoc-template"
     }
 }
