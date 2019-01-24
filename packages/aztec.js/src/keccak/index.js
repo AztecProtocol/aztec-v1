@@ -61,4 +61,8 @@ Keccak.prototype.keccak = function keccak(reductionContext = null) {
     return this.data;
 };
 
+Keccak.prototype.toGroupScalar = function toGroupScalar(reductionContext) {
+    return new BN(this.data[0], 16).toRed(reductionContext);
+};
+
 module.exports = Keccak;
