@@ -6,5 +6,6 @@ coverage.json
 build/
 coverage/
 coverageEnv/
+docs/
 lib/
 node_modules/

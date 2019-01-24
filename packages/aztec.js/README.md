@@ -6,7 +6,7 @@ This library contains methods required to construct AZTEC zero-knowledge proofs,
   
 This repository is under active development, with our interfaces and smart contracts changing substantially as we prepare our Cryptography Engine. If you want to investigate the smart contracts and tooling that created our first zero-knowledge AZTEC transactions, please clone from the [`release-0.1.0`](https://github.com/AztecProtocol/aztec-crypto-js/tree/release-0.1.0) branch.
 
-To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in the [@aztec/demo](https://github.com/AztecProtocol/aztec-monorepo/tree/master/packages/demo) package. For full API docs, view our [GitHub Pages website](https://aztecprotocol.github.io/AZTEC)
+To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in the [@aztec/demo](https://github.com/AztecProtocol/AZTEC/tree/master/packages/demo) package. For full API docs, view our [GitHub Pages website](https://aztecprotocol.github.io/AZTEC)
 
 ## Pre Requisites
 
@@ -20,7 +20,7 @@ $ npm install
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](https://github.com/AztecProtocol/aztec-monorepo/blob/master/CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](https://github.com/AztecProtocol/AZTEC/blob/master/CONTRIBUTING.md) before getting started.
 
 ### Notation
 
