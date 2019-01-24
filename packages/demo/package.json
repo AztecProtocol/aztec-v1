@@ -42,9 +42,11 @@
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
+    "rimraf": "^2.6.3",
     "sinon": "^7.2.3"
   },
   "scripts": {
+    "clean": "./node_modules/.bin/rimraf ./dbDevelopment.json ./dbKovan.json ./dbMainNet.json ./dbRinkeby.json ./dbRopsten.json ./dbTest.json ./testWallets.json ./wallets.json",
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix",
     "test": "scripts/test.sh",
