@@ -21,6 +21,12 @@ grammar.topLevel = {
         '\\((\\d+)\\)',
         '\\{((?:[^\\}])*)\\}',
     ]),
+    CODE_TABLE: regex([
+        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '\\b(table)\\b',
+        '([A-Za-z0-9_]\\w*)',
+        '\\{((?:[^\\}])*)\\}',
+    ]),
     JUMP_TABLE: regex([
         '^(?:[\\s\\n]*#[\\s\\n]*define)',
         '\\b(jumptable)\\b',

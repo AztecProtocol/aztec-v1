@@ -191,19 +191,26 @@ parser.processMacro = (
     const tableOffsets = {};
     jumpkeys.forEach((jumpkey) => {
         const jumptable = jumptables[jumpkey];
-        tableOffsets[jumptable.name] = tableOffset;
-        tableOffset += jumptable.table.size;
-        const tablecode = jumptable.table.jumps.map((jumplabel) => {
-            if (!result.jumpindices[jumplabel]) {
-                return '';
-            }
-            const offset = result.jumpindices[jumplabel];
-            const hex = formatEvenBytes(toHex(offset));
-            if (!jumptable.table.compressed) {
-                return padNBytes(hex, 0x20);
-            }
-            return hex;
-        }).join('');
+        let tablecode;
+        if (jumptable.table.jumps) {
+            tableOffsets[jumptable.name] = tableOffset;
+            tableOffset += jumptable.table.size;
+            tablecode = jumptable.table.jumps.map((jumplabel) => {
+                if (!result.jumpindices[jumplabel]) {
+                    return '';
+                }
+                const offset = result.jumpindices[jumplabel];
+                const hex = formatEvenBytes(toHex(offset));
+                if (!jumptable.table.compressed) {
+                    return padNBytes(hex, 0x20);
+                }
+                return hex;
+            }).join('');
+        } else {
+            tablecode = jumptable.table.table;
+            tableOffsets[jumptable.name] = tableOffset
+            tableOffset += jumptable.table.size;
+        }
         bytecode += tablecode;
     });
     result.tableInstances.forEach((tableInstance) => {
@@ -407,6 +414,16 @@ parser.parseJumpTable = (body, compressed = false) => {
     };
 };
 
+parser.parseCodeTable = (body) => {
+    const table = body.match(grammar.jumpTable.JUMPS).map(j => regex.removeSpacesAndLines(j)).join('');
+    let size = table.length / 2;
+    return {
+        jumps: null,
+        table,
+        size,
+    };
+};
+
 parser.parseMacro = (body, macros, jumptables, startingIndex = 0) => {
     let input = body;
     let index = 0;
@@ -562,6 +579,17 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             index += macro[0].length;
             currentContext = CONTEXT.NONE;
             currentExpression = { templateParams: [] };
+        } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.CODE_TABLE.test(input)) {
+            const table = input.match(grammar.topLevel.CODE_TABLE);
+            const body = table[3];
+            jumptables = {
+                ...jumptables,
+                [table[2]]: {
+                    name: table[2],
+                    table: parser.parseCodeTable(body),
+                },
+            };
+            index += table[0].length;
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE_PACKED.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
             const type = jumptable[1];
