@@ -181,21 +181,15 @@ contract DividendCalc {
                     }
 
 
-                    // If i > m then this is an output note.
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-                    switch gt(add(i, 0x01), 0) // m = 0
-                    case 1 {
+                    let x := mod(mload(0x00), gen_order) // x is the kecca hash of the input commitments
+                    k := mulmod(k, x, gen_order) // kx
+                    a := mulmod(a, x, gen_order) // ax
+                    c := mulmod(challenge, x, gen_order) // cx
+                    mstore(0x1000, x) // todo remove
+                    // calculate x_{j+1}
+                    mstore(0x00, keccak256(0x00, 0x20)) // rehashing the kecca hash, for use in the next x
 
-                        let x := mod(mload(0x00), gen_order) // x is the kecca hash of the input commitments
-                        k := mulmod(k, x, gen_order) // kx
-                        a := mulmod(a, x, gen_order) // ax
-                        c := mulmod(challenge, x, gen_order) // cx
-                        mstore(0x1000, x) // todo remove
-                        // calculate x_{j+1}
-                        mstore(0x00, keccak256(0x00, 0x20)) // rehashing the kecca hash, for use in the next x
-                    }
-                    case 0 {
-                    }
 
                     // Check this commitment is well formed
                     validateCommitment(noteIndex, k, a)
@@ -290,16 +284,11 @@ contract DividendCalc {
                     if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
+                
 
-                // If the AZTEC protocol is implemented correctly then any input notes were previously outputs of
-                // a JoinSplit transaction. We can inductively assume that all input notes 
-                // are well-formed AZTEC commitments and do not need to validate the implicit range proof. 
-                // This is not the case for any output commitments, so if (m < n) call validatePairing()
-                if lt(0, 3) { // m = 0, n = 3
                     validatePairing(0x2a4) // argument is just a hexadecimal number here. Used in the 
                                          //  function to give the call data location of the trusted setup
                                          //  public key
-                }
 
                 // We now have the message sender, z_a, z_b, note commitments and the 
                 // calculated blinding factors in a block of memory starting at 0x2a0, of size (b - 0x2a0).
