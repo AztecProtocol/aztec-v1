@@ -70,7 +70,7 @@ npm install
 npm run demo:rinkeby
 ```
 
-For more information, check out our [documentation](https://readthedocs.org/).
+For more information, check out our [documentation](https://aztecprotocol.github.io/AZTEC/).
 
 ## Contributing :raising_hand_woman:
 
