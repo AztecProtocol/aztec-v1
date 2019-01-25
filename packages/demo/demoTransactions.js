@@ -11,7 +11,9 @@ const wallets = require('./resources/wallets');
 const web3 = require('./web3Listener');
 const keystore = require('./accounts');
 
-const { erc20ScalingFactor: scalingFactor } = config;
+const constants = require('../contracts/utils/constants');
+
+const { ERC20_SCALING_FACTOR: SCALING_FACTOR } = constants;
 
 /**
  * Runs a sequence of demonstration confidential transactions.  
@@ -40,7 +42,7 @@ async function demoTransactions(mint = false) {
         }));
     }
     const aztecBridgeContractAddress = await aztecBridgeContract.getContractAddress();
-    // approve aztecBridgeContract for scalingFactor.mul(100) tokens from account 0
+    // approve aztecBridgeContract for SCALING_FACTOR.mul(100) tokens from account 0
     // create 4 notes split between accounts 0, 1 and 2
     // split 1st and 3rd note
     // split 2nd and 4th note
@@ -50,7 +52,7 @@ async function demoTransactions(mint = false) {
             await erc20.mint(
                 accounts[0],
                 accounts[0],
-                scalingFactor.mul(new BN(100)).toString(10)
+                SCALING_FACTOR.mul(new BN(100)).toString(10)
             )
         );
         console.log('minted');
@@ -61,7 +63,7 @@ async function demoTransactions(mint = false) {
         await erc20.approve(
             accounts[0],
             aztecBridgeContractAddress,
-            scalingFactor.mul(new BN(100)).toString(10)
+            SCALING_FACTOR.mul(new BN(100)).toString(10)
         )
     );
     const proofs = [];
