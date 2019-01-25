@@ -11,9 +11,12 @@ const deployer = require('../../../deployer');
 const wallets = require('../../wallets');
 const transactions = require('../../transactions');
 const config = require('../../../config');
+
+const constants = require('../../../../contracts/utils/constants');
 const ERC20Mintable = require('../../../../contracts/build/contracts/ERC20Mintable.json');
 
 const { web3 } = deployer;
+const { DAI_ADDRESS } = constants;
 const { TX_TYPES } = config;
 
 const erc20 = {};
@@ -25,7 +28,7 @@ const erc20 = {};
  */
 erc20.getContractAddress = async () => {
     if (config.env === 'MAINNET') {
-        return config.daiAddress;
+        return DAI_ADDRESS;
     }
     const networkId = await deployer.getNetwork();
     if (!ERC20Mintable.networks[networkId] || !ERC20Mintable.networks[networkId].address) {
