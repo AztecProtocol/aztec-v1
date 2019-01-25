@@ -21,7 +21,7 @@ library AZTECInterface {
  * memory mutation and undefined behaviour. The intended use case is to call this externally via `staticcall`. 
  * External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no storage and 
  * makes no external calls (other than to precompiles)
- * Copyright Spilbury Holdings Ltd 2018. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2018. All rights reserved.
  * We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum.
  * Our full vision of the protocol includes confidential cross-asset interactions via our family of 
  * AZTEC zero-knowledge proofs and the AZTEC token standard, stay tuned for updates!
