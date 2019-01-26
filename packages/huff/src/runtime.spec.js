@@ -1,7 +1,7 @@
 const chai = require('chai');
 const BN = require('bn.js');
 const path = require('path');
-const Runtime = require('./runtime');
+const { Runtime } = require('./runtime');
 
 const { expect } = chai;
 

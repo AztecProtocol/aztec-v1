@@ -208,7 +208,7 @@ parser.processMacro = (
             }).join('');
         } else {
             tablecode = jumptable.table.table;
-            tableOffsets[jumptable.name] = tableOffset
+            tableOffsets[jumptable.name] = tableOffset;
             tableOffset += jumptable.table.size;
         }
         bytecode += tablecode;
@@ -416,7 +416,7 @@ parser.parseJumpTable = (body, compressed = false) => {
 
 parser.parseCodeTable = (body) => {
     const table = body.match(grammar.jumpTable.JUMPS).map(j => regex.removeSpacesAndLines(j)).join('');
-    let size = table.length / 2;
+    const size = table.length / 2;
     return {
         jumps: null,
         table,

@@ -155,7 +155,7 @@ Please, by all means. Huff is open-source and licensed under LGPL-3.0.
 ### **Usage**
 
 ```
-const Runtime = require('huff');
+const { Runtime } = require('huff');
 
 const main = new Runtime('main_loop.huff', 'path_to_macros');
 const calldata = [ // calldata for macro
