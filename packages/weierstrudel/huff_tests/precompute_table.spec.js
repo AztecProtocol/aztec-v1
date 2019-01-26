@@ -3,7 +3,7 @@ const BN = require('bn.js');
 const EC = require('elliptic');
 const path = require('path');
 
-const Runtime = require('../huff');
+const { Runtime } = require('../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 
