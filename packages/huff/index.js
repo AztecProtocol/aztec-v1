@@ -1,3 +1,7 @@
-const runtime = require('./src/runtime');
+const Runtime = require('./src/runtime');
+const compile = require('./src/compiler');
 
-module.exports = runtime;
+module.exports = {
+    compile,
+    Runtime,
+};
