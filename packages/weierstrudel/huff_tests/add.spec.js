@@ -2,7 +2,7 @@ const chai = require('chai');
 const path = require('path');
 const BN = require('bn.js');
 
-const Runtime = require('../huff');
+const { Runtime } = require('../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;

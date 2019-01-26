@@ -5,7 +5,7 @@ const path = require('path');
 
 const endomorphism = require('../js_snippets/endomorphism');
 const referenceWnaf = require('../js_snippets/wnaf');
-const Runtime = require('../huff');
+const { Runtime } = require('../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;

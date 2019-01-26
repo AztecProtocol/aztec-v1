@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const EC = require('elliptic');
 const path = require('path');
 
-const Runtime = require('../huff');
+const { Runtime } = require('../huff');
 const {
     n,
     lambda,

@@ -426,3 +426,5 @@ sensible_inputs:
     __tablesize(WNAF_GREEDY__JUMP_TABLE)
     add add dup1 __codesize(MAIN__CONSTRUCTOR_SHALLOW) 0x00 codecopy 0x00 return
 }
+
+#define macro TEST_CONSTRUCTOR = takes(0) returns(0) {}

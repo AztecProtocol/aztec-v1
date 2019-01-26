@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 
 const parser = require('./huff/src/parser');
+const compiler = require('./huff/src/compiler');
 
 const pathToData = path.posix.resolve(__dirname, './huff_modules');
 
@@ -27,5 +28,7 @@ fs.writeFileSync(
     path.posix.resolve(__dirname, './weierstrudel.json'),
     JSON.stringify(contract)
 );
+
+compiler('weierstrudel_project.json', pathToData);
 
 console.log('written bytecode to weierstrudel.json');
