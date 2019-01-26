@@ -1,6 +1,6 @@
 const path = require('path');
 
-const { Runtime } = require('./huff');
+const { Runtime } = require('./../huff;
 const bn128Reference = require('./js_snippets/bn128_reference');
 
 const pathToTestData = path.posix.resolve(__dirname, './huff_modules');
