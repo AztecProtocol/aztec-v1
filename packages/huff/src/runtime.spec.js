@@ -1,7 +1,7 @@
 const chai = require('chai');
 const BN = require('bn.js');
 const path = require('path');
-const { Runtime } = require('./runtime');
+const Runtime = require('./runtime');
 
 const { expect } = chai;
 
@@ -11,7 +11,7 @@ const testHelper = `
 #include "double.huff"
 #include "constants.huff"
 #define macro DOUBLE__MAIN_IMPL = takes(3) returns(3) {
-    DOUBLE__MAIN<P,P>()
+    DOUBLE_MAIN<P,P>()
 }
 
 #define macro X2 = takes(0) returns(1) { 0x00 }
@@ -19,7 +19,7 @@ const testHelper = `
 #define macro Z2 = takes(0) returns(1) { 0x40 }
 
 #define macro DOUBLE__PRECOMPUTE_TABLE_B_IMPL = takes(3) returns(3) {
-    DOUBLE__PRECOMPUTE_TABLE_B<P,P,X2,Y2,Z2>()
+    PRECOMPUTE_TABLE_DOUBLE_B<P,P,X2,Y2,Z2>()
 }
 `;
 
