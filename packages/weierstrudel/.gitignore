@@ -1,0 +1,9 @@
+node_modules
+
+js_snippets/hashToPoint.js
+
+debug.txt
+log.txt
+
+.vscode
+.nyc_output

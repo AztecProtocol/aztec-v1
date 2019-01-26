@@ -1,0 +1,430 @@
+#include "constants.huff"
+#include "wnaf.huff"
+#include "precompute_table.huff"
+#include "double.huff"
+#include "add.huff"
+
+#define macro GET_P_30 = takes(0) returns(0) {
+    0x5a dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_29 = takes(0) returns(0) {
+    0x58 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_28 = takes(0) returns(0) {
+    0x56 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_27 = takes(0) returns(0) {
+    0x54 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_26 = takes(0) returns(0) {
+    0x52 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_25 = takes(0) returns(0) {
+    0x50 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_24 = takes(0) returns(0) {
+    0x4e dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_23 = takes(0) returns(0) {
+    0x4c dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_22 = takes(0) returns(0) {
+    0x4a dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+
+#define macro GET_P_21 = takes(0) returns(0) {
+    0x48 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_20 = takes(0) returns(0) {
+    0x46 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_19 = takes(0) returns(0) {
+    0x44 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_18 = takes(0) returns(0) {
+    0x42 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_17 = takes(0) returns(0) {
+    0x40 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+// p t1 p z1 -y1 x1 i
+#define macro GET_P_16 = takes(0) returns(0) {
+    0x3e dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_15 = takes(0) returns(0) {
+    0x3c dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_14 = takes(0) returns(0) {
+    0x3a dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_13 = takes(0) returns(0) {
+    0x38 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_12 = takes(0) returns(0) {
+    0x36 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_11 = takes(0) returns(0) {
+    0x34 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_10 = takes(0) returns(0) {
+    0x32 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_9 = takes(0) returns(0) {
+    0x30 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_8 = takes(0) returns(0) {
+    0x2e dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_7 = takes(0) returns(0) {
+    0x2c dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_6 = takes(0) returns(0) {
+    0x2a dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_5 = takes(0) returns(0) {
+    0x28 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_4 = takes(0) returns(0) {
+    0x26 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_3 = takes(0) returns(0) {
+    0x24 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define macro GET_P_2 = takes(0) returns(0) {
+    0x22 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+// ? ? ? z y x i
+#define macro GET_P_1 = takes(0) returns(0) {
+    0x20 dup8 sub mload 0x02ffe0 and
+    dup1 0x20 add
+}
+
+#define jumptable__packed MAIN__JUMP_TABLE {
+    main__add_00 main__add_01 main__add_02 main__add_03 main__add_04 main__add_05 main__add_06 main__add_07
+    main__add_08 main__add_09 main__add_10 main__add_11 main__add_12 main__add_13 main__add_14 main__add_15
+    main__add_16 main__add_17 main__add_18 main__add_19 main__add_20 main__add_21 main__add_22 main__add_23
+    main__add_24 main__add_25 main__add_26 main__add_27 main__add_28 main__add_29 main__add_30
+    main__add_f_00 main__add_f_01 main__add_f_02 main__add_f_03 main__add_f_04 main__add_f_05 main__add_f_06 main__add_f_07
+    main__add_f_08 main__add_f_09 main__add_f_10 main__add_f_11 main__add_f_12 main__add_f_13 main__add_f_14 main__add_f_15
+    main__add_f_16 main__add_f_17 main__add_f_18 main__add_f_19 main__add_f_20 main__add_f_21 main__add_f_22 main__add_f_23
+    main__add_f_24 main__add_f_25 main__add_f_26 main__add_f_27 main__add_f_28 main__add_f_29 main__add_f_30
+}
+
+// start here
+//          |
+//          v
+#define macro MAIN__WEIERSTRUDEL = takes(0) returns(0) {
+    // Step 1, validate integrity of inputs.
+    // `callvalue` must be exactly 1 wei. No more or less.
+    // calldatasize must be a clean multiple of 0x60
+    callvalue 0x01 eq
+    0x60 calldatasize div 0x60 mul calldatasize eq
+    and sensible_inputs jumpi
+    400 0x00 mstore
+    0x20 0x00 revert
+sensible_inputs:
+
+    // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
+    // Get this out of the way first so we can free up the memory this thing needs for its jump table
+    WNAF_GREEDY__SIZE_OF_ENTRY()
+    WNAF_GREEDY__COMPUTE()
+    // Set up our stack state. We need the order of the group that the bn128 curve's point coordinates are members of.
+    // (this is p)
+    // We also need 2p and 3p, because we avoid performing a modular reduction in intermediate sums when the result
+    // still fits into an evm word. When we compute inversions of these 'overloaded' points we need to scale p by
+    // an equivalent amount.
+    // start by negating the size of our wnaf entry, it's more useful in this form
+    // because we'll be subtracting it from our pointer to the next wnaf entry.
+    // (the `add` opcode doesn't care about variable ordering on the stack, `sub` does.
+    //    so whenever possible it's usually more efficient to add negative values than
+    //    subtract positive ones)
+    0 sub
+    3P()
+    2P()
+    P()
+    // Stack state: p 2p 3p d
+
+    // Set up our memory state. The precomputed lookup table requires 'beta', the cube root of unity mod p.
+ 
+    // Because we need this value when the state of our stack is somewhat undefined (hon hon), we keep it in memory.
+    // We do the same with 2p, 3p for the same reasons
+    BETA() BETA_LOCATION() mstore // p 2p 3p d
+    dup3 3P_LOCATION() mstore
+    dup2 2P_LOCATION() mstore
+
+    // Next, let's compute our point lookup table.
+    PRECOMPUTE_TABLE__COMPUTE()
+
+    // Nice. now, put the global-z coordinate on the stack, we want to re-use that memory
+    GLOBAL_Z_LOCATION() mload // z p 2p 3p d
+
+    // we also want the pointer to the most significant non-zero wnaf entry on the stack
+    WNAF_GREEDY__FIND_FIRST_ENTRY<dup5,dup6>()
+    
+    // The next step is to fiddle with the *least* significant wnaf entry. 
+    // We want this entry to point to a location in the jump table that will terminate
+    // the algorithm. We can do this by adding 62 (max number of points *2 + 2) to the entry
+    WNAF_START_LOCATION() mload 0x3e add WNAF_START_LOCATION() mstore
+
+    // Next, we set up our jump table.
+    __tablesize(MAIN__JUMP_TABLE) __tablestart(MAIN__JUMP_TABLE) 0x1e codecopy
+    // The stack state is now: i Z p 2p 3p
+    // We now want to get the first point in our wnaf entry and set that as our
+    // initial point
+    dup1 mload                  // n i z p 2p 3p
+    dup2 sub                    // o i z p 2p 3p d
+    // the wnaf entries are located 30 + (size of wnaf) bytes behind the location of 'n'
+    0x1e dup8 sub add           // o' i z p 2p 3p d
+    mload
+    // entry should now be in least significant 2 bytes
+    0x02ffe0 and                // o_x
+    dup1 mload                  // -x o_x i z p 2p 3p
+    dup5 sub                    // x o_x i z p 2p 3p
+    swap1 0x20 add mload        // -y x i z p 2p 3p
+    dup5 sub                    // y x i z p 2p 3p
+    callvalue                   // z y x i p 2p 3p
+
+    // next, we want to use the number of entries at this wnaf index as
+    // an index to our lookup table, but offset by 1 (0x02) because we have already
+    // fished a point out of the wnaf entry.
+    // z y x i z p 2p 3p
+    0x02
+    dup5                        // i 32 z y x i z p 2p 3p d
+    dup11 add
+    swap5
+    mload
+    sub
+    // and finally we can load up this jump entry and jump into our main loop
+    mload 0xffff and jump
+
+    // jump destinations for our main loop. Each destination 'falls through' to the next
+    // destination, so we 'only' need 30 copies of the addition algorithm
+    main__add_30:
+        ADD__MAIN<GET_P_30, dup6, dup7>()
+    main__add_29:
+        ADD__MAIN<GET_P_29, dup6, dup7>()
+    main__add_28:
+        ADD__MAIN<GET_P_28, dup6, dup7>()
+    main__add_27:
+        ADD__MAIN<GET_P_27, dup6, dup7>()
+    main__add_26:
+        ADD__MAIN<GET_P_26, dup6, dup7>()
+    main__add_25:
+        ADD__MAIN<GET_P_25, dup6, dup7>()
+    main__add_24:
+        ADD__MAIN<GET_P_24, dup6, dup7>()
+    main__add_23:
+        ADD__MAIN<GET_P_23, dup6, dup7>()
+    main__add_22:
+        ADD__MAIN<GET_P_22, dup6, dup7>()
+    main__add_21:
+        ADD__MAIN<GET_P_21, dup6, dup7>()
+    main__add_20:
+        ADD__MAIN<GET_P_20, dup6, dup7>()
+    main__add_19:
+        ADD__MAIN<GET_P_19, dup6, dup7>()
+    main__add_18:
+        ADD__MAIN<GET_P_18, dup6, dup7>()
+    main__add_17:
+        ADD__MAIN<GET_P_17, dup6, dup7>()
+    main__add_16:
+        ADD__MAIN<GET_P_16, dup6, dup7>()
+    main__add_15:
+        ADD__MAIN<GET_P_15, dup6, dup7>()
+    main__add_14:
+        ADD__MAIN<GET_P_14, dup6, dup7>()
+    main__add_13:
+        ADD__MAIN<GET_P_13, dup6, dup7>()
+    main__add_12:
+        ADD__MAIN<GET_P_12, dup6, dup7>()
+    main__add_11:
+        ADD__MAIN<GET_P_11, dup6, dup7>()
+    main__add_10:
+        ADD__MAIN<GET_P_10, dup6, dup7>()
+    main__add_09:
+        ADD__MAIN<GET_P_9, dup6, dup7>()
+    main__add_08:
+        ADD__MAIN<GET_P_8, dup6, dup7>()
+    main__add_07:
+        ADD__MAIN<GET_P_7, dup6, dup7>()
+    main__add_06:
+        ADD__MAIN<GET_P_6, dup6, dup7>()
+    main__add_05:
+        ADD__MAIN<GET_P_5, dup6, dup7>()
+    main__add_04:
+        ADD__MAIN<GET_P_4, dup6, dup7>()
+    main__add_03:
+        ADD__MAIN<GET_P_3, dup6, dup7>()
+    main__add_02:
+        ADD__MAIN<GET_P_2, dup6, dup7>()
+    main__add_01:
+        ADD__MAIN<GET_P_1, dup6, dup7>()
+    main__add_00:
+        // double the accumulator once there's nothing left to add
+        DOUBLE__MAIN<dup6, dup7>()
+        // stack state: z y x i Z p 2p 3p d
+        // Next up, we want to decrease i by the size of a wnaf entry in memory.
+        // We then want to load up the next wnaf index and jump.
+        // (the pointer i points to the next wnaf entry, so we're pointing to
+        //    the *next* wnaf pointer, not the current one. This saves a swap op)
+        dup9 dup5 add swap4
+        mload
+        // Once we have the wnaf entry, we need to convert to a jump index.
+        mload 0xffff and
+        jump // *jazz hands*
+
+    // We have a separate instantiation of the 'loop' for the final entry in our wnaf. This is because
+    // we don't want to double the accumulator at the end of this section.
+    main__add_f_30:
+        ADD__MAIN<GET_P_30, dup6, dup7>()
+    main__add_f_29:
+        ADD__MAIN<GET_P_29, dup6, dup7>()
+    main__add_f_28:
+        ADD__MAIN<GET_P_28, dup6, dup7>()
+    main__add_f_27:
+        ADD__MAIN<GET_P_27, dup6, dup7>()
+    main__add_f_26:
+        ADD__MAIN<GET_P_26, dup6, dup7>()
+    main__add_f_25:
+        ADD__MAIN<GET_P_25, dup6, dup7>()
+    main__add_f_24:
+        ADD__MAIN<GET_P_24, dup6, dup7>()
+    main__add_f_23:
+        ADD__MAIN<GET_P_23, dup6, dup7>()
+    main__add_f_22:
+        ADD__MAIN<GET_P_22, dup6, dup7>()
+    main__add_f_21:
+        ADD__MAIN<GET_P_21, dup6, dup7>()
+    main__add_f_20:
+        ADD__MAIN<GET_P_20, dup6, dup7>()
+    main__add_f_19:
+        ADD__MAIN<GET_P_19, dup6, dup7>()
+    main__add_f_18:
+        ADD__MAIN<GET_P_18, dup6, dup7>()
+    main__add_f_17:
+        ADD__MAIN<GET_P_17, dup6, dup7>()
+    main__add_f_16:
+        ADD__MAIN<GET_P_16, dup6, dup7>()
+    main__add_f_15:
+        ADD__MAIN<GET_P_15, dup6, dup7>()
+    main__add_f_14:
+        ADD__MAIN<GET_P_14, dup6, dup7>()
+    main__add_f_13:
+        ADD__MAIN<GET_P_13, dup6, dup7>()
+    main__add_f_12:
+        ADD__MAIN<GET_P_12, dup6, dup7>()
+    main__add_f_11:
+        ADD__MAIN<GET_P_11, dup6, dup7>()
+    main__add_f_10:
+        ADD__MAIN<GET_P_10, dup6, dup7>()
+    main__add_f_09:
+        ADD__MAIN<GET_P_9, dup6, dup7>()
+    main__add_f_08:
+        ADD__MAIN<GET_P_8, dup6, dup7>()
+    main__add_f_07:
+        ADD__MAIN<GET_P_7, dup6, dup7>()
+    main__add_f_06:
+        ADD__MAIN<GET_P_6, dup6, dup7>()
+    main__add_f_05:
+        ADD__MAIN<GET_P_5, dup6, dup7>()
+    main__add_f_04:
+        ADD__MAIN<GET_P_4, dup6, dup7>()
+    main__add_f_03:
+        ADD__MAIN<GET_P_3, dup6, dup7>()
+    main__add_f_02:
+        ADD__MAIN<GET_P_2, dup6, dup7>()
+    main__add_f_01:
+        ADD__MAIN<GET_P_1, dup6, dup7>()
+    main__add_f_00:
+    // We're almost done now. We have our result, but we need to scale the final
+    // point's Z-coordinate by the globalZ coordinate, as we performed the
+    // entire scalar multiplication algorithm on an isomorphism of the bn128 curve
+    // where globalZ is considered affine.
+    // Our accumulator also represents the y-coordinate in its inverse form,
+    // so we need to negate it.
+    // Finally, both x and y are probably overloaded so we perform a modular reduction
+        dup5                    // z zf yf xf i Z p 2p 3p 
+        dup7 swap2 mulmod       // z'' yf xf i Z p 2p 3p
+        0x40 mstore             // yf xf i Z p 2p 3p
+        dup5 swap1 mod          // yf xf i Z p 2p 3p
+        dup5 sub                // y xf i Z p 2p 3p
+        0x20 mstore             // xf i Z p 2p 3p
+        dup4 swap1 mod          // x i Z p 2p 3p
+        returndatasize mstore   // i Z p 2p 3p
+    // Might as well clean up the stack, it's only 12 gas.
+        pop pop pop pop pop pop
+    // and we're done! Let's get out of here...
+        0x60 returndatasize return
+}
+
+#define macro MAIN__CONSTRUCTOR_SHALLOW = takes(0) returns(0) {
+    __codesize(MAIN__WEIERSTRUDEL)
+    __tablesize(MAIN__JUMP_TABLE)
+    __tablesize(WNAF_GREEDY__JUMP_TABLE)
+    add add dup1 0x01 0x00 codecopy 0x00 return
+}
+
+#define macro MAIN__CONSTRUCTOR = takes(0) returns(0) {
+    __codesize(MAIN__WEIERSTRUDEL)
+    __tablesize(MAIN__JUMP_TABLE)
+    __tablesize(WNAF_GREEDY__JUMP_TABLE)
+    add add dup1 __codesize(MAIN__CONSTRUCTOR_SHALLOW) 0x00 codecopy 0x00 return
+}
+
+#define macro TEST_CONSTRUCTOR = takes(0) returns(0) {}

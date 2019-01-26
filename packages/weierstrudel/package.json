@@ -1,0 +1,28 @@
+{
+  "name": "weierstrudle",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "benchmark": "node ./benchmark.js",
+    "compile": "node ./compile.js",
+    "jstest": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec"
+  },
+  "author": "AZTEC",
+  "license": "LGPL-3.0-or-later",
+  "dependencies": {
+    "bn.js": "^4.11.8",
+    "ethereumjs-vm": "^2.4.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "sinon": "^7.2.2"
+  }
+}

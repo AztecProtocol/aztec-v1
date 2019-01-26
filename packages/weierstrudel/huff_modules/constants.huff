@@ -1,0 +1,47 @@
+#define macro P = takes(0) returns(1) { 0x30644E72E131A029B85045B68181585D97816A916871CA8D3C208C16D87CFD47 }
+#define macro 2P = takes(0) returns(1) { 0x60C89CE5C263405370A08B6D0302B0BB2F02D522D0E3951A7841182DB0F9FA8E }
+#define macro 3P = takes(0) returns(1) { 0x912CEB58A394E07D28F0D12384840918C6843FB439555FA7B461A4448976F7D5 }
+#define macro BETA = takes(0) returns(1) { 0x59e26bcea0d48bacd4f263f1acdb5c4f5763473177fffffe }
+#define macro PRECOMPUTE_ITERATOR = takes(0) returns(0) { 0x60 }
+#define macro WNAF_MASK = takes(0) returns(1) { 0x1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f }
+#define macro X2 = takes(0) returns(1) { 0x00 }
+#define macro Y2 = takes(0) returns(1) { 0x20 }
+#define macro Z2 = takes(0) returns(1) { 0x40 }
+#define macro TABLE_OFFSET = takes(0) returns(1) { 0x8a }
+#define macro BETA_LOCATION = takes(0) returns(1) { 0xc0 }
+#define macro 2P_LOCATION = takes(0) returns(1) { 0x80 }
+#define macro 3P_LOCATION = takes(0) returns(1) { 0xa0 }
+#define macro GLOBAL_Z_LOCATION = takes(0) returns(1) { returndatasize }
+#define macro GET_2P = takes(0) returns(1) { 2P_LOCATION() mload }
+#define macro GET_3P = takes(0) returns(1) { 3P_LOCATION() mload }
+
+template <t>
+#define macro LITERAL = takes(0) returns(1) {
+<t>
+}
+
+#define macro GET_NUMBER_OF_POINTS = takes(0) returns(1) {
+    0x60 calldatasize div
+}
+
+#define macro WNAF_START_LOCATION = takes(0) returns(1) {
+    GET_NUMBER_OF_POINTS() 0x800 mul 0x200 add
+}
+
+#define macro POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
+    0xe0
+}
+#define macro POINT_TABLE_START_LOCATION = takes(0) returns(1) {
+    0x100
+}
+#define macro POINT_TABLE_START_LOCATION_MINUS_32 = takes(0) returns(1) {
+    LITERAL<POINT_TABLE_START_LOCATION-0x20>()
+}
+
+#define macro WNAF_TABLE_BITS = takes(0) returns(1) { 4 }
+#define macro WNAF_SIZE = takes(0) returns(1) { 5 }
+#define macro WNAF_TABLE_MASK = takes(0) returns(1) { 0x1e0 }
+
+#define macro GREEDY_WNAF__OFFSET_TO_POINTS = takes(0) returns(1) {
+    GET_NUMBER_OF_POINTS() 0x04 mul 0x1e add
+}
