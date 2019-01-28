@@ -1,26 +1,40 @@
 const { padLeft } = require('web3-utils');
 
-const secp256k1 = require('../secp256k1');
+const secp256k1 = require('../../secp256k1');
+const outputCoder = require('./outputCoder');
 
-const abiBilateralEncoder = {};
+const bilateralSwap = {};
+bilateralSwap.outputCoder = outputCoder;
 
 const abi = {
     CHALLENGE: 0,
     PROOF_DATA: 1,
-    OUTPUT_OWNERS: 2,
-    METADATA: 3,
-    START_DATA: 4, // these numbers are index positions for parameters later on
+    INPUT_OWNERS: 2,
+    OUTPUT_OWNERS: 3,
+    METADATA: 4,
+    START_DATA: 5, // these numbers are index positions for parameters later on
 };
 
-function encodeNote(notes) { 
-    return notes.map(note => 
+function encodeNote(notes) {
+    return notes.map(note =>
         padLeft(note.slice(2), 64)).join('');
 }
 
 function encodeProofData(proofData) {
     const { length } = proofData;
     const noteString = proofData.map(notes => encodeNote(notes));
-    const data = [padLeft(Number(length).toString(16), 64), ...noteString].join(''); 
+    const data = [padLeft(Number(length).toString(16), 64), ...noteString].join('');
+    return {
+        data,
+        length: Number(data.length / 2),
+    };
+}
+
+
+function encodeInputOwners(inputOwners) {
+    const { length } = inputOwners;
+    const ownerStrings = inputOwners.map(o => padLeft(o.slice(2), 64));
+    const data = [padLeft(Number(length).toString(16), 64), ...ownerStrings].join('');
     return {
         data,
         length: Number(data.length / 2),
@@ -37,7 +51,7 @@ function encodeOutputOwners(outputOwners) {
     };
 }
 
-abiBilateralEncoder.encodeMetadata = (notes) => {
+bilateralSwap.encodeMetadata = (notes) => {
     const metadata = notes
         .map(n => secp256k1.compress(n.ephemeral.getPublic()))
         .map(m => `${padLeft('21', 64)}${m.slice(2)}`);
@@ -60,26 +74,32 @@ abiBilateralEncoder.encodeMetadata = (notes) => {
     };
 };
 
-abiBilateralEncoder.encode = (proofData, challenge, outputOwners, metadata) => {
+// the output of all this becomes the proof data
+bilateralSwap.encode = (proofData, challenge, inputOwners, outputOwners, metadata) => {
     const parameters = [];
     parameters[abi.CHALLENGE] = challenge.slice(2); // 0x00 - 0x20
     parameters[abi.PROOF_DATA] = ''; // 0x20 - 0x40
-    parameters[abi.OUTPUT_OWNERS] = ''; // 0x40 - 0x60
-    parameters[abi.METADATA] = ''; // 0x60 - 0x80
+    parameters[abi.INPUT_OWNERS] = ''; // 0x40 - 0x60
+    parameters[abi.OUTPUT_OWNERS] = ''; // 0x60 - 0x80
+    parameters[abi.METADATA] = ''; // 0x80 - 0xA0
     let offset = (abi.START_DATA + 1) * 32; // setting an offset to just over the first entry in these bytes arguments
     const formattedProofData = encodeProofData(proofData); // just formatting the proof data
     parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64); // putting the offset in
     offset += formattedProofData.length; // increasing the offset by the length of the formatted proof data
+    const formattedInputOwners = encodeInputOwners(inputOwners);
+    parameters[abi.INPUT_OWNERS] = padLeft(offset.toString(16), 64);
+    offset += formattedInputOwners.length;
     const formattedOutputOwners = encodeOutputOwners(outputOwners);
     parameters[abi.OUTPUT_OWNERS] = padLeft(offset.toString(16), 64);
     offset += formattedOutputOwners.length;
-    const formattedMetadata = abiBilateralEncoder.encodeMetadata(metadata);
+    const formattedMetadata = bilateralSwap.encodeMetadata(metadata);
     parameters[abi.METADATA] = padLeft(offset.toString(16), 64);
 
     parameters.push(formattedProofData.data);
+    parameters.push(formattedInputOwners.data);
     parameters.push(formattedOutputOwners.data);
     parameters.push(formattedMetadata.data);
     return `0x${parameters.join('')}`.toLowerCase();
 };
 
-module.exports = abiBilateralEncoder;
+module.exports = bilateralSwap;

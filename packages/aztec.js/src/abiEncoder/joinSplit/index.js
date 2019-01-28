@@ -3,8 +3,8 @@ const { padLeft } = require('web3-utils');
 const secp256k1 = require('../../secp256k1');
 const outputCoder = require('./outputCoder');
 
-const abiEncoderJoinSplit = {};
-abiEncoderJoinSplit.outputCoder = outputCoder;
+const joinSplit = {};
+joinSplit.outputCoder = outputCoder;
 
 const abi = {
     M: 0,
@@ -31,7 +31,7 @@ function encodeProofData(proofData) {
     };
 }
 
-abiEncoderJoinSplit.encodeInputSignatures = (inputSignatures) => {
+joinSplit.encodeInputSignatures = (inputSignatures) => {
     const { length } = inputSignatures;
     const signatureString = inputSignatures.map(([v, r, s]) => {
         return `${v.slice(2)}${r.slice(2)}${s.slice(2)}`;
@@ -53,7 +53,7 @@ function encodeOutputOwners(outputOwners) {
     };
 }
 
-abiEncoderJoinSplit.encodeMetadata = (notes) => {
+joinSplit.encodeMetadata = (notes) => {
     const metadata = notes
         .map(n => secp256k1.compress(n.ephemeral.getPublic()))
         .map(m => `${padLeft('21', 64)}${m.slice(2)}`);
@@ -76,7 +76,7 @@ abiEncoderJoinSplit.encodeMetadata = (notes) => {
     };
 };
 
-abiEncoderJoinSplit.encode = (proofData, m, challenge, publicOwner, inputSignatures, outputOwners, metadata) => {
+joinSplit.encode = (proofData, m, challenge, publicOwner, inputSignatures, outputOwners, metadata) => {
     const parameters = [];
     parameters[abi.M] = padLeft(Number(m).toString(16), 64);
     parameters[abi.CHALLENGE] = challenge.slice(2);
@@ -89,13 +89,13 @@ abiEncoderJoinSplit.encode = (proofData, m, challenge, publicOwner, inputSignatu
     const formattedProofData = encodeProofData(proofData);
     parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64);
     offset += formattedProofData.length;
-    const formattedInputSignatures = abiEncoderJoinSplit.encodeInputSignatures(inputSignatures);
+    const formattedInputSignatures = joinSplit.encodeInputSignatures(inputSignatures);
     parameters[abi.INPUT_SIGNATURES] = padLeft(offset.toString(16), 64);
     offset += formattedInputSignatures.length;
     const formattedOutputOwners = encodeOutputOwners(outputOwners);
     parameters[abi.OUTPUT_OWNERS] = padLeft(offset.toString(16), 64);
     offset += formattedOutputOwners.length;
-    const formattedMetadata = abiEncoderJoinSplit.encodeMetadata(metadata);
+    const formattedMetadata = joinSplit.encodeMetadata(metadata);
     parameters[abi.METADATA] = padLeft(offset.toString(16), 64);
 
     parameters.push(formattedProofData.data);
@@ -105,4 +105,4 @@ abiEncoderJoinSplit.encode = (proofData, m, challenge, publicOwner, inputSignatu
     return `0x${parameters.join('')}`.toLowerCase();
 };
 
-module.exports = abiEncoderJoinSplit;
+module.exports = joinSplit;
