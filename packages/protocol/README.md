@@ -10,6 +10,7 @@ This package contains the core smart contracts of the AZTEC Protocol. The contra
 
 ```bash
 $ npm install truffle@^5.0.0 --global
+$ npm install ganache-cli --global
 ```
 
 ### Modules
@@ -17,6 +18,17 @@ $ npm install truffle@^5.0.0 --global
 ```bash
 $ npm install
 ```
+
+## Usage
+
+To venture out with the contracts, just compile and deploy them with truffle:
+
+```bash
+truffle compile --all
+truffle migrate --network development
+```
+
+Make sure to have a running ganache instance in the background.
 
 ## Contributing
 
@@ -40,12 +52,4 @@ $ npm run lint
 
 ```bash
 $ npm run test
-```
-
-### Compile
-
-If you add changes to this package, use truffle to recompile and verify the integrity of your contracts:
-
-```bash
-truffle compile --all
 ```
