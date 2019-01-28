@@ -1,4 +1,5 @@
 // ### external dependencies
+const { constants: { ERC20_SCALING_FACTOR: SCALING_FACTOR } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 
 // ### internal dependencies
@@ -10,10 +11,6 @@ const transactions = require('./resources/transactions');
 const wallets = require('./resources/wallets');
 const web3 = require('./web3Listener');
 const keystore = require('./accounts');
-
-const constants = require('../contracts/utils/constants');
-
-const { ERC20_SCALING_FACTOR: SCALING_FACTOR } = constants;
 
 /**
  * Runs a sequence of demonstration confidential transactions.  

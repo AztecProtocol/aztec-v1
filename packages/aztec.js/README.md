@@ -4,27 +4,39 @@ This library contains methods required to construct AZTEC zero-knowledge proofs,
 
 **IMPORTANT: The deployed AZTEC smart contracts use a trusted setup created by AZTEC in-house and should only be used for testing and development purposes. We will be launching a multiparty computation protocol to create a trusted setup that is secured by the wider Ethereum community, where only one person has to act honestly for the setup database to be secure. If you wish to participate please let us know at hello@aztecprotocol.com**
   
-This repository is under active development, with our interfaces and smart contracts changing substantially as we prepare our Cryptography Engine. If you want to investigate the smart contracts and tooling that created our first zero-knowledge AZTEC transactions, please clone from the [`release-0.1.0`](https://github.com/AztecProtocol/aztec-crypto-js/tree/release-0.1.0) branch.
+This repository is under active development, with our interfaces and smart contracts changing substantially as we prepare our Cryptography Engine. If you want to investigate the smart contracts and tooling that created our first zero-knowledge AZTEC transactions, please clone from the [`release-0.1.0`](https://github.com/AztecProtocol/AZTEC/tree/release-0.1.0) branch.
 
-To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in the [@aztec/demo](https://github.com/AztecProtocol/AZTEC/tree/master/packages/demo) package. For full API docs, view our [GitHub Pages website](https://aztecprotocol.github.io/AZTEC)
+## Usage
 
-## Pre Requisites
-
-### Modules
+Install the module:
 
 ```bash
-$ npm install
+$ npm install aztec.js
 ```
+
+Then import it in your project:
+
+```js
+const aztec = require('aztec.js');
+```
+
+To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in the [@aztec/demo](https://github.com/AztecProtocol/AZTEC/tree/master/packages/demo) package. For full API docs, view our [GitHub Pages website](https://aztecprotocol.github.io/AZTEC)
 
 ## Contributing
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](https://github.com/AztecProtocol/AZTEC/blob/master/CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
 
 ### Notation
 
 Unless stated otherwise, public keys, private keys and addresses are encoded as hex-strings, prepended by the characters ```0x```.
+
+### Install Modules
+
+```bash
+$ npm install
+```
 
 ### Build
 

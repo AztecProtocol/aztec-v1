@@ -19,8 +19,8 @@ jobs:
                 name: "Build Packages"
                 command: ./node_modules/.bin/lerna run build
             - run:
-                name: "Compile Contracts"
-                command: cd packages/contracts && ./node_modules/.bin/truffle compile
+                name: "Compile Protocol Contracts"
+                command: cd packages/protocol && ./node_modules/.bin/truffle compile
             - save_cache:
                 key: repo-{{ .Environment.CIRCLE_SHA1 }}
                 paths:

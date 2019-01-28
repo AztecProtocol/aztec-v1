@@ -1,14 +1,12 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const BN = require('bn.js');
-const { padLeft, sha3 } = require('web3-utils');
-const crypto = require('crypto');
-
-// ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2, GROUP_MODULUS } } = require('aztec.js');
+const { exceptions } = require('@aztec/dev-utils');
+const BN = require('bn.js');
+const crypto = require('crypto');
+const { padLeft, sha3 } = require('web3-utils');
 
-const exceptions = require('../../utils/exceptions');
+const { params: { t2, GROUP_MODULUS } } = aztec;
 
 // ### Artifacts
 const AZTEC = artifacts.require('./contracts/AZTEC/AZTEC');

@@ -29,22 +29,34 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 ### JavaScript Packages
 
-| Package                                                     | Version                                                                                                                      | Description                                                                                       |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [`aztec.js`](/packages/aztec.js)                            | [![npm](https://img.shields.io/npm/v/aztec.js.svg)](https://www.npmjs.com/package/aztec.js)                                  | An aggregate package combining many smaller utility packages for interacting with the AZTEC Protocol |
-| [`@aztec/artifacts`](/packages/artifacts) | [![npm](https://img.shields.io/npm/v/@aztec/artifacts.svg)](https://www.npmjs.com/package/@aztec/contract-artifacts)                           | Aztec smart contract compiled artifacts                                                           |
-| [`@aztec/contract-addresses`](/packages/contract-addresses) | [![npm](https://img.shields.io/npm/v/@aztec/contract-addresses.svg)](https://www.npmjs.com/package/@aztec/contract-addresses)| A tiny utility library for getting known deployed contract addresses for a particular network.    |
+| Package                                                     | Version                                                                                                                      |Description                                                                                             |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [`aztec.js`](/packages/aztec.js)                            | [![npm](https://img.shields.io/npm/v/aztec.js.svg)](https://www.npmjs.com/package/aztec.js) | An aggregate package combining many smaller utility packages for interacting with the AZTEC Protocol |
+| [`@aztec/contract-artifacts`](/packages/contract-artifacts) | [![npm](https://img.shields.io/npm/v/@aztec/contract-artifacts.svg)](https://www.npmjs.com/package/@aztec/contract-artifacts)| AZTEC smart contract compiled artifacts |
+| [`@aztec/contract-addresses`](/packages/contract-addresses) | [![npm](https://img.shields.io/npm/v/@aztec/contract-addresses.svg)](https://www.npmjs.com/package/@aztec/contract-addresses)| A tiny utility library for getting known deployed contract addresses for a particular network. |
+| [`@aztec/dev-utils`](/packages/dev-utils) | [![npm](https://img.shields.io/npm/v/@aztec/dev-utils.svg)](https://www.npmjs.com/package/@aztec/dev-utils) | Dev utils to be shared across AZTEC projects and packages. |
+
+### Solidity Packages
+
+| Package                                            | Description                                                                      |
+| -------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [`@aztec/protocol`](/packages/protocol)            | AZTEC Protocol solidity smart contracts & tests                                  |
 
 ### Private Packages
 
 | Package                                            | Description                                                                      |
 | -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [`@aztec/contracts`](/packages/contracts)          | AZTEC Protocol solidity smart contracts & tests                                  |
 | [`@aztec/demo`](/packages/demo)                    | Demo of AZTEC written in javascript                                              |
 
 ## Usage :hammer_and_pick:
 
-To fiddle with our cryptography engine and create your own AZTEC notes:
+Clone this repo and install all the dependencies:
+
+```bash
+$ npm run bootstrap
+```
+
+To fiddle only with our cryptography engine and create your own AZTEC notes:
 
 ```bash
 $ npm install aztec.js --save
@@ -53,7 +65,7 @@ $ npm install aztec.js --save
 To integrate our deployed contracts' ABI and addresses:
 
 ```bash
-$ npm install @aztec/artifacts @aztec/contract-addresses --save
+$ npm install @aztec/contract-artifacts @aztec/contract-addresses --save
 ```
 
 To see a demo on the Rinkeby testnet:

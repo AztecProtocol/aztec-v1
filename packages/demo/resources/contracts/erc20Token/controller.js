@@ -5,19 +5,18 @@
  *
  * @module erc20Controller
  */
+const constants = require('@aztec/dev-utils');
 
-const deployer = require('../../../deployer');
-
-const wallets = require('../../wallets');
-const transactions = require('../../transactions');
 const config = require('../../../config');
+const deployer = require('../../../deployer');
+const transactions = require('../../transactions');
+const wallets = require('../../wallets');
 
-const constants = require('../../../../contracts/utils/constants');
-const ERC20Mintable = require('../../../../contracts/build/contracts/ERC20Mintable.json');
+const ERC20Mintable = require('../../../../protocol/build/contracts/ERC20Mintable.json');
 
-const { web3 } = deployer;
 const { DAI_ADDRESS } = constants;
 const { TX_TYPES } = config;
+const { web3 } = deployer;
 
 const erc20 = {};
 
