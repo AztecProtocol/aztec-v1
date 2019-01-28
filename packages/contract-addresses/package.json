@@ -1,6 +1,6 @@
 {
   "name": "@aztec/contract-addresses",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "AZTEC",
   "description": "Addresses of deployed AZTEC contracts on Ethereum mainnet and testnets",
   "license": "LGPL-3.0",
@@ -45,6 +45,7 @@
   "scripts": {
     "clean": "./node_modules/.bin/rimraf ./lib",
     "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
+    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
+    "publish": "npm run build && npm publish"
   }
 }
