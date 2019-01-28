@@ -1,4 +1,4 @@
-# Contracts
+# Protocol
 
 This package contains the core smart contracts of the AZTEC Protocol. The contracts are written in solidity and yul.
 
