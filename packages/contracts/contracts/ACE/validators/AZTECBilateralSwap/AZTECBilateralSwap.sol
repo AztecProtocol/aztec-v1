@@ -71,22 +71,21 @@ contract AZTECBilateralSwap {
 
             /**
              * New calldata map
-             * 0x04:0x24      = calldata location of proofData byte array - pointer to the proofData 
-             * 0x24:0x44      = message sender
-             * 0x44:0x64      = h_x
-             * 0x64:0x84      = h_y
-             * 0x84:0xa4      = t2_x0
-             * 0xa4:0xc4      = t2_x1
-             * 0xc4:0xe4      = t2_y0
-             * 0xe4:0x104     = t2_y1
-             * 0x104:0x124    = length of proofData byte array
-             * 0x124:0x144    = m
-             * 0x144:0x164    = challenge
-             * 0x164:0x184    = publicOwner
-             * 0x184:0x1a4    = offset in byte array to notes
-             * 0x1a4:0x1c4    = offset in byte array to inputSignatures
-             * 0x1c4:0x1e4    = offset in byte array to outputOwners
-             * 0x1e4:0x204    = offset in byte array to metadata
+             * 0x04:0x24      = calldata location of proofData byte array - pointer to the proofData. 
+             *                  Think this has a fixed length - must do for consistency
+             * 0x24:0x44      = message sender // sender
+             * 0x44:0x64      = h_x     // crs
+             * 0x64:0x84      = h_y     // crs
+             * 0x84:0xa4      = t2_x0   // crs
+             * 0xa4:0xc4      = t2_x1   // crs
+             * 0xa4:0xc4      = t2_x1   // crs
+             * 0xc4:0xe4      = t2_y0   // crs
+             * 0xe4:0x104     = t2_y1   // crs
+             * 0x104:0x124    = length of proofData byte array 
+             * 0x124:0x144    = challenge
+             * 0x144:0x164    = offset in byte array to notes
+             * 0x164:0x184    = offset in byte array to outputOwners
+             * 0x184:0x1a4    = offset in byte array to metadata
              *
              *
              * Note data map (uint[6]) is
@@ -118,9 +117,8 @@ contract AZTECBilateralSwap {
 
                 mstore(0x80, calldataload(0x44)) // h_x
                 mstore(0xa0, calldataload(0x64)) // h_y
-                let notes := add(0x104, calldataload(0x184)) // start position of notes
+                let notes := add(0x104, calldataload(0x144)) // start position of notes
                 let n := calldataload(notes) // first element of the notes array is the length of it
-
 
                 if iszero(eq(n, 0x04)) { // eq(n, 4) will resolve to 0 if n != 4
 
@@ -129,13 +127,15 @@ contract AZTECBilateralSwap {
 
                 }
 
-                let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
-                let challenge := mod(calldataload(0x144), gen_order)
 
-                mstore(0x2e0, caller) // store the msg.sender, to be hashed later
+
+                let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+                let challenge := mod(calldataload(0x124), gen_order)
+
+                mstore(0x2e0, calldataload(0x24)) // store the msg.sender, to be hashed later
 
                 hashCommitments(notes, n)
-                let b := add(0x320, mul(n, 0x80)) // set pointer to memory location of commitments where the commitments
+                let b := add(0x300, mul(n, 0x80)) // set pointer to memory location of commitments where the commitments
 
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
@@ -226,10 +226,6 @@ contract AZTECBilateralSwap {
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
-
-                // Great! All done. This is a valid proof so return ```true```
-                mstore(0x00, 0x01)
-                return(0x00, 0x20)
             }
 
             /**
@@ -305,6 +301,6 @@ contract AZTECBilateralSwap {
 
         // if we've reached here, we've validated the bilateral swap and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        // BilateralSwapABIEncoder.encodeAndExit(domainHash);
+        BilateralSwapABIEncoder.encodeAndExit(domainHash);
     }
 }
