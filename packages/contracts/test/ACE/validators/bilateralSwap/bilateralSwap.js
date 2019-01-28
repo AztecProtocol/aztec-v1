@@ -9,7 +9,7 @@ const aztec = require('aztec.js');
 const { params: { t2 } } = require('aztec.js');
 const { proof: { bilateralSwap } } = require('aztec.js');
 
-const exceptions = require('../../../utils/exceptions');
+const exceptions = require('../../../../utils/exceptions');
 
 // ### Artifacts
 const BilateralSwap = artifacts.require('./contracts/ACE/validators/AZTECBilateralSwap');
@@ -37,9 +37,15 @@ function encodeBilateralSwapTransaction({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
+
+    const publicOwner = '0x00';
+    const publicValue = new BN(0);
+
+    const expectedOutput = `0x${aztec.abiEncoder.bilateralSwap.outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
+        publicOwner,
+        publicValue,
     }]).slice(0x42)}`;
     return { proofData, expectedOutput };
 }
@@ -64,8 +70,8 @@ contract('Bilateral Swap', (accounts) => {
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
             notes = [
                 ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
             ];
+
             const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
             const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
             crs = [
@@ -75,22 +81,44 @@ contract('Bilateral Swap', (accounts) => {
             ];
         });
 
-        it.only('succesfully validates a Bilateral Swap zero-knowledge proof', async () => {
-            const inputNotes = notes.slice(2, 4);
-            const outputNotes = notes.slice(0, 2);
-            const { proofData, expectedOutput } = encodeBilateralSwapTransaction({
+        it('validate that the input ABI encoding has worked correctly and that the contract can validate proof', async () => {
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+
+            const { proofData } = encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
-                inputNoteOwners: bilateralSwapAccounts.slice(2, 4),
-                bilateralSwapAddress: bilateralSwapContract.address,
             });
 
             const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], crs, {
                 from: accounts[0],
                 gas: 4000000,
             });
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+
+            const gasUsed = await bilateralSwapContract.validateBilateralSwap.estimateGas(proofData, accounts[0], crs, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+
+            console.log('gas used = ', gasUsed);
+            expect(result).to.equal(true);
+        });
+
+        it('succesfully validate output encoding for bilateral proof in zero-knowledge', async () => {
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+            const { proofData, expectedOutput } = encodeBilateralSwapTransaction({
+                inputNotes,
+                outputNotes,
+                senderAddress: accounts[0],
+            });
+
+            const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], crs, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+            const decoded = aztec.abiEncoder.bilateralSwap.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
