@@ -1,15 +1,13 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
+const aztec = require('aztec.js');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-
-// ### Internal Dependencies
-const aztec = require('aztec.js');
-const { params: { t2, K_MAX } } = require('aztec.js');
 
 // ### Artifacts
 const ABIEncoder = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit/JoinSplitABIEncoderTest');
 
+const { params: { t2, K_MAX } } = aztec;
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));

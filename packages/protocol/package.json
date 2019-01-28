@@ -1,17 +1,15 @@
 {
-  "name": "@aztec/contracts",
+  "name": "@aztec/protocol",
   "version": "0.2.0",
   "author": "AZTEC",
   "description": "AZTEC Smart Contract Repository",
   "license": "LGPL-3.0",
-  "directories": {
-    "test": "test"
-  },
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
   "keywords": [
     "aztec",
     "cryptography",
     "privacy",
+    "protocol",
     "ethereum",
     "blockchain"
   ],
@@ -23,12 +21,13 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "aztec.js": "file:../aztec.js",
+    "@aztec/dev-utils": "^0.1.0",
+    "aztec.js": "^0.2.4",
     "bn.js": "^4.11.8",
     "ganache-cli": "^6.2.5",
     "openzeppelin-solidity": "2.0.0",
-    "web3": "^1.0.0-beta.37",
-    "web3-utils": "^1.0.0-beta.37"
+    "web3": "1.0.0-beta.37",
+    "web3-utils": "1.0.0-beta.37"
   },
   "devDependencies": {
     "chai": "^4.2.0",
@@ -38,6 +37,7 @@
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.2.0",
     "eslint-plugin-react": "^7.12.4",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
@@ -50,8 +50,7 @@
   },
   "scripts": {
     "clean": "./node_modules/.bin/rimraf -rf ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json || true",
-    "lint:js": "./node_modules/.bin/eslint .",
-    "lint:js:fix": "./node_modules/.bin/eslint . --fix",
+    "lint:js": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "./node_modules/.bin/solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint": "npm run lint:js && npm run lint:sol",
     "test": "scripts/test.sh",

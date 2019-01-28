@@ -6,12 +6,12 @@
 const { params: { t2 } } = require('aztec.js');
 
 const deployer = require('../../../deployer');
-const wallets = require('../../wallets');
 const transactions = require('../../transactions');
+const wallets = require('../../wallets');
 const { TX_TYPES } = require('../../../config');
 
-const AZTEC = require('../../../../contracts/build/contracts/AZTEC.json');
-const AZTECInterface = require('../../../../contracts/build/contracts/AZTECInterface.json');
+const AZTEC = require('../../../../protocol/build/contracts/AZTEC.json');
+const AZTECInterface = require('../../../../protocol/build/contracts/AZTECInterface.json');
 
 const { web3 } = deployer;
 AZTEC.abi = AZTECInterface.abi; // hon hon hon

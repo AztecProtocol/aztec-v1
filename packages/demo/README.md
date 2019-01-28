@@ -19,7 +19,7 @@ $ npm install
 
 In order to use these scripts, Ethereum private keys and addresses need to be added to `accounts.json`; these are the accounts used to issue AZTEC transactions. The demo script currently requires three but you can modify it to fit your purposes.  
 
-You can deploy your own AZTEC contracts (attached to different ERC20 token contracts if you want) by switching to the [contracts](https://github.com/AztecProtocol/AZTEC/tree/master/packages/contracts) package and running `truffle migrate`, specifying the appropriate network. See the [truffle docs](https://truffleframework.com/docs/truffle/getting-started/running-migrations) for more details.
+You can deploy your own AZTEC contracts (attached to different ERC20 token contracts if you want) by switching to the [protocol](https://github.com/AztecProtocol/AZTEC/tree/master/packages/protocool) package and running `truffle migrate`, specifying the appropriate network. See the [truffle docs](https://truffleframework.com/docs/truffle/getting-started/running-migrations) for more details.
 
 ### Testnets
 The AZTEC token smart contract is attached to a dummy ERC20 contract that anybody can mint from. The `demoTransactions.js` script will automatically mint tokens for you.
@@ -46,7 +46,7 @@ $ npm run demo:mainnet
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](https://github.com/AztecProtocol/AZTEC/blob/master/CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
 
 ### Clean
 
