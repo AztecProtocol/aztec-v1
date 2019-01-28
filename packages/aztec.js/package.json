@@ -5,12 +5,8 @@
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
   "main": "index.js",
-  "files": [
-    "lib",
-    "src"
-  ],
   "directories": {
-    "doc": "docs",
+    "lib": "lib",
     "test": "test"
   },
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
@@ -18,6 +14,7 @@
     "aztec",
     "cryptography",
     "privacy",
+    "protocol",
     "ethereum",
     "blockchain"
   ],
