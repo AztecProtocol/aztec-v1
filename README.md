@@ -39,8 +39,8 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 | Package                                            | Description                                                                      |
 | -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [`@aztec/contracts`](/packages/contracts)          | AZTEC Protocol solidity smart contracts & tests                                  |
 | [`@aztec/demo`](/packages/demo)                    | Demo of AZTEC written in javascript                                              |
+| [`@aztec/protocol`](/packages/protocol)            | AZTEC Protocol solidity smart contracts & tests                                  |
 
 ## Usage :hammer_and_pick:
 
