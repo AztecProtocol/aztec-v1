@@ -1,0 +1,18 @@
+{
+  "env": {
+    "development": {
+      "presets": ["env"],
+      "plugins": [
+        "add-module-exports",
+        "transform-object-rest-spread"
+      ]
+    },
+    "production": {
+      "presets": ["env", "minify"],
+      "plugins": [
+        "add-module-exports",
+        "transform-object-rest-spread"
+      ]
+    }
+  }
+}
