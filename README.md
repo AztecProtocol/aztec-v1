@@ -44,7 +44,13 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 ## Usage :hammer_and_pick:
 
-To fiddle with our cryptography engine and create your own AZTEC notes:
+Clone this repo and install all the dependencies:
+
+```bash
+$ npm run bootstrap
+```
+
+To fiddle only with our cryptography engine and create your own AZTEC notes:
 
 ```bash
 $ npm install aztec.js --save
@@ -53,7 +59,7 @@ $ npm install aztec.js --save
 To integrate our deployed contracts' ABI and addresses:
 
 ```bash
-$ npm install @aztec/artifacts @aztec/contract-addresses --save
+$ npm install @aztec/contract-artifacts @aztec/contract-addresses --save
 ```
 
 To see a demo on the Rinkeby testnet:
