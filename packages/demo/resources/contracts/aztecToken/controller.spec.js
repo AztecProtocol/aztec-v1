@@ -1,10 +1,10 @@
 /* eslint-disable prefer-arrow-callback */
 const aztec = require('aztec.js');
+const { constants: { ERC20_SCALING_FACTOR: SCALING_FACTOR } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
-const { params: { t2 } } = require('aztec.js');
 
 const { clear: clearDatabase } = require('../../../db');
 const walletController = require('../../wallets');
@@ -15,12 +15,12 @@ const deployer = require('../../../deployer');
 const transactionsController = require('../../transactions');
 const noteController = require('../../notes');
 
-const { ERC20_SCALING_FACTOR: SCALING_FACTOR } = require('../../../../contracts/utils/constants');
+const { params: { t2 } } = aztec;
 const { TX_STATUS, NOTE_STATUS } = require('../../../config');
 
 const web3 = require('../../../web3Listener');
 
-const AZTECERC20Bridge = require('../../../../contracts/build/contracts/AZTECERC20Bridge');
+const AZTECERC20Bridge = require('../../../../protocol/build/contracts/AZTECERC20Bridge');
 
 const { expect } = chai;
 

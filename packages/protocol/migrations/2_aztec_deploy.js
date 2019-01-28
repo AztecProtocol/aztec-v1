@@ -4,7 +4,7 @@ const AZTEC = artifacts.require('./AZTEC.sol');
 const AZTECERC20Bridge = artifacts.require('./AZTECERC20Bridge.sol');
 
 const { params: { t2 } } = require('aztec.js');
-const { DAI_ADDRESS, ERC20_SCALING_FACTOR } = require('../utils/constants');
+const { constants: { DAI_ADDRESS, ERC20_SCALING_FACTOR } } = require('@aztec/dev-utils');
 
 module.exports = (deployer, network) => {
     // just a bytecode switcheroo, nothing to see here...

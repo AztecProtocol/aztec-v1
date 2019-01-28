@@ -46,7 +46,7 @@ $ npm run demo:mainnet
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](https://github.com/AztecProtocol/AZTEC/blob/master/CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
 
 ### Clean
 

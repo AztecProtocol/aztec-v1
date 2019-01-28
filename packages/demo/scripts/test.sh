@@ -28,7 +28,7 @@ else
 fi
 
 echo "Deploying contracts to ganache"
-cd ../contracts
+cd ../protocol
 ./node_modules/.bin/truffle migrate --reset --network development
 cd ../demo
 

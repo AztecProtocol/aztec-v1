@@ -6,17 +6,15 @@ This library contains methods required to construct AZTEC zero-knowledge proofs,
   
 This repository is under active development, with our interfaces and smart contracts changing substantially as we prepare our Cryptography Engine. If you want to investigate the smart contracts and tooling that created our first zero-knowledge AZTEC transactions, please clone from the [`release-0.1.0`](https://github.com/AztecProtocol/AZTEC/tree/release-0.1.0) branch.
 
-## Pre Requisites
-
-### Modules
-
-```bash
-$ npm install
-```
-
 ## Usage
 
-Just import the module in your project:
+Install the module:
+
+```bash
+$ npm install aztec.js
+```
+
+Then import it in your project:
 
 ```js
 const aztec = require('aztec.js');
@@ -28,11 +26,17 @@ To see how this library can be used to issue AZTEC confidential transactions and
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](https://github.com/AztecProtocol/AZTEC/blob/master/CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
 
 ### Notation
 
 Unless stated otherwise, public keys, private keys and addresses are encoded as hex-strings, prepended by the characters ```0x```.
+
+### Install Modules
+
+```bash
+$ npm install
+```
 
 ### Build
 
