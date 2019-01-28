@@ -5,7 +5,7 @@ const aztecProof = require('../../../src/proof/joinSplit');
 const secp256k1 = require('../../../src/secp256k1');
 const sign = require('../../../src/sign');
 const note = require('../../../src/note');
-const abiEncoder = require('../../../src/abiEncoder/joinSplit');
+const joinSplit = require('../../../src/abiEncoder/joinSplit');
 const { K_MAX } = require('../../../src/params');
 
 const { expect } = chai;
@@ -53,7 +53,7 @@ describe('abiEncoder.joinSplit tests', () => {
     });
 
     it('encodeMetadata works', () => {
-        const { data, length } = abiEncoder.encodeMetadata(notes.slice(0, 4));
+        const { data, length } = joinSplit.encodeMetadata(notes.slice(0, 4));
         const result = new HexString(data);
         expect(length).to.equal(result.hexLength());
         expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(result.hexLength() - 0x20);
@@ -73,7 +73,7 @@ describe('abiEncoder.joinSplit tests', () => {
             fakeSignature(),
             fakeSignature(),
         ];
-        const { data, length } = abiEncoder.encodeInputSignatures(input);
+        const { data, length } = joinSplit.encodeInputSignatures(input);
         const result = new HexString(data);
         expect(result.hexLength()).to.equal((0x60 * input.length) + 0x20);
         expect(result.hexLength()).to.equal(length);
@@ -103,7 +103,7 @@ describe('abiEncoder.joinSplit tests', () => {
         const publicOwner = accounts[0].address;
         const outputOwners = outputNotes.map(n => n.owner);
 
-        const result = new HexString(abiEncoder.encode(
+        const result = new HexString(joinSplit.encode(
             proofData,
             m,
             challenge,
@@ -143,6 +143,6 @@ describe('abiEncoder.joinSplit tests', () => {
         expect(parseInt(result.slice(offsetToMetadata, offsetToMetadata + 0x20), 16)).to.equal(2);
 
         const recoveredMetadata = result.slice(offsetToMetadata - 0x20, offsetToMetadata + metadataLength);
-        expect(recoveredMetadata).to.equal(abiEncoder.encodeMetadata(outputNotes).data);
+        expect(recoveredMetadata).to.equal(joinSplit.encodeMetadata(outputNotes).data);
     });
 });
