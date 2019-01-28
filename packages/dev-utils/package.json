@@ -46,6 +46,7 @@
   "scripts": {
     "clean": "./node_modules/.bin/rimraf ./lib",
     "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
+    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
+    "publish": "npm run build && npm publish"
   }
 }

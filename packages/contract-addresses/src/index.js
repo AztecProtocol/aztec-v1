@@ -9,6 +9,10 @@ export const NetworkId = {
 };
 
 const networkToAddresses = {
+    1: {
+        aztec: '0xbF58Dc0EDF212C0439C913A98DD95d328688B3eA',
+        aztecErc20Bridge: '0xb8184c18c5541e437d98af1a31396fc304296e08',
+    },
     3: {
         aztec: '0x455DF7B66aa3F0866Ea5f696Ed316B80c9E9df9c',
         aztecErc20Bridge: '0x656D4ae3983DaeD3177CB42360D0fA7C7D55C6d2',
