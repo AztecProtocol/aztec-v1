@@ -1,15 +1,13 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
+const aztec = require('aztec.js');
+const { exceptions } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
 
-// ### Internal Dependencies
-const aztec = require('aztec.js');
-const { params: { t2 } } = require('aztec.js');
-const { proof: { joinSplit } } = require('aztec.js');
-
-const exceptions = require('../../../utils/exceptions');
+const { params: { t2 } } = aztec;
+const { proof: { joinSplit } } = aztec;
 
 // ### Artifacts
 const AZTEC = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');

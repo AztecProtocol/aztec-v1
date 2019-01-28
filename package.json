@@ -1,13 +1,16 @@
 {
-  "name": "aztec-mono-repo",
+  "name": "aztec-monorepo",
   "private": true,
   "engines": {
     "node": ">=4"
   },
   "workspaces": [
-    "packages/*"
+    "packages/**"
   ],
   "devDependencies": {
     "lerna": "^3.10.6"
+  },
+  "scripts": {
+    "bootstrap": "lerna link && lerna exec npm install"
   }
 }
