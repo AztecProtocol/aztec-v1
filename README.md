@@ -148,7 +148,7 @@ To run tests in a specific package:
 $ lerna run test --scope aztec.js
 ```
 
-## FAQ :face_with_monocle:
+## FAQ :question:
 
 ### What is the AZTEC Protocol?
 
