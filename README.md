@@ -50,32 +50,27 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 ## Usage :hammer_and_pick:
 
-Clone this repo and install all the dependencies:
-
-```bash
-$ npm run bootstrap
-```
-
-To fiddle only with our cryptography engine and create your own AZTEC notes:
+To fiddle with cryptography engine and create your own AZTEC notes:
 
 ```bash
 $ npm install aztec.js --save
 ```
 
-To integrate our deployed contracts' ABI and addresses:
+Other goodies:
 
 ```bash
-$ npm install @aztec/contract-artifacts @aztec/contract-addresses --save
+$ npm install @aztec/contract-artifacts
+$ npm install @aztec/contract-addresses
+$ npm install @aztec/dev-utils
 ```
 
-To see a demo on the Rinkeby testnet:
+To see a demo, head to the demo package:
 
 ```bash
-git clone git@github.com:AztecProtocol/AZTEC.git
-cd AZTEC/packages/demo
+cd packages/demo
 ```
 
-Now, make sure you use your own private keys instead of the defaults in `accounts.json`. Then:
+Make sure you use your own private keys instead of the defaults in `accounts.json`. Then:
 
 ```bash
 npm install
@@ -103,7 +98,7 @@ $ npm install truffle@^5.0.0 --global
 To install the node modules in all packages:
 
 ```bash
-$ lerna exec -- npm install
+$ npm run bootstrap
 ```
 
 To build all packages:

@@ -1,16 +1,25 @@
 {
-  "name": "weierstrudle",
+  "name": "weierstrudel",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "benchmark": "node ./benchmark.js",
-    "compile": "node ./compile.js",
-    "jstest": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec"
-  },
   "author": "AZTEC",
-  "license": "LGPL-3.0-or-later",
+  "description": "Highly optimized smart contract that performs elliptic curve scalar multiplication",
+  "license": "LGPL-3.0",
+  "main": "./index.js",
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "keywords": [
+    "huff",
+    "ethereum",
+    "evm",
+    "smart",
+    "contracts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
+  },
   "dependencies": {
     "bn.js": "^4.11.8",
     "ethereumjs-vm": "^2.4.0",
@@ -24,5 +33,13 @@
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
     "sinon": "^7.2.2"
+  },
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
+    "test": "./node_modules/.bin/mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "test:js": "./node_modules/.bin/mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "compile": "node ./compile.js",
+    "benchmark": "node ./benchmark.js",
+    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
   }
 }
