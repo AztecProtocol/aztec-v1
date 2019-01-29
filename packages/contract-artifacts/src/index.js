@@ -1,20 +1,20 @@
 const path = require('path');
 
-const ACE = path.join(__dirname, '..', 'artifacts', 'ACE.json');
-const AZTEC = path.join(__dirname, '..', 'artifacts', 'AZTEC.json');
-const AZTECERC20Bridge = path.join(__dirname, '..', 'artifacts', 'AZTECERC20Bridge.json');
-const AZTECInterface = path.join(__dirname, '..', 'artifacts', 'AZTECInterface.json');
-const AZTECJoinSplit = path.join(__dirname, '..', 'artifacts', 'AZTECJoinSplit.json');
-const AZTECJoinSplitInterface = path.join(__dirname, '..', 'artifacts', 'AZTECJoinSplitInterface.json');
-const Doorbell = path.join(__dirname, '..', 'artifacts', 'Doorbell.json');
-const ERC20 = path.join(__dirname, '..', 'artifacts', 'ERC20.json');
-const ERC20Interface = path.join(__dirname, '..', 'artifacts', 'ERC20Interface.json');
-const ERC20Mintable = path.join(__dirname, '..', 'artifacts', 'ERC20Mintable.json');
-const Extractor = path.join(__dirname, '..', 'artifacts', 'Extractor.json');
-const IERC20 = path.join(__dirname, '..', 'artifacts', 'IERC20.json');
-const JoinSplitABIEncoder = path.join(__dirname, '..', 'artifacts', 'JoinSplitABIEncoder.json');
-const NoteUtilies = path.join(__dirname, '..', 'artifacts', 'NoteUtilies.json');
-const Validator = path.join(__dirname, '..', 'artifacts', 'Validator.json');
+const ACE = require(path.join(__dirname, '..', 'artifacts', 'ACE.json'));
+const AZTEC = require(path.join(__dirname, '..', 'artifacts', 'AZTEC.json'));
+const AZTECERC20Bridge = require(path.join(__dirname, '..', 'artifacts', 'AZTECERC20Bridge.json'));
+const AZTECInterface = require(path.join(__dirname, '..', 'artifacts', 'AZTECInterface.json'));
+const AZTECJoinSplit = require(path.join(__dirname, '..', 'artifacts', 'AZTECJoinSplit.json'));
+const AZTECJoinSplitInterface = require(path.join(__dirname, '..', 'artifacts', 'AZTECJoinSplitInterface.json'));
+const Doorbell = require(path.join(__dirname, '..', 'artifacts', 'Doorbell.json'));
+const ERC20 = require(path.join(__dirname, '..', 'artifacts', 'ERC20.json'));
+const ERC20Interface = require(path.join(__dirname, '..', 'artifacts', 'ERC20Interface.json'));
+const ERC20Mintable = require(path.join(__dirname, '..', 'artifacts', 'ERC20Mintable.json'));
+const Extractor = require(path.join(__dirname, '..', 'artifacts', 'Extractor.json'));
+const IERC20 = require(path.join(__dirname, '..', 'artifacts', 'IERC20.json'));
+const JoinSplitABIEncoder = require(path.join(__dirname, '..', 'artifacts', 'JoinSplitABIEncoder.json'));
+const NoteUtilities = require(path.join(__dirname, '..', 'artifacts', 'NoteUtilities.json'));
+const Validator = require(path.join(__dirname, '..', 'artifacts', 'Validator.json'));
 
 module.exports = {
     ACE,
@@ -30,6 +30,6 @@ module.exports = {
     Extractor,
     IERC20,
     JoinSplitABIEncoder,
-    NoteUtilies,
+    NoteUtilities,
     Validator,
 };

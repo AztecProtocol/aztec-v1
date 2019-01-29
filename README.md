@@ -47,6 +47,8 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 | Package                                            | Description                                                                      |
 | -------------------------------------------------- | -------------------------------------------------------------------------------- |
 | [`@aztec/demo`](/packages/demo)                    | Demo of AZTEC written in javascript                                              |
+| [`@aztec/huff`](/packages/huff)                    | DSL for low-level Ethereum smart contract programming                            |
+| [`@aztec/weierstrudel`](/packages/weierstrudel)    | Efficient elliptic curve arithmetic for smart contracts                          |
 
 ## Usage :hammer_and_pick:
 

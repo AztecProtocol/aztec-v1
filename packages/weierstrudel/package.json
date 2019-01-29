@@ -39,7 +39,6 @@
     "test": "./node_modules/.bin/mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
     "test:js": "./node_modules/.bin/mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
     "compile": "node ./compile.js",
-    "benchmark": "node ./benchmark.js",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
+    "benchmark": "node ./benchmark.js"
   }
 }
