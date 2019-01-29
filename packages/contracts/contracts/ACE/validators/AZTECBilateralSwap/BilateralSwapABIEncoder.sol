@@ -17,18 +17,20 @@ library BilateralSwapABIEncoder {
     * 0x104:0x124    = length of proofData byte array 
     * 0x124:0x144    = challenge
     * 0x144:0x164    = offset in byte array to notes
-    * 0x164:0x184    = offset in byte array to outputOwners
-    * 0x184:0x1a4    = offset in byte array to metadata
+    * 0x164:0x184    = offset in byte array to inputOwners
+    * 0x184:0x1a4    = offset in byte array to outputOwners
+    * 0x1a4:0x1c4    = offset in byte array to metadata
     **/
 
-    function encodeAndExit(bytes32 domainHash) internal view {
+    function encodeAndExit() internal view {
         assembly {
             // set up initial variables
             let notes := add(0x104, calldataload(0x144))
             let m := 2 // input notes
             let n := calldataload(notes)
-            let outputOwners := add(0x124, calldataload(0x164)) // one word after outputOwners = 1st
-            let metadata := add(0x144, calldataload(0x184)) // two words after metadata = 1st
+            let inputOwners := add(0x124, calldataload(0x164)) // // one word after inputOwners = 1st
+            let outputOwners := add(0x124, calldataload(0x184)) // one word after outputOwners = 1st
+            let metadata := add(0x144, calldataload(0x1a4)) // two words after metadata = 1st
 
             // memory map of `proofOutputs`
 
@@ -50,7 +52,6 @@ library BilateralSwapABIEncoder {
             // 0x140 - 0x160 = domainHash
             // 0x160 - 0x180 = structHash
             mstore(0x120, 0x1901)
-            mstore(0x140, domainHash) // domain hash
 
             // `returndata` starts at 0x160
             // `proofOutputs` starts at 0x180
@@ -105,18 +106,17 @@ library BilateralSwapABIEncoder {
 
             for { let i := 0 } lt(i, m) { i := add(i, 0x01) } {
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
+
                 // copy note data to 0x00 - 0x80
                 calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
                 // construct EIP712 signature parameters
                 mstore(0xc0, keccak256(0x00, 0x80)) // note hash
-                // construct EIP712 signature message
-                mstore(0x160, keccak256(0x80, 0xa0))
-                mstore(0x00, keccak256(0x13e, 0x42))
+
                 // store note length in `s`
                 mstore(s, 0xa0)
-                // store note owner in `s + 0x20`. Got spare memory here
-
+                // store note owner in `s + 0x20`. If there is no owners, or signing address is `0`, throw an error
+                mstore(add(s, 0x20), calldataload(add(inputOwners, mul(i, 0x20))))
                 // store note hash in `s + 0x40`
                 mstore(add(s, 0x40), mload(0xc0))
                 // store note metadata length in `s + 0x60` (just the coordinates)
@@ -148,6 +148,7 @@ library BilateralSwapABIEncoder {
         
                 // increase s by note length
                 s := add(s, 0xc0)
+
             }
 
             // transition between input and output notes
@@ -157,15 +158,17 @@ library BilateralSwapABIEncoder {
             mstore(add(inputPtr, 0x20), sub(n, m)) // store number of output notes
             s := add(s, add(0x40, mul(sub(n, m), 0x20)))
 
-            // output notes
             for { let i := m } lt(i, n) { i := add(i, 0x01) } {
                 // get note index
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
+
                 // get pointer to metadata
                 let metadataIndex := calldataload(add(metadata, mul(sub(i, m), 0x20)))
+ 
                 // get size of metadata
                 let metadataLength := calldataload(add(sub(metadata, 0x40), metadataIndex))
-
+                // mstore(0x00, metadata)
+                // return(0x00, 0x20)
                 // copy note data to 0x00 - 0x80
                 calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
@@ -222,23 +225,6 @@ library BilateralSwapABIEncoder {
 
 
 contract BilateralSwapABIEncoderTest {
-    bytes32 private domainHash;
-
-    constructor(uint _chainId) public {
-        assembly {
-            let m := mload(0x40)
-            // "EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)"
-            mstore(m, 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f)
-            // name = "AZTEC_CRYPTOGRAPHY_ENGINE"
-            mstore(add(m, 0x20), 0xc8066e2c715ce196630b273cd256d8959d5b9fefc55e9e6d999fb0f08bb7f75f)
-            // version = "0.1.0"
-            mstore(add(m, 0x40), 0xaa7cdbe2cce2ec7b606b0e199ddd9b264a6e645e767fb8479a7917dcd1b8693f)
-            mstore(add(m, 0x60), _chainId) // chain id
-            mstore(add(m, 0x80), address) // verifying contract
-            sstore(domainHash_slot, keccak256(m, 0xa0)) // domain hash
-        }
-    }
-
     function validateBilateralSwap(
         bytes, 
         address, 
@@ -248,6 +234,6 @@ contract BilateralSwapABIEncoderTest {
         view 
         returns (bytes) 
     {
-        BilateralSwapABIEncoder.encodeAndExit(domainHash);
+        BilateralSwapABIEncoder.encodeAndExit();
     }
 }
