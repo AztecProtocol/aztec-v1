@@ -1,19 +1,17 @@
 /* eslint-disable prefer-arrow-callback */
-
 const chai = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 
 const { clear: clearDatabase } = require('../../../db');
-
-const walletsController = require('../../wallets');
+const deployer = require('../../../deployer');
 const doorbellController = require('./controller');
 const transactionsController = require('../../transactions');
 const { TX_STATUS } = require('../../../config');
 const web3 = require('../../../web3Listener');
-const deployer = require('../../../deployer');
+const walletsController = require('../../wallets');
 
-const Doorbell = require('../../../../protocol/build/contracts/Doorbell');
+const Doorbell = require('../../../../build/contracts/Doorbell.json');
 
 const { expect } = chai;
 

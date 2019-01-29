@@ -49,16 +49,14 @@ const environment = {
 
 const config = {
     /**
-     * @enum {TX_TYPES}
+     * @enum {NOTE_STATUS}
      * @memberof module:config
-     * @description Transaction type enum
+     * @description Note status enum
      */
-    TX_TYPES: {
-        AZTEC_TOKEN_CONFIDENTIAL_TRANSFER: 'AZTEC_TOKEN_CONFIDENTIAL_TRANSFER',
-        AZTEC_JOIN_SPLIT: 'AZTEC_JOIN_SPLIT',
-        DOORBELL_SET_BLOCK: 'DOORBELL_SET_BLOCK',
-        ERC20_APPROVE: 'ERC20_APPROVE',
-        ERC20_MINT: 'ERC20_MINT',
+    NOTE_STATUS: {
+        OFF_CHAIN: 'OFF_CHAIN',
+        UNSPENT: 'UNSPENT',
+        SPENT: 'SPENT',
     },
     /**
      * @enum {TX_STATUS}
@@ -71,14 +69,16 @@ const config = {
         MINED: 'MINED',
     },
     /**
-     * @enum {NOTE_STATUS}
+     * @enum {TX_TYPES}
      * @memberof module:config
-     * @description Note status enum
+     * @description Transaction type enum
      */
-    NOTE_STATUS: {
-        OFF_CHAIN: 'OFF_CHAIN',
-        UNSPENT: 'UNSPENT',
-        SPENT: 'SPENT',
+    TX_TYPES: {
+        AZTEC_TOKEN_CONFIDENTIAL_TRANSFER: 'AZTEC_TOKEN_CONFIDENTIAL_TRANSFER',
+        AZTEC_JOIN_SPLIT: 'AZTEC_JOIN_SPLIT',
+        DOORBELL_SET_BLOCK: 'DOORBELL_SET_BLOCK',
+        ERC20_APPROVE: 'ERC20_APPROVE',
+        ERC20_MINT: 'ERC20_MINT',
     },
 };
 

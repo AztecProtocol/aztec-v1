@@ -1,27 +1,26 @@
 /* eslint-disable prefer-arrow-callback */
 const aztec = require('aztec.js');
 const { constants: { ERC20_SCALING_FACTOR: SCALING_FACTOR } } = require('@aztec/dev-utils');
+
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 
-const { clear: clearDatabase } = require('../../../db');
-const walletController = require('../../wallets');
-const erc20Controller = require('../erc20Token');
 const aztecController = require('../aztec');
 const aztecTokenController = require('./controller');
+const { clear: clearDatabase } = require('../../../db');
 const deployer = require('../../../deployer');
-const transactionsController = require('../../transactions');
+const erc20Controller = require('../erc20Token');
 const noteController = require('../../notes');
-
-const { params: { t2 } } = aztec;
+const transactionsController = require('../../transactions');
 const { TX_STATUS, NOTE_STATUS } = require('../../../config');
-
+const walletController = require('../../wallets');
 const web3 = require('../../../web3Listener');
 
-const AZTECERC20Bridge = require('../../../../protocol/build/contracts/AZTECERC20Bridge');
+const AZTECERC20Bridge = require('../../../../build/contracts/AZTECERC20Bridge.json');
 
+const { params: { t2 } } = aztec;
 const { expect } = chai;
 
 describe('aztecToken controller tests', () => {
