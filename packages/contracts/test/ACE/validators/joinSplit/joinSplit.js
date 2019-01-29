@@ -64,7 +64,7 @@ function encodeJoinSplitTransaction({
     return { proofData, expectedOutput };
 }
 
-contract.only('AZTEC', (accounts) => {
+contract('AZTEC', (accounts) => {
     let aztecContract;
     // Creating a collection of tests that should pass
     describe('success states', () => {

@@ -13,7 +13,7 @@ const AZTECInterface = artifacts.require('./contracts/AZTEC/AZTECInterface');
 
 AZTEC.abi = AZTECInterface.abi;
 
-contract.only('AZTEC', (accounts) => {
+contract('AZTEC', (accounts) => {
     let aztecContract;
     // Creating a collection of tests that should pass
     describe('success states', () => {
@@ -39,7 +39,7 @@ contract.only('AZTEC', (accounts) => {
           4) Calculate the gas used in validating this join-split transaction
           */
 
-        it.only('succesfully validates an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
+        it('succesfully validates an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
             const {
                 commitments,
                 m,

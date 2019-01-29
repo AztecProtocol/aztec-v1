@@ -16,7 +16,7 @@ function randomNoteValue() {
 }
 
 const fakeNetworkId = 100;
-contract('ABI Encoder', (accounts) => {
+contract('JoinSplit ABI Encoder', (accounts) => {
     let aztecAbiEncoder;
     let aztecAccounts = [];
     let notes = [];
