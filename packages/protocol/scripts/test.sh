@@ -59,7 +59,7 @@ if [ "$SOLC_NIGHTLY" = true ]; then
   wget -q https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-nightly.js -O /tmp/soljson.js && find . -name soljson.js -exec cp /tmp/soljson.js {} \;
 fi
 
-truffle version
+./node_modules/.bin/truffle version
 
 if [ "$SOLIDITY_COVERAGE" = true ]; then
   ./node_modules/.bin/solidity-coverage
@@ -70,3 +70,12 @@ if [ "$SOLIDITY_COVERAGE" = true ]; then
 else
   ./node_modules/.bin/truffle test "$@"
 fi
+
+if [ "$TEST_DEMO" = true ]; then
+  ./node_modules/.bin/truffle migrate --reset --network development
+
+  echo "Using Mocha $(./node_modules/.bin/mocha --version)"
+
+  NODE_ENV=TEST ./node_modules/.bin/mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec
+fi
+

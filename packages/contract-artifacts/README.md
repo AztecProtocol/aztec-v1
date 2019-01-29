@@ -1,4 +1,4 @@
-# `Contract Artifacts
+# Contract Artifacts
 
 Smart contract compilation artifacts for the latest version of AZTEC.
 
