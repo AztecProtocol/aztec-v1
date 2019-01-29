@@ -1,4 +1,4 @@
-const { padLeft } = require('web3-utils');
+const { padLeft, sha3 } = require('web3-utils');
 const BN = require('bn.js');
 
 const bn128 = require('../bn128');
@@ -88,6 +88,17 @@ outputCoder.decodeProofOutputs = (proofOutputsHex) => {
         const outputOffset = parseInt(proofOutputs.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
         return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
     });
+};
+
+outputCoder.getProofOutput = (proofOutputsHex, i) => {
+    const proofOutputs = proofOutputsHex.slice(2);
+    const offset = parseInt(proofOutputs.slice(0x40 + (0x40 * i), 0x80 + (0x40 * i)), 16);
+    const length = parseInt(proofOutputs.slice((offset * 2) - 0x40, (offset * 2)), 16);
+    return proofOutputs.slice((offset * 2) - 0x40, (offset * 2) + (length * 2));
+};
+
+outputCoder.hashProofOutput = (proofOutput) => {
+    return sha3(`0x${proofOutput}`);
 };
 
 outputCoder.encodeOutputNote = (note) => {

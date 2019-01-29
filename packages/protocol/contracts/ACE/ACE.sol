@@ -1,18 +1,17 @@
 pragma solidity 0.4.24;
 
-
 library NoteUtilities {
 
-    function length(bytes memory proofOutputsOrNotes) internal pure returns (
+    function getLength(bytes memory proofOutputsOrNotes) internal pure returns (
         uint len
     ) {
         assembly {
-                len := mload(add(proofOutputsOrNotes, 0x20))
+            len := mload(add(proofOutputsOrNotes, 0x20))
         }
     }
 
     function get(bytes memory proofOutputsOrNotes, uint i) internal pure returns (
-        bytes out
+        bytes memory out
     ) {
         assembly {
             let base := add(add(proofOutputsOrNotes, 0x40), mul(i, 0x20))
@@ -43,6 +42,15 @@ library NoteUtilities {
             owner := mload(add(note, 0x20))
             noteHash := mload(add(note, 0x40))
             metadata := add(note, mload(add(note, 0x60)))
+        }
+    }
+
+    function hashProofOutput(bytes memory proofOutput) internal pure returns (
+        bytes32 proofHash
+    ) {
+        assembly {
+            let len := add(mload(proofOutput), 0x20)
+            proofHash := keccak256(proofOutput, len)
         }
     }
 }
@@ -177,7 +185,7 @@ contract ACE {
     * @param _proofType the AZTEC proof type
     * Unnamed param is a dynamic array of proof hashes
     */
-    function clearProofByHashes(uint16 _proofType, bytes32[]) external {
+    function clearProofByHashes(uint16 _proofType, bytes32[] calldata) external {
         assembly {
             let m := mload(0x40)
             let proofHashes := add(0x04, calldataload(0x24))
@@ -273,7 +281,7 @@ contract ACE {
     * we use a custom getter for `commonReferenceString` - the default getter created by making the storage
     * variable public indexes individual elements of the array, and we want to return the whole array
     */
-    function getCommonReferenceString() public view returns (bytes32[6]) {
+    function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
     }
 }
