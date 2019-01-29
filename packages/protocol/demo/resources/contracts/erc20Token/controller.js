@@ -5,16 +5,15 @@
  *
  * @module erc20Controller
  */
-const constants = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const config = require('../../../config');
 const deployer = require('../../../deployer');
 const transactions = require('../../transactions');
 const wallets = require('../../wallets');
 
-const ERC20Mintable = require('../../../../protocol/build/contracts/ERC20Mintable.json');
+const ERC20Mintable = require('../../../../build/contracts/ERC20Mintable.json');
 
-const { DAI_ADDRESS } = constants;
 const { TX_TYPES } = config;
 const { web3 } = deployer;
 
@@ -27,7 +26,7 @@ const erc20 = {};
  */
 erc20.getContractAddress = async () => {
     if (config.env === 'MAINNET') {
-        return DAI_ADDRESS;
+        return constants.DAI_ADDRESS;
     }
     const networkId = await deployer.getNetwork();
     if (!ERC20Mintable.networks[networkId] || !ERC20Mintable.networks[networkId].address) {

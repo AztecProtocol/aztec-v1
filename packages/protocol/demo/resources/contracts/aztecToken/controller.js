@@ -3,7 +3,6 @@
  *
  * @module aztecTokenController
  */
-
 const web3Utils = require('web3-utils');
 
 const deployer = require('../../../deployer');
@@ -12,7 +11,7 @@ const wallets = require('../../wallets');
 const transactions = require('../../transactions');
 const { TX_TYPES, NOTE_STATUS } = require('../../../config');
 
-const AZTECERC20Bridge = require('../../../../protocol/build/contracts/AZTECERC20Bridge.json');
+const AZTECERC20Bridge = require('../../../../build/contracts/AZTECERC20Bridge.json');
 
 const { web3 } = deployer;
 const { padLeft } = web3Utils;
@@ -20,7 +19,8 @@ const { padLeft } = web3Utils;
 const aztecToken = {};
 
 /**
- * Get the AZTECERC20Bridge.sol AZTEC token contract address
+ * Get the AZTECERC20Bridge.sol AZTEC token contract address. We need the lowercase version
+ * due to the bytecode comparison tests
  * @method getContractAddress
  * @returns {string} the contract address
  */
@@ -29,7 +29,7 @@ aztecToken.getContractAddress = async () => {
     if (!AZTECERC20Bridge.networks[networkId] || !AZTECERC20Bridge.networks[networkId].address) {
         throw new Error(`AZTECERC20Bridge.sol not deployed to network ${networkId}`);
     }
-    return AZTECERC20Bridge.networks[networkId].address;
+    return AZTECERC20Bridge.networks[networkId].address.toLowerCase();
 };
 
 /**

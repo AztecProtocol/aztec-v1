@@ -1,14 +1,13 @@
 const aztec = require('aztec.js');
+
 const chai = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 
 const { clear } = require('../../db');
-
 const notes = require('./controller');
-const wallets = require('../wallets');
-
 const { NOTE_STATUS } = require('../../config');
+const wallets = require('../wallets');
 
 const { expect } = chai;
 

@@ -1,19 +1,20 @@
 /* eslint-disable prefer-arrow-callback */
 const aztec = require('aztec.js');
+
 const chai = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 
-const { clear: clearDatabase } = require('../../../db');
 const aztecController = require('./controller');
+const { clear: clearDatabase } = require('../../../db');
+const deployer = require('../../../deployer');
 const noteController = require('../../notes');
 const transactionsController = require('../../transactions');
-const walletController = require('../../wallets');
 const { TX_STATUS } = require('../../../config');
-const deployer = require('../../../deployer');
+const walletController = require('../../wallets');
 const web3 = require('../../../web3Listener');
 
-const AZTEC = require('../../../../protocol/build/contracts/AZTEC');
+const AZTEC = require('../../../../build/contracts/AZTEC.json');
 
 const { expect } = chai;
 
@@ -55,12 +56,7 @@ describe('aztec controller tests', () => {
                 noteController.createNote(wallets[1].address, 26),
             ];
             const { proofData, challenge } = aztec.proof.joinSplit.constructJoinSplit(inputNotes, 0, wallet.address, -300);
-            const transactionHash = await aztecController.joinSplit(
-                wallet.address,
-                proofData,
-                0,
-                challenge
-            );
+            const transactionHash = await aztecController.joinSplit(wallet.address, proofData, 0, challenge);
             expect(typeof (transactionHash)).to.equal('string');
             expect(transactionHash.length).to.equal(66);
 

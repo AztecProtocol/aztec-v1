@@ -2,7 +2,6 @@ const chai = require('chai');
 const crypto = require('crypto');
 
 const { clear } = require('../../db');
-
 const transactions = require('./controller');
 const { TX_TYPES, TX_STATUS } = require('../../config');
 

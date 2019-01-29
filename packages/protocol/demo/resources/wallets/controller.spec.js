@@ -3,10 +3,9 @@ const chai = require('chai');
 const crypto = require('crypto');
 const Tx = require('ethereumjs-tx');
 
-const { clear } = require('../../db');
-
-const keystore = require('../../accounts.json');
 const basicWallet = require('./controller');
+const { clear } = require('../../db');
+const keystore = require('../../accounts.json');
 const web3 = require('../../web3Listener');
 
 const { expect } = chai;

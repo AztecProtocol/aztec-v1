@@ -6,10 +6,10 @@
 
 const aztec = require('aztec.js');
 const db = require('./db');
-const wallets = require('../wallets');
-const { NOTE_STATUS } = require('../../config');
 
 const deployer = require('../../deployer.js');
+const { NOTE_STATUS } = require('../../config');
+const wallets = require('../wallets');
 
 const noteController = {};
 

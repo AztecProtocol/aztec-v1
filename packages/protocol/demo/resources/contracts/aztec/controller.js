@@ -7,11 +7,11 @@ const { params: { t2 } } = require('aztec.js');
 
 const deployer = require('../../../deployer');
 const transactions = require('../../transactions');
-const wallets = require('../../wallets');
 const { TX_TYPES } = require('../../../config');
+const wallets = require('../../wallets');
 
-const AZTEC = require('../../../../protocol/build/contracts/AZTEC.json');
-const AZTECInterface = require('../../../../protocol/build/contracts/AZTECInterface.json');
+const AZTEC = require('../../../../build/contracts/AZTEC.json');
+const AZTECInterface = require('../../../../build/contracts/AZTECInterface.json');
 
 const { web3 } = deployer;
 AZTEC.abi = AZTECInterface.abi; // hon hon hon
@@ -19,7 +19,8 @@ AZTEC.abi = AZTECInterface.abi; // hon hon hon
 const aztec = {};
 
 /**
- * Get the AZTEC validator contract address
+ * Get the AZTEC validator contract address. We need the lowercase version
+ * due to the bytecode comparison tests
  * @method getContractAddress
  * @returns {string} the contract address
  */
@@ -28,7 +29,6 @@ aztec.getContractAddress = async () => {
     if (!AZTEC.networks[networkId] || !AZTEC.networks[networkId].address) {
         throw new Error(`AZTEC.sol not deployed to network ${networkId}`);
     }
-    // truffle ^5.0 returns a checksummed addresses and this messes up with the bytecode comparison tests
     return AZTEC.networks[networkId].address.toLowerCase();
 };
 
