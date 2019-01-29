@@ -13,7 +13,7 @@ const BilateralSwapAbiEncoder = artifacts.require('./contracts/ACE/validators/AZ
 
 
 const fakeNetworkId = 100;
-contract.only('ABI Encoder', (accounts) => {
+contract('Bilateral ABI Encoder', (accounts) => {
     let bilateralSwapAbiEncoder;
     let bilateralSwapAccounts = [];
     let notes = [];
@@ -53,22 +53,23 @@ contract.only('ABI Encoder', (accounts) => {
                 proofData,
                 challenge,
             } = aztec.proof.bilateralSwap.constructBilateralSwap([...inputNotes, ...outputNotes], accounts[0]);
-
+            
+            const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
-            console.log('output owners: ', outputOwners);
+
             const data = aztec.abiEncoder.bilateralSwap.encode(
                 proofData,
                 challenge,
+                inputOwners,
                 outputOwners,
                 outputNotes
             );
-
+            console.log('data: ', data);
+            console.log('data type: ', typeof data);
             const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, crs, {
                 from: accounts[0],
                 gas: 4000000,
             });
-
-            // console.log('result: ', result);
 
             const expected = aztec.abiEncoder.bilateralSwap.outputCoder.encodeProofOutputs([{
                 inputNotes,
@@ -89,22 +90,19 @@ contract.only('ABI Encoder', (accounts) => {
 
             expect(decoded[0].inputNotes[0].gamma.eq(inputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);
-            console.log(decoded[0].outputNotes[0].owner);
-            console.log(decoded[0].outputNotes[1].owner);
-            console.log(decoded[0].inputNotes[0].owner);
-            console.log(decoded[0].inputNotes[1].owner);
             expect(decoded[0].inputNotes[0].noteHash).to.equal(inputNotes[0].noteHash);
-            // expect(decoded[0].inputNotes[0].owner).to.equal(inputNotes[0].owner.toLowerCase());
+            expect(decoded[0].inputNotes[0].owner).to.equal(inputNotes[0].owner.toLowerCase());
             expect(decoded[0].inputNotes[1].gamma.eq(inputNotes[1].gamma)).to.equal(true);
             expect(decoded[0].inputNotes[1].sigma.eq(inputNotes[1].sigma)).to.equal(true);
             expect(decoded[0].inputNotes[1].noteHash).to.equal(inputNotes[1].noteHash);
-            // expect(decoded[0].inputNotes[1].owner).to.equal(inputNotes[1].owner.toLowerCase());
+            expect(decoded[0].inputNotes[1].owner).to.equal(inputNotes[1].owner.toLowerCase());
 
             expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
             expect(decoded[0].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await bilateralSwapAbiEncoder.validateJoinSplit.estimateGas(data, senderAddress, crs, {
+
+            const gasUsed = await bilateralSwapAbiEncoder.validateBilateralSwap.estimateGas(data, senderAddress, crs, {
                 from: accounts[0],
                 gas: 4000000,
             });
