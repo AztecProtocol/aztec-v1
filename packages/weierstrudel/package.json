@@ -1,5 +1,5 @@
 {
-  "name": "weierstrudel",
+  "name": "@aztec/weierstrudel",
   "version": "0.1.0",
   "author": "AZTEC",
   "description": "Highly optimized smart contract that performs elliptic curve scalar multiplication",
