@@ -1,17 +1,12 @@
 module.exports = {
     "extends": "airbnb-base",
     "env": {
+        "browser": true,
         "mocha": true,
         "node": true,
-        "browser": true
     },
     "rules": {
-        "strict": 0,
         "arrow-body-style": 0,
-        "no-trailing-spaces": [
-            "error",
-            { "ignoreComments": true }
-        ],
         "comma-dangle": [
             "error",
             {
@@ -22,6 +17,7 @@ module.exports = {
                 "functions": "never"
             }
         ],
+        "import/no-dynamic-require": 0,
         "import/no-extraneous-dependencies": 0,
         "indent": [
             "error",
@@ -31,16 +27,6 @@ module.exports = {
             }
         ],
         "linebreak-style": 0,
-        "no-console": 0,
-        "no-underscore-dangle": [
-            "error",
-            {
-                "allow": [
-                    "_id"
-                ]
-            }
-        ],
-        "prefer-template": 0,
         "max-len": [
             "warn",
             130,
@@ -50,6 +36,21 @@ module.exports = {
             {
                 "ignoreTrailingComments": true
             }
-        ]
+        ],
+        "no-console": 0,
+        "no-underscore-dangle": [
+            "error",
+            {
+                "allow": [
+                    "_id"
+                ]
+            }
+        ],
+        "no-trailing-spaces": [
+            "error",
+            { "ignoreComments": true }
+        ],
+        "prefer-template": 0,
+        "strict": 0,
     }
 };

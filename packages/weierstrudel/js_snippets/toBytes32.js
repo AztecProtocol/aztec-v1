@@ -11,4 +11,4 @@ module.exports = function toBytes32(input, padding = 'left') { // assumes hex fo
         }
     }
     return s;
-}
+};

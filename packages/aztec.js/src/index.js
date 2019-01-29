@@ -1,4 +1,3 @@
-/* eslint-disable import/no-dynamic-require */
 const path = require('path');
 
 const abiEncoder = require(path.join(__dirname, 'abiEncoder'));
