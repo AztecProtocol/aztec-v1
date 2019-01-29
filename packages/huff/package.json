@@ -1,5 +1,5 @@
 {
-  "name": "huff",
+  "name": "@aztec/huff",
   "version": "0.1.0",
   "author": "AZTEC",
   "description": "Compiler for Huff, a DSL for low-level Ethereum smart contract programming",
