@@ -2,9 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./BilateralSwapABIEncoder.sol";
 
-contract AZTECBilateralSwapInterface {
-    constructor(uint _chainId) public {}
-    
+contract BilateralSwapInterface {    
     function validateBilateralSwap(
         bytes, 
         address, 
@@ -31,25 +29,6 @@ contract AZTECBilateralSwapInterface {
  **/
 contract AZTECBilateralSwap {
 
-    bytes32 private domainHash;
-
-    constructor(uint _chainId) public {
-        assembly {
-
-            // no idea what's going on here
-            let m := mload(0x40)
-            // "EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)"
-            mstore(m, 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f)
-            // name = "AZTEC_CRYPTOGRAPHY_ENGINE"
-            mstore(add(m, 0x20), 0xc8066e2c715ce196630b273cd256d8959d5b9fefc55e9e6d999fb0f08bb7f75f)
-            // version = "0.1.0"
-            mstore(add(m, 0x40), 0xaa7cdbe2cce2ec7b606b0e199ddd9b264a6e645e767fb8479a7917dcd1b8693f)
-            mstore(add(m, 0x60), _chainId) // chain id
-            mstore(add(m, 0x80), address) // verifying contract
-            sstore(domainHash_slot, keccak256(m, 0xa0)) // domain hash
-        }
-    }
-
     /**
      * @dev BilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
@@ -64,10 +43,6 @@ contract AZTECBilateralSwap {
             // We still assume calldata is offset by 4 bytes so that we can represent 
             // this contract through a comp\atible ABI
             validateBilateralSwap()
-
-            // should not get here
-            mstore(0x00, 404)
-            revert(0x00, 0x20)
 
             /**
              * New calldata map
@@ -84,8 +59,9 @@ contract AZTECBilateralSwap {
              * 0x104:0x124    = length of proofData byte array 
              * 0x124:0x144    = challenge
              * 0x144:0x164    = offset in byte array to notes
-             * 0x164:0x184    = offset in byte array to outputOwners
-             * 0x184:0x1a4    = offset in byte array to metadata
+             * 0x164:0x184    = offset in byte array to inputOwners
+             * 0x184:0x1a4    = offset in byte array to outputOwners
+             * 0x1a4:0x1c4    = offset in byte array to metadata
              *
              *
              * Note data map (uint[6]) is
@@ -126,8 +102,6 @@ contract AZTECBilateralSwap {
                     revert(0x00, 0x20)
 
                 }
-
-
 
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x124), gen_order)
@@ -289,18 +263,16 @@ contract AZTECBilateralSwap {
              **/
             function hashCommitments(notes, n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
-                    let index := add(add(notes, mul(i, 0xc0)), 0x60)
-
-                    calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
+                let index := add(add(notes, mul(i, 0xc0)), 0x60)
+                calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
                 // storing at position 0x00 in memory, the kecca hash of everything from 
                 // start of the commitments to the end
                 mstore(0x00, keccak256(0x300, mul(n, 0x80)))
             }
         }
-
         // if we've reached here, we've validated the bilateral swap and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        BilateralSwapABIEncoder.encodeAndExit(domainHash);
+        BilateralSwapABIEncoder.encodeAndExit();
     }
 }
