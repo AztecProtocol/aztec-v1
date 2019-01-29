@@ -2,7 +2,7 @@
   "name": "huff",
   "version": "0.1.0",
   "author": "AZTEC",
-  "description": "Compiler for Huff - a DSL for low-level Ethereum smart contract programming",
+  "description": "Compiler for Huff, a DSL for low-level Ethereum smart contract programming",
   "license": "LGPL-3.0",
   "main": "./src",
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
@@ -34,9 +34,7 @@
     "sinon": "^7.2.3"
   },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf ./lib",
     "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "test": "./node_modules/.bin/mocha ./src/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
+    "test": "./node_modules/.bin/mocha ./src/ --trace-warnings --exit --colors --recursive --reporter spec"
   }
 }

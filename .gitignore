@@ -5,6 +5,14 @@
 coverage.json
 lerna-debug.log*
 npm-debug.log*
+packages/protocol/demo/dbDevelopment.json
+packages/protocol/demo/dbKovan.json
+packages/protocol/demo/dbMainNet.json
+packages/protocol/demo/dbRinkeby.json
+packages/protocol/demo/dbRopsten.json
+packages/protocol/demo/dbTest.json
+packages/protocol/demo/testWallets.json
+packages/protocol/demo/wallets.json
 yarn-debug.log*
 yarn-error.log*
 
