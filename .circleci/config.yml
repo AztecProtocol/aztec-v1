@@ -14,7 +14,7 @@ jobs:
                 name: "Install Node Modules"
                 command: |
                     npm install
-                    ./node_modules/.bin/lerna exec -- npm install
+                    npm run bootstrap
             - run:
                 name: "Build Packages"
                 command: ./node_modules/.bin/lerna run build
