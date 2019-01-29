@@ -136,7 +136,7 @@ contract ACE {
     * @param _proofType the AZTEC proof type
     * Unnamed param is a dynamic array of proof hashes
     */
-    function clearProofByHashes(uint16 _proofType, bytes32[]) external {
+    function clearProofByHashes(uint16 _proofType, bytes32[] calldata) external {
         assembly {
             let m := mload(0x40)
             let proofHashes := add(0x04, calldataload(0x24))
