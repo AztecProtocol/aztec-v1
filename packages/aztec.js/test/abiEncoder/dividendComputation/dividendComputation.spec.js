@@ -88,17 +88,16 @@ describe.only('abiEncioder.dividendComputation tests', () => {
         ).slice(2));
         expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
 
-        const offsetToProofData = parseInt(result.slice(0x20, 0x40), 16);
+        expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(za);
+        expect(parseInt(result.slice(0x40, 0x60), 16)).to.equal(zb);
+
+        const offsetToProofData = parseInt(result.slice(0x60, 0x80), 16);
         expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(3);
         const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + (4 * 0xc0)));
         for (let i = 0; i < 3; i += 1) {
             const recoveredNote = recoveredProofData.slice((i * 0xc0), ((i * 0xc0) + 0xc0));
             expect(recoveredNote).to.equal(proofData[i].map(p => p.slice(2)).join(''));
         }
-
-        
-        expect(parseInt(result.slice(0x40, 0x60), 16)).to.equal(za);
-        expect(parseInt(result.slice(0x60, 0x80), 16)).to.equal(zb);
 
         const offsetToInputOwners = parseInt(result.slice(0x80, 0xa0), 16);
         expect(parseInt(result.slice(offsetToInputOwners - 0x20, offsetToInputOwners), 16)).to.equal(1); // one piece of data in the element
