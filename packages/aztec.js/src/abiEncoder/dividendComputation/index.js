@@ -9,10 +9,12 @@ abiEncoderDividendComputation.outputCoder = outputCoder;
 const abi = {
     CHALLENGE: 0,
     PROOF_DATA: 1,
-    INPUT_OWNERS: 2,
-    OUTPUT_OWNERS: 3,
-    METADATA: 4,
-    START_DATA: 5,
+    ZA: 2,
+    ZB: 3,
+    INPUT_OWNERS: 4,
+    OUTPUT_OWNERS: 5,
+    METADATA: 6,
+    START_DATA: 7,
 };
 
 function encodeNote(notes) {
@@ -29,17 +31,6 @@ function encodeProofData(proofData) {
     };
 }
 
-abiEncoderDividendComputation.encodeInputSignatures = (inputSignatures) => {
-    const { length } = inputSignatures;
-    const signatureString = inputSignatures.map(([v, r, s]) => {
-        return `${v.slice(2)}${r.slice(2)}${s.slice(2)}`;
-    });
-    const data = [padLeft(Number(length).toString(16), 64), ...signatureString].join('');
-    return {
-        data,
-        length: Number(data.length / 2),
-    };
-};
 
 function encodeInputOwners(inputOwners) {
     const { length } = inputOwners;
@@ -84,13 +75,15 @@ abiEncoderDividendComputation.encodeMetadata = (notes) => {
     };
 };
 
-abiEncoderDividendComputation.encode = (proofData, challenge, inputOwners, outputOwners, metadata) => {
+abiEncoderDividendComputation.encode = (proofData, challenge, za, zb, inputOwners, outputOwners, metadata) => {
     const parameters = [];
     parameters[abi.CHALLENGE] = challenge.slice(2); // 0x00 - 0x20
     parameters[abi.PROOF_DATA] = ''; // 0x20 - 0x40
-    parameters[abi.INPUT_OWNERS] = ''; // 0x40 - 0x60
-    parameters[abi.OUTPUT_OWNERS] = ''; // 0x60 - 0x80
-    parameters[abi.METADATA] = ''; // 0x80 - 0xa0 
+    parameters[abi.ZA] = padLeft(Number(za).toString(16), 64); // 0x40 - 0x60
+    parameters[abi.ZB] = padLeft(Number(zb).toString(16), 64); // 0x60 - 0x80
+    parameters[abi.INPUT_OWNERS] = ''; // 0x80 - 0xa0
+    parameters[abi.OUTPUT_OWNERS] = ''; // 0xa0 - 0xc0
+    parameters[abi.METADATA] = ''; // 0xc0 - 0xe0 
     let offset = (abi.START_DATA + 1) * 32;
     const formattedProofData = encodeProofData(proofData);
     parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64);

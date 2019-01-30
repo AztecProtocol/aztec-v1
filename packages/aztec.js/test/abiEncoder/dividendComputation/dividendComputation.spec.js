@@ -24,7 +24,7 @@ class HexString extends String {
     }
 }
 
-describe('abiEncioder.dividendComputation tests', () => {
+describe.only('abiEncioder.dividendComputation tests', () => {
     let accounts = [];
     let notes = [];
     let za;
@@ -80,6 +80,8 @@ describe('abiEncioder.dividendComputation tests', () => {
         const result = new HexString(abiEncoder.encode(
             proofData,
             challenge,
+            za,
+            zb,
             inputOwners,
             outputOwners,
             outputNotes
@@ -94,18 +96,22 @@ describe('abiEncioder.dividendComputation tests', () => {
             expect(recoveredNote).to.equal(proofData[i].map(p => p.slice(2)).join(''));
         }
 
-        const offsetToInputOwners = parseInt(result.slice(0x40, 0x60), 16);
+        
+        expect(parseInt(result.slice(0x40, 0x60), 16)).to.equal(za);
+        expect(parseInt(result.slice(0x60, 0x80), 16)).to.equal(zb);
+
+        const offsetToInputOwners = parseInt(result.slice(0x80, 0xa0), 16);
         expect(parseInt(result.slice(offsetToInputOwners - 0x20, offsetToInputOwners), 16)).to.equal(1); // one piece of data in the element
         const recoveredInputOwners = new HexString(result.slice(offsetToInputOwners, offsetToInputOwners + 0x60)); // why are we doing 3 + 0x60
         expect(recoveredInputOwners.slice(0x00, 0x20)).to.equal(padLeft(inputOwners[0].slice(2).toLowerCase(), 64));
 
-        const offsetToOutputOwners = parseInt(result.slice(0x60, 0x80), 16);
+        const offsetToOutputOwners = parseInt(result.slice(0xa0, 0xc0), 16);
         expect(parseInt(result.slice(offsetToOutputOwners - 0x20, offsetToOutputOwners), 16)).to.equal(2);
         const recoveredOutputOwners = new HexString(result.slice(offsetToOutputOwners, offsetToOutputOwners + (2 * 0x20)));
         expect(recoveredOutputOwners.slice(0x00, 0x20)).to.equal(padLeft(outputOwners[0].slice(2).toLowerCase(), 64));
         expect(recoveredOutputOwners.slice(0x20, 0x40)).to.equal(padLeft(outputOwners[1].slice(2).toLowerCase(), 64));
 
-        const offsetToMetadata = parseInt(result.slice(0x80, 0xa0), 16);
+        const offsetToMetadata = parseInt(result.slice(0xc0, 0xe0), 16);
         const metadataLength = parseInt(result.slice(offsetToMetadata - 0x20, offsetToMetadata), 16);
         expect(parseInt(result.slice(offsetToMetadata, offsetToMetadata + 0x20), 16)).to.equal(2);
 
