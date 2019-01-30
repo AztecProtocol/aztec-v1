@@ -8,9 +8,9 @@ abiEncoderDividendComputation.outputCoder = outputCoder;
 
 const abi = {
     CHALLENGE: 0,
-    PROOF_DATA: 1,
-    ZA: 2,
-    ZB: 3,
+    ZA: 1,
+    ZB: 2,
+    PROOF_DATA: 3,
     INPUT_OWNERS: 4,
     OUTPUT_OWNERS: 5,
     METADATA: 6,
@@ -78,9 +78,9 @@ abiEncoderDividendComputation.encodeMetadata = (notes) => {
 abiEncoderDividendComputation.encode = (proofData, challenge, za, zb, inputOwners, outputOwners, metadata) => {
     const parameters = [];
     parameters[abi.CHALLENGE] = challenge.slice(2); // 0x00 - 0x20
-    parameters[abi.PROOF_DATA] = ''; // 0x20 - 0x40
-    parameters[abi.ZA] = padLeft(Number(za).toString(16), 64); // 0x40 - 0x60
-    parameters[abi.ZB] = padLeft(Number(zb).toString(16), 64); // 0x60 - 0x80
+    parameters[abi.ZA] = padLeft(Number(za).toString(16), 64); // 0x20 - 0x40
+    parameters[abi.ZB] = padLeft(Number(zb).toString(16), 64); // 0x40 - 0x60
+    parameters[abi.PROOF_DATA] = ''; // 0x60 - 0x80
     parameters[abi.INPUT_OWNERS] = ''; // 0x80 - 0xa0
     parameters[abi.OUTPUT_OWNERS] = ''; // 0xa0 - 0xc0
     parameters[abi.METADATA] = ''; // 0xc0 - 0xe0 
