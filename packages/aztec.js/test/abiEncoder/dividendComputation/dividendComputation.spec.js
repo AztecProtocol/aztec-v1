@@ -3,10 +3,8 @@ const { padLeft } = require('web3-utils');
 
 const dividendComputation = require('../../../src/proof/dividendComputation');
 const secp256k1 = require('../../../src/secp256k1');
-const sign = require('../../../src/sign');
 const note = require('../../../src/note');
 const abiEncoder = require('../../../src/abiEncoder/dividendComputation');
-const { K_MAX } = require('../../../src/params');
 
 const { expect } = chai;
 
@@ -24,7 +22,7 @@ class HexString extends String {
     }
 }
 
-describe.only('abiEncioder.dividendComputation tests', () => {
+describe('abiEncioder.dividendComputation tests', () => {
     let accounts = [];
     let notes = [];
     let za;
@@ -64,21 +62,21 @@ describe.only('abiEncioder.dividendComputation tests', () => {
         const outputNotes = notes.slice(1, 3);
 
         const senderAddress = accounts[0].address;
-        const contractAddress = accounts[1].address;
-        let {
+        const {
             proofData,
             challenge,
         } = dividendComputation.constructProof([...inputNotes, ...outputNotes], za, zb, senderAddress);
-        
+
+
         // Putting into format required by ABI input encoder 
         // (expects note data to be seperated out into arrays for each note)
-        proofData = [proofData.slice(0, 6)].concat([proofData.slice(6, 12)], [proofData.slice(12, 18)]);
+        const proofDataFormatted = [proofData.slice(0, 6)].concat([proofData.slice(6, 12)], [proofData.slice(12, 18)]);
 
         const inputOwners = inputNotes.map(m => m.owner);
         const outputOwners = outputNotes.map(n => n.owner);
 
         const result = new HexString(abiEncoder.encode(
-            proofData,
+            proofDataFormatted,
             challenge,
             za,
             zb,
@@ -96,7 +94,7 @@ describe.only('abiEncioder.dividendComputation tests', () => {
         const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + (4 * 0xc0)));
         for (let i = 0; i < 3; i += 1) {
             const recoveredNote = recoveredProofData.slice((i * 0xc0), ((i * 0xc0) + 0xc0));
-            expect(recoveredNote).to.equal(proofData[i].map(p => p.slice(2)).join(''));
+            expect(recoveredNote).to.equal(proofDataFormatted[i].map(p => p.slice(2)).join(''));
         }
 
         const offsetToInputOwners = parseInt(result.slice(0x80, 0xa0), 16);

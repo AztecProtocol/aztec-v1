@@ -23,7 +23,6 @@ function encodeNote(notes) {
 
 function encodeProofData(proofData) {
     const { length } = proofData;
-    console.log('proof data: ', proofData);
     const noteString = proofData.map(notes => encodeNote(notes));
     const data = [padLeft(Number(length).toString(16), 64), ...noteString].join('');
     return {
