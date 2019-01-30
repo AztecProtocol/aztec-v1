@@ -5,7 +5,6 @@ const bn128 = require('../../../src/bn128');
 const secp256k1 = require('../../../src/secp256k1');
 const note = require('../../../src/note');
 const dividendComputation = require('../../../src/abiEncoder/dividendComputation');
-const { K_MAX } = require('../../../src/params');
 
 const { expect } = chai;
 
@@ -30,7 +29,7 @@ class HexString extends String {
     }
 }
 
-describe.only('abiEncioder.outputCoder tests', () => {
+describe('abiEncioder.outputCoder tests', () => {
     let accounts = [];
     let notes = [];
     beforeEach(() => {

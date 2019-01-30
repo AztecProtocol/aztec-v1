@@ -5,19 +5,18 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2, K_MAX } } = require('aztec.js');
+const { params: { t2 } } = require('aztec.js');
 
 // ### Artifacts
 const ABIEncoder = artifacts.require('./contracts/ACE/validators/AZTECDividendComputation/DividendComputationABIEncoderTest');
 
 
 const fakeNetworkId = 100;
-contract.only('Dividend Computation ABI Encoder', (accounts) => {
+contract('Dividend Computation ABI Encoder', (accounts) => {
     let DividendComputationAbiEncoder;
     let dividendAccounts = [];
     let notes = [];
 
-    // Creating a collection of tests that should pass
     describe('success states', () => {
         let crs;
         let za;
@@ -49,20 +48,20 @@ contract.only('Dividend Computation ABI Encoder', (accounts) => {
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
-            let {
+            const {
                 proofData,
                 challenge,
             } = aztec.proof.dividendComputation.constructProof([...inputNotes, ...outputNotes], za, zb, accounts[0]);
 
-            proofData = [proofData.slice(0, 6)].concat([proofData.slice(6, 12), proofData.slice(12, 18)]);
-            
+            const proofDataFormatted = [proofData.slice(0, 6)].concat([proofData.slice(6, 12), proofData.slice(12, 18)]);
+
             const publicOwner = '0x0000000000000000000000000000000000000000';
 
             const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
             const data = aztec.abiEncoder.dividendComputation.encode(
-                proofData,
+                proofDataFormatted,
                 challenge,
                 za,
                 zb,
@@ -75,8 +74,6 @@ contract.only('Dividend Computation ABI Encoder', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             });
-            // console.log('original challenge: ', challenge);
-            // console.log('result: ', result);
 
             const expected = aztec.abiEncoder.dividendComputation.outputCoder.encodeProofOutputs([{
                 inputNotes,
@@ -85,7 +82,10 @@ contract.only('Dividend Computation ABI Encoder', (accounts) => {
                 publicValue: 0,
             }]);
 
-            const decoded = aztec.abiEncoder.dividendComputation.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.dividendComputation.outputCoder.decodeProofOutputs(
+                `0x${padLeft('0', 64)}${result.slice(2)}`
+            );
+
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
@@ -104,11 +104,13 @@ contract.only('Dividend Computation ABI Encoder', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await DividendComputationAbiEncoder.validateDividendComputation.estimateGas(data, senderAddress, crs, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-
+            const gasUsed = await DividendComputationAbiEncoder.validateDividendComputation.estimateGas(
+                data, senderAddress, crs,
+                {
+                    from: accounts[0],
+                    gas: 4000000,
+                }
+            );
             console.log('gas used = ', gasUsed);
         });
     });
