@@ -1,8 +1,10 @@
 const { padLeft } = require('web3-utils');
 
-const secp256k1 = require('../secp256k1');
+const secp256k1 = require('../../secp256k1');
+const outputCoder = require('./outputCoder');
 
-const abiEncoder = {};
+const abiEncoderJoinSplit = {};
+abiEncoderJoinSplit.outputCoder = outputCoder;
 
 const abi = {
     M: 0,
@@ -21,6 +23,7 @@ function encodeNote(notes) {
 
 function encodeProofData(proofData) {
     const { length } = proofData;
+    console.log('proof data: ', proofData);
     const noteString = proofData.map(notes => encodeNote(notes));
     const data = [padLeft(Number(length).toString(16), 64), ...noteString].join('');
     return {
@@ -29,7 +32,7 @@ function encodeProofData(proofData) {
     };
 }
 
-abiEncoder.encodeInputSignatures = (inputSignatures) => {
+abiEncoderJoinSplit.encodeInputSignatures = (inputSignatures) => {
     const { length } = inputSignatures;
     const signatureString = inputSignatures.map(([v, r, s]) => {
         return `${v.slice(2)}${r.slice(2)}${s.slice(2)}`;
@@ -51,7 +54,7 @@ function encodeOutputOwners(outputOwners) {
     };
 }
 
-abiEncoder.encodeMetadata = (notes) => {
+abiEncoderJoinSplit.encodeMetadata = (notes) => {
     const metadata = notes
         .map(n => secp256k1.compress(n.ephemeral.getPublic()))
         .map(m => `${padLeft('21', 64)}${m.slice(2)}`);
@@ -74,7 +77,7 @@ abiEncoder.encodeMetadata = (notes) => {
     };
 };
 
-abiEncoder.encode = (proofData, m, challenge, publicOwner, inputSignatures, outputOwners, metadata) => {
+abiEncoderJoinSplit.encode = (proofData, m, challenge, publicOwner, inputSignatures, outputOwners, metadata) => {
     const parameters = [];
     parameters[abi.M] = padLeft(Number(m).toString(16), 64);
     parameters[abi.CHALLENGE] = challenge.slice(2);
@@ -87,13 +90,13 @@ abiEncoder.encode = (proofData, m, challenge, publicOwner, inputSignatures, outp
     const formattedProofData = encodeProofData(proofData);
     parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64);
     offset += formattedProofData.length;
-    const formattedInputSignatures = abiEncoder.encodeInputSignatures(inputSignatures);
+    const formattedInputSignatures = abiEncoderJoinSplit.encodeInputSignatures(inputSignatures);
     parameters[abi.INPUT_SIGNATURES] = padLeft(offset.toString(16), 64);
     offset += formattedInputSignatures.length;
     const formattedOutputOwners = encodeOutputOwners(outputOwners);
     parameters[abi.OUTPUT_OWNERS] = padLeft(offset.toString(16), 64);
     offset += formattedOutputOwners.length;
-    const formattedMetadata = abiEncoder.encodeMetadata(metadata);
+    const formattedMetadata = abiEncoderJoinSplit.encodeMetadata(metadata);
     parameters[abi.METADATA] = padLeft(offset.toString(16), 64);
 
     parameters.push(formattedProofData.data);
@@ -103,4 +106,4 @@ abiEncoder.encode = (proofData, m, challenge, publicOwner, inputSignatures, outp
     return `0x${parameters.join('')}`.toLowerCase();
 };
 
-module.exports = abiEncoder;
+module.exports = abiEncoderJoinSplit;
