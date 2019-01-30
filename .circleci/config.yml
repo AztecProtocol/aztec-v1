@@ -11,16 +11,13 @@ jobs:
                 name: "Update NPM"
                 command: sudo npm install -g npm@5.6.0
             - run:
-                name: "Install Node Modules"
+                name: "Bootstrap Monorepo"
                 command: |
-                    npm install
-                    ./node_modules/.bin/lerna exec -- npm install
+                  npm install
+                  npm run bootstrap
             - run:
                 name: "Build Packages"
                 command: ./node_modules/.bin/lerna run build
-            - run:
-                name: "Compile Protocol Contracts"
-                command: cd packages/protocol && ./node_modules/.bin/truffle compile
             - save_cache:
                 key: repo-{{ .Environment.CIRCLE_SHA1 }}
                 paths:

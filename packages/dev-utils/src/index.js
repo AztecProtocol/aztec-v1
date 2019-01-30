@@ -1,4 +1,3 @@
-/* eslint-disable import/no-dynamic-require */
 const path = require('path');
 
 const constants = require(path.join(__dirname, 'constants'));
