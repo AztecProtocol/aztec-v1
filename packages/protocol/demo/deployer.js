@@ -8,7 +8,7 @@ const Tx = require('ethereumjs-tx');
 
 const config = require('./config');
 const web3 = require('./web3Listener');
-const wallets = require('./resources/wallets');
+const wallets = require('./src/wallets');
 
 // N.B. you must be running ganache-cli 6.2.5 or greater or this won't work - I think previous versions
 // used EIP-155 to get the transaction hash, instead of hashing the rlp-encoded signed transaction

@@ -19,6 +19,10 @@ if (!fs.existsSync(CONTRACTS_DIR)) {
 
 const cherrypickContractJson = async (filename) => {
     const content = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, filename), 'utf-8'));
+    if (filename === 'AZTECERC20Bridge.json') {
+        content.bytecode = content.bytecode.replace('AZTECInterface', 'AZTEC');
+        content.deployedBytecode = content.deployedBytecode.replace('AZTECInterface', 'AZTEC');
+    }
     return {
         abi: content.abi,
         bytecode: content.bytecode,

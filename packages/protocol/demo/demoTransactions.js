@@ -3,12 +3,12 @@ const { constants: { ERC20_SCALING_FACTOR: SCALING_FACTOR } } = require('@aztec/
 const BN = require('bn.js');
 
 // ### internal dependencies
-const aztecBridgeContract = require('./resources/contracts/aztecToken');
+const aztecBridgeContract = require('./src/contracts/aztecToken');
 const config = require('./config');
-const erc20 = require('./resources/contracts/erc20Token');
-const notes = require('./resources/notes');
-const transactions = require('./resources/transactions');
-const wallets = require('./resources/wallets');
+const erc20 = require('./src/contracts/erc20Token');
+const notes = require('./src/notes');
+const transactions = require('./src/transactions');
+const wallets = require('./src/wallets');
 const web3 = require('./web3Listener');
 const keystore = require('./accounts');
 
