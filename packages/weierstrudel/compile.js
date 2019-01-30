@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 
-const parser = require('./huff/src/parser');
-const compiler = require('./huff/src/compiler');
+const { compiler } = require('../huff/src');
+const parser = require('../huff/src/parser');
 
 const pathToData = path.posix.resolve(__dirname, './huff_modules');
 

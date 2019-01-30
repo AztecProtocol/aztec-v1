@@ -4,14 +4,16 @@
       "presets": ["env"],
       "plugins": [
         "add-module-exports",
-        "transform-object-rest-spread"
+        "transform-object-rest-spread",
+        "transform-runtime"
       ]
     },
     "production": {
       "presets": ["env", "minify"],
       "plugins": [
         "add-module-exports",
-        "transform-object-rest-spread"
+        "transform-object-rest-spread",
+        "transform-runtime"
       ]
     }
   }

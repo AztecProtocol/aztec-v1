@@ -31,6 +31,7 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-add-module-exports": "^1.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-minify": "^0.5.0",
     "cross-env": "^5.2.0",
@@ -45,7 +46,6 @@
   "scripts": {
     "clean": "./node_modules/.bin/rimraf ./lib",
     "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
-    "publish": "npm run build && npm publish"
+    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
   }
 }
