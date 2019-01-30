@@ -11,7 +11,7 @@ library DividendComputationInterface {
     ) 
         external
         pure
-        returns (bytes32[1]) 
+        returns (bytes) 
     {}
 }
 
@@ -283,8 +283,7 @@ contract DividendComputation {
                 // calculated blinding factors in a block of memory starting at 0x2a0, of size (b - 0x2a0).
                 // Hash this block to reconstruct the initial challenge and validate that they match
                 let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
-                mstore(0x00, expected)
-                return(0x00, 0x20)
+
 
                 if iszero(eq(expected, challenge)) {
                     
@@ -292,10 +291,6 @@ contract DividendComputation {
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
-
-                // Great! All done. This is a valid proof so return ```true```
-                mstore(0x00, 0x01)
-                return(0x00, 0x20)
             }
 
             /**        
@@ -428,5 +423,7 @@ contract DividendComputation {
                 mstore(0x00, keccak256(0x300, mul(n, 0x80)))
             }
         }
+
+        DividendComputationABIEncoder.encodeAndExit();
     }
 }
