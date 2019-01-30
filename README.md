@@ -66,16 +66,17 @@ $ npm install @aztec/contract-addresses
 $ npm install @aztec/dev-utils
 ```
 
-To see a demo, head to the demo package:
+To see a demo, head to the protocol package:
 
 ```bash
-cd packages/demo
+cd packages/protocol
 ```
 
-Make sure you use your own private keys instead of the defaults in `accounts.json`. Then:
+Make sure you use your own private keys instead of the defaults in `demo/accounts.json`. Then:
 
 ```bash
 npm install
+truffle migrate --network rinkeby
 npm run demo:rinkeby
 ```
 
