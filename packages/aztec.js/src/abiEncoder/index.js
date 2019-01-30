@@ -1,7 +1,8 @@
 const joinSplit = require('./joinSplit');
-const outputCoder = require('./outputCoder');
+const dividendComputation = require('./dividendComputation');
+
 
 module.exports = {
     joinSplit,
-    outputCoder,
+    dividendComputation,
 };
