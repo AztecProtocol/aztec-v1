@@ -1,10 +1,25 @@
-.DS_Store
+# folders
+.idea/
 .nyc_output/
-*.log
+.vscode/
+build/
+coverage/
+coverageEnv/
+docs/
+lib/
+node_modules/
 
+# files
+.DS_Store
+.env
+*.log
 coverage.json
 lerna-debug.log*
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# packages
 packages/protocol/demo/dbDevelopment.json
 packages/protocol/demo/dbKovan.json
 packages/protocol/demo/dbMainNet.json
@@ -13,12 +28,6 @@ packages/protocol/demo/dbRopsten.json
 packages/protocol/demo/dbTest.json
 packages/protocol/demo/testWallets.json
 packages/protocol/demo/wallets.json
-yarn-debug.log*
-yarn-error.log*
-
-build/
-coverage/
-coverageEnv/
-docs/
-lib/
-node_modules/
+packages/weierstrudel/debug.txt
+packages/weierstrudel/log.txt
+packages/weierstrudel/js_snippets/hashToPoint.js
