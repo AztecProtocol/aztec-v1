@@ -12,6 +12,7 @@ const deployer = require('../../../deployer');
 const transactions = require('../../transactions');
 const wallets = require('../../wallets');
 
+const { getContractAddressesForNetwork } = require('@aztec/contract-addresses');
 const ERC20Mintable = require('../../../../protocol/build/contracts/ERC20Mintable.json');
 
 const { DAI_ADDRESS } = constants;
@@ -30,8 +31,14 @@ erc20.getContractAddress = async () => {
         return DAI_ADDRESS;
     }
     const networkId = await deployer.getNetwork();
+    let fallback = getContractAddressesForNetwork(networkId).erc20Mintable // Deployed by AZTEC
+
     if (!ERC20Mintable.networks[networkId] || !ERC20Mintable.networks[networkId].address) {
-        throw new Error(`ERC20Mintable.sol not deployed to network ${networkId}`);
+        if (fallback) {
+            return fallback
+        } else {
+            throw new Error(`ERC20Mintable.sol not deployed to network ${networkId}`);
+        }
     }
     return ERC20Mintable.networks[networkId].address;
 };

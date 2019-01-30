@@ -58,7 +58,7 @@ module.exports = {
             host: '127.0.0.1',
             gas: 4700000,
             gasPrice: toHex(toWei('1', 'gwei')),
-            network_id: 1234, // eslint-disable-line camelcase
+            network_id: '*', // eslint-disable-line camelcase
             port: 8545,
         },
         coverage: {

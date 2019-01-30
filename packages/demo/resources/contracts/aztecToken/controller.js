@@ -12,6 +12,7 @@ const wallets = require('../../wallets');
 const transactions = require('../../transactions');
 const { TX_TYPES, NOTE_STATUS } = require('../../../config');
 
+const { getContractAddressesForNetwork } = require('@aztec/contract-addresses');
 const AZTECERC20Bridge = require('../../../../protocol/build/contracts/AZTECERC20Bridge.json');
 
 const { web3 } = deployer;
@@ -26,8 +27,13 @@ const aztecToken = {};
  */
 aztecToken.getContractAddress = async () => {
     const networkId = await deployer.getNetwork();
+    let fallback = getContractAddressesForNetwork(networkId).aztecErc20Bridge // Deployed by AZTEC
     if (!AZTECERC20Bridge.networks[networkId] || !AZTECERC20Bridge.networks[networkId].address) {
-        throw new Error(`AZTECERC20Bridge.sol not deployed to network ${networkId}`);
+        if (fallback) {
+            return fallback
+        } else {
+            throw new Error(`AZTECERC20Bridge.sol not deployed to network ${networkId}`);
+        }
     }
     return AZTECERC20Bridge.networks[networkId].address;
 };
