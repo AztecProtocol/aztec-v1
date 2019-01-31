@@ -64,7 +64,6 @@ contract('JoinSplit ABI Encoder', (accounts) => {
             });
             const publicOwner = aztecAccounts[0].address;
             const outputOwners = outputNotes.map(n => n.owner);
-            console.log('output owners: ', outputOwners);
 
             const data = aztec.abiEncoder.joinSplit.encode(
                 proofData,
@@ -89,8 +88,6 @@ contract('JoinSplit ABI Encoder', (accounts) => {
             }]);
 
             const decoded = aztec.abiEncoder.joinSplit.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-            console.log(decoded[0].inputNotes[0].owner);
-            console.log(decoded[0].inputNotes[1].owner);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
