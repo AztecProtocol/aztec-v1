@@ -1,4 +1,4 @@
-## **Huff**: a programming language for the Ethereum Virtual Machine  
+## **Huff**: a programming language for the Ethereum Virtual Machine
 
 <p align="center"><img src="https://i.imgur.com/SVRjUhU.png" width="640px"/></p>
 
@@ -8,13 +8,13 @@ Huff enables the construction of EVM assembly macros - blocks of bytecode that c
 
 Huff doesn't hide the workings of the EVM behind syntactic sugar. In fact, Huff doesn't hide anything at all. Huff does not have variables, instead directly exposing the EVM's program stack to the developer to be directly manipulated.  
 
-### **"Wait...that sounds terrible! What is the point of huff?"**  
+### **"Wait...that sounds terrible! What is the point of huff?"**
 
 I developed Huff while writing [weierstrudel](https://github.com/AztecProtocol/weierstrudel/tree/master/huff_modules), an elliptic curve arithmetic library. Huff is designed for developing highly optimized algorithms where direct manipulation of the program's bytecode is preferred.  
 
-Huff supports a form of templating - Huff macros can accept template parameters, which in turn are Huff macros. This allows for customizable macros that are ideal for loop unrolling.  
+Huff supports a form of templating - Huff macros can accept template parameters, which in turn are Huff macros. This allows for customizable macros that are ideal for loop unrolling. 
 
-Huff algorithms can be broken down into their constituent macros and rigorously ested without having to split the algorithm into functions and invoke jump instructions.
+Huff algorithms can be broken down into their constituent macros and rigorously tested without having to split the algorithm into functions and invoke jump instructions.
 
 ### **Huff syntax**
 
@@ -154,7 +154,7 @@ Please, by all means. Huff is open-source and licensed under LGPL-3.0.
 
 ### **Usage**
 
-```
+```js
 const { Runtime } = require('huff');
 
 const main = new Runtime('main_loop.huff', 'path_to_macros');

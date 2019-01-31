@@ -13,7 +13,7 @@ weierstrudel is written entirely in [Huff](https://github.com/AztecProtocol/huff
 * Using the GLV technique to exploit a curve endomorphism and reduce the number of 'point doubling' operations in half.  
 * Using Shamir's trick to combine multiple scalar multiplications into a single algorithm, fixing the number of 'point doubling' operations to ~127  
 * Using Windowed-Non-Adjacent-Form representations for scalar multipliers, reducing the number of 'point addition' operations to ~50 per point  
-* Using the difference between the bn254 curve's 254-bit field modulus and the EVM's 256 word size to defer modular reductions until absolutely neccessary  
+* Using the difference between the bn254 curve's 254-bit field modulus and the EVM's 256 word size to defer modular reductions until absolutely necessary  
 
 `weierstrudel` makes extensive use of bit-shift opcodes and is only compatible with Ethereum once the Constantinople hard-fork has been activated.  
 
@@ -55,27 +55,27 @@ Of course! `weierstrudel` is open-source software, licensed under LGPL-3.0. Howe
 
 Gas estimates can be obtained by running `npm run benchmark`. For reference, the scalar multiplication precompile costs `40,000` gas per point. This is excluding the overheads of having to make a contract call per point when using the precompiles, as well as calling the point addition precompile to combine points into a single sum.
 
-Number of points | Approximate gas cost (average of 10 runs) | Cost per point
---- | --- | ---
-1 | 47,593 | 47,593
-2 | 69,057 | 34,528
-3 | 89,997 | 29,999
-4 | 111,554 | 27,889
-5 | 133,580 | 26,716
-6 | 154,759 | 25,793
-7 | 176,051 | 25,150
-8 | 196,570 | 24,571
-9 | 219,103 | 24,244
-10 | 239,872 | 23,987
-11 | 261,243 | 23,749
-12 | 282,349 | 23,529
-13 | 304,197 | 23,400
-14 | 324,816 | 23,201
-15 | 348,173 | 23,211
+| Number of points | Approximate gas cost (average of 10 runs) | Cost per point |
+| ---------------- | ----------------------------------------- | -------------- |
+| 1 | 47,593 | 47,593 |
+| 2 | 69,057 | 34,528 |
+| 3 | 89,997 | 29,999 |
+| 4 | 111,554 | 27,889 |
+| 5 | 133,580 | 26,716 |
+| 6 | 154,759 | 25,793 |
+| 7 | 176,051 | 25,150 |
+| 8 | 196,570 | 24,571 |
+| 9 | 219,103 | 24,244 |
+| 10 | 239,872 | 23,987 |
+| 11 | 261,243 | 23,749 |
+| 12 | 282,349 | 23,529 |
+| 13 | 304,197 | 23,400 |
+| 14 | 324,816 | 23,201 |
+| 15 | 348,173 | 23,211 |
 
 ### **Deployed weierstrudel**
 
-`weierstrudel` is currently deployed on [Ropsten](https://ropsten.etherscan.io/address/0xd68131a43ca870ce0a27f5ace6c696dd6c442683#code)
+`weierstrudel` is currently deployed on [Ropsten](https://ropsten.etherscan.io/address/0xd68131a43ca870ce0a27f5ace6c696dd6c442683#code).
 
 ### **Usage**
 

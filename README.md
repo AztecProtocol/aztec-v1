@@ -33,13 +33,14 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 | ------- | ------- | ----------- |
 | [`aztec.js`](/packages/aztec.js) | [![npm](https://img.shields.io/npm/v/aztec.js.svg)](https://www.npmjs.com/package/aztec.js) | An aggregate package combining many smaller utility packages for interacting with the AZTEC Protocol |
 | [`@aztec/contract-artifacts`](/packages/contract-artifacts) | [![npm](https://img.shields.io/npm/v/@aztec/contract-artifacts.svg)](https://www.npmjs.com/package/@aztec/contract-artifacts) | AZTEC smart contract compiled artifacts |
-| [`@aztec/contract-addresses`](/packages/contract-addresses) | [![npm](https://img.shields.io/npm/v/@aztec/contract-addresses.svg)](https://www.npmjs.com/package/@aztec/contract-addresses) | A tiny utility library for getting known deployed contract addresses for a particular network | [`@aztec/dev-utils`](/packages/dev-utils) | [![npm](https://img.shields.io/npm/v/@aztec/dev-utils.svg)](https://www.npmjs.com/package/@aztec/dev-utils) | Dev utils to be shared across AZTEC projects and packages. |
+| [`@aztec/contract-addresses`](/packages/contract-addresses) | [![npm](https://img.shields.io/npm/v/@aztec/contract-addresses.svg)](https://www.npmjs.com/package/@aztec/contract-addresses) | A tiny utility library for getting known deployed contract addresses for a particular network |
+| [`@aztec/dev-utils`](/packages/dev-utils) | [![npm](https://img.shields.io/npm/v/@aztec/dev-utils.svg)](https://www.npmjs.com/package/@aztec/dev-utils) | Dev utils to be shared across AZTEC projects and packages |
 
 ### Solidity Packages
 
-| Package                                            | Description                                                                      |
-| -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [`@aztec/protocol`](/packages/protocol)            | AZTEC solidity smart contracts & tests                                           |
+| Package | Version | Description |
+| ------- | ------- | ----------- |
+| [`@aztec/protocol`](/packages/protocol) | [![npm](https://img.shields.io/npm/v/@aztec/protocol.svg)](https://www.npmjs.com/package/@aztec/protocol) | AZTEC solidity smart contracts & tests |
 
 ### Private Packages
 
@@ -67,15 +68,15 @@ $ npm install @aztec/dev-utils
 To see a demo, head to the protocol package:
 
 ```bash
-* cd packages/protocol
+$ cd packages/protocol
 ```
 
 Make sure you use your own private keys instead of the defaults in `demo/accounts.json`. Then:
 
 ```bash
-* npm install
-* truffle migrate --network rinkeby
-* npm run demo:rinkeby
+$ npm install
+$ truffle migrate --network rinkeby
+$ npm run demo:rinkeby
 ```
 
 For more information, check out our [documentation](https://aztecprotocol.github.io/AZTEC/).
