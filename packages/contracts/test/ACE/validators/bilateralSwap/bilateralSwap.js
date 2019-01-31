@@ -50,7 +50,7 @@ function encodeBilateralSwapTransaction({
     return { proofData, expectedOutput };
 }
 
-contract.only('Bilateral Swap', (accounts) => {
+contract('Bilateral Swap', (accounts) => {
     let bilateralSwapContract;
     describe('success states', () => {
         let crs;

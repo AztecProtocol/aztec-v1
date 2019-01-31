@@ -8,7 +8,6 @@ const { padLeft, sha3 } = require('web3-utils');
 // ### Internal Dependencies
 const aztec = require('aztec.js');
 const { params: { t2, GROUP_MODULUS } } = require('aztec.js');
-const { note: { utils: { toBytes32 } } } = require('aztec.js');
 const exceptions = require('../../utils/exceptions');
 
 // ### Artifacts
@@ -125,8 +124,10 @@ contract('BilateralSwap', (accounts) => {
 
         it('Validate failure for using fake proof data', async () => {
             const { challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(testNotes, accounts[0]);
-     
-            const fakeProofData = new Array(4).map(() => new Array(6).map(() => toBytes32.randomBytes32()));
+
+            const fakeProofData = [...Array(4)]
+                .map(() => [...Array(6)]
+                    .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
 
             await exceptions.catchRevert(bilateralSwapContract.validateBilateralSwap(fakeProofData, challenge, t2, {
                 from: accounts[0],
