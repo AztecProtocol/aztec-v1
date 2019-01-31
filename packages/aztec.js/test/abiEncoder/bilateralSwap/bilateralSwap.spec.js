@@ -6,8 +6,6 @@ const bilateralProof = require('../../../src/proof/bilateralSwap');
 const bilateralSwap = require('../../../src/abiEncoder/bilateralSwap');
 const secp256k1 = require('../../../src/secp256k1');
 const note = require('../../../src/note');
-const { K_MAX } = require('../../../src/params');
-
 
 const { expect } = chai;
 
@@ -26,7 +24,7 @@ class HexString extends String {
 }
 
 
-describe.only('abiEncoder.bilateralSwap tests', () => {
+describe('abiEncoder.bilateralSwap tests', () => {
     let accounts = [];
     let notes = [];
     beforeEach(() => {
@@ -59,7 +57,6 @@ describe.only('abiEncoder.bilateralSwap tests', () => {
         const inputNotes = notes.slice(0, 2);
         const outputNotes = notes.slice(2, 4);
         const senderAddress = accounts[0].address;
-        const contractAddress = accounts[1].address;
         const {
             proofData,
             challenge,

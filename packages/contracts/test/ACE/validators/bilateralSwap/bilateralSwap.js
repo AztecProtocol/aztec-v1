@@ -1,15 +1,13 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const crypto = require('crypto');
-const { padLeft, sha3 } = require('web3-utils');
+const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
 const { params: { t2 } } = require('aztec.js');
 const { proof: { bilateralSwap } } = require('aztec.js');
 
-const exceptions = require('../../../../utils/exceptions');
 
 // ### Artifacts
 const BilateralSwap = artifacts.require('./contracts/ACE/validators/AZTECBilateralSwap');
@@ -29,7 +27,6 @@ function encodeBilateralSwapTransaction({
         proofData: proofDataRaw,
         challenge,
     } = bilateralSwap.constructBilateralSwap([...inputNotes, ...outputNotes], senderAddress);
-
     const inputOwners = inputNotes.map(m => m.owner);
     const outputOwners = outputNotes.map(n => n.owner);
 
@@ -55,7 +52,6 @@ function encodeBilateralSwapTransaction({
 
 contract.only('Bilateral Swap', (accounts) => {
     let bilateralSwapContract;
-    // Creating a collection of tests that should pass
     describe('success states', () => {
         let crs;
         let bilateralSwapAccounts = [];
@@ -67,7 +63,6 @@ contract.only('Bilateral Swap', (accounts) => {
             });
             // Need to set the value of the notes created, to be consistent with the 
             // bilateral swap condition
-
             const noteValues = [10, 20, 10, 20];
 
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
@@ -93,13 +88,15 @@ contract.only('Bilateral Swap', (accounts) => {
                 senderAddress: accounts[0],
             });
 
-
             const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], crs, {
                 from: accounts[0],
                 gas: 4000000,
             });
-            
-            const decoded = aztec.abiEncoder.bilateralSwap.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+
+            const decoded = aztec.abiEncoder.bilateralSwap.outputCoder.decodeProofOutputs(
+                `0x${padLeft('0', 64)}${result.slice(2)}`
+            );
+
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);

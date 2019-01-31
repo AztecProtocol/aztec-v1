@@ -1,6 +1,6 @@
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
-const BN = require('bn.js')
+const BN = require('bn.js');
 
 const bn128 = require('../../../src/bn128');
 const secp256k1 = require('../../../src/secp256k1');
