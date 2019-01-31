@@ -182,11 +182,17 @@ contract ACE {
         }
     }
 
-    function createNoteRegistry(bool _isPrivate, bool _isTracked, uint256 _scalingFactor) public returns (address) {
+    function createNoteRegistry(
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert,
+        uint256 _scalingFactor
+    ) public returns (address) {
         require(noteRegistries[msg.sender] == NoteRegistry(0), "address already has a linked Note Registry");
         NoteRegistry registry = new NoteRegistry(
-            _isPrivate,
-            _isTracked,
+            _canMint,
+            _canBurn,
+            _canConvert,
             _scalingFactor,
             msg.sender,
             this,

@@ -19,8 +19,9 @@ contract NoteRegistry {
     bytes32[4] public totalSupplyPrivate;
 
     struct Flags {
-        bool isPrivate;
-        bool isTracked;
+        bool canMint;
+        bool canBurn;
+        bool canConvert;
     }
 
     Flags public flags;
@@ -32,14 +33,15 @@ contract NoteRegistry {
     mapping(bytes32 => Note) public registry;
 
     constructor(
-        bool _isPrivate,
-        bool _isTracked,
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert,
         uint256 _linkedTokenScalingFactor,
         address _linkedToken,
         address _ace,
         address _owner
     ) public {
-        flags = Flags(_isPrivate, _isTracked);
+        flags = Flags(_canMint, _canBurn, _canConvert);
         if (_linkedToken != address(0)) {
             linkedToken = ERC20(_linkedToken);
         }
@@ -65,8 +67,7 @@ contract NoteRegistry {
 
 
         if (publicValue != 0) {
-            require(flags.isPrivate == false, "private assets cannot have a public value!");
-            require(flags.isTracked == true, "untracked assets cannot accept tokens!");
+            require(flags.canConvert == true, "this asset cannot be converted into public tokens!");
             if (publicValue < 0) {
                 totalSupply += uint256(-publicValue);
                 require(linkedToken.transferFrom(publicOwner, this, uint256(-publicValue)), "transfer failed!");

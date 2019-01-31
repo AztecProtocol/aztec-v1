@@ -21,17 +21,18 @@ contract ZkERC20 {
     event LogRedeemTokens(address indexed owner, uint256 value);
 
     constructor(
-        bool _isPrivate,
-        bool _isTracked,
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert,
         uint256 _scalingFactor,
         address _linkedToken,
         address _ace
     ) public {
-        flags = NoteRegistry.Flags(_isPrivate, _isTracked);
+        flags = NoteRegistry.Flags(_canMint, _canBurn, _canConvert);
         scalingFactor = _scalingFactor;
         ace = ACE(_ace);
         linkedToken = ERC20(_linkedToken);
-        noteRegistry = NoteRegistry(ace.createNoteRegistry(_isPrivate, _isTracked, _scalingFactor));
+        noteRegistry = NoteRegistry(ace.createNoteRegistry(_canMint, _canBurn, _canConvert, _scalingFactor));
     }
 
     function confidentialTransfer(bytes _proofData) external returns (bool) {
