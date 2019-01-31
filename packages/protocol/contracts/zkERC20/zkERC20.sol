@@ -15,8 +15,8 @@ contract ZkERC20 {
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
 
-    event LogCreateNote(address indexed owner, bytes metadata);
-    event LogDestroyNote(address indexed owner, bytes metadata);
+    event LogCreateNote(bytes32 indexed noteHash, address indexed owner, bytes metadata);
+    event LogDestroyNote(bytes32 indexed noteHash, address indexed owner, bytes metadata);
     event LogConvertTokens(address indexed owner, uint256 value);
     event LogRedeemTokens(address indexed owner, uint256 value);
 
@@ -105,15 +105,15 @@ contract ZkERC20 {
 
     function logInputNotes(bytes memory inputNotes) internal {
         for (uint i = 0; i < inputNotes.getLength(); i += 1) {
-            (address owner, , bytes memory metadata) = inputNotes.get(i).extractNote();
-            emit LogDestroyNote(owner, metadata);
+            (address owner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
+            emit LogDestroyNote(noteHash, owner, metadata);
         }
     }
 
     function logOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
-            (address owner, , bytes memory metadata) = outputNotes.get(i).extractNote();
-            emit LogCreateNote(owner, metadata);
+            (address owner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
+            emit LogCreateNote(noteHash, owner, metadata);
         }
     }
 }
