@@ -121,7 +121,6 @@ contract('AZTEC', (accounts) => {
                 kPublic,
                 aztecAddress: aztecContract.address,
             });
-
             const result = await aztecContract.validateJoinSplit(proofData, accounts[0], crs, {
                 from: accounts[0],
                 gas: 4000000,

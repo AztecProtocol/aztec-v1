@@ -6,7 +6,7 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2, K_MAX } } = require('aztec.js');
+const { params: { t2 } } = require('aztec.js');
 
 // ### Artifacts
 const BilateralSwapAbiEncoder = artifacts.require('./contracts/ACE/validators/AZTECBilateralSwap/BilateralSwapABIEncoderTest');
@@ -18,7 +18,6 @@ contract('Bilateral ABI Encoder', (accounts) => {
     let bilateralSwapAccounts = [];
     let notes = [];
 
-    // Creating a collection of tests that should pass
     describe('success states', () => {
         let crs;
 
@@ -53,7 +52,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 proofData,
                 challenge,
             } = aztec.proof.bilateralSwap.constructBilateralSwap([...inputNotes, ...outputNotes], accounts[0]);
-            
+
             const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
@@ -64,8 +63,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 outputOwners,
                 outputNotes
             );
-            console.log('data: ', data);
-            console.log('data type: ', typeof data);
+
             const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, crs, {
                 from: accounts[0],
                 gas: 4000000,
@@ -78,7 +76,10 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 publicValue,
             }]);
 
-            const decoded = aztec.abiEncoder.bilateralSwap.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.bilateralSwap.outputCoder.decodeProofOutputs(
+                `0x${padLeft('0', 64)}${result.slice(2)}`
+            );
+
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
