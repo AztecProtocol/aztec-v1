@@ -1,6 +1,6 @@
 {
   "name": "@aztec/dev-utils",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "AZTEC",
   "description": "Dev utils to be shared across AZTEC packages",
   "license": "LGPL-3.0",
@@ -26,8 +26,7 @@
   },
   "dependencies": {
     "bn.js": "^4.11.8",
-    "chai": "^4.2.0",
-    "lodash": "^4.17.11"
+    "chai": "^4.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
