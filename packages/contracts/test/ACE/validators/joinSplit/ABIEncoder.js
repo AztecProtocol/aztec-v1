@@ -79,14 +79,14 @@ contract('ABI Encoder', (accounts) => {
                 gas: 4000000,
             });
 
-            const expected = aztec.abiEncoder.outputCoder.encodeProofOutputs([{
+            const expected = aztec.abiEncoder.joinSplit.outputCoder.encodeProofOutputs([{
                 inputNotes,
                 outputNotes,
                 publicOwner,
                 publicValue: 0,
             }]);
 
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.joinSplit.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
