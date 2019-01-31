@@ -48,8 +48,6 @@ contract NoteRegistry {
         ace = ACE(_ace);
     }
 
-    event Debug(address test);
-
     function updateNoteRegistry(bytes _proofOutput, uint16 _proofType, address _proofSender) public returns (bool) {
         require(msg.sender == registryOwner);
         bytes32 proofHash = _proofOutput.hashProofOutput();
