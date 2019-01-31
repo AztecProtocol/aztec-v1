@@ -108,17 +108,14 @@ contract('NoteRegistry', (accounts) => {
             await ace.setCommonReferenceString(crs);
             const aztec = await AZTEC.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
-            const inputNotes = [];
-            const outputNotes = notes.slice(0, 2);
-            const kPublic = -10;
             const publicOwner = accounts[0];
             proofs[0] = encodeJoinSplitTransaction({
-                inputNotes,
-                outputNotes,
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
                 senderAddress: accounts[0],
                 inputNoteOwners: [],
                 publicOwner,
-                kPublic,
+                kPublic: -10,
                 aztecAddress: aztec.address,
             });
             proofs[1] = encodeJoinSplitTransaction({
@@ -130,10 +127,47 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: -40,
                 aztecAddress: aztec.address,
             });
+            proofs[2] = encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(6, 8),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[2],
+                kPublic: -130,
+                aztecAddress: aztec.address,
+            });
+            proofs[3] = encodeJoinSplitTransaction({
+                inputNotes: notes.slice(6, 8),
+                outputNotes: notes.slice(4, 6),
+                senderAddress: accounts[0],
+                inputNoteOwners: aztecAccounts.slice(6, 8),
+                publicOwner: accounts[2],
+                kPublic: 40,
+                aztecAddress: aztec.address,
+            });
+            proofs[4] = encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: [notes[0], notes[3]],
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[3],
+                kPublic: -30,
+                aztecAddress: aztec.address,
+            });
+            proofs[5] = encodeJoinSplitTransaction({
+                inputNotes: [notes[0], notes[3]],
+                outputNotes: [notes[1], notes[2]],
+                senderAddress: accounts[0],
+                inputNoteOwners: [aztecAccounts[0], aztecAccounts[3]],
+                publicOwner: accounts[3],
+                kPublic: 0, // perfectly balanced...
+                aztecAddress: aztec.address,
+            });
             proofOutputs = proofs.map(({ expectedOutput }) => outputCoder.getProofOutput(expectedOutput, 0));
 
             erc20 = await ERC20Mintable.new();
             noteRegistry = await NoteRegistry.new(
+                false,
                 false,
                 true,
                 10,
@@ -163,13 +197,36 @@ contract('NoteRegistry', (accounts) => {
             expect(regReceipt.status).to.equal(true);
         });
 
-        it('can update a note registry by consuming input notes', async () => {
+        it('can update a note registry by consuming input notes, with kPublic negative', async () => {
             await ace.validateProof(1, accounts[0], proofs[0].proofData);
             await noteRegistry.updateNoteRegistry(`0x${proofOutputs[0].slice(0x40)}`, 1, accounts[0]);
-
             const { receipt: aceReceipt } = await ace.validateProof(1, accounts[0], proofs[1].proofData);
             const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
             const { receipt: regReceipt } = await noteRegistry.updateNoteRegistry(formattedProofOutput, 1, accounts[0]);
+            expect(aceReceipt.status).to.equal(true);
+            expect(regReceipt.status).to.equal(true);
+        });
+
+        it('can update a note registry by consuming input notes, with kPublic positive', async () => {
+            await ace.validateProof(1, accounts[0], proofs[2].proofData);
+            await noteRegistry.updateNoteRegistry(`0x${proofOutputs[2].slice(0x40)}`, 1, accounts[0]);
+
+            const { receipt: aceReceipt } = await ace.validateProof(1, accounts[0], proofs[3].proofData);
+            const formattedProofOutput = `0x${proofOutputs[3].slice(0x40)}`;
+            const { receipt: regReceipt } = await noteRegistry.updateNoteRegistry(formattedProofOutput, 1, accounts[0]);
+
+            expect(aceReceipt.status).to.equal(true);
+            expect(regReceipt.status).to.equal(true);
+        });
+
+        it('can update a note registry with kPublic = 0', async () => {
+            await ace.validateProof(1, accounts[0], proofs[4].proofData);
+            await noteRegistry.updateNoteRegistry(`0x${proofOutputs[4].slice(0x40)}`, 1, accounts[0]);
+
+            const { receipt: aceReceipt } = await ace.validateProof(1, accounts[0], proofs[5].proofData);
+            const formattedProofOutput = `0x${proofOutputs[5].slice(0x40)}`;
+            const { receipt: regReceipt } = await noteRegistry.updateNoteRegistry(formattedProofOutput, 1, accounts[0]);
+
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });

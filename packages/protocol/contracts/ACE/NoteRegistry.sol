@@ -16,7 +16,7 @@ contract NoteRegistry {
     }
 
     uint256 public totalSupply;
-    bytes32[4] public totalSupplyPrivate;
+    bytes32 public confidentialTotalSupply;
 
     struct Flags {
         bool canMint;
@@ -50,12 +50,100 @@ contract NoteRegistry {
         ace = ACE(_ace);
     }
 
+    function mint(bytes _proofOutput, address _proofSender) public returns (bool) {
+        require(msg.sender == registryOwner, "message sender is not registry owner!");
+        require(flags.canMint == true, "this asset is not mintable!");
+        bytes32 proofHash = _proofOutput.hashProofOutput();
+        require(
+            ace.validateProofByHash(1, proofHash, _proofSender) == true,
+            "ACE has not validated a matching proof!"
+        );
+        (
+            bytes memory inputNotes,
+            bytes memory outputNotes,
+            ,
+            int256 publicValue
+        ) = _proofOutput.extractProofOutput();
+        require(publicValue == 0, "mint transactions cannot have a public value!");
+
+        require(outputNotes.getLength() > 0, "mint transactions require at least one output note");
+        require(inputNotes.getLength() == 1, "mint transactions can only have one input note");
+        (
+            ,
+            bytes32 noteHash,
+        ) = outputNotes.get(0).extractNote();
+        require(noteHash == confidentialTotalSupply, "provided total supply note does not match!");
+        (
+            ,
+            noteHash,
+        ) = inputNotes.get(0).extractNote();
+
+        confidentialTotalSupply = noteHash;
+
+        for (uint i = 1; i < outputNotes.getLength(); i += 1) {
+            address owner;
+            (owner, noteHash, ) = outputNotes.get(i).extractNote();
+            Note storage note = registry[noteHash];
+            require(note.status == 0, "output note exists!");
+            note.status = uint8(1);
+            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.createdOn = bytes5(now);
+            note.owner = owner;
+        }
+    }
+
+    function burn(bytes _proofOutput, address _proofSender) public returns (bool) {
+        require(msg.sender == registryOwner, "message sender is not registry owner!");
+        require(flags.canBurn == true, "this asset is not burnable!");
+        bytes32 proofHash = _proofOutput.hashProofOutput();
+        require(
+            ace.validateProofByHash(1, proofHash, _proofSender) == true,
+            "ACE has not validated a matching proof!"
+        );
+        (
+            bytes memory inputNotes,
+            bytes memory outputNotes,
+            ,
+            int256 publicValue
+        ) = _proofOutput.extractProofOutput();
+        require(publicValue == 0, "mint transactions cannot have a public value!");
+
+        require(inputNotes.getLength() > 0, "burn transactions require at least one input note");
+        require(outputNotes.getLength() == 1, "burn transactions can only have one output note");
+        (
+            ,
+            bytes32 noteHash,
+        ) = inputNotes.get(0).extractNote();
+        require(noteHash == confidentialTotalSupply, "provided total supply note does not match!");
+        (
+            ,
+            noteHash,
+        ) = outputNotes.get(0).extractNote();
+
+        confidentialTotalSupply = noteHash;
+
+        for (uint i = 1; i < inputNotes.getLength(); i += 1) {
+            address owner;
+            (owner, noteHash, ) = outputNotes.get(i).extractNote();
+            Note storage note = registry[noteHash];
+            require(note.status == 1, "input note does not exist!");
+            require(note.owner == owner, "input note owner does not match!");
+            note.status = uint8(2);
+            // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.destroyedOn = bytes5(now);
+        }
+    }
+
     function updateNoteRegistry(bytes _proofOutput, uint16 _proofType, address _proofSender) public returns (bool) {
-        require(msg.sender == registryOwner);
+        require(msg.sender == registryOwner, "message sender is not registry owner!");
         bytes32 proofHash = _proofOutput.hashProofOutput();
         require(
             ace.validateProofByHash(_proofType, proofHash, _proofSender) == true,
-            "ACE has not validated a matching proof"
+            "ACE has not validated a matching proof!"
         );
         (bytes memory inputNotes,
         bytes memory outputNotes,
@@ -67,6 +155,8 @@ contract NoteRegistry {
 
 
         if (publicValue != 0) {
+            require(flags.canMint == false, "mintable assets cannot be converted into public tokens!");
+            require(flags.canBurn == false, "burnable assets cannot be converted into public tokens!");
             require(flags.canConvert == true, "this asset cannot be converted into public tokens!");
             if (publicValue < 0) {
                 totalSupply += uint256(-publicValue);
