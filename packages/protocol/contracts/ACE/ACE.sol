@@ -1,60 +1,7 @@
 pragma solidity 0.4.24;
 
-library NoteUtilities {
-
-    function getLength(bytes memory proofOutputsOrNotes) internal pure returns (
-        uint len
-    ) {
-        assembly {
-            len := mload(add(proofOutputsOrNotes, 0x20))
-        }
-    }
-
-    function get(bytes memory proofOutputsOrNotes, uint i) internal pure returns (
-        bytes memory out
-    ) {
-        assembly {
-            let base := add(add(proofOutputsOrNotes, 0x40), mul(i, 0x20))
-            out := add(proofOutputsOrNotes, mload(base))
-        }
-    }
-
-    function extractProofOutput(bytes memory proofOutput) internal pure returns (
-        bytes memory inputNotes,
-        bytes memory outputNotes,
-        address publicOwner,
-        int256 publicValue
-    ) {
-        assembly {
-            inputNotes := add(proofOutput, mload(add(proofOutput, 0x20)))
-            outputNotes := add(proofOutput, mload(add(proofOutput, 0x40)))
-            publicOwner := mload(add(proofOutput, 0x60))
-            publicValue := mload(add(proofOutput, 0x80))
-        }
-    }
-
-    function extractNote(bytes memory note) internal pure returns (
-            address owner,
-            bytes32 noteHash,
-            bytes memory metadata
-        ) {
-        assembly {
-            owner := mload(add(note, 0x20))
-            noteHash := mload(add(note, 0x40))
-            metadata := add(note, mload(add(note, 0x60)))
-        }
-    }
-
-    function hashProofOutput(bytes memory proofOutput) internal pure returns (
-        bytes32 proofHash
-    ) {
-        assembly {
-            let len := add(mload(proofOutput), 0x20)
-            proofHash := keccak256(proofOutput, len)
-        }
-    }
-}
-
+import "./NoteRegistry.sol";
+import "./NoteUtilities.sol";
 
 /**
  * @title The AZTEC Cryptography Engine
@@ -91,6 +38,8 @@ contract ACE {
     //          transfer instruction without having to validate another zero-knowledge proof.
     mapping(uint16 => bool) public balancedProofs;
     mapping(bytes32 => bool) private validatedProofs;
+
+    mapping(address => NoteRegistry) public noteRegistries;
 
     event LogSetProof(uint16 _proofType, address _validatorAddress, bool _isBalanced);
     event LogSetCommonReferenceString(bytes32[6] _commonReferenceString);
@@ -185,7 +134,7 @@ contract ACE {
     * @param _proofType the AZTEC proof type
     * Unnamed param is a dynamic array of proof hashes
     */
-    function clearProofByHashes(uint16 _proofType, bytes32[] calldata) external {
+    function clearProofByHashes(uint16 _proofType, bytes32[]) external {
         assembly {
             let m := mload(0x40)
             let proofHashes := add(0x04, calldataload(0x24))
@@ -231,6 +180,26 @@ contract ACE {
             mstore(m, sload(keccak256(0x00, 0x40)))
             return(m, 0x20)
         }
+    }
+
+    function createNoteRegistry(bool _isPrivate, bool _isTracked, uint256 _scalingFactor) public returns (address) {
+        require(noteRegistries[msg.sender] == NoteRegistry(0), "address already has a linked Note Registry");
+        NoteRegistry registry = new NoteRegistry(
+            _isPrivate,
+            _isTracked,
+            _scalingFactor,
+            msg.sender,
+            this,
+            this);
+        noteRegistries[msg.sender] = registry;
+        return address(registry);
+    }
+
+    function updateNoteRegistry(bytes _proofOutput, uint16 _proofType, address _proofSender) public returns (bool) {
+        NoteRegistry registry = noteRegistries[msg.sender];
+        require(registry != NoteRegistry(0), "sender does not have a linked Note Registry");
+        require(registry.updateNoteRegistry(_proofOutput, _proofType, _proofSender), "update failed!");
+        return true;
     }
 
     /**
