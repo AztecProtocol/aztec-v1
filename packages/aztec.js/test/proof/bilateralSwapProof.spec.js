@@ -19,7 +19,7 @@ function generateNoteValue() {
 }
 
 
-describe.only('AZTEC bilateral swap proof construction tests', () => {
+describe('AZTEC bilateral swap proof construction tests', () => {
     let testNotes;
     let sender;
 
@@ -30,7 +30,8 @@ describe.only('AZTEC bilateral swap proof construction tests', () => {
         sender = randomHex(20);
     });
 
-    it('bilateralProof.constructBilateralSwap creates a proof where blinding scalar relations are satisfied i.e. bk1 = bk3 and bk2 = bk4', () => {
+    it('bilateralProof.constructBilateralSwap creates a proof where blinding scalar relations are satisfied', () => {
+        // i.e. bk1 = bk3 and bk2 = bk4
         const finalHash = new Keccak();
 
         testNotes.forEach((note) => {
@@ -52,7 +53,6 @@ describe.only('AZTEC bilateral swap proof construction tests', () => {
     it('bilateralProof.constructBilateralSwap creates a proof with well-formed outputs', () => {
         const { proofData } = bilateralProof.constructBilateralSwap(testNotes, sender);
         expect(proofData.length).to.equal(4);
-        console.log('proofData[0]', proofData[0]);
         expect(proofData[0].length).to.equal(6);
         expect(proofData[1].length).to.equal(6);
         expect(proofData[2].length).to.equal(6);
@@ -60,7 +60,10 @@ describe.only('AZTEC bilateral swap proof construction tests', () => {
     });
 
     it('bilateralProof.constructBilateralSwap will throw for input notes of random value', () => {
-        const wrongNotes = helpers.makeTestNotes([generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]);
+        const wrongNotes = helpers.makeTestNotes(
+            [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
+        );
+
         const { proofData, challenge } = bilateralProof.constructBilateralSwap(wrongNotes, sender);
 
         try {
