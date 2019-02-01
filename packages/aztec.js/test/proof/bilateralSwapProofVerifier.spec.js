@@ -2,7 +2,7 @@
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
-const { padLeft, randomHex, sha3 } = require('web3-utils');
+const { padLeft, randomHex } = require('web3-utils');
 
 const bn128 = require('../../src/bn128');
 const bilateralProof = require('../../src/proof/bilateralSwap');
@@ -16,10 +16,6 @@ const { expect } = chai;
 
 function generateNoteValue() {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
-}
-
-function randomAddress() {
-    return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
 
@@ -90,6 +86,19 @@ describe('AZTEC bilateral swap verifier tests', () => {
             }
         });
 
+        it('will REJECT for random note values', () => {
+            const randomNotes = helpers.makeTestNotes(
+                [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
+            );
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(randomNotes, sender);
+
+            try {
+                bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
+            } catch (err) {
+                console.log('random note values');
+            }
+        });
+
         it('will REJECT if bilateral swap note balancing relationship not satisfied', () => {
             const unbalancedNotes = helpers.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
             const { proofData, challenge } = bilateralProof.constructBilateralSwap(unbalancedNotes, sender);
@@ -136,7 +145,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             const { proofData } = bilateralProof.constructBilateralSwap(testNotes, sender);
             proofData[0][0] = `0x${padLeft('', 64)}`;
             proofData[0][1] = `0x${padLeft('', 64)}`;
-            proofData[0][2] = `0x${padLeft('', 64)}`;
+            proofData[0][2] = `09x${padLeft('', 64)}`;
             proofData[0][3] = `0x${padLeft('', 64)}`;
             proofData[0][4] = `0x${padLeft('', 64)}`;
             proofData[0][5] = `0x${padLeft('', 64)}`;

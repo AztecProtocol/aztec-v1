@@ -33,7 +33,7 @@ function generateNoteValue() {
 }
 
 
-contract.only('BilateralSwap', (accounts) => {
+contract('BilateralSwap', (accounts) => {
     describe('success states', () => {
         let bilateralSwap;
         let testNotes;
@@ -194,28 +194,34 @@ contract.only('BilateralSwap', (accounts) => {
             // this test doesn't work at the moment
             const { challenge } = aztec.proof.bilateralSwap.constructBilateralSwap(testNotes, accounts[0]);
 
-            const fakeProofData = [...new Array(4)].map(() => [...new Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
+            const fakeProofData = [...new Array(4)].map(
+                () => [...new Array(6)].map(
+                    () => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`
+                )
+            );
             await exceptions.catchRevert(bilateralSwapContract.validateBilateralSwap(fakeProofData, challenge, t2, {
                 from: accounts[0],
                 gas: 4000000,
             }));
         });
 
-        it.only('Validate failure when points not on curve', async () => {
+        it('Validate failure when points not on curve', async () => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const challenge = sha3(challengeString, 'hex');
 
-            const proofData = [...new Array(4)].map(() => [...new Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
+            const proofData = [...new Array(4)].map(
+                () => [...new Array(6)].map(
+                    () => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`
+                )
+            );
             // Making the kBars satisfy the proof relation, to ensure it's not an incorrect
             // balancing relationship that causes the test to fail
             proofData[0][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_1
             proofData[1][0] = '0x2000000000000000000000000000000000000000000000000000000000000000'; // k_2
             proofData[2][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_3
             proofData[3][0] = '0x2000000000000000000000000000000000000000000000000000000000000000'; // k_4
-
-            console.log('proof data: ', proofData);
 
             await exceptions.catchRevert(bilateralSwapContract.validateBilateralSwap(proofData, challenge, t2, {
                 from: accounts[0],
