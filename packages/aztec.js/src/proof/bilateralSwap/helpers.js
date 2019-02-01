@@ -1,6 +1,4 @@
 const BN = require('bn.js');
-const crypto = require('crypto');
-
 
 const bn128 = require('../../bn128');
 const secp256k1 = require('../../secp256k1');
@@ -13,85 +11,8 @@ const { groupReduction } = bn128;
 const helpers = {};
 
 helpers.makeTestNotes = (makerNoteValues, takerNoteValues) => {
-    const noteValues = makerNoteValues.concat(takerNoteValues);
-    const numNotes = noteValues.length;
-
-    let i;
-    const publicKeys = [];
-    for (i = 0; i < numNotes; i += 1) {
-        const { publicKey } = secp256k1.accountFromPrivateKey(crypto.randomBytes(32));
-        publicKeys.push(publicKey);
-    }
-
-    const testNotes = publicKeys.map((publicKey, j) => {
-        return notesConstruct.create(publicKey, noteValues[j]);
-    });
-
-    return testNotes;
-};
-
-helpers.checkNumberNotes = (notes, numberExpected) => {
-    if (notes.length !== numberExpected) {
-        throw new Error('Incorrect number of notes');
-    }
-};
-
-helpers.makeNoteArray = (notes) => {
-    const makerNotes = Object.values(notes.makerNotes);
-    const takerNotes = Object.values(notes.takerNotes);
-    const noteArray = [makerNotes[0], makerNotes[1], takerNotes[0], takerNotes[1]];
-    return noteArray;
-};
-
-helpers.makeIncorrectArray = (notes) => {
-    const makerNotes = Object.values(notes.makerNotes);
-    const takerNotes = Object.values(notes.takerNotes);
-    const noteArray = [makerNotes[0], makerNotes[1], makerNotes[2], takerNotes[0], takerNotes[1], takerNotes[2]];
-    return noteArray;
-};
-
-helpers.validateOnCurve = (x, y) => {
-    const rhs = x.redSqr().redMul(x).redAdd(bn128.curve.b);
-    const lhs = y.redSqr();
-    if (!rhs.fromRed().eq(lhs.fromRed())) {
-        throw new Error('point not on the curve');
-    }
-};
-
-helpers.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
-    const bkArray = [];
-    const blindingFactors = noteArray.map((note, i) => {
-        let bk = bn128.randomGroupScalar();
-        const ba = bn128.randomGroupScalar();
-        let B;
-
-        /*
-        Explanation of the below if/else
-        - The purpose is to set bk1 = bk3 and bk2 = bk4
-        - i is used as an indexing variable, to keep track of whether we are at a maker note or taker note
-        - All bks are stored in a bkArray. When we arrive at the taker notes, we set bk equal to the bk of the corresponding 
-          maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the bkArray, and setting the current
-          bk equal to the element at the resulting position.
-        */
-
-        // Maker notes
-        if (i <= 1) {
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-        } else { // taker notes
-            bk = bkArray[i - 2];
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-        }
-        finalHash.append(B);
-        bkArray.push(bk);
-
-        return {
-            bk,
-            ba,
-            B,
-        };
-    });
-    const challenge = finalHash.keccak(groupReduction);
-    return { blindingFactors, challenge };
+    const noteValues = [...makerNoteValues, ...takerNoteValues];
+    return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 
 helpers.toBnAndAppendPoints = (proofData) => {
@@ -121,13 +42,48 @@ helpers.toBnAndAppendPoints = (proofData) => {
     return proofDataBn;
 };
 
+helpers.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
+    const bkArray = [];
+    const blindingFactors = noteArray.map((note, i) => {
+        let bk = bn128.randomGroupScalar();
+        const ba = bn128.randomGroupScalar();
+
+        /*
+        Explanation of the below if/else
+        - The purpose is to set bk1 = bk3 and bk2 = bk4
+        - i is used as an indexing variable, to keep track of whether we are at a maker note or taker note
+        - All bks are stored in a bkArray. When we arrive at the taker notes, we set bk equal to the bk of the corresponding 
+          maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the bkArray, and setting the current
+          bk equal to the element at the resulting position.
+        */
+
+        // Taker notes
+        if (i > 1) {
+            bk = bkArray[i - 2];
+        }
+
+        const B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+
+        finalHash.append(B);
+        bkArray.push(bk);
+
+        return {
+            bk,
+            ba,
+            B,
+        };
+    });
+    const challenge = finalHash.keccak(groupReduction);
+    return { blindingFactors, challenge };
+};
+
 helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, finalHash) => {
     const kBarArray = [];
 
     // Validate that the commitments lie on the bn128 curve
     proofDataBn.forEach((proofElement) => {
-        helpers.validateOnCurve(proofElement[2], proofElement[3]); // checking gamma point
-        helpers.validateOnCurve(proofElement[4], proofElement[5]); // checking sigma point
+        bn128.curve.validate(proofElement[6]); // checking gamma point
+        bn128.curve.validate(proofElement[7]); // checking sigma point
     });
 
     const recoveredBlindingFactors = proofDataBn.map((proofElement, i) => {
@@ -135,7 +91,6 @@ helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, f
         const aBar = proofElement[1];
         const gamma = proofElement[6];
         const sigma = proofElement[7];
-        let B;
 
         /*
         Explanation of the below if/else
@@ -146,13 +101,12 @@ helpers.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, f
           kBar equal to the element at the resulting position.
         */
 
-        // Maker notes
-        if (i <= 1) {
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
-        } else { // taker notes
+        // Taker notes
+        if (i > 1) {
             kBar = kBarArray[i - 2];
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
         }
+
+        const B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
 
         finalHash.append(B);
         kBarArray.push(kBar);
