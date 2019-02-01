@@ -145,6 +145,7 @@ contract NoteRegistry {
             ace.validateProofByHash(_proofType, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof!"
         );
+
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -166,6 +167,7 @@ contract NoteRegistry {
                 require(linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed!");
             }
         }
+
         return true;
     }
 

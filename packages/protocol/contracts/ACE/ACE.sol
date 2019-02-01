@@ -93,10 +93,12 @@ contract ACE {
             calldatacopy(add(m, 0x104), _proofData, add(calldataload(_proofData), 0x20))
 
             // call our validator smart contract, and validate the call succeeded
+            
             if iszero(staticcall(gas, validatorAddress, m, add(calldataload(_proofData), 0x124), 0x00, 0x00)) {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed - proof is invalid!
             }
             returndatacopy(m, 0x00, returndatasize) // copy returndata to memory
+            let returnStart := m
             let proofOutputs := add(m, mload(m)) // proofOutputs points to the start of return data
             m := add(add(m, 0x20), returndatasize)
             // does this proof satisfy a balancing relationship? If it does, we need to record the proof
@@ -118,7 +120,7 @@ contract ACE {
                     sstore(keccak256(0x00, 0x40), 0x01)
                 }
             }
-            return(proofOutputs, returndatasize) // return `proofOutputs` to caller
+            return(returnStart, returndatasize) // return `proofOutputs` to caller
         }
     }
 
@@ -186,7 +188,8 @@ contract ACE {
         bool _canMint,
         bool _canBurn,
         bool _canConvert,
-        uint256 _scalingFactor
+        uint256 _scalingFactor,
+        address _linkedToken
     ) public returns (address) {
         require(noteRegistries[msg.sender] == NoteRegistry(0), "address already has a linked Note Registry");
         NoteRegistry registry = new NoteRegistry(
@@ -194,7 +197,7 @@ contract ACE {
             _canBurn,
             _canConvert,
             _scalingFactor,
-            msg.sender,
+            _linkedToken,
             this,
             this);
         noteRegistries[msg.sender] = registry;
