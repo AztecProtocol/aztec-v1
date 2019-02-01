@@ -5,7 +5,7 @@ library BilateralSwapInterface {
                                 // 6 pieces of data per note, unspecified number of notes
 }
 
-/**npm aud
+/**
  * @title Library to validate AZTEC Bilateral Swap zero-knowledge proofs
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses 
@@ -92,8 +92,8 @@ contract BilateralSwap {
 
                 mstore(0x2e0, caller) // store the msg.sender, to be hashed later
 
-                hashCommitments(notes, n)
-                let b := add(0x300, mul(n, 0x80)) // set pointer to memory location of commitments where the commitments
+                hashCommitments(notes)
+                let b := 0x500 // set pointer to memory location of commitments
 
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
@@ -249,15 +249,14 @@ contract BilateralSwap {
              * @param notes calldata location notes
              * @param n number of notes
              **/
-            function hashCommitments(notes, n) {
-                for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
-                    let index := add(add(notes, mul(i, 0xc0)), 0x60)
-
-                    calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
-                }
-                // storing at position 0x00 in memory, the kecca hash of everything from 
+            function hashCommitments(notes) {
+                calldatacopy(0x300, add(notes, 0x60), 0x80)
+                calldatacopy(0x380, add(notes, 0x120), 0x80)
+                calldatacopy(0x400, add(notes, 0x1e0), 0x80)
+                calldatacopy(0x480, add(notes, 0x2a0), 0x80)
+                // storing at position 0x00 in memory, the keccak hash of everything from 
                 // start of the commitments to the end
-                mstore(0x00, keccak256(0x300, mul(n, 0x80)))
+                mstore(0x00, keccak256(0x300, 0x200))
             }
         }
     }
