@@ -51,6 +51,21 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
         const sigma = proofElement[7];
         let B;
 
+        // Only check these conditions for the input notes, because
+        // the output notes automatically have kBar set to 0
+
+        if (i <= 1) {
+            // Check if the scalar kBar is zero, if it is then throw
+            if (kBar.fromRed().eq(new BN(0))) {
+                throw new Error('A scalar is zero');
+            }
+
+            // Check if the scalar aBar is zero, if it is then throw
+            if (aBar.fromRed().eq(new BN(0))) {
+                throw new Error('A scalar is zero');
+            }
+        }
+
         /*
         Explanation of the below if/else
         - The purpose is to set kBar1 = kBar3 and kBar2 = kBar4
@@ -68,6 +83,11 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
             B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
         }
 
+        // Check if the blinding factor is infinity, if it is then throw
+        if (B.isInfinity()) {
+            throw new Error('B is infinity');
+        }
+
         finalHash.append(B);
         kBarArray.push(kBar);
 
@@ -76,7 +96,6 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
             B,
         };
     });
-
     const recoveredChallenge = finalHash.keccak(groupReduction);
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
 

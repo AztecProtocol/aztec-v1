@@ -78,12 +78,14 @@ describe('AZTEC bilateral swap verifier tests', () => {
         it('will REJECT if malformed challenge', () => {
             const { proofData } = bilateralProof.constructBilateralSwap(testNotes, sender);
             const fakeChallenge = `0x${crypto.randomBytes(31).toString('hex')}`;
+            let message = '';
 
             try {
                 bilateralProof.verifier.verifyBilateralSwap(proofData, fakeChallenge, sender);
             } catch (err) {
-                console.log('malformed challenge');
+                ({ message } = err);
             }
+            expect(message).to.equal('proof validation failed');
         });
 
         it('will REJECT for random note values', () => {
@@ -91,23 +93,27 @@ describe('AZTEC bilateral swap verifier tests', () => {
                 [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
             );
             const { proofData, challenge } = bilateralProof.constructBilateralSwap(randomNotes, sender);
+            let message = '';
 
             try {
                 bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
             } catch (err) {
-                console.log('random note values');
+                ({ message } = err);
             }
+            expect(message).to.equal('proof validation failed');
         });
 
         it('will REJECT if bilateral swap note balancing relationship not satisfied', () => {
             const unbalancedNotes = helpers.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
             const { proofData, challenge } = bilateralProof.constructBilateralSwap(unbalancedNotes, sender);
+            let message = '';
 
             try {
                 bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
             } catch (err) {
-                console.log('malformed challenge');
+                ({ message } = err);
             }
+            expect(message).to.equal('proof validation failed');
         });
 
         it('will REJECT for random proof data', () => {
@@ -116,12 +122,14 @@ describe('AZTEC bilateral swap verifier tests', () => {
                     .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
 
             const { challenge } = bilateralProof.constructBilateralSwap(testNotes, sender);
+            let message = '';
 
             try {
                 bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
             } catch (err) {
-                console.log('malformed proof data');
+                ({ message } = err);
             }
+            expect(message).to.equal('proof validation failed');
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
@@ -134,28 +142,45 @@ describe('AZTEC bilateral swap verifier tests', () => {
             proofData[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
             const challenge = `0x${padLeft('0a', 64)}`;
 
+            let message = '';
+
             try {
                 bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
             } catch (err) {
-                console.log('blinding factor at infinity created');
+                ({ message } = err);
             }
+            expect(message).to.equal('B is infinity');
         });
 
-        it('will REJECT if blinding factor computed from invalid point', () => {
-            const { proofData } = bilateralProof.constructBilateralSwap(testNotes, sender);
-            proofData[0][0] = `0x${padLeft('', 64)}`;
-            proofData[0][1] = `0x${padLeft('', 64)}`;
-            proofData[0][2] = `09x${padLeft('', 64)}`;
-            proofData[0][3] = `0x${padLeft('', 64)}`;
-            proofData[0][4] = `0x${padLeft('', 64)}`;
-            proofData[0][5] = `0x${padLeft('', 64)}`;
-            const challenge = `0x${padLeft('', 64)}`;
+        it('will REJECT if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', () => {
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(testNotes, sender);
+            proofData[0][0] = `0x${padLeft('', 64)}`; // kBar
+            proofData[0][1] = `0x${padLeft('', 64)}`; // aBar
+
+            let message = '';
 
             try {
                 bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
             } catch (err) {
-                console.log('blinding factor computed from invalid point');
+                ({ message } = err);
             }
+            expect(message).to.equal('A scalar is zero');
+        });
+
+
+        it('will REJECT if blinding factor computed from points not on the curve', () => {
+            const { proofData, challenge } = bilateralProof.constructBilateralSwap(testNotes, sender);
+
+            // Setting one point to be zero and off the curve
+            proofData[0][2] = `0x${padLeft('', 64)}`;
+            let message = '';
+
+            try {
+                bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
+            } catch (err) {
+                ({ message } = err);
+            }
+            expect(message).to.equal('proof validation failed');
         });
     });
 });

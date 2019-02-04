@@ -30,7 +30,7 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         sender = randomHex(20);
     });
 
-    it('bilateralProof.constructBilateralSwap creates a proof where blinding scalar relations are satisfied', () => {
+    it('checking that the proof logic creates a proof where blinding scalar relations are satisfied', () => {
         // i.e. bk1 = bk3 and bk2 = bk4
         const finalHash = new Keccak();
 
@@ -65,12 +65,14 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         );
 
         const { proofData, challenge } = bilateralProof.constructBilateralSwap(wrongNotes, sender);
+        let message = '';
 
         try {
             bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
         } catch (err) {
-            console.log('note inputs have wrong balancing relationship');
+            ({ message } = err);
         }
+        expect(message).to.equal('proof validation failed');
     });
 
     it('bilateralProof.constructBilateralSwap will throw for input points not on the curve', () => {
@@ -81,7 +83,9 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
         const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-        const proofData = [...new Array(4)].map(() => [...new Array(6)].map(() => '0x00'));
+        const proofData = [...new Array(4)].map(
+            () => [...new Array(6)].map(() => '0x0000000000000000000000000000000000000000000000000000000000000000')
+        );
         // Making the kBars satisfy the proof relation, to ensure it's not an incorrect
         // balancing relationship that causes the test to fail
         proofData[0][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_1
@@ -89,10 +93,19 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         proofData[2][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_3
         proofData[3][0] = '0x2000000000000000000000000000000000000000000000000000000000000000'; // k_4
 
+        // Setting aBars to random numbers, to ensure it's not failing due to aBar = 0
+        proofData[0][1] = '0x4000000000000000000000000000000000000000000000000000000000000000'; // a_1
+        proofData[1][1] = '0x5000000000000000000000000000000000000000000000000000000000000000'; // a_2
+        proofData[2][1] = '0x6000000000000000000000000000000000000000000000000000000000000000'; // a_3
+        proofData[3][1] = '0x7000000000000000000000000000000000000000000000000000000000000000'; // a_4
+
+        let message = '';
+
         try {
             bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
         } catch (err) {
-            console.log('point not on the curve');
+            ({ message } = err);
         }
+        expect(message).to.equal('proof validation failed');
     });
 });
