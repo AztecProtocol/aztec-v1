@@ -14,20 +14,7 @@ const helpers = {};
 
 helpers.makeTestNotes = (makerNoteValues, takerNoteValues) => {
     const noteValues = makerNoteValues.concat(takerNoteValues);
-    const numNotes = noteValues.length;
-
-    let i;
-    const publicKeys = [];
-    for (i = 0; i < numNotes; i += 1) {
-        const { publicKey } = secp256k1.accountFromPrivateKey(crypto.randomBytes(32));
-        publicKeys.push(publicKey);
-    }
-
-    const testNotes = publicKeys.map((publicKey, j) => {
-        return notesConstruct.create(publicKey, noteValues[j]);
-    });
-
-    return testNotes;
+    return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 
 helpers.toBnAndAppendPoints = (proofData) => {
@@ -55,34 +42,6 @@ helpers.toBnAndAppendPoints = (proofData) => {
     });
 
     return proofDataBn;
-};
-
-helpers.checkNumberNotes = (notes, numberExpected) => {
-    if (notes.length !== numberExpected) {
-        throw new Error('Incorrect number of notes');
-    }
-};
-
-helpers.makeNoteArray = (notes) => {
-    const makerNotes = Object.values(notes.makerNotes);
-    const takerNotes = Object.values(notes.takerNotes);
-    const noteArray = [makerNotes[0], makerNotes[1], takerNotes[0], takerNotes[1]];
-    return noteArray;
-};
-
-helpers.makeIncorrectArray = (notes) => {
-    const makerNotes = Object.values(notes.makerNotes);
-    const takerNotes = Object.values(notes.takerNotes);
-    const noteArray = [makerNotes[0], makerNotes[1], makerNotes[2], takerNotes[0], takerNotes[1], takerNotes[2]];
-    return noteArray;
-};
-
-helpers.validateOnCurve = (x, y) => {
-    const rhs = x.redSqr().redMul(x).redAdd(bn128.curve.b);
-    const lhs = y.redSqr();
-    if (!rhs.fromRed().eq(lhs.fromRed())) {
-        throw new Error('point not on the curve');
-    }
 };
 
 module.exports = helpers;
