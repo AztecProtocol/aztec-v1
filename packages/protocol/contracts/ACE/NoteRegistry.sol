@@ -31,6 +31,7 @@ contract NoteRegistry {
     uint256 public linkedTokenScalingFactor;
     address public registryOwner;
     mapping(bytes32 => Note) public registry;
+    mapping(address => mapping(bytes32 => uint256)) publicApprovals;
 
     constructor(
         bool _canMint,
@@ -161,6 +162,11 @@ contract NoteRegistry {
             require(flags.canConvert == true, "this asset cannot be converted into public tokens!");
             if (publicValue < 0) {
                 totalSupply += uint256(-publicValue);
+                require(
+                    publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
+                    "public owner has not validated a transfer of tokens"
+                );
+                publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
                 require(linkedToken.transferFrom(publicOwner, this, uint256(-publicValue)), "transfer failed!");
             } else {
                 totalSupply -= uint256(publicValue);
@@ -168,6 +174,11 @@ contract NoteRegistry {
             }
         }
 
+        return true;
+    }
+
+    function publicApprove(bytes32 proofHash, uint256 value) public returns (bool) {
+        publicApprovals[msg.sender][proofHash] = value;
         return true;
     }
 

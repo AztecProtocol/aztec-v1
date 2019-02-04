@@ -41,7 +41,7 @@ library NoteUtilities {
         assembly {
             owner := mload(add(note, 0x20))
             noteHash := mload(add(note, 0x40))
-            metadata := add(note, mload(add(note, 0x60)))
+            metadata := add(note, 0x60)
         }
     }
 
