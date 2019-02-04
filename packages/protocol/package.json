@@ -28,7 +28,7 @@
     "aztec.js": "^0.2.4",
     "bn.js": "^4.11.8",
     "ganache-cli": "^6.2.5",
-    "openzeppelin-solidity": "2.0.0",
+    "openzeppelin-solidity": "^2.1.0",
     "web3": "1.0.0-beta.37",
     "web3-utils": "1.0.0-beta.37"
   },

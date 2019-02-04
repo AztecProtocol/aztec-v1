@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity >=0.5.0 <0.6.0;
 
 
 library NoteUtilities {
@@ -12,7 +12,7 @@ library NoteUtilities {
     }
 
     function get(bytes memory proofOutputsOrNotes, uint i) internal pure returns (
-        bytes out
+        bytes memory out
     ) {
         assembly {
             let base := add(add(proofOutputsOrNotes, 0x40), mul(i, 0x20))
@@ -113,7 +113,7 @@ contract ACE {
     function validateProof(
         uint16 _proofType,
         address _sender,
-        bytes
+        bytes calldata
     ) external returns (
         bytes memory
     ) {
@@ -177,7 +177,7 @@ contract ACE {
     * @param _proofType the AZTEC proof type
     * Unnamed param is a dynamic array of proof hashes
     */
-    function clearProofByHashes(uint16 _proofType, bytes32[]) external {
+    function clearProofByHashes(uint16 _proofType, bytes32[] calldata) external {
         assembly {
             let m := mload(0x40)
             let proofHashes := add(0x04, calldataload(0x24))
@@ -273,7 +273,7 @@ contract ACE {
     * we use a custom getter for `commonReferenceString` - the default getter created by making the storage
     * variable public indexes individual elements of the array, and we want to return the whole array
     */
-    function getCommonReferenceString() public view returns (bytes32[6]) {
+    function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
     }
 }

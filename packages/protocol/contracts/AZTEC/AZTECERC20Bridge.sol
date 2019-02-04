@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "./AZTEC.sol";
 
@@ -45,7 +45,7 @@ contract AZTECERC20Bridge {
      * so we don't want to directly map note value : token value
      **/
     constructor(
-        bytes32[4] _setupPubKey, 
+        bytes32[4] memory _setupPubKey, 
         address _token, 
         uint256 _scalingFactor, 
         uint256 _chainId
@@ -69,7 +69,7 @@ contract AZTECERC20Bridge {
             _domainHash := keccak256(m, 0xa0)
         }
         domainHash = _domainHash;
-        emit LogCreate(_domainHash, this);
+        emit LogCreate(_domainHash, address(this));
     }
 
     /**
@@ -94,12 +94,12 @@ contract AZTECERC20Bridge {
      * the ephemeral keys required for note owner to identify their note
      */
     function confidentialTransfer(
-        bytes32[6][] notes, 
+        bytes32[6][] calldata notes, 
         uint256 m, 
         uint256 challenge, 
-        bytes32[3][] inputSignatures, 
-        address[] outputOwners, 
-        bytes
+        bytes32[3][] calldata inputSignatures, 
+        address[] calldata outputOwners, 
+        bytes calldata
     ) 
         external 
     {
@@ -145,7 +145,7 @@ contract AZTECERC20Bridge {
                 // confidential note form. only proceed if the required transferFrom call from msg.sender
                 // to this contract succeeds
                 require(
-                    token.transferFrom(msg.sender, this, (GROUP_MODULUS - kPublic) * scalingFactor), 
+                    token.transferFrom(msg.sender, address(this), (GROUP_MODULUS - kPublic) * scalingFactor), 
                     "token transfer from user failed!"
                 );
             }
@@ -174,8 +174,8 @@ contract AZTECERC20Bridge {
      * @param domainHashT Temporary holding ```domainHash``` (to minimize # of sload ops)
      **/
     function validateInputNote(
-        bytes32[6] note, 
-        bytes32[3] signature, 
+        bytes32[6] memory note, 
+        bytes32[3] memory signature, 
         uint challenge, 
         bytes32 domainHashT
     ) 
@@ -200,10 +200,10 @@ contract AZTECERC20Bridge {
             mstore(m, 0x1901)
             signatureMessage := keccak256(add(m, 0x1e), 0x42)
         }
-        address owner = ecrecover(signatureMessage, uint8(signature[0]), signature[1], signature[2]);
+        address owner = ecrecover(signatureMessage, uint8(uint(signature[0])), signature[1], signature[2]);
         require(owner != address(0), "signature invalid");
         require(noteRegistry[noteHash] == owner, "expected input note to exist in registry");
-        noteRegistry[noteHash] = 0;
+        noteRegistry[noteHash] = address(0);
     }
 
     /**
@@ -212,7 +212,7 @@ contract AZTECERC20Bridge {
      * @param note AZTEC confidential note to be created
      * @param owner The address of the note owner
      **/
-    function validateOutputNote(bytes32[6] note, address owner) internal {
+    function validateOutputNote(bytes32[6] memory note, address owner) internal {
         bytes32 noteHash; // Construct a keccak256 hash of the note coordinates.
         assembly {
             let m := mload(0x40)
@@ -223,7 +223,7 @@ contract AZTECERC20Bridge {
             noteHash := keccak256(m, 0x80)
         }
         require(owner != address(0), "owner must be valid Ethereum address");
-        require(noteRegistry[noteHash] == 0, "expected output note to not exist in registry");
+        require(noteRegistry[noteHash] == address(0), "expected output note to not exist in registry");
         noteRegistry[noteHash] = owner;
     }
 }
