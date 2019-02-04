@@ -5,6 +5,7 @@ const { padLeft } = require('web3-utils');
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const helpers = require('./helpers');
+const verifier = require('./verifier');
 const { K_MAX } = require('../../params');
 
 
@@ -18,6 +19,47 @@ const { groupReduction } = bn128;
 */
 const dividendComputation = {};
 dividendComputation.helpers = helpers;
+dividendComputation.verifier = verifier;
+
+/**
+ * Compute the Fiat-Shamir heuristic-ified challenge variable.
+ *   Separated out into a distinct method so that we can stub this for extractor tests
+ *
+ * @method computeChallenge
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ * @param {number} m number of input notes
+ * @param {Object[]} notes array of AZTEC notes
+ * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
+ */
+dividendComputation.computeChallenge = (...challengeVariables) => {
+    const hash = new Keccak();
+
+    const recurse = (inputs) => {
+        inputs.forEach((challengeVar) => {
+            if (typeof (challengeVar) === 'string') {
+                hash.appendBN(new BN(challengeVar.slice(2), 16));
+            } else if (typeof (challengeVar) === 'number') {
+                hash.appendBN(new BN(challengeVar));
+            } else if (BN.isBN(challengeVar)) {
+                hash.appendBN(challengeVar.umod(bn128.curve.n));
+            } else if (Array.isArray(challengeVar)) {
+                recurse(challengeVar);
+            } else if (challengeVar.gamma) {
+                hash.append(challengeVar.gamma);
+                hash.append(challengeVar.sigma);
+            } else if (challengeVar.B) {
+                hash.append(challengeVar.B);
+            } else {
+                throw new Error(`I don't know how to add ${challengeVar} to hash`);
+            }
+        });
+    };
+    recurse(challengeVariables);
+
+    return hash.keccak(groupReduction);
+};
+
 
 /**
  * Construct AZTEC dividend computation proof transcript
@@ -47,11 +89,12 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     } else {
         zbBN = new BN(zb);
     }
-
+    // Check that proof data lies on the bn128 curve
     notes.forEach((note) => {
-        rollingHash.append(note.gamma);
-        rollingHash.append(note.sigma);
+        bn128.curve.validate(note.gamma); // checking gamma point
+        bn128.curve.validate(note.sigma); // checking sigma point
     });
+
 
     // finalHash is used to create final proof challenge
     const finalHash = new Keccak();
@@ -133,131 +176,6 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         proofData, // this has 18 elements
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
-};
-
-/**
- * Verify AZTEC dividend computation proof transcript
- *
- * @method verifyProof
- * @param {Array[proofData]} proofData - proofData array of AZTEC notes
- * @param {big number instance} challenge - challenge variable used in zero-knowledge protocol
- * @returns {number} - returns 1 if proof is validated, throws an error if not
- */
-dividendComputation.verifyProof = (proofData, challenge, sender, za, zb) => {
-    let zaBN;
-    let zbBN;
-    const K_MAXBN = new BN(K_MAX);
-    const kBarArray = [];
-
-    // toBnAndAppendPoints appends gamma and sigma to the end of proofdata as well
-    const proofDataBn = helpers.toBnAndAppendPoints(proofData);
-
-    const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
-
-    // Check that proof data lies on the bn128 curve
-    proofDataBn.forEach((proofElement) => {
-        helpers.validateOnCurve(proofElement[2], proofElement[3]); // checking gamma point
-        helpers.validateOnCurve(proofElement[4], proofElement[5]); // checking sigma point
-    });
-
-    // convert to bn.js instances if not already
-    if (BN.isBN(za)) {
-        zaBN = za;
-    } else {
-        zaBN = new BN(za);
-    }
-
-    if (BN.isBN(zb)) {
-        zbBN = zb;
-    } else {
-        zbBN = new BN(zb);
-    }
-
-    // Check that za and zb are less than k_max
-    if (zaBN.gte(K_MAXBN)) {
-        throw new Error('z_a is greater than or equal to kMax');
-    }
-
-    if (zbBN.gte(K_MAXBN)) {
-        throw new Error('z_b is greater than or equal to kMax');
-    }
-
-    const rollingHash = new Keccak();
-
-    // Append note data to rollingHash
-    proofDataBn.forEach((proofElement) => {
-        rollingHash.append(proofElement[6]);
-        rollingHash.append(proofElement[7]);
-    });
-
-    // Create finalHash and append to it - in same order as the proof construction code (otherwise final hash will be different)
-    const finalHash = new Keccak();
-    finalHash.appendBN(new BN(sender.slice(2), 16));
-    finalHash.appendBN(zaBN);
-    finalHash.appendBN(zbBN);
-    finalHash.data = [...finalHash.data, ...rollingHash.data];
-    rollingHash.keccak();
-
-    proofDataBn.map((proofElement, i) => {
-        let kBar = proofElement[0];
-        const aBar = proofElement[1];
-        const gamma = proofElement[6];
-        const sigma = proofElement[7];
-        let B;
-
-        let x = new BN(0).toRed(groupReduction);
-        x = rollingHash.toGroupScalar(groupReduction);
-
-        if (i === 0) { // input note
-            const kBarX = kBar.redMul(x); // xbk = bk*x
-            const aBarX = aBar.redMul(x); // xba = ba*x
-            const challengeX = formattedChallenge.mul(x);
-            rollingHash.keccak();
-            B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul(challengeX).neg());
-            kBarArray.push(kBar);
-        }
-
-        if (i === 1) { // output note
-            const aBarX = aBar.redMul(x);
-            const kBarX = kBar.redMul(x);
-            const challengeX = formattedChallenge.mul(x);
-            rollingHash.keccak();
-            B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul(challengeX).neg());
-            kBarArray.push(kBar);
-        }
-
-        if (i === 2) { // residual note
-            const zbRed = zbBN.toRed(groupReduction);
-            const zaRed = zaBN.toRed(groupReduction);
-
-            // kBar_3 = (z_b)(kBar_1) - (z_a)(kBar_2)
-            kBar = (zbRed.redMul(kBarArray[0])).redSub(zaRed.redMul(kBarArray[1]));
-
-            const aBarX = aBar.redMul(x);
-            const kBarX = kBar.redMul(x);
-            const challengeX = formattedChallenge.redMul(x);
-            rollingHash.keccak();
-
-            B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul((challengeX).neg()));
-            kBarArray.push(kBar);
-        }
-
-        finalHash.append(B);
-        return {
-            kBar,
-            B,
-        };
-    });
-    const recoveredChallenge = finalHash.keccak(groupReduction);
-
-    const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
-
-    // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
-    if (finalChallenge !== challenge) {
-        throw new Error('proof validation failed');
-    } else {
-        return true;
-    }
 };
 
 module.exports = dividendComputation;
