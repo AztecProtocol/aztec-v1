@@ -44,7 +44,13 @@ contract('DividendCalc', (accounts) => {
                 accounts[0]
             );
 
-            const result = aztec.proof.dividendComputation.verifyProof(proofDataUnformatted, challenge, accounts[0], za, zb);
+            const result = aztec.proof.dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                challenge,
+                accounts[0],
+                za,
+                zb
+            );
 
             expect(result).to.equal(true);
         });
