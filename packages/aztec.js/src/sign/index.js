@@ -3,11 +3,12 @@
  *   following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
  * @namespace sign
- * @memberof module:eip712
+ * @memberof module:sign
  */
 
-const ecdsa = require('../secp256k1/ecdsa');
 const eip712 = require('./eip712');
+const ecdsa = require('../secp256k1/ecdsa');
+
 const { AZTEC_NOTE_SIGNATURE, ACE_NOTE_SIGNATURE, ACE_DOMAIN_PARAMS } = require('../params');
 
 // For backwards compatibility. TODO: remove
@@ -22,7 +23,7 @@ sign.eip712 = eip712;
 /**
  * generate EIP712 domain parameters for AZTECERC20Bridge.sol
  * @method generateAZTECDomainParams
- * @memberof module:eip712.sign
+ * @memberof module:sign
  * @param {string} verifyingContract address of target contract
  * @param {number} chainId the network ID
  * @returns {Object} EIP712 Domain type object
@@ -43,10 +44,10 @@ sign.generateAZTECDomainParams = function generateAZTECDomainParams(
 /**
  * create an EIP712 ECDSA signature over an AZTEC note
  * @method signNote
- * @memberof module:eip712.sign
+ * @memberof module:sign
  * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
  * @param {string} challenge AZTEC zero-knowledge proof challenge variable
- * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @param {string} verifyingContract address of target contract
  * @param {string} privateKey the private key of message signer
  * @param {number} chainId the network ID
@@ -70,10 +71,10 @@ sign.signNote = function signNote(note, challenge, senderAddress, verifyingContr
 /**
  * create an EIP712 ECDSA signature over an AZTEC note according to AZTEC Cryptography Engine Spec
  * @method signACENote
- * @memberof module:eip712.sign
+ * @memberof module:sign
  * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
  * @param {string} challenge AZTEC zero-knowledge proof challenge variable
- * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @param {string} verifyingContract address of target contract
  * @param {string} privateKey the private key of message signer
  * @param {number} chainId the network ID
@@ -98,10 +99,10 @@ sign.signACENote = function signACENote(note, challenge, senderAddress, verifyin
 /**
  * recover the Ethereum address of an EIP712 AZTEC note signature
  * @method recoverAddress
- * @memberof module:eip712.sign
+ * @memberof module:sign
  * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
  * @param {string} challenge AZTEC zero-knowledge proof challenge variable
- * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not neccesarily the note signer)
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @param {string} verifyingContract address of target contract
  * @param {string[]} signature ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  * @returns {string} Ethereum address of signer
