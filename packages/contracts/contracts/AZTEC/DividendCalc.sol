@@ -118,7 +118,7 @@ contract DividendCalc {
                 mstore(0x2c0, za)
                 mstore(0x2e0, zb)
                 hashCommitments(notes, 3) // n = 3
-                let b := add(0x300, mul(3, 0x80)) // n = 3
+                let b := 0x480 // n = 3
 
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
@@ -182,13 +182,13 @@ contract DividendCalc {
 
 
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-                    let x := mod(mload(0x00), gen_order) // x is the kecca hash of the input commitments
+                    let x := mod(mload(0x00), gen_order) // x is the keccak hash of the input commitments
                     k := mulmod(k, x, gen_order) // kx
                     a := mulmod(a, x, gen_order) // ax
                     c := mulmod(challenge, x, gen_order) // cx
                     mstore(0x1000, x) // todo remove
                     // calculate x_{j+1}
-                    mstore(0x00, keccak256(0x00, 0x20)) // rehashing the kecca hash, for use in the next x
+                    mstore(0x00, keccak256(0x00, 0x20)) // rehashing the keccak hash, for use in the next x
 
 
                     // Check this commitment is well formed
@@ -421,20 +421,15 @@ contract DividendCalc {
              *   
              * It then copies the next 128 bytes worth of data from the note, into the appropriate memory location
              *
-             * Following this, we take the kecca hash of all the note data that we've copied over into memory. 
+             * Following this, we take the keccak hash of all the note data that we've copied over into memory. 
              *
-             * We store the result of the kecca hash in memory location 0x00
+             * We store the result of the keccak hash in memory location 0x00
              **/
-            function hashCommitments(notes, n) {
-                for { let i := 0 } lt(i, n) { i := add(i, 0x01) } { // iterating through i
-                    // goes to the start of the appropriate note, then steps in by 0x60 (96 bytes)
-                    let index := add(add(notes, mul(i, 0xc0)), 0x40) 
-
-                    // copy 0x80 (128 bytes) from call data at position index to 
-                    // memory location (0x300 + note_number * 0x80)
-                    calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
-                }
-                mstore(0x00, keccak256(0x300, mul(n, 0x80)))
+            function hashCommitments(notes) {
+                calldatacopy(0x300, add(notes, 0x40), 0x80)
+                calldatacopy(0x380, add(notes, 0x100), 0x80)
+                calldatacopy(0x400, add(notes, 0x1c0), 0x80)
+                mstore(0x00, keccak256(0x300, 0x180))
             }
         }
     }
