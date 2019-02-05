@@ -61,7 +61,7 @@ library EIP712Utils {
     }
 }
 
-contract ZkERC20 {
+contract ZKERC20 {
 
     using NoteUtilities for bytes;
 
