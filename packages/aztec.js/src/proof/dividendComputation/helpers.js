@@ -1,6 +1,4 @@
 const BN = require('bn.js');
-const crypto = require('crypto');
-
 
 const bn128 = require('../../bn128');
 const secp256k1 = require('../../secp256k1');
@@ -13,7 +11,7 @@ const { groupReduction } = bn128;
 const helpers = {};
 
 helpers.makeTestNotes = (makerNoteValues, takerNoteValues) => {
-    const noteValues = makerNoteValues.concat(takerNoteValues);
+    const noteValues = [...makerNoteValues, ...takerNoteValues];
     return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 

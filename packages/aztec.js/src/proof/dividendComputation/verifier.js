@@ -12,6 +12,7 @@ const { groupReduction } = bn128;
 
 const verifier = {};
 
+
 /**
  * Verify AZTEC dividend computation proof transcript
  *
@@ -33,8 +34,12 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     // Check that proof data lies on the bn128 curve
     proofDataBn.forEach((proofElement) => {
-        bn128.curve.validate(proofElement[6]); // checking gamma point
-        bn128.curve.validate(proofElement[7]); // checking sigma point
+        const gammaOnCurve = bn128.curve.validate(proofElement[6]); // checking gamma point
+        const sigmaOnCurve = bn128.curve.validate(proofElement[7]); // checking sigma point
+
+        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
+            throw new Error('point not on curve');
+        }
     });
 
     // convert to bn.js instances if not already
@@ -119,14 +124,19 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
             kBarArray.push(kBar);
         }
 
-        finalHash.append(B);
+        if (B === null) {
+            throw new Error('undefined blinding factor');
+        } else {
+            finalHash.append(B);
+        }
+
         return {
             kBar,
             B,
         };
     });
-    const recoveredChallenge = finalHash.keccak(groupReduction);
 
+    const recoveredChallenge = finalHash.keccak(groupReduction);
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
