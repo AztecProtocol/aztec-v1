@@ -169,6 +169,7 @@ contract.only('zkERC20', (accounts) => {
             erc20 = await ERC20Mintable.new();
 
             zkERC20 = await ZKERC20.new(
+                'Cocoa',
                 false,
                 false,
                 true,

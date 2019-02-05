@@ -69,6 +69,8 @@ contract ZkERC20 {
     ERC20 public linkedToken;
     NoteRegistry public noteRegistry;
     NoteRegistry.Flags public flags;
+
+    string public name;
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
     bytes32 public domainHash;
@@ -88,29 +90,31 @@ contract ZkERC20 {
         address ace
     );
 
-    event LogCreateNote(bytes32 indexed noteHash, address indexed owner, bytes metadata);
-    event LogDestroyNote(bytes32 indexed noteHash, address indexed owner, bytes metadata);
-    event LogConvertTokens(address indexed owner, uint256 value);
-    event LogRedeemTokens(address indexed owner, uint256 value);
+    event LogCreateNote(bytes32 indexed _noteHash, address indexed _owner, bytes _metadata);
+    event LogDestroyNote(bytes32 indexed _noteHash, address indexed _owner, bytes _metadata);
+    event LogConvertTokens(address indexed _owner, uint256 _value);
+    event LogRedeemTokens(address indexed _owner, uint256 _value);
 
     constructor(
+        string _name,
         bool _canMint,
         bool _canBurn,
         bool _canConvert,
         uint256 _scalingFactor,
-        address _linkedToken,
-        address _ace
+        address _linkedTokenAddress,
+        address _aceAddress
     ) public {
+        name = _name;
         flags = NoteRegistry.Flags(_canMint, _canBurn, _canConvert);
         scalingFactor = _scalingFactor;
-        ace = ACE(_ace);
-        linkedToken = ERC20(_linkedToken);
+        ace = ACE(_aceAddress);
+        linkedToken = ERC20(_linkedTokenAddress);
         noteRegistry = NoteRegistry(ace.createNoteRegistry(
             _canMint,
             _canBurn,
             _canConvert,
             _scalingFactor,
-            _linkedToken
+            _linkedTokenAddress
         ));
         domainHash = EIP712Utils.constructDomainHash("ZkERC20", "0.1.0", 1);
         emit LogCreateNoteRegistry(noteRegistry);
@@ -119,8 +123,8 @@ contract ZkERC20 {
             _canBurn,
             _canConvert,
             _scalingFactor,
-            _linkedToken,
-            _ace
+            _linkedTokenAddress,
+            _aceAddress
         );
     }
     
