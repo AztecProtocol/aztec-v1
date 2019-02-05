@@ -81,7 +81,7 @@ contract ZKERC20 {
 
     event LogCreateNoteRegistry(address noteRegistry);
 
-    event LogCreateZkERC20(
+    event LogCreateZKERC20(
         bool canMint,
         bool canBurn,
         bool canConvert,
@@ -116,9 +116,9 @@ contract ZKERC20 {
             _scalingFactor,
             _linkedTokenAddress
         ));
-        domainHash = EIP712Utils.constructDomainHash("ZkERC20", "0.1.0", 1);
+        domainHash = EIP712Utils.constructDomainHash("ZKERC20", "0.1.0", 1);
         emit LogCreateNoteRegistry(noteRegistry);
-        emit LogCreateZkERC20(
+        emit LogCreateZKERC20(
             _canMint,
             _canBurn,
             _canConvert,
