@@ -163,7 +163,6 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: 0, // perfectly balanced...
                 aztecAddress: aztec.address,
             });
-            proofOutputs = proofs.map(({ expectedOutput }) => outputCoder.getProofOutput(expectedOutput, 0));
 
             erc20 = await ERC20Mintable.new();
             noteRegistry = await NoteRegistry.new(
@@ -187,6 +186,28 @@ contract('NoteRegistry', (accounts) => {
                 scalingFactor.mul(tokensTransferred),
                 { from: account, gas: 4700000 }
             ))); // approving tokens
+            proofOutputs = proofs.map(({ expectedOutput }) => outputCoder.getProofOutput(expectedOutput, 0));
+            const proofHashes = proofOutputs.map(proofOutput => outputCoder.hashProofOutput(proofOutput));
+            await noteRegistry.publicApprove(
+                proofHashes[0],
+                10,
+                { from: accounts[0] }
+            );
+            await noteRegistry.publicApprove(
+                proofHashes[1],
+                40,
+                { from: accounts[1] }
+            );
+            await noteRegistry.publicApprove(
+                proofHashes[2],
+                130,
+                { from: accounts[2] }
+            );
+            await noteRegistry.publicApprove(
+                proofHashes[4],
+                30,
+                { from: accounts[3] }
+            );
         });
 
         it('will can update a note registry with output notes', async () => {
