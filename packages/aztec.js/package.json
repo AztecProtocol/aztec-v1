@@ -1,6 +1,6 @@
 {
   "name": "aztec.js",
-  "version": "0.3.0-beta.2",
+  "version": "0.3.0",
   "author": "AZTEC",
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",

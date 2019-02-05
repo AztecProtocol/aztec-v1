@@ -4,19 +4,18 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-
 const {
-    proof,
     abiEncoder,
     params: { t2 },
-    secp256k1,
-    sign,
     note,
+    proof,
+    secp256k1,
 // eslint-disable-next-line import/no-unresolved
 } = require('aztec.js');
 
-const { joinSplit: aztecProof } = proof;
 const { outputCoder } = abiEncoder;
+
+const fakeNetworkId = 100;
 
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
@@ -27,53 +26,6 @@ const ZKERC20 = artifacts.require('./contracts/zkERC20/ZkERC20');
 const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
 AZTEC.abi = AZTECInterface.abi;
-
-const fakeNetworkId = 100;
-
-function encodeJoinSplitTransaction({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-    inputNoteOwners,
-    publicOwner,
-    kPublic,
-    aztecAddress,
-}) {
-    const m = inputNotes.length;
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = aztecProof.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
-
-    const inputSignatures = inputNotes.map((inputNote, index) => {
-        const { privateKey } = inputNoteOwners[index];
-        return sign.signACENote(
-            proofDataRaw[index],
-            challenge,
-            senderAddress,
-            aztecAddress,
-            privateKey,
-            fakeNetworkId
-        );
-    });
-    const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = abiEncoder.joinSplit.encode(
-        proofDataRaw,
-        m,
-        challenge,
-        publicOwner,
-        inputSignatures,
-        outputOwners,
-        outputNotes
-    );
-    const expectedOutput = `0x${abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue: kPublic,
-    }]).slice(0x42)}`;
-    return { proofData, expectedOutput };
-}
 
 const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
 const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
@@ -111,7 +63,7 @@ contract.only('zkERC20', (accounts) => {
             aztec = await AZTEC.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
 
-            proofs[0] = encodeJoinSplitTransaction({
+            proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes: notes.slice(0, 2),
                 senderAddress: accounts[0],
@@ -120,7 +72,7 @@ contract.only('zkERC20', (accounts) => {
                 kPublic: -10,
                 aztecAddress: aztec.address,
             });
-            proofs[1] = encodeJoinSplitTransaction({
+            proofs[1] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
                 outputNotes: notes.slice(2, 4),
                 senderAddress: accounts[0],
@@ -129,7 +81,7 @@ contract.only('zkERC20', (accounts) => {
                 kPublic: -40,
                 aztecAddress: aztec.address,
             });
-            proofs[2] = encodeJoinSplitTransaction({
+            proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes: notes.slice(6, 8),
                 senderAddress: accounts[0],
@@ -138,7 +90,7 @@ contract.only('zkERC20', (accounts) => {
                 kPublic: -130,
                 aztecAddress: aztec.address,
             });
-            proofs[3] = encodeJoinSplitTransaction({
+            proofs[3] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(6, 8),
                 outputNotes: notes.slice(4, 6),
                 senderAddress: accounts[0],
@@ -147,7 +99,7 @@ contract.only('zkERC20', (accounts) => {
                 kPublic: 40,
                 aztecAddress: aztec.address,
             });
-            proofs[4] = encodeJoinSplitTransaction({
+            proofs[4] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes: [notes[0], notes[3]],
                 senderAddress: accounts[0],
@@ -156,7 +108,7 @@ contract.only('zkERC20', (accounts) => {
                 kPublic: -30,
                 aztecAddress: aztec.address,
             });
-            proofs[5] = encodeJoinSplitTransaction({
+            proofs[5] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [notes[0], notes[3]],
                 outputNotes: [notes[1], notes[2]],
                 senderAddress: accounts[0],
@@ -224,14 +176,12 @@ contract.only('zkERC20', (accounts) => {
             // const { receipt } = await ace.validateProof(1, accounts[0], proofs[0].proofData);
             const { receipt } = await zkERC20.confidentialTransfer(proofs[0].proofData);
             expect(receipt.status).to.equal(true);
-            console.log('receipt = ', receipt);
         });
 
         it('can update a note registry by consuming input notes, with kPublic negative', async () => {
             await zkERC20.confidentialTransfer(proofs[0].proofData);
             const { receipt } = await zkERC20.confidentialTransfer(proofs[1].proofData);
             expect(receipt.status).to.equal(true);
-            console.log('second receipt = ', receipt);
         });
 
         it('can update a note registry by consuming input notes, with kPublic positive', async () => {
@@ -240,16 +190,10 @@ contract.only('zkERC20', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
-        it.only('can update a note registry with kPublic = 0', async () => {
+        it('can update a note registry with kPublic = 0', async () => {
             await zkERC20.confidentialTransfer(proofs[4].proofData);
             const { receipt } = await zkERC20.confidentialTransfer(proofs[5].proofData);
             expect(receipt.status).to.equal(true);
-            console.log('final receipt = ', receipt);
-            const gasUsed = await aztec.validateJoinSplit.estimateGas(proofs[5].proofData, accounts[0], crs, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-            console.log('gas used for raw crypto = ', gasUsed);
         });
     });
 });

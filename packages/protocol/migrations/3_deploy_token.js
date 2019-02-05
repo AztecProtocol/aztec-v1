@@ -14,7 +14,7 @@ module.exports = (deployer, network) => {
             if (network === 'mainnet') {
                 return Promise.resolve({ address: DAI_ADDRESS });
             }
-            return deployer.deploy(ERC20Mintable);
+            return Promise.resolve({ address: ERC20Mintable.address });
         })
         .then(({ address: erc20Address }) => {
             return deployer.deploy(zkERC20, 'Cocoa', true, true, true, ERC20_SCALING_FACTOR, erc20Address, aceAddress);
