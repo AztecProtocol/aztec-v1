@@ -6,8 +6,6 @@ const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const helpers = require('./helpers');
 const verifier = require('./verifier');
-const { K_MAX } = require('../../params');
-
 
 const { groupReduction } = bn128;
 
@@ -60,7 +58,6 @@ dividendComputation.computeChallenge = (...challengeVariables) => {
     return hash.keccak(groupReduction);
 };
 
-
 /**
  * Construct AZTEC dividend computation proof transcript
  *
@@ -69,6 +66,11 @@ dividendComputation.computeChallenge = (...challengeVariables) => {
  * @returns {{proofData:Array[string]}, {challenge: string}} - proof data and challenge
  */
 dividendComputation.constructProof = (notes, za, zb, sender) => {
+    // Error checking
+    if (notes.length !== 3) {
+        throw new Error('incorrect number of notes');
+    }
+
     // Array to store bk values later
     const bkArray = [];
     // convert z_a and z_b into BN instances if they aren't already
@@ -95,6 +97,10 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         bn128.curve.validate(note.sigma); // checking sigma point
     });
 
+    notes.forEach((note) => {
+        rollingHash.append(note.gamma);
+        rollingHash.append(note.sigma);
+    });
 
     // finalHash is used to create final proof challenge
     const finalHash = new Keccak();
@@ -109,6 +115,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         const ba = bn128.randomGroupScalar();
         let B;
         let x = new BN(0).toRed(groupReduction);
+
         x = rollingHash.toGroupScalar(groupReduction);
 
         // Calculating the blinding factors
@@ -116,7 +123,6 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
             rollingHash.keccak();
-
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             bkArray.push(bk);
         }
@@ -124,8 +130,8 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         if (i === 1) { // output note
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
-            rollingHash.keccak();
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            rollingHash.keccak();
             bkArray.push(bk);
         }
 
@@ -145,16 +151,15 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         }
 
         finalHash.append(B);
-
         return {
             bk,
             ba,
             B,
-            x,
         };
     });
+
     finalHash.keccak();
-    const challenge = finalHash.toGroupScalar(groupReduction);
+    const challenge = dividendComputation.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
     const proofDataUnformatted = blindingFactors.map((blindingFactor, i) => {
         const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
         const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
