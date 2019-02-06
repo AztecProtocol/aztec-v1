@@ -11,7 +11,7 @@ const {
     proof,
     secp256k1,
 // eslint-disable-next-line import/no-unresolved
-} = require('aztec.js');
+} = require('aztecJoinSplit.js');
 
 const { outputCoder } = abiEncoder;
 
@@ -20,12 +20,12 @@ const fakeNetworkId = 100;
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const AZTEC = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');
+const AZTECJoinSplit = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');
 const AZTECInterface = artifacts.require('./contracts/ACE/validators/AZTECJoinSplitInterface');
 const ZKERC20Contract = artifacts.require('./contracts/ZKERC20/ZKERC20');
 const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
-AZTEC.abi = AZTECInterface.abi;
+AZTECJoinSplit.abi = AZTECInterface.abi;
 
 const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
 const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
@@ -39,7 +39,7 @@ contract('ZKERC20', (accounts) => {
         let erc20;
         let ZKERC20;
         let scalingFactor;
-        let aztec;
+        let aztecJoinSplit;
         let noteRegistryAddress;
         const proofs = [];
         const tokensTransferred = new BN(100000);
@@ -60,8 +60,8 @@ contract('ZKERC20', (accounts) => {
                 ...t2,
             ];
             await ace.setCommonReferenceString(crs);
-            aztec = await AZTEC.new(fakeNetworkId);
-            await ace.setProof(1, aztec.address, true);
+            aztecJoinSplit = await AZTECJoinSplit.new(fakeNetworkId);
+            await ace.setProof(1, aztecJoinSplit.address, true);
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -70,7 +70,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[0],
                 kPublic: -10,
-                aztecAddress: aztec.address,
+                aztecAddress: aztecJoinSplit.address,
             });
             proofs[1] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
@@ -79,7 +79,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner: accounts[1],
                 kPublic: -40,
-                aztecAddress: aztec.address,
+                aztecAddress: aztecJoinSplit.address,
             });
             proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -88,7 +88,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[2],
                 kPublic: -130,
-                aztecAddress: aztec.address,
+                aztecAddress: aztecJoinSplit.address,
             });
             proofs[3] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(6, 8),
@@ -97,7 +97,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(6, 8),
                 publicOwner: accounts[2],
                 kPublic: 40,
-                aztecAddress: aztec.address,
+                aztecAddress: aztecJoinSplit.address,
             });
             proofs[4] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -106,7 +106,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[3],
                 kPublic: -30,
-                aztecAddress: aztec.address,
+                aztecAddress: aztecJoinSplit.address,
             });
             proofs[5] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [notes[0], notes[3]],
@@ -115,7 +115,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [aztecAccounts[0], aztecAccounts[3]],
                 publicOwner: accounts[3],
                 kPublic: 0, // perfectly balanced...
-                aztecAddress: aztec.address,
+                aztecAddress: aztecJoinSplit.address,
             });
 
             erc20 = await ERC20Mintable.new();
