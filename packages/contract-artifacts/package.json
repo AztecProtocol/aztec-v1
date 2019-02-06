@@ -1,6 +1,6 @@
 {
   "name": "@aztec/contract-artifacts",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "AZTEC",
   "description": "Smart contract compilation artifacts for the latest version of AZTEC.",
   "license": "LGPL-3.0",
@@ -25,9 +25,7 @@
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
-  "dependencies": {
-    "lodash": "^4.17.11"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-add-module-exports": "^1.0.0",

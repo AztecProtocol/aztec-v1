@@ -1,52 +1,7 @@
 pragma solidity 0.4.24;
 
-
-library NoteUtilities {
-
-    function length(bytes memory proofOutputsOrNotes) internal pure returns (
-        uint len
-    ) {
-        assembly {
-                len := mload(add(proofOutputsOrNotes, 0x20))
-        }
-    }
-
-    function get(bytes memory proofOutputsOrNotes, uint i) internal pure returns (
-        bytes out
-    ) {
-        assembly {
-            let base := add(add(proofOutputsOrNotes, 0x40), mul(i, 0x20))
-            out := add(proofOutputsOrNotes, mload(base))
-        }
-    }
-
-    function extractProofOutput(bytes memory proofOutput) internal pure returns (
-        bytes memory inputNotes,
-        bytes memory outputNotes,
-        address publicOwner,
-        int256 publicValue
-    ) {
-        assembly {
-            inputNotes := add(proofOutput, mload(add(proofOutput, 0x20)))
-            outputNotes := add(proofOutput, mload(add(proofOutput, 0x40)))
-            publicOwner := mload(add(proofOutput, 0x60))
-            publicValue := mload(add(proofOutput, 0x80))
-        }
-    }
-
-    function extractNote(bytes memory note) internal pure returns (
-            address owner,
-            bytes32 noteHash,
-            bytes memory metadata
-        ) {
-        assembly {
-            owner := mload(add(note, 0x20))
-            noteHash := mload(add(note, 0x40))
-            metadata := add(note, mload(add(note, 0x60)))
-        }
-    }
-}
-
+import "./NoteRegistry.sol";
+import "./NoteUtilities.sol";
 
 /**
  * @title The AZTEC Cryptography Engine
@@ -83,6 +38,8 @@ contract ACE {
     //          transfer instruction without having to validate another zero-knowledge proof.
     mapping(uint16 => bool) public balancedProofs;
     mapping(bytes32 => bool) private validatedProofs;
+
+    mapping(address => NoteRegistry) public noteRegistries;
 
     event LogSetProof(uint16 _proofType, address _validatorAddress, bool _isBalanced);
     event LogSetCommonReferenceString(bytes32[6] _commonReferenceString);
@@ -136,10 +93,12 @@ contract ACE {
             calldatacopy(add(m, 0x104), _proofData, add(calldataload(_proofData), 0x20))
 
             // call our validator smart contract, and validate the call succeeded
+            
             if iszero(staticcall(gas, validatorAddress, m, add(calldataload(_proofData), 0x124), 0x00, 0x00)) {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed - proof is invalid!
             }
             returndatacopy(m, 0x00, returndatasize) // copy returndata to memory
+            let returnStart := m
             let proofOutputs := add(m, mload(m)) // proofOutputs points to the start of return data
             m := add(add(m, 0x20), returndatasize)
             // does this proof satisfy a balancing relationship? If it does, we need to record the proof
@@ -161,7 +120,7 @@ contract ACE {
                     sstore(keccak256(0x00, 0x40), 0x01)
                 }
             }
-            return(proofOutputs, returndatasize) // return `proofOutputs` to caller
+            return(returnStart, returndatasize) // return `proofOutputs` to caller
         }
     }
 
@@ -225,6 +184,33 @@ contract ACE {
         }
     }
 
+    function createNoteRegistry(
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert,
+        uint256 _scalingFactor,
+        address _linkedToken
+    ) public returns (address) {
+        require(noteRegistries[msg.sender] == NoteRegistry(0), "address already has a linked Note Registry");
+        NoteRegistry registry = new NoteRegistry(
+            _canMint,
+            _canBurn,
+            _canConvert,
+            _scalingFactor,
+            _linkedToken,
+            this,
+            this);
+        noteRegistries[msg.sender] = registry;
+        return address(registry);
+    }
+
+    function updateNoteRegistry(bytes _proofOutput, uint16 _proofType, address _proofSender) public returns (bool) {
+        NoteRegistry registry = noteRegistries[msg.sender];
+        require(registry != NoteRegistry(0), "sender does not have a linked Note Registry");
+        require(registry.updateNoteRegistry(_proofOutput, _proofType, _proofSender), "update failed!");
+        return true;
+    }
+
     /**
     * @dev Set the common reference string
     *      If the trusted setup is re-run, we will need to be able to change the crs
@@ -273,7 +259,7 @@ contract ACE {
     * we use a custom getter for `commonReferenceString` - the default getter created by making the storage
     * variable public indexes individual elements of the array, and we want to return the whole array
     */
-    function getCommonReferenceString() public view returns (bytes32[6]) {
+    function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
     }
 }

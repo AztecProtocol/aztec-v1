@@ -1,17 +1,22 @@
 /**
  * Constructs AZTEC join-split zero-knowledge proofs
  *
- * @module proof
+ * @module proof.joinSplit
  */
+
+const { constants: { FAKE_NETWORK_ID } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const bn128 = require('../../bn128');
-const Keccak = require('../../keccak');
-const { K_MAX } = require('../../params');
 
 const extractor = require('./extractor');
 const helpers = require('./helpers');
 const verifier = require('./verifier');
+
+const abiEncoder = require('../../abiEncoder');
+const bn128 = require('../../bn128');
+const Keccak = require('../../keccak');
+const sign = require('../../sign');
+const { K_MAX } = require('../../params');
 
 const { groupReduction } = bn128;
 
@@ -25,6 +30,7 @@ joinSplit.verifier = verifier;
  *   Separated out into a distinct method so that we can stub this for extractor tests
  *
  * @method generateBlindingScalars
+ * @memberof proof.joinSplit
  * @param {number} n number of notes
  * @param {number} m number of input notes
  */
@@ -56,6 +62,7 @@ joinSplit.generateBlindingScalars = (n, m) => {
  *   Separated out into a distinct method so that we can stub this for extractor tests
  *
  * @method computeChallenge
+ * @memberof proof.joinSplit
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
  * @param {number} m number of input notes
@@ -100,6 +107,7 @@ function isOnCurve(point) {
  * Validate proof inputs are well formed
  *
  * @method parseInputs
+ * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
@@ -133,6 +141,7 @@ joinSplit.parseInputs = (notes, m, sender, kPublic) => {
  * Construct AZTEC join-split proof transcript
  *
  * @method constructJoinSplit
+ * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
@@ -216,6 +225,7 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
  * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
  *
  * @method constructJoinSplit
+ * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
@@ -292,6 +302,66 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
         proofData,
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
+};
+
+/**
+ * Encode a join split transaction
+ * 
+ * @method encodeJoinSplitTransaction
+ * @memberof module:proof.joinSplit.helpers
+ * @param {Object} values
+ * @param {Note[]} inputNotes input AZTEC notes
+ * @param {Note[]} outputNotes output AZTEC notes
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
+ * @param {string[]} inputNoteOwners array with the owners of the input notes
+ * @param {string} publicOwner address(0x0) or the holder of a public token being converted
+ * @param {string} kPublic public commitment being added to proof
+ * @param {string} aztecAddress address of the AZTECJoinSplit contract
+ * @returns {Object} AZTEC proof data and expected output
+ */
+joinSplit.encodeJoinSplitTransaction = ({
+    inputNotes,
+    outputNotes,
+    senderAddress,
+    inputNoteOwners,
+    publicOwner,
+    kPublic,
+    aztecAddress,
+}) => {
+    const m = inputNotes.length;
+    const {
+        proofData: proofDataRaw,
+        challenge,
+    } = joinSplit.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
+
+    const inputSignatures = inputNotes.map((inputNote, index) => {
+        const { privateKey } = inputNoteOwners[index];
+        return sign.signACENote(
+            proofDataRaw[index],
+            challenge,
+            senderAddress,
+            aztecAddress,
+            privateKey,
+            FAKE_NETWORK_ID
+        );
+    });
+    const outputOwners = outputNotes.map(n => n.owner);
+    const proofData = abiEncoder.joinSplit.encode(
+        proofDataRaw,
+        m,
+        challenge,
+        publicOwner,
+        inputSignatures,
+        outputOwners,
+        outputNotes
+    );
+    const expectedOutput = `0x${abiEncoder.outputCoder.encodeProofOutputs([{
+        inputNotes,
+        outputNotes,
+        publicOwner,
+        publicValue: kPublic,
+    }]).slice(0x42)}`;
+    return { proofData, expectedOutput };
 };
 
 module.exports = joinSplit;
