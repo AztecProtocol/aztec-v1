@@ -4,11 +4,11 @@ const chai = require('chai');
 const crypto = require('crypto');
 const { padLeft, randomHex, sha3 } = require('web3-utils');
 
-const bn128 = require('../../src/bn128');
-const bilateralProof = require('../../src/proof/bilateralSwap');
-const helpers = require('../../src/proof/bilateralSwap/helpers');
-const Keccak = require('../../src/keccak');
-const { K_MAX } = require('../../src/params');
+const bn128 = require('../../../src/bn128');
+const bilateralProof = require('../../../src/proof/bilateralSwap');
+const helpers = require('../../../src/proof/bilateralSwap/helpers');
+const Keccak = require('../../../src/keccak');
+const { K_MAX } = require('../../../src/params');
 
 
 const { expect } = chai;
