@@ -2,7 +2,7 @@
 const chai = require('chai');
 const web3Utils = require('web3-utils');
 
-const dividendComputation = require('../../src/proof/dividendComputation');
+const dividendComputation = require('../../../src/proof/dividendComputation');
 
 const { expect } = chai;
 

@@ -5,9 +5,9 @@ const { padLeft, sha3 } = require('web3-utils');
 const crypto = require('crypto');
 
 
-const bn128 = require('../../src/bn128');
-const dividendComputation = require('../../src/proof/dividendComputation');
-const { K_MAX } = require('../../src/params');
+const bn128 = require('../../../src/bn128');
+const dividendComputation = require('../../../src/proof/dividendComputation');
+const { K_MAX } = require('../../../src/params');
 
 const { expect } = chai;
 

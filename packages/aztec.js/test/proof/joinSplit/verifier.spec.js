@@ -5,11 +5,11 @@ const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
 
-const bn128 = require('../../src/bn128');
-const proof = require('../../src/proof/joinSplit');
-const verifier = require('../../src/proof/joinSplit/verifier');
-const proofHelpers = require('../../src/proof/joinSplit/helpers');
-const { K_MAX } = require('../../src/params');
+const bn128 = require('../../../src/bn128');
+const proof = require('../../../src/proof/joinSplit');
+const verifier = require('../../../src/proof/joinSplit/verifier');
+const proofHelpers = require('../../../src/proof/joinSplit/helpers');
+const { K_MAX } = require('../../../src/params');
 
 const { expect } = chai;
 
