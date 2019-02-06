@@ -117,8 +117,8 @@ contract DividendCalc {
                 mstore(0x2a0, caller)
                 mstore(0x2c0, za)
                 mstore(0x2e0, zb)
-                hashCommitments(notes, 3) // n = 3
-                let b := 0x480 // n = 3
+                hashCommitments(notes)
+                let b := 0x480 
 
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
