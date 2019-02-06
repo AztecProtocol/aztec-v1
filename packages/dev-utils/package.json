@@ -1,6 +1,6 @@
 {
   "name": "@aztec/dev-utils",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "author": "AZTEC",
   "description": "Dev utils to be shared across AZTEC packages",
   "license": "LGPL-3.0",
@@ -25,6 +25,7 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "bn.js": "^4.11.8",
     "chai": "^4.2.0"
   },

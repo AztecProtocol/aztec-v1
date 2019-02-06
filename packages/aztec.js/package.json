@@ -1,6 +1,6 @@
 {
   "name": "aztec.js",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "author": "AZTEC",
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@aztec/dev-utils": "^1.0.5",
+    "babel-runtime": "^6.26.0",
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.1",
     "ethereumjs-abi": "^0.6.6",
