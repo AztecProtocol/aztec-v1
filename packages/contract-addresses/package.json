@@ -1,6 +1,6 @@
 {
   "name": "@aztec/contract-addresses",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "AZTEC",
   "description": "Addresses of deployed AZTEC contracts on Ethereum mainnet and testnets",
   "license": "LGPL-3.0",
@@ -25,6 +25,7 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
