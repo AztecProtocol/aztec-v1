@@ -17,7 +17,7 @@ const DividencCalcInterface = artifacts.require('./contracts/AZTEC/DividendCalcI
 
 DividendCalc.abi = DividencCalcInterface.abi;
 
-contract.only('DividendCalc', (accounts) => {
+contract('DividendCalc', (accounts) => {
     let dividendCalcContract;
 
     // Creating a collection of tests that should pass
@@ -31,7 +31,6 @@ contract.only('DividendCalc', (accounts) => {
             const makerNoteValues = [90];
             const takerNoteValues = [4, 50];
 
-            console.log('methods attached to dividendComputation', aztec.proof.dividendComputation);
             testNotes = aztec.proof.dividendComputation.helpers.makeTestNotes(makerNoteValues, takerNoteValues);
 
             za = 100;
