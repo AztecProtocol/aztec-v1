@@ -353,7 +353,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${abiEncoder.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${abiEncoder.joinSplit.outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
