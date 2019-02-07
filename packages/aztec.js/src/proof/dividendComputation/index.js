@@ -70,7 +70,6 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     if (notes.length !== 3) {
         throw new Error('incorrect number of notes');
     }
-
     // Array to store bk values later
     const bkArray = [];
     // convert z_a and z_b into BN instances if they aren't already
@@ -93,21 +92,18 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     }
     // Check that proof data lies on the bn128 curve
     notes.forEach((note) => {
-        bn128.curve.validate(note.gamma); // checking gamma point
-        bn128.curve.validate(note.sigma); // checking sigma point
+        const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
+        const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
+
+        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
+            throw new Error('point not on curve');
+        }
     });
 
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
         rollingHash.append(note.sigma);
     });
-
-    // finalHash is used to create final proof challenge
-    const finalHash = new Keccak();
-    finalHash.appendBN(new BN(sender.slice(2), 16));
-    finalHash.appendBN(zaBN);
-    finalHash.appendBN(zbBN);
-    finalHash.data = [...finalHash.data, ...rollingHash.data];
 
     let x = new BN(0).toRed(groupReduction);
     x = rollingHash.keccak(groupReduction);
@@ -121,7 +117,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         if (i === 0) { // input note
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
-            rollingHash.keccak();
+            x = rollingHash.keccak(groupReduction);
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             bkArray.push(bk);
         }
@@ -130,7 +126,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
-            rollingHash.keccak();
+            x = rollingHash.keccak(groupReduction);
             bkArray.push(bk);
         }
 
@@ -144,12 +140,11 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
 
-            rollingHash.keccak();
+            x = rollingHash.keccak(groupReduction);
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             bkArray.push(bk);
         }
 
-        finalHash.append(B);
         return {
             bk,
             ba,
@@ -157,7 +152,6 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         };
     });
 
-    finalHash.keccak();
     const challenge = dividendComputation.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
     const proofDataUnformatted = blindingFactors.map((blindingFactor, i) => {
         const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();

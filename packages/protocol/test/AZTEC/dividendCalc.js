@@ -12,10 +12,10 @@ const exceptions = require('../../utils/exceptions');
 
 // ### Artifacts
 const DividendCalc = artifacts.require('./contracts/AZTEC/DividendCalc');
-const DividencCalcInterface = artifacts.require('./contracts/AZTEC/DividendCalcInterface');
+const DividendCalcInterface = artifacts.require('./contracts/AZTEC/DividendCalcInterface');
 
 
-DividendCalc.abi = DividencCalcInterface.abi;
+DividendCalc.abi = DividendCalcInterface.abi;
 
 contract('DividendCalc', (accounts) => {
     let dividendCalcContract;

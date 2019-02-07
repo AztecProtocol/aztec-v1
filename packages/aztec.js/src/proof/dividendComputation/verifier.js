@@ -94,7 +94,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
             const kBarX = kBar.redMul(x); // xbk = bk*x
             const aBarX = aBar.redMul(x); // xba = ba*x
             const challengeX = formattedChallenge.mul(x);
-            rollingHash.keccak();
+            x = rollingHash.keccak(groupReduction);
             B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul(challengeX).neg());
             kBarArray.push(kBar);
         }
@@ -103,7 +103,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
             const aBarX = aBar.redMul(x);
             const kBarX = kBar.redMul(x);
             const challengeX = formattedChallenge.mul(x);
-            rollingHash.keccak();
+            x = rollingHash.keccak(groupReduction);
             B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul(challengeX).neg());
             kBarArray.push(kBar);
         }
@@ -118,7 +118,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
             const aBarX = aBar.redMul(x);
             const kBarX = kBar.redMul(x);
             const challengeX = formattedChallenge.redMul(x);
-            rollingHash.keccak();
+            x = rollingHash.keccak(groupReduction);
 
             B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul((challengeX).neg()));
             kBarArray.push(kBar);
