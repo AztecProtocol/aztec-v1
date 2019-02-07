@@ -5,7 +5,7 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit/JoinSplitABIEncoderTest');
+const ABIEncoder = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitABIEncoderTest');
 
 const { params: { t2, K_MAX } } = aztec;
 
@@ -14,8 +14,8 @@ function randomNoteValue() {
 }
 
 const fakeNetworkId = 100;
-contract('ABI Encoder', (accounts) => {
-    let aztecAbiEncoder;
+contract('Join Split ABI Encoder', (accounts) => {
+    let joinSplitAbiEncoder;
     let aztecAccounts = [];
     let notes = [];
 
@@ -28,7 +28,7 @@ contract('ABI Encoder', (accounts) => {
                 return aztec.note.create(publicKey, randomNoteValue());
             });
 
-            aztecAbiEncoder = await ABIEncoder.new(fakeNetworkId, {
+            joinSplitAbiEncoder = await ABIEncoder.new(fakeNetworkId, {
                 from: accounts[0],
             });
             const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
@@ -55,7 +55,7 @@ contract('ABI Encoder', (accounts) => {
                     proofData[index],
                     challenge,
                     senderAddress,
-                    aztecAbiEncoder.address,
+                    joinSplitAbiEncoder.address,
                     privateKey,
                     fakeNetworkId
                 );
@@ -72,7 +72,7 @@ contract('ABI Encoder', (accounts) => {
                 outputNotes
             );
 
-            const result = await aztecAbiEncoder.validateJoinSplit(data, senderAddress, crs, {
+            const result = await joinSplitAbiEncoder.validateJoinSplit(data, senderAddress, crs, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -107,7 +107,7 @@ contract('ABI Encoder', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await aztecAbiEncoder.validateJoinSplit.estimateGas(data, senderAddress, crs, {
+            const gasUsed = await joinSplitAbiEncoder.validateJoinSplit.estimateGas(data, senderAddress, crs, {
                 from: accounts[0],
                 gas: 4000000,
             });

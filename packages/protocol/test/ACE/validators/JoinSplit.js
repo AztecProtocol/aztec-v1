@@ -10,11 +10,11 @@ const { params: { t2 } } = aztec;
 const { proof: { joinSplit } } = aztec;
 
 // ### Artifacts
-const AZTEC = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');
-const AZTECInterface = artifacts.require('./contracts/ACE/validators/AZTECJoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 
 
-AZTEC.abi = AZTECInterface.abi;
+JoinSplit.abi = JoinSplitInterface.abi;
 
 const fakeNetworkId = 100;
 
@@ -63,7 +63,7 @@ function encodeJoinSplitTransaction({
     return { proofData, expectedOutput };
 }
 
-contract('AZTEC', (accounts) => {
+contract('JoinSplit', (accounts) => {
     let aztecContract;
     // Creating a collection of tests that should pass
     describe('success states', () => {
@@ -71,7 +71,7 @@ contract('AZTEC', (accounts) => {
         let aztecAccounts = [];
         let notes = [];
         beforeEach(async () => {
-            aztecContract = await AZTEC.new(fakeNetworkId, {
+            aztecContract = await JoinSplit.new(fakeNetworkId, {
                 from: accounts[0],
             });
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
@@ -376,7 +376,7 @@ contract('AZTEC', (accounts) => {
         let aztecAccounts = [];
         let notes = [];
         beforeEach(async () => {
-            aztecContract = await AZTEC.new(fakeNetworkId, {
+            aztecContract = await JoinSplit.new(fakeNetworkId, {
                 from: accounts[0],
             });
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());

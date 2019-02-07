@@ -20,11 +20,11 @@ const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const AZTEC = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');
-const AZTECInterface = artifacts.require('./contracts/ACE/validators/AZTECJoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 
 
-AZTEC.abi = AZTECInterface.abi;
+JoinSplit.abi = JoinSplitInterface.abi;
 
 const fakeNetworkId = 100;
 
@@ -99,7 +99,7 @@ contract('ACE', (accounts) => {
         });
 
         it('can set a proof', async () => {
-            const aztec = await AZTEC.new(fakeNetworkId);
+            const aztec = await JoinSplit.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
             const resultValidatorAddress = await ace.validators(1);
             expect(resultValidatorAddress).to.equal(aztec.address);
@@ -144,7 +144,7 @@ contract('ACE', (accounts) => {
                 ...t2,
             ];
             await ace.setCommonReferenceString(crs);
-            const aztec = await AZTEC.new(fakeNetworkId);
+            const aztec = await JoinSplit.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
             const inputNotes = notes.slice(2, 4);
             const outputNotes = notes.slice(0, 2);
