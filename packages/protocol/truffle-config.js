@@ -70,7 +70,7 @@ module.exports = {
         },
         kovan: {
             provider: kovanProvider,
-            gas: 4700000,
+            gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '42',
         },
