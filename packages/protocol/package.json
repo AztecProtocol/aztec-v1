@@ -24,11 +24,13 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
+    "@aztec/contract-addresses": "^1.0.4",
+    "@aztec/contract-artifacts": "^1.2.0",
     "openzeppelin-solidity": "2.0.0"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.0.5",
-    "aztec.js": "^0.3.0",
+    "@aztec/dev-utils": "^1.0.6",
+    "aztec.js": "^0.3.2",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.3",
     "bn.js": "^4.11.8",
