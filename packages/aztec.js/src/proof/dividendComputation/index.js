@@ -108,15 +108,14 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     finalHash.appendBN(zaBN);
     finalHash.appendBN(zbBN);
     finalHash.data = [...finalHash.data, ...rollingHash.data];
-    rollingHash.keccak();
+
+    let x = new BN(0).toRed(groupReduction);
+    x = rollingHash.keccak(groupReduction);
 
     const blindingFactors = notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
         let B;
-        let x = new BN(0).toRed(groupReduction);
-
-        x = rollingHash.toGroupScalar(groupReduction);
 
         // Calculating the blinding factors
         if (i === 0) { // input note
