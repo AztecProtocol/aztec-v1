@@ -113,6 +113,10 @@ outputCoder.encodeOutputNote = (note) => {
     return encoded.join('');
 };
 
+outputCoder.hashProofOutput = (proofOutput) => {
+    return sha3(`0x${proofOutput}`);
+};
+
 outputCoder.encodeInputNote = (note) => {
     const encoded = [...new Array(7)];
     encoded[0] = padLeft('a0', 64);

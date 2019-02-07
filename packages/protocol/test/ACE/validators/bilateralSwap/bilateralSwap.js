@@ -50,7 +50,7 @@ function encodeBilateralSwapTransaction({
     return { proofData, expectedOutput };
 }
 
-contract('Bilateral Swap', (accounts) => {
+contract.only('Bilateral Swap', (accounts) => {
     let bilateralSwapContract;
     describe('success states', () => {
         let crs;
@@ -61,6 +61,7 @@ contract('Bilateral Swap', (accounts) => {
             bilateralSwapContract = await BilateralSwap.new(fakeNetworkId, {
                 from: accounts[0],
             });
+
             // Need to set the value of the notes created, to be consistent with the 
             // bilateral swap condition
             const noteValues = [10, 20, 10, 20];
@@ -79,7 +80,7 @@ contract('Bilateral Swap', (accounts) => {
             ];
         });
 
-        it('succesfully validate output encoding for bilateral proof in zero-knowledge', async () => {
+        it.only('succesfully validate output encoding for bilateral proof in zero-knowledge', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const { proofData, expectedOutput } = encodeBilateralSwapTransaction({
@@ -87,6 +88,11 @@ contract('Bilateral Swap', (accounts) => {
                 outputNotes,
                 senderAddress: accounts[0],
             });
+            console.log('Bilateral Swap');
+            console.log('proof data: ', proofData);
+            console.log('accounts[0]', accounts[0]);
+            console.log('crs', crs);
+            console.log('');
 
             const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], crs, {
                 from: accounts[0],
