@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./JoinSplitABIEncoder.sol";
 
 
-contract AZTECJoinSplitInterface {
+contract JoinSplitInterface {
     constructor(uint _chainId) public {}
     
     function validateJoinSplit(
@@ -33,7 +33,7 @@ contract AZTECJoinSplitInterface {
  * family of AZTEC zero-knowledge proofs
  * and the AZTEC token standard, stay tuned for updates!
  **/
-contract AZTECJoinSplit {
+contract JoinSplit {
 
     bytes32 private domainHash;
 

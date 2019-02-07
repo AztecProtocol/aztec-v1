@@ -21,11 +21,11 @@ const { outputCoder } = abiEncoder;
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const AZTEC = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');
-const AZTECInterface = artifacts.require('./contracts/ACE/validators/AZTECJoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
-AZTEC.abi = AZTECInterface.abi;
+JoinSplit.abi = JoinSplitInterface.abi;
 
 const fakeNetworkId = 100;
 
@@ -106,7 +106,7 @@ contract('NoteRegistry', (accounts) => {
                 ...t2,
             ];
             await ace.setCommonReferenceString(crs);
-            const aztec = await AZTEC.new(fakeNetworkId);
+            const aztec = await JoinSplit.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
             const publicOwner = accounts[0];
             proofs[0] = encodeJoinSplitTransaction({
