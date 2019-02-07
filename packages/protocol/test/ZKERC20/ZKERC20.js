@@ -20,12 +20,12 @@ const fakeNetworkId = 100;
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const AZTECJoinSplit = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');
-const AZTECJoinSplitInterface = artifacts.require('./contracts/ACE/validators/AZTECJoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 const ZKERC20 = artifacts.require('./contracts/ZKERC20/ZKERC20');
 const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
-AZTECJoinSplit.abi = AZTECJoinSplitInterface.abi;
+JoinSplit.abi = JoinSplitInterface.abi;
 
 const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
 const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
@@ -60,7 +60,7 @@ contract('ZKERC20', (accounts) => {
                 ...t2,
             ];
             await ace.setCommonReferenceString(crs);
-            aztecJoinSplit = await AZTECJoinSplit.new(fakeNetworkId);
+            aztecJoinSplit = await JoinSplit.new(fakeNetworkId);
             await ace.setProof(1, aztecJoinSplit.address, true);
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
