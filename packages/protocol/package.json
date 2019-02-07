@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@aztec/dev-utils": "^1.0.5",
-    "aztec.js": "^0.4.0-beta.0",
+    "aztec.js": "^0.4.0-beta.1",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.3",
     "bn.js": "^4.11.8",

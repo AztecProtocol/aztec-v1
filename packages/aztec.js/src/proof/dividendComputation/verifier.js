@@ -78,7 +78,9 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     finalHash.appendBN(zaBN);
     finalHash.appendBN(zbBN);
     finalHash.data = [...finalHash.data, ...rollingHash.data];
-    rollingHash.keccak();
+
+    let x = new BN(0).toRed(groupReduction);
+    x = rollingHash.keccak(groupReduction);
 
     proofDataBn.map((proofElement, i) => {
         let kBar = proofElement[0];
@@ -87,8 +89,6 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         const sigma = proofElement[7];
         let B;
 
-        let x = new BN(0).toRed(groupReduction);
-        x = rollingHash.toGroupScalar(groupReduction);
 
         if (i === 0) { // input note
             const kBarX = kBar.redMul(x); // xbk = bk*x
