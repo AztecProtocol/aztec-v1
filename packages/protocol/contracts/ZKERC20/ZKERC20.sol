@@ -1,8 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "../ACE/ACE.sol";
-import "../ACE/NoteRegistry.sol";
-import "../ACE/NoteUtilities.sol";
 
 // TODO: EIP-712 signatures are a pain because the domain hash requires 'chainId'.
 // We could deploy a bunch of 'Oracle' contracts to relevant testnets/mainnet that 
