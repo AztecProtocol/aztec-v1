@@ -29,8 +29,8 @@ const cherrypickContractJson = async (filename) => {
         content.deployedBytecode = content.deployedBytecode.replace('AZTECInterface', 'AZTEC');
     }
     if (filename === 'JoinSplit') {
-        content.bytecode = content.bytecode.replace('JoinSplitInterface', 'JoinSplit');
-        content.deployedBytecode = content.deployedBytecode.replace('JoinSplitInterface', 'JoinSplit');
+        const joinSplitInterface = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, 'JoinSplitInterface.sol')));
+        content.abi = joinSplitInterface.abi;
     }
     return {
         abi: content.abi,
