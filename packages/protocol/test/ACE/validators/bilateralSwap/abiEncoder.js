@@ -9,7 +9,7 @@ const aztec = require('aztec.js');
 const { params: { t2 } } = require('aztec.js');
 
 // ### Artifacts
-const BilateralSwapAbiEncoder = artifacts.require('./contracts/ACE/validators/AZTECBilateralSwap/BilateralSwapABIEncoderTest');
+const BilateralSwapAbiEncoder = artifacts.require('./contracts/ACE/validators/AZTECBilateralSwap/bilateralSwap/BilateralSwapABIEncoderTest');
 
 
 const fakeNetworkId = 100;
