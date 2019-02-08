@@ -1,6 +1,5 @@
 /* global artifacts */
-const { params: { t2 } } = require('aztec.js');
-const { constants: { DAI_ADDRESS, ERC20_SCALING_FACTOR } } = require('@aztec/dev-utils');
+const { constants: { DAI_ADDRESS, ERC20_SCALING_FACTOR, t2 } } = require('@aztec/dev-utils');
 const { isUndefined } = require('lodash');
 
 const ERC20Mintable = artifacts.require('./ERC20Mintable.sol');
