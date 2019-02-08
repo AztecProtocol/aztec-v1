@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "author": "AZTEC",
   "description": "AZTEC smart contract repository",
   "license": "LGPL-3.0",
@@ -24,12 +24,12 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "@aztec/contract-addresses": "^1.0.4",
-    "@aztec/contract-artifacts": "^1.2.0",
     "openzeppelin-solidity": "2.0.0"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.1.0",
+    "@aztec/contract-addresses": "^1.0.5",
+    "@aztec/contract-artifacts": "^1.2.0",
+    "@aztec/dev-utils": "^1.1.1",
     "aztec.js": "^0.3.2",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.3",
