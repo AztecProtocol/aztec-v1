@@ -1,19 +1,22 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 
 const {
     proof,
     abiEncoder,
-    params: { t2 },
     secp256k1,
     sign,
     note,
 // eslint-disable-next-line import/no-unresolved
 } = require('aztec.js');
+const {
+    constants: {
+        CRS,
+    },
+} = require('@aztec/dev-utils');
 
 const { joinSplit: aztecProof } = proof;
 const { outputCoder } = abiEncoder;
@@ -74,12 +77,8 @@ function encodeJoinSplitTransaction({
     return { proofData, expectedOutput };
 }
 
-const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
-
 contract('NoteRegistry', (accounts) => {
     describe('success states', () => {
-        let crs;
         let aztecAccounts = [];
         let notes = [];
         let ace;
@@ -100,12 +99,7 @@ contract('NoteRegistry', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
-            crs = [
-                `0x${padLeft(hx.toString(16), 64)}`,
-                `0x${padLeft(hy.toString(16), 64)}`,
-                ...t2,
-            ];
-            await ace.setCommonReferenceString(crs);
+            await ace.setCommonReferenceString(CRS);
             const aztec = await JoinSplit.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
             const publicOwner = accounts[0];

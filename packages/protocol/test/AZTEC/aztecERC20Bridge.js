@@ -1,5 +1,6 @@
 /* global artifacts, contract, beforeEach, expect, it:true */
 /* eslint-disable no-console */
+const { constants: { GROUP_MODULUS, t2 } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const Web3 = require('web3');
 
@@ -13,7 +14,6 @@ const { sha3 } = require('web3-utils'); // TODO REMOVE
 AZTEC.abi = AZTECInterface.abi; // hon hon hon
 
 const aztec = require('aztec.js');
-const { params: { t2, GROUP_MODULUS } } = require('aztec.js');
 const { proof: { joinSplit } } = require('aztec.js');
 const { constants: { ZERO_ADDRESS }, exceptions } = require('@aztec/dev-utils');
 

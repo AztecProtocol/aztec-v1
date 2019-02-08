@@ -29,7 +29,7 @@
     "openzeppelin-solidity": "2.0.0"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.0.6",
+    "@aztec/dev-utils": "^1.1.0",
     "aztec.js": "^0.3.2",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.3",
