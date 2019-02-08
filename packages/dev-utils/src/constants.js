@@ -10,7 +10,7 @@ const t2 = [
     `0x${padLeft('2cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc', 64)}`,
 ];
 const CRS = [
-    `0x${padLeft(H_X.toString(16), 64)}npm`,
+    `0x${padLeft(H_X.toString(16), 64)}`,
     `0x${padLeft(H_Y.toString(16), 64)}`,
     ...t2,
 ];
