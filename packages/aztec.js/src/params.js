@@ -5,7 +5,9 @@ const { padLeft } = require('web3-utils');
  * Helper module that contains key constants for our zero-knowledge proving system
  *
  * @module params
+ * @deprecated will get deprecated in ^2.0 in favour of the @aztec/dev-utils package
  */
+console.warn('The `params` module will be deprecated in version ^2.0 of aztec.js');
 module.exports = {
     /** Number of signatures per file in trusted setup database
      *  @constant SIGNATURES_PER_FILE
