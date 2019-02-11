@@ -63,17 +63,6 @@ bilateralSwap.computeChallenge = (...challengeVariables) => {
  * @returns {{proofData:Array[string]}, {challenge: string}} - proof data and challenge
  */
 bilateralSwap.constructBilateralSwap = (notes, sender) => {
-    // finalHash is used to create final proof challenge
-
-    // finalHash.appendBN(new BN(sender.slice(2), 16));
-
-    /*
-    notes.forEach((note) => {
-        finalHash.append(note.gamma);
-        finalHash.append(note.sigma);
-    });
-    */
-
     const bkArray = [];
     const blindingFactors = notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
@@ -96,7 +85,6 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
             bk = bkArray[i - 2];
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         }
-        // finalHash.append(B);
         bkArray.push(bk);
 
         return {
@@ -107,7 +95,6 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
     });
 
     const challenge = bilateralSwap.computeChallenge(sender, notes, blindingFactors);
-    // finalHash.keccak(groupReduction);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar;
