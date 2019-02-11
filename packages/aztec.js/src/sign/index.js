@@ -6,10 +6,15 @@
  * @memberof module:sign
  */
 
+const {
+    constants: {
+        AZTEC_NOTE_SIGNATURE,
+        ACE_NOTE_SIGNATURE,
+        ACE_DOMAIN_PARAMS,
+    },
+} = require('@aztec/dev-utils');
 const eip712 = require('./eip712');
 const ecdsa = require('../secp256k1/ecdsa');
-
-const { AZTEC_NOTE_SIGNATURE, ACE_NOTE_SIGNATURE, ACE_DOMAIN_PARAMS } = require('../params');
 
 // For backwards compatibility. TODO: remove
 const defaultDomainParams = {

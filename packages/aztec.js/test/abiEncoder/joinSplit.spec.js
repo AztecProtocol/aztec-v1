@@ -1,3 +1,4 @@
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
@@ -6,7 +7,6 @@ const secp256k1 = require('../../src/secp256k1');
 const sign = require('../../src/sign');
 const note = require('../../src/note');
 const abiEncoder = require('../../src/abiEncoder/joinSplit');
-const { K_MAX } = require('../../src/params');
 
 const { expect } = chai;
 

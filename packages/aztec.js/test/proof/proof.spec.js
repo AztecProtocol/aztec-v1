@@ -1,3 +1,4 @@
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
@@ -6,7 +7,6 @@ const { padLeft } = require('web3-utils');
 const bn128 = require('../../src/bn128');
 const proof = require('../../src/proof/joinSplit');
 const proofHelpers = require('../../src/proof/joinSplit/helpers');
-const { K_MAX } = require('../../src/params');
 
 const { expect } = chai;
 
