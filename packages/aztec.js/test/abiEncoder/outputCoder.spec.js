@@ -34,7 +34,7 @@ class HexString extends String {
     }
 }
 
-describe('abiEncioder.outputCoder tests', () => {
+describe('abiEncoder.outputCoder tests', () => {
     let accounts = [];
     let notes = [];
     beforeEach(() => {
