@@ -76,7 +76,6 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     let zaBN;
     let zbBN;
 
-    // finalHash is used to create final proof challenge
     const rollingHash = new Keccak();
 
     if (BN.isBN(za)) {

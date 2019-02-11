@@ -167,7 +167,6 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
         rollingHash.append(note.gamma);
         rollingHash.append(note.sigma);
     });
-    // finalHash is used to create final proof challenge
 
     // define 'running' blinding factor for the k-parameter in final note
     let runningBk = new BN(0).toRed(groupReduction);
@@ -251,7 +250,6 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
         rollingHash.append(note.gamma);
         rollingHash.append(note.sigma);
     });
-    // finalHash is used to create final proof challenge
 
     // define 'running' blinding factor for the k-parameter in final note
     let runningBk = new BN(0).toRed(groupReduction);
