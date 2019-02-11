@@ -39,7 +39,7 @@ function fakeSignature() {
     ];
 }
 
-describe('abiEncioder.joinSplit tests', () => {
+describe('abiEncoder.joinSplit tests', () => {
     let accounts = [];
     let notes = [];
     beforeEach(() => {
