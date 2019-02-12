@@ -314,7 +314,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
  * @param {string[]} inputNoteOwners array with the owners of the input notes
  * @param {string} publicOwner address(0x0) or the holder of a public token being converted
  * @param {string} kPublic public commitment being added to proof
- * @param {string} aztecAddress address of the AZTECJoinSplit contract
+ * @param {string} aztecAddress address of the JoinSplit contract
  * @returns {Object} AZTEC proof data and expected output
  */
 joinSplit.encodeJoinSplitTransaction = ({

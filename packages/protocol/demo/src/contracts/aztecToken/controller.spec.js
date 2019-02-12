@@ -1,6 +1,6 @@
-/* eslint-disable prefer-arrow-callback */
+/* eslint-disable prefer-arrow-callback, prefer-destructuring */
 const aztec = require('aztec.js');
-const { constants: { ERC20_SCALING_FACTOR: SCALING_FACTOR } } = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const BN = require('bn.js');
 const chai = require('chai');
@@ -20,7 +20,8 @@ const web3 = require('../../../web3Listener');
 
 const AZTECERC20Bridge = require('../../../../build/contracts/AZTECERC20Bridge.json');
 
-const { params: { t2 } } = aztec;
+const SCALING_FACTOR = constants.ERC20_SCALING_FACTOR;
+const t2 = constants.t2;
 const { expect } = chai;
 
 describe('aztecToken controller tests', () => {

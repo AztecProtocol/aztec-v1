@@ -1,43 +1,33 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const aztec = require('aztec.js');
-const BN = require('bn.js');
+const { constants: { CRS, K_MAX } } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit/JoinSplitABIEncoderTest');
-
-const { params: { t2, K_MAX } } = aztec;
+const ABIEncoder = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitABIEncoderTest');
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
 
 const fakeNetworkId = 100;
-contract('ABI Encoder', (accounts) => {
-    let aztecAbiEncoder;
+contract('Join Split ABI Encoder', (accounts) => {
+    let joinSplitAbiEncoder;
     let aztecAccounts = [];
     let notes = [];
 
     // Creating a collection of tests that should pass
     describe('success states', () => {
-        let crs;
         beforeEach(async () => {
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
             notes = aztecAccounts.map(({ publicKey }) => {
                 return aztec.note.create(publicKey, randomNoteValue());
             });
 
-            aztecAbiEncoder = await ABIEncoder.new(fakeNetworkId, {
+            joinSplitAbiEncoder = await ABIEncoder.new(fakeNetworkId, {
                 from: accounts[0],
             });
-            const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-            const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
-            crs = [
-                `0x${padLeft(hx.toString(16), 64)}`,
-                `0x${padLeft(hy.toString(16), 64)}`,
-                ...t2,
-            ];
         });
 
         it('succesfully encodes output of a join split proof', async () => {
@@ -55,7 +45,7 @@ contract('ABI Encoder', (accounts) => {
                     proofData[index],
                     challenge,
                     senderAddress,
-                    aztecAbiEncoder.address,
+                    joinSplitAbiEncoder.address,
                     privateKey,
                     fakeNetworkId
                 );
@@ -72,7 +62,7 @@ contract('ABI Encoder', (accounts) => {
                 outputNotes
             );
 
-            const result = await aztecAbiEncoder.validateJoinSplit(data, senderAddress, crs, {
+            const result = await joinSplitAbiEncoder.validateJoinSplit(data, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -107,7 +97,7 @@ contract('ABI Encoder', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await aztecAbiEncoder.validateJoinSplit.estimateGas(data, senderAddress, crs, {
+            const gasUsed = await joinSplitAbiEncoder.validateJoinSplit.estimateGas(data, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });

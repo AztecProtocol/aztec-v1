@@ -3,7 +3,7 @@
  *
  * @module aztecController
  */
-const { params: { t2 } } = require('aztec.js');
+const { constants: { t2 } } = require('@aztec/dev-utils');
 
 const deployer = require('../../../deployer');
 const transactions = require('../../transactions');
