@@ -9,22 +9,26 @@ const { exceptions } = require('@aztec/dev-utils');
 const {
     proof,
     abiEncoder,
-    params: { t2 },
     secp256k1,
     sign,
     note,
 } = require('aztec.js');
+const {
+    constants: {
+        CRS,
+    },
+} = require('@aztec/dev-utils');
 
 const { joinSplit: aztecProof } = proof;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const AZTEC = artifacts.require('./contracts/ACE/validators/AZTECJoinSplit');
-const AZTECInterface = artifacts.require('./contracts/ACE/validators/AZTECJoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 
 
-AZTEC.abi = AZTECInterface.abi;
+JoinSplit.abi = JoinSplitInterface.abi;
 
 const fakeNetworkId = 100;
 
@@ -73,33 +77,24 @@ function encodeJoinSplitTransaction({
     return { proofData, expectedOutput };
 }
 
-const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
-
 contract('ACE', (accounts) => {
     // Creating a collection of tests that should pass
     describe('initialization tests', () => {
         let ace;
-        let crs;
         beforeEach(async () => {
             ace = await ACE.new({
                 from: accounts[0],
             });
-            crs = [
-                `0x${padLeft(hx.toString(16), 64)}`,
-                `0x${padLeft(hy.toString(16), 64)}`,
-                ...t2,
-            ];
         });
 
         it('can set the common reference string', async () => {
-            await ace.setCommonReferenceString(crs, { from: accounts[0] });
+            await ace.setCommonReferenceString(CRS, { from: accounts[0] });
             const result = await ace.getCommonReferenceString();
-            expect(result).to.deep.equal(crs);
+            expect(result).to.deep.equal(CRS);
         });
 
         it('can set a proof', async () => {
-            const aztec = await AZTEC.new(fakeNetworkId);
+            const aztec = await JoinSplit.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
             const resultValidatorAddress = await ace.validators(1);
             expect(resultValidatorAddress).to.equal(aztec.address);
@@ -114,14 +109,13 @@ contract('ACE', (accounts) => {
         });
 
         it('cannot set the common reference string if not owner', async () => {
-            await exceptions.catchRevert(ace.setCommonReferenceString(crs, {
+            await exceptions.catchRevert(ace.setCommonReferenceString(CRS, {
                 from: accounts[1],
             }));
         });
     });
 
     describe('success states', () => {
-        let crs;
         let aztecAccounts = [];
         let notes = [];
         let ace;
@@ -138,13 +132,8 @@ contract('ACE', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
-            crs = [
-                `0x${padLeft(hx.toString(16), 64)}`,
-                `0x${padLeft(hy.toString(16), 64)}`,
-                ...t2,
-            ];
-            await ace.setCommonReferenceString(crs);
-            const aztec = await AZTEC.new(fakeNetworkId);
+            await ace.setCommonReferenceString(CRS);
+            const aztec = await JoinSplit.new(fakeNetworkId);
             await ace.setProof(1, aztec.address, true);
             const inputNotes = notes.slice(2, 4);
             const outputNotes = notes.slice(0, 2);
