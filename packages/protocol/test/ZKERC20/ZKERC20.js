@@ -172,7 +172,7 @@ contract('ZKERC20', (accounts) => {
             ))); // approving tokens
         });
 
-        it.only('will can update a note registry with output notes', async () => {
+        it('will can update a note registry with output notes', async () => {
             // const { receipt } = await ace.validateProof(1, accounts[0], proofs[0].proofData);
             const { receipt } = await zkerc20.confidentialTransfer(proofs[0].proofData);
             expect(receipt.status).to.equal(true);
