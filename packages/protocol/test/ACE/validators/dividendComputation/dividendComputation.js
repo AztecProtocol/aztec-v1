@@ -46,7 +46,7 @@ function encodeDividendComputationTransaction({
         outputNotes
     );
 
-    const expectedOutput = `0x${aztec.abiEncoder.dividendComputation.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
@@ -105,7 +105,7 @@ contract('Dividend Computation', (accounts) => {
                 gas: 4000000,
             });
 
-            const decoded = aztec.abiEncoder.dividendComputation.outputCoder.decodeProofOutputs(
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(
                 `0x${padLeft('0', 64)}${result.slice(2)}`
             );
 

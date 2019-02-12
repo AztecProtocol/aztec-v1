@@ -52,7 +52,7 @@ function encodeJoinSplitTransaction({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${aztec.abiEncoder.joinSplit.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
@@ -116,7 +116,7 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             });
-            const decoded = aztec.abiEncoder.joinSplit.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
@@ -196,7 +196,7 @@ contract('JoinSplit', (accounts) => {
                 gas: 4000000,
             });
             expect(result).to.equal(expectedOutput);
-            const decoded = aztec.abiEncoder.joinSplit.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].publicValue).to.equal(-40);
 
 
