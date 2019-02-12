@@ -31,7 +31,6 @@ library DividendComputationABIEncoder {
             let outputOwners := add(0x124, calldataload(0x1c4)) // one word after outputOwners = 1st
             let metadata := add(0x144, calldataload(0x1e4)) // two words after metadata = 1st
 
-            // mstore(0x140, domainHash) // domain hash
 
             // `returndata` starts at 0x160
             // `proofOutputs` starts at 0x180
@@ -91,7 +90,6 @@ library DividendComputationABIEncoder {
 
                 // construct note hash
                 mstore(0xc0, keccak256(0x00, 0x80))
-
 
                 // store note length in `s`
                 mstore(s, 0xa0)

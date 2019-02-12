@@ -20,7 +20,6 @@ DividendCalc.abi = DividendCalcInterface.abi;
 contract('DividendCalc', (accounts) => {
     let dividendCalcContract;
 
-    // Creating a collection of tests that should pass
     describe('success states', () => {
         let testNotes;
         let za;

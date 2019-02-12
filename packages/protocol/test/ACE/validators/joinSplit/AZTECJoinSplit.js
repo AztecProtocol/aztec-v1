@@ -63,7 +63,7 @@ function encodeJoinSplitTransaction({
 
 contract('JoinSplit', (accounts) => {
     let aztecContract;
-    // Creating a collection of tests that should pass
+
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
@@ -77,24 +77,6 @@ contract('JoinSplit', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, i * 10)),
             ];
         });
-
-        /*
-          General structure of the success state unit tests:
-          1) Construct the commitments from a selection of k_in and k_out (input and output values)
-          2) Generate the proofData and random challenge. Proof data contains notes,
-             and each note contains 6 pieces of information:
-              a) gamma_x
-              b) gamma_y
-              c) sigma_x
-              d) sigma_y
-              e) k^bar
-              f) a^bar
-              Note: a), b), c) and d) are the Pedersen commitment data
-              Note: Syntax to access proof data for one note: proofData[].
-              Syntax to access gamma_x for a particular note: proofData[][0]
-          3) Validate that these result in a successfull join-split transaction
-          4) Calculate the gas used in validating this join-split transaction
-          */
 
         it('succesfully validates an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
             const inputNotes = notes.slice(2, 4);

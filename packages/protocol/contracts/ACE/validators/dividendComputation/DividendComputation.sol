@@ -30,8 +30,8 @@ contract DividendComputation {
     /**
      * @dev This will take any dividend calculation proof data and attempt to verify it in zero-knowledge
      * If the proof is not valid, the transaction will throw.
-     * @notice See DividendCalcInterface for how method calls should be constructed.
-     * DividendCalc is written in YUL to enable manual memory management and for other efficiency savings.
+     * @notice See DividendComputationInterface for how method calls should be constructed.
+     * DividendComputation is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     function() external payable {
         assembly {
@@ -77,8 +77,6 @@ contract DividendComputation {
                 let za := mod(calldataload(0x144), gen_order)
                 let zb := mod(calldataload(0x164), gen_order)
 
-                // mstore(0x00, calldataload(0x164))
-                // return(0x00, 0x20)
 
                 // Check that za < kMax
                 if gt(za, 1048576) {
@@ -108,8 +106,7 @@ contract DividendComputation {
 
                 hashCommitments(notes, n) 
                 let b := add(0x300, mul(n, 0x80)) 
-                // mstore(0x00, 0x01)
-                // return(0x00, 0x20)
+
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
                 */
@@ -225,20 +222,6 @@ contract DividendComputation {
                     // we're appending blinding factors to the end of the commitment block
                     result := and(result, staticcall(gas, 6, 0x160, 0x80, b, 0x40))
 
-                    /*
-                    calldatacopy(0xe0, add(noteIndex, 0x80), add(b, 0x40))  
-                    calldatacopy(0x20, add(noteIndex, 0x40), add(b, 0x80))
-                    mstore(add(b, 0xa0),
-                        addmod(
-                            mulmod(calldataload(sub(noteIndex, add(0xc0, 0xc0))), zb, gen_order), // k_1 * z_b
-                            mulmod(sub(gen_order, calldataload(sub(noteIndex, 0xc0))), za, gen_order), // - (k_2 * z_a)
-                            gen_order)      
-                    )
-                    mstore(add(b, 0xc0),
-                    calldataload(add(noteIndex, 0x20)))
-                    mstore(add(b, 0xe0), mload(0x1000))
-                    return(b, 0xc0)
-                    */
                     // We have \sigma^{-c} at 0x1a0:0x200
                     // And \sigma_{acc} at 0x1e0:0x200
                     // If i = m + 1 (i.e. first output note)
@@ -275,9 +258,7 @@ contract DividendComputation {
                 }
                 
 
-                    validatePairing(0x84) // argument is just a hexadecimal number here. Used in the 
-                                         //  function to give the call data location of the trusted setup
-                                         //  public key
+                    validatePairing(0x84)
 
                 // We now have the message sender, z_a, z_b, note commitments and the 
                 // calculated blinding factors in a block of memory starting at 0x2a0, of size (b - 0x2a0).
@@ -402,22 +383,11 @@ contract DividendComputation {
              * @param n number of notes
              * 
              * @notice
-             * This is iterating through each note. It first calculates an index 
-             * for each note - the memory location in calldata where note data is stored. 
-             *   
-             * It then copies the next 128 bytes worth of data from the note, into the appropriate memory location
-             *
-             * Following this, we take the kecca hash of all the note data that we've copied over into memory. 
-             *
-             * We store the result of the kecca hash in memory location 0x00
-             **/
-            function hashCommitments(notes, n) {
-                for { let i := 0 } lt(i, n) { i := add(i, 0x01) } { // iterating through i
-                    // goes to the start of the appropriate note, then steps in by 0x60 (96 bytes)
-                    let index := add(add(notes, mul(i, 0xc0)), 0x60) 
+             */
 
-                    // copy 0x80 (128 bytes) from call data at position index to 
-                    // memory location (0x300 + note_number * 0x80)
+            function hashCommitments(notes, n) {
+                for { let i := 0 } lt(i, n) { i := add(i, 0x01) } { 
+                    let index := add(add(notes, mul(i, 0xc0)), 0x60) 
                     calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
                 mstore(0x00, keccak256(0x300, mul(n, 0x80)))

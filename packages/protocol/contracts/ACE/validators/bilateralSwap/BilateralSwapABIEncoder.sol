@@ -5,7 +5,6 @@ library BilateralSwapABIEncoder {
     /**
     * New calldata map
     * 0x04:0x24      = calldata location of proofData byte array - pointer to the proofData. 
-    *                  Think this has a fixed length - must do for consistency
     * 0x24:0x44      = message sender // sender
     * 0x44:0x64      = h_x     // crs
     * 0x64:0x84      = h_y     // crs
@@ -33,7 +32,6 @@ library BilateralSwapABIEncoder {
             let metadata := add(0x144, calldataload(0x1a4)) // two words after metadata = 1st
 
             // memory map of `proofOutputs`
-
             // 0x00 - 0x160  = scratch data for EIP712 signature computation and note hash computation
             // ACE_NOTE_SIGNATURE struct hash variables
             // 0x80 = struct hash
@@ -93,14 +91,13 @@ library BilateralSwapABIEncoder {
             // length of proofOutput is at s + 0x60
             mstore(0x200, 0xa0)                            // location of inputNotes
             mstore(0x240, 0x00)             // publicOwner
-
-            // location of outputNotes is at s + 0xa0
  
             let kPublic := 0
             mstore(0x260, kPublic)
 
             let inputPtr := 0x280                                 // point to inputNotes
             mstore(add(inputPtr, 0x20), m)                        // number of input notes
+
             // set note pointer, offsetting lookup indices for each input note
             let s := add(0x2c0, mul(m, 0x20))
 
@@ -110,13 +107,14 @@ library BilateralSwapABIEncoder {
                 // copy note data to 0x00 - 0x80
                 calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
-                // construct EIP712 signature parameters
-                mstore(0xc0, keccak256(0x00, 0x80)) // note hash
+                // construct hash of note data
+                mstore(0xc0, keccak256(0x00, 0x80)) 
 
                 // store note length in `s`
                 mstore(s, 0xa0)
                 // store note owner in `s + 0x20`. If there is no owners, or signing address is `0`, throw an error
                 mstore(add(s, 0x20), calldataload(add(inputOwners, mul(i, 0x20))))
+                
                 // store note hash in `s + 0x40`
                 mstore(add(s, 0x40), mload(0xc0))
                 // store note metadata length in `s + 0x60` (just the coordinates)
@@ -167,8 +165,7 @@ library BilateralSwapABIEncoder {
  
                 // get size of metadata
                 let metadataLength := calldataload(add(sub(metadata, 0x40), metadataIndex))
-                // mstore(0x00, metadata)
-                // return(0x00, 0x20)
+
                 // copy note data to 0x00 - 0x80
                 calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
@@ -216,7 +213,6 @@ library BilateralSwapABIEncoder {
             let notesLength := sub(s, 0x280)
             mstore(0x1e0, add(0x80, notesLength)) // store length of proofOutput at 0x160
             mstore(0x180, add(0xe0, notesLength)) // store length of proofOutputs at 0x100
-            // mstore(0x00 , notesLength) return(0x00, 0x20)
             mstore(0x160, 0x20)
             return(0x160, add(0x120, notesLength)) // return the final byte array
         }

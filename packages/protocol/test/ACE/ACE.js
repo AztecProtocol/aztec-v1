@@ -78,7 +78,6 @@ function encodeJoinSplitTransaction({
 }
 
 contract('ACE', (accounts) => {
-    // Creating a collection of tests that should pass
     describe('initialization tests', () => {
         let ace;
         beforeEach(async () => {
