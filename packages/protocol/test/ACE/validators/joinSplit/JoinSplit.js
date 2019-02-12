@@ -8,8 +8,8 @@ const { padLeft, sha3 } = require('web3-utils');
 const { proof: { joinSplit } } = aztec;
 
 // ### Artifacts
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitABIEncoder');
 
 
 JoinSplit.abi = JoinSplitInterface.abi;
@@ -52,7 +52,7 @@ function encodeJoinSplitTransaction({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${aztec.abiEncoder.joinSplit.outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
@@ -63,7 +63,7 @@ function encodeJoinSplitTransaction({
 
 contract('JoinSplit', (accounts) => {
     let aztecContract;
-
+    // Creating a collection of tests that should pass
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
@@ -77,6 +77,24 @@ contract('JoinSplit', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, i * 10)),
             ];
         });
+
+        /*
+          General structure of the success state unit tests:
+          1) Construct the commitments from a selection of k_in and k_out (input and output values)
+          2) Generate the proofData and random challenge. Proof data contains notes,
+             and each note contains 6 pieces of information:
+              a) gamma_x
+              b) gamma_y
+              c) sigma_x
+              d) sigma_y
+              e) k^bar
+              f) a^bar
+              Note: a), b), c) and d) are the Pedersen commitment data
+              Note: Syntax to access proof data for one note: proofData[].
+              Syntax to access gamma_x for a particular note: proofData[][0]
+          3) Validate that these result in a successfull join-split transaction
+          4) Calculate the gas used in validating this join-split transaction
+          */
 
         it('succesfully validates an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
             const inputNotes = notes.slice(2, 4);
@@ -97,7 +115,7 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             });
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.joinSplit.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
@@ -177,7 +195,7 @@ contract('JoinSplit', (accounts) => {
                 gas: 4000000,
             });
             expect(result).to.equal(expectedOutput);
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.joinSplit.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].publicValue).to.equal(-40);
 
 
