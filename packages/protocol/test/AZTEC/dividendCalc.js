@@ -7,8 +7,8 @@ const web3Utils = require('web3-utils');
 // ### Internal Dependencies
 const aztec = require('aztec.js');
 const { params: { t2, GROUP_MODULUS, K_MAX } } = require('aztec.js');
+const { exceptions } = require('@aztec/dev-utils');
 
-const exceptions = require('../../utils/exceptions');
 
 // ### Artifacts
 const DividendCalc = artifacts.require('./contracts/AZTEC/DividendCalc');
