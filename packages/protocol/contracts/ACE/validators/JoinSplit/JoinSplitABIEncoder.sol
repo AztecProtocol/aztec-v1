@@ -231,7 +231,6 @@ library JoinSplitABIEncoder {
             let notesLength := sub(s, 0x280)
             mstore(0x1e0, add(0x80, notesLength)) // store length of proofOutput at 0x160
             mstore(0x180, add(0xe0, notesLength)) // store length of proofOutputs at 0x100
-            // mstore(0x00 , notesLength) return(0x00, 0x20)
             mstore(0x160, 0x20)
             return(0x160, add(0x120, notesLength)) // return the final byte array
         }

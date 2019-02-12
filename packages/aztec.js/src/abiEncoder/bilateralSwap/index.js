@@ -12,7 +12,7 @@ const abi = {
     INPUT_OWNERS: 2,
     OUTPUT_OWNERS: 3,
     METADATA: 4,
-    START_DATA: 5, // these numbers are index positions for parameters later on
+    START_DATA: 5,
 };
 
 function encodeNote(notes) {
@@ -73,18 +73,17 @@ bilateralSwap.encodeMetadata = (notes) => {
     };
 };
 
-// the output of all this becomes the proof data
 bilateralSwap.encode = (proofData, challenge, inputOwners, outputOwners, metadata) => {
     const parameters = [];
-    parameters[abi.CHALLENGE] = challenge.slice(2); // 0x00 - 0x20
-    parameters[abi.PROOF_DATA] = ''; // 0x20 - 0x40
-    parameters[abi.INPUT_OWNERS] = ''; // 0x40 - 0x60
-    parameters[abi.OUTPUT_OWNERS] = ''; // 0x60 - 0x80
-    parameters[abi.METADATA] = ''; // 0x80 - 0xA0
-    let offset = (abi.START_DATA + 1) * 32; // setting an offset to just over the first entry in these bytes arguments
-    const formattedProofData = encodeProofData(proofData); // just formatting the proof data
-    parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64); // putting the offset in
-    offset += formattedProofData.length; // increasing the offset by the length of the formatted proof data
+    parameters[abi.CHALLENGE] = challenge.slice(2);
+    parameters[abi.PROOF_DATA] = '';
+    parameters[abi.INPUT_OWNERS] = '';
+    parameters[abi.OUTPUT_OWNERS] = '';
+    parameters[abi.METADATA] = '';
+    let offset = (abi.START_DATA + 1) * 32;
+    const formattedProofData = encodeProofData(proofData);
+    parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64);
+    offset += formattedProofData.length;
     const formattedInputOwners = encodeInputOwners(inputOwners);
     parameters[abi.INPUT_OWNERS] = padLeft(offset.toString(16), 64);
     offset += formattedInputOwners.length;

@@ -77,13 +77,13 @@ abiEncoderDividendComputation.encodeMetadata = (notes) => {
 
 abiEncoderDividendComputation.encode = (proofData, challenge, za, zb, inputOwners, outputOwners, metadata) => {
     const parameters = [];
-    parameters[abi.CHALLENGE] = challenge.slice(2); // 0x00 - 0x20
-    parameters[abi.ZA] = padLeft(Number(za).toString(16), 64); // 0x20 - 0x40
-    parameters[abi.ZB] = padLeft(Number(zb).toString(16), 64); // 0x40 - 0x60
-    parameters[abi.PROOF_DATA] = ''; // 0x60 - 0x80
-    parameters[abi.INPUT_OWNERS] = ''; // 0x80 - 0xa0
-    parameters[abi.OUTPUT_OWNERS] = ''; // 0xa0 - 0xc0
-    parameters[abi.METADATA] = ''; // 0xc0 - 0xe0 
+    parameters[abi.CHALLENGE] = challenge.slice(2);
+    parameters[abi.ZA] = padLeft(Number(za).toString(16), 64);
+    parameters[abi.ZB] = padLeft(Number(zb).toString(16), 64);
+    parameters[abi.PROOF_DATA] = '';
+    parameters[abi.INPUT_OWNERS] = '';
+    parameters[abi.OUTPUT_OWNERS] = '';
+    parameters[abi.METADATA] = '';
     let offset = (abi.START_DATA + 1) * 32;
     const formattedProofData = encodeProofData(proofData);
     parameters[abi.PROOF_DATA] = padLeft(offset.toString(16), 64);

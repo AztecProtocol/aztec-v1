@@ -61,8 +61,7 @@ contract('Bilateral Swap', (accounts) => {
             bilateralSwapContract = await BilateralSwap.new(fakeNetworkId, {
                 from: accounts[0],
             });
-            // Need to set the value of the notes created, to be consistent with the 
-            // bilateral swap condition
+
             const noteValues = [10, 20, 10, 20];
 
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());

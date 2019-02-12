@@ -64,7 +64,6 @@ outputCoder.decodeNotes = (notes, isOutput) => {
 };
 
 outputCoder.decodeProofOutput = (proofOutput) => {
-    // const byteLength = parseInt(proofOutput.slice(0x00, 0x40), 16);
     const inputNotesOffset = parseInt(proofOutput.slice(0x40, 0x80), 16);
     const outputNotesOffset = parseInt(proofOutput.slice(0x80, 0xc0), 16);
     const publicOwner = `0x${proofOutput.slice(0xd8, 0x100)}`;

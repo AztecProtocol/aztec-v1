@@ -21,7 +21,6 @@ contract('ABI Encoder', (accounts) => {
     let aztecAccounts = [];
     let notes = [];
 
-    // Creating a collection of tests that should pass
     describe('success states', () => {
         let crs;
         beforeEach(async () => {

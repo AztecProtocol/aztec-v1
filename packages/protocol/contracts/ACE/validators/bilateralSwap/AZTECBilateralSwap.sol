@@ -30,10 +30,10 @@ contract BilateralSwapInterface {
 contract AZTECBilateralSwap {
 
     /**
-     * @dev BilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
+     * @dev AZTECBilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
-     * @notice See AZTECInterface for how method calls should be constructed.
-     * BilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
+     * @notice See BilateralSwapInterface for how method calls should be constructed.
+     * AZTECBilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     function() external payable {
         assembly {
@@ -46,8 +46,7 @@ contract AZTECBilateralSwap {
 
             /**
              * New calldata map
-             * 0x04:0x24      = calldata location of proofData byte array - pointer to the proofData. 
-             *                  Think this has a fixed length - must do for consistency
+             * 0x04:0x24      = calldata location of proofData byte array 
              * 0x24:0x44      = message sender // sender
              * 0x44:0x64      = h_x     // crs
              * 0x64:0x84      = h_y     // crs
@@ -94,7 +93,7 @@ contract AZTECBilateralSwap {
                 mstore(0x80, calldataload(0x44)) // h_x
                 mstore(0xa0, calldataload(0x64)) // h_y
                 let notes := add(0x104, calldataload(0x144)) // start position of notes
-                let n := calldataload(notes) // first element of the notes array is the length of it
+                let n := calldataload(notes) // first element of the notes array is it's length
 
                 if iszero(eq(n, 0x04)) { // eq(n, 4) will resolve to 0 if n != 4
 
