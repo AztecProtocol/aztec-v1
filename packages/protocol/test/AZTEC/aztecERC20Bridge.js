@@ -1,4 +1,4 @@
-/* global artifacts, contract, beforeEach, expect, it:true */
+/* global artifacts, contract, expect, it:true */
 /* eslint-disable no-console */
 const BN = require('bn.js');
 const Web3 = require('web3');
