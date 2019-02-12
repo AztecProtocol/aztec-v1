@@ -41,7 +41,7 @@ function encodeBilateralSwapTransaction({
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
-    const expectedOutput = `0x${aztec.abiEncoder.bilateralSwap.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
@@ -92,7 +92,7 @@ contract('Bilateral Swap', (accounts) => {
                 gas: 4000000,
             });
 
-            const decoded = aztec.abiEncoder.bilateralSwap.outputCoder.decodeProofOutputs(
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(
                 `0x${padLeft('0', 64)}${result.slice(2)}`
             );
 

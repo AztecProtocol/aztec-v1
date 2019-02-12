@@ -1,12 +1,17 @@
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
-const bn128 = require('../../../src/bn128');
-const secp256k1 = require('../../../src/secp256k1');
-const note = require('../../../src/note');
-const dividendComputation = require('../../../src/abiEncoder/dividendComputation');
+const bn128 = require('../../src/bn128');
+const secp256k1 = require('../../src/secp256k1');
+const note = require('../../src/note');
+const joinSplit = require('../../src/abiEncoder/joinSplit');
+const { K_MAX } = require('../../src/params');
 
 const { expect } = chai;
+
+function randomNoteValue() {
+    return Math.floor(Math.random() * Math.floor(K_MAX));
+}
 
 function clean(input) {
     return input.replace(/^0+/, '');
@@ -29,14 +34,13 @@ class HexString extends String {
     }
 }
 
-describe('abiEncioder.outputCoder tests', () => {
+describe('abiEncoder.outputCoder tests', () => {
     let accounts = [];
     let notes = [];
     beforeEach(() => {
-        const noteValues = [90, 4, 50];
-        accounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-        notes = accounts.map(({ publicKey }, i) => {
-            return note.create(publicKey, noteValues[i]);
+        accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
+        notes = accounts.map(({ publicKey }) => {
+            return note.create(publicKey, randomNoteValue());
         });
     });
 
@@ -49,7 +53,7 @@ describe('abiEncioder.outputCoder tests', () => {
     });
 
     it('outputCoder can encode output note', () => {
-        const encoded = new HexString(dividendComputation.outputCoder.encodeOutputNote(notes[0]));
+        const encoded = new HexString(joinSplit.outputCoder.encodeOutputNote(notes[0]));
         expect(isHex(encoded)).to.equal(true);
         expect(encoded.hexLength()).to.equal(0xe1);
 
@@ -63,7 +67,7 @@ describe('abiEncioder.outputCoder tests', () => {
     });
 
     it('outputCoder can encode input note', () => {
-        const encoded = new HexString(dividendComputation.outputCoder.encodeInputNote(notes[0]));
+        const encoded = new HexString(joinSplit.outputCoder.encodeInputNote(notes[0]));
         expect(isHex(encoded)).to.equal(true);
         expect(encoded.hexLength()).to.equal(0xc0);
 
@@ -76,8 +80,8 @@ describe('abiEncioder.outputCoder tests', () => {
     });
 
     it('outputCoder can encode notes', () => {
-        const inputNotes = [notes[0]];
-        const encoded = new HexString(dividendComputation.outputCoder.encodeNotes(inputNotes, true));
+        const inputNotes = [notes[0], notes[2], notes[5]];
+        const encoded = new HexString(joinSplit.outputCoder.encodeNotes(inputNotes, true));
 
         expect(isHex(encoded)).to.equal(true);
         const length = parseInt(encoded.slice(0x20, 0x40), 16);
@@ -89,18 +93,18 @@ describe('abiEncioder.outputCoder tests', () => {
             const byteLength = parseInt(encoded.slice(location, location + 0x20), 16);
             const encodedNote = encoded.slice(location, location + 0x20 + byteLength);
             sum += (byteLength + 0x40);
-            expect(encodedNote).to.equal(dividendComputation.outputCoder.encodeOutputNote(inputNotes[i]));
+            expect(encodedNote).to.equal(joinSplit.outputCoder.encodeOutputNote(inputNotes[i]));
         }
         expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(sum - 0x20);
         expect(encoded.hexLength()).to.equal(sum);
     });
 
     it('outputCoder can encode a proof output', () => {
-        const inputNotes = [notes[0]];
-        const outputNotes = [notes[1], notes[2]];
-        const publicOwner = '0x0000000000000000000000000000000000000000';
-        const publicValue = 0;
-        const encoded = new HexString(dividendComputation.outputCoder.encodeProofOutput({
+        const inputNotes = [notes[0], notes[1]];
+        const outputNotes = [notes[2], notes[3], notes[4]];
+        const publicOwner = accounts[5].address;
+        const publicValue = randomNoteValue();
+        const encoded = new HexString(joinSplit.outputCoder.encodeProofOutput({
             inputNotes,
             outputNotes,
             publicOwner,
@@ -123,24 +127,24 @@ describe('abiEncioder.outputCoder tests', () => {
         expect(recoveredValue).to.equal(publicValue);
         expect(parseInt(encoded.slice(inputsLocation + 0x20, inputsLocation + 0x40), 16)).to.equal(inputNotes.length);
         expect(parseInt(encoded.slice(outputsLocation + 0x20, outputsLocation + 0x40), 16)).to.equal(outputNotes.length);
-        expect(String(encodedInputNotes)).to.equal(dividendComputation.outputCoder.encodeNotes(inputNotes, false));
-        expect(String(encodedOutputNotes)).to.equal(dividendComputation.outputCoder.encodeNotes(outputNotes, true));
+        expect(String(encodedInputNotes)).to.equal(joinSplit.outputCoder.encodeNotes(inputNotes, false));
+        expect(String(encodedOutputNotes)).to.equal(joinSplit.outputCoder.encodeNotes(outputNotes, true));
         expect(encoded.hexLength()).to.equal(totalLength);
     });
 
     it('outputCoder can encode proof outputs', () => {
         const proofs = [{
-            inputNotes: [notes[0]],
-            outputNotes: [notes[1], notes[2]],
-            publicOwner: '0x0000000000000000000000000000000000000000',
-            publicValue: 0,
+            inputNotes: [notes[0], notes[1]],
+            outputNotes: [notes[2], notes[3]],
+            publicOwner: accounts[4].address,
+            publicValue: randomNoteValue(),
         }, {
-            inputNotes: [notes[0]],
-            outputNotes: [notes[1], notes[2]],
-            publicOwner: '0x0000000000000000000000000000000000000000',
-            publicValue: 0,
+            inputNotes: [notes[5], notes[6]],
+            outputNotes: [notes[7], notes[8]],
+            publicOwner: accounts[9].address,
+            publicValue: randomNoteValue(),
         }];
-        const encoded = new HexString(dividendComputation.outputCoder.encodeProofOutputs(proofs).slice(2));
+        const encoded = new HexString(joinSplit.outputCoder.encodeProofOutputs(proofs).slice(2));
         expect(isHex(encoded)).to.equal(true);
 
         const encodedLength = parseInt(encoded.slice(0x00, 0x20), 16);
@@ -152,7 +156,7 @@ describe('abiEncioder.outputCoder tests', () => {
             const location = parseInt(encoded.slice(0x40 + (i * 0x20), 0x60 + (i * 0x20)), 16);
             const byteLength = parseInt(encoded.slice(location, location + 0x20), 16);
             const proofOutput = encoded.slice(location, location + 0x20 + byteLength);
-            expect(proofOutput).to.equal(dividendComputation.outputCoder.encodeProofOutput(proofs[i]).toLowerCase());
+            expect(proofOutput).to.equal(joinSplit.outputCoder.encodeProofOutput(proofs[i]).toLowerCase());
             sum += (byteLength + 0x40);
         }
         expect(encodedLength).to.equal(sum - 0x20);
@@ -160,8 +164,8 @@ describe('abiEncioder.outputCoder tests', () => {
     });
 
     it('outputCoder can decode an encoded output note', () => {
-        const encoded = dividendComputation.outputCoder.encodeOutputNote(notes[0]);
-        const result = dividendComputation.outputCoder.decodeOutputNote(encoded);
+        const encoded = joinSplit.outputCoder.encodeOutputNote(notes[0]);
+        const result = joinSplit.outputCoder.decodeOutputNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
         expect(result.sigma.eq(notes[0].sigma)).to.equal(true);
         expect(result.ephemeral.eq(notes[0].ephemeral.getPublic())).to.equal(true);
@@ -170,8 +174,8 @@ describe('abiEncioder.outputCoder tests', () => {
     });
 
     it('outputCoder can decode an encoded input note', () => {
-        const encoded = dividendComputation.outputCoder.encodeInputNote(notes[0]);
-        const result = dividendComputation.outputCoder.decodeInputNote(encoded);
+        const encoded = joinSplit.outputCoder.encodeInputNote(notes[0]);
+        const result = joinSplit.outputCoder.decodeInputNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
         expect(result.sigma.eq(notes[0].sigma)).to.equal(true);
         expect(result.owner).to.equal(notes[0].owner);
@@ -179,8 +183,8 @@ describe('abiEncioder.outputCoder tests', () => {
     });
 
     it('outputCoder can decode encoded input notes', () => {
-        const encoded = dividendComputation.outputCoder.encodeNotes([notes[0], notes[1]], true);
-        const result = dividendComputation.outputCoder.decodeNotes(encoded, true);
+        const encoded = joinSplit.outputCoder.encodeNotes([notes[0], notes[1]], true);
+        const result = joinSplit.outputCoder.decodeNotes(encoded, true);
         expect(result.length).to.equal(2);
         for (let i = 0; i < result.length; i += 1) {
             expect(result[i].gamma.eq(notes[i].gamma)).to.equal(true);
@@ -192,17 +196,17 @@ describe('abiEncioder.outputCoder tests', () => {
     });
 
     it('outputCoder can decode a proof output', () => {
-        const encoded = dividendComputation.outputCoder.encodeProofOutput({
-            inputNotes: [notes[0]],
-            outputNotes: [notes[1], notes[2]],
-            publicOwner: '0x0000000000000000000000000000000000000000',
-            publicValue: 0,
+        const encoded = joinSplit.outputCoder.encodeProofOutput({
+            inputNotes: [notes[0], notes[1]],
+            outputNotes: [notes[2], notes[3]],
+            publicOwner: notes[3].owner,
+            publicValue: 123456789,
         });
-        const result = dividendComputation.outputCoder.decodeProofOutput(encoded);
+        const result = joinSplit.outputCoder.decodeProofOutput(encoded);
 
-        expect(result.publicOwner).to.equal('0x0000000000000000000000000000000000000000');
-        expect(result.publicValue).to.equal(0);
-        expect(result.inputNotes.length).to.equal(1);
+        expect(result.publicOwner).to.equal(notes[3].owner);
+        expect(result.publicValue).to.equal(123456789);
+        expect(result.inputNotes.length).to.equal(2);
         expect(result.outputNotes.length).to.equal(2);
         for (let i = 0; i < result.inputNotes.length; i += 1) {
             expect(result.inputNotes[i].gamma.eq(notes[i].gamma)).to.equal(true);
@@ -211,33 +215,29 @@ describe('abiEncioder.outputCoder tests', () => {
             expect(result.inputNotes[i].noteHash).to.equal(notes[i].noteHash);
         }
         for (let i = 0; i < result.outputNotes.length; i += 1) {
-            // the indexing pattern notes[i + 1] is used, rather than notes[i] because 
-            // i starts off equal to 1. We are dealing with output notes only here, 
-            // which for a dividendComputation begin at i = 1. Hence, we 'jump' over
-            // the input note using i + 1
-            expect(result.outputNotes[i].gamma.eq(notes[i + 1].gamma)).to.equal(true);
-            expect(result.outputNotes[i].sigma.eq(notes[i + 1].sigma)).to.equal(true);
-            expect(result.outputNotes[i].ephemeral.eq(notes[i + 1].ephemeral.getPublic())).to.equal(true);
-            expect(result.outputNotes[i].owner).to.equal(notes[i + 1].owner);
-            expect(result.outputNotes[i].noteHash).to.equal(notes[i + 1].noteHash);
+            expect(result.outputNotes[i].gamma.eq(notes[i + 2].gamma)).to.equal(true);
+            expect(result.outputNotes[i].sigma.eq(notes[i + 2].sigma)).to.equal(true);
+            expect(result.outputNotes[i].ephemeral.eq(notes[i + 2].ephemeral.getPublic())).to.equal(true);
+            expect(result.outputNotes[i].owner).to.equal(notes[i + 2].owner);
+            expect(result.outputNotes[i].noteHash).to.equal(notes[i + 2].noteHash);
         }
     });
 
 
     it('outputCoder can decode proof outputs', () => {
         const proofOutputs = [{
-            inputNotes: [notes[0]],
-            outputNotes: [notes[1], notes[2]],
-            publicOwner: '0x0000000000000000000000000000000000000000',
-            publicValue: 0,
+            inputNotes: [notes[0], notes[1]],
+            outputNotes: [notes[2], notes[3]],
+            publicOwner: notes[3].owner,
+            publicValue: 123456789,
         }, {
-            inputNotes: [notes[0]],
-            outputNotes: [notes[1], notes[2]],
-            publicOwner: '0x0000000000000000000000000000000000000000',
-            publicValue: 0,
+            inputNotes: [notes[4], notes[5]],
+            outputNotes: [notes[7], notes[6]],
+            publicOwner: notes[8].owner,
+            publicValue: 987654321,
         }];
-        const encoded = dividendComputation.outputCoder.encodeProofOutputs(proofOutputs);
-        const result = dividendComputation.outputCoder.decodeProofOutputs(encoded);
+        const encoded = joinSplit.outputCoder.encodeProofOutputs(proofOutputs);
+        const result = joinSplit.outputCoder.decodeProofOutputs(encoded);
         expect(result.length).to.equal(proofOutputs.length);
         for (let i = 0; i < result.length; i += 1) {
             expect(result[i].publicOwner).to.equal(proofOutputs[i].publicOwner.toLowerCase());

@@ -1,7 +1,7 @@
 const { padLeft } = require('web3-utils');
 
 const secp256k1 = require('../../secp256k1');
-const outputCoder = require('./outputCoder');
+const outputCoder = require('../outputCoder');
 
 const abiEncoderDividendComputation = {};
 abiEncoderDividendComputation.outputCoder = outputCoder;

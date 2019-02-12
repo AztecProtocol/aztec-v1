@@ -71,14 +71,14 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 gas: 4000000,
             });
 
-            const expected = aztec.abiEncoder.bilateralSwap.outputCoder.encodeProofOutputs([{
+            const expected = aztec.abiEncoder.outputCoder.encodeProofOutputs([{
                 inputNotes,
                 outputNotes,
                 publicOwner,
                 publicValue,
             }]);
 
-            const decoded = aztec.abiEncoder.bilateralSwap.outputCoder.decodeProofOutputs(
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(
                 `0x${padLeft('0', 64)}${result.slice(2)}`
             );
 
