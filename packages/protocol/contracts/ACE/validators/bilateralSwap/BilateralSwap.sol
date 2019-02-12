@@ -27,7 +27,7 @@ contract BilateralSwapInterface {
  * contains no storage and makes no external calls (other than to precompiles)
  * Copyright Spilbury Holdings Ltd 2018. All rights reserved.
  **/
-contract AZTECBilateralSwap {
+contract BilateralSwap {
 
     /**
      * @dev AZTECBilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
