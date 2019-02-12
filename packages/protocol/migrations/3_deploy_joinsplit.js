@@ -1,12 +1,9 @@
 /* global artifacts */
-const JoinSplit = artifacts.require('./JoinSplit.sol');
-const JoinSplitInterface = artifacts.require('./JoinSplitInterface.sol');
+const AZTECJoinSplit = artifacts.require('./AZTECJoinSplit.sol');
+const AZTECJoinSplitInterface = artifacts.require('./AZTECJoinSplitInterface.sol');
 
-JoinSplit.abi = JoinSplitInterface.abi;
+AZTECJoinSplit.abi = AZTECJoinSplitInterface.abi;
 
 module.exports = (deployer) => {
-    // just a bytecode switcheroo, nothing to see here...
-    // JoinSplit.bytecode = JoinSplit.bytecode.replace('JoinSplitInterface', 'JoinSplit');
-    // JoinSplit.deployedBytecode = JoinSplit.deployedBytecode.replace('JoinSplitInterface', 'JoinSplit');
-    return deployer.deploy(JoinSplit, deployer.network_id);
+    return deployer.deploy(AZTECJoinSplit, deployer.network_id);
 };
