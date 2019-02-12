@@ -1,9 +1,9 @@
 /* global artifacts */
-const AZTECJoinSplit = artifacts.require('./AZTECJoinSplit.sol');
-const AZTECJoinSplitInterface = artifacts.require('./AZTECJoinSplitInterface.sol');
+const JoinSplit = artifacts.require('./JoinSplit.sol');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface.sol');
 
-AZTECJoinSplit.abi = AZTECJoinSplitInterface.abi;
+JoinSplit.abi = JoinSplitInterface.abi;
 
 module.exports = (deployer) => {
-    return deployer.deploy(AZTECJoinSplit, deployer.network_id);
+    return deployer.deploy(JoinSplit, deployer.network_id);
 };
