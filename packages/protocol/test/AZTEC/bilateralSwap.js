@@ -33,7 +33,7 @@ function generateNoteValue() {
 }
 
 
-contract.only('BilateralSwap', (accounts) => {
+contract('BilateralSwap', (accounts) => {
     describe('success states', () => {
         let bilateralSwap;
         let testNotes;

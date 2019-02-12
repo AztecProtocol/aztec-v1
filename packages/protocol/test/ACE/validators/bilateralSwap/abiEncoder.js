@@ -10,7 +10,7 @@ const { params: { t2 } } = require('aztec.js');
 
 // ### Artifacts
 const BilateralSwapAbiEncoder = artifacts.require(
-    './contracts/ACE/validators/AZTECBilateralSwap/bilateralSwap/BilateralSwapABIEncoderTest'
+    './contracts/ACE/validators/BilateralSwap/bilateralSwap/BilateralSwapABIEncoderTest'
 );
 
 

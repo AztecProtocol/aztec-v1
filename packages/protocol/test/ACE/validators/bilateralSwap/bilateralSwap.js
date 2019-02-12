@@ -10,7 +10,7 @@ const { proof: { bilateralSwap } } = require('aztec.js');
 
 
 // ### Artifacts
-const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/AZTECBilateralSwap');
+const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
 const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwapInterface');
 
 
