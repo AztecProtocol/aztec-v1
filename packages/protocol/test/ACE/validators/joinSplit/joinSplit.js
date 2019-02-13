@@ -43,7 +43,7 @@ function encodeJoinSplitTransaction({
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = aztec.abiEncoder.joinSplit.encode(
+    const proofData = aztec.abiEncoder.inputCoder.joinSplit(
         proofDataRaw,
         m,
         challenge,
@@ -61,7 +61,7 @@ function encodeJoinSplitTransaction({
     return { proofData, expectedOutput };
 }
 
-contract('JoinSplit', (accounts) => {
+contract.only('JoinSplit', (accounts) => {
     let aztecContract;
 
     // Creating a collection of tests that should pass
@@ -435,7 +435,7 @@ contract('JoinSplit', (accounts) => {
                 .map(() => [...Array(6)]
                     .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
 
-            const proofData = aztec.abiEncoder.joinSplit.encode(
+            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
                 fakeProofData,
                 m,
                 challenge,
@@ -479,7 +479,7 @@ contract('JoinSplit', (accounts) => {
             });
             const outputOwners = outputNotes.map(n => n.owner);
 
-            const proofData = aztec.abiEncoder.joinSplit.encode(
+            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
                 proofDataRaw,
                 m,
                 challenge,
@@ -522,7 +522,7 @@ contract('JoinSplit', (accounts) => {
                 );
             });
             const outputOwners = outputNotes.map(n => n.owner);
-            const proofData = aztec.abiEncoder.joinSplit.encode(
+            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
                 proofDataRaw,
                 m,
                 challenge,
@@ -566,7 +566,7 @@ contract('JoinSplit', (accounts) => {
                 );
             });
             const outputOwners = aztecAccounts.slice(2, 4).map(a => a.address);
-            const proofData = aztec.abiEncoder.joinSplit.encode(
+            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
                 proofDataRaw,
                 m,
                 challenge,
@@ -602,7 +602,7 @@ contract('JoinSplit', (accounts) => {
             ];
             const outputOwners = [];
             const publicOwner = aztecAccounts[0].address;
-            const proofData = aztec.abiEncoder.joinSplit.encode(
+            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
                 proofDataRaw,
                 m,
                 challenge,
