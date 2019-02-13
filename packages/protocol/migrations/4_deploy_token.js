@@ -19,6 +19,7 @@ module.exports = (deployer, network) => {
         }
         return deployer.deploy(ERC20Mintable).then(({ address: erc20Address }) => {
             const aceAddress = ACE.address;
+            // we're pairing the confidential token with an ERC20, so we cannot mint or burn within this contract
             const canMint = false;
             const canBurn = false;
             const canConvert = true;
