@@ -1,3 +1,4 @@
+/* solhint-disable separate-by-one-line-in-contract*/
 pragma solidity ^0.4.24;
 
 import "../ACE/ACE.sol";
@@ -72,7 +73,6 @@ contract ZKERC20 {
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
     bytes32 public domainHash;
-
     bytes32 private constant NOTE_SIGNATURE_TYPEHASH = keccak256(
         "NoteSignature(bytes32 noteHash, address spender, bool status)"
     );

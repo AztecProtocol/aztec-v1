@@ -1,3 +1,4 @@
+/* solhint-disable separate-by-one-line-in-contract*/
 pragma solidity ^0.4.24;
 
 /*
