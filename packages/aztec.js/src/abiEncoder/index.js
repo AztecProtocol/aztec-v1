@@ -1,12 +1,14 @@
+const outputCoder = require('./outputCoder');
+const inputCoder = require('./inputCoder');
+const encoderFactory = require('./encoderFactory');
 const joinSplit = require('./joinSplit');
 const dividendComputation = require('./dividendComputation');
-const bilateralSwap = require('./bilateralSwap');
-const outputCoder = require('./outputCoder');
 
 
 module.exports = {
+    encoderFactory,
+    inputCoder,
+    outputCoder,
     joinSplit,
     dividendComputation,
-    bilateralSwap,
-    outputCoder,
 };
