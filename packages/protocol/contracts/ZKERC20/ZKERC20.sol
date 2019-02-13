@@ -77,21 +77,27 @@ contract ZKERC20 {
         "NoteSignature(bytes32 noteHash, address spender, bool status)"
     );
 
-    event LogCreateNoteRegistry(address noteRegistry);
-
-    event LogCreateZKERC20(
-        bool canMint,
-        bool canBurn,
-        bool canConvert,
-        uint256 scalingFactor,
-        address linkedToken,
-        address ace
+    event CreateNoteRegistry(address _noteRegistry);
+    event CreateZKERC20(
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert,
+        uint256 _scalingFactor,
+        address _linkedToken,
+        address _ace
     );
-
-    event LogCreateNote(bytes32 indexed _noteHash, address indexed _owner, bytes _metadata);
-    event LogDestroyNote(bytes32 indexed _noteHash, address indexed _owner, bytes _metadata);
-    event LogConvertTokens(address indexed _owner, uint256 _value);
-    event LogRedeemTokens(address indexed _owner, uint256 _value);
+    event CreateNote(
+        bytes32 indexed _noteHash, 
+        address indexed _owner, 
+        bytes _metadata
+    );
+    event DestroyNote(
+        bytes32 indexed _noteHash, 
+        address indexed _owner, 
+        bytes _metadata
+    );
+    event ConvertTokens(address indexed _owner, uint256 _value);
+    event RedeemTokens(address indexed _owner, uint256 _value);
 
     constructor(
         string _name,
@@ -114,9 +120,9 @@ contract ZKERC20 {
             _scalingFactor,
             _linkedTokenAddress
         ));
-        domainHash = EIP712Utils.constructDomainHash("ZKERC20", "0.1.0", 1);
-        emit LogCreateNoteRegistry(noteRegistry);
-        emit LogCreateZKERC20(
+        domainHash = EIP712Utils.constructDomainHash("ZKERC20", "1", 1);
+        emit CreateNoteRegistry(noteRegistry);
+        emit CreateZKERC20(
             _canMint,
             _canBurn,
             _canConvert,
@@ -126,7 +132,28 @@ contract ZKERC20 {
         );
     }
     
-    function confidentialTransfer(bytes _proofData) external returns (bool) {
+    function confidentialApprove(
+        bytes32 _noteHash,
+        address _spender,
+        bool _status,
+        bytes _signature) public returns (bool) {
+        ( uint8 status, , , address noteOwner) = noteRegistry.registry(_noteHash);
+        require(status == 1, "only unspent notes can be approved");
+
+        // validate EIP-712 signature
+        address signer = EIP712Utils.recoverSignature(
+            constructSignatureMessage(
+                _noteHash,
+                _spender,
+                _status
+            ),
+            _signature
+        );
+        require(signer == noteOwner, "the note owner did not sign this message!");
+        confidentialApproved[_noteHash][_spender] = _status;
+    }
+
+    function confidentialTransfer(bytes _proofData) public returns (bool) {
         bytes memory proofOutputs = ace.validateProof(1, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid!");
         bytes memory proofOutput = proofOutputs.get(0);
@@ -142,14 +169,14 @@ contract ZKERC20 {
         logInputNotes(inputNotes);
         logOutputNotes(outputNotes);
         if (publicValue < 0) {
-            emit LogConvertTokens(publicOwner, uint256(-publicValue));
+            emit ConvertTokens(publicOwner, uint256(-publicValue));
         }
         if (publicValue > 0) {
-            emit LogRedeemTokens(publicOwner, uint256(publicValue));
+            emit RedeemTokens(publicOwner, uint256(publicValue));
         }
     }
 
-    function confidentialTransferFrom(uint16 _proofId, bytes _proofOutput) external returns (bool) {
+    function confidentialTransferFrom(uint16 _proofId, bytes _proofOutput) public returns (bool) {
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -170,64 +197,37 @@ contract ZKERC20 {
         logInputNotes(inputNotes);
         logOutputNotes(outputNotes);
         if (publicValue < 0) {
-            emit LogConvertTokens(publicOwner, uint256(-publicValue));
+            emit ConvertTokens(publicOwner, uint256(-publicValue));
         }
         if (publicValue > 0) {
-            emit LogRedeemTokens(publicOwner, uint256(publicValue));
+            emit RedeemTokens(publicOwner, uint256(publicValue));
         }
     }
 
-    function confidentialApprove(
-        bytes32 _noteHash,
-        address _spender,
-        bool _status,
-        bytes _signature) public returns (bool) {
-        (
-            uint8 status,
-            ,
-            ,
-            address noteOwner
-        ) = noteRegistry.registry(_noteHash);
-
-        require(status == 1, "only unspent notes can be approved");
-
-        // validate EIP-712 signature
-        address signer = EIP712Utils.recoverSignature(
-            constructSignatureMessage(
-                _noteHash,
-                _spender,
-                _status
-            ),
-            _signature
-        );
-        require(signer == noteOwner, "the note owner did not sign this message!");
-        confidentialApproved[_noteHash][_spender] = _status;
-    }
-
-    function logInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
-            (address owner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
-            emit LogDestroyNote(noteHash, owner, metadata);
+    function logInputNotes(bytes memory _inputNotes) internal {
+        for (uint i = 0; i < _inputNotes.getLength(); i += 1) {
+            (address owner, bytes32 noteHash, bytes memory metadata) = _inputNotes.get(i).extractNote();
+            emit DestroyNote(noteHash, owner, metadata);
         }
     }
 
-    function logOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
-            (address owner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
-            emit LogCreateNote(noteHash, owner, metadata);
+    function logOutputNotes(bytes memory _outputNotes) internal {
+        for (uint i = 0; i < _outputNotes.getLength(); i += 1) {
+            (address owner, bytes32 noteHash, bytes memory metadata) = _outputNotes.get(i).extractNote();
+            emit CreateNote(noteHash, owner, metadata);
         }
     }
 
     function constructSignatureMessage(
-        bytes32 noteHash,
-        address spender,
-        bool status
+        bytes32 _noteHash,
+        address _spender,
+        bool _status
     ) internal view returns (bytes32) {
         bytes32 structHash = keccak256(abi.encode(
             NOTE_SIGNATURE_TYPEHASH,
-            noteHash,
-            spender,
-            status
+            _noteHash,
+            _spender,
+            _status
         ));
         return keccak256(abi.encodePacked(
             "\x19\x01",
