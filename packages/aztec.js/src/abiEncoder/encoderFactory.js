@@ -75,16 +75,28 @@ encoderFactory.encodeMetadata = (notes) => {
     };
 };
 
-encoderFactory.encode = (config, abiSettings) => {
+encoderFactory.encode = (config, abiSettings, proofType) => {
+    let abiEncodedParameters;
+    let sortedEncodedParameters;
+    let challenge;
+    let m;
+    let publicOwner;
+
     const parameters = Object.keys(abiSettings);
 
-    const [challenge, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
+    if (proofType === 'bilateralSwap') {
+        [challenge, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
+    } else if (proofType === 'joinSplit') {
+        [m, challenge, publicOwner, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
+    } else {
+        throw new Error('incorrect proof name input');
+    }
+
     const encodedParameters = sortedEncodedParameters.reduce((acc, parameter) => {
         const encodedData = config[parameter];
         acc.push(encodedData.data);
         return acc;
     }, []);
-
     const { offsets } = encodedParameters.reduce((acc, encodedParameter) => {
         acc.offsets.push(padLeft(acc.offset.toString(16), 64));
         acc.offset += (encodedParameter.length) / 2;
@@ -94,7 +106,14 @@ encoderFactory.encode = (config, abiSettings) => {
         offsets: [],
     });
 
-    const abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
+
+    if (proofType === 'bilateralSwap') {
+        abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
+    } else if (proofType === 'joinSplit') {
+        abiEncodedParameters = [config.M, config.CHALLENGE, config.PUBLIC_OWNER, ...offsets, ...encodedParameters];
+    } else {
+        throw new Error('incorrect proof name input');
+    }
     return `0x${abiEncodedParameters.join('')}`.toLowerCase();
 };
 

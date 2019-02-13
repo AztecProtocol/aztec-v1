@@ -12,7 +12,7 @@ function randomNoteValue() {
 }
 
 const fakeNetworkId = 100;
-contract('Join Split ABI Encoder', (accounts) => {
+contract.only('Join Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
     let aztecAccounts = [];
     let notes = [];
@@ -52,7 +52,7 @@ contract('Join Split ABI Encoder', (accounts) => {
             });
             const publicOwner = aztecAccounts[0].address;
             const outputOwners = outputNotes.map(n => n.owner);
-            const data = aztec.abiEncoder.joinSplit.encode(
+            const data = aztec.abiEncoder.inputCoder.joinSplit(
                 proofData,
                 m,
                 challenge,
