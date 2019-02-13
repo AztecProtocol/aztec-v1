@@ -4,6 +4,8 @@ const aztec = require('aztec.js');
 const { constants: { CRS, K_MAX } } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
+const { outputCoder, inputCoder } = aztec.abiEncoder;
+const joinSplitEncode = inputCoder.joinSplit;
 // ### Artifacts
 const ABIEncoder = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitABIEncoderTest');
 
@@ -12,7 +14,7 @@ function randomNoteValue() {
 }
 
 const fakeNetworkId = 100;
-contract.only('Join Split ABI Encoder', (accounts) => {
+contract('Join Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
     let aztecAccounts = [];
     let notes = [];
@@ -52,7 +54,7 @@ contract.only('Join Split ABI Encoder', (accounts) => {
             });
             const publicOwner = aztecAccounts[0].address;
             const outputOwners = outputNotes.map(n => n.owner);
-            const data = aztec.abiEncoder.inputCoder.joinSplit(
+            const data = joinSplitEncode(
                 proofData,
                 m,
                 challenge,
@@ -67,14 +69,14 @@ contract.only('Join Split ABI Encoder', (accounts) => {
                 gas: 4000000,
             });
 
-            const expected = aztec.abiEncoder.outputCoder.encodeProofOutputs([{
+            const expected = outputCoder.encodeProofOutputs([{
                 inputNotes,
                 outputNotes,
                 publicOwner,
                 publicValue: 0,
             }]);
 
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);

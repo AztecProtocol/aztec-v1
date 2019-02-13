@@ -7,6 +7,7 @@ const { padLeft } = require('web3-utils');
 const aztec = require('aztec.js');
 const { params: { t2 } } = require('aztec.js');
 
+const dividendInputEncode = aztec.abiEncoder.inputCoder.dividendComputation;
 
 // ### Artifacts
 const dividend = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputation');
@@ -36,7 +37,7 @@ function encodeDividendComputationTransaction({
 
     const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
 
-    const proofData = aztec.abiEncoder.dividendComputation.encode(
+    const proofData = dividendInputEncode(
         proofDataRawFormatted,
         challenge,
         za,

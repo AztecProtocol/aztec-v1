@@ -81,6 +81,8 @@ encoderFactory.encode = (config, abiSettings, proofType) => {
     let challenge;
     let m;
     let publicOwner;
+    let za;
+    let zb;
 
     const parameters = Object.keys(abiSettings);
 
@@ -88,6 +90,8 @@ encoderFactory.encode = (config, abiSettings, proofType) => {
         [challenge, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
     } else if (proofType === 'joinSplit') {
         [m, challenge, publicOwner, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
+    } else if (proofType === 'dividendComputation') {
+        [challenge, za, zb, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
     } else {
         throw new Error('incorrect proof name input');
     }
@@ -106,11 +110,12 @@ encoderFactory.encode = (config, abiSettings, proofType) => {
         offsets: [],
     });
 
-
     if (proofType === 'bilateralSwap') {
         abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
     } else if (proofType === 'joinSplit') {
         abiEncodedParameters = [config.M, config.CHALLENGE, config.PUBLIC_OWNER, ...offsets, ...encodedParameters];
+    } else if (proofType === 'dividendComputation') {
+        abiEncodedParameters = [config.CHALLENGE, config.ZA, config.ZB, ...offsets, ...encodedParameters];
     } else {
         throw new Error('incorrect proof name input');
     }

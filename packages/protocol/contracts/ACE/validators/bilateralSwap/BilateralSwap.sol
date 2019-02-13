@@ -15,7 +15,7 @@ contract BilateralSwapInterface {
 }
 
 
-/**npm aud
+/**
  * @title Library to validate AZTEC Bilateral Swap zero-knowledge proofs
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses 
