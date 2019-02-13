@@ -60,7 +60,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
             const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
-            const data = aztec.abiEncoder.dividendComputation.encode(
+            const data = aztec.abiEncoder.inputCoder.dividendComputation(
                 proofDataFormatted,
                 challenge,
                 za,

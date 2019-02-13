@@ -6,6 +6,8 @@ const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
 
 const { proof: { joinSplit } } = aztec;
+const { outputCoder, inputCoder } = aztec.abiEncoder;
+const joinSplitEncode = inputCoder.joinSplit;
 
 // ### Artifacts
 const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
@@ -43,7 +45,7 @@ function encodeJoinSplitTransaction({
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = aztec.abiEncoder.inputCoder.joinSplit(
+    const proofData = joinSplitEncode(
         proofDataRaw,
         m,
         challenge,
@@ -52,7 +54,7 @@ function encodeJoinSplitTransaction({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
@@ -61,7 +63,7 @@ function encodeJoinSplitTransaction({
     return { proofData, expectedOutput };
 }
 
-contract.only('JoinSplit', (accounts) => {
+contract('JoinSplit', (accounts) => {
     let aztecContract;
 
     // Creating a collection of tests that should pass
@@ -116,7 +118,7 @@ contract.only('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             });
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
@@ -435,7 +437,7 @@ contract.only('JoinSplit', (accounts) => {
                 .map(() => [...Array(6)]
                     .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
 
-            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
+            const proofData = joinSplitEncode(
                 fakeProofData,
                 m,
                 challenge,
@@ -479,7 +481,7 @@ contract.only('JoinSplit', (accounts) => {
             });
             const outputOwners = outputNotes.map(n => n.owner);
 
-            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
+            const proofData = joinSplitEncode(
                 proofDataRaw,
                 m,
                 challenge,
@@ -522,7 +524,7 @@ contract.only('JoinSplit', (accounts) => {
                 );
             });
             const outputOwners = outputNotes.map(n => n.owner);
-            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
+            const proofData = joinSplitEncode(
                 proofDataRaw,
                 m,
                 challenge,
@@ -566,7 +568,7 @@ contract.only('JoinSplit', (accounts) => {
                 );
             });
             const outputOwners = aztecAccounts.slice(2, 4).map(a => a.address);
-            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
+            const proofData = joinSplitEncode(
                 proofDataRaw,
                 m,
                 challenge,
@@ -602,7 +604,7 @@ contract.only('JoinSplit', (accounts) => {
             ];
             const outputOwners = [];
             const publicOwner = aztecAccounts[0].address;
-            const proofData = aztec.abiEncoder.inputCoder.joinSplit(
+            const proofData = joinSplitEncode(
                 proofDataRaw,
                 m,
                 challenge,

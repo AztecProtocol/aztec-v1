@@ -8,7 +8,6 @@ const aztec = require('aztec.js');
 const { params: { t2 } } = require('aztec.js');
 const { proof: { bilateralSwap } } = require('aztec.js');
 
-
 // ### Artifacts
 const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
 const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwapInterface');

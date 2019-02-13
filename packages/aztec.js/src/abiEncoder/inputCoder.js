@@ -39,8 +39,7 @@ inputCoder.bilateralSwap = (proofData, challenge, inputOwners, outputOwners, met
         },
     };
 
-    const result = encoderFactory.encode(configs, abiSettings, 'bilateralSwap');
-    return result;
+    return encoderFactory.encode(configs, abiSettings, 'bilateralSwap');
 };
 
 inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, outputOwners, metadata) => {
@@ -91,8 +90,58 @@ inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, o
         },
     };
 
-    const result = encoderFactory.encode(configs, abiSettings, 'joinSplit');
-    return result;
+    return encoderFactory.encode(configs, abiSettings, 'joinSplit');
+};
+
+inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, outputOwners, metadata) => {
+    const configs = {
+        CHALLENGE: challenge.slice(2),
+        ZA: padLeft(Number(za).toString(16), 64),
+        ZB: padLeft(Number(zb).toString(16), 64),
+        PROOF_DATA: encoderFactory.encodeProofData(proofData),
+        INPUT_OWNERS: encoderFactory.encodeInputOwners(inputOwners),
+        OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(outputOwners),
+        METADATA: encoderFactory.encodeMetadata(metadata),
+    };
+
+    const abiSettings = {
+        CHALLENGE: {
+            inputIndex: 1,
+            encodedIndex: 0,
+        },
+
+        ZA: {
+            inputIndex: 2,
+            encodedIndex: 1,
+        },
+
+        ZB: {
+            inputIndex: 3,
+            encodedIndex: 2,
+        },
+
+        PROOF_DATA: {
+            inputIndex: 0,
+            encodedIndex: 3,
+        },
+
+        INPUT_OWNERS: {
+            inputIndex: 4,
+            encodedIndex: 4,
+        },
+
+        OUTPUT_OWNERS: {
+            inputIndex: 5,
+            encodedIndex: 5,
+        },
+
+        METADATA: {
+            inputIndex: 6,
+            encodedIndex: 6,
+        },
+    };
+
+    return encoderFactory.encode(configs, abiSettings, 'dividendComputation');
 };
 
 module.exports = inputCoder;

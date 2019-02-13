@@ -19,7 +19,8 @@ const {
 } = require('@aztec/dev-utils');
 
 const { joinSplit: aztecProof } = proof;
-const { outputCoder } = abiEncoder;
+const { outputCoder, inputCoder } = abiEncoder;
+const joinSplitEncode = inputCoder.joinSplit;
 
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
@@ -59,7 +60,7 @@ function encodeJoinSplitTransaction({
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = abiEncoder.joinSplit.encode(
+    const proofData = joinSplitEncode(
         proofDataRaw,
         m,
         challenge,
@@ -68,7 +69,7 @@ function encodeJoinSplitTransaction({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${abiEncoder.joinSplit.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
