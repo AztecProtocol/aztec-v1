@@ -58,7 +58,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
             const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
-            const data = aztec.abiEncoder.bilateralSwap.encode(
+            const data = aztec.abiEncoder.inputCoder.bilateralSwap(
                 proofData,
                 challenge,
                 inputOwners,
