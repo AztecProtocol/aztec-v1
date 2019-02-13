@@ -1,50 +1,31 @@
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
-// const bilateralProof = require('../../proof/bilateralProof');
-const bilateralProof = require('../../../src/proof/bilateralSwap');
-const bilateralSwap = require('../../../src/abiEncoder/bilateralSwap');
-const secp256k1 = require('../../../src/secp256k1');
-const note = require('../../../src/note');
+const HexString = require('./HexString');
+const bilateralProof = require('../../src/proof/bilateralSwap');
+const abiEncoder = require('../../src/abiEncoder');
+const secp256k1 = require('../../src/secp256k1');
+const note = require('../../src/note');
 
 const { expect } = chai;
 
-
-class HexString extends String {
-    slice(a, b = null) {
-        if (b) {
-            return (super.slice(a * 2, b * 2));
-        }
-        return (super.slice(a * 2));
-    }
-
-    hexLength() {
-        return this.length / 2;
-    }
-}
-
-
 describe('abiEncoder.bilateralSwap tests', () => {
-    let accounts = [];
-    let notes = [];
-    beforeEach(() => {
-        accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-        const noteValues = [10, 20, 10, 20, 5, 6, 7, 8, 9, 10];
-        notes = accounts.map(({ publicKey }, i) => {
+    it('encodeMetadata works', () => {
+        // Setup
+        const numNotes = 4;
+        const accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+        const noteValues = [10, 20, 10, 20];
+        const notes = accounts.map(({ publicKey }, i) => {
             return note.create(publicKey, noteValues[i]);
         });
-    });
 
-    afterEach(() => {
-    });
-
-    it('encodeMetadata works', () => {
-        const { data, length } = bilateralSwap.encodeMetadata(notes.slice(0, 4));
+        // Body of test
+        const { data, length } = abiEncoder.encoderFactory.encodeMetadata(notes.slice(0, numNotes));
         const result = new HexString(data);
         expect(length).to.equal(result.hexLength());
         expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(result.hexLength() - 0x20);
-        expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(4);
-        for (let i = 0; i < 4; i += 1) {
+        expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(numNotes);
+        for (let i = 0; i < numNotes; i += 1) {
             const offset = parseInt(result.slice(0x40 + (i * 0x20), 0x60 + (i * 0x20)), 16);
             const metadataLength = parseInt(result.slice(offset, offset + 0x20), 16);
             expect(metadataLength).to.equal(0x21);
@@ -54,6 +35,15 @@ describe('abiEncoder.bilateralSwap tests', () => {
     });
 
     it('bilateralSwap is correctly formatted', () => {
+        // Setup
+        const numNotes = 4;
+        const accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+        const noteValues = [10, 20, 10, 20];
+        const notes = accounts.map(({ publicKey }, i) => {
+            return note.create(publicKey, noteValues[i]);
+        });
+
+        // Body of test 
         const inputNotes = notes.slice(0, 2);
         const outputNotes = notes.slice(2, 4);
         const senderAddress = accounts[0].address;
@@ -65,19 +55,19 @@ describe('abiEncoder.bilateralSwap tests', () => {
         const inputOwners = inputNotes.map(m => m.owner);
         const outputOwners = outputNotes.map(n => n.owner);
 
-        const result = new HexString(bilateralSwap.encode(
+        const result = new HexString(abiEncoder.inputCoder.bilateralSwap(
             proofData,
             challenge,
             inputOwners,
             outputOwners,
             outputNotes
         ).slice(2));
-        expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
 
+        expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
         const offsetToProofData = parseInt(result.slice(0x20, 0x40), 16);
-        expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(4);
-        const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + (4 * 0xc0)));
-        for (let i = 0; i < 4; i += 1) {
+        expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(numNotes);
+        const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + (numNotes * 0xc0)));
+        for (let i = 0; i < numNotes; i += 1) {
             const recoveredNote = recoveredProofData.slice((i * 0xc0), ((i * 0xc0) + 0xc0));
             expect(recoveredNote).to.equal(proofData[i].map(p => p.slice(2)).join(''));
         }
@@ -99,6 +89,6 @@ describe('abiEncoder.bilateralSwap tests', () => {
         expect(parseInt(result.slice(offsetToMetadata, offsetToMetadata + 0x20), 16)).to.equal(2);
 
         const recoveredMetadata = result.slice(offsetToMetadata - 0x20, offsetToMetadata + metadataLength);
-        expect(recoveredMetadata).to.equal(bilateralSwap.encodeMetadata(outputNotes).data);
+        expect(recoveredMetadata).to.equal(abiEncoder.encoderFactory.encodeMetadata(outputNotes).data);
     });
 });
