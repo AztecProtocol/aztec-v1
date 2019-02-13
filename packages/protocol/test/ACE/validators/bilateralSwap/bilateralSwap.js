@@ -30,7 +30,7 @@ function encodeBilateralSwapTransaction({
     const inputOwners = inputNotes.map(m => m.owner);
     const outputOwners = outputNotes.map(n => n.owner);
 
-    const proofData = aztec.abiEncoder.bilateralSwap.encode(
+    const proofData = aztec.abiEncoder.inputCoder.bilateralSwap(
         proofDataRaw,
         challenge,
         inputOwners,

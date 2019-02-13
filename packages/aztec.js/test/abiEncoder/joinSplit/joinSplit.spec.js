@@ -1,6 +1,7 @@
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
+const HexString = require('../HexString');
 const aztecProof = require('../../../src/proof/joinSplit');
 const secp256k1 = require('../../../src/secp256k1');
 const sign = require('../../../src/sign');
@@ -12,19 +13,6 @@ const { expect } = chai;
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
-}
-
-class HexString extends String {
-    slice(a, b = null) {
-        if (b) {
-            return (super.slice(a * 2, b * 2));
-        }
-        return (super.slice(a * 2));
-    }
-
-    hexLength() {
-        return this.length / 2;
-    }
 }
 
 function randomBytes(numBytes) {
@@ -40,25 +28,21 @@ function fakeSignature() {
 }
 
 describe('abiEncoder.joinSplit tests', () => {
-    let accounts = [];
-    let notes = [];
-    beforeEach(() => {
-        accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-        notes = accounts.map(({ publicKey }) => {
+    it('encodeMetadata works', () => {
+        // Setup
+        const accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
+        const notes = accounts.map(({ publicKey }) => {
             return note.create(publicKey, randomNoteValue());
         });
-    });
+        const numNotes = 4;
 
-    afterEach(() => {
-    });
-
-    it('encodeMetadata works', () => {
+        // Main
         const { data, length } = joinSplit.encodeMetadata(notes.slice(0, 4));
         const result = new HexString(data);
         expect(length).to.equal(result.hexLength());
         expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(result.hexLength() - 0x20);
         expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(4);
-        for (let i = 0; i < 4; i += 1) {
+        for (let i = 0; i < numNotes; i += 1) {
             const offset = parseInt(result.slice(0x40 + (i * 0x20), 0x60 + (i * 0x20)), 16);
             const metadataLength = parseInt(result.slice(offset, offset + 0x20), 16);
             expect(metadataLength).to.equal(0x21);
@@ -86,11 +70,19 @@ describe('abiEncoder.joinSplit tests', () => {
     });
 
     it('joinSplit is correctly formatted', () => {
+        // Setup
+        const accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
+        const notes = accounts.map(({ publicKey }) => {
+            return note.create(publicKey, randomNoteValue());
+        });
+        const numNotes = 4;
         const m = 2;
         const inputNotes = notes.slice(0, 2);
         const outputNotes = notes.slice(2, 4);
         const senderAddress = accounts[0].address;
         const contractAddress = accounts[1].address;
+
+        // Main
         const {
             proofData,
             challenge,
@@ -119,7 +111,7 @@ describe('abiEncoder.joinSplit tests', () => {
         const offsetToProofData = parseInt(result.slice(0x60, 0x80), 16);
         expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(4);
         const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + (4 * 0xc0)));
-        for (let i = 0; i < 4; i += 1) {
+        for (let i = 0; i < numNotes; i += 1) {
             const recoveredNote = recoveredProofData.slice((i * 0xc0), ((i * 0xc0) + 0xc0));
             expect(recoveredNote).to.equal(proofData[i].map(p => p.slice(2)).join(''));
         }
