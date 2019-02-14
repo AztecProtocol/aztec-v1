@@ -87,7 +87,7 @@ contract('Dividend Computation', (accounts) => {
             ];
         });
 
-        it('succesfully validates an AZTEC dividend computation zero-knowledge proof', async () => {
+        it('succesfully validates output coding of AZTEC dividend computation zero-knowledge proof', async () => {
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
 
