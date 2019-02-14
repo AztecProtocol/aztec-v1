@@ -19,10 +19,10 @@ library AZTECBilateralSwapInterface {
  **/
 contract AZTECBilateralSwap {
     /**
-     * @dev BilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
+     * @dev AZTECBilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
-     * @notice See AZTECInterface for how method calls should be constructed.
-     * BilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
+     * @notice See AZTECBilateralSwap for how method calls should be constructed.
+     * AZTECBilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     function() external payable {
         assembly {
