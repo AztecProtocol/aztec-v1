@@ -53,7 +53,10 @@ describe('inputCoder tests', () => {
             expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(result.hexLength() - 0x20);
             expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(numNotes);
             for (let i = 0; i < numNotes; i += 1) {
-                const offset = parseInt(result.slice(0x40 + (i * 0x20), 0x60 + (i * 0x20)), 16);
+                const offsetDataStart = 0x40 + (i * 0x20);
+                const offsetDataFinish = 0x60 + (i * 0x20);
+
+                const offset = parseInt(result.slice(offsetDataStart, offsetDataFinish), 16);
                 const metadataLength = parseInt(result.slice(offset, offset + 0x20), 16);
                 expect(metadataLength).to.equal(0x21);
                 const metadata = result.slice(offset + 0x20, offset + 0x20 + metadataLength);
@@ -62,6 +65,7 @@ describe('inputCoder tests', () => {
         });
 
         it('encodeInputSignatures works', () => {
+            // Setup
             const input = [
                 fakeSignature(),
                 fakeSignature(),
@@ -72,6 +76,7 @@ describe('inputCoder tests', () => {
             expect(result.hexLength()).to.equal((0x60 * input.length) + 0x20);
             expect(result.hexLength()).to.equal(length);
             expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(input.length);
+
             for (let i = 0; i < input.length; i += 1) {
                 expect(result.slice(0x20 + (i * 0x60), 0x40 + (i * 0x60))).to.equal(input[i][0].slice(2));
                 expect(result.slice(0x40 + (i * 0x60), 0x60 + (i * 0x60))).to.equal(input[i][1].slice(2));
@@ -115,7 +120,10 @@ describe('inputCoder tests', () => {
             expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(numNotes);
             const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + (numNotes * 0xc0)));
             for (let i = 0; i < numNotes; i += 1) {
-                const recoveredNote = recoveredProofData.slice((i * 0xc0), ((i * 0xc0) + 0xc0));
+                const noteDataStart = (i * 0xc0);
+                const noteDataFinish = (i * 0xc0) + 0xc0;
+
+                const recoveredNote = recoveredProofData.slice(noteDataStart, noteDataFinish);
                 expect(recoveredNote).to.equal(proofData[i].map(p => p.slice(2)).join(''));
             }
 
@@ -177,27 +185,37 @@ describe('inputCoder tests', () => {
                 outputOwners,
                 outputNotes
             ).slice(2));
-            expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(2);
+
+            const mDataStart = 0x00;
+            const mDataFinish = 0x20;
+
+            expect(parseInt(result.slice(mDataStart, mDataFinish), 16)).to.equal(m);
             expect(result.slice(0x20, 0x40)).to.equal(padLeft(challenge.slice(2), 64));
             expect(result.slice(0x40, 0x60)).to.equal(padLeft(publicOwner.slice(2).toLowerCase(), 64));
 
             const offsetToProofData = parseInt(result.slice(0x60, 0x80), 16);
             expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(4);
             const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + (4 * 0xc0)));
+
             for (let i = 0; i < numNotes; i += 1) {
                 const recoveredNote = recoveredProofData.slice((i * 0xc0), ((i * 0xc0) + 0xc0));
                 expect(recoveredNote).to.equal(proofData[i].map(p => p.slice(2)).join(''));
             }
+
             const offsetToSignatures = parseInt(result.slice(0x80, 0xa0), 16);
             expect(parseInt(result.slice(offsetToSignatures - 0x20, offsetToSignatures), 16)).to.equal(2);
             const recoveredSignatures = new HexString(result.slice(offsetToSignatures, offsetToSignatures + 3 * 0x60));
             for (let i = 0; i < m; i += 1) {
-                const recoveredSignature = recoveredSignatures.slice(i * 0x60, (i * 0x60) + 0x60);
+                const sigDataStart = i * 0x60;
+                const sigDataFinish = (i * 0x60) + 0x60;
+                const recoveredSignature = recoveredSignatures.slice(sigDataStart, sigDataFinish);
                 expect(recoveredSignature).to.equal(inputSignatures[i].map(s => s.slice(2)).join(''));
             }
 
             const offsetToOwners = parseInt(result.slice(0xa0, 0xc0), 16);
-            expect(parseInt(result.slice(offsetToOwners - 0x20, offsetToOwners), 16)).to.equal(2);
+            const numInputOwners = 2;
+
+            expect(parseInt(result.slice(offsetToOwners - 0x20, offsetToOwners), 16)).to.equal(numInputOwners);
             const recoveredOwners = new HexString(result.slice(offsetToOwners, offsetToOwners + (2 * 0x20)));
             expect(recoveredOwners.slice(0x00, 0x20)).to.equal(padLeft(outputOwners[0].slice(2).toLowerCase(), 64));
             expect(recoveredOwners.slice(0x20, 0x40)).to.equal(padLeft(outputOwners[1].slice(2).toLowerCase(), 64));
@@ -216,8 +234,8 @@ describe('inputCoder tests', () => {
             // Setup
             let accounts = [];
             let notes = [];
-            let za;
-            let zb;
+            const za = 100;
+            const zb = 5;
 
             const numNotes = 3;
             const noteValues = [90, 4, 50];
@@ -225,9 +243,6 @@ describe('inputCoder tests', () => {
             notes = accounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
             });
-
-            za = 100;
-            zb = 5;
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);

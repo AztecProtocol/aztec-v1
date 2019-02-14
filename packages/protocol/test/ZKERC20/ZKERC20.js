@@ -17,8 +17,7 @@ const {
 } = require('@aztec/dev-utils');
 
 
-const { outputCoder, inputCoder } = abiEncoder;
-const joinSplitEncode = inputCoder.joinSplit;
+const { outputCoder } = abiEncoder;
 
 const fakeNetworkId = 100;
 
