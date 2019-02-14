@@ -75,28 +75,10 @@ encoderFactory.encodeMetadata = (notes) => {
     };
 };
 
-encoderFactory.encode = (config, abiSettings, proofType) => {
+encoderFactory.encode = (config, abiParams, proofType) => {
     let abiEncodedParameters;
-    let sortedEncodedParameters;
-    let challenge;
-    let m;
-    let publicOwner;
-    let za;
-    let zb;
 
-    const parameters = Object.keys(abiSettings);
-
-    if (proofType === 'bilateralSwap') {
-        [challenge, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
-    } else if (proofType === 'joinSplit') {
-        [m, challenge, publicOwner, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
-    } else if (proofType === 'dividendComputation') {
-        [challenge, za, zb, ...sortedEncodedParameters] = parameters.sort((a, b) => abiSettings[a].encodedIndex > abiSettings[b].encodedIndex);
-    } else {
-        throw new Error('incorrect proof name input');
-    }
-
-    const encodedParameters = sortedEncodedParameters.reduce((acc, parameter) => {
+    const encodedParameters = abiParams.reduce((acc, parameter) => {
         const encodedData = config[parameter];
         acc.push(encodedData.data);
         return acc;
@@ -106,7 +88,7 @@ encoderFactory.encode = (config, abiSettings, proofType) => {
         acc.offset += (encodedParameter.length) / 2;
         return acc;
     }, {
-        offset: (parameters.length + 1) * 32,
+        offset: (Object.keys(config).length + 1) * 32,
         offsets: [],
     });
 

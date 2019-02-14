@@ -5,6 +5,7 @@ const encoderFactory = require('./encoderFactory');
 
 const inputCoder = {};
 
+
 inputCoder.bilateralSwap = (proofData, challenge, inputOwners, outputOwners, metadata) => {
     const configs = {
         CHALLENGE: challenge.slice(2),
@@ -14,32 +15,14 @@ inputCoder.bilateralSwap = (proofData, challenge, inputOwners, outputOwners, met
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiSettings = {
-        CHALLENGE: {
-            inputIndex: 1,
-            encodedIndex: 0,
-        },
+    const abiParams = [
+        'PROOF_DATA',
+        'INPUT_OWNERS',
+        'OUTPUT_OWNERS',
+        'METADATA',
+    ];
 
-        PROOF_DATA: {
-            inputIndex: 0,
-            encodedIndex: 1,
-        },
-
-        INPUT_OWNERS: {
-            inputIndex: 2,
-            encodedIndex: 2,
-        },
-        OUTPUT_OWNERS: {
-            inputIndex: 3,
-            encodedIndex: 3,
-        },
-        METADATA: {
-            inputIndex: 4,
-            encodedIndex: 4,
-        },
-    };
-
-    return encoderFactory.encode(configs, abiSettings, 'bilateralSwap');
+    return encoderFactory.encode(configs, abiParams, 'bilateralSwap');
 };
 
 inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, outputOwners, metadata) => {
@@ -53,44 +36,14 @@ inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, o
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiSettings = {
-        M: {
-            inputIndex: 1,
-            encodedIndex: 0,
-        },
+    const abiParams = [
+        'PROOF_DATA',
+        'INPUT_SIGNATURES',
+        'OUTPUT_OWNERS',
+        'METADATA',
+    ];
 
-        CHALLENGE: {
-            inputIndex: 2,
-            encodedIndex: 1,
-        },
-
-        PUBLIC_OWNER: {
-            inputIndex: 3,
-            encodedIndex: 2,
-        },
-
-        PROOF_DATA: {
-            inputIndex: 0,
-            encodedIndex: 3,
-        },
-
-        INPUT_SIGNATURES: {
-            inputIndex: 4,
-            encodedIndex: 4,
-        },
-
-        OUTPUT_OWNERS: {
-            inputIndex: 5,
-            encodedIndex: 5,
-        },
-
-        METADATA: {
-            inputIndex: 6,
-            encodedIndex: 6,
-        },
-    };
-
-    return encoderFactory.encode(configs, abiSettings, 'joinSplit');
+    return encoderFactory.encode(configs, abiParams, 'joinSplit');
 };
 
 inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, outputOwners, metadata) => {
@@ -104,44 +57,14 @@ inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, out
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiSettings = {
-        CHALLENGE: {
-            inputIndex: 1,
-            encodedIndex: 0,
-        },
+    const abiParams = [
+        'PROOF_DATA',
+        'INPUT_OWNERS',
+        'OUTPUT_OWNERS',
+        'METADATA',
+    ];
 
-        ZA: {
-            inputIndex: 2,
-            encodedIndex: 1,
-        },
-
-        ZB: {
-            inputIndex: 3,
-            encodedIndex: 2,
-        },
-
-        PROOF_DATA: {
-            inputIndex: 0,
-            encodedIndex: 3,
-        },
-
-        INPUT_OWNERS: {
-            inputIndex: 4,
-            encodedIndex: 4,
-        },
-
-        OUTPUT_OWNERS: {
-            inputIndex: 5,
-            encodedIndex: 5,
-        },
-
-        METADATA: {
-            inputIndex: 6,
-            encodedIndex: 6,
-        },
-    };
-
-    return encoderFactory.encode(configs, abiSettings, 'dividendComputation');
+    return encoderFactory.encode(configs, abiParams, 'dividendComputation');
 };
 
 module.exports = inputCoder;
