@@ -98,7 +98,7 @@ describe('abiEncoder.joinSplit tests', () => {
 
         const inputSignatures = inputNotes.map((inputNote, index) => {
             const { privateKey } = accounts[index];
-            return sign.signNote(proofData[index], challenge, senderAddress, contractAddress, privateKey, 100);
+            return sign.signNote(proofData[index], challenge, senderAddress, contractAddress, privateKey);
         });
         const publicOwner = accounts[0].address;
         const outputOwners = outputNotes.map(n => n.owner);
