@@ -27,7 +27,7 @@ const networkToAddresses = {
         aztecErc20Bridge: '0x5a2DE5b11cfDA9D7D3C10e0220D9e7008a480642',
         erc20Mintable: '0x08F3484bBE7501d1614B40f07D9bE0eeb007a80c',
         doorbell: '0xf45FF560ad8e7e06B64505CAe76472F432a99b9C',
-        joinSplit: '0x01462AB7017a1888405e1258E65954Ee171fFEC5',
+        joinSplit: '0x0b092b1B1496636d0e5721bC6cB0Ec27E99d47A0',
     },
     42: {
         ace: '0x3dAEf97C8F235C4C2a6186D1e326cC84b2DdeE87',
