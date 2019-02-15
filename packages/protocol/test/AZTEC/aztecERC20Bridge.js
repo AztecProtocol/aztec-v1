@@ -25,7 +25,6 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'
 // Step 4: blind tokens into note form
 // Step 5: issue a join split transaction of confidential notes
 // Step 6: redeem tokens from confidential form
-const fakeNetworkId = 100;
 contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
     describe('success states', () => {
         let aztecContract;
@@ -41,14 +40,14 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             token = await ERC20Mintable.new();
             aztecContract = await AZTEC.new(accounts[0]);
             AZTECERC20Bridge.link('AZTECInterface', aztecContract.address);
-            aztecToken = await AZTECERC20Bridge.new(t2, token.address, 100000, fakeNetworkId, {
+            aztecToken = await AZTECERC20Bridge.new(t2, token.address, 100000, {
                 from: accounts[0],
                 gas: 4700000,
             });
             scalingFactor = await aztecToken.scalingFactor();
-
             const receipt = await web3.eth.getTransactionReceipt(aztecToken.transactionHash);
             console.log('gas spent creating contract = ', receipt.gasUsed);
+
             aztecAccounts = accounts.map(() => aztec.secp256k1.generateAccount());
             await Promise.all(accounts.map(account => token.mint(
                 account,
@@ -72,11 +71,10 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
                 EIP712Domain: [
                     { name: 'name', type: 'string' },
                     { name: 'version', type: 'string' },
-                    { name: 'chainId', type: 'uint256' },
                     { name: 'verifyingContract', type: 'address' },
                 ],
             };
-            const message = aztec.sign.generateAZTECDomainParams(aztecToken.address, fakeNetworkId);
+            const message = aztec.sign.generateAZTECDomainParams(aztecToken.address);
             const domainHash = sha3(`0x${aztec.sign.eip712.encodeMessageData(domainTypes, 'EIP712Domain', message)}`);
             expect(domainHash).to.equal(storage[4]);
         });
@@ -109,8 +107,8 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             const { proofData, challenge } = joinSplit.constructJoinSplit(commitments, m, accounts[0], 0);
             const { address } = aztecToken;
             const signatures = [
-                aztec.sign.signNote(proofData[0], challenge, accounts[0], address, aztecAccounts[2].privateKey, fakeNetworkId),
-                aztec.sign.signNote(proofData[1], challenge, accounts[0], address, aztecAccounts[3].privateKey, fakeNetworkId),
+                aztec.sign.signNote(proofData[0], challenge, accounts[0], address, aztecAccounts[2].privateKey),
+                aztec.sign.signNote(proofData[1], challenge, accounts[0], address, aztecAccounts[3].privateKey),
             ];
             const outputOwners = [aztecAccounts[0].address, aztecAccounts[2].address];
             const result = await aztecToken.confidentialTransfer(proofData, m, challenge, signatures, outputOwners, '0x');
@@ -125,8 +123,8 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             const { proofData, challenge } = joinSplit.constructJoinSplit(commitments, m, accounts[3], kPublic);
             const { address } = aztecToken;
             const signatures = [
-                aztec.sign.signNote(proofData[0], challenge, accounts[3], address, aztecAccounts[0].privateKey, fakeNetworkId),
-                aztec.sign.signNote(proofData[1], challenge, accounts[3], address, aztecAccounts[0].privateKey, fakeNetworkId),
+                aztec.sign.signNote(proofData[0], challenge, accounts[3], address, aztecAccounts[0].privateKey),
+                aztec.sign.signNote(proofData[1], challenge, accounts[3], address, aztecAccounts[0].privateKey),
             ];
             const result = await aztecToken.confidentialTransfer(
                 proofData,
@@ -167,7 +165,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             token = await ERC20Mintable.new();
             aztecContract = await AZTEC.new(accounts[0]);
             AZTECERC20Bridge.link('AZTECInterface', aztecContract.address);
-            aztecToken = await AZTECERC20Bridge.new(t2, token.address, 100000, fakeNetworkId, {
+            aztecToken = await AZTECERC20Bridge.new(t2, token.address, 100000, {
                 from: accounts[0],
                 gas: 4700000,
             });
@@ -255,7 +253,7 @@ contract('AZTEC - ERC20 Token Bridge Tests', (accounts) => {
             const { proofData, challenge } = joinSplit.constructJoinSplit(commitment, m, accounts[0], kPublic);
             const { address } = aztecToken;
             const signatures = [
-                aztec.sign.signNote(proofData[0], challenge, accounts[0], address, aztecAccounts[0].privateKey, fakeNetworkId),
+                aztec.sign.signNote(proofData[0], challenge, accounts[0], address, aztecAccounts[0].privateKey),
             ];
 
             await exceptions.catchRevert(aztecToken.confidentialTransfer(
