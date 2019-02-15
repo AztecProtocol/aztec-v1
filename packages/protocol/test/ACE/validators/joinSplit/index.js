@@ -66,7 +66,6 @@ function encodeJoinSplitTransaction({
 contract('JoinSplit', (accounts) => {
     let aztecContract;
 
-    // Creating a collection of tests that should pass
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
@@ -96,11 +95,14 @@ contract('JoinSplit', (accounts) => {
                 aztecAddress: aztecContract.address,
             });
 
+
             const result = await aztecContract.validateJoinSplit(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
+
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
