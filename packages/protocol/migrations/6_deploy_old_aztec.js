@@ -24,5 +24,5 @@ module.exports = (deployer, network) => {
             return Promise.resolve({ address: ERC20Mintable.address });
         })
         .then(({ address: erc20Address }) => deployer
-            .deploy(AZTECERC20Bridge, t2, erc20Address, ERC20_SCALING_FACTOR, deployer.network_id));
+            .deploy(AZTECERC20Bridge, t2, erc20Address, ERC20_SCALING_FACTOR));
 };
