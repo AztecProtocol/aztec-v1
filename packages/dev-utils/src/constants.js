@@ -24,13 +24,11 @@ module.exports = {
     AZTEC_RINKEBY_DOMAIN_PARAMS: {
         name: 'AZTEC_RINKEBY_DOMAIN',
         version: '0.1.1',
-        chainId: '4',
         salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
     },
     AZTEC_MAINNET_DOMAIN_PARAMS: {
         name: 'AZTEC_MAINNET_DOMAIN',
         version: '0.1.1',
-        chainId: '1',
         salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
     },
     AZTEC_NOTE_SIGNATURE: {
@@ -43,7 +41,6 @@ module.exports = {
             EIP712Domain: [
                 { name: 'name', type: 'string' },
                 { name: 'version', type: 'string' },
-                { name: 'chainId', type: 'uint256' },
                 { name: 'verifyingContract', type: 'address' },
             ],
         },
@@ -60,7 +57,6 @@ module.exports = {
             EIP712Domain: [
                 { name: 'name', type: 'string' },
                 { name: 'version', type: 'string' },
-                { name: 'chainId', type: 'uint256' },
                 { name: 'verifyingContract', type: 'address' },
             ],
         },

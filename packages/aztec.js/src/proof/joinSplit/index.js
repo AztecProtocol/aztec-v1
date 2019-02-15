@@ -4,7 +4,6 @@
  * @module proof.joinSplit
  */
 
-const { constants: { FAKE_NETWORK_ID } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
@@ -339,8 +338,7 @@ joinSplit.encodeJoinSplitTransaction = ({
             challenge,
             senderAddress,
             aztecAddress,
-            privateKey,
-            FAKE_NETWORK_ID
+            privateKey
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);

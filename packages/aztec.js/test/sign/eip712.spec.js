@@ -117,7 +117,6 @@ describe('comparison with reference implementation', () => {
             EIP712Domain: [
                 { name: 'name', type: 'string' },
                 { name: 'version', type: 'string' },
-                { name: 'chainId', type: 'uint256' },
                 { name: 'verifyingContract', type: 'address' },
             ],
             Person: [
@@ -134,7 +133,6 @@ describe('comparison with reference implementation', () => {
         domain: {
             name: 'Ether Mail',
             version: '1',
-            chainId: 1,
             verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         },
         message: {
@@ -155,7 +153,6 @@ describe('comparison with reference implementation', () => {
             EIP712Domain: [
                 { name: 'name', type: 'string' },
                 { name: 'version', type: 'string' },
-                { name: 'chainId', type: 'uint256' },
                 { name: 'verifyingContract', type: 'address' },
             ],
             Mail: [
@@ -178,7 +175,6 @@ describe('comparison with reference implementation', () => {
         domain: {
             name: 'Ether Mail',
             version: '1',
-            chainId: 1,
             verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         },
         message: {
@@ -305,14 +301,14 @@ describe('comparison with reference implementation', () => {
             '0xc52c0ee5d84264471806290a3f2c4cecfc5490626bf912d01f240d7a274b371e'
         );
         expect(ethUtil.bufferToHex(structHash(typedData.types, 'EIP712Domain', typedData.domain))).to.equal(
-            '0xf2cee375fa42b42143804025fc449deafd50cc031ca257e0b194a650a912090f'
+            '0x90ff64e3f1b37929070019d005a22cc7fff531b757333b8792f107ced731a142'
         );
         expect(ethUtil.bufferToHex(signHash(typedData)))
-            .to.equal('0xbe609aee343fb3c4b28e1df9e632fca64fcfaede20f02e86244efddf30957bd2');
+            .to.equal('0x9a2eab5155649cdf23c22c5472515affd1e0f5412d48998a2b3beb461fcfac11');
         expect(ethUtil.bufferToHex(address)).to.equal('0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826');
-        expect(sig.v).to.equal(28);
-        expect(ethUtil.bufferToHex(sig.r)).to.equal('0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d');
-        expect(ethUtil.bufferToHex(sig.s)).to.equal('0x07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b91562');
+        expect(sig.v).to.equal(27);
+        expect(ethUtil.bufferToHex(sig.r)).to.equal('0x5a7f92e9266e41696943dd7b9b0c5fe001241a9c519ac7a8050c9c5487c8e6ce');
+        expect(ethUtil.bufferToHex(sig.s)).to.equal('0x4a1f3928d31059a69b0682f0c8c3942139117bdabe72876ebfeae844632ccdec');
     });
 
     it('referenec implementation throws when given arrays', () => {

@@ -72,8 +72,6 @@ const sign = require('./sign');
 
 // address of confidential AZTEC - DAI smart contract
 const aztecContract = '0x0000';
-// main-net chain Id
-const chainId = 1;
 
 const accounts = [
     secp256k1.generateAccount(),
@@ -98,8 +96,8 @@ const { proofData, challenge } = proof.constructJoinSplit([...inputNotes, ...out
 
 // construct EIP712-compatible ECDSA signatures over input notes, required to spend input notes
 const inputSignatures = [
-    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
-    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey, chainId),
+    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey),
+    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey),
 ];
 
 const outputOwners = [accounts[1].address, accounts[1].address];
