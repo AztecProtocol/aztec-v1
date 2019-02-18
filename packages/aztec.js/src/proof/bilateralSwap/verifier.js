@@ -96,7 +96,7 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
             throw customError(
                 ERROR_TYPES.BAD_BLINDING_FACTOR,
                 {
-                    data: 'The blinding factor is infinity',
+                    data: 'The blinding factor is at infinity',
                 }
             );
         }
