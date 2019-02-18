@@ -230,6 +230,7 @@ library JoinSplitABIEncoder {
             let notesLength := sub(s, 0x280)
             mstore(0x1e0, add(0x80, notesLength)) // store length of proofOutput at 0x160
             mstore(0x180, add(0xe0, notesLength)) // store length of proofOutputs at 0x100
+            // mstore(0x00 , notesLength) return(0x00, 0x20)
             mstore(0x160, 0x20)
             return(0x160, add(0x120, notesLength)) // return the final byte array
         }
@@ -237,22 +238,7 @@ library JoinSplitABIEncoder {
 }
 
 
-contract JoinSplitABIEncoderTest {
-    bytes32 private domainHash;
-
-    constructor() public {
-        assembly {
-            let m := mload(0x40)
-            // "EIP712Domain(string name, string version, address verifyingContract)"
-            mstore(m, 0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766)
-            // name = "AZTEC_CRYPTOGRAPHY_ENGINE"
-            mstore(add(m, 0x20), 0xc8066e2c715ce196630b273cd256d8959d5b9fefc55e9e6d999fb0f08bb7f75f)
-            // version = "1"
-            mstore(add(m, 0x40), 0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6)
-            mstore(add(m, 0x60), address) // verifying contract
-            sstore(domainHash_slot, keccak256(m, 0x80)) // domain hash
-        }
-    }
+contract JoinSplitABIEncoderTest is LibEIP712 {
 
     function validateJoinSplit(
         bytes calldata, 
@@ -263,6 +249,6 @@ contract JoinSplitABIEncoderTest {
         view 
         returns (bytes memory) 
     {
-        JoinSplitABIEncoder.encodeAndExit(domainHash);
+        JoinSplitABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
     }
 }

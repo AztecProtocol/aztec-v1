@@ -1,8 +1,12 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./JoinSplitABIEncoder.sol";
+import "../../../libs/LibEIP712.sol";
 
-contract JoinSplitInterface {
+contract JoinSplitInterface is LibEIP712 {
+    /* solhint-disable-next-line var-name-mixedcase */
+    bytes32 public EIP712_DOMAIN_HASH;
+
     constructor() public {}
     
     function validateJoinSplit(
@@ -31,23 +35,7 @@ contract JoinSplitInterface {
  * family of AZTEC zero-knowledge proofs
  * and the AZTEC token standard, stay tuned for updates!
  **/
-contract JoinSplit {
-
-    bytes32 private domainHash;
-
-    constructor() public {
-        assembly {
-            let m := mload(0x40)
-            // "EIP712Domain(string name,string version,address verifyingContract)"
-            mstore(m, 0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766)
-            // name = "AZTEC_CRYPTOGRAPHY_ENGINE"
-            mstore(add(m, 0x20), 0xc8066e2c715ce196630b273cd256d8959d5b9fefc55e9e6d999fb0f08bb7f75f)
-            // version = "1"
-            mstore(add(m, 0x40), 0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6)
-            mstore(add(m, 0x60), address) // verifying contract
-            sstore(domainHash_slot, keccak256(m, 0x80)) // domain hash
-        }
-    }
+contract JoinSplit is LibEIP712 {
 
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
@@ -399,6 +387,6 @@ contract JoinSplit {
 
         // if we've reached here, we've validated the join split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        JoinSplitABIEncoder.encodeAndExit(domainHash);
+        JoinSplitABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
     }
 }
