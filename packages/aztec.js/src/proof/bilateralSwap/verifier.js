@@ -59,7 +59,7 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
                 throw customError(
                     ERROR_TYPES.SCALAR_IS_ZERO,
                     {
-                        message: 'kBar is equal to 0',
+                        data: 'kBar is equal to 0',
                     }
                 );
             }
@@ -69,7 +69,7 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
                 throw customError(
                     ERROR_TYPES.SCALAR_IS_ZERO,
                     {
-                        message: 'aBar is equal to 0',
+                        data: 'aBar is equal to 0',
                     }
                 );
             }
@@ -96,7 +96,7 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
             throw customError(
                 ERROR_TYPES.BAD_BLINDING_FACTOR,
                 {
-                    message: 'The blinding factor is infinity',
+                    data: 'The blinding factor is infinity',
                 }
             );
         }
@@ -117,7 +117,7 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
         throw customError(
             ERROR_TYPES.PROOF_FAILED,
             {
-                message: `The recovered challenge is not equal to the original
+                data: `The recovered challenge is not equal to the original
                           challenge. Proof verification has failed`,
             }
         );

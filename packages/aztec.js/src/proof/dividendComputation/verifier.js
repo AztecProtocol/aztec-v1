@@ -52,7 +52,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         throw customError(
             ERROR_TYPES.ZA_TOO_BIG,
             {
-                message: `za is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
+                data: `za is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
             }
         );
     }
@@ -61,7 +61,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         throw customError(
             ERROR_TYPES.ZB_TOO_BIG,
             {
-                message: `zb is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
+                data: `zb is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
             }
         );
     }
@@ -130,7 +130,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
             throw customError(
                 ERROR_TYPES.BLINDING_FACTOR_IS_NULL,
                 {
-                    message: 'Blinding factor is equal to null',
+                    data: 'Blinding factor is equal to null',
                 }
             );
         } else {
@@ -151,7 +151,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         throw customError(
             ERROR_TYPES.PROOF_FAILED,
             {
-                message: `The recovered challenge does not equal the original challenge.
+                data: `The recovered challenge does not equal the original challenge.
                            Proof validation has failed`,
             }
         );

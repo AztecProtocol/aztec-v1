@@ -56,7 +56,7 @@ bilateralSwap.computeChallenge = (...challengeVariables) => {
                 throw customError(
                     ERROR_TYPES.NO_ADD_CHALLENGEVAR,
                     {
-                        message: `I don't know how to add ${challengeVar} to hash`,
+                        data: `I don't know how to add ${challengeVar} to hash`,
                     }
                 );
             }
@@ -85,7 +85,7 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
             throw customError(
                 ERROR_TYPES.NOT_ON_CURVE,
                 {
-                    message: `Is gamma on the curve?: ${gammaOnCurve}
+                    data: `Is gamma on the curve?: ${gammaOnCurve}
                     Is sigma on the curve?: ${sigmaOnCurve}`,
                 }
             );
