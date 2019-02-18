@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "version": "0.4.0-beta.1",
+  "version": "0.4.0-beta.2",
   "author": "AZTEC",
   "description": "AZTEC smart contract repository",
   "license": "LGPL-3.0",
@@ -27,8 +27,8 @@
     "openzeppelin-solidity": "2.0.0"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.2.0",
-    "aztec.js": "^0.4.0-beta.11",
+    "@aztec/dev-utils": "^1.2.1",
+    "aztec.js": "0.4.0-beta.12",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.3",
     "bn.js": "^4.11.8",
