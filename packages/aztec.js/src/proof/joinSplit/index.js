@@ -4,6 +4,7 @@
  * @module proof.joinSplit
  */
 
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
@@ -15,7 +16,6 @@ const abiEncoder = require('../../abiEncoder');
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const sign = require('../../sign');
-const { K_MAX } = require('../../params');
 
 const { groupReduction } = bn128;
 const { outputCoder, inputCoder } = abiEncoder;

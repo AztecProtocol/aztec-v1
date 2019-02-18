@@ -1,9 +1,9 @@
+const { constants: { H_X, H_Y } } = require('@aztec/dev-utils');
 const chai = require('chai');
 const crypto = require('crypto');
 
 const BN = require('bn.js');
 const bn128 = require('../../src/bn128');
-const { H_X, H_Y } = require('../../src/params');
 
 const { expect } = chai;
 
