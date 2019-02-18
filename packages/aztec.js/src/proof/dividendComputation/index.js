@@ -62,8 +62,8 @@ dividendComputation.computeChallenge = (...challengeVariables) => {
  * Construct AZTEC dividend computation proof transcript
  *
  * @method constructProof
- * @param {Array[Note]} notes array of AZTEC notes
- * @returns {{proofData:Array[string]}, {challenge: string}} - proof data and challenge
+ * @param {Note[]} notes array of AZTEC notes
+ * @returns {{proofData:string[], challenge: string}} - proof data and challenge
  */
 dividendComputation.constructProof = (notes, za, zb, sender) => {
     // Error checking

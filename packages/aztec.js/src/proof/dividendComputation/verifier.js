@@ -17,8 +17,8 @@ const verifier = {};
  * Verify AZTEC dividend computation proof transcript
  *
  * @method verifyProof
- * @param {Array[proofData]} proofData - proofData array of AZTEC notes
- * @param {big number instance} challenge - challenge variable used in zero-knowledge protocol
+ * @param {Object[]} proofData - proofData array of AZTEC notes
+ * @param {BN} challenge - challenge variable used in zero-knowledge protocol
  * @returns {number} - returns 1 if proof is validated, throws an error if not
  */
 verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
