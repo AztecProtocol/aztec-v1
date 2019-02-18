@@ -1,6 +1,6 @@
 {
   "name": "aztec.js",
-  "version": "0.4.0-beta.11",
+  "version": "0.4.0-beta.12",
   "author": "AZTEC",
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
@@ -28,6 +28,7 @@
     "npm": ">=4"
   },
   "dependencies": {
+    "@aztec/dev-utils": "^1.2.1",
     "babel-runtime": "^6.26.0",
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.1",
@@ -54,7 +55,7 @@
     "eslint-plugin-react": "^7.12.4",
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "push-dir": "^0.4.1",
     "rimraf": "^2.6.3",
     "sinon": "^7.2.3"
