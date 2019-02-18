@@ -9,12 +9,12 @@
  * @module setup
  */
 
+const { constants: { SIGNATURES_PER_FILE } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const fs = require('fs');
 const path = require('path');
 
 const setup = {};
-const { SIGNATURES_PER_FILE } = require('../params');
 const bn128 = require('../bn128');
 
 const partialPath = path.posix.resolve(__dirname, '../setupDatabase');
