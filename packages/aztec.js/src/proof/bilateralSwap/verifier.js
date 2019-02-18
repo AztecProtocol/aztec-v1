@@ -5,8 +5,13 @@
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
+const utils = require('@aztec/dev-utils');
+
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
+
+const { customError } = utils.errors;
+const { ERROR_TYPES } = utils.constants;
 
 const helpers = require('./helpers');
 
@@ -38,12 +43,6 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
 
     const kBarArray = [];
 
-    // Validate that the commitments lie on the bn128 curve
-    proofDataBn.forEach((proofElement) => {
-        bn128.curve.validate(proofElement[6]); // checking gamma point
-        bn128.curve.validate(proofElement[7]); // checking sigma point
-    });
-
     proofDataBn.map((proofElement, i) => {
         let kBar = proofElement[0];
         const aBar = proofElement[1];
@@ -57,12 +56,22 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
         if (i <= 1) {
             // Check if the scalar kBar is zero, if it is then throw
             if (kBar.fromRed().eq(new BN(0))) {
-                throw new Error('A scalar is zero');
+                throw customError(
+                    ERROR_TYPES.SCALAR_IS_ZERO,
+                    {
+                        message: 'kBar is equal to 0',
+                    }
+                );
             }
 
             // Check if the scalar aBar is zero, if it is then throw
             if (aBar.fromRed().eq(new BN(0))) {
-                throw new Error('A scalar is zero');
+                throw customError(
+                    ERROR_TYPES.SCALAR_IS_ZERO,
+                    {
+                        message: 'aBar is equal to 0',
+                    }
+                );
             }
         }
 
@@ -83,9 +92,13 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
             B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
         }
 
-        // Check if the blinding factor is infinity, if it is then throw
         if (B.isInfinity()) {
-            throw new Error('B is infinity');
+            throw customError(
+                ERROR_TYPES.BAD_BLINDING_FACTOR,
+                {
+                    message: 'The blinding factor is infinity',
+                }
+            );
         }
 
         finalHash.append(B);
@@ -101,7 +114,13 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (finalChallenge !== challenge) {
-        throw new Error('proof validation failed');
+        throw customError(
+            ERROR_TYPES.PROOF_FAILED,
+            {
+                message: `The recovered challenge is not equal to the original
+                          challenge. Proof verification has failed`,
+            }
+        );
     } else {
         return true;
     }

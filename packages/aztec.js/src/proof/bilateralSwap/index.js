@@ -5,6 +5,9 @@
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
+const utils = require('@aztec/dev-utils');
+
+
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 
@@ -16,6 +19,9 @@ const { groupReduction } = bn128;
 const bilateralSwap = {};
 bilateralSwap.helpers = helpers;
 bilateralSwap.verifier = verifier;
+
+const { customError } = utils.errors;
+const { ERROR_TYPES } = utils.constants;
 
 
 /**
@@ -47,7 +53,12 @@ bilateralSwap.computeChallenge = (...challengeVariables) => {
             } else if (challengeVar.B) {
                 hash.append(challengeVar.B);
             } else {
-                throw new Error(`I don't know how to add ${challengeVar} to hash`);
+                throw customError(
+                    ERROR_TYPES.NO_ADD_CHALLENGEVAR,
+                    {
+                        message: `I don't know how to add ${challengeVar} to hash`,
+                    }
+                );
             }
         });
     };
@@ -64,10 +75,28 @@ bilateralSwap.computeChallenge = (...challengeVariables) => {
  */
 bilateralSwap.constructBilateralSwap = (notes, sender) => {
     const bkArray = [];
+
+    // Check that proof data lies on the bn128 curve
+    notes.forEach((note) => {
+        const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
+        const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
+
+        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
+            throw customError(
+                ERROR_TYPES.NOT_ON_CURVE,
+                {
+                    message: `Is gamma on the curve?: ${gammaOnCurve}
+                    Is sigma on the curve?: ${sigmaOnCurve}`,
+                }
+            );
+        }
+    });
+
     const blindingFactors = notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
         let B;
+
 
         /*
         Explanation of the below if/else
