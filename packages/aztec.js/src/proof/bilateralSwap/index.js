@@ -59,8 +59,8 @@ bilateralSwap.computeChallenge = (...challengeVariables) => {
  * Construct AZTEC bilateral swap proof transcript
  *
  * @method constructProof
- * @param {Array[Note]} notes array of AZTEC notes
- * @returns {{proofData:Array[string]}, {challenge: string}} - proof data and challenge
+ * @param {Note[]} notes array of AZTEC notes
+ * @returns {{ proofData: string[], challenge: string }} - proof data and challenge
  */
 bilateralSwap.constructBilateralSwap = (notes, sender) => {
     const bkArray = [];
