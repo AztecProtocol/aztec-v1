@@ -40,6 +40,8 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             }
         );
     }
+
+    proofUtils.parseInputs(notes, sender);
     // Array to store bk values later
     const bkArray = [];
     // convert z_a and z_b into BN instances if they aren't already

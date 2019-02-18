@@ -46,6 +46,8 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
         }
     });
 
+    proofUtils.parseInputs(notes, sender);
+
     const blindingFactors = notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();

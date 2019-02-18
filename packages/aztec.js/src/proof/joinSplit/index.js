@@ -80,7 +80,7 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
     } else {
         kPublicBn = new BN(kPublic);
     }
-    joinSplit.parseInputs(notes, m, sender, kPublicBn);
+    proofUtils.parseInputs(notes, sender, m, kPublicBn);
 
     // construct initial hash of note commitments
     notes.forEach((note) => {
