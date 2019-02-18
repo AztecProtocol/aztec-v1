@@ -1,6 +1,6 @@
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-
+const utils = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
@@ -9,6 +9,8 @@ const { K_MAX } = require('../../params');
 
 
 const { groupReduction } = bn128;
+const { customError } = utils.errors;
+const { ERROR_TYPES } = utils.constants;
 
 const verifier = {};
 
@@ -32,16 +34,6 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
 
-    // Check that proof data lies on the bn128 curve
-    proofDataBn.forEach((proofElement) => {
-        const gammaOnCurve = bn128.curve.validate(proofElement[6]); // checking gamma point
-        const sigmaOnCurve = bn128.curve.validate(proofElement[7]); // checking sigma point
-
-        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
-            throw new Error('point not on curve');
-        }
-    });
-
     // convert to bn.js instances if not already
     if (BN.isBN(za)) {
         zaBN = za;
@@ -57,11 +49,21 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     // Check that za and zb are less than k_max
     if (zaBN.gte(K_MAXBN)) {
-        throw new Error('z_a is greater than or equal to kMax');
+        throw customError(
+            ERROR_TYPES.ZA_TOO_BIG,
+            {
+                message: `za is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
+            }
+        );
     }
 
     if (zbBN.gte(K_MAXBN)) {
-        throw new Error('z_b is greater than or equal to kMax');
+        throw customError(
+            ERROR_TYPES.ZB_TOO_BIG,
+            {
+                message: `zb is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
+            }
+        );
     }
 
     const rollingHash = new Keccak();
@@ -125,7 +127,12 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         }
 
         if (B === null) {
-            throw new Error('undefined blinding factor');
+            throw customError(
+                ERROR_TYPES.BLINDING_FACTOR_IS_NULL,
+                {
+                    message: 'Blinding factor is equal to null',
+                }
+            );
         } else {
             finalHash.append(B);
         }
@@ -141,7 +148,13 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (finalChallenge !== challenge) {
-        throw new Error('proof validation failed');
+        throw customError(
+            ERROR_TYPES.PROOF_FAILED,
+            {
+                message: `The recovered challenge does not equal the original challenge.
+                           Proof validation has failed`,
+            }
+        );
     } else {
         return true;
     }
