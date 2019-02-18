@@ -3,18 +3,14 @@
  *
  * @module proof
  */
-const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
 
-
-const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 
 const helpers = require('./helpers');
 const verifier = require('./verifier');
-
-const { groupReduction } = bn128;
+const proofUtils = require('../proofUtils');
 
 const bilateralSwap = {};
 bilateralSwap.helpers = helpers;
@@ -23,49 +19,6 @@ bilateralSwap.verifier = verifier;
 const { customError } = utils.errors;
 const { ERROR_TYPES } = utils.constants;
 
-
-/**
- * Compute the Fiat-Shamir heuristic-ified challenge variable.
- *   Separated out into a distinct method so that we can stub this for extractor tests
- *
- * @method computeChallenge
- * @param {string} sender Ethereum address of transaction sender
- * @param {number} m number of input notes
- * @param {Object[]} notes array of AZTEC notes
- * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
- */
-bilateralSwap.computeChallenge = (...challengeVariables) => {
-    const hash = new Keccak();
-
-    const recurse = (inputs) => {
-        inputs.forEach((challengeVar) => {
-            if (typeof (challengeVar) === 'string') {
-                hash.appendBN(new BN(challengeVar.slice(2), 16));
-            } else if (typeof (challengeVar) === 'number') {
-                hash.appendBN(new BN(challengeVar));
-            } else if (BN.isBN(challengeVar)) {
-                hash.appendBN(challengeVar.umod(bn128.curve.n));
-            } else if (Array.isArray(challengeVar)) {
-                recurse(challengeVar);
-            } else if (challengeVar.gamma) {
-                hash.append(challengeVar.gamma);
-                hash.append(challengeVar.sigma);
-            } else if (challengeVar.B) {
-                hash.append(challengeVar.B);
-            } else {
-                throw customError(
-                    ERROR_TYPES.NO_ADD_CHALLENGEVAR,
-                    {
-                        data: `I don't know how to add ${challengeVar} to hash`,
-                    }
-                );
-            }
-        });
-    };
-    recurse(challengeVariables);
-
-    return hash.keccak(groupReduction);
-};
 /**
  * Construct AZTEC bilateral swap proof transcript
  *
@@ -124,7 +77,7 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
         };
     });
 
-    const challenge = bilateralSwap.computeChallenge(sender, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar;

@@ -6,6 +6,7 @@ const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const helpers = require('./helpers');
 const verifier = require('./verifier');
+const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
 const { customError } = utils.errors;
@@ -20,50 +21,6 @@ const dividendComputation = {};
 dividendComputation.helpers = helpers;
 dividendComputation.verifier = verifier;
 
-/**
- * Compute the Fiat-Shamir heuristic-ified challenge variable.
- *   Separated out into a distinct method so that we can stub this for extractor tests
- *
- * @method computeChallenge
- * @param {string} sender Ethereum address of transaction sender
- * @param {string} kPublic public commitment being added to proof
- * @param {number} m number of input notes
- * @param {Object[]} notes array of AZTEC notes
- * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
- */
-dividendComputation.computeChallenge = (...challengeVariables) => {
-    const hash = new Keccak();
-
-    const recurse = (inputs) => {
-        inputs.forEach((challengeVar) => {
-            if (typeof (challengeVar) === 'string') {
-                hash.appendBN(new BN(challengeVar.slice(2), 16));
-            } else if (typeof (challengeVar) === 'number') {
-                hash.appendBN(new BN(challengeVar));
-            } else if (BN.isBN(challengeVar)) {
-                hash.appendBN(challengeVar.umod(bn128.curve.n));
-            } else if (Array.isArray(challengeVar)) {
-                recurse(challengeVar);
-            } else if (challengeVar.gamma) {
-                hash.append(challengeVar.gamma);
-                hash.append(challengeVar.sigma);
-            } else if (challengeVar.B) {
-                hash.append(challengeVar.B);
-            } else {
-                throw customError(
-                    ERROR_TYPES.NO_ADD_CHALLENGEVAR,
-                    {
-                        data: `The format of ${challengeVar} is invalid, it can not be
-                        added to the hash`,
-                    }
-                );
-            }
-        });
-    };
-    recurse(challengeVariables);
-
-    return hash.keccak(groupReduction);
-};
 
 /**
  * Construct AZTEC dividend computation proof transcript
@@ -171,7 +128,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         };
     });
 
-    const challenge = dividendComputation.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
     const proofDataUnformatted = blindingFactors.map((blindingFactor, i) => {
         const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
         const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
