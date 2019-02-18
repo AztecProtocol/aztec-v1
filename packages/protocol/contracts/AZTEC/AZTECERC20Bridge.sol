@@ -61,8 +61,8 @@ contract AZTECERC20Bridge {
             mstore(m, 0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766)
             // name = "AZTECERC20BRIDGE_DOMAIN"
             mstore(add(m, 0x20), 0x60d177492a60de7c666b3e3d468f14d59def1d4b022d08b6adf554d88da60d63)
-            // version = "0.1.1"
-            mstore(add(m, 0x40), 0x28a43689b8932fb9695c28766648ed3d943ff8a6406f8f593738feed70039290)
+            // version = "1"
+            mstore(add(m, 0x40), 0xc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6)
             mstore(add(m, 0x60), address) // verifying contract
             _domainHash := keccak256(m, 0x80)
         }
