@@ -30,7 +30,6 @@ describe.only('AZTEC bilateral swap verifier tests', () => {
         beforeEach(() => {
             testNotes = helpers.makeTestNotes([10, 20], [10, 20]);
 
-            // Dummy, random sender address for proof of concept
             sender = randomHex(20);
         });
 

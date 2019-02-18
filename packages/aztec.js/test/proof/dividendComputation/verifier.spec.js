@@ -212,7 +212,7 @@ describe.only('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
+            expect(message).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
         });
     });
 });

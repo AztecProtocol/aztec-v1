@@ -69,7 +69,7 @@ proofUtils.computeChallenge = (...challengeVariables) => {
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
  */
-proofUtils.parseInputs = (notes, m, sender, kPublic) => {
+proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
     notes.forEach((note) => {
         if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
             throw customError(
@@ -121,6 +121,7 @@ proofUtils.parseInputs = (notes, m, sender, kPublic) => {
             }
         );
     }
+
     if (m > notes.length) {
         throw customError(
             ERROR_TYPES.M_TOO_BIG,

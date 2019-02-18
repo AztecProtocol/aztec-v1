@@ -51,7 +51,9 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
         let B;
 
         // Only check these conditions for the input notes, because
-        // the output notes automatically have kBar set to 0
+        // the output notes initially have kBar set to 0 
+        // (we set the value of kBar later using a cryptographic relation
+        // unique to bilateral swaps)
 
         if (i <= 1) {
             // Check if the scalar kBar is zero, if it is then throw
