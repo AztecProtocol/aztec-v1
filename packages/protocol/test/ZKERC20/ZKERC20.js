@@ -3,19 +3,9 @@
 const BN = require('bn.js');
 
 // ### Internal Dependencies
-const {
-    abiEncoder,
-    note,
-    proof,
-    secp256k1,
-// eslint-disable-next-line import/no-unresolved
-} = require('aztec.js');
-const {
-    constants: {
-        CRS,
-    },
-} = require('@aztec/dev-utils');
-
+// eslint-disable-next-line object-curly-newline
+const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
+const { constants: { CRS } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -38,6 +28,7 @@ contract('ZKERC20', (accounts) => {
         let zkerc20;
         let scalingFactor;
         let aztecJoinSplit;
+        let noteRegistry;
         let noteRegistryAddress;
         const proofs = [];
         const tokensTransferred = new BN(100000);
@@ -129,7 +120,7 @@ contract('ZKERC20', (accounts) => {
             );
 
             noteRegistryAddress = await zkerc20.noteRegistry();
-            const noteRegistry = await NoteRegistry.at(noteRegistryAddress);
+            noteRegistry = await NoteRegistry.at(noteRegistryAddress);
             scalingFactor = new BN(10);
             await Promise.all(accounts.map(account => erc20.mint(
                 account,
