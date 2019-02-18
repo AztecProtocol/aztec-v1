@@ -2,7 +2,9 @@
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
-const { padLeft, randomHex } = require('web3-utils');
+const { padLeft, randomHex, sha3 } = require('web3-utils');
+const utils = require('@aztec/dev-utils');
+
 
 const bn128 = require('../../../src/bn128');
 const bilateralProof = require('../../../src/proof/bilateralSwap');
@@ -12,6 +14,7 @@ const { K_MAX } = require('../../../src/params');
 
 
 const { expect } = chai;
+const { ERROR_TYPES } = utils.constants;
 
 
 function generateNoteValue() {
@@ -19,7 +22,7 @@ function generateNoteValue() {
 }
 
 
-describe('AZTEC bilateral swap verifier tests', () => {
+describe.only('AZTEC bilateral swap verifier tests', () => {
     describe('success states', () => {
         let testNotes;
         let sender;
@@ -71,7 +74,6 @@ describe('AZTEC bilateral swap verifier tests', () => {
         beforeEach(() => {
             testNotes = helpers.makeTestNotes([10, 20], [10, 20]);
 
-            // Dummy, random sender address for proof of concept
             sender = randomHex(20);
         });
 
@@ -85,7 +87,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT for random note values', () => {
@@ -100,7 +102,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT if bilateral swap note balancing relationship not satisfied', () => {
@@ -113,7 +115,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT for random proof data', () => {
@@ -129,7 +131,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
@@ -149,7 +151,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('B is infinity');
+            expect(message).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
         });
 
         it('will REJECT if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', () => {
@@ -164,15 +166,32 @@ describe('AZTEC bilateral swap verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('A scalar is zero');
+            expect(message).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
         });
 
-
         it('will REJECT if blinding factor computed from points not on the curve', () => {
-            const { proofData, challenge } = bilateralProof.constructBilateralSwap(testNotes, sender);
+            const zeroes = `${padLeft('0', 64)}`;
+            const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
+            const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
+            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            // Setting one point to be zero and off the curve
-            proofData[0][2] = `0x${padLeft('', 64)}`;
+            const proofData = [...new Array(4)].map(
+                () => [...new Array(6)].map(() => '0x0000000000000000000000000000000000000000000000000000000000000000')
+            );
+
+            // Making the kBars satisfy the proof relation, to ensure it's not an incorrect
+            // balancing relationship that causes the test to fail
+            proofData[0][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_1
+            proofData[1][0] = '0x2000000000000000000000000000000000000000000000000000000000000000'; // k_2
+            proofData[2][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_3
+            proofData[3][0] = '0x2000000000000000000000000000000000000000000000000000000000000000'; // k_4
+
+            // Setting aBars to random numbers, to ensure it's not failing due to aBar = 0
+            proofData[0][1] = '0x4000000000000000000000000000000000000000000000000000000000000000'; // a_1
+            proofData[1][1] = '0x5000000000000000000000000000000000000000000000000000000000000000'; // a_2
+            proofData[2][1] = '0x6000000000000000000000000000000000000000000000000000000000000000'; // a_3
+            proofData[3][1] = '0x7000000000000000000000000000000000000000000000000000000000000000'; // a_4
+
             let message = '';
 
             try {
@@ -180,7 +199,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
     });
 });

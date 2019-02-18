@@ -2,9 +2,10 @@
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
-const { padLeft, randomHex, sha3 } = require('web3-utils');
+const { randomHex } = require('web3-utils');
+const utils = require('@aztec/dev-utils');
 
-const bn128 = require('../../../src/bn128');
+
 const bilateralProof = require('../../../src/proof/bilateralSwap');
 const helpers = require('../../../src/proof/bilateralSwap/helpers');
 const Keccak = require('../../../src/keccak');
@@ -13,20 +14,21 @@ const { K_MAX } = require('../../../src/params');
 
 const { expect } = chai;
 
+const { ERROR_TYPES } = utils.constants;
+
 
 function generateNoteValue() {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
 }
 
 
-describe('AZTEC bilateral swap proof construction tests', () => {
+describe.only('AZTEC bilateral swap proof construction tests', () => {
     let testNotes;
     let sender;
 
     beforeEach(() => {
         testNotes = helpers.makeTestNotes([10, 20], [10, 20]);
 
-        // Dummy, random sender address for proof of concept
         sender = randomHex(20);
     });
 
@@ -72,40 +74,6 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         } catch (err) {
             ({ message } = err);
         }
-        expect(message).to.equal('proof validation failed');
-    });
-
-    it('bilateralProof.constructBilateralSwap will throw for input points not on the curve', () => {
-        // Setting the x and y coordinates of the commitment to zero - i.e. not on the curve
-        // Should then fail to be validated, as points aren't on the curve
-        const zeroes = `${padLeft('0', 64)}`;
-        const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
-        const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-        const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-
-        const proofData = [...new Array(4)].map(
-            () => [...new Array(6)].map(() => '0x0000000000000000000000000000000000000000000000000000000000000000')
-        );
-        // Making the kBars satisfy the proof relation, to ensure it's not an incorrect
-        // balancing relationship that causes the test to fail
-        proofData[0][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_1
-        proofData[1][0] = '0x2000000000000000000000000000000000000000000000000000000000000000'; // k_2
-        proofData[2][0] = '0x1000000000000000000000000000000000000000000000000000000000000000'; // k_3
-        proofData[3][0] = '0x2000000000000000000000000000000000000000000000000000000000000000'; // k_4
-
-        // Setting aBars to random numbers, to ensure it's not failing due to aBar = 0
-        proofData[0][1] = '0x4000000000000000000000000000000000000000000000000000000000000000'; // a_1
-        proofData[1][1] = '0x5000000000000000000000000000000000000000000000000000000000000000'; // a_2
-        proofData[2][1] = '0x6000000000000000000000000000000000000000000000000000000000000000'; // a_3
-        proofData[3][1] = '0x7000000000000000000000000000000000000000000000000000000000000000'; // a_4
-
-        let message = '';
-
-        try {
-            bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
-        } catch (err) {
-            ({ message } = err);
-        }
-        expect(message).to.equal('proof validation failed');
+        expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
     });
 });
