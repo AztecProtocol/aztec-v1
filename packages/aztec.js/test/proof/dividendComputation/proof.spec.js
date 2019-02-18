@@ -7,7 +7,7 @@ const dividendComputation = require('../../../src/proof/dividendComputation');
 const { expect } = chai;
 
 
-describe('Dividend computation proof construction tests', () => {
+describe.only('Dividend computation proof construction tests', () => {
     let testNotes;
     let sender;
     let za;
@@ -28,7 +28,6 @@ describe('Dividend computation proof construction tests', () => {
         za = 100;
         zb = 5;
 
-        // Dummy, random sender address for proof of concept
         sender = web3Utils.randomHex(20);
     });
 

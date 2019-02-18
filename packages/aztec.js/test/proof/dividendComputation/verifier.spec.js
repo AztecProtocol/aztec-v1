@@ -3,11 +3,14 @@ const BN = require('bn.js');
 const chai = require('chai');
 const { padLeft, sha3 } = require('web3-utils');
 const crypto = require('crypto');
+const utils = require('@aztec/dev-utils');
 
 
 const bn128 = require('../../../src/bn128');
 const dividendComputation = require('../../../src/proof/dividendComputation');
 const { K_MAX } = require('../../../src/params');
+
+const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
@@ -15,7 +18,7 @@ function randomAddress() {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
-describe('Dividend computation verifier tests', () => {
+describe.only('Dividend computation verifier tests', () => {
     describe('success states', () => {
         let testNotes;
         let sender;
@@ -37,7 +40,6 @@ describe('Dividend computation verifier tests', () => {
             za = 100;
             zb = 5;
 
-            // Dummy, random sender address for proof of concept
             sender = randomAddress();
         });
 
@@ -70,7 +72,6 @@ describe('Dividend computation verifier tests', () => {
             za = 100;
             zb = 5;
 
-            // Dummy, random sender address for proof of concept
             sender = randomAddress();
         });
 
@@ -83,7 +84,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('incorrect number of notes');
+            expect(message).to.equal(ERROR_TYPES.INCORRECT_NOTE_NUMBER);
         });
 
         it('will REJECT for unsatisfied proof relations', () => {
@@ -97,7 +98,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT for fake challenge', () => {
@@ -115,7 +116,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT for fake proof data', () => {
@@ -132,7 +133,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('point not on curve');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
 
@@ -147,7 +148,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('z_a is greater than or equal to kMax');
+            expect(message).to.equal(ERROR_TYPES.ZA_TOO_BIG);
         });
 
         it('will REJECT for z_b > k_max', () => {
@@ -160,7 +161,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('z_b is greater than or equal to kMax');
+            expect(message).to.equal(ERROR_TYPES.ZB_TOO_BIG);
         });
 
         it('will REJECT if point not on the curve', () => {
@@ -175,7 +176,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('point not on curve');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT if blinding factor at infinity', () => {
@@ -193,7 +194,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('proof validation failed');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
 
         it('will REJECT if blinding factor computed from invalid point', () => {
@@ -211,7 +212,7 @@ describe('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal('point not on curve');
+            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
         });
     });
 });

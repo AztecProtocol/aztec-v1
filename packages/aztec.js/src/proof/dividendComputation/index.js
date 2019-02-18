@@ -1,6 +1,6 @@
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-
+const utils = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
@@ -8,7 +8,8 @@ const helpers = require('./helpers');
 const verifier = require('./verifier');
 
 const { groupReduction } = bn128;
-
+const { customError } = utils.errors;
+const { ERROR_TYPES } = utils.constants;
 
 /**
  * Constructs AZTEC dividend computations
@@ -49,7 +50,13 @@ dividendComputation.computeChallenge = (...challengeVariables) => {
             } else if (challengeVar.B) {
                 hash.append(challengeVar.B);
             } else {
-                throw new Error(`I don't know how to add ${challengeVar} to hash`);
+                throw customError(
+                    ERROR_TYPES.NO_ADD_CHALLENGEVAR,
+                    {
+                        message: `The format of ${challengeVar} is invalid, it can not be
+                        added to the hash`,
+                    }
+                );
             }
         });
     };
@@ -68,7 +75,13 @@ dividendComputation.computeChallenge = (...challengeVariables) => {
 dividendComputation.constructProof = (notes, za, zb, sender) => {
     // Error checking
     if (notes.length !== 3) {
-        throw new Error('incorrect number of notes');
+        throw customError(
+            ERROR_TYPES.INCORRECT_NOTE_NUMBER,
+            {
+                message: `dividendComputation.constructProof has an incorrect number of input notes
+                There are ${notes.length}, rather than the required 3.`,
+            }
+        );
     }
     // Array to store bk values later
     const bkArray = [];
@@ -95,7 +108,13 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
 
         if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
-            throw new Error('point not on curve');
+            throw customError(
+                ERROR_TYPES.NOT_ON_CURVE,
+                {
+                    message: `Is gamma on the curve?: ${gammaOnCurve}
+                    Is sigma on the curve?: ${sigmaOnCurve}`,
+                }
+            );
         }
     });
 

@@ -164,5 +164,8 @@ module.exports = {
         PROOF_FAILED: 'PROOF_FAILED',
         KA_TOO_BIG: 'KA_TOO_BIG',
         KB_TOO_BIG: 'KB_TOO_BIG',
+        ZA_TOO_BIG: 'ZA_TOO_BIG',
+        ZB_TOO_BIG: 'ZB_TOO_BIG',
+        BLINDING_FACTOR_IS_NULL: 'BLINDING_FACTOR_IS_NULL',
     },
 };
