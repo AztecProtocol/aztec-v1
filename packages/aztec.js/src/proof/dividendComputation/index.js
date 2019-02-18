@@ -53,7 +53,7 @@ dividendComputation.computeChallenge = (...challengeVariables) => {
                 throw customError(
                     ERROR_TYPES.NO_ADD_CHALLENGEVAR,
                     {
-                        message: `The format of ${challengeVar} is invalid, it can not be
+                        data: `The format of ${challengeVar} is invalid, it can not be
                         added to the hash`,
                     }
                 );
@@ -78,7 +78,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         throw customError(
             ERROR_TYPES.INCORRECT_NOTE_NUMBER,
             {
-                message: `dividendComputation.constructProof has an incorrect number of input notes
+                data: `dividendComputation.constructProof has an incorrect number of input notes
                 There are ${notes.length}, rather than the required 3.`,
             }
         );
@@ -111,7 +111,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             throw customError(
                 ERROR_TYPES.NOT_ON_CURVE,
                 {
-                    message: `Is gamma on the curve?: ${gammaOnCurve}
+                    data: `Is gamma on the curve?: ${gammaOnCurve}
                     Is sigma on the curve?: ${sigmaOnCurve}`,
                 }
             );
