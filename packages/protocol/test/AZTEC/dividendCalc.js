@@ -6,8 +6,7 @@ const web3Utils = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2, GROUP_MODULUS, K_MAX } } = require('aztec.js');
-const { exceptions } = require('@aztec/dev-utils');
+const { constants: { K_MAX, GROUP_MODULUS, t2 }, exceptions } = require('@aztec/dev-utils');
 
 
 // ### Artifacts
