@@ -141,4 +141,28 @@ module.exports = {
      * Generic burning Etheruem address
      */
     ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
+    /** error codes for use during proof construction
+     * 
+     */
+    ERROR_TYPES: {
+        SCALAR_TOO_BIG: 'SCALAR_TOO_BIG',
+        SCALAR_IS_ZERO: 'SCALAR_IS_ZERO',
+        X_TOO_BIG: 'X_TOO_BIG',
+        Y_TOO_BIG: 'Y_TOO_BIG',
+        NOT_ON_CURVE: 'NOT_ON_CURVE',
+        BAD_BLINDING_FACTOR: 'BAD_BLINDING_FACTOR',
+        CHALLENGE_RESPONSE_FAIL: 'CHALLENGE_RESPONSE_FAIL',
+        BAD_KPUBLIC: 'BAD_KPUBLIC',
+        BAD_VIEWING_KEY: 'BAD_VIEWING_KEY',
+        M_TOO_BIG: 'M_TOO_BIG',
+        BAD_K: 'BAD_K',
+        GAMMA_IS_INFINITY: 'GAMMA_IS_INFINTY',
+        SIGMA_IS_INFINTY: 'SIGMA_IS_INFINITY',
+        NO_ADD_CHALLENGEVAR: 'NO_ADD_CHALLENGEVAR',
+        INCORRECT_NOTE_NUMBER: 'INCORRECT_NOTE_NUMBER',
+        GAMMA_SIGMA_NOT_ON_CURVE: 'GAMMA_SIGMA_NOT_ON_CURVE',
+        PROOF_FAILED: 'PROOF_FAILED',
+        KA_TOO_BIG: 'KA_TOO_BIG',
+        KB_TOO_BIG: 'KB_TOO_BIG',
+    },
 };
