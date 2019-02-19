@@ -82,7 +82,6 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
     }
     proofUtils.parseInputs(notes, sender, m, kPublicBn);
 
-    // construct initial hash of note commitments
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
         rollingHash.append(note.sigma);
@@ -154,7 +153,7 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
 joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
-    // convert kPublic into a BN instance if it is not one
+
     let kPublicBn;
     if (BN.isBN(kPublic)) {
         kPublicBn = kPublic;
@@ -165,7 +164,6 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
     }
     joinSplit.parseInputs(notes, m, sender, kPublicBn);
 
-    // construct initial hash of note commitments
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
         rollingHash.append(note.sigma);

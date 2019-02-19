@@ -8,7 +8,6 @@ const helpers = require('./helpers');
 const { K_MAX } = require('../../params');
 
 const { groupReduction } = bn128;
-const { customError } = utils.errors;
 const { ERROR_TYPES } = utils.constants;
 
 const verifier = {};
@@ -23,6 +22,8 @@ const verifier = {};
  * @returns {number} - returns 1 if proof is validated, throws an error if not
  */
 verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
+    const errors = [];
+
     let zaBN;
     let zbBN;
     const K_MAXBN = new BN(K_MAX);
@@ -47,21 +48,11 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     // Check that za and zb are less than k_max
     if (zaBN.gte(K_MAXBN)) {
-        throw customError(
-            ERROR_TYPES.ZA_TOO_BIG,
-            {
-                data: `za is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
-            }
-        );
+        errors.push(ERROR_TYPES.ZA_TOO_BIG);
     }
 
     if (zbBN.gte(K_MAXBN)) {
-        throw customError(
-            ERROR_TYPES.ZB_TOO_BIG,
-            {
-                data: `zb is greater than the maximum allowed value of K_MAX - ${K_MAX}`,
-            }
-        );
+        errors.push(ERROR_TYPES.ZB_TOO_BIG);
     }
 
     const rollingHash = new Keccak();
@@ -91,21 +82,11 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         let B;
 
         if (kBar.fromRed().eq(new BN(0))) {
-            throw customError(
-                ERROR_TYPES.SCALAR_IS_ZERO,
-                {
-                    data: 'kBar is equal to 0',
-                }
-            );
+            errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
         }
 
         if (aBar.fromRed().eq(new BN(0))) {
-            throw customError(
-                ERROR_TYPES.SCALAR_IS_ZERO,
-                {
-                    data: 'aBar is equal to 0',
-                }
-            );
+            errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
         }
 
         if (i === 0) { // input note
@@ -143,21 +124,9 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         }
 
         if (B === null) {
-            throw customError(
-                ERROR_TYPES.BLINDING_FACTOR_IS_NULL,
-                {
-                    data: 'Blinding factor is equal to null',
-                }
-            );
+            errors.push(ERROR_TYPES.BLINDING_FACTOR_IS_NULL);
         } else if (B.isInfinity()) {
-            if (B.isInfinity()) {
-                throw customError(
-                    ERROR_TYPES.BAD_BLINDING_FACTOR,
-                    {
-                        data: 'The blinding factor is at infinity',
-                    }
-                );
-            }
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
         } else {
             finalHash.append(B);
         }
@@ -173,16 +142,14 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (finalChallenge !== challenge) {
-        throw customError(
-            ERROR_TYPES.PROOF_FAILED,
-            {
-                data: `The recovered challenge does not equal the original challenge.
-                           Proof validation has failed`,
-            }
-        );
-    } else {
-        return true;
+        errors.push(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
     }
+    const valid = errors.length === 0;
+
+    return {
+        valid,
+        errors,
+    };
 };
 
 module.exports = verifier;
