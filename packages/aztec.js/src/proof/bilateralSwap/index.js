@@ -3,8 +3,10 @@
  *
  * @module proof
  */
+const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
+const crypto = require('crypto');
 
 const bn128 = require('../../bn128');
 
@@ -82,10 +84,12 @@ bilateralSwap.constructProof = (notes, sender) => {
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar;
 
+        // Only set the first 2 values of kBar - the third and fourth are later inferred
+        // from a cryptographic relation. Set the third and fourth to random values
         if (i <= 1) {
             kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
         } else {
-            kBar = 0;
+            kBar = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
         }
 
         const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();

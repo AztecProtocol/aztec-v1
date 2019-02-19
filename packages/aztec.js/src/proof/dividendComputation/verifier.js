@@ -30,8 +30,10 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const kBarArray = [];
 
     proofUtils.checkNumNotesNoThrow(proofData, errors);
+
     // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
-    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData);
+    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
+
     const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
 
     // convert to bn.js instances if not already
@@ -64,7 +66,6 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         rollingHash.append(proofElement[7]);
     });
 
-
     // Create finalHash and append to it - in same order as the proof construction code (otherwise final hash will be different)
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));
@@ -81,14 +82,6 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         const gamma = proofElement[6];
         const sigma = proofElement[7];
         let B;
-
-        if (kBar.fromRed().eq(new BN(0))) {
-            errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
-        }
-
-        if (aBar.fromRed().eq(new BN(0))) {
-            errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
-        }
 
         if (i === 0) { // input note
             const kBarX = kBar.redMul(x); // xbk = bk*x

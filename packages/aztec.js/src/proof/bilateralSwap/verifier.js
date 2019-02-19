@@ -28,7 +28,7 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
 
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
 
-    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData);
+    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
 
     const finalHash = new Keccak();
 
@@ -47,23 +47,6 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
         const gamma = proofElement[6];
         const sigma = proofElement[7];
         let B;
-
-        // Only check these conditions for the input notes, because
-        // the output notes initially have kBar set to 0 
-        // (we set the value of kBar later using a cryptographic relation
-        // unique to bilateral swaps)
-
-        if (i <= 1) {
-            // Check if the scalar kBar is zero, if it is then throw
-            if (kBar.fromRed().eq(new BN(0))) {
-                errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
-            }
-
-            // Check if the scalar aBar is zero, if it is then throw
-            if (aBar.fromRed().eq(new BN(0))) {
-                errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
-            }
-        }
 
         /*
         Explanation of the below if/else

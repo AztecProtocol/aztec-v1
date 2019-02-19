@@ -18,11 +18,6 @@ const { expect } = chai;
 const { ERROR_TYPES } = utils.constants;
 
 
-function generateNoteValue() {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
-}
-
-
 describe('AZTEC bilateral swap verifier tests', () => {
     describe('success states', () => {
         let testNotes;
@@ -36,13 +31,15 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
         it('bilateralProof.constructProof creates a valid bilateral swap proof', () => {
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);
-            const result = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
-            expect(result.valid).to.equal(true);
+            const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
+            expect(valid).to.equal(true);
+            expect(errors.length).to.equal(0);
         });
 
         it('validate that the kbar relations are satisfied i.e. kbar1 = kbar3 and kbar2 = kbar4', () => {
+            const errors = [];
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);
-            const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData);
+            const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
             const formattedChallenge = new BN(challenge.slice(2), 16);
 
             const finalHash = new Keccak();
@@ -98,7 +95,10 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
         it('will REJECT for random note values', () => {
             const randomNotes = proofUtils.makeTestNotes(
-                [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
+                [proofUtils.generateNoteValue(),
+                    proofUtils.generateNoteValue()],
+                [proofUtils.generateNoteValue(),
+                    proofUtils.generateNoteValue()]
             );
             const { proofData, challenge } = bilateralProof.constructProof(randomNotes, sender);
 
@@ -130,8 +130,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
 
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
@@ -189,8 +188,21 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors.length).to.equal(13);
+
+            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[2]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
+            expect(errors[3]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[4]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[5]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
+            expect(errors[6]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[7]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[8]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
+            expect(errors[9]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[10]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[11]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
+            expect(errors[12]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
     });
 });

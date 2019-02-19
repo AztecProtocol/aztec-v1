@@ -1,24 +1,12 @@
 /* global, beforeEach, it:true */
-const BN = require('bn.js');
 const chai = require('chai');
-const crypto = require('crypto');
 const { randomHex } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
-
 
 const bilateralProof = require('../../../src/proof/bilateralSwap');
 const Keccak = require('../../../src/keccak');
 const proofUtils = require('../../../src/proof/proofUtils');
-const { K_MAX } = require('../../../src/params');
 
 const { expect } = chai;
-
-const { ERROR_TYPES } = utils.constants;
-
-
-function generateNoteValue() {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
-}
 
 
 describe('AZTEC bilateral swap proof construction tests', () => {
@@ -58,21 +46,5 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         expect(proofData[1].length).to.equal(6);
         expect(proofData[2].length).to.equal(6);
         expect(proofData[3].length).to.equal(6);
-    });
-
-    it('bilateralProof.constructProof will throw for input notes of random value', () => {
-        const wrongNotes = proofUtils.makeTestNotes(
-            [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
-        );
-
-        const { proofData, challenge } = bilateralProof.constructProof(wrongNotes, sender);
-        let message = '';
-
-        try {
-            bilateralProof.verifier.verifyProof(proofData, challenge, sender);
-        } catch (err) {
-            ({ message } = err);
-        }
-        expect(message).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
     });
 });
