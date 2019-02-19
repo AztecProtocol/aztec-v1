@@ -7,7 +7,7 @@ const dividendComputation = require('../../../src/proof/dividendComputation');
 const { expect } = chai;
 
 
-describe.only('Dividend computation proof construction tests', () => {
+describe('Dividend computation proof construction tests', () => {
     let testNotes;
     let sender;
     let za;
@@ -33,8 +33,10 @@ describe.only('Dividend computation proof construction tests', () => {
 
     it('dividendComputation.constructProof outputs proof data with correct number of proof variables and is well formed', () => {
         const { proofDataUnformatted, proofData, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
+        const numProofDataElements = 18;
+
         expect(proofDataUnformatted.length).to.equal(3);
-        expect(proofData.length).to.equal(18);
+        expect(proofData.length).to.equal(numProofDataElements);
         expect(challenge.length).to.equal(66);
         expect(proofDataUnformatted[0].length).to.equal(6);
         expect(proofDataUnformatted[1].length).to.equal(6);

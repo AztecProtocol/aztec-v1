@@ -2,11 +2,14 @@ const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
+const utils = require('@aztec/dev-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const { K_MAX } = require('../../../src/params');
+
+const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
@@ -78,7 +81,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('kPublic value malformed');
+            expect(err.message).to.equal(ERROR_TYPES.KPUBLIC_MALFORMED);
         }
     });
 
@@ -91,7 +94,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructJoinSplit(commitments, 500, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('m is greater than note array length');
+            expect(err.message).to.equal(ERROR_TYPES.M_TOO_BIG);
         }
     });
 
@@ -104,7 +107,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructJoinSplit(commitments, 500, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('point not on curve');
+            expect(err.message).to.equal(ERROR_TYPES.NOT_ON_CURVE);
         }
     });
 
@@ -120,7 +123,7 @@ describe('AZTEC proof construction tests', () => {
         } catch (err) {
             ({ message } = err);
         }
-        expect(message).to.contain('point at infinity');
+        expect(message).to.equal(ERROR_TYPES.POINT_AT_INFINITY);
     });
 
     it('proof.constructJoinSplit will throw if viewing key response is 0', () => {
@@ -132,7 +135,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('viewing key malformed');
+            expect(err.message).to.equal(ERROR_TYPES.VIEWING_KEY_MALFORMED);
         }
     });
 
@@ -145,7 +148,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('note value malformed');
+            expect(err.message).to.equal(ERROR_TYPES.NOTE_VALUE_TOO_BIG);
         }
     });
 });

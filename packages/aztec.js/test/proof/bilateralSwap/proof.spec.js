@@ -22,7 +22,7 @@ function generateNoteValue() {
 }
 
 
-describe.only('AZTEC bilateral swap proof construction tests', () => {
+describe('AZTEC bilateral swap proof construction tests', () => {
     let testNotes;
     let sender;
 
@@ -74,6 +74,6 @@ describe.only('AZTEC bilateral swap proof construction tests', () => {
         } catch (err) {
             ({ message } = err);
         }
-        expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
+        expect(message).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
     });
 });
