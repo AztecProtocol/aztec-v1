@@ -141,8 +141,7 @@ describe('Dividend computation verifier tests', () => {
             );
 
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
 
@@ -196,8 +195,9 @@ describe('Dividend computation verifier tests', () => {
                 zb
             );
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors.length).to.equal(2);
+            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor at infinity', () => {
@@ -242,11 +242,13 @@ describe('Dividend computation verifier tests', () => {
             );
 
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(4);
-            expect(errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(errors[1]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(errors[2]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
-            expect(errors[3]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors.length).to.equal(6);
+            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[2]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(errors[3]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(errors[4]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            expect(errors[5]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
     });
 });

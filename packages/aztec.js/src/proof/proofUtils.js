@@ -1,6 +1,7 @@
 
 const BN = require('bn.js');
 const utils = require('@aztec/dev-utils');
+const crypto = require('crypto');
 
 const bn128 = require('../bn128');
 const Keccak = require('../keccak');
@@ -21,6 +22,9 @@ proofUtils.makeTestNotes = (makerNoteValues, takerNoteValues) => {
     return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 
+proofUtils.generateNoteValue = () => {
+    return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
+};
 
 proofUtils.checkNumNotesAndThrow = (notes) => {
     if (notes.length !== 3) {
@@ -40,21 +44,24 @@ proofUtils.checkNumNotesNoThrow = (notes, errors) => {
     }
 };
 
-proofUtils.convertToBNAndAppendPoints = (proofData) => {
+proofUtils.convertToBNAndAppendPoints = (proofData, errors) => {
     const proofDataBn = proofData.map((proofElement) => {
         // Reconstruct gamma
-        const xGamma = new BN(proofElement[2].slice(2), 16).toRed(bn128.curve.red);
-        const yGamma = new BN(proofElement[3].slice(2), 16).toRed(bn128.curve.red);
-        const gamma = bn128.curve.point(xGamma, yGamma);
+        const xGamma = proofElement[2];
+        const yGamma = proofElement[3];
+        const gamma = proofUtils.hexToGroupElement(xGamma, yGamma, errors);
 
         // Reconstruct sigma
-        const xSigma = new BN(proofElement[4].slice(2), 16).toRed(bn128.curve.red);
-        const ySigma = new BN(proofElement[5].slice(2), 16).toRed(bn128.curve.red);
-        const sigma = bn128.curve.point(xSigma, ySigma);
+        const xSigma = proofElement[4];
+        const ySigma = proofElement[5];
+        const sigma = proofUtils.hexToGroupElement(xSigma, ySigma, errors);
+
+        const kBar = proofUtils.hexToGroupScalar(proofElement[0], errors);
+        const aBar = proofUtils.hexToGroupScalar(proofElement[1], errors);
 
         return [
-            new BN(proofElement[0].slice(2), 16).toRed(groupReduction), // kbar
-            new BN(proofElement[1].slice(2), 16).toRed(groupReduction), // aBar
+            kBar,
+            aBar,
             xGamma,
             yGamma,
             xSigma,
