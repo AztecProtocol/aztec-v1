@@ -42,7 +42,6 @@ contract('ZKERC20', (accounts) => {
         const proofs = [];
         const tokensTransferred = new BN(100000);
 
-
         beforeEach(async () => {
             ace = await ACE.new({
                 from: accounts[0],
@@ -111,8 +110,14 @@ contract('ZKERC20', (accounts) => {
                 aztecAddress: aztecJoinSplit.address,
             });
 
-            erc20 = await ERC20Mintable.new();
+            const proofOutputs = proofs.map(({ expectedOutput }) => {
+                return outputCoder.getProofOutput(expectedOutput, 0);
+            });
+            const proofHashes = proofOutputs.map((proofOutput) => {
+                return outputCoder.hashProofOutput(proofOutput);
+            });
 
+            erc20 = await ERC20Mintable.new();
             zkerc20 = await ZKERC20.new(
                 'Cocoa',
                 false,
@@ -135,9 +140,8 @@ contract('ZKERC20', (accounts) => {
                 noteRegistryAddress,
                 scalingFactor.mul(tokensTransferred),
                 { from: account, gas: 4700000 }
-            ))); // approving tokens
-            const proofOutputs = proofs.map(({ expectedOutput }) => outputCoder.getProofOutput(expectedOutput, 0));
-            const proofHashes = proofOutputs.map(proofOutput => outputCoder.hashProofOutput(proofOutput));
+            )));
+            // approving tokens
             await noteRegistry.publicApprove(
                 proofHashes[0],
                 10,
@@ -158,11 +162,6 @@ contract('ZKERC20', (accounts) => {
                 30,
                 { from: accounts[3] }
             );
-            await Promise.all(accounts.map(account => noteRegistry.publicApprove(
-                noteRegistryAddress,
-                scalingFactor.mul(tokensTransferred),
-                { from: account, gas: 4700000 }
-            ))); // approving tokens
         });
 
         it('will can update a note registry with output notes', async () => {
