@@ -14,6 +14,18 @@ const proofUtils = {};
 const { customError } = utils.errors;
 const { ERROR_TYPES } = utils.constants;
 
+
+proofUtils.hexToGroupScalar = (hex, errors, canBeZero = false) => {
+    const hexBn = new BN(hex.slice(2), 16);
+    if (!hexBn.lt(bn128.curve.n)) {
+        errors.push(ERROR_TYPES.SCALAR_TOO_BIG);
+    }
+    if (!canBeZero && hexBn.eq(new BN(0))) {
+        errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
+    }
+    return hexBn.toRed(groupReduction);
+};
+
 /**
  * Compute the Fiat-Shamir heuristic-ified challenge variable.
  *   Separated out into a distinct method so that we can stub this for extractor tests
@@ -114,7 +126,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
 
     if (!kPublic.lt(bn128.curve.n)) {
         throw customError(
-            ERROR_TYPES.KPUBLIC_TOO_BIG,
+            ERROR_TYPES.KPUBLIC_MALFORMED,
             {
                 message: `K_public is equal to or greater than  
                 ${bn128.curve.n}`,

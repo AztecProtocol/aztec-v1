@@ -7,18 +7,14 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
 
+const helpers = require('./helpers');
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
-
-const { customError } = utils.errors;
-const { ERROR_TYPES } = utils.constants;
-
-const helpers = require('./helpers');
-
-const { groupReduction } = bn128;
+const proofUtils = require('../proofUtils');
 
 const verifier = {};
-
+const { ERROR_TYPES } = utils.constants;
+const { groupReduction } = bn128;
 
 /**
  * Verify AZTEC bilateral swap proof transcript
@@ -28,9 +24,12 @@ const verifier = {};
  * @param {BN} challenge - challenge variable used in zero-knowledge protocol 
  * @returns {number} - returns 1 if proof is validated, throws an error if not
  */
-verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
+verifier.verifyBilateralSwap = (proofData, challengeHex, sender) => {
+    const errors = [];
+
+    const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
+
     const proofDataBn = helpers.toBnAndAppendPoints(proofData);
-    const formattedChallenge = new BN(challenge.slice(2), 16);
 
     const finalHash = new Keccak();
 
@@ -58,22 +57,12 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
         if (i <= 1) {
             // Check if the scalar kBar is zero, if it is then throw
             if (kBar.fromRed().eq(new BN(0))) {
-                throw customError(
-                    ERROR_TYPES.SCALAR_IS_ZERO,
-                    {
-                        data: 'kBar is equal to 0',
-                    }
-                );
+                errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
             }
 
             // Check if the scalar aBar is zero, if it is then throw
             if (aBar.fromRed().eq(new BN(0))) {
-                throw customError(
-                    ERROR_TYPES.SCALAR_IS_ZERO,
-                    {
-                        data: 'aBar is equal to 0',
-                    }
-                );
+                errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
             }
         }
 
@@ -88,22 +77,23 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
 
         // Maker notes
         if (i <= 1) {
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
+            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
         } else { // taker notes
             kBar = kBarArray[i - 2];
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
+            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
         }
 
         if (B.isInfinity()) {
-            throw customError(
-                ERROR_TYPES.BAD_BLINDING_FACTOR,
-                {
-                    data: 'The blinding factor is at infinity',
-                }
-            );
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.appendBN(new BN(0));
+            finalHash.appendBN(new BN(0));
+        } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.append(B);
+        } else {
+            finalHash.append(B);
         }
 
-        finalHash.append(B);
         kBarArray.push(kBar);
 
         return {
@@ -115,17 +105,15 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
-    if (finalChallenge !== challenge) {
-        throw customError(
-            ERROR_TYPES.PROOF_FAILED,
-            {
-                data: `The recovered challenge is not equal to the original
-                          challenge. Proof verification has failed`,
-            }
-        );
-    } else {
-        return true;
+    if (finalChallenge !== challengeHex) {
+        errors.push(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
     }
+
+    const valid = errors.length === 0;
+    return {
+        valid,
+        errors,
+    };
 };
 
 module.exports = verifier;
