@@ -3,6 +3,7 @@ const chai = require('chai');
 const web3Utils = require('web3-utils');
 
 const dividendComputation = require('../../../src/proof/dividendComputation');
+const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
@@ -24,7 +25,7 @@ describe('Dividend computation proof construction tests', () => {
         - zb = 100
         */
 
-        testNotes = dividendComputation.helpers.makeTestNotes([90], [4, 50]);
+        testNotes = proofUtils.makeTestNotes([90], [4, 50]);
         za = 100;
         zb = 5;
 

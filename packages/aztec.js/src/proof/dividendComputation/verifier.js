@@ -4,8 +4,8 @@ const utils = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
-const helpers = require('./helpers');
 const { K_MAX } = require('../../params');
+const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
 const { ERROR_TYPES } = utils.constants;
@@ -29,8 +29,8 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const K_MAXBN = new BN(K_MAX);
     const kBarArray = [];
 
-    // toBnAndAppendPoints appends gamma and sigma to the end of proofdata as well
-    const proofDataBn = helpers.toBnAndAppendPoints(proofData);
+    // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
+    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData);
     const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
 
     // convert to bn.js instances if not already

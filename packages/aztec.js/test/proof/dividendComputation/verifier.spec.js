@@ -9,6 +9,7 @@ const utils = require('@aztec/dev-utils');
 const bn128 = require('../../../src/bn128');
 const dividendComputation = require('../../../src/proof/dividendComputation');
 const { K_MAX } = require('../../../src/params');
+const proofUtils = require('../../../src/proof/proofUtils');
 
 const { ERROR_TYPES } = utils.constants;
 
@@ -18,7 +19,7 @@ function randomAddress() {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
-describe('Dividend computation verifier tests', () => {
+describe.only('Dividend computation verifier tests', () => {
     describe('success states', () => {
         let testNotes;
         let sender;
@@ -36,7 +37,7 @@ describe('Dividend computation verifier tests', () => {
             - zb = 100
             */
 
-            testNotes = dividendComputation.helpers.makeTestNotes([90], [4, 50]);
+            testNotes = proofUtils.makeTestNotes([90], [4, 50]);
             za = 100;
             zb = 5;
 
@@ -68,7 +69,7 @@ describe('Dividend computation verifier tests', () => {
             - zb = 100
             */
 
-            testNotes = dividendComputation.helpers.makeTestNotes([90], [4, 50]);
+            testNotes = proofUtils.makeTestNotes([90], [4, 50]);
             za = 100;
             zb = 5;
 
@@ -76,7 +77,7 @@ describe('Dividend computation verifier tests', () => {
         });
 
         it('will REJECT for incorrect number of input notes', () => {
-            const tooManyNotes = dividendComputation.helpers.makeTestNotes([90, 1], [4, 50]);
+            const tooManyNotes = proofUtils.makeTestNotes([90, 1], [4, 50]);
 
             let message = '';
             try {
@@ -88,7 +89,7 @@ describe('Dividend computation verifier tests', () => {
         });
 
         it('will REJECT for unsatisfied proof relations', () => {
-            const wrongRelationship = dividendComputation.helpers.makeTestNotes([90], [4, 49]);
+            const wrongRelationship = proofUtils.makeTestNotes([90], [4, 49]);
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(wrongRelationship, za, zb, sender);
 
             let message = '';

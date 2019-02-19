@@ -8,12 +8,10 @@ const utils = require('@aztec/dev-utils');
 
 const bn128 = require('../../bn128');
 
-const helpers = require('./helpers');
 const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 
 const bilateralSwap = {};
-bilateralSwap.helpers = helpers;
 bilateralSwap.verifier = verifier;
 
 const { customError } = utils.errors;

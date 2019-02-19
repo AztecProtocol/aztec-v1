@@ -6,6 +6,7 @@
  */
 
 const verifier = require('./verifier');
+const proofUtils = require('../proofUtils');
 
 const extractor = {};
 
@@ -25,12 +26,12 @@ extractor.extractWitness = (transcripts, m, challenges) => {
         notes: firstNotes,
         challenge: firstChallenge,
         rollingHash,
-    } = verifier.convertTranscript(transcripts[0], m, challenges[0], []);
+    } = proofUtils.convertTranscript(transcripts[0], m, challenges[0], []);
 
     const {
         notes: secondNotes,
         challenge: secondChallenge,
-    } = verifier.convertTranscript(transcripts[1], m, challenges[1], []);
+    } = proofUtils.convertTranscript(transcripts[1], m, challenges[1], []);
     rollingHash.keccak();
     const challengeFactor = firstChallenge.redSub(secondChallenge).redInvm();
     const witnesses = firstNotes.map((firstNote, i) => {
