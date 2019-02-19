@@ -1,5 +1,5 @@
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
 const H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
@@ -21,6 +21,9 @@ const CRS = [
  * @module params
  */
 module.exports = {
+    /**
+     *  The domain and signature constants below are related to EIP712
+     */ 
     AZTEC_RINKEBY_DOMAIN_PARAMS: {
         name: 'AZTEC_RINKEBY_DOMAIN',
         version: '1',
@@ -46,6 +49,10 @@ module.exports = {
         },
         primaryType: 'AZTEC_NOTE_SIGNATURE',
     },
+    ACE_DOMAIN_PARAMS: {
+        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
+        version: '1',
+    },
     ACE_NOTE_SIGNATURE: {
         types: {
             ACE_NOTE_SIGNATURE: [
@@ -62,10 +69,7 @@ module.exports = {
         },
         primaryType: 'ACE_NOTE_SIGNATURE',
     },
-    ACE_DOMAIN_PARAMS: {
-        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
-        version: '1',
-    },
+    ACE_NOTE_SIGNATURE_HASH: keccak256('NoteSignature(bytes32 noteHash,address spender,bool status)'),
     /**
      * Common reference string
      */
