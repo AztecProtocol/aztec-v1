@@ -31,8 +31,6 @@ const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-const fakeNetworkId = 100;
-
 function encodeJoinSplitTransaction({
     inputNotes,
     outputNotes,
@@ -55,8 +53,7 @@ function encodeJoinSplitTransaction({
             challenge,
             senderAddress,
             aztecAddress,
-            privateKey,
-            fakeNetworkId
+            privateKey
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
@@ -101,7 +98,7 @@ contract('NoteRegistry', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
             await ace.setCommonReferenceString(CRS);
-            const aztec = await JoinSplit.new(fakeNetworkId);
+            const aztec = await JoinSplit.new();
             await ace.setProof(1, aztec.address, true);
             const publicOwner = accounts[0];
             proofs[0] = encodeJoinSplitTransaction({

@@ -7,7 +7,6 @@
 const aztec = require('aztec.js');
 const db = require('./db');
 
-const deployer = require('../../deployer.js');
 const { NOTE_STATUS } = require('../../config');
 const wallets = require('../wallets');
 
@@ -102,8 +101,6 @@ noteController.encodeMetadata = (noteArray) => {
  * @returns {module:notesController~Proof} The zero-knowledge proof data required to broadcast an AZTEC transaction
  */
 noteController.createConfidentialTransfer = async (inputNoteHashes, outputNoteData, v, senderAddress, aztecTokenAddress) => {
-    const chainId = await deployer.getNetwork();
-
     const inputNotes = inputNoteHashes.map(noteHash => noteController.get(noteHash));
     const outputNotes = outputNoteData.map(([owner, value]) => noteController.createNote(owner, value));
     const m = inputNotes.length;
@@ -117,7 +114,7 @@ noteController.createConfidentialTransfer = async (inputNoteHashes, outputNoteDa
     const inputSignatures = inputNotes.map((inputNote, index) => {
         const { owner } = inputNote;
         const wallet = wallets.get(owner);
-        return aztec.sign.signNote(proofData[index], challenge, senderAddress, aztecTokenAddress, wallet.privateKey, chainId);
+        return aztec.sign.signNote(proofData[index], challenge, senderAddress, aztecTokenAddress, wallet.privateKey);
     });
 
     const noteHashes = noteData.map(n => n.noteHash);

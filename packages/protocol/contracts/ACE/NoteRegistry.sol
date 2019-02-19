@@ -2,8 +2,8 @@ pragma solidity 0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-import "./NoteUtilities.sol";
 import "./ACE.sol";
+import "../utils/NoteUtilities.sol";
 
 contract NoteRegistry {
     using NoteUtilities for bytes;
@@ -138,8 +138,6 @@ contract NoteRegistry {
             note.destroyedOn = bytes5(now);
         }
     }
-
-    event Debug(address test);
 
     function updateNoteRegistry(bytes _proofOutput, uint16 _proofType, address _proofSender) public returns (bool) {
         require(msg.sender == registryOwner, "message sender is not registry owner!");

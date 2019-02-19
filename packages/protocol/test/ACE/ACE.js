@@ -31,8 +31,6 @@ const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSpl
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-const fakeNetworkId = 100;
-
 function encodeJoinSplitTransaction({
     inputNotes,
     outputNotes,
@@ -55,8 +53,7 @@ function encodeJoinSplitTransaction({
             challenge,
             senderAddress,
             aztecAddress,
-            privateKey,
-            fakeNetworkId
+            privateKey
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
@@ -94,7 +91,7 @@ contract('ACE', (accounts) => {
         });
 
         it('can set a proof', async () => {
-            const aztec = await JoinSplit.new(fakeNetworkId);
+            const aztec = await JoinSplit.new();
             await ace.setProof(1, aztec.address, true);
             const resultValidatorAddress = await ace.validators(1);
             expect(resultValidatorAddress).to.equal(aztec.address);
@@ -133,7 +130,7 @@ contract('ACE', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
             await ace.setCommonReferenceString(CRS);
-            const aztec = await JoinSplit.new(fakeNetworkId);
+            const aztec = await JoinSplit.new();
             await ace.setProof(1, aztec.address, true);
             const inputNotes = notes.slice(2, 4);
             const outputNotes = notes.slice(0, 2);

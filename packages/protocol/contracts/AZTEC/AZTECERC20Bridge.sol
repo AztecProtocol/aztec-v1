@@ -47,8 +47,7 @@ contract AZTECERC20Bridge {
     constructor(
         bytes32[4] _setupPubKey, 
         address _token, 
-        uint256 _scalingFactor, 
-        uint256 _chainId
+        uint256 _scalingFactor
     ) 
         public 
     {
@@ -58,15 +57,14 @@ contract AZTECERC20Bridge {
         bytes32 _domainHash;
         assembly {
             let m := mload(0x40)
-            // "EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)"
-            mstore(m, 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f)
+            // "EIP712Domain(string name, string version, address verifyingContract)"
+            mstore(m, 0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766)
             // name = "AZTECERC20BRIDGE_DOMAIN"
             mstore(add(m, 0x20), 0x60d177492a60de7c666b3e3d468f14d59def1d4b022d08b6adf554d88da60d63)
             // version = "0.1.1"
             mstore(add(m, 0x40), 0x28a43689b8932fb9695c28766648ed3d943ff8a6406f8f593738feed70039290)
-            mstore(add(m, 0x60), _chainId) // chain id
-            mstore(add(m, 0x80), address) // verifying contract
-            _domainHash := keccak256(m, 0xa0)
+            mstore(add(m, 0x60), address) // verifying contract
+            _domainHash := keccak256(m, 0x80)
         }
         domainHash = _domainHash;
         emit LogCreate(_domainHash, this);
