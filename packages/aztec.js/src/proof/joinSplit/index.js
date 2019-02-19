@@ -313,7 +313,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
  * @param {string[]} inputNoteOwners array with the owners of the input notes
  * @param {string} publicOwner address(0x0) or the holder of a public token being converted
  * @param {string} kPublic public commitment being added to proof
- * @param {string} aztecAddress address of the JoinSplit contract
+ * @param {string} validatorAddress address of the JoinSplit contract
  * @returns {Object} AZTEC proof data and expected output
  */
 joinSplit.encodeJoinSplitTransaction = ({
@@ -323,7 +323,7 @@ joinSplit.encodeJoinSplitTransaction = ({
     inputNoteOwners,
     publicOwner,
     kPublic,
-    aztecAddress,
+    validatorAddress,
 }) => {
     const m = inputNotes.length;
     const {
@@ -337,7 +337,7 @@ joinSplit.encodeJoinSplitTransaction = ({
             proofDataRaw[index],
             challenge,
             senderAddress,
-            aztecAddress,
+            validatorAddress,
             privateKey
         );
     });
