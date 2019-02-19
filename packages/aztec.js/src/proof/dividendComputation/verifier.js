@@ -29,6 +29,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const K_MAXBN = new BN(K_MAX);
     const kBarArray = [];
 
+    proofUtils.checkNumNotesNoThrow(proofData, errors);
     // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
     const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData);
     const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
@@ -127,6 +128,11 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
             errors.push(ERROR_TYPES.BLINDING_FACTOR_IS_NULL);
         } else if (B.isInfinity()) {
             errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.appendBN(new BN(0));
+            finalHash.appendBN(new BN(0));
+        } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.append(B);
         } else {
             finalHash.append(B);
         }
