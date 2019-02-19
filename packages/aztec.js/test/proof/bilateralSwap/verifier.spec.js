@@ -10,7 +10,6 @@ const utils = require('@aztec/dev-utils');
 const bn128 = require('../../../src/bn128');
 const bilateralProof = require('../../../src/proof/bilateralSwap');
 const Keccak = require('../../../src/keccak');
-const { K_MAX } = require('../../../src/params');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 
