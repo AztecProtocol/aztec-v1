@@ -13,7 +13,6 @@ function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
 
-const fakeNetworkId = 100;
 contract('Join Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
     let aztecAccounts = [];
@@ -27,7 +26,7 @@ contract('Join Split ABI Encoder', (accounts) => {
                 return aztec.note.create(publicKey, randomNoteValue());
             });
 
-            joinSplitAbiEncoder = await ABIEncoder.new(fakeNetworkId, {
+            joinSplitAbiEncoder = await ABIEncoder.new({
                 from: accounts[0],
             });
         });
@@ -48,8 +47,7 @@ contract('Join Split ABI Encoder', (accounts) => {
                     challenge,
                     senderAddress,
                     joinSplitAbiEncoder.address,
-                    privateKey,
-                    fakeNetworkId
+                    privateKey
                 );
             });
             const publicOwner = aztecAccounts[0].address;

@@ -16,8 +16,6 @@ const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSpl
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-const fakeNetworkId = 100;
-
 function encodeJoinSplitTransaction({
     inputNotes,
     outputNotes,
@@ -40,8 +38,7 @@ function encodeJoinSplitTransaction({
             challenge,
             senderAddress,
             aztecAddress,
-            privateKey,
-            fakeNetworkId
+            privateKey
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
@@ -70,7 +67,7 @@ contract('JoinSplit', (accounts) => {
         let aztecAccounts = [];
         let notes = [];
         beforeEach(async () => {
-            aztecContract = await JoinSplit.new(fakeNetworkId, {
+            aztecContract = await JoinSplit.new({
                 from: accounts[0],
             });
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
@@ -352,7 +349,7 @@ contract('JoinSplit', (accounts) => {
         let aztecAccounts = [];
         let notes = [];
         beforeEach(async () => {
-            aztecContract = await JoinSplit.new(fakeNetworkId, {
+            aztecContract = await JoinSplit.new({
                 from: accounts[0],
             });
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
@@ -412,8 +409,7 @@ contract('JoinSplit', (accounts) => {
                     challenge,
                     senderAddress,
                     aztecContract.address,
-                    privateKey,
-                    fakeNetworkId
+                    privateKey
                 );
             });
             const outputOwners = outputNotes.map(n => n.owner);
@@ -459,8 +455,7 @@ contract('JoinSplit', (accounts) => {
                     challenge,
                     senderAddress,
                     aztecContract.address,
-                    privateKey,
-                    fakeNetworkId
+                    privateKey
                 );
             });
             const outputOwners = outputNotes.map(n => n.owner);
@@ -503,8 +498,7 @@ contract('JoinSplit', (accounts) => {
                     challenge,
                     senderAddress,
                     aztecContract.address,
-                    privateKey,
-                    fakeNetworkId
+                    privateKey
                 );
             });
             const outputOwners = outputNotes.map(n => n.owner);
@@ -547,8 +541,7 @@ contract('JoinSplit', (accounts) => {
                     challenge,
                     senderAddress,
                     aztecContract.address,
-                    privateKey,
-                    fakeNetworkId
+                    privateKey
                 );
             });
             const outputOwners = aztecAccounts.slice(2, 4).map(a => a.address);
@@ -582,8 +575,7 @@ contract('JoinSplit', (accounts) => {
                     challenge,
                     senderAddress,
                     aztecContract.address,
-                    aztecAccounts[0].privateKey,
-                    fakeNetworkId
+                    aztecAccounts[0].privateKey
                 ),
             ];
             const outputOwners = [];

@@ -2,20 +2,15 @@ pragma solidity ^0.4.24;
 
 import "../ACE/ACE.sol";
 
-// TODO: EIP-712 signatures are a pain because the domain hash requires 'chainId'.
-// We could deploy a bunch of 'Oracle' contracts to relevant testnets/mainnet that 
-// just returns the chain Id.
-
 library EIP712Utils {
 
     bytes32 private constant EIP_DOMAIN_TYPEHASH = keccak256(
-        "EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)"
+        "EIP712Domain(string name, string version, address verifyingContract)"
     );
 
     function constructDomainHash(
         bytes32 contractName,
-        bytes32 version,
-        uint chainId
+        bytes32 version
     ) internal view returns (bytes32 domainHash) {
         bytes32 versionHash = keccak256(abi.encode(version));
         bytes32 contractNameHash = keccak256(abi.encode(contractName));
@@ -25,9 +20,8 @@ library EIP712Utils {
             mstore(m, domainTypeHash)
             mstore(add(m, 0x20), contractNameHash)
             mstore(add(m, 0x40), versionHash)
-            mstore(add(m, 0x60), chainId) // chain id
-            mstore(add(m, 0x80), address) // verifying contract
-            domainHash := keccak256(m, 0xa0)
+            mstore(add(m, 0x60), address) // verifying contract
+            domainHash := keccak256(m, 0x80)
         }
     }
 
@@ -114,7 +108,7 @@ contract ZKERC20 {
             _scalingFactor,
             _linkedTokenAddress
         ));
-        domainHash = EIP712Utils.constructDomainHash("ZKERC20", "0.1.0", 1);
+        domainHash = EIP712Utils.constructDomainHash("ZKERC20", "0.1.0");
         emit LogCreateNoteRegistry(noteRegistry);
         emit LogCreateZKERC20(
             _canMint,

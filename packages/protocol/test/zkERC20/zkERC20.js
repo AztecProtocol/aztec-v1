@@ -19,8 +19,6 @@ const {
 
 const { outputCoder } = abiEncoder;
 
-const fakeNetworkId = 100;
-
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
@@ -55,7 +53,7 @@ contract('ZKERC20', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
             await ace.setCommonReferenceString(CRS);
-            aztecJoinSplit = await JoinSplit.new(fakeNetworkId);
+            aztecJoinSplit = await JoinSplit.new();
             await ace.setProof(1, aztecJoinSplit.address, true);
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({

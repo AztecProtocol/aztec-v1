@@ -19,8 +19,8 @@ const verifier = {};
  * Verify AZTEC bilateral swap proof transcript
  *
  * @method verifyBilateralSwap
- * @param {Array[proofData]} proofData - proofData array of AZTEC notes
- * @param {big number instance} challenge - challenge variable used in zero-knowledge protocol 
+ * @param {Object[]} proofData - proofData array of AZTEC notes
+ * @param {BN} challenge - challenge variable used in zero-knowledge protocol 
  * @returns {number} - returns 1 if proof is validated, throws an error if not
  */
 verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
