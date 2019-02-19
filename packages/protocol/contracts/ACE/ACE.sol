@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
 import "./NoteRegistry.sol";
-import "./NoteUtilities.sol";
+import "../utils/NoteUtilities.sol";
 
 /**
  * @title The AZTEC Cryptography Engine

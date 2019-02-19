@@ -19,7 +19,10 @@ module.exports = (deployer, network) => {
         }
         return deployer.deploy(ERC20Mintable).then(({ address: erc20Address }) => {
             const aceAddress = ACE.address;
-            return deployer.deploy(ZKERC20, 'Cocoa', true, true, true, ERC20_SCALING_FACTOR, erc20Address, aceAddress);
+            const canMint = false;
+            const canBurn = false;
+            const canConvert = true;
+            return deployer.deploy(ZKERC20, 'Cocoa', canMint, canBurn, canConvert, ERC20_SCALING_FACTOR, erc20Address, aceAddress);
         });
     });
 };
