@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.imgur.com/BaalNC8.jpg" width="280px"/></p>
 
-<p align="center"> AZTEC is an efficient zero-knowledge privacy protocol and decentralised exchange. The protocol powers real world financial applications on Ethereum mainnet today. A complete explanation of AZTEC can be found in our <a href="https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf">white paper</a>.</p>
+<p align="center"> AZTEC is an efficient zero-knowledge privacy protocol. The protocol powers real world financial applications on Ethereum mainnet today. A complete explanation of AZTEC can be found in our <a href="https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf">white paper</a>.</p>
 
 <p align="center">
  <a href="https://circleci.com/gh/AztecProtocol/AZTEC">
@@ -177,10 +177,6 @@ The AZTEC protocol can enable confidential transactions for *any* generic digita
 
 The AZTEC protocol can be utilized as a stand-alone confidential token, with value transfers described entirely through AZTEC **join-split** transactions
 
-#### Decentralized Confidential Exchanges
-
-The AZTEC protocol and its decentralized exchange protocol extension (coming soon) can be used to trade AZTEC assets in complete confidentiality, without having to expose the values or prices of any trade.
-
 ### How much gas do these transactions cost?
 
 The gas costs scale with the number of input and output notes in a **join-split** transaction. For a fully confidential transfer, with 2 input notes and 2 output notes, the gas cost is approximately 900,000 gas. [Planned EIP improvements](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1108.md) will reduce the cost of these transactions dramatically, to approximately 200,000 - 300,000 gas.
@@ -188,15 +184,6 @@ The gas costs scale with the number of input and output notes in a **join-split*
 ### Where can I see this in action?
 
 The AZTEC protocol is live today on the Ethereum main-net. [Our proof of concept contract](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F) converts DAI into AZTEC note form and is live on the Ethereum main-net. [Here is an example AZTEC join-split transaction](https://etherscan.io/tx/0x6cb6bccb6d51445ce026dd76b8526e8014a6a276255d22e4f5be26f8efb891fb).
-
-### What is the future of the AZTEC protocol?
-
-AZTEC will provide efficient and easy to use transaction privacy to the next generation of digital asset builders. We will be releasing the following information, open source technology and protocol upgrades over the coming months:
-
-1. Release the full AZTEC token standard, with associated API tools to construct confidential transactions
-2. Release our multiparty computation trusted setup protocol and register participants
-3. Release the formal specification for the AZTEC decentralized exchange and example smart contracts
-4. Release API tools to use the AZTEC decentralized exchange
 
 ### Range proofs you say? How does that work?
 
