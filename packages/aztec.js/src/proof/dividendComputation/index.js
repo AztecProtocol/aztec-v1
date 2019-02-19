@@ -29,15 +29,8 @@ dividendComputation.verifier = verifier;
  */
 dividendComputation.constructProof = (notes, za, zb, sender) => {
     // Error checking
-    if (notes.length !== 3) {
-        throw customError(
-            ERROR_TYPES.INCORRECT_NOTE_NUMBER,
-            {
-                data: `dividendComputation.constructProof has an incorrect number of input notes
-                There are ${notes.length}, rather than the required 3.`,
-            }
-        );
-    }
+
+    proofUtils.checkNumNotesAndThrow(notes);
 
     proofUtils.parseInputs(notes, sender);
     // Array to store bk values later

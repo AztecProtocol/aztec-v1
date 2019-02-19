@@ -5,7 +5,6 @@
  * @memberof module:proof.joinSplit
  */
 
-const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 
 const extractor = {};

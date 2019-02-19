@@ -21,6 +21,25 @@ proofUtils.makeTestNotes = (makerNoteValues, takerNoteValues) => {
     return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 
+
+proofUtils.checkNumNotesAndThrow = (notes) => {
+    if (notes.length !== 3) {
+        throw customError(
+            ERROR_TYPES.INCORRECT_NOTE_NUMBER,
+            {
+                data: `dividendComputation.constructProof has an incorrect number of input notes
+                There are ${notes.length}, rather than the required 3.`,
+            }
+        );
+    }
+};
+
+proofUtils.checkNumNotesNoThrow = (notes, errors) => {
+    if (notes.length !== 3) {
+        errors.push(ERROR_TYPES.INCORRECT_NOTE_NUMBER);
+    }
+};
+
 proofUtils.convertToBNAndAppendPoints = (proofData) => {
     const proofDataBn = proofData.map((proofElement) => {
         // Reconstruct gamma
@@ -242,6 +261,7 @@ proofUtils.computeChallenge = (...challengeVariables) => {
             } else if (challengeVar.B) {
                 hash.append(challengeVar.B);
             } else {
+                console.log('error can not add: ', challengeVar);
                 throw customError(
                     ERROR_TYPES.NO_ADD_CHALLENGEVAR,
                     {
