@@ -18,7 +18,7 @@ function randomAddress() {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
-describe.only('Dividend computation verifier tests', () => {
+describe('Dividend computation verifier tests', () => {
     describe('success states', () => {
         let testNotes;
         let sender;
@@ -98,7 +98,7 @@ describe.only('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
+            expect(message).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT for fake challenge', () => {
@@ -116,7 +116,7 @@ describe.only('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
+            expect(message).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT for fake proof data', () => {
@@ -133,7 +133,7 @@ describe.only('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
+            expect(message).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
 
@@ -176,7 +176,7 @@ describe.only('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
+            expect(message).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor at infinity', () => {
@@ -194,7 +194,7 @@ describe.only('Dividend computation verifier tests', () => {
             } catch (err) {
                 ({ message } = err);
             }
-            expect(message).to.equal(ERROR_TYPES.PROOF_FAILED);
+            expect(message).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor computed from invalid point', () => {
