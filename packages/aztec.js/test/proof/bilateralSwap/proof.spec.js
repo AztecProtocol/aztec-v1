@@ -7,10 +7,9 @@ const utils = require('@aztec/dev-utils');
 
 
 const bilateralProof = require('../../../src/proof/bilateralSwap');
-const helpers = require('../../../src/proof/bilateralSwap/helpers');
 const Keccak = require('../../../src/keccak');
+const proofUtils = require('../../../src/proof/proofUtils');
 const { K_MAX } = require('../../../src/params');
-
 
 const { expect } = chai;
 
@@ -27,7 +26,7 @@ describe('AZTEC bilateral swap proof construction tests', () => {
     let sender;
 
     beforeEach(() => {
-        testNotes = helpers.makeTestNotes([10, 20], [10, 20]);
+        testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
 
         sender = randomHex(20);
     });
@@ -41,7 +40,7 @@ describe('AZTEC bilateral swap proof construction tests', () => {
             finalHash.append(note.sigma);
         });
 
-        const { blindingFactors } = helpers.getBlindingFactorsAndChallenge(testNotes, finalHash);
+        const { blindingFactors } = proofUtils.getBlindingFactorsAndChallenge(testNotes, finalHash);
 
         const testk1 = (blindingFactors[0].bk).toString(16);
         const testk2 = (blindingFactors[1].bk).toString(16);
@@ -62,7 +61,7 @@ describe('AZTEC bilateral swap proof construction tests', () => {
     });
 
     it('bilateralProof.constructBilateralSwap will throw for input notes of random value', () => {
-        const wrongNotes = helpers.makeTestNotes(
+        const wrongNotes = proofUtils.makeTestNotes(
             [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
         );
 

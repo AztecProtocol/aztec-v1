@@ -9,6 +9,7 @@ const proof = require('../../../src/proof/joinSplit');
 const extractor = require('../../../src/proof/joinSplit/extractor');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const { K_MAX } = require('../../../src/params');
+const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
@@ -64,7 +65,7 @@ describe('AZTEC extractor tests', () => {
         generateBlindingScalars = sinon.stub(proof, 'generateBlindingScalars').callsFake(() => blindingScalars);
 
         // It's a random oracle! ...sort of, if you squint a bit.
-        computeChallenge = sinon.stub(proof, 'computeChallenge').callsFake(() => {
+        computeChallenge = sinon.stub(proofUtils, 'computeChallenge').callsFake(() => {
             return new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
         });
     });

@@ -4,7 +4,6 @@ const utils = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
-const helpers = require('./helpers');
 const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 
@@ -18,7 +17,6 @@ const { ERROR_TYPES } = utils.constants;
  * @module dividendComputation
 */
 const dividendComputation = {};
-dividendComputation.helpers = helpers;
 dividendComputation.verifier = verifier;
 
 

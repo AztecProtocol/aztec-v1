@@ -7,7 +7,6 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
 
-const helpers = require('./helpers');
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
@@ -29,7 +28,7 @@ verifier.verifyBilateralSwap = (proofData, challengeHex, sender) => {
 
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
 
-    const proofDataBn = helpers.toBnAndAppendPoints(proofData);
+    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData);
 
     const finalHash = new Keccak();
 

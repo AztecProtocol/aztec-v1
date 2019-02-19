@@ -9,7 +9,6 @@ const utils = require('@aztec/dev-utils');
 
 const bn128 = require('../../../src/bn128');
 const bilateralProof = require('../../../src/proof/bilateralSwap');
-const helpers = require('../../../src/proof/bilateralSwap/helpers');
 const Keccak = require('../../../src/keccak');
 const { K_MAX } = require('../../../src/params');
 const proofUtils = require('../../../src/proof/proofUtils');
@@ -24,13 +23,13 @@ function generateNoteValue() {
 }
 
 
-describe.only('AZTEC bilateral swap verifier tests', () => {
+describe('AZTEC bilateral swap verifier tests', () => {
     describe('success states', () => {
         let testNotes;
         let sender;
 
         beforeEach(() => {
-            testNotes = helpers.makeTestNotes([10, 20], [10, 20]);
+            testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
 
             sender = randomHex(20);
         });
@@ -43,7 +42,7 @@ describe.only('AZTEC bilateral swap verifier tests', () => {
 
         it('validate that the kbar relations are satisfied i.e. kbar1 = kbar3 and kbar2 = kbar4', () => {
             const { proofData, challenge } = bilateralProof.constructBilateralSwap(testNotes, sender);
-            const proofDataBn = helpers.toBnAndAppendPoints(proofData);
+            const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData);
             const formattedChallenge = new BN(challenge.slice(2), 16);
 
             const finalHash = new Keccak();
@@ -53,7 +52,7 @@ describe.only('AZTEC bilateral swap verifier tests', () => {
                 finalHash.append(proofElement[7]);
             });
 
-            const { recoveredBlindingFactors } = helpers.recoverBlindingFactorsAndChallenge(proofDataBn,
+            const { recoveredBlindingFactors } = proofUtils.recoverBlindingFactorsAndChallenge(proofDataBn,
                 formattedChallenge,
                 finalHash);
 
@@ -77,7 +76,7 @@ describe.only('AZTEC bilateral swap verifier tests', () => {
             // so we need to turn off proof.parseInputs
             parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-            testNotes = helpers.makeTestNotes([10, 20], [10, 20]);
+            testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
 
             sender = randomHex(20);
         });
@@ -98,7 +97,7 @@ describe.only('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT for random note values', () => {
-            const randomNotes = helpers.makeTestNotes(
+            const randomNotes = proofUtils.makeTestNotes(
                 [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
             );
             const { proofData, challenge } = bilateralProof.constructBilateralSwap(randomNotes, sender);
@@ -111,7 +110,7 @@ describe.only('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT if bilateral swap note balancing relationship not satisfied', () => {
-            const unbalancedNotes = helpers.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
+            const unbalancedNotes = proofUtils.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
             const { proofData, challenge } = bilateralProof.constructBilateralSwap(unbalancedNotes, sender);
 
             const { valid, errors } = bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
