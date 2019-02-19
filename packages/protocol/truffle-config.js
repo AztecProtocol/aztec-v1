@@ -16,7 +16,7 @@ function createProvider(network) {
     return () => {
         return new HDWalletProvider(
             process.env.PRIVATE_KEY || process.env.MNEMONIC,
-            `https://${network}.infura.io/` + process.env.INFURA_API_KEY
+            `https://${network}.infura.io/v3/` + process.env.INFURA_API_KEY
         );
     };
 }
@@ -40,7 +40,7 @@ const ropstenProvider = process.env.SOLIDITY_COVERAGE
 module.exports = {
     compilers: {
         solc: {
-            version: '0.4.24',
+            version: '0.5.4',
             settings: {
                 optimizer: {
                     enabled: true,
