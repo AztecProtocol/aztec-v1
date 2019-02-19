@@ -23,7 +23,7 @@ const { groupReduction } = bn128;
  * @param {BN} challenge - challenge variable used in zero-knowledge protocol 
  * @returns {number} - returns 1 if proof is validated, throws an error if not
  */
-verifier.verifyBilateralSwap = (proofData, challengeHex, sender) => {
+verifier.verifyProof = (proofData, challengeHex, sender) => {
     const errors = [];
 
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);

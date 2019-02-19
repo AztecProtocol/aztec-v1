@@ -51,8 +51,8 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         expect(testk2).to.equal(testk4);
     });
 
-    it('bilateralProof.constructBilateralSwap creates a proof with well-formed outputs', () => {
-        const { proofData } = bilateralProof.constructBilateralSwap(testNotes, sender);
+    it('bilateralProof.constructProof creates a proof with well-formed outputs', () => {
+        const { proofData } = bilateralProof.constructProof(testNotes, sender);
         expect(proofData.length).to.equal(4);
         expect(proofData[0].length).to.equal(6);
         expect(proofData[1].length).to.equal(6);
@@ -60,16 +60,16 @@ describe('AZTEC bilateral swap proof construction tests', () => {
         expect(proofData[3].length).to.equal(6);
     });
 
-    it('bilateralProof.constructBilateralSwap will throw for input notes of random value', () => {
+    it('bilateralProof.constructProof will throw for input notes of random value', () => {
         const wrongNotes = proofUtils.makeTestNotes(
             [generateNoteValue(), generateNoteValue()], [generateNoteValue(), generateNoteValue()]
         );
 
-        const { proofData, challenge } = bilateralProof.constructBilateralSwap(wrongNotes, sender);
+        const { proofData, challenge } = bilateralProof.constructProof(wrongNotes, sender);
         let message = '';
 
         try {
-            bilateralProof.verifier.verifyBilateralSwap(proofData, challenge, sender);
+            bilateralProof.verifier.verifyProof(proofData, challenge, sender);
         } catch (err) {
             ({ message } = err);
         }

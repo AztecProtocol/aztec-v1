@@ -24,7 +24,7 @@ const { ERROR_TYPES } = utils.constants;
  * @param {Note[]} notes array of AZTEC notes
  * @returns {{ proofData: string[], challenge: string }} - proof data and challenge
  */
-bilateralSwap.constructBilateralSwap = (notes, sender) => {
+bilateralSwap.constructProof = (notes, sender) => {
     const bkArray = [];
 
     // Check that proof data lies on the bn128 curve
