@@ -62,7 +62,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[0],
                 kPublic: -10,
-                aztecAddress: aztecJoinSplit.address,
+                validatorAddress: aztecJoinSplit.address,
             });
             proofs[1] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
@@ -71,7 +71,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner: accounts[1],
                 kPublic: -40,
-                aztecAddress: aztecJoinSplit.address,
+                validatorAddress: aztecJoinSplit.address,
             });
             proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -80,7 +80,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[2],
                 kPublic: -130,
-                aztecAddress: aztecJoinSplit.address,
+                validatorAddress: aztecJoinSplit.address,
             });
             proofs[3] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(6, 8),
@@ -89,7 +89,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(6, 8),
                 publicOwner: accounts[2],
                 kPublic: 40,
-                aztecAddress: aztecJoinSplit.address,
+                validatorAddress: aztecJoinSplit.address,
             });
             proofs[4] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -98,7 +98,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[3],
                 kPublic: -30,
-                aztecAddress: aztecJoinSplit.address,
+                validatorAddress: aztecJoinSplit.address,
             });
             proofs[5] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [notes[0], notes[3]],
@@ -107,7 +107,7 @@ contract('ZKERC20', (accounts) => {
                 inputNoteOwners: [aztecAccounts[0], aztecAccounts[3]],
                 publicOwner: accounts[3],
                 kPublic: 0, // perfectly balanced...
-                aztecAddress: aztecJoinSplit.address,
+                validatorAddress: aztecJoinSplit.address,
             });
 
             const proofOutputs = proofs.map(({ expectedOutput }) => {
