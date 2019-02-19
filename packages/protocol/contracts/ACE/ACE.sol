@@ -78,29 +78,29 @@ contract ACE {
         address validatorAddress = validators[_proofType];
         require(validatorAddress != address(0), "expect validator address to exist");
         assembly {
-            let m := mload(0x40)
+            let memPtr := mload(0x40)
             let _proofData := add(0x04, calldataload(0x44)) // calldata location of start of `proofData`
 
             // manually construct validator calldata map
-            mstore(add(m, 0x04), 0x100) // location in calldata of the start of `bytes _proofData` (0x100)
-            mstore(add(m, 0x24), _sender)
-            mstore(add(m, 0x44), sload(commonReferenceString_slot))
-            mstore(add(m, 0x64), sload(add(0x01, commonReferenceString_slot)))
-            mstore(add(m, 0x84), sload(add(0x02, commonReferenceString_slot)))
-            mstore(add(m, 0xa4), sload(add(0x03, commonReferenceString_slot)))
-            mstore(add(m, 0xc4), sload(add(0x04, commonReferenceString_slot)))
-            mstore(add(m, 0xe4), sload(add(0x05, commonReferenceString_slot)))
-            calldatacopy(add(m, 0x104), _proofData, add(calldataload(_proofData), 0x20))
+            mstore(add(memPtr, 0x04), 0x100) // location in calldata of the start of `bytes _proofData` (0x100)
+            mstore(add(memPtr, 0x24), _sender)
+            mstore(add(memPtr, 0x44), sload(commonReferenceString_slot))
+            mstore(add(memPtr, 0x64), sload(add(0x01, commonReferenceString_slot)))
+            mstore(add(memPtr, 0x84), sload(add(0x02, commonReferenceString_slot)))
+            mstore(add(memPtr, 0xa4), sload(add(0x03, commonReferenceString_slot)))
+            mstore(add(memPtr, 0xc4), sload(add(0x04, commonReferenceString_slot)))
+            mstore(add(memPtr, 0xe4), sload(add(0x05, commonReferenceString_slot)))
+            calldatacopy(add(memPtr, 0x104), _proofData, add(calldataload(_proofData), 0x20))
 
             // call our validator smart contract, and validate the call succeeded
             
-            if iszero(staticcall(gas, validatorAddress, m, add(calldataload(_proofData), 0x124), 0x00, 0x00)) {
+            if iszero(staticcall(gas, validatorAddress, memPtr, add(calldataload(_proofData), 0x124), 0x00, 0x00)) {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed - proof is invalid!
             }
-            returndatacopy(m, 0x00, returndatasize) // copy returndata to memory
-            let returnStart := m
-            let proofOutputs := add(m, mload(m)) // proofOutputs points to the start of return data
-            m := add(add(m, 0x20), returndatasize)
+            returndatacopy(memPtr, 0x00, returndatasize) // copy returndata to memory
+            let returnStart := memPtr
+            let proofOutputs := add(memPtr, mload(memPtr)) // proofOutputs points to the start of return data
+            memPtr := add(add(memPtr, 0x20), returndatasize)
             // does this proof satisfy a balancing relationship? If it does, we need to record the proof
             mstore(0x00, _proofType) mstore(0x20, balancedProofs_slot)
             switch sload(keccak256(0x00, 0x40)) // index `balanceProofs[_profType]`
@@ -113,10 +113,10 @@ contract ACE {
                     let proofHash := keccak256(loc, add(mload(loc), 0x20)) // hash the proof output
                     // combine the following: proofHash, _proofType, msg.sender
                     // hashing the above creates a unique key that we can log against this proof, in `validatedProofs`
-                    mstore(m, proofHash)
-                    mstore(add(m, 0x20), _proofType)
-                    mstore(add(m, 0x40), caller)
-                    mstore(0x00, keccak256(m, 0x60)) mstore(0x20, validatedProofs_slot)
+                    mstore(memPtr, proofHash)
+                    mstore(add(memPtr, 0x20), _proofType)
+                    mstore(add(memPtr, 0x40), caller)
+                    mstore(0x00, keccak256(memPtr, 0x60)) mstore(0x20, validatedProofs_slot)
                     sstore(keccak256(0x00, 0x40), 0x01)
                 }
             }
@@ -138,11 +138,11 @@ contract ACE {
     */
     function clearProofByHashes(uint16 _proofType, bytes32[]) external {
         assembly {
-            let m := mload(0x40)
+            let memPtr := mload(0x40)
             let proofHashes := add(0x04, calldataload(0x24))
             let length := calldataload(proofHashes)
-            mstore(add(m, 0x20), _proofType)
-            mstore(add(m, 0x40), caller)
+            mstore(add(memPtr, 0x20), _proofType)
+            mstore(add(memPtr, 0x40), caller)
             mstore(0x20, validatedProofs_slot)
             for { let i := 0 } lt(i, length) { i := add(i, 0x01) } {
                 let proofHash := calldataload(add(add(proofHashes, mul(i, 0x20)), 0x20))
@@ -151,8 +151,8 @@ contract ACE {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
-                mstore(m, proofHash)
-                mstore(0x00, keccak256(m, 0x60))
+                mstore(memPtr, proofHash)
+                mstore(0x00, keccak256(memPtr, 0x60))
                 sstore(keccak256(0x00, 0x40), 0x00)
             }
         }
@@ -173,14 +173,14 @@ contract ACE {
         address _sender
     ) external view returns (bool) {
         assembly {
-            let m := mload(0x40)
-            mstore(m, _proofHash)
-            mstore(add(m, 0x20), _proofType)
-            mstore(add(m, 0x40), _sender)
-            mstore(0x00, keccak256(m, 0x60))
+            let memPtr := mload(0x40)
+            mstore(memPtr, _proofHash)
+            mstore(add(memPtr, 0x20), _proofType)
+            mstore(add(memPtr, 0x40), _sender)
+            mstore(0x00, keccak256(memPtr, 0x60))
             mstore(0x20, validatedProofs_slot)
-            mstore(m, sload(keccak256(0x00, 0x40)))
-            return(m, 0x20)
+            mstore(memPtr, sload(keccak256(0x00, 0x40)))
+            return(memPtr, 0x20)
         }
     }
 
