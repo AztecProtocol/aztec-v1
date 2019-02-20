@@ -7,11 +7,10 @@ const { exceptions } = require('@aztec/dev-utils');
 // ### Internal Dependencies
 
 const {
-    proof,
     abiEncoder,
-    secp256k1,
-    sign,
     note,
+    proof,
+    secp256k1,
 } = require('aztec.js');
 const {
     constants: {
@@ -19,7 +18,6 @@ const {
     },
 } = require('@aztec/dev-utils');
 
-const { joinSplit: aztecProof } = proof;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
@@ -29,50 +27,6 @@ const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSpl
 
 
 JoinSplit.abi = JoinSplitInterface.abi;
-
-function encodeJoinSplitTransaction({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-    inputNoteOwners,
-    publicOwner,
-    kPublic,
-    aztecAddress,
-}) {
-    const m = inputNotes.length;
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = aztecProof.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
-
-    const inputSignatures = inputNotes.map((inputNote, index) => {
-        const { privateKey } = inputNoteOwners[index];
-        return sign.signACENote(
-            proofDataRaw[index],
-            challenge,
-            senderAddress,
-            aztecAddress,
-            privateKey
-        );
-    });
-    const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = abiEncoder.joinSplit.encode(
-        proofDataRaw,
-        m,
-        challenge,
-        publicOwner,
-        inputSignatures,
-        outputOwners,
-        outputNotes
-    );
-    const expectedOutput = `0x${abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue: kPublic,
-    }]).slice(0x42)}`;
-    return { proofData, expectedOutput };
-}
 
 contract('ACE', (accounts) => {
     // Creating a collection of tests that should pass
@@ -136,14 +90,14 @@ contract('ACE', (accounts) => {
             const outputNotes = notes.slice(0, 2);
             const kPublic = 40;
             const publicOwner = aztecAccounts[0].address;
-            ({ proofData, expectedOutput } = encodeJoinSplitTransaction({
+            ({ proofData, expectedOutput } = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
                 inputNoteOwners: aztecAccounts.slice(2, 4),
                 publicOwner,
                 kPublic,
-                aztecAddress: aztec.address,
+                validatorAddress: aztec.address,
             }));
             const proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
             proofHash = outputCoder.hashProofOutput(proofOutput);

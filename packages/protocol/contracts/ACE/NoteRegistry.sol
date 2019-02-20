@@ -185,6 +185,7 @@ contract NoteRegistry {
     function updateInputNotes(bytes memory inputNotes) internal {
         for (uint i = 0; i < inputNotes.getLength(); i += 1) {
             (address owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
+            // `note` will be stored on the blockchain
             Note storage note = registry[noteHash];
             require(note.status == 1, "input note does not exist!");
             require(note.owner == owner, "input note owner does not match!");
@@ -199,6 +200,7 @@ contract NoteRegistry {
     function updateOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
+            // `note` will be stored on the blockchain
             Note storage note = registry[noteHash];
             require(note.status == 0, "output note exists!");
             note.status = uint8(1);
