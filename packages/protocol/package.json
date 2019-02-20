@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "version": "0.4.0-beta.3",
+  "version": "0.4.0-beta.4",
   "author": "AZTEC",
   "description": "AZTEC smart contract repository",
   "license": "LGPL-3.0",
@@ -62,16 +62,10 @@
     "lint:js": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "./node_modules/.bin/solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint": "npm run lint:js && npm run lint:sol",
-    "test:demo": "NODE_ENV=TEST ./node_modules/.bin/mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:sol": "TEST_DEMO=false scripts/test.sh",
-    "test": "TEST_DEMO=true scripts/test.sh",
+    "test:sol": "scripts/test.sh",
+    "test": "scripts/test.sh",
     "coverage": "scripts/coverage.sh",
     "compile": "./node_modules/.bin/truffle compile --all",
-    "build:artifacts": "node scripts/artifacts.js",
-    "demo:development": "NODE_ENV=DEVELOPMENT node ./demo/demoTransactions.js",
-    "demo:rinkeby": "NODE_ENV=RINKEBY node ./demo/demoTransactions.js",
-    "demo:kovan": "NODE_ENV=KOVAN node ./demo/demoTransactions.js",
-    "demo:mainnet": "NODE_ENV=MAINNET node ./demo/demoTransactions.js",
-    "demo:ropsten": "NODE_ENV=ROPSTEN node ./demo/demoTransactions.js"
+    "build:artifacts": "node scripts/artifacts.js"
   }
 }

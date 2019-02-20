@@ -1,22 +1,20 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "./JoinSplitABIEncoder.sol";
-
 
 contract JoinSplitInterface {
     constructor() public {}
     
     function validateJoinSplit(
-        bytes, 
+        bytes calldata, 
         address, 
-        uint[6]
+        uint[6] calldata
     ) 
         external 
         pure 
-        returns (bytes) 
+        returns (bytes memory) 
     {}
 }
-
 
 /**
  * @title Library to validate AZTEC zero-knowledge proofs

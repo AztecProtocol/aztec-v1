@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "../ACE/ACE.sol";
 
@@ -55,7 +55,7 @@ library EIP712Utils {
 
 contract ZKERC20 {
 
-    using NoteUtilities for bytes;
+    using NoteUtils for bytes;
 
     ACE public ace;
     ERC20 public linkedToken;
@@ -88,7 +88,7 @@ contract ZKERC20 {
     event LogRedeemTokens(address indexed _owner, uint256 _value);
 
     constructor(
-        string _name,
+        string memory _name,
         bool _canMint,
         bool _canBurn,
         bool _canConvert,
@@ -109,7 +109,7 @@ contract ZKERC20 {
             _linkedTokenAddress
         ));
         domainHash = EIP712Utils.constructDomainHash("ZKERC20", "0.1.0");
-        emit LogCreateNoteRegistry(noteRegistry);
+        emit LogCreateNoteRegistry(address(noteRegistry));
         emit LogCreateZKERC20(
             _canMint,
             _canBurn,
@@ -120,13 +120,13 @@ contract ZKERC20 {
         );
     }
     
-    function confidentialTransfer(bytes _proofData) external returns (bool) {
+    function confidentialTransfer(bytes calldata _proofData) external returns (bool) {
         bytes memory proofOutputs = ace.validateProof(1, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid!");
         bytes memory proofOutput = proofOutputs.get(0);
         
         
-        require(ace.updateNoteRegistry(proofOutput, 1, this), "could not update note registry!");
+        require(ace.updateNoteRegistry(proofOutput, 1, address(this)), "could not update note registry!");
         
         (bytes memory inputNotes,
         bytes memory outputNotes,
@@ -143,7 +143,7 @@ contract ZKERC20 {
         }
     }
 
-    function confidentialTransferFrom(uint16 _proofId, bytes _proofOutput) external returns (bool) {
+    function confidentialTransferFrom(uint16 _proofId, bytes calldata _proofOutput) external returns (bool) {
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -175,7 +175,8 @@ contract ZKERC20 {
         bytes32 _noteHash,
         address _spender,
         bool _status,
-        bytes _signature) public returns (bool) {
+        bytes memory _signature
+    ) public returns (bool) {
         (
             uint8 status,
             ,
