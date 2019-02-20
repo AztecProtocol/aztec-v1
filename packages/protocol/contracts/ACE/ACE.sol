@@ -1,7 +1,7 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "./NoteRegistry.sol";
-import "../utils/NoteUtilities.sol";
+import "../utils/NoteUtils.sol";
 
 /**
  * @title The AZTEC Cryptography Engine
@@ -70,7 +70,7 @@ contract ACE {
     function validateProof(
         uint16 _proofType,
         address _sender,
-        bytes
+        bytes calldata
     ) external returns (
         bytes memory
     ) {
@@ -136,7 +136,7 @@ contract ACE {
     * @param _proofType the AZTEC proof type
     * Unnamed param is a dynamic array of proof hashes
     */
-    function clearProofByHashes(uint16 _proofType, bytes32[]) external {
+    function clearProofByHashes(uint16 _proofType, bytes32[] calldata) external {
         assembly {
             let memPtr := mload(0x40)
             let proofHashes := add(0x04, calldataload(0x24))
@@ -198,13 +198,18 @@ contract ACE {
             _canConvert,
             _scalingFactor,
             _linkedToken,
-            this,
-            this);
+            address(this),
+            address(this)
+        );
         noteRegistries[msg.sender] = registry;
         return address(registry);
     }
 
-    function updateNoteRegistry(bytes _proofOutput, uint16 _proofType, address _proofSender) public returns (bool) {
+    function updateNoteRegistry(
+        bytes memory _proofOutput, 
+        uint16 _proofType, 
+        address _proofSender
+    ) public returns (bool) {
         NoteRegistry registry = noteRegistries[msg.sender];
         require(registry != NoteRegistry(0), "sender does not have a linked Note Registry");
         require(registry.updateNoteRegistry(_proofOutput, _proofType, _proofSender), "update failed!");
