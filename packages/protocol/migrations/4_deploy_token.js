@@ -22,7 +22,16 @@ module.exports = (deployer, network) => {
             const canMint = false;
             const canBurn = false;
             const canConvert = true;
-            return deployer.deploy(ZKERC20, 'Cocoa', canMint, canBurn, canConvert, ERC20_SCALING_FACTOR, erc20Address, aceAddress);
+            return deployer.deploy(
+                ZKERC20,
+                'Cocoa',
+                canMint,
+                canBurn,
+                canConvert,
+                ERC20_SCALING_FACTOR,
+                erc20Address,
+                aceAddress
+            );
         });
     });
 };
