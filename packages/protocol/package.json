@@ -27,6 +27,7 @@
     "openzeppelin-solidity": "2.1.2"
   },
   "devDependencies": {
+    "@0x/sol-coverage": "^2.0.3",
     "@aztec/dev-utils": "^1.2.0",
     "aztec.js": "0.4.0-beta.13",
     "babel-runtime": "^6.26.0",
@@ -47,10 +48,11 @@
     "rimraf": "^2.6.3",
     "solc": "0.5.4",
     "solhint": "1.5.0",
-    "solidity-coverage": "git+https://github.com/rotcivegaf/solidity-coverage.git#5875f5b7bc74d447f3312c9c0e9fc7814b482477",
+    "solidity-coverage": "git+https://github.com/leapdao/solidity-coverage.git#0c2fe7d3bf64208f473bad1f57e4e14455abe141",
     "truffle": "^5.0.4",
     "truffle-hdwallet-provider": "^1.0.4",
     "web3": "1.0.0-beta.37",
+    "web3-provider-engine": "^14.1.0",
     "web3-utils": "1.0.0-beta.37"
   },
   "scripts": {
