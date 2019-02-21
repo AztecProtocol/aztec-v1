@@ -158,7 +158,7 @@ contract JoinSplit {
                     k := kn
 
                     // if all notes are input notes, invert k
-                    switch eq(m, n) 
+                    switch eq(m, n)
                     case 1 {
                         k := sub(gen_order, k)
                     }
@@ -228,7 +228,7 @@ contract JoinSplit {
                 // And \sigma_{acc} at 0x1e0:0x200
                 // If i = m + 1 (i.e. first output note)
                 // then we set \gamma_{acc} and \sigma_{acc} to \gamma_i, -\sigma_i
-                switch eq(i, m) 
+                switch eq(i, m)
                 case 1 {
                     mstore(0x260, mload(0x20))
                     mstore(0x280, mload(0x40))
@@ -239,7 +239,7 @@ contract JoinSplit {
                 // If i > m + 1 (i.e. subsequent output notes)
                 // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
                 // we then calculate \gamma^{cx} and add into \gamma_{acc}
-                switch gt(i, m) 
+                switch gt(i, m)
                 case 1 {
                     mstore(0x60, c)
                     result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
@@ -252,7 +252,7 @@ contract JoinSplit {
                 }
 
                 // throw transaction if any calls to precompiled contracts failed
-                switch iszero(result) 
+                switch iszero(result)
                 case 1 { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
@@ -261,7 +261,7 @@ contract JoinSplit {
                 // a JoinSplit transaction. We can inductively assume that all input notes
                 // are well-formed AZTEC commitments and do not need to validate the implicit range proof
                 // This is not the case for any output commitments, so if (m < n) call validatePairing()
-                switch lt(m, n) 
+                switch lt(m, n)
                 case 1 {
                     validatePairing(0x84)
                 }
@@ -270,7 +270,7 @@ contract JoinSplit {
                 // starting at 0x2a0, of size (b - 0x2a0).
                 // Hash this block to reconstruct the initial challenge and validate that they match
                 let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
-                switch iszero(eq(expected, challenge)) 
+                switch iszero(eq(expected, challenge))
                 case 1 {
 
                     // No! Bad! No soup for you!
@@ -329,7 +329,7 @@ contract JoinSplit {
 
                 let success := staticcall(gas, 8, 0x20, 0x180, 0x20, 0x20)
 
-                switch or(iszero(success), iszero(mload(0x20))) 
+                switch or(iszero(success), iszero(mload(0x20)))
                 case 1 {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
