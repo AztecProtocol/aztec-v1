@@ -16,7 +16,6 @@ const {
     },
 } = require('@aztec/dev-utils');
 
-
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts

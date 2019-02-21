@@ -48,7 +48,6 @@
     "rimraf": "^2.6.3",
     "solc": "0.5.4",
     "solhint": "1.5.0",
-    "solidity-coverage": "git+https://github.com/leapdao/solidity-coverage.git#0c2fe7d3bf64208f473bad1f57e4e14455abe141",
     "truffle": "^5.0.4",
     "truffle-hdwallet-provider": "^1.0.4",
     "web3": "1.0.0-beta.37",
