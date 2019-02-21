@@ -95,7 +95,7 @@ contract JoinSplit {
                 let challenge := mod(calldataload(0x144), gen_order)
 
                 // validate m <= n
-                if gt(m, n) { mstore(0x00, 404) revert(0x00, 0x20) }
+                switch gt(m, n) case 1 { mstore(0x00, 404) revert(0x00, 0x20) }
 
                 // recover k_{public} and calculate k_{public}
                 let kn := calldataload(sub(add(notes, mul(calldataload(notes), 0xc0)), 0xa0))
@@ -158,7 +158,8 @@ contract JoinSplit {
                     k := kn
 
                     // if all notes are input notes, invert k
-                    if eq(m, n) {
+                    switch eq(m, n) 
+                    case 1 {
                         k := sub(gen_order, k)
                     }
                 }
@@ -227,7 +228,8 @@ contract JoinSplit {
                 // And \sigma_{acc} at 0x1e0:0x200
                 // If i = m + 1 (i.e. first output note)
                 // then we set \gamma_{acc} and \sigma_{acc} to \gamma_i, -\sigma_i
-                if eq(i, m) {
+                switch eq(i, m) 
+                case 1 {
                     mstore(0x260, mload(0x20))
                     mstore(0x280, mload(0x40))
                     mstore(0x1e0, mload(0xe0))
@@ -237,7 +239,8 @@ contract JoinSplit {
                 // If i > m + 1 (i.e. subsequent output notes)
                 // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
                 // we then calculate \gamma^{cx} and add into \gamma_{acc}
-                if gt(i, m) {
+                switch gt(i, m) 
+                case 1 {
                     mstore(0x60, c)
                     result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
 
@@ -249,7 +252,8 @@ contract JoinSplit {
                 }
 
                 // throw transaction if any calls to precompiled contracts failed
-                if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
+                switch iszero(result) 
+                case 1 { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
 
@@ -257,7 +261,8 @@ contract JoinSplit {
                 // a JoinSplit transaction. We can inductively assume that all input notes
                 // are well-formed AZTEC commitments and do not need to validate the implicit range proof
                 // This is not the case for any output commitments, so if (m < n) call validatePairing()
-                if lt(m, n) {
+                switch lt(m, n) 
+                case 1 {
                     validatePairing(0x84)
                 }
 
@@ -265,7 +270,8 @@ contract JoinSplit {
                 // starting at 0x2a0, of size (b - 0x2a0).
                 // Hash this block to reconstruct the initial challenge and validate that they match
                 let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
-                if iszero(eq(expected, challenge)) {
+                switch iszero(eq(expected, challenge)) 
+                case 1 {
 
                     // No! Bad! No soup for you!
                     mstore(0x00, 404)
@@ -289,7 +295,7 @@ contract JoinSplit {
                 let t2_y_2 := calldataload(add(t2, 0x60))
 
                 // check provided setup pubkey is not zero or g2
-                if or(or(or(or(or(or(or(
+                switch or(or(or(or(or(or(or(
                     iszero(t2_x_1),
                     iszero(t2_x_2)),
                     iszero(t2_y_1)),
@@ -298,7 +304,7 @@ contract JoinSplit {
                     eq(t2_x_2, 0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2)),
                     eq(t2_y_1, 0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa)),
                     eq(t2_y_2, 0x90689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b))
-                {
+                case 1 {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
@@ -323,7 +329,8 @@ contract JoinSplit {
 
                 let success := staticcall(gas, 8, 0x20, 0x180, 0x20, 0x20)
 
-                if or(iszero(success), iszero(mload(0x20))) {
+                switch or(iszero(success), iszero(mload(0x20))) 
+                case 1 {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
@@ -335,14 +342,15 @@ contract JoinSplit {
              * Transaction will throw if this is not the case.
              * @param note the calldata loation of the note
              **/
-            function validateCommitment(note, k, a) {
+            // solhint-disable-next-line space-after-comma
+            function validateCommitment(note,k,a) {
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let field_order := 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
                 let gammaX := calldataload(add(note, 0x40))
                 let gammaY := calldataload(add(note, 0x60))
                 let sigmaX := calldataload(add(note, 0x80))
                 let sigmaY := calldataload(add(note, 0xa0))
-                if iszero(
+                switch iszero(
                     and(
                         and(
                         and(
@@ -373,7 +381,7 @@ contract JoinSplit {
                         )
                         )
                     )
-                ) {
+                ) case 1 {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
@@ -388,10 +396,11 @@ contract JoinSplit {
              * @param notes calldata location notes
              * @param n number of notes
              **/
-            function hashCommitments(notes, n) {
+            // solhint-disable-next-line space-after-comma
+            function hashCommitments(notes,n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
-                let index := add(add(notes, mul(i, 0xc0)), 0x60)
-                calldatacopy(add(0x320, mul(i, 0x80)), index, 0x80)
+                    let index := add(add(notes, mul(i, 0xc0)), 0x60)
+                    calldatacopy(add(0x320, mul(i, 0x80)), index, 0x80)
                 }
                 mstore(0x00, keccak256(0x320, mul(n, 0x80)))
             }

@@ -128,11 +128,13 @@ library JoinSplitABIEncoder {
                 // store note length in `s`
                 mstore(s, 0xa0)
                 // store note owner in `s + 0x20`. If ECDSA recovery fails, or signing address is `0`, throw an error
-                if or(
-                iszero(mload(add(s, 0x20))),
-                iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x20), 0x20))
-                ) {
-                mstore(0x00, 400) revert(0x00, 0x20)
+                switch 
+                or(
+                    iszero(mload(add(s, 0x20))),
+                    iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x20), 0x20))
+                ) 
+                case 1 {
+                    mstore(0x00, 400) revert(0x00, 0x20)
                 }
                 // store note hash in `s + 0x40`
                 mstore(add(s, 0x40), mload(0xc0))

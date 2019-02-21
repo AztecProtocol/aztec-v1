@@ -93,8 +93,8 @@ contract ACE {
             calldatacopy(add(memPtr, 0x104), _proofData, add(calldataload(_proofData), 0x20))
 
             // call our validator smart contract, and validate the call succeeded
-            
-            if iszero(staticcall(gas, validatorAddress, memPtr, add(calldataload(_proofData), 0x124), 0x00, 0x00)) {
+            switch iszero(staticcall(gas, validatorAddress, memPtr, add(calldataload(_proofData), 0x124), 0x00, 0x00)) 
+            case 1 {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed - proof is invalid!
             }
             returndatacopy(memPtr, 0x00, returndatasize) // copy returndata to memory

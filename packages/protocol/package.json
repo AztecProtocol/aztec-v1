@@ -47,7 +47,7 @@
     "rimraf": "^2.6.3",
     "solc": "0.5.4",
     "solhint": "1.5.0",
-    "solidity-coverage": "^0.5.11",
+    "solidity-coverage": "git+https://github.com/rotcivegaf/solidity-coverage.git#5875f5b7bc74d447f3312c9c0e9fc7814b482477",
     "truffle": "^5.0.4",
     "truffle-hdwallet-provider": "^1.0.4",
     "web3": "1.0.0-beta.37",
