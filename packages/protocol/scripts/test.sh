@@ -7,43 +7,37 @@ set -o errexit
 trap cleanup EXIT
 
 cleanup() {
-  # Kill the ganache instance that we started (if we started one and if it's still running).
-  if [ -n "$ganache_pid" ] && ps -p $ganache_pid > /dev/null; then
-    kill -9 $ganache_pid
+  # Kill the devnet instance that we started (if we started one and if it's still running).  
+  if [ "$SOLIDITY_COVERAGE" = true ]; then
+    if [ docker inspect -f "{{.State.Running}}" ethnode = true ]; then
+      docker stop $(docker ps -aq --filter ancestor=0xorg/devnet:latest) > /dev/null
+    fi
+  else
+    if [ -n "$devnet_pid" ] && ps -p $devnet_pid > /dev/null; then
+      kill -9 $devnet_pid
+    fi
   fi
 }
 
-ganache_port=8545
-
-ganache_running() {
-  nc -z localhost "$ganache_port"
+devnet_running() {
+  nc -z localhost 8545
 }
 
-start_ganache() {
-  # We define 10 accounts with balance 1M ether, needed for high-value tests.
-  local accounts=(
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501203,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501204,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501205,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501206,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501207,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208,1000000000000000000000000"
-    --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501209,1000000000000000000000000"
-  )
+start_devnet() {
+  if [ "$SOLIDITY_COVERAGE" = true ]; then
+    docker run -it -d --rm -p 8545:8501 -p 8546:8546 --name ethnode 0xorg/devnet:latest /bin/bash > /dev/null &
+  else
+    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff > /dev/null &
+  fi
 
-  ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff "${accounts[@]}" > /dev/null &
-
-  ganache_pid=$!
+  devnet_pid=$!
 }
 
-if ganache_running; then
-  echo "Using existing ganache instance"
+if devnet_running; then
+  echo "Using existing devnet instance"
 else
-  echo "Starting our own ganache instance"
-  start_ganache
+  echo "Starting our own devnet instance"
+  start_devnet
 fi
 
 if [ "$SOLC_NIGHTLY" = true ]; then
@@ -54,3 +48,6 @@ fi
 ./node_modules/.bin/truffle version
 ./node_modules/.bin/truffle test "$@"
 
+if [ "$CONTINUOUS_INTEGRATION" = true ]; then
+  cat coverage/lcov.info | node_modules/.bin/coveralls
+fi

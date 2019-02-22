@@ -10,6 +10,9 @@ const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
  * @url https://github.com/0xProject/0x-monorepo/tree/development/packages/devnet
  */
 const main = async () => {
+    if (!process.env.SOLIDITY_COVERAGE) {
+        return;
+    }
     // the first account is the "sealer"
     const devnetAccounts = [
         '0xe8816898d851d5b61b7f950627d04d794c07ca37',
