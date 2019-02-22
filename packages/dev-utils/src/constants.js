@@ -81,11 +81,8 @@ module.exports = {
      * Generic scaling factor that maps between AZTEC note values and ERC20 token balances.
      * when used for DAI token, 1 AZTEC note value = 0.1 DAI
      */
+    DEVNET_SEALER: '0xe8816898d851d5b61b7f950627d04d794c07ca37',
     ERC20_SCALING_FACTOR: new BN('100000000000000000', 10),
-    /**
-     * Dummy network id used in contract testing
-     */
-    FAKE_NETWORK_ID: 100,
     /** Maximum value that can be held in an AZTEC Note
      *  @constant K_MAX
      *  @type {string}
