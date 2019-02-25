@@ -60,7 +60,7 @@ joinSplit.generateBlindingScalars = (n, m) => {
 /**
  * Construct AZTEC join-split proof transcript
  *
- * @method constructJoinSplit
+ * @method constructProof
  * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
@@ -68,7 +68,7 @@ joinSplit.generateBlindingScalars = (n, m) => {
  * @param {string} kPublic public commitment being added to proof
  * @returns {Object} proof data and challenge
  */
-joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
+joinSplit.constructProof = (notes, m, sender, kPublic) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
     // convert kPublic into a BN instance if it is not one
@@ -142,7 +142,7 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
 /**
  * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
  *
- * @method constructJoinSplit
+ * @method constructProof
  * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
@@ -162,7 +162,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
     } else {
         kPublicBn = new BN(kPublic);
     }
-    joinSplit.parseInputs(notes, m, sender, kPublicBn);
+    proofUtils.parseInputs(notes, sender, m, kPublicBn);
 
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
@@ -197,7 +197,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
         };
     });
 
-    const challenge = joinSplit.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
