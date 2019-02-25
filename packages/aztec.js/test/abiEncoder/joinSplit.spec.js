@@ -94,7 +94,7 @@ describe('abiEncoder.joinSplit tests', () => {
         const {
             proofData,
             challenge,
-        } = aztecProof.constructJoinSplit([...inputNotes, ...outputNotes], m, senderAddress, 0);
+        } = aztecProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
 
         const inputSignatures = inputNotes.map((inputNote, index) => {
             const { privateKey } = accounts[index];

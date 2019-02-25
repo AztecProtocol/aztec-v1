@@ -41,7 +41,7 @@ function randomAddress() {
  *
  * We stub proof.computeChallenge with a 'random oracle' - something that spits out random challenges instead of using hashes.
  * We also stub proof.generateBlindingScalars with a function that always returns the same set of blinding scalars.
- * This ensures that when we call proof.constructJoinSplit two times, with the same notes, we have the same input string
+ * This ensures that when we call proof.constructProof two times, with the same notes, we have the same input string
  * for both proofs.
  *
  * Finally, once we have our two proof transcripts we call extractor.extractWitness
@@ -86,13 +86,13 @@ describe('AZTEC extractor tests', () => {
         const {
             proofData: firstTranscript,
             challenge: firstChallenge,
-        } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+        } = proof.constructProof(commitments, m, sender, kPublic);
 
         // and now let's get a second proof over the same input string
         const {
             proofData: secondTranscript,
             challenge: secondChallenge,
-        } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+        } = proof.constructProof(commitments, m, sender, kPublic);
 
         const witnesses = extractor.extractWitness(
             [firstTranscript, secondTranscript],

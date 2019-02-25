@@ -106,7 +106,7 @@ noteController.createConfidentialTransfer = async (inputNoteHashes, outputNoteDa
     const m = inputNotes.length;
     const noteData = [...inputNotes.map(n => n.note), ...outputNotes];
 
-    const { proofData, challenge } = aztec.proof.joinSplit.constructJoinSplit(noteData, m, senderAddress, v);
+    const { proofData, challenge } = aztec.proof.joinSplit.constructProof(noteData, m, senderAddress, v);
     const metadata = noteController.encodeMetadata(inputNotes.map(n => n.note));
 
     const outputOwners = outputNoteData.map(([owner]) => owner);

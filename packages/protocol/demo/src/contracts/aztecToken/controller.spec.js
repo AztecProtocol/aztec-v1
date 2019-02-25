@@ -84,7 +84,7 @@ describe('aztecToken controller tests', () => {
                 noteController.createNote(wallets[0].address, 101),
                 noteController.createNote(wallets[0].address, 26),
             ];
-            const { proofData, challenge } = aztec.proof.joinSplit.constructJoinSplit(inputNotes, 0, wallets[0].address, -300);
+            const { proofData, challenge } = aztec.proof.joinSplit.constructProof(inputNotes, 0, wallets[0].address, -300);
 
             const metadata = noteController.encodeMetadata(inputNotes);
 
