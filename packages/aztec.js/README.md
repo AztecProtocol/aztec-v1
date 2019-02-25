@@ -70,8 +70,8 @@ const proof = require('./proof/joinSplit');
 const secp256k1 = require('./secp256k1');
 const sign = require('./sign');
 
-// address of confidential AZTEC - DAI smart contract
-const aztecContract = '0x0000';
+// address of a confidential AZTEC contract, can be any valid Ethereum address for testing
+const aztecContract = '0x76581320dCdFFC93E2FFFF7DADfE668Ba55796a9';
 
 const accounts = [
     secp256k1.generateAccount(),
@@ -97,7 +97,7 @@ const { proofData, challenge } = proof.constructJoinSplit([...inputNotes, ...out
 // construct EIP712-compatible ECDSA signatures over input notes, required to spend input notes
 const inputSignatures = [
     sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey),
-    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey),
+    sign.signNote(proofData[1], challenge, sender, aztecContract, accounts[0].privateKey),
 ];
 
 const outputOwners = [accounts[1].address, accounts[1].address];
@@ -111,6 +111,4 @@ const transactionData = {
     outputOwners,
     metadata: note.encodeMetadata(outputNotes),
 };
-
-return transactionData;
 ```
