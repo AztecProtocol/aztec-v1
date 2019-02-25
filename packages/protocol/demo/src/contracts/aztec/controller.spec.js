@@ -55,7 +55,7 @@ describe('aztec controller tests', () => {
                 noteController.createNote(wallets[1].address, 101),
                 noteController.createNote(wallets[1].address, 26),
             ];
-            const { proofData, challenge } = aztec.proof.joinSplit.constructJoinSplit(inputNotes, 0, wallet.address, -300);
+            const { proofData, challenge } = aztec.proof.joinSplit.constructProof(inputNotes, 0, wallet.address, -300);
             const transactionHash = await aztecController.joinSplit(wallet.address, proofData, 0, challenge);
             expect(typeof (transactionHash)).to.equal('string');
             expect(transactionHash.length).to.equal(66);
