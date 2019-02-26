@@ -24,7 +24,7 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "openzeppelin-solidity": "2.0.0"
+    "openzeppelin-solidity": "2.1.2"
   },
   "devDependencies": {
     "@aztec/dev-utils": "^1.2.0-beta.1",
@@ -32,28 +32,24 @@
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.3",
     "bn.js": "^4.11.8",
-    "chai": "^4.2.0",
     "coveralls": "^3.0.2",
     "dotenv": "^6.2.0",
-    "eslint": "^5.8.0",
+    "eslint": "^5.14.1",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.2.0",
     "eslint-plugin-react": "^7.12.4",
-    "ethereumjs-tx": "^1.3.7",
     "fs-extra": "^7.0.1",
     "ganache-cli": "^6.3.0",
     "lodash": "^4.17.11",
-    "lowdb": "^1.0.0",
     "mocha": "^5.2.0",
     "rimraf": "^2.6.3",
-    "sinon": "^7.2.3",
-    "solc": "0.4.24",
+    "solc": "0.5.4",
     "solhint": "1.5.0",
     "solidity-coverage": "^0.5.11",
-    "truffle": "^5.0.3",
-    "truffle-hdwallet-provider": "^1.0.0-web3one.5",
+    "truffle": "^5.0.4",
+    "truffle-hdwallet-provider": "^1.0.4",
     "web3": "1.0.0-beta.37",
     "web3-utils": "1.0.0-beta.37"
   },
@@ -62,16 +58,10 @@
     "lint:js": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "./node_modules/.bin/solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint": "npm run lint:js && npm run lint:sol",
-    "test:demo": "NODE_ENV=TEST ./node_modules/.bin/mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:sol": "TEST_DEMO=false scripts/test.sh",
-    "test": "TEST_DEMO=true scripts/test.sh",
+    "test:sol": "scripts/test.sh",
+    "test": "scripts/test.sh",
     "coverage": "scripts/coverage.sh",
     "compile": "./node_modules/.bin/truffle compile --all",
-    "build:artifacts": "node scripts/artifacts.js",
-    "demo:development": "NODE_ENV=DEVELOPMENT node ./demo/demoTransactions.js",
-    "demo:rinkeby": "NODE_ENV=RINKEBY node ./demo/demoTransactions.js",
-    "demo:kovan": "NODE_ENV=KOVAN node ./demo/demoTransactions.js",
-    "demo:mainnet": "NODE_ENV=MAINNET node ./demo/demoTransactions.js",
-    "demo:ropsten": "NODE_ENV=ROPSTEN node ./demo/demoTransactions.js"
+    "build:artifacts": "node scripts/artifacts.js"
   }
 }
