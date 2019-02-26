@@ -1,6 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.5.0 <0.6.0;
 
-library NoteUtilities {
+library NoteUtils {
 
     function getLength(bytes memory proofOutputsOrNotes) internal pure returns (
         uint len
