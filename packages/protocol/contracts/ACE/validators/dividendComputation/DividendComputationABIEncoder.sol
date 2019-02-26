@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity >=0.5.0 <0.6.0;
 
 
 library DividendComputationABIEncoder {
@@ -202,13 +202,13 @@ library DividendComputationABIEncoder {
 
 contract DividendComputationABIEncoderTest {
     function validateDividendComputation(
-        bytes, 
+        bytes calldata, 
         address, 
-        uint[6]
+        uint[6] calldata
     ) 
         external 
         view 
-        returns (bytes) 
+        returns (bytes memory) 
     {
         DividendComputationABIEncoder.encodeAndExit();
     }
