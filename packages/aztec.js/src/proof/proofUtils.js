@@ -1,3 +1,8 @@
+/**
+ * Constructs AZTEC bilateral swap zero-knowledge proofs
+ *
+ * @module proofUtils
+ */
 
 const BN = require('bn.js');
 const utils = require('@aztec/dev-utils');
@@ -15,19 +20,41 @@ const { K_MAX } = require('../params');
 const proofUtils = {};
 const { customError } = utils.errors;
 const { ERROR_TYPES } = utils.constants;
+
 const zero = new BN(0).toRed(groupReduction);
 
+/**
+ * Make test notes
+ * @method makeTestNotes
+ * @memberof module:proofUtils
+ * @param {string[]} makerNoteValues - array of maker note values 
+ * @param {string[]} makerNoteValues - array of taker note values
+ * @returns {[Notes{}]} - array of AZTEC notes
+ */
 proofUtils.makeTestNotes = (makerNoteValues, takerNoteValues) => {
     const noteValues = [...makerNoteValues, ...takerNoteValues];
     return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 
+/**
+ * Generate a random note value that is less than K_MAX
+ * @method generateNoteValue
+ * @memberof module:proofUtils
+ * @returns {BN} - big number instance of an AZTEC note value
+ */
 proofUtils.generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
 };
 
-proofUtils.checkNumNotesAndThrow = (notes) => {
-    if (notes.length !== 3) {
+/**
+ * Checks the number of notes, and throws if incorrect number
+ * @method checkNumNotesAndThrow
+ * @memberof module:proofUtils
+ * @param {Object[]} notes - array of AZTEC notes
+ * @param {integer} numNotes - desired number of notes
+ */
+proofUtils.checkNumNotesAndThrow = (notes, numNotes) => {
+    if (notes.length !== numNotes) {
         throw customError(
             ERROR_TYPES.INCORRECT_NOTE_NUMBER,
             {
@@ -38,12 +65,30 @@ proofUtils.checkNumNotesAndThrow = (notes) => {
     }
 };
 
-proofUtils.checkNumNotesNoThrow = (notes, errors) => {
-    if (notes.length !== 3) {
+/**
+ * Checks the number of notes, records error if wrong
+ * but does not throw
+ * @method checkNumNotesNoThrow
+ * @memberof module:proofUtils
+ * @param {Object[]} notes - array of AZTEC notes
+ * @param {integer} numNotes - desired number of notes
+ * @param {string[]} errors - record of all errors that are thrown
+ */
+proofUtils.checkNumNotesNoThrow = (notes, numNotes, errors) => {
+    if (notes.length !== numNotes) {
         errors.push(ERROR_TYPES.INCORRECT_NOTE_NUMBER);
     }
 };
 
+/**
+ * Converts proof data to bn.js format, calculates gamma and sigma 
+ * then appends these to the end
+ * @method convertToBNAndAppendPoints
+ * @memberof module:proofUtils
+ * @param {string[]} proofData - array of proof data from proof construction
+ * @param {string[]} errors - record of all errors that are thrown
+ * @returns {BN[]} proofData - array of proof data in bn.js format
+ */
 proofUtils.convertToBNAndAppendPoints = (proofData, errors) => {
     const proofDataBn = proofData.map((proofElement) => {
         // Reconstruct gamma
@@ -74,6 +119,15 @@ proofUtils.convertToBNAndAppendPoints = (proofData, errors) => {
     return proofDataBn;
 };
 
+/**
+ * Computes the blinding factors and challenge from note array and final hash
+ * Used for testing purposes
+ * @method getBlindingFactorsAndChallenge
+ * @memberof module:proofUtils
+ * @param {string[]} noteArray - array of proof data from proof construction
+ * @param {Hash} finalHash - hash object used to recover the challenge
+ * @returns { blindingFactors: BN[] , challenge: string} proofData - array of proof data in bn.js format
+ */
 proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
     const bkArray = [];
     const blindingFactors = noteArray.map((note, i) => {
@@ -109,6 +163,16 @@ proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
     return { blindingFactors, challenge };
 };
 
+/**
+ * Recovers the blinding factors and challenge
+ * Used for testing purposes
+ * @method getBlindingFactorsAndChallenge
+ * @memberof module:proofUtils
+ * @param {string[]} proofDataBn - array of proof data from proof construction
+ * @param {string} formattedChallenge - challenge variable
+ * @param {Hash} finalHash - hash object used to recover the challenge
+ * @returns { blindingFactors: BN[] , challenge: string} proofData - array of proof data in bn.js format
+ */
 proofUtils.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, finalHash) => {
     const kBarArray = [];
 
@@ -152,6 +216,15 @@ proofUtils.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge
     return { recoveredBlindingFactors, recoveredChallenge };
 };
 
+/**
+ * Converts a hexadecimal input into a scalar bn.js
+ * @method hexToGroupScalar
+ * @memberof module:proofUtils
+ * @param {string} hex - hex input
+ * @param {string[]} errors - collection of all errors that occurred
+ * @param {boolean} canbeZero - control to determine hex input can be zero
+ * @returns {BN} bn.js formatted version of the scalar
+ */
 proofUtils.hexToGroupScalar = (hex, errors, canBeZero = false) => {
     const hexBn = new BN(hex.slice(2), 16);
     if (!hexBn.lt(bn128.curve.n)) {
@@ -163,6 +236,15 @@ proofUtils.hexToGroupScalar = (hex, errors, canBeZero = false) => {
     return hexBn.toRed(groupReduction);
 };
 
+/**
+ * Converts a hexadecimal input to a group element
+ * @method hexToGroupScalar
+ * @memberof module:proofUtils
+ * @param {string} xHex - hexadecimal representation of x coordinate
+ * @param {string} yHex - hexadecimal representation of y coordinate
+ * @param {string[]} errors - collection of all errors that occurred
+ * @returns {BN} bn.js formatted version of a point on the bn128 curve
+ */
 proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
     let x = new BN(xHex.slice(2), 16);
     let y = new BN(yHex.slice(2), 16);
@@ -186,11 +268,12 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
  * Convert ABI encoded proof transcript back into BN.js form (for scalars) and elliptic.js form (for points)
  *
  * @method convertTranscript
- * @memberof module:proof.joinSplit.verifier
+ * @memberof module:proofUtils
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
  * @param {number} m number of input notes
  * @param {string} challengeHex hex-string formatted proof challenge
  * @param {string[]} errors container for discovered errors
+ * @returns { notes: Object[], rollingHash: Hash, challenge: string, kPublic: BN} necessary proof variables in required format
  */
 proofUtils.convertTranscript = (proofData, m, challengeHex, errors) => {
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
@@ -357,6 +440,14 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
     }
 };
 
+/**
+ * Validate proof inputs are well formed
+ *
+ * @method isOnCurve
+ * @memberof proofUtils
+ * @param {BN[]} point - bn.js format of a point on the curve
+ * @returns boolean - true if point is on curve, false if not
+ */
 proofUtils.isOnCurve = (point) => {
     const lhs = point.y.redSqr();
     const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.curve.b);

@@ -1,3 +1,9 @@
+/**
+ * Verifies AZTEC dividend computations
+ *
+ * @module proof.dividendComputation
+*/
+
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
@@ -18,8 +24,12 @@ const verifier = {};
  *
  * @method verifyProof
  * @param {Object[]} proofData - proofData array of AZTEC notes
- * @param {BN} challenge - challenge variable used in zero-knowledge protocol
- * @returns {number} - returns 1 if proof is validated, throws an error if not
+ * @param {string} challenge - challenge variable used in zero-knowledge protocol
+ * @param {string} sender - Ethereum address
+ * @param {integer} za - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {integer} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @returns {boolean, string[]} valid, errors - valid describes whether the proof verification is valid, 
+ * errors is an array of all errors that were caught
  */
 verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const errors = [];
@@ -28,8 +38,9 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     let zbBN;
     const K_MAXBN = new BN(K_MAX);
     const kBarArray = [];
+    const numNotes = 3;
 
-    proofUtils.checkNumNotesNoThrow(proofData, errors);
+    proofUtils.checkNumNotesNoThrow(proofData, numNotes, errors);
 
     // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
     const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
