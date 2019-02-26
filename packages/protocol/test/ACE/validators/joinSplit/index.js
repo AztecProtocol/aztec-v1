@@ -5,25 +5,26 @@ const { constants: { CRS }, exceptions } = require('@aztec/dev-utils');
 const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
 
-const { proof: { joinSplit } } = aztec;
-const { outputCoder, inputCoder } = aztec.abiEncoder;
-const joinSplitEncode = inputCoder.joinSplit;
+const { proof: { joinSplit: { encodeJoinSplitTransaction } } } = aztec;
+const joinSplitInputEncode = aztec.abiEncoder.inputCoder.joinSplit;
+
+
+const { outputCoder } = aztec.abiEncoder;
 
 // ### Artifacts
 const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitInterface');
 
-
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('JoinSplit', (accounts) => {
-    let aztecJoinSplit;
+    let joinSplitContract;
     // Creating a collection of tests that should pass
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
         beforeEach(async () => {
-            aztecJoinSplit = await JoinSplit.new({
+            joinSplitContract = await JoinSplit.new({
                 from: accounts[0],
             });
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
@@ -38,18 +39,18 @@ contract('JoinSplit', (accounts) => {
             const outputNotes = notes.slice(0, 2);
             const kPublic = 40;
             const publicOwner = aztecAccounts[0].address;
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
                 inputNoteOwners: aztecAccounts.slice(2, 4),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
 
-            const result = await aztecContract.validateJoinSplit(proofData, accounts[0], CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -78,7 +79,7 @@ contract('JoinSplit', (accounts) => {
             expect(decoded[0].publicValue).to.equal(40);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, accounts[0], CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -90,24 +91,24 @@ contract('JoinSplit', (accounts) => {
             const outputNotes = notes.slice(0, 2);
             const kPublic = 80;
             const publicOwner = aztecAccounts[0].address;
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
                 inputNoteOwners: aztecAccounts.slice(2, 5),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
-            const result = await aztecJoinSplit.validateJoinSplit(proofData, accounts[0], CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
 
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, accounts[0], CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -120,17 +121,17 @@ contract('JoinSplit', (accounts) => {
             const kPublic = -40;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress,
                 inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
-            const result = await aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -139,7 +140,7 @@ contract('JoinSplit', (accounts) => {
             expect(decoded[0].publicValue).to.equal(-40);
 
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -152,23 +153,23 @@ contract('JoinSplit', (accounts) => {
             const kPublic = 0;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress,
                 inputNoteOwners: aztecAccounts.slice(0, 10),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
-            const result = await aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -181,23 +182,23 @@ contract('JoinSplit', (accounts) => {
             const kPublic = -450;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes,
                 senderAddress,
                 inputNoteOwners: [],
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
-            const result = await aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -210,23 +211,23 @@ contract('JoinSplit', (accounts) => {
             const kPublic = 450;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes: [],
                 senderAddress,
                 inputNoteOwners: aztecAccounts.slice(0, 10),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
-            const result = await aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -243,23 +244,23 @@ contract('JoinSplit', (accounts) => {
             const kPublic = -10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress,
                 inputNoteOwners: aztecAccounts.slice(0, 10),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
-            const result = await aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -276,23 +277,23 @@ contract('JoinSplit', (accounts) => {
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
-            const { proofData, expectedOutput } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress,
                 inputNoteOwners: aztecAccounts.slice(0, 10),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
 
-            const result = await aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await aztecJoinSplit.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -305,7 +306,7 @@ contract('JoinSplit', (accounts) => {
         let aztecAccounts = [];
         let notes = [];
         beforeEach(async () => {
-            aztecJoinSplit = await JoinSplit.new({
+            joinSplitContract = await JoinSplit.new({
                 from: accounts[0],
             });
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
@@ -324,20 +325,20 @@ contract('JoinSplit', (accounts) => {
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
-            const { proofData } = aztec.proof.joinSplit.encodeJoinSplitTransaction({
+            const { proofData } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress,
                 inputNoteOwners: aztecAccounts.slice(0, 10),
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: joinSplitContract.address,
             });
             const fakeChallenge = padLeft(crypto.randomBytes(32).toString('hex'), 64);
 
             const fakeProofData = `0x${proofData.slice(0x02, 0x42)}${fakeChallenge}${proofData.slice(0x82)}`;
 
-            exceptions.catchRevert(aztecJoinSplit.validateJoinSplit(fakeProofData, senderAddress, CRS, {
+            exceptions.catchRevert(joinSplitContract.validateJoinSplit(fakeProofData, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             }));
@@ -366,7 +367,7 @@ contract('JoinSplit', (accounts) => {
                     proofDataRaw[index],
                     challenge,
                     senderAddress,
-                    aztecJoinSplit.address,
+                    joinSplitContract.address,
                     privateKey
                 );
             });
@@ -375,7 +376,7 @@ contract('JoinSplit', (accounts) => {
                 .map(() => [...Array(6)]
                     .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
 
-            const proofData = joinSplitEncode(
+            const proofData = joinSplitInputEncode(
                 fakeProofData,
                 m,
                 challenge,
@@ -385,7 +386,7 @@ contract('JoinSplit', (accounts) => {
                 outputNotes
             );
 
-            exceptions.catchRevert(aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            exceptions.catchRevert(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             }));
@@ -414,13 +415,13 @@ contract('JoinSplit', (accounts) => {
                     proofDataRaw[index],
                     challenge,
                     senderAddress,
-                    aztecJoinSplit.address,
+                    joinSplitContract.address,
                     privateKey
                 );
             });
             const outputOwners = outputNotes.map(n => n.owner);
 
-            const proofData = joinSplitEncode(
+            const proofData = joinSplitInputEncode(
                 proofDataRaw,
                 m,
                 challenge,
@@ -430,7 +431,7 @@ contract('JoinSplit', (accounts) => {
                 outputNotes
             );
 
-            exceptions.catchRevert(aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            exceptions.catchRevert(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             }));
@@ -459,12 +460,12 @@ contract('JoinSplit', (accounts) => {
                     proofDataRaw[index],
                     challenge,
                     senderAddress,
-                    aztecJoinSplit.address,
+                    joinSplitContract.address,
                     privateKey
                 );
             });
             const outputOwners = outputNotes.map(n => n.owner);
-            const proofData = joinSplitEncode(
+            const proofData = joinSplitInputEncode(
                 proofDataRaw,
                 m,
                 challenge,
@@ -474,7 +475,7 @@ contract('JoinSplit', (accounts) => {
                 outputNotes
             );
 
-            exceptions.catchRevert(aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            exceptions.catchRevert(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             }));
@@ -502,12 +503,12 @@ contract('JoinSplit', (accounts) => {
                     proofDataRaw[index],
                     challenge,
                     senderAddress,
-                    aztecJoinSplit.address,
+                    joinSplitContract.address,
                     privateKey
                 );
             });
             const outputOwners = aztecAccounts.slice(2, 4).map(a => a.address);
-            const proofData = joinSplitEncode(
+            const proofData = joinSplitInputEncode(
                 proofDataRaw,
                 m,
                 challenge,
@@ -517,7 +518,7 @@ contract('JoinSplit', (accounts) => {
                 notes.slice(0, 2)
             );
 
-            exceptions.catchRevert(aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            exceptions.catchRevert(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             }));
@@ -536,13 +537,13 @@ contract('JoinSplit', (accounts) => {
                     proofDataRaw[0],
                     challenge,
                     senderAddress,
-                    aztecJoinSplit.address,
+                    joinSplitContract.address,
                     aztecAccounts[0].privateKey
                 ),
             ];
             const outputOwners = [];
             const publicOwner = aztecAccounts[0].address;
-            const proofData = joinSplitEncode(
+            const proofData = joinSplitInputEncode(
                 proofDataRaw,
                 m,
                 challenge,
@@ -551,7 +552,7 @@ contract('JoinSplit', (accounts) => {
                 outputOwners,
                 []
             );
-            await exceptions.catchRevert(aztecJoinSplit.validateJoinSplit(proofData, senderAddress, CRS, {
+            await exceptions.catchRevert(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
                 from: senderAddress,
                 gas: 4000000,
             }));
