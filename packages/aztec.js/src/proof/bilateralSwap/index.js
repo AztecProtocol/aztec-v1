@@ -1,7 +1,7 @@
 /**
  * Constructs AZTEC bilateral swap zero-knowledge proofs
  *
- * @module proof
+ * @module proof.bilateralSwap
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
@@ -23,7 +23,7 @@ const { ERROR_TYPES } = utils.constants;
  * Construct AZTEC bilateral swap proof transcript
  *
  * @method constructProof
- * @param {Note[]} notes array of AZTEC notes
+ * @param {Object[], sender} notes array of AZTEC notes, sender address
  * @returns {{ proofData: string[], challenge: string }} - proof data and challenge
  */
 bilateralSwap.constructProof = (notes, sender) => {

@@ -1,7 +1,7 @@
 /**
  * Verifies AZTEC bilateral swap zero-knowledge proofs
  *
- * @module proof
+ * @module proof.bilateralSwap
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
@@ -18,10 +18,13 @@ const { groupReduction } = bn128;
 /**
  * Verify AZTEC bilateral swap proof transcript
  *
- * @method verifyBilateralSwap
- * @param {Object[]} proofData - proofData array of AZTEC notes
- * @param {BN} challenge - challenge variable used in zero-knowledge protocol 
- * @returns {number} - returns 1 if proof is validated, throws an error if not
+ * @method verifyProof
+ * @memberof module:proof.bilateralSwap
+ * @param {Object[]} proofData - AZTEC bilateralSwap zero-knowledge proof data
+ * @param {string} challengeHex - hex-string formatted proof challenge
+ * @param {string} sender - Ethereum address of transaction sender
+ * @returns {boolean, string[]} valid, errors - valid describes whether the proof verification is valid, 
+ * errors is an array of all errors that were caught
  */
 verifier.verifyProof = (proofData, challengeHex, sender) => {
     const errors = [];

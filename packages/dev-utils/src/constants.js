@@ -141,8 +141,8 @@ module.exports = {
      * Generic burning Etheruem address
      */
     ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
-    /** error codes for use during proof construction
-     * 
+    /** 
+     * error codes for use during proof construction
      */
     ERROR_TYPES: {
         SCALAR_TOO_BIG: 'SCALAR_TOO_BIG',

@@ -1,3 +1,9 @@
+/**
+ * Constructs AZTEC dividend computations
+ *
+ * @module proof.dividendComputation
+*/
+
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
@@ -11,11 +17,6 @@ const { groupReduction } = bn128;
 const { customError } = utils.errors;
 const { ERROR_TYPES } = utils.constants;
 
-/**
- * Constructs AZTEC dividend computations
- *
- * @module dividendComputation
-*/
 const dividendComputation = {};
 dividendComputation.verifier = verifier;
 
@@ -24,13 +25,17 @@ dividendComputation.verifier = verifier;
  * Construct AZTEC dividend computation proof transcript
  *
  * @method constructProof
- * @param {Note[]} notes array of AZTEC notes
+ * @param {Object[]} notes - array of AZTEC notes
+ * @param {integer} za - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {integer} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {sender} sender - Ethereum address
  * @returns {{proofData:string[], challenge: string}} - proof data and challenge
  */
 dividendComputation.constructProof = (notes, za, zb, sender) => {
-    // Error checking
+    const numNotes = 3;
 
-    proofUtils.checkNumNotesAndThrow(notes);
+    // Error checking
+    proofUtils.checkNumNotesAndThrow(notes, numNotes);
 
     proofUtils.parseInputs(notes, sender);
     // Array to store bk values later
