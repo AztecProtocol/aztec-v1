@@ -1,7 +1,9 @@
-const joinSplit = require('./joinSplit');
 const outputCoder = require('./outputCoder');
+const inputCoder = require('./inputCoder');
+const encoderFactory = require('./encoderFactory');
 
 module.exports = {
-    joinSplit,
+    encoderFactory,
+    inputCoder,
     outputCoder,
 };

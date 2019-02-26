@@ -1,66 +1,72 @@
+
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const aztec = require('aztec.js');
-const { constants: { CRS, K_MAX } } = require('@aztec/dev-utils');
+const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
+// ### Internal Dependencies
+const aztec = require('aztec.js');
+const { params: { t2 } } = require('aztec.js');
+
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitABIEncoderTest');
+const BilateralSwapAbiEncoder = artifacts.require(
+    './contracts/ACE/validators/BilateralSwap/bilateralSwap/BilateralSwapABIEncoderTest'
+);
 
-function randomNoteValue() {
-    return Math.floor(Math.random() * Math.floor(K_MAX));
-}
 
-contract('Join Split ABI Encoder', (accounts) => {
-    let joinSplitAbiEncoder;
-    let aztecAccounts = [];
+const fakeNetworkId = 100;
+contract('Bilateral ABI Encoder', (accounts) => {
+    let bilateralSwapAbiEncoder;
+    let bilateralSwapAccounts = [];
     let notes = [];
 
-    // Creating a collection of tests that should pass
     describe('success states', () => {
-        beforeEach(async () => {
-            aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
-            notes = aztecAccounts.map(({ publicKey }) => {
-                return aztec.note.create(publicKey, randomNoteValue());
-            });
+        let crs;
 
-            joinSplitAbiEncoder = await ABIEncoder.new({
+        beforeEach(async () => {
+            const noteValues = [10, 20, 10, 20];
+
+            bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
+
+            notes = [
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
+            ];
+
+            bilateralSwapAbiEncoder = await BilateralSwapAbiEncoder.new(fakeNetworkId, {
                 from: accounts[0],
             });
+            const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
+            const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
+            crs = [
+                `0x${padLeft(hx.toString(16), 64)}`,
+                `0x${padLeft(hy.toString(16), 64)}`,
+                ...t2,
+            ];
         });
 
-        it('succesfully encodes output of a join split proof', async () => {
-            const m = 2;
+        it('succesfully encodes output of a bilateral swap zero knowledge proof', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
+            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicValue = new BN(0);
             const {
                 proofData,
                 challenge,
-            } = aztec.proof.joinSplit.constructJoinSplit([...inputNotes, ...outputNotes], m, accounts[0], 0);
-            const inputSignatures = inputNotes.map((inputNote, index) => {
-                const { privateKey } = aztecAccounts[index];
-                return aztec.sign.signACENote(
-                    proofData[index],
-                    challenge,
-                    senderAddress,
-                    joinSplitAbiEncoder.address,
-                    privateKey
-                );
-            });
-            const publicOwner = aztecAccounts[0].address;
+            } = aztec.proof.bilateralSwap.constructBilateralSwap([...inputNotes, ...outputNotes], accounts[0]);
+
+            const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
-            const data = aztec.abiEncoder.joinSplit.encode(
+
+            const data = aztec.abiEncoder.inputCoder.bilateralSwap(
                 proofData,
-                m,
                 challenge,
-                publicOwner,
-                inputSignatures,
+                inputOwners,
                 outputOwners,
                 outputNotes
             );
 
-            const result = await joinSplitAbiEncoder.validateJoinSplit(data, senderAddress, CRS, {
+            const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, crs, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -69,10 +75,13 @@ contract('Join Split ABI Encoder', (accounts) => {
                 inputNotes,
                 outputNotes,
                 publicOwner,
-                publicValue: 0,
+                publicValue,
             }]);
 
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(
+                `0x${padLeft('0', 64)}${result.slice(2)}`
+            );
+
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
@@ -95,7 +104,8 @@ contract('Join Split ABI Encoder', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await joinSplitAbiEncoder.validateJoinSplit.estimateGas(data, senderAddress, CRS, {
+
+            const gasUsed = await bilateralSwapAbiEncoder.validateBilateralSwap.estimateGas(data, senderAddress, crs, {
                 from: accounts[0],
                 gas: 4000000,
             });

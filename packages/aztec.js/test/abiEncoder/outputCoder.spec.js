@@ -1,14 +1,16 @@
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
+const HexString = require('./HexString');
 const bn128 = require('../../src/bn128');
 const secp256k1 = require('../../src/secp256k1');
 const note = require('../../src/note');
-const outputCoder = require('../../src/abiEncoder/outputCoder');
+const abiEncoder = require('../../src/abiEncoder');
 const { K_MAX } = require('../../src/params');
 
 const { expect } = chai;
 
+const { outputCoder } = abiEncoder;
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
@@ -21,22 +23,11 @@ function isHex(input) {
     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
 }
 
-class HexString extends String {
-    slice(a, b = null) {
-        if (b) {
-            return (super.slice(a * 2, b * 2));
-        }
-        return (super.slice(a * 2));
-    }
 
-    hexLength() {
-        return this.length / 2;
-    }
-}
-
-describe('abiEncoder.outputCoder tests', () => {
+describe('abiEncoderoutputCoder tests', () => {
     let accounts = [];
     let notes = [];
+
     beforeEach(() => {
         accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
         notes = accounts.map(({ publicKey }) => {

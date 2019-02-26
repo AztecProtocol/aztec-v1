@@ -18,6 +18,9 @@ const sign = require('../../sign');
 const { K_MAX } = require('../../params');
 
 const { groupReduction } = bn128;
+const { outputCoder, inputCoder } = abiEncoder;
+const joinSplitEncode = inputCoder.joinSplit;
+
 
 const joinSplit = {};
 joinSplit.extractor = extractor;
@@ -342,7 +345,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = abiEncoder.joinSplit.encode(
+    const proofData = joinSplitEncode(
         proofDataRaw,
         m,
         challenge,
@@ -351,7 +354,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${abiEncoder.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,
