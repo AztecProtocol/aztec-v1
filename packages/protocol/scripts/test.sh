@@ -70,12 +70,3 @@ if [ "$SOLIDITY_COVERAGE" = true ]; then
 else
   ./node_modules/.bin/truffle test "$@"
 fi
-
-if [ "$TEST_DEMO" = true ]; then
-  ./node_modules/.bin/truffle migrate --reset --network development
-
-  echo "Using Mocha $(./node_modules/.bin/mocha --version)"
-
-  NODE_ENV=TEST ./node_modules/.bin/mocha ./demo --trace-warnings --exit --colors --recursive --reporter spec
-fi
-

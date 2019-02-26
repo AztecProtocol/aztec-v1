@@ -1,12 +1,14 @@
-pragma solidity 0.4.24;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 import "./ACE.sol";
-import "../utils/NoteUtilities.sol";
+import "../utils/IntegerUtils.sol";
+import "../utils/NoteUtils.sol";
 
 contract NoteRegistry {
-    using NoteUtilities for bytes;
+    using IntegerUtils for uint;
+    using NoteUtils for bytes;
 
     struct Note {
         uint8 status;
@@ -51,7 +53,7 @@ contract NoteRegistry {
         ace = ACE(_ace);
     }
 
-    function mint(bytes _proofOutput, address _proofSender) public returns (bool) {
+    function mint(bytes memory _proofOutput, address _proofSender) public returns (bool) {
         require(msg.sender == registryOwner, "message sender is not registry owner!");
         require(flags.canMint == true, "this asset is not mintable!");
         bytes32 proofHash = _proofOutput.hashProofOutput();
@@ -90,12 +92,12 @@ contract NoteRegistry {
             // AZTEC uses timestamps to measure the age of a note on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.createdOn = bytes5(now);
+            note.createdOn = now.uintToBytes(5);
             note.owner = owner;
         }
     }
 
-    function burn(bytes _proofOutput, address _proofSender) public returns (bool) {
+    function burn(bytes memory _proofOutput, address _proofSender) public returns (bool) {
         require(msg.sender == registryOwner, "message sender is not registry owner!");
         require(flags.canBurn == true, "this asset is not burnable!");
         bytes32 proofHash = _proofOutput.hashProofOutput();
@@ -135,11 +137,15 @@ contract NoteRegistry {
             // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = bytes5(now);
+            note.destroyedOn = now.uintToBytes(5);
         }
     }
 
-    function updateNoteRegistry(bytes _proofOutput, uint16 _proofType, address _proofSender) public returns (bool) {
+    function updateNoteRegistry(
+        bytes memory _proofOutput, 
+        uint16 _proofType, 
+        address _proofSender
+    ) public returns (bool) {
         require(msg.sender == registryOwner, "message sender is not registry owner!");
         bytes32 proofHash = _proofOutput.hashProofOutput();
         require(
@@ -167,7 +173,9 @@ contract NoteRegistry {
                     "public owner has not validated a transfer of tokens"
                 );
                 publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
-                require(linkedToken.transferFrom(publicOwner, this, uint256(-publicValue)), "transfer failed!");
+                require(
+                    linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), "transfer failed!"
+                );
             } else {
                 totalSupply -= uint256(publicValue);
                 require(linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed!");
@@ -185,6 +193,7 @@ contract NoteRegistry {
     function updateInputNotes(bytes memory inputNotes) internal {
         for (uint i = 0; i < inputNotes.getLength(); i += 1) {
             (address owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
+            // `note` will be stored on the blockchain
             Note storage note = registry[noteHash];
             require(note.status == 1, "input note does not exist!");
             require(note.owner == owner, "input note owner does not match!");
@@ -192,20 +201,21 @@ contract NoteRegistry {
             // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = bytes5(now);
+            note.destroyedOn = now.uintToBytes(5);
         }
     }
 
     function updateOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
+            // `note` will be stored on the blockchain
             Note storage note = registry[noteHash];
             require(note.status == 0, "output note exists!");
             note.status = uint8(1);
             // AZTEC uses timestamps to measure the age of a note on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.createdOn = bytes5(now);
+            note.createdOn = now.uintToBytes(5);
             note.owner = owner;
         }
     }

@@ -13,4 +13,3 @@
 - [ ] Prefix PR title with [WIP] if necessary.
 - [ ] Write tests for added code when needed.
 - [ ] Update documentation when needed.
-<!-- - [ ] Add new entries to the relevant CHANGELOG.md files. -->
