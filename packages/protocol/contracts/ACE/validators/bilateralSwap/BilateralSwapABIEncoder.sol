@@ -1,37 +1,37 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-library JoinSplitABIEncoder {
+
+library BilateralSwapABIEncoder {
     /**
-     * Calldata map
-     * 0x04:0x24      = calldata location of proofData byte array
-     * 0x24:0x44      = message sender
-     * 0x44:0x64      = h_x
-     * 0x64:0x84      = h_y
-     * 0x84:0xa4      = t2_x0
-     * 0xa4:0xc4      = t2_x1
-     * 0xc4:0xe4      = t2_y0
-     * 0xe4:0x104     = t2_y1
-     * 0x104:0x124    = length of proofData byte array
-     * 0x124:0x144    = m
-     * 0x144:0x164    = challenge
-     * 0x164:0x184    = publicOwner
-     * 0x184:0x1a4    = offset in byte array to notes
-     * 0x1a4:0x1c4    = offset in byte array to inputSignatures
-     * 0x1c4:0x2e4    = offset in byte array to outputOwners
-     * 0x1e4:0x204    = offset in byte array to metadata
-     */
-    function encodeAndExit(bytes32 domainHash) internal view {
+    * New calldata map
+    * 0x04:0x24      = calldata location of proofData byte array - pointer to the proofData. 
+    * 0x24:0x44      = message sender // sender
+    * 0x44:0x64      = h_x     // crs
+    * 0x64:0x84      = h_y     // crs
+    * 0x84:0xa4      = t2_x0   // crs
+    * 0xa4:0xc4      = t2_x1   // crs
+    * 0xa4:0xc4      = t2_x1   // crs
+    * 0xc4:0xe4      = t2_y0   // crs
+    * 0xe4:0x104     = t2_y1   // crs
+    * 0x104:0x124    = length of proofData byte array 
+    * 0x124:0x144    = challenge
+    * 0x144:0x164    = offset in byte array to notes
+    * 0x164:0x184    = offset in byte array to inputOwners
+    * 0x184:0x1a4    = offset in byte array to outputOwners
+    * 0x1a4:0x1c4    = offset in byte array to metadata
+    **/
+
+    function encodeAndExit() internal view {
         assembly {
             // set up initial variables
-            let notes := add(0x104, calldataload(0x184))
+            let notes := add(0x104, calldataload(0x144))
+            let m := 2 // input notes
             let n := calldataload(notes)
-            let m := calldataload(0x124)
-            let outputOwners := add(0x124, calldataload(0x1c4)) // one word after outputOwners = 1st
-            let signatures := add(0x124, calldataload(0x1a4)) // one word after signatures = 1st
-            let metadata := add(0x144, calldataload(0x1e4)) // two words after metadata = 1st
+            let inputOwners := add(0x124, calldataload(0x164)) // // one word after inputOwners = 1st
+            let outputOwners := add(0x124, calldataload(0x184)) // one word after outputOwners = 1st
+            let metadata := add(0x144, calldataload(0x1a4)) // two words after metadata = 1st
 
             // memory map of `proofOutputs`
-
             // 0x00 - 0x160  = scratch data for EIP712 signature computation and note hash computation
             // ACE_NOTE_SIGNATURE struct hash variables
             // 0x80 = struct hash
@@ -42,7 +42,7 @@ library JoinSplitABIEncoder {
             // struct hash of 'ACE_NOTE_SIGNATURE'
             mstore(0x80, 0x6c1a087ea32e7586c4241d8ad29826c79af0e5ae5c44ca4be88caa5a18b99446)
             mstore(0xa0, 0x01)
-            mstore(0xe0, calldataload(0x144)) // challenge
+            mstore(0xe0, calldataload(0x124)) // challenge
             mstore(0x100, calldataload(0x24))
 
             // EIP712 Signature variables
@@ -50,7 +50,6 @@ library JoinSplitABIEncoder {
             // 0x140 - 0x160 = domainHash
             // 0x160 - 0x180 = structHash
             mstore(0x120, 0x1901)
-            mstore(0x140, domainHash) // domain hash
 
             // `returndata` starts at 0x160
             // `proofOutputs` starts at 0x180
@@ -91,49 +90,31 @@ library JoinSplitABIEncoder {
             mstore(0x1c0, 0x60)                            // offset to 1st proof
             // length of proofOutput is at s + 0x60
             mstore(0x200, 0xa0)                            // location of inputNotes
-            // location of outputNotes is at s + 0xa0
-            mstore(0x240, calldataload(0x164))             // publicOwner
-            // store kPublic. If kPublic is negative, store correct signed representation,
-            // relative to 2^256, not to the order of the bn128 group
-            let kPublic := calldataload(sub(add(notes, mul(calldataload(notes), 0xc0)), 0xa0))
-            switch gt(kPublic, 10944121435919637611123202872628637544274182200208017171849102093287904247808)
-            case 1 {
-                mstore(0x260, sub(kPublic, 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001))
-            }
-            case 0 {
-                mstore(0x260, kPublic)
-            }
+            mstore(0x240, 0x00)             // publicOwner
+ 
+            let kPublic := 0
+            mstore(0x260, kPublic)
 
             let inputPtr := 0x280                                 // point to inputNotes
             mstore(add(inputPtr, 0x20), m)                        // number of input notes
+
             // set note pointer, offsetting lookup indices for each input note
             let s := add(0x2c0, mul(m, 0x20))
 
             for { let i := 0 } lt(i, m) { i := add(i, 0x01) } {
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
-                // get pointer to input signatures
-                let signatureIndex := add(signatures, mul(i, 0x60))
+
                 // copy note data to 0x00 - 0x80
                 calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
-                // construct EIP712 signature parameters
-                mstore(0xc0, keccak256(0x00, 0x80)) // note hash
-                // construct EIP712 signature message
-                mstore(0x160, keccak256(0x80, 0xa0))
-                mstore(0x00, keccak256(0x13e, 0x42))
-                // recover address of EIP712 signature
-                mstore(0x20, and(calldataload(signatureIndex), 0xff)) // get 8-bit v
-                calldatacopy(0x40, add(signatureIndex, 0x20), 0x40) // copy r, s into memory
+                // construct hash of note data
+                mstore(0xc0, keccak256(0x00, 0x80)) 
 
                 // store note length in `s`
                 mstore(s, 0xa0)
-                // store note owner in `s + 0x20`. If ECDSA recovery fails, or signing address is `0`, throw an error
-                if or(
-                iszero(mload(add(s, 0x20))),
-                iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x20), 0x20))
-                ) {
-                mstore(0x00, 400) revert(0x00, 0x20)
-                }
+                // store note owner in `s + 0x20`. If there is no owners, or signing address is `0`, throw an error
+                mstore(add(s, 0x20), calldataload(add(inputOwners, mul(i, 0x20))))
+                
                 // store note hash in `s + 0x40`
                 mstore(add(s, 0x40), mload(0xc0))
                 // store note metadata length in `s + 0x60` (just the coordinates)
@@ -165,6 +146,7 @@ library JoinSplitABIEncoder {
         
                 // increase s by note length
                 s := add(s, 0xc0)
+
             }
 
             // transition between input and output notes
@@ -174,12 +156,13 @@ library JoinSplitABIEncoder {
             mstore(add(inputPtr, 0x20), sub(n, m)) // store number of output notes
             s := add(s, add(0x40, mul(sub(n, m), 0x20)))
 
-            // output notes
             for { let i := m } lt(i, n) { i := add(i, 0x01) } {
                 // get note index
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
+
                 // get pointer to metadata
                 let metadataIndex := calldataload(add(metadata, mul(sub(i, m), 0x20)))
+ 
                 // get size of metadata
                 let metadataLength := calldataload(add(sub(metadata, 0x40), metadataIndex))
 
@@ -237,24 +220,8 @@ library JoinSplitABIEncoder {
 }
 
 
-contract JoinSplitABIEncoderTest {
-    bytes32 private domainHash;
-
-    constructor() public {
-        assembly {
-            let m := mload(0x40)
-            // "EIP712Domain(string name, string version, address verifyingContract)"
-            mstore(m, 0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766)
-            // name = "AZTEC_CRYPTOGRAPHY_ENGINE"
-            mstore(add(m, 0x20), 0xc8066e2c715ce196630b273cd256d8959d5b9fefc55e9e6d999fb0f08bb7f75f)
-            // version = "0.1.0"
-            mstore(add(m, 0x40), 0xaa7cdbe2cce2ec7b606b0e199ddd9b264a6e645e767fb8479a7917dcd1b8693f)
-            mstore(add(m, 0x60), address) // verifying contract
-            sstore(domainHash_slot, keccak256(m, 0x80)) // domain hash
-        }
-    }
-
-    function validateJoinSplit(
+contract BilateralSwapABIEncoderTest {
+    function validateBilateralSwap(
         bytes calldata, 
         address, 
         uint[6] calldata
@@ -263,6 +230,6 @@ contract JoinSplitABIEncoderTest {
         view 
         returns (bytes memory) 
     {
-        JoinSplitABIEncoder.encodeAndExit(domainHash);
+        BilateralSwapABIEncoder.encodeAndExit();
     }
 }
