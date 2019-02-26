@@ -9,8 +9,8 @@ const { exceptions } = require('@aztec/dev-utils');
 const {
     abiEncoder,
     note,
-    proof,
     secp256k1,
+    proof,
 } = require('aztec.js');
 const {
     constants: {
@@ -18,9 +18,9 @@ const {
     },
 } = require('@aztec/dev-utils');
 
-const { joinSplit: aztecProof } = proof;
-const { outputCoder, inputCoder } = abiEncoder;
-const joinSplitEncode = inputCoder.joinSplit;
+const { outputCoder } = abiEncoder;
+const { joinSplit: { encodeJoinSplitTransaction } } = proof;
+
 
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
@@ -91,7 +91,7 @@ contract('ACE', (accounts) => {
             const outputNotes = notes.slice(0, 2);
             const kPublic = 40;
             const publicOwner = aztecAccounts[0].address;
-            ({ proofData, expectedOutput } = proof.joinSplit.encodeJoinSplitTransaction({
+            ({ proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
