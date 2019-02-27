@@ -1,6 +1,6 @@
 {
   "name": "@aztec/contract-artifacts",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "author": "AZTEC",
   "description": "Smart contract compilation artifacts for the latest version of AZTEC.",
   "license": "LGPL-3.0",
