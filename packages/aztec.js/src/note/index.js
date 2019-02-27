@@ -7,6 +7,7 @@ const secp256k1 = require('../secp256k1');
 const ecdsa = require('../secp256k1/ecdsa');
 const setup = require('../setup');
 const utils = require('./utils');
+const { noteCoder } = require('../abiEncoder');
 
 const { getSharedSecret, getNoteHash } = utils;
 const { padLeft } = web3Utils;
@@ -118,10 +119,8 @@ function Note(publicKey, viewingKey, owner = '0x') {
  * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
  */
 Note.prototype.getPublic = function getPublic() {
-    const gamma = this.gamma.encode('hex', true);
-    const sigma = this.sigma.encode('hex', true);
-    const ephemeral = this.ephemeral.getPublic(true, 'hex');
-    return `0x${padLeft(gamma, 66)}${padLeft(sigma, 66)}${padLeft(ephemeral, 66)}`;
+    const ephemeral = this.ephemeral.getPublic();
+    return noteCoder.encodeNotePublicKey({ gamma: this.gamma, sigma: this.sigma, ephemeral });
 };
 
 /**
@@ -201,6 +200,22 @@ Note.prototype.exportMetadata = function exportMetadata() {
  */
 const note = {};
 note.utils = utils;
+
+/**
+ * Create Note instance from an event log and a spending key
+ *
+ * @method fromEventLog
+ * @param {string} logNoteData the note data returned from an event log
+ * @returns {Note} created note instance
+ */
+note.fromEventLog = async (logNoteData, spendingKey = null) => {
+    const publicKey = noteCoder.decodeNoteFromEventLog(logNoteData);
+    const newNote = new Note(publicKey, null);
+    if (spendingKey) {
+        await newNote.derive(spendingKey);
+    }
+    return newNote;
+};
 
 /**
  * Create Note instance from a Note public key

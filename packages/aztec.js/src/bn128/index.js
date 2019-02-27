@@ -90,27 +90,13 @@ bn128.K_MAX = K_MAX;
  * @param {Point} gammaK the AZTEC decrypted coordinate \gamma^{k}. Computed from \sigma.h^{-a}
  * @returns {number} the value of the note
  */
-bn128.recoverMessage = async function recoverMessage(gamma, gammaK) {
+bn128.recoverMessage = function recoverMessage(gamma, gammaK) {
     if (gammaK.isInfinity()) {
         return 1;
     }
     const a = decodePoint.serializePointForMcl(gamma);
     const b = decodePoint.serializePointForMcl(gammaK);
-    const k = await decodePoint.decode(a, b, bn128.K_MAX);
-    return k;
-    // let accumulator = gamma;
-    // let k = 1;
-    // while (k < bn128.K_MAX) {
-    //     if (accumulator.eq(gammaK)) {
-    //         break;
-    //     }
-    //     accumulator = accumulator.add(gamma);
-    //     k += 1;
-    // }
-    // if (k === bn128.K_MAX) {
-    //     throw new Error('could not find k!');
-    // }
-    // return k;
+    return decodePoint.decode(a, b, bn128.K_MAX);
 };
 
 /**
