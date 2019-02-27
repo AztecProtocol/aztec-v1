@@ -148,11 +148,11 @@ Note.prototype.getView = function getView() {
  * @function
  * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
  */
-Note.prototype.derive = function derive(spendingKey) {
+Note.prototype.derive = async function derive(spendingKey) {
     const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), spendingKey);
     this.a = new BN(sharedSecret.slice(2), 16).toRed(bn128.groupReduction);
     const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
-    this.k = new BN(bn128.recoverMessage(this.gamma, gammaK)).toRed(bn128.groupReduction);
+    this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(bn128.groupReduction);
 };
 
 /**
@@ -233,9 +233,9 @@ note.fromViewKey = (viewingKey) => {
  * @param {string} spendingKey hex-string formatted spending key (can also be an Ethereum private key)
  * @returns {Note} created note instance
  */
-note.derive = (publicKey, spendingKey) => {
+note.derive = async (publicKey, spendingKey) => {
     const newNote = new Note(publicKey);
-    newNote.derive(spendingKey);
+    await newNote.derive(spendingKey);
     return newNote;
 };
 

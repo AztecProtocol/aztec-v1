@@ -30,10 +30,10 @@ describe('note tests', () => {
         expect(importedNote.sigma.encode('hex', false)).to.equal(note.sigma.encode('hex', false));
     });
 
-    it('note.create and note.derive create well formed notes', () => {
+    it('note.create and note.derive create well formed notes', async () => {
         const spendingKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
         const result = notes.create(`0x${spendingKey.getPublic(true, 'hex')}`, 1234);
-        const expected = notes.derive(result.getPublic(), `0x${spendingKey.getPrivate('hex')}`);
+        const expected = await notes.derive(result.getPublic(), `0x${spendingKey.getPrivate('hex')}`);
         expect(result.gamma.encode('hex', false)).to.equal(expected.gamma.encode('hex', false));
         expect(result.sigma.encode('hex', false)).to.equal(expected.sigma.encode('hex', false));
         expect(result.k.toString(16)).to.equal(expected.k.toString(16));
