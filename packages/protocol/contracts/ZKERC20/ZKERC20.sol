@@ -4,7 +4,6 @@ import "../ACE/ACE.sol";
 import "../libs/LibEIP712.sol";
 
 contract ZKERC20 is LibEIP712 {
- 
     using NoteUtils for bytes;
     
     // Hash for the EIP712 Note Signature schema
@@ -28,11 +27,6 @@ contract ZKERC20 is LibEIP712 {
     string public name;
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
-    bytes32 public domainHash;
-
-    bytes32 private constant NOTE_SIGNATURE_TYPEHASH = keccak256(
-        "NoteSignature(bytes32 noteHash, address spender, bool status)"
-    );
 
     event LogCreateNoteRegistry(address noteRegistry);
     event LogCreateZKERC20(
@@ -70,7 +64,7 @@ contract ZKERC20 is LibEIP712 {
             _scalingFactor,
             _linkedTokenAddress
         ));
-        emit LogCreateNoteRegistry(noteRegistry);
+        emit LogCreateNoteRegistry(address(noteRegistry));
         emit LogCreateZKERC20(
             _canMint,
             _canBurn,

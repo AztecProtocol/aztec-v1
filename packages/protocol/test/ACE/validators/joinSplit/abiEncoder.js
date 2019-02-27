@@ -7,11 +7,12 @@ const { padLeft } = require('web3-utils');
 const { outputCoder, inputCoder } = aztec.abiEncoder;
 const joinSplitEncode = inputCoder.joinSplit;
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitABIEncoderTest');
+const ABIEncoder = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitABIEncoderTest');
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
+
 
 contract('Join Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
@@ -31,7 +32,7 @@ contract('Join Split ABI Encoder', (accounts) => {
             });
         });
 
-        it('succesfully encodes output of a join split proof', async () => {
+        it('successfully encodes output of a join split proof', async () => {
             const m = 2;
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
