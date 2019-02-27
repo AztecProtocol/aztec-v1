@@ -21,7 +21,7 @@ library BilateralSwapABIEncoder {
     * 0x1a4:0x1c4    = offset in byte array to metadata
     **/
 
-    function encodeAndExit() internal view {
+    function encodeAndExit() internal pure {
         assembly {
             // set up initial variables
             let notes := add(0x104, calldataload(0x144))
@@ -227,7 +227,7 @@ contract BilateralSwapABIEncoderTest {
         uint[6] calldata
     ) 
         external 
-        view 
+        pure 
         returns (bytes memory) 
     {
         BilateralSwapABIEncoder.encodeAndExit();

@@ -1,5 +1,6 @@
-/*
+pragma solidity >=0.5.0 <0.6.0;
 
+/*
   Copyright Spilsbury Holdings Ltd 2018.
   
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +17,6 @@
 
   Forked from https://github.com/0xProject/0x-monorepo
 */
-
-pragma solidity ^0.4.24;
-
 
 contract LibEIP712 {
 
@@ -51,7 +49,7 @@ contract LibEIP712 {
             EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
             keccak256(bytes(EIP712_DOMAIN_NAME)),
             keccak256(bytes(EIP712_DOMAIN_VERSION)),
-            bytes32(address(this))
+            bytes32(uint256(address(this)))
         ));
     }
 

@@ -21,7 +21,7 @@ library DividendComputationABIEncoder {
     * 0x1c4:0x1e4    = offset in byte array to outputOwners
     * 0x1e4:0x204    = offset in byte array to metadata
     */ 
-    function encodeAndExit() internal view {
+    function encodeAndExit() internal pure {
         assembly {
             // set up initial variables
             let notes := add(0x104, calldataload(0x184))
@@ -207,7 +207,7 @@ contract DividendComputationABIEncoderTest {
         uint[6] calldata
     ) 
         external 
-        view 
+        pure 
         returns (bytes memory) 
     {
         DividendComputationABIEncoder.encodeAndExit();
