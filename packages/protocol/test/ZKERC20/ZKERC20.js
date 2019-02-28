@@ -3,31 +3,22 @@
 const BN = require('bn.js');
 
 // ### Internal Dependencies
-const {
-    abiEncoder,
-    note,
-    proof,
-    secp256k1,
-// eslint-disable-next-line import/no-unresolved
-} = require('aztec.js');
-const {
-    constants: {
-        CRS,
-    },
-} = require('@aztec/dev-utils');
-
+// eslint-disable-next-line object-curly-newline
+const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
+const { constants: { CRS } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
 const ZKERC20 = artifacts.require('./contracts/ZKERC20/ZKERC20');
 const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
 JoinSplit.abi = JoinSplitInterface.abi;
+
 
 contract('ZKERC20', (accounts) => {
     describe('success states', () => {
@@ -38,6 +29,7 @@ contract('ZKERC20', (accounts) => {
         let zkerc20;
         let scalingFactor;
         let aztecJoinSplit;
+        let noteRegistry;
         let noteRegistryAddress;
         const proofs = [];
         const tokensTransferred = new BN(100000);
@@ -129,7 +121,7 @@ contract('ZKERC20', (accounts) => {
             );
 
             noteRegistryAddress = await zkerc20.noteRegistry();
-            const noteRegistry = await NoteRegistry.at(noteRegistryAddress);
+            noteRegistry = await NoteRegistry.at(noteRegistryAddress);
             scalingFactor = new BN(10);
             await Promise.all(accounts.map(account => erc20.mint(
                 account,

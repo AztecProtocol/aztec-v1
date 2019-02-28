@@ -1,21 +1,18 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2 } } = require('aztec.js');
 const { proof: { bilateralSwap } } = require('aztec.js');
+const { constants: { CRS } } = require('@aztec/dev-utils');
 
 // ### Artifacts
 const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
 const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwapInterface');
 
-
 BilateralSwap.abi = BilateralSwapInterface.abi;
 
-const fakeNetworkId = 100;
 
 function encodeBilateralSwapTransaction({
     inputNotes,
@@ -52,12 +49,11 @@ function encodeBilateralSwapTransaction({
 contract('Bilateral Swap', (accounts) => {
     let bilateralSwapContract;
     describe('success states', () => {
-        let crs;
         let bilateralSwapAccounts = [];
         let notes = [];
 
         beforeEach(async () => {
-            bilateralSwapContract = await BilateralSwap.new(fakeNetworkId, {
+            bilateralSwapContract = await BilateralSwap.new({
                 from: accounts[0],
             });
 
@@ -67,17 +63,9 @@ contract('Bilateral Swap', (accounts) => {
             notes = [
                 ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
             ];
-
-            const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-            const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
-            crs = [
-                `0x${padLeft(hx.toString(16), 64)}`,
-                `0x${padLeft(hy.toString(16), 64)}`,
-                ...t2,
-            ];
         });
 
-        it('succesfully validate output encoding for bilateral proof in zero-knowledge', async () => {
+        it('successfully validate output encoding for bilateral proof in zero-knowledge', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const { proofData, expectedOutput } = encodeBilateralSwapTransaction({
@@ -86,7 +74,7 @@ contract('Bilateral Swap', (accounts) => {
                 senderAddress: accounts[0],
             });
 
-            const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], crs, {
+            const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -115,7 +103,7 @@ contract('Bilateral Swap', (accounts) => {
 
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await bilateralSwapContract.validateBilateralSwap.estimateGas(proofData, accounts[0], crs, {
+            const gasUsed = await bilateralSwapContract.validateBilateralSwap.estimateGas(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });

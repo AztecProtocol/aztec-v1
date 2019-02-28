@@ -1,3 +1,4 @@
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
@@ -12,11 +13,7 @@ const secp256k1 = require('../../src/secp256k1');
 const note = require('../../src/note');
 const sign = require('../../src/sign');
 
-const { K_MAX } = require('../../src/params');
-
-
 const { expect } = chai;
-
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
@@ -33,7 +30,6 @@ function fakeSignature() {
         `0x${randomBytes(32)}`,
     ];
 }
-
 
 describe('inputCoder tests', () => {
     describe('General functionality: metadata encoding, signature encoding...', () => {

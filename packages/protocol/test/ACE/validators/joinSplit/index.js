@@ -12,10 +12,11 @@ const joinSplitInputEncode = aztec.abiEncoder.inputCoder.joinSplit;
 const { outputCoder } = aztec.abiEncoder;
 
 // ### Artifacts
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplit/JoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit/JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
+
 
 contract('JoinSplit', (accounts) => {
     let joinSplitContract;
@@ -34,7 +35,7 @@ contract('JoinSplit', (accounts) => {
             ];
         });
 
-        it('succesfully validates encoding of an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
+        it('successfully validates encoding of an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
             const inputNotes = notes.slice(2, 4);
             const outputNotes = notes.slice(0, 2);
             const kPublic = 40;

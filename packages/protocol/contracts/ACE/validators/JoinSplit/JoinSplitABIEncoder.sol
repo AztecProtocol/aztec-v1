@@ -1,5 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+import "../../../libs/LibEIP712.sol";
+
 library JoinSplitABIEncoder {
     /**
      * Calldata map
@@ -230,6 +232,7 @@ library JoinSplitABIEncoder {
             let notesLength := sub(s, 0x280)
             mstore(0x1e0, add(0x80, notesLength)) // store length of proofOutput at 0x160
             mstore(0x180, add(0xe0, notesLength)) // store length of proofOutputs at 0x100
+            // mstore(0x00 , notesLength) return(0x00, 0x20)
             mstore(0x160, 0x20)
             return(0x160, add(0x120, notesLength)) // return the final byte array
         }
@@ -237,22 +240,7 @@ library JoinSplitABIEncoder {
 }
 
 
-contract JoinSplitABIEncoderTest {
-    bytes32 private domainHash;
-
-    constructor() public {
-        assembly {
-            let m := mload(0x40)
-            // "EIP712Domain(string name, string version, address verifyingContract)"
-            mstore(m, 0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766)
-            // name = "AZTEC_CRYPTOGRAPHY_ENGINE"
-            mstore(add(m, 0x20), 0xc8066e2c715ce196630b273cd256d8959d5b9fefc55e9e6d999fb0f08bb7f75f)
-            // version = "0.1.0"
-            mstore(add(m, 0x40), 0xaa7cdbe2cce2ec7b606b0e199ddd9b264a6e645e767fb8479a7917dcd1b8693f)
-            mstore(add(m, 0x60), address) // verifying contract
-            sstore(domainHash_slot, keccak256(m, 0x80)) // domain hash
-        }
-    }
+contract JoinSplitABIEncoderTest is LibEIP712 {
 
     function validateJoinSplit(
         bytes calldata, 
@@ -263,6 +251,6 @@ contract JoinSplitABIEncoderTest {
         view 
         returns (bytes memory) 
     {
-        JoinSplitABIEncoder.encodeAndExit(domainHash);
+        JoinSplitABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
     }
 }
