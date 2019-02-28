@@ -1,3 +1,4 @@
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
@@ -5,8 +6,6 @@ const { padLeft } = require('web3-utils');
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const helpers = require('./helpers');
-const { K_MAX } = require('../../params');
-
 
 const { groupReduction } = bn128;
 

@@ -6,23 +6,20 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2 } } = require('aztec.js');
+const { constants: { CRS } } = require('@aztec/dev-utils');
 
 // ### Artifacts
 const BilateralSwapAbiEncoder = artifacts.require(
-    './contracts/ACE/validators/BilateralSwap/bilateralSwap/BilateralSwapABIEncoderTest'
+    './contracts/ACE/validators/bilateralSwap/BilateralSwapABIEncoderTest'
 );
 
 
-const fakeNetworkId = 100;
 contract('Bilateral ABI Encoder', (accounts) => {
     let bilateralSwapAbiEncoder;
     let bilateralSwapAccounts = [];
     let notes = [];
 
     describe('success states', () => {
-        let crs;
-
         beforeEach(async () => {
             const noteValues = [10, 20, 10, 20];
 
@@ -32,19 +29,12 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
             ];
 
-            bilateralSwapAbiEncoder = await BilateralSwapAbiEncoder.new(fakeNetworkId, {
+            bilateralSwapAbiEncoder = await BilateralSwapAbiEncoder.new({
                 from: accounts[0],
             });
-            const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-            const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
-            crs = [
-                `0x${padLeft(hx.toString(16), 64)}`,
-                `0x${padLeft(hy.toString(16), 64)}`,
-                ...t2,
-            ];
         });
 
-        it('succesfully encodes output of a bilateral swap zero knowledge proof', async () => {
+        it('successfully encodes output of a bilateral swap zero knowledge proof', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
@@ -66,7 +56,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 outputNotes
             );
 
-            const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, crs, {
+            const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -105,7 +95,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
 
-            const gasUsed = await bilateralSwapAbiEncoder.validateBilateralSwap.estimateGas(data, senderAddress, crs, {
+            const gasUsed = await bilateralSwapAbiEncoder.validateBilateralSwap.estimateGas(data, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });

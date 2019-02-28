@@ -17,13 +17,13 @@ describe('sign tests', () => {
     it('will generate correct AZTEC domain params', () => {
         expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
             name: 'AZTECERC20BRIDGE_DOMAIN',
-            version: '0.1.1',
+            version: '1',
             verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         });
 
         expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
             name: 'AZTECERC20BRIDGE_DOMAIN',
-            version: '0.1.1',
+            version: '1',
             verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         });
     });
@@ -34,7 +34,7 @@ describe('sign tests', () => {
         const messageData = [
             sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
             sha3('AZTECERC20BRIDGE_DOMAIN').slice(2),
-            sha3('0.1.1').slice(2),
+            sha3('1').slice(2),
             padLeft('cccccccccccccccccccccccccccccccccccccccc', 64),
         ];
         const expected = (messageData.join(''));

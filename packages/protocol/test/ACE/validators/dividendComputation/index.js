@@ -1,11 +1,10 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { params: { t2 } } = require('aztec.js');
+const { constants: { CRS } } = require('@aztec/dev-utils');
 
 const dividendInputEncode = aztec.abiEncoder.inputCoder.dividendComputation;
 
@@ -13,10 +12,8 @@ const dividendInputEncode = aztec.abiEncoder.inputCoder.dividendComputation;
 const dividend = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputation');
 const dividendInterface = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputationInterface');
 
-
 dividend.abi = dividendInterface.abi;
 
-const fakeNetworkId = 100;
 
 function encodeDividendComputationTransaction({
     inputNotes,
@@ -59,14 +56,13 @@ function encodeDividendComputationTransaction({
 contract('Dividend Computation', (accounts) => {
     let dividendContract;
     describe('success states', () => {
-        let crs;
         let dividendAccounts = [];
         let notes = [];
         let za;
         let zb;
 
         beforeEach(async () => {
-            dividendContract = await dividend.new(fakeNetworkId, {
+            dividendContract = await dividend.new({
                 from: accounts[0],
             });
             dividendAccounts = [...new Array(3)].map(() => aztec.secp256k1.generateAccount());
@@ -78,16 +74,9 @@ contract('Dividend Computation', (accounts) => {
             notes = [
                 ...dividendAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
             ];
-            const hx = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-            const hy = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
-            crs = [
-                `0x${padLeft(hx.toString(16), 64)}`,
-                `0x${padLeft(hy.toString(16), 64)}`,
-                ...t2,
-            ];
         });
 
-        it('succesfully validates output coding of AZTEC dividend computation zero-knowledge proof', async () => {
+        it('successfully validates output coding of AZTEC dividend computation zero-knowledge proof', async () => {
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
 
@@ -101,7 +90,7 @@ contract('Dividend Computation', (accounts) => {
 
             const publicOwner = '0x0000000000000000000000000000000000000000';
 
-            const result = await dividendContract.validateDividendComputation(proofData, accounts[0], crs, {
+            const result = await dividendContract.validateDividendComputation(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -128,7 +117,7 @@ contract('Dividend Computation', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await dividendContract.validateDividendComputation.estimateGas(proofData, accounts[0], crs, {
+            const gasUsed = await dividendContract.validateDividendComputation.estimateGas(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });

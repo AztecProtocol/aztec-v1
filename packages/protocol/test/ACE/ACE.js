@@ -24,11 +24,11 @@ const { joinSplit: { encodeJoinSplitTransaction } } = proof;
 
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
-
+const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
+
 
 contract('ACE', (accounts) => {
     describe('initialization tests', () => {
