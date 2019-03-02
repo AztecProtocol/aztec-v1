@@ -1,0 +1,27 @@
+{
+    "name": "Bitshifts",
+    "file": "bitshifts.huff",
+    "constructor": "BITSHIFTS__CONSTRUCTOR",
+    "entryMacro": "BITSHIFTS__MAIN",
+    "abi": [
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "shift",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "pure",
+            "type": "function"
+        }
+    ]
+}

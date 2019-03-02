@@ -1,5 +1,5 @@
 {
-    "name": "weierstrudel_test",
+    "name": "Weierstrudel",
     "file": "main_loop.huff",
     "constructor": "TEST_CONSTRUCTOR",
     "entryMacro": "MAIN__WEIERSTRUDEL",

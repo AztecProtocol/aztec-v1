@@ -1,0 +1,5 @@
+#define macro BITSHIFTS__MAIN = takes(0) returns(0) {
+    0x04 calldataload 2 shl 0x00 mstore 0x20 0x00 return
+}
+
+#define macro BITSHIFTS__CONSTRUCTOR = takes(0) returns(0) {}
