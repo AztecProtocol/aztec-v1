@@ -1,21 +1,19 @@
 /* eslint-disable no-restricted-syntax */
-const path = require('path');
 const fs = require('fs');
 
-const newParser = require('./parser');
-const { padNBytes, toHex } = require('./utils');
+const newParser = require('../parser');
+const { padNBytes, toHex } = require('../utils');
 
-function Compiler(projectName, projectPath) {
-    let settingsString;
-    try {
-        const fileLocation = path.posix.resolve(projectPath, projectName);
-        settingsString = fs.readFileSync(fileLocation, 'utf8');
-    } catch (e) {
-        console.log(e);
-        settingsString = projectName;
+function compiler(projectConfig, modulesPath) {
+    let settings;
+    if (typeof (projectConfig) === 'string' && fs.existsSync(projectConfig)) {
+        settings = JSON.parse(fs.readFileSync(projectConfig, 'utf8'));
+    } else if (typeof (projectConfig) === 'object') {
+        settings = { ...projectConfig };
+    } else {
+        throw new Error(`could not find project ${projectConfig}`);
     }
 
-    const settings = JSON.parse(settingsString);
     const {
         abi,
         name,
@@ -23,10 +21,12 @@ function Compiler(projectName, projectPath) {
         entryMacro,
         constructor,
     } = settings;
+
     if (!entryMacro || !constructor || !entryFilename) {
         throw new Error(`could not find ${entryMacro}, ${constructor}, ${entryFilename}`);
     }
-    const { inputMap, macros, jumptables } = newParser.parseFile(entryFilename, projectPath);
+
+    const { inputMap, macros, jumptables } = newParser.parseFile(entryFilename, modulesPath);
 
     const { data: macroData } = newParser.processMacro(entryMacro, 0, [], macros, inputMap, jumptables);
     const { data: constructorData } = newParser.processMacro(constructor, 0, [], macros, inputMap, {});
@@ -40,17 +40,23 @@ function Compiler(projectName, projectPath) {
     // push2(contract size) dup1 push2(offset to code) push1(0) codecopy push1(0) return
     const bootstrapCode = `61${contractSize}8061${contractCodeOffset}6000396000f3`;
     const constructorCode = `${constructorData.bytecode}${bootstrapCode}`;
+    const deployedBytecode = `0x${macroData.bytecode}`;
+    const bytecode = `0x${constructorCode}${macroData.bytecode}`;
 
-    const { bytecode } = macroData;
-    const deployedBytecode = `${constructorCode}${bytecode}`;
-
-    const output = {
+    const filedata = {
         abi,
-        name,
+        contractName: name,
         bytecode,
         deployedBytecode,
+        compiler: {
+            name: 'huff',
+            version: '0.2.0', // TODO: versioning
+        },
     };
-    fs.writeFileSync(path.posix.resolve(projectPath, 'build.json'), JSON.stringify(output));
+    return {
+        filename: `${name}.json`,
+        filedata,
+    };
 }
 
-module.exports = Compiler;
+module.exports = compiler;
