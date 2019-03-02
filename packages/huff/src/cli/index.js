@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const compile = require('./commands/compile');
 const init = require('./commands/init');
 const config = require('../config');
