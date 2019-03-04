@@ -20,12 +20,6 @@ describe('sign tests', () => {
             version: '1',
             verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         });
-
-        expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
-            name: 'AZTECERC20BRIDGE_DOMAIN',
-            version: '1',
-            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-        });
     });
 
     it('AZTEC domain params resolves to expected message', () => {
