@@ -24,8 +24,7 @@ contract ZKERC20 is LibEIP712 {
 
     ACE public ace;
     ERC20 public linkedToken;
-    NoteRegistry public noteRegistry;
-    NoteRegistry.Flags public flags;
+    ACE.Flags public flags;
 
     string public name;
     uint256 public scalingFactor;
@@ -56,18 +55,21 @@ contract ZKERC20 is LibEIP712 {
         address _aceAddress
     ) public {
         name = _name;
-        flags = NoteRegistry.Flags(_canMint, _canBurn, _canConvert);
+        flags = ACE.Flags({
+            canMint: _canMint, 
+            canBurn: _canBurn, 
+            canConvert: _canConvert
+        });
         scalingFactor = _scalingFactor;
         ace = ACE(_aceAddress);
         linkedToken = ERC20(_linkedTokenAddress);
-        noteRegistry = NoteRegistry(ace.createNoteRegistry(
+        ace.createNoteRegistry(
+            _linkedTokenAddress,
+            _scalingFactor,
             _canMint,
             _canBurn,
-            _canConvert,
-            _scalingFactor,
-            _linkedTokenAddress
-        ));
-        emit LogCreateNoteRegistry(address(noteRegistry));
+            _canConvert
+        );
         emit LogCreateZKERC20(
             _canMint,
             _canBurn,
@@ -82,7 +84,6 @@ contract ZKERC20 is LibEIP712 {
         bytes memory proofOutputs = ace.validateProof(1, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid!");
         bytes memory proofOutput = proofOutputs.get(0);
-        
         
         require(ace.updateNoteRegistry(proofOutput, 1, address(this)), "could not update note registry!");
         
@@ -140,7 +141,7 @@ contract ZKERC20 is LibEIP712 {
             ,
             ,
             address noteOwner
-        ) = noteRegistry.registry(_noteHash);
+        ) = ace.getNote(msg.sender, _noteHash);
 
         require(status == 1, "only unspent notes can be approved");
 

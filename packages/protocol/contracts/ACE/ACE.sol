@@ -1,16 +1,48 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./NoteRegistry.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+
+import "../utils/IntegerUtils.sol";
 import "../utils/NoteUtils.sol";
 
 /**
  * @title The AZTEC Cryptography Engine
  * @author AZTEC
  * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
- * digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
+ *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
  **/
 contract ACE {
-    // the commonReferenceString contains one G1 group element and one G2 group element,
+    using IntegerUtils for uint;
+    using NoteUtils for bytes;
+
+    event LogSetProof(uint16 _proofType, address _validatorAddress, bool _isBalanced);
+    event LogSetCommonReferenceString(bytes32[6] _commonReferenceString);
+
+    struct Note {
+        uint8 status;
+        bytes5 createdOn;
+        bytes5 destroyedOn;
+        address owner;
+    }
+
+    struct Flags {
+        bool canMint;
+        bool canBurn;
+        bool canConvert;
+    }
+
+    struct NoteRegistry {
+        bool active;
+        ERC20 linkedToken;
+        uint256 scalingFactor;
+        uint256 totalSupply;
+        bytes32 confidentialTotalSupply;
+        Flags flags;
+        mapping(bytes32 => Note) notes;
+        mapping(address => mapping(bytes32 => uint256)) publicApprovals;
+    }
+
+    // The commonReferenceString contains one G1 group element and one G2 group element,
     // that are created via the AZTEC protocol's trusted setup. All zero-knowledge proofs supported
     // by ACE use the same common reference string.
     bytes32[6] private commonReferenceString;
@@ -18,7 +50,7 @@ contract ACE {
     // TODO: add a consensus mechanism! This contract is for testing purposes only until then
     address public owner;
 
-    // `validators` contains the validator smart contracts that validate specific proof types
+    // `validators`contains the validator smart contracts that validate specific proof types
     mapping(uint16 => address) public validators;
 
     // `balancedProofs` identifies whether a proof type satisfies a balancing relationship.
@@ -39,13 +71,12 @@ contract ACE {
     mapping(uint16 => bool) public balancedProofs;
     mapping(bytes32 => bool) private validatedProofs;
 
-    mapping(address => NoteRegistry) public noteRegistries;
-
-    event LogSetProof(uint16 _proofType, address _validatorAddress, bool _isBalanced);
-    event LogSetCommonReferenceString(bytes32[6] _commonReferenceString);
+    // Every user has their own note registry
+    mapping(address => NoteRegistry) internal registries;
 
     /**
-    * @dev contract constructor. Sets the owner of ACE.
+    * @dev contract constructor. Sets the owner of ACE, the flags, the linked token address and
+    *      the scaling factor.
     **/
     constructor() public {
         owner = msg.sender;
@@ -93,8 +124,8 @@ contract ACE {
             calldatacopy(add(memPtr, 0x104), _proofData, add(calldataload(_proofData), 0x20))
 
             // call our validator smart contract, and validate the call succeeded
-            
-            if iszero(staticcall(gas, validatorAddress, memPtr, add(calldataload(_proofData), 0x124), 0x00, 0x00)) {
+            switch iszero(staticcall(gas, validatorAddress, memPtr, add(calldataload(_proofData), 0x124), 0x00, 0x00))
+            case 1 {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed - proof is invalid!
             }
             returndatacopy(memPtr, 0x00, returndatasize) // copy returndata to memory
@@ -171,7 +202,7 @@ contract ACE {
         uint16 _proofType,
         bytes32 _proofHash,
         address _sender
-    ) external view returns (bool) {
+    ) public view returns (bool) {
         assembly {
             let memPtr := mload(0x40)
             mstore(memPtr, _proofHash)
@@ -182,38 +213,6 @@ contract ACE {
             mstore(memPtr, sload(keccak256(0x00, 0x40)))
             return(memPtr, 0x20)
         }
-    }
-
-    function createNoteRegistry(
-        bool _canMint,
-        bool _canBurn,
-        bool _canConvert,
-        uint256 _scalingFactor,
-        address _linkedToken
-    ) public returns (address) {
-        require(noteRegistries[msg.sender] == NoteRegistry(0), "address already has a linked Note Registry");
-        NoteRegistry registry = new NoteRegistry(
-            _canMint,
-            _canBurn,
-            _canConvert,
-            _scalingFactor,
-            _linkedToken,
-            address(this),
-            address(this)
-        );
-        noteRegistries[msg.sender] = registry;
-        return address(registry);
-    }
-
-    function updateNoteRegistry(
-        bytes memory _proofOutput, 
-        uint16 _proofType, 
-        address _proofSender
-    ) public returns (bool) {
-        NoteRegistry registry = noteRegistries[msg.sender];
-        require(registry != NoteRegistry(0), "sender does not have a linked Note Registry");
-        require(registry.updateNoteRegistry(_proofOutput, _proofType, _proofSender), "update failed!");
-        return true;
     }
 
     /**
@@ -244,7 +243,222 @@ contract ACE {
         balancedProofs[_proofType] = _isBalanced;
         emit LogSetProof(_proofType, _validatorAddress, _isBalanced);
     }
-    
+
+    /**
+     * @dev NoteRegistry functions
+     */
+    function createNoteRegistry(
+        address _linkedToken,
+        uint256 _scalingFactor,
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert
+    ) public {
+        require(registries[msg.sender].active == false, "address already has a linked Note Registry");
+        NoteRegistry memory registry = NoteRegistry({
+            active: true,
+            scalingFactor: _scalingFactor,
+            linkedToken: ERC20(_linkedToken),
+            totalSupply: 0,
+            confidentialTotalSupply: bytes32(0x0),
+            flags: Flags({
+                canMint: _canMint,
+                canBurn: _canBurn,
+                canConvert: _canConvert
+            })
+        });
+        registries[msg.sender] = registry;
+    }
+
+    function updateNoteRegistry(
+        bytes memory _proofOutput, 
+        uint16 _proofType, 
+        address _proofSender
+    ) public returns (bool) {
+        NoteRegistry storage registry = registries[msg.sender];
+        require(registry.active == true, "Note Registry does not exist for the given address");
+        bytes32 proofHash = _proofOutput.hashProofOutput();
+        require(
+            validateProofByHash(_proofType, proofHash, _proofSender) == true,
+            "ACE has not validated a matching proof!"
+        );
+
+        (bytes memory inputNotes,
+        bytes memory outputNotes,
+        address publicOwner,
+        int256 publicValue) = _proofOutput.extractProofOutput();
+
+        updateInputNotes(inputNotes);
+        updateOutputNotes(outputNotes);
+
+
+        if (publicValue != 0) {
+            require(registry.flags.canMint == false, "mintable assets cannot be converted into public tokens!");
+            require(registry.flags.canBurn == false, "burnable assets cannot be converted into public tokens!");
+            require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens!");
+            if (publicValue < 0) {
+                registry.totalSupply += uint256(-publicValue);
+                require(
+                    registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
+                    "public owner has not validated a transfer of tokens"
+                );
+                registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
+                require(
+                    registry.linkedToken.transferFrom(
+                        publicOwner, 
+                        address(this), 
+                        uint256(-publicValue)
+                    ), 
+                    "transfer failed!"
+                );
+            } else {
+                registry.totalSupply -= uint256(publicValue);
+                require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed!");
+            }
+        }
+
+        return true;
+    }
+
+    function mint(bytes memory _proofOutput, address _proofSender) public returns (bool) {
+        NoteRegistry storage registry = registries[msg.sender];
+        require(registry.active == false, "Note Registry does not exist for the given address");
+        require(registry.flags.canMint == true, "this asset is not mintable!");
+        bytes32 proofHash = _proofOutput.hashProofOutput();
+        require(
+            validateProofByHash(1, proofHash, _proofSender) == true,
+            "ACE has not validated a matching proof!"
+        );
+        (
+            bytes memory inputNotes,
+            bytes memory outputNotes,
+            ,
+            int256 publicValue
+        ) = _proofOutput.extractProofOutput();
+        require(publicValue == 0, "mint transactions cannot have a public value!");
+
+        require(outputNotes.getLength() > 0, "mint transactions require at least one output note");
+        require(inputNotes.getLength() == 1, "mint transactions can only have one input note");
+        (
+            ,
+            bytes32 noteHash,
+        ) = outputNotes.get(0).extractNote();
+        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match!");
+        (
+            ,
+            noteHash,
+        ) = inputNotes.get(0).extractNote();
+
+        registry.confidentialTotalSupply = noteHash;
+
+        for (uint i = 1; i < outputNotes.getLength(); i += 1) {
+            address _owner;
+            (_owner, noteHash, ) = outputNotes.get(i).extractNote();
+            Note storage note = registry.notes[noteHash];
+            require(note.status == 0, "output note exists!");
+            note.status = uint8(1);
+            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.createdOn = now.uintToBytes(5);
+            note.owner = _owner;
+        }
+    }
+
+    function burn(bytes memory _proofOutput, address _proofSender) public returns (bool) {
+        NoteRegistry storage registry = registries[msg.sender];
+        require(registry.active == true, "Note Registry does not exist for the given address");
+        require(registry.flags.canBurn == true, "this asset is not burnable!");
+        bytes32 proofHash = _proofOutput.hashProofOutput();
+        require(
+            validateProofByHash(1, proofHash, _proofSender) == true,
+            "ACE has not validated a matching proof!"
+        );
+        (
+            bytes memory inputNotes,
+            bytes memory outputNotes,
+            ,
+            int256 publicValue
+        ) = _proofOutput.extractProofOutput();
+        require(publicValue == 0, "mint transactions cannot have a public value!");
+
+        require(inputNotes.getLength() > 0, "burn transactions require at least one input note");
+        require(outputNotes.getLength() == 1, "burn transactions can only have one output note");
+        (
+            ,
+            bytes32 noteHash,
+        ) = inputNotes.get(0).extractNote();
+        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match!");
+        (
+            ,
+            noteHash,
+        ) = outputNotes.get(0).extractNote();
+
+        registry.confidentialTotalSupply = noteHash;
+
+        for (uint i = 1; i < inputNotes.getLength(); i += 1) {
+            address _owner;
+            (_owner, noteHash, ) = outputNotes.get(i).extractNote();
+            Note storage note = registry.notes[noteHash];
+            require(note.status == 1, "input note does not exist!");
+            require(note.owner == _owner, "input note owner does not match!");
+            note.status = uint8(2);
+            // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.destroyedOn = now.uintToBytes(5);
+        }
+    }
+
+    function publicApprove(bytes32 proofHash, uint256 value) public returns (bool) {
+        NoteRegistry storage registry = registries[msg.sender];
+        registry.publicApprovals[msg.sender][proofHash] = value;
+        return true;
+    }
+
+    /**
+     * @dev Returns the registry for a given address
+     */
+    function getRegistry(address _owner) public view returns (
+        ERC20 _linkedToken,
+        uint256 _scalingFactor,
+        uint256 _totalSupply,
+        bytes32 _confidentialTotalSupply,
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert
+    ) {
+        NoteRegistry memory registry = registries[_owner];
+        return (
+            registry.linkedToken,
+            registry.scalingFactor,
+            registry.totalSupply,
+            registry.confidentialTotalSupply,
+            registry.flags.canMint,
+            registry.flags.canBurn,
+            registry.flags.canConvert
+        );
+    }
+
+    /**
+     * @dev Returns the note for a given address and note hash
+     */
+    function getNote(address _owner, bytes32 _noteHash) public view returns (
+        uint8 _status,
+        bytes5 _createdOn,
+        bytes5 _destroyedOn,
+        address _noteOwner
+    ) {
+        NoteRegistry storage registry = registries[_owner];
+        Note storage note = registry.notes[_noteHash];
+        return (
+            note.status,
+            note.createdOn,
+            note.destroyedOn,
+            note.owner
+        );
+    }
+
     /**
     * @dev Returns the validator address for a given proof type
     */
@@ -267,4 +481,35 @@ contract ACE {
     function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
     }
+
+    function updateInputNotes(bytes memory inputNotes) internal {
+        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
+            (address _owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
+            // `note` will be stored on the blockchain
+            Note storage note = registries[msg.sender].notes[noteHash];
+            require(note.status == 1, "input note does not exist!");
+            require(note.owner == _owner, "input note owner does not match!");
+            note.status = uint8(2);
+            // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.destroyedOn = now.uintToBytes(5);
+        }
+    }
+
+    function updateOutputNotes(bytes memory outputNotes) internal {
+        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
+            (address _owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
+            // `note` will be stored on the blockchain
+            Note storage note = registries[msg.sender].notes[noteHash];
+            require(note.status == 0, "output note exists!");
+            note.status = uint8(1);
+            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.createdOn = now.uintToBytes(5);
+            note.owner = _owner;
+        }
+    }
 }
+
