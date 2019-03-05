@@ -10,6 +10,8 @@ const {
     constants: {
         ACE_DOMAIN_PARAMS,
         ACE_NOTE_SIGNATURE,
+        AZTEC_TEST_DOMAIN_PARAMS,
+        AZTEC_NOTE_SIGNATURE,
     },
 } = require('@aztec/dev-utils');
 
@@ -24,6 +26,30 @@ function randomAddress() {
 
 
 describe('sign tests', () => {
+    let message;
+    let schema;
+    let accounts;
+    let domainParams;
+    let verifyingContract;
+    let challenge;
+    let senderAddress;
+    let noteString;
+
+
+    beforeEach(() => {
+        accounts = [
+            secp256k1.generateAccount(),
+            secp256k1.generateAccount(),
+        ];
+
+        noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
+
+        senderAddress = randomAddress();
+        const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
+        challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+        verifyingContract = randomAddress();
+    });
+
     describe('Structure specific EIP712 tests', () => {
         const domainTypes = {
             EIP712Domain: [
@@ -42,8 +68,8 @@ describe('sign tests', () => {
         });
 
         it('AZTEC domain params resolves to expected message', () => {
-            const message = sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
-            const result = eip712.encodeMessageData(domainTypes, 'EIP712Domain', message);
+            const messageInput = sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
+            const result = eip712.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
             const messageData = [
                 sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
                 sha3('AZTECERC20BRIDGE_DOMAIN').slice(2),
@@ -55,31 +81,8 @@ describe('sign tests', () => {
         });
     });
 
-    describe.only('General purpose EIP712 tests', () => {
-        let message;
-        let schema;
-        let accounts;
-        let domainParams;
-        let verifyingContract;
-        let challenge;
-        let senderAddress;
-        let noteString;
-
-
+    describe('EIP712 implementation tests for ACE_NOTE_SIGNATURE', () => {
         beforeEach(() => {
-            accounts = [
-                secp256k1.generateAccount(),
-                secp256k1.generateAccount(),
-            ];
-
-            noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
-
-            senderAddress = randomAddress();
-            const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
-            challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-            verifyingContract = randomAddress();
-
-
             domainParams = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
 
             message = {
@@ -130,6 +133,35 @@ describe('sign tests', () => {
 
             const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
 
+            expect(publicKeyRecover).to.equal(publicKey.slice(4));
+        });
+    });
+
+    describe.only('EIP712 implementation tests for AZTEC_NOTE_SIGNATURE', () => {
+        beforeEach(() => {
+            domainParams = sign.generateAZTECDomainParams(verifyingContract, AZTEC_TEST_DOMAIN_PARAMS);
+
+            message = {
+                note: noteString,
+                challenge,
+                sender: senderAddress,
+            };
+
+            schema = AZTEC_NOTE_SIGNATURE;
+        });
+
+        it('for AZTEC_NOTE_SIGNATURE, check public key is correctly recovered from signature params', () => {
+            const { privateKey, publicKey } = accounts[0];
+
+            const { signature, encodeTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+
+            const messageHash = Buffer.from(encodeTypedData.slice(2), 'hex');
+
+            const v = parseInt(signature[0], 16); // has to be in number format
+            const r = Buffer.from(signature[1].slice(2), 'hex');
+            const s = Buffer.from(signature[2].slice(2), 'hex');
+
+            const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
     });
