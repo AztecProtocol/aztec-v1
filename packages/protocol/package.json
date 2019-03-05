@@ -49,6 +49,7 @@
     "solhint": "1.5.0",
     "solidity-coverage": "^0.5.11",
     "truffle": "^5.0.4",
+    "truffle-assertions": "^0.8.0",
     "truffle-hdwallet-provider": "^1.0.4",
     "web3": "1.0.0-beta.37",
     "web3-utils": "1.0.0-beta.37"
