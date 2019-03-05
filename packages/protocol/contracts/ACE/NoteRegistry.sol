@@ -1,14 +1,16 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "./ACE.sol";
 import "../utils/IntegerUtils.sol";
 import "../utils/NoteUtils.sol";
 
 contract NoteRegistry {
-    using IntegerUtils for uint;
     using NoteUtils for bytes;
+    using IntegerUtils for uint256;
+    using SafeMath for uint256;
 
     struct Note {
         uint8 status;
@@ -83,7 +85,7 @@ contract NoteRegistry {
 
         confidentialTotalSupply = noteHash;
 
-        for (uint i = 1; i < outputNotes.getLength(); i += 1) {
+        for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
             address owner;
             (owner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry[noteHash];
@@ -127,7 +129,7 @@ contract NoteRegistry {
 
         confidentialTotalSupply = noteHash;
 
-        for (uint i = 1; i < inputNotes.getLength(); i += 1) {
+        for (uint i = 1; i < inputNotes.getLength(); i = i.add(1)) {
             address owner;
             (owner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry[noteHash];
@@ -167,7 +169,7 @@ contract NoteRegistry {
             require(flags.canBurn == false, "burnable assets cannot be converted into public tokens!");
             require(flags.canConvert == true, "this asset cannot be converted into public tokens!");
             if (publicValue < 0) {
-                totalSupply += uint256(-publicValue);
+                totalSupply = totalSupply.add(uint256(-publicValue));
                 require(
                     publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
                     "public owner has not validated a transfer of tokens"
@@ -191,7 +193,7 @@ contract NoteRegistry {
     }
 
     function updateInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
             (address owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registry[noteHash];
@@ -206,7 +208,7 @@ contract NoteRegistry {
     }
 
     function updateOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < outputNotes.getLength(); i = i.add(1)) {
             (address owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registry[noteHash];

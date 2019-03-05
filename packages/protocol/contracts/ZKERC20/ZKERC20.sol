@@ -1,10 +1,13 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import "../ACE/ACE.sol";
 import "../libs/LibEIP712.sol";
 
 contract ZKERC20 is LibEIP712 {
     using NoteUtils for bytes;
+    using SafeMath for uint256;
     
     // Hash for the EIP712 Note Signature schema
     /* solhint-disable */
@@ -103,7 +106,7 @@ contract ZKERC20 is LibEIP712 {
         bytes memory outputNotes,
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
-        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
             (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
             require(
                 confidentialApproved[noteHash][msg.sender] == true,
@@ -157,14 +160,14 @@ contract ZKERC20 is LibEIP712 {
     }
 
     function logInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
             (address owner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
             emit LogDestroyNote(noteHash, owner, metadata);
         }
     }
 
     function logOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < outputNotes.getLength(); i = i.add(1)) {
             (address owner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
             emit LogCreateNote(noteHash, owner, metadata);
         }
