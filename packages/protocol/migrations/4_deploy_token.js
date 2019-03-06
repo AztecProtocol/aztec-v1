@@ -22,6 +22,7 @@ module.exports = (deployer, network) => {
             const canMint = false;
             const canBurn = false;
             const canConvert = true;
+            const isOpen = true;
             return deployer.deploy(
                 ZKERC20,
                 'Cocoa',
@@ -30,7 +31,8 @@ module.exports = (deployer, network) => {
                 canConvert,
                 ERC20_SCALING_FACTOR,
                 erc20Address,
-                aceAddress
+                aceAddress,
+                isOpen
             );
         });
     });
