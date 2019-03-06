@@ -53,10 +53,6 @@ module.exports = {
         },
         primaryType: 'AZTEC_NOTE_SIGNATURE',
     },
-    ACE_DOMAIN_PARAMS: {
-        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
-        version: '1',
-    },
     ACE_NOTE_SIGNATURE: {
         types: {
             ACE_NOTE_SIGNATURE: [
@@ -72,6 +68,25 @@ module.exports = {
             ],
         },
         primaryType: 'ACE_NOTE_SIGNATURE',
+    },
+    ACE_DOMAIN_PARAMS: {
+        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
+        version: '0.1.0',
+    },
+    NOTE_SIGNATURE: {
+        types: {
+            NOTE_SIGNATURE: [
+                { name: 'noteHash', type: 'bytes32' },
+                { name: 'spender', type: 'address' },
+                { name: 'status', type: 'bool' },
+            ],
+            EIP712Domain: [
+                { name: 'name', type: 'string' },
+                { name: 'version', type: 'string' },
+                { name: 'verifyingContract', type: 'address' },
+            ],
+        },
+        primaryType: 'NOTE_SIGNATURE',
     },
     /**
      * Common reference string

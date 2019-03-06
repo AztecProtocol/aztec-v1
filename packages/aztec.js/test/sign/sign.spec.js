@@ -137,7 +137,36 @@ describe('sign tests', () => {
         });
     });
 
-    describe.only('EIP712 implementation tests for AZTEC_NOTE_SIGNATURE', () => {
+    describe('EIP712 implementation tests for AZTEC_NOTE_SIGNATURE', () => {
+        beforeEach(() => {
+            domainParams = sign.generateAZTECDomainParams(verifyingContract, AZTEC_TEST_DOMAIN_PARAMS);
+
+            message = {
+                note: noteString,
+                challenge,
+                sender: senderAddress,
+            };
+
+            schema = AZTEC_NOTE_SIGNATURE;
+        });
+
+        it('for AZTEC_NOTE_SIGNATURE, check public key is correctly recovered from signature params', () => {
+            const { privateKey, publicKey } = accounts[0];
+
+            const { signature, encodeTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+
+            const messageHash = Buffer.from(encodeTypedData.slice(2), 'hex');
+
+            const v = parseInt(signature[0], 16); // has to be in number format
+            const r = Buffer.from(signature[1].slice(2), 'hex');
+            const s = Buffer.from(signature[2].slice(2), 'hex');
+
+            const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
+            expect(publicKeyRecover).to.equal(publicKey.slice(4));
+        });
+    });
+
+    describe('EIP712 implementation tests for NOTE_SIGNATURE', () => {
         beforeEach(() => {
             domainParams = sign.generateAZTECDomainParams(verifyingContract, AZTEC_TEST_DOMAIN_PARAMS);
 

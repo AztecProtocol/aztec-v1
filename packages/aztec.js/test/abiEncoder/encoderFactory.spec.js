@@ -145,7 +145,7 @@ describe('inputCoder tests', () => {
         });
     });
 
-    describe.only('joinSplit tests work', () => {
+    describe('joinSplit tests work', () => {
         it('joinSplit is correctly formatted', () => {
             // Setup
             const accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
