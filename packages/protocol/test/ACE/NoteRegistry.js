@@ -1,6 +1,7 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
+const { constants } = require('@aztec/dev-utils');
 
 // ### Internal Dependencies
 

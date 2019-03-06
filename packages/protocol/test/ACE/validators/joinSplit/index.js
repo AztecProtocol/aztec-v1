@@ -4,6 +4,9 @@ const aztec = require('aztec.js');
 const { constants: { CRS }, exceptions } = require('@aztec/dev-utils');
 const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
+const { constants } = require('@aztec/dev-utils');
+
+const { sign } = aztec;
 
 const { proof: { joinSplit: { encodeJoinSplitTransaction } } } = aztec;
 const joinSplitInputEncode = aztec.abiEncoder.inputCoder.joinSplit;
@@ -364,13 +367,18 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
-                return aztec.sign.signACENote(
-                    proofDataRaw[index],
+
+                const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
+
+                const message = {
+                    note: proofDataRaw[index],
                     challenge,
-                    senderAddress,
-                    joinSplitContract.address,
-                    privateKey
-                );
+                    sender: senderAddress,
+                };
+                const schema = constants.ACE_NOTE_SIGNATURE;
+
+                const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+                return signature;
             });
             const outputOwners = outputNotes.map(n => n.owner);
             const fakeProofData = [...Array(4)]
@@ -412,13 +420,18 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
-                return aztec.sign.signACENote(
-                    proofDataRaw[index],
+
+                const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
+
+                const message = {
+                    note: proofDataRaw[index],
                     challenge,
-                    senderAddress,
-                    joinSplitContract.address,
-                    privateKey
-                );
+                    sender: senderAddress,
+                };
+                const schema = constants.ACE_NOTE_SIGNATURE;
+
+                const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+                return signature;
             });
             const outputOwners = outputNotes.map(n => n.owner);
 
@@ -457,13 +470,18 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
-                return aztec.sign.signACENote(
-                    proofDataRaw[index],
+
+                const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
+
+                const message = {
+                    note: proofDataRaw[index],
                     challenge,
-                    senderAddress,
-                    joinSplitContract.address,
-                    privateKey
-                );
+                    sender: senderAddress,
+                };
+                const schema = constants.ACE_NOTE_SIGNATURE;
+
+                const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+                return signature;
             });
             const outputOwners = outputNotes.map(n => n.owner);
             const proofData = joinSplitInputEncode(
@@ -500,13 +518,18 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = commitments.slice(0, 2).map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
-                return aztec.sign.signACENote(
-                    proofDataRaw[index],
+
+                const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
+
+                const message = {
+                    note: proofDataRaw[index],
                     challenge,
-                    senderAddress,
-                    joinSplitContract.address,
-                    privateKey
-                );
+                    sender: senderAddress,
+                };
+                const schema = constants.ACE_NOTE_SIGNATURE;
+
+                const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+                return signature;
             });
             const outputOwners = aztecAccounts.slice(2, 4).map(a => a.address);
             const proofData = joinSplitInputEncode(
@@ -533,15 +556,18 @@ contract('JoinSplit', (accounts) => {
             const m = 1;
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
             const senderAddress = accounts[0];
-            const inputSignatures = [
-                aztec.sign.signACENote(
-                    proofDataRaw[0],
-                    challenge,
-                    senderAddress,
-                    joinSplitContract.address,
-                    aztecAccounts[0].privateKey
-                ),
-            ];
+
+            const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
+
+            const message = {
+                note: proofDataRaw[0],
+                challenge,
+                sender: senderAddress,
+            };
+            const schema = constants.ACE_NOTE_SIGNATURE;
+
+            const inputSignatures = sign.signStructuredData(domainParams, schema, message, aztecAccounts[0].privateKey);
+
             const outputOwners = [];
             const publicOwner = aztecAccounts[0].address;
             const proofData = joinSplitInputEncode(

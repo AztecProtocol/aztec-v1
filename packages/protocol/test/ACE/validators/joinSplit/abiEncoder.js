@@ -3,6 +3,9 @@
 const aztec = require('aztec.js');
 const { constants: { CRS, K_MAX } } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
+const { constants } = require('@aztec/dev-utils');
+
+const { sign } = aztec;
 
 const { outputCoder, inputCoder } = aztec.abiEncoder;
 const joinSplitEncode = inputCoder.joinSplit;
@@ -43,13 +46,18 @@ contract('Join Split ABI Encoder', (accounts) => {
             } = aztec.proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
-                return aztec.sign.signACENote(
-                    proofData[index],
+
+                const domainParams = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.ACE_DOMAIN_PARAMS);
+
+                const message = {
+                    note: proofData[index],
                     challenge,
-                    senderAddress,
-                    joinSplitAbiEncoder.address,
-                    privateKey
-                );
+                    sender: senderAddress,
+                };
+                const schema = constants.ACE_NOTE_SIGNATURE;
+
+                const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+                return signature;
             });
             const publicOwner = aztecAccounts[0].address;
             const outputOwners = outputNotes.map(n => n.owner);
