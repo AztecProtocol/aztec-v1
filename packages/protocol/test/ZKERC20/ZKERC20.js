@@ -51,7 +51,7 @@ contract('ZKERC20', (accounts) => {
             ];
             await ace.setCommonReferenceString(CRS);
             aztecJoinSplit = await JoinSplit.new();
-            await ace.setProof(1, aztecJoinSplit.address, true);
+            await ace.setProof(1, aztecJoinSplit.address);
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],

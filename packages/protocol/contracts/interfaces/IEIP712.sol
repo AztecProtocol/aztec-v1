@@ -18,7 +18,7 @@ pragma solidity >=0.5.0 <0.6.0;
   Forked from https://github.com/0xProject/0x-monorepo
 */
 
-contract LibEIP712 {
+contract IEIP712 {
 
     // EIP191 header for EIP712 prefix
     string constant internal EIP191_HEADER = "\x19\x01";
