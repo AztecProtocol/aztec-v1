@@ -97,7 +97,7 @@ contract('ACE', (accounts) => {
             proofHash = outputCoder.hashProofOutput(proofOutput);
         });
 
-        it.only('will validate a join-split transaction', async () => {
+        it('will validate a join-split transaction', async () => {
             const { receipt } = await ace.validateProof(joinSplitProof, accounts[0], proofData);
             expect(receipt.status).to.equal(true);
             const hashData = [
