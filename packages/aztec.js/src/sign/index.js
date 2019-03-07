@@ -102,13 +102,13 @@ sign.signNote = function signNote(note, challenge, senderAddress, verifyingContr
  * @param {string} privateKey the private key of message signer
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
-sign.signACENote = function signACENote(notes, challenge, senderAddress, verifyingContract, privateKey) {
+sign.signACENote = function signACENote(note, challenge, senderAddress, verifyingContract, privateKey) {
     const messageBase = {
         ...ACE_NOTE_SIGNATURE,
         domain: sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS),
         message: {
             proofId: 1,
-            note: notes,
+            note: [note[2], note[3], note[4], note[5]],
             challenge,
             sender: senderAddress,
         },

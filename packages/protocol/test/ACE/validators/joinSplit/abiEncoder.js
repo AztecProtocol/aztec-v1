@@ -26,6 +26,7 @@ contract('Join Split ABI Encoder', (accounts) => {
     describe('success states', () => {
         beforeEach(async () => {
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
+
             notes = aztecAccounts.map(({ publicKey }) => {
                 return aztec.note.create(publicKey, randomNoteValue());
             });
@@ -40,6 +41,7 @@ contract('Join Split ABI Encoder', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
+
             const {
                 proofData,
                 challenge,
@@ -50,7 +52,8 @@ contract('Join Split ABI Encoder', (accounts) => {
                 const domainParams = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.ACE_DOMAIN_PARAMS);
 
                 const message = {
-                    note: proofData[index],
+                    proofId: 1,
+                    note: proofData[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
                 };

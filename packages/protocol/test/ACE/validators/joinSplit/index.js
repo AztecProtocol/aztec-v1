@@ -371,7 +371,8 @@ contract('JoinSplit', (accounts) => {
                 const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
 
                 const message = {
-                    note: proofDataRaw[index],
+                    proofId: 1,
+                    note: proofDataRaw[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
                 };
@@ -424,7 +425,8 @@ contract('JoinSplit', (accounts) => {
                 const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
 
                 const message = {
-                    note: proofDataRaw[index],
+                    proofId: 1,
+                    note: proofDataRaw[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
                 };
@@ -474,7 +476,8 @@ contract('JoinSplit', (accounts) => {
                 const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
 
                 const message = {
-                    note: proofDataRaw[index],
+                    proofId: 1,
+                    note: proofDataRaw[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
                 };
@@ -522,7 +525,8 @@ contract('JoinSplit', (accounts) => {
                 const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
 
                 const message = {
-                    note: proofDataRaw[index],
+                    proofId: 1,
+                    note: proofDataRaw[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
                 };
@@ -560,13 +564,14 @@ contract('JoinSplit', (accounts) => {
             const domainParams = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
 
             const message = {
-                note: proofDataRaw[0],
+                proofId: 1,
+                note: [proofDataRaw[0][2], proofDataRaw[0][3], proofDataRaw[0][4], proofDataRaw[0][5]],
                 challenge,
                 sender: senderAddress,
             };
             const schema = constants.ACE_NOTE_SIGNATURE;
 
-            const inputSignatures = sign.signStructuredData(domainParams, schema, message, aztecAccounts[0].privateKey);
+            const { signature } = sign.signStructuredData(domainParams, schema, message, aztecAccounts[0].privateKey);
 
             const outputOwners = [];
             const publicOwner = aztecAccounts[0].address;
@@ -575,7 +580,7 @@ contract('JoinSplit', (accounts) => {
                 m,
                 challenge,
                 publicOwner,
-                inputSignatures,
+                signature,
                 outputOwners,
                 []
             );

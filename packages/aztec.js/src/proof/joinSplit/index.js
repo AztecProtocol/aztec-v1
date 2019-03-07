@@ -260,10 +260,12 @@ joinSplit.encodeJoinSplitTransaction = ({
         const domainParams = sign.generateAZTECDomainParams(validatorAddress, constants.ACE_DOMAIN_PARAMS);
 
         const message = {
-            note: proofDataRaw[index],
+            proofId: 1,
+            note: proofDataRaw[index].slice(2, 6),
             challenge,
             sender: senderAddress,
         };
+
         const schema = constants.ACE_NOTE_SIGNATURE;
 
         const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
