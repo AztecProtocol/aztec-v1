@@ -71,7 +71,7 @@ module.exports = {
     },
     ACE_DOMAIN_PARAMS: {
         name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
-        version: '0.1.0',
+        version: '1',
     },
     NOTE_SIGNATURE: {
         types: {
