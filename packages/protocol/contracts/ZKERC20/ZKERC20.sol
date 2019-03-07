@@ -34,6 +34,8 @@ contract ZKERC20 is IAZTEC, IEIP712 {
     address public owner;
     mapping(uint8 => bool) public epochs;
     mapping(uint8 => mapping(uint8 => bool)) proofs;
+    bool private epochsInitialized;
+    mapping(uint8 => bool) private proofsInitialized;
 
     event CreateNoteRegistry(address noteRegistry);
     event CreateZKERC20(
@@ -95,6 +97,8 @@ contract ZKERC20 is IAZTEC, IEIP712 {
     function setEpochs(uint8[] calldata _epochs) external {
         require(isOpen == false, "expected the asset to not be open");
         require(msg.sender == owner, "only the owner can set the epochs");
+        require(epochsInitialized == false, "expected epoch to not be initialized");
+        
         uint256 length = _epochs.length;
         require(length <= 255, "there can only be 255 epochs at maximum");
 
@@ -102,13 +106,18 @@ contract ZKERC20 is IAZTEC, IEIP712 {
             uint8 epoch = _epochs[i];
             epochs[epoch] = true;
         }
+        epochsInitialized = true;
     }
 
     function setProofsForEpoch(
         uint8 _epoch,
         uint8[] calldata ids
     ) external {
+        require(isOpen == false, "expected the asset to not be open");
+        require(msg.sender == owner, "only the owner can set the epoch proofs");
         require(epochs[_epoch] == true, "expected epoch to be supported");
+        require(proofsInitialized[_epoch] == false, "expected proofs to not be initialized for given epoch");
+        
         uint256 length = ids.length;
         require(length <= 255, "there can only be 255 proofs at maximum");
 
@@ -117,6 +126,7 @@ contract ZKERC20 is IAZTEC, IEIP712 {
             uint8 id = ids[i];
             proofs[balancedCategory][id] = true;
         }
+        proofsInitialized[_epoch] = true;
     }
     
     function confidentialTransfer(bytes calldata _proofData) external returns (bool) {
