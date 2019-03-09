@@ -1,8 +1,5 @@
-const path = require('path');
-
-const constants = require(path.join(__dirname, 'constants'));
-const exceptions = require(path.join(__dirname, 'exceptions'));
-const errors = require(path.join(__dirname, 'errors'));
+const constants = require('./constants');
+const exceptions = require('./exceptions');
 
 module.exports = {
     constants,
