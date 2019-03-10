@@ -333,7 +333,7 @@ template<number_of_points>
     strange_wnaf_start:
 
         // For a given scalar, we need TWO WNAFs, one for each endomorphism-split scalar. We push 0x01 onto the stack to serve as our iterator (`v`)
-        callvalue
+        0x01
 
         // Next up, we load the scalar from calldata and split it into two half-length scalars using a bn128 curve endomorphism.
         // (see ENDOMORPHISM for details, this endomorphism is present for any short Weierstrass curve where a = 0)
@@ -415,7 +415,7 @@ template<number_of_points>
         // we do this by decreasing 'v' by 0x01 and checking to see if original value is nonzero
         // stack state: // k1 o k2? v s m
         pop swap1 // k2? o v s m
-        callvalue dup4 sub swap3 strange_wnaf_continue jumpi
+        0x01 dup4 sub swap3 strange_wnaf_continue jumpi
 
         // stack state: ?? ?? v s m
         // We hit this fall-through if we've converted both endomorphism-split scalars into WNAFs.

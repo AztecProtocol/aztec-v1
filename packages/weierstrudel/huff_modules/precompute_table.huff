@@ -193,7 +193,7 @@ precompute_table_start:
     GLOBAL_Z_LOCATION() mstore // store our global Z coordinate, we'll need it later
 
 
-    callvalue callvalue // add in dz^2 and dz^3 onto stack
+    0x01 0x01 // add in dz^2 and dz^3 onto stack
     // we've positioned our 'PRECOMPUTE_TABLE__RESCALE a point in the point table' code so that each PRECOMPUTE_TABLE__RESCALE macro
     // cascades into the next macro (starting at P15, then P14, P13 etc).
     // We want to jump to the bytecode index that corresponds to the start of the rescaling macro that
