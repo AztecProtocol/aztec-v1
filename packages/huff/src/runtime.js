@@ -53,12 +53,12 @@ function encodeStack(stack) {
     }, '');
 }
 
-function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = [], callvalue = 0) {
+function runCode(vm, bytecode, calldata = null, sourcemapOffset = 0, sourcemap = [], callvalue = 0) {
     return new Promise((resolve, reject) => {
         vm.runCode({
             code: Buffer.from(bytecode, 'hex'),
             gasLimit: Buffer.from('ffffffff', 'hex'),
-            data: calldata ? processMemory(calldata) : null,
+            data: calldata, //  ? processMemory(calldata) : null,
             value: new BN(callvalue),
         }, (err, results) => {
             if (err) {

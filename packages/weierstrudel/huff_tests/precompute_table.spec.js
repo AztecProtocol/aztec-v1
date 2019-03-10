@@ -5,7 +5,12 @@ const path = require('path');
 
 const { Runtime } = require('../../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
-
+const { 
+    generateCalldata,
+    generatePoints,
+    generateScalars,
+    sliceMemory,
+} = require('../js_snippets/utils');
 
 const {
     beta,
@@ -46,43 +51,6 @@ function getComparisonTable(x, y, z) {
         table[i] = point.mul(new BN((i * 2) + 1));
     }
     return table;
-}
-
-
-function sliceMemory(memArray) {
-    const numWords = Math.ceil(memArray.length / 32);
-    const result = [];
-    for (let i = 0; i < numWords * 32; i += 32) {
-        result.push(new BN(memArray.slice(i, i + 32), 16));
-    }
-    return result;
-}
-
-/* function splitPoint(x, y) {
-    return {
-        x: p.sub(x),
-        xEndo: p.sub(x).mul(beta).umod(p),
-        yNeg: y,
-        y: p.sub(y),
-    };
-} */
-
-function generatePoints(num) {
-    return [...new Array(num)].map(() => bn128Reference.randomPoint()).map(point => ({ x: point.x, y: point.y, z: new BN(1) }));
-}
-
-function generateCalldata(points) {
-    const formattedPoints = points.reduce((calldata, { x, y }, i) => [
-        ...calldata,
-        { index: (i * 64), value: x },
-        { index: (i * 64) + 32, value: y },
-    ], []);
-    const offset = formattedPoints.length * 32;
-    const scalars = points.reduce((s, x, i) => [
-        ...s,
-        { index: offset + (i * 32), value: bn128Reference.randomScalar() },
-    ], []);
-    return [...formattedPoints, ...scalars];
 }
 
 function generateTables(numPoints) {
@@ -269,7 +237,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for ONE point', async () => {
         const { points, globalZ, referenceTables } = generateTables(1);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(1));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -278,7 +246,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for TWO points', async () => {
         const { points, globalZ, referenceTables } = generateTables(2);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(2));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -287,7 +255,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for THREE points', async () => {
         const { points, globalZ, referenceTables } = generateTables(3);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(3));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -296,7 +264,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for FOUR points', async () => {
         const { points, globalZ, referenceTables } = generateTables(4);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(4));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -305,7 +273,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for FIVE points', async () => {
         const { points, globalZ, referenceTables } = generateTables(5);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(5));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -314,7 +282,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for SIX points', async () => {
         const { points, globalZ, referenceTables } = generateTables(6);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(6));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -323,7 +291,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for SEVEN points', async () => {
         const { points, globalZ, referenceTables } = generateTables(7);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(7));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -332,7 +300,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for EIGHT points', async () => {
         const { points, globalZ, referenceTables } = generateTables(8);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(8));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -341,7 +309,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for NINE points', async () => {
         const { points, globalZ, referenceTables } = generateTables(9);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(9));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -350,7 +318,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for TEN points', async () => {
         const { points, globalZ, referenceTables } = generateTables(10);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(10));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -358,7 +326,7 @@ describe('bn128 precompute table full', () => {
     });
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for ELEVEN points', async () => {
         const { points, globalZ, referenceTables } = generateTables(11);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(11));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -367,7 +335,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for TWELVE points', async () => {
         const { points, globalZ, referenceTables } = generateTables(12);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(12));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -376,7 +344,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for THIRTEEN points', async () => {
         const { points, globalZ, referenceTables } = generateTables(13);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(13));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -385,7 +353,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for FOURTEEN points', async () => {
         const { points, globalZ, referenceTables } = generateTables(14);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(14));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);
@@ -394,7 +362,7 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__COMPUTE correctly calculates precomputed table for FIFTEEN points', async () => {
         const { points, globalZ, referenceTables } = generateTables(15);
-        const calldata = generateCalldata(points);
+        const { calldata } = generateCalldata(points, generateScalars(15));
 
         const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
         expect(stack.length).to.equal(3);

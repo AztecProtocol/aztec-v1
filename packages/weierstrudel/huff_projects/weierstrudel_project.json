@@ -3,5 +3,351 @@
     "file": "main_loop.huff",
     "constructor": "TEST_CONSTRUCTOR",
     "entryMacro": "MAIN__WEIERSTRUDEL",
-    "abi": []
+    "abi": [
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][2]"
+			},
+			{
+				"name": "",
+				"type": "uint256[2]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][10]"
+			},
+			{
+				"name": "",
+				"type": "uint256[10]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][1]"
+			},
+			{
+				"name": "",
+				"type": "uint256[1]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][7]"
+			},
+			{
+				"name": "",
+				"type": "uint256[7]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][9]"
+			},
+			{
+				"name": "",
+				"type": "uint256[9]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][4]"
+			},
+			{
+				"name": "",
+				"type": "uint256[4]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][15]"
+			},
+			{
+				"name": "",
+				"type": "uint256[15]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][8]"
+			},
+			{
+				"name": "",
+				"type": "uint256[8]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][14]"
+			},
+			{
+				"name": "",
+				"type": "uint256[14]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][5]"
+			},
+			{
+				"name": "",
+				"type": "uint256[5]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][13]"
+			},
+			{
+				"name": "",
+				"type": "uint256[13]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][11]"
+			},
+			{
+				"name": "",
+				"type": "uint256[11]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][3]"
+			},
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][12]"
+			},
+			{
+				"name": "",
+				"type": "uint256[12]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256[2][6]"
+			},
+			{
+				"name": "",
+				"type": "uint256[6]"
+			}
+		],
+		"name": "eccMul",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[3]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	}
+]
 }

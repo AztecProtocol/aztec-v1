@@ -7,6 +7,7 @@ const endomorphism = require('../js_snippets/endomorphism');
 const referenceWnaf = require('../js_snippets/wnaf');
 const { Runtime } = require('../../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
+const { generatePoints, generateScalars, generateCalldata } = require('../js_snippets/utils');
 
 const { expect } = chai;
 
@@ -32,34 +33,9 @@ describe('wnaf', function describe() {
     });
 
     it('macro WNAF_GREEDY__COMPUTE will correctly calculate w=5 endo split wnafs for multiple scalars', async () => {
-        const scalars = [
-            bn128Reference.randomScalar(),
-            bn128Reference.randomScalar(),
-            bn128Reference.randomScalar(),
-            bn128Reference.randomScalar(),
-        ];
-        const points = [
-            bn128Reference.randomPoint(),
-            bn128Reference.randomPoint(),
-            bn128Reference.randomPoint(),
-            bn128Reference.randomPoint(),
-        ];
-
-        const calldata = [
-            { index: 0, value: points[0].x },
-            { index: 32 * 1, value: points[0].y },
-            { index: 32 * 2, value: points[1].x },
-            { index: 32 * 3, value: points[1].y },
-            { index: 32 * 4, value: points[2].x },
-            { index: 32 * 5, value: points[2].y },
-            { index: 32 * 6, value: points[3].x },
-            { index: 32 * 7, value: points[3].y },
-            { index: 32 * 8, value: scalars[0] },
-            { index: 32 * 9, value: scalars[1] },
-            { index: 32 * 10, value: scalars[2] },
-            { index: 32 * 11, value: scalars[3] },
-        ];
-
+        const points = generatePoints(4);
+        const scalars = generateScalars(4);
+        const { calldata } = generateCalldata(points, scalars);
 
         let { stack } = await wnaf('WNAF_START_LOCATION', [], [], calldata, 1);
         const wnafStartLocation = stack[0].toNumber();
