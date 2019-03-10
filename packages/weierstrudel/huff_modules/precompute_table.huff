@@ -147,8 +147,7 @@ template <m,p1,p2>
     // Saves about 100 gas because we can cut out a few mulmod ops
 
     // get location in calldata of last point
-    0x40 0x03 0x04 calldatasize sub div dup1 add sub
-    0x04 add // (...)
+    0x3c 0x03 0x04 calldatasize sub div dup1 add sub
     // we want to keep track of the number of points we're iterating over.
     // can't store on stack because our stack size is a function of the number of loop iterations
     // store at memory location PRECOMPUTE_ITERATOR()
