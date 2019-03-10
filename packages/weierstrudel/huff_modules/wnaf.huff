@@ -328,7 +328,7 @@ template<number_of_points>
     // The calldata map contains points, followed by scalars. So we must point to the calldata location that is directly after the block of point data.
     // Which is (number of points * 0x40). We can do this with a bit shift to save some gas.
     swap1 0x06 shl                // s m
-
+    0x04 add // add on function sig offset
     // Ok, now we can start our 'loop'.
     strange_wnaf_start:
 

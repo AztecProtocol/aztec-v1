@@ -21,7 +21,7 @@ template <t>
 }
 
 #define macro GET_NUMBER_OF_POINTS = takes(0) returns(1) {
-    0x60 calldatasize div
+    0x60 0x04 calldatasize sub div
 }
 
 #define macro WNAF_START_LOCATION = takes(0) returns(1) {
@@ -41,7 +41,3 @@ template <t>
 #define macro WNAF_TABLE_BITS = takes(0) returns(1) { 4 }
 #define macro WNAF_SIZE = takes(0) returns(1) { 5 }
 #define macro WNAF_TABLE_MASK = takes(0) returns(1) { 0x1e0 }
-
-#define macro GREEDY_WNAF__OFFSET_TO_POINTS = takes(0) returns(1) {
-    GET_NUMBER_OF_POINTS() 0x04 mul 0x1e add
-}

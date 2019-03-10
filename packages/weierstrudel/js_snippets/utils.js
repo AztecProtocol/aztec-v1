@@ -1,23 +1,20 @@
 const ethers = require('ethers');
 const BN = require('bn.js');
 const EC = require('elliptic');
+const path = require('path');
+const fs = require('fs');
 
 const bn128Reference = require('./bn128_reference');
+
 ethers.errors.setLogLevel('error');
 
-const abiCoder = ethers.utils.defaultAbiCoder;
 const { p, n } = bn128Reference;
 
 const utils = {};
 
-// const pathToProjectData = path.posix.resolve(__dirname, '../huff_projects');
-
-// const projectParams = JSON.parse(fs.readFileSync(path.join(pathToProjectData, 'weierstrudel_project.json')));
-
-// const contractInterface = new ethers.utils.Interface(projectParams.abi);
-
-// const calldata = contractInterface.functions['eccMul(uint256[2][3],uint256[3])'].encode([[[2,3], [3,3], [4,4]], [5, 6, 7]]);
-// const calldata2 = contractInterface.functions['eccMul(uint256[2][2],uint256[2])'].encode([[[1,2],[3,4]], [5,6]]);
+const pathToProjectData = path.posix.resolve(__dirname, '../huff_projects');
+const projectParams = JSON.parse(fs.readFileSync(path.join(pathToProjectData, 'weierstrudel_project.json')));
+const contractInterface = new ethers.utils.Interface(projectParams.abi);
 
 // eslint-disable-next-line new-cap
 const referenceCurve = new EC.curve.short({
@@ -48,18 +45,18 @@ utils.generatePoints = (numPoints) => {
 
 utils.generateScalars = (numPoints) => {
     return [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
-}
+};
 
 utils.generateCalldata = (points, scalars) => {
     const numPoints = points.length;
     if (numPoints !== scalars.length) { throw new Error('num points !== num scalars!'); }
-    const calldata = Buffer.from(abiCoder.encode(
-        [`uint256[2][${numPoints}]`, `uint256[${numPoints}]`],
-        [
+    const calldata = Buffer.from(contractInterface
+        .functions[`eccMul(uint256[2][${numPoints}],uint256[${numPoints}])`]
+        .encode([
             points.map(({ x, y }) => [x.toString(10), y.toString(10)]),
-            scalars.map(s => s.toString(10))
-        ]
-    ).slice(2), 'hex');
+            scalars.map(s => s.toString(10)),
+        ])
+        .slice(2), 'hex');
     const expected = points.reduce((acc, { x, y }, i) => {
         if (!acc) {
             return referenceCurve.point(x, y).mul(scalars[i]);
@@ -67,7 +64,7 @@ utils.generateCalldata = (points, scalars) => {
         return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
     }, null);
     return { calldata, expected };
-}
+};
 
 utils.generatePointData = (numPoints) => {
     return utils.generateCalldata(

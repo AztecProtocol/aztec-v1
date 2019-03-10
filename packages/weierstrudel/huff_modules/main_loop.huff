@@ -171,11 +171,11 @@
 //          v
 #define macro MAIN__WEIERSTRUDEL = takes(0) returns(0) {
     // Step 1, validate integrity of inputs.
-    // `callvalue` must be exactly 1 wei. No more or less.
+    // `callvalue` must be 0
     // calldatasize must be a clean multiple of 0x60
-    callvalue 0x01 eq
-    0x60 calldatasize div 0x60 mul calldatasize eq
-    and sensible_inputs jumpi
+    callvalue
+    0x60 0x04 calldatasize sub mod // todo check this works
+    or iszero sensible_inputs jumpi
     400 0x00 mstore
     0x20 0x00 revert
 sensible_inputs:
