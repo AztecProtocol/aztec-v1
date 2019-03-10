@@ -16,7 +16,7 @@
 				"type": "uint256[2]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -39,7 +39,7 @@
 				"type": "uint256[10]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -62,7 +62,7 @@
 				"type": "uint256[1]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -85,7 +85,7 @@
 				"type": "uint256[7]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -108,7 +108,7 @@
 				"type": "uint256[9]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -131,7 +131,7 @@
 				"type": "uint256[4]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -154,7 +154,7 @@
 				"type": "uint256[15]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -177,7 +177,7 @@
 				"type": "uint256[8]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -200,7 +200,7 @@
 				"type": "uint256[14]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -223,7 +223,7 @@
 				"type": "uint256[5]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -246,7 +246,7 @@
 				"type": "uint256[13]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -269,7 +269,7 @@
 				"type": "uint256[11]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -292,7 +292,7 @@
 				"type": "uint256[3]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -315,7 +315,7 @@
 				"type": "uint256[12]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",
@@ -338,7 +338,7 @@
 				"type": "uint256[6]"
 			}
 		],
-		"name": "eccMul",
+		"name": "ecBatchMul",
 		"outputs": [
 			{
 				"name": "",

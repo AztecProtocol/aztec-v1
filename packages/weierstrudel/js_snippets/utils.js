@@ -51,7 +51,7 @@ utils.generateCalldata = (points, scalars) => {
     const numPoints = points.length;
     if (numPoints !== scalars.length) { throw new Error('num points !== num scalars!'); }
     const calldata = Buffer.from(contractInterface
-        .functions[`eccMul(uint256[2][${numPoints}],uint256[${numPoints}])`]
+        .functions[`ecBatchMul(uint256[2][${numPoints}],uint256[${numPoints}])`]
         .encode([
             points.map(({ x, y }) => [x.toString(10), y.toString(10)]),
             scalars.map(s => s.toString(10)),

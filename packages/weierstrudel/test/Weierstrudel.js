@@ -1,21 +1,14 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 
 const Weierstrudel = artifacts.require('Weierstrudel');
-const WeierstrudelCaller = artifacts.require('WeierstrudelCaller');
 
-contract('Weierstrudel contract tests', (accounts) => {
+contract('Weierstrudel contract tests', () => {
     beforeEach(async () => {
     });
 
     let weierstrudel;
-    let weierstrudelCaller;
     before(async () => {
         weierstrudel = await Weierstrudel.new();
-        WeierstrudelCaller.link('LWeierstrudel', weierstrudel.address);
-        weierstrudelCaller = await WeierstrudelCaller.new({
-            from: accounts[0],
-            value: 50,
-        });
     });
 
 
@@ -25,7 +18,7 @@ contract('Weierstrudel contract tests', (accounts) => {
     });
 
     it('WeierstrudelCaller sort of works?', async () => {
-        const result = await weierstrudelCaller.ecBatchMul([[1, 2]], [100]);
+        const result = await weierstrudel.ecBatchMul([[1, 2]], [100]);
         console.log(result.logs[0].args);
         console.log('result = ', result);
     });
