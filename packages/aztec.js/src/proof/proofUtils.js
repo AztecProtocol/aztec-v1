@@ -48,35 +48,38 @@ proofUtils.generateNoteValue = () => {
 
 /**
  * Checks the number of notes, and throws if incorrect number
- * @method checkNumNotesAndThrow
+ * @method checkNumNotes
  * @memberof module:proofUtils
  * @param {Object[]} notes - array of AZTEC notes
  * @param {integer} numNotes - desired number of notes
+ * @param {boolean} shouldThrow - choose whether the tx should be thrown or the error simply recorded
+ * @param {boolean} errors - input error recording array, set a default value
+
  */
-proofUtils.checkNumNotesAndThrow = (notes, numNotes) => {
-    if (notes.length !== numNotes) {
+proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
+    if (shouldThrow) {
+        if (notes.length !== numNotes) {
+            throw customError(
+                ERROR_TYPES.INCORRECT_NOTE_NUMBER,
+                {
+                    message: 'Incorrect number of input notes',
+                    expectedNumber: numNotes,
+                    actualNumber: notes.length,
+                }
+            );
+        }
+    } else if (!shouldThrow) {
+        if (notes.length !== numNotes) {
+            errors.push(ERROR_TYPES.INCORRECT_NOTE_NUMBER);
+        }
+    } else {
         throw customError(
-            ERROR_TYPES.INCORRECT_NOTE_NUMBER,
+            ERROR_TYPES.SHOULD_THROW_IS_UNDEFINED,
             {
-                data: `dividendComputation.constructProof has an incorrect number of input notes
-                There are ${notes.length}, rather than the required 3.`,
+                message: 'shouldThrow input argument not defined (3rd input argument)',
+                shouldThrow,
             }
         );
-    }
-};
-
-/**
- * Checks the number of notes, records error if wrong
- * but does not throw
- * @method checkNumNotesNoThrow
- * @memberof module:proofUtils
- * @param {Object[]} notes - array of AZTEC notes
- * @param {integer} numNotes - desired number of notes
- * @param {string[]} errors - record of all errors that are thrown
- */
-proofUtils.checkNumNotesNoThrow = (notes, numNotes, errors) => {
-    if (notes.length !== numNotes) {
-        errors.push(ERROR_TYPES.INCORRECT_NOTE_NUMBER);
     }
 };
 
@@ -351,11 +354,12 @@ proofUtils.computeChallenge = (...challengeVariables) => {
             } else if (challengeVar.B) {
                 hash.append(challengeVar.B);
             } else {
-                console.log('error can not add: ', challengeVar);
                 throw customError(
                     ERROR_TYPES.NO_ADD_CHALLENGEVAR,
                     {
-                        message: `I don't know how to add ${challengeVar} to hash`,
+                        message: 'Can not add the challenge variable to the hash',
+                        challengeVar,
+                        type: typeof (challengeVar),
                     }
                 );
             }
@@ -382,8 +386,10 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
             throw customError(
                 ERROR_TYPES.VIEWING_KEY_MALFORMED,
                 {
-                    message: `Viewing key is malformed. It is either not less than 
-                    ${bn128.curve.n} or it is equal to zero`,
+                    message: 'Viewing key is malformed',
+                    viewingKey: note.a.fromRed(),
+                    criteria: `Viewing key should be less than ${bn128.curve.n} 
+                    and greater than zero`,
                 }
             );
         }
@@ -392,8 +398,9 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
             throw customError(
                 ERROR_TYPES.NOTE_VALUE_TOO_BIG,
                 {
-                    message: `Note value is equal to or greater than K_Max 
-                                - ${K_MAX}`,
+                    message: 'Note value is equal to or greater than K_Max',
+                    noteValue: note.k.fromRed(),
+                    K_MAX,
                 }
             );
         }
@@ -402,8 +409,9 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
             throw customError(
                 ERROR_TYPES.POINT_AT_INFINITY,
                 {
-                    message: `Is gamma at infinity?: ${note.gamma.isInfinity()} 
-                            Is sigma at infinity?: ${note.sigma.isInfinity()}`,
+                    message: 'One of the note points is at infinity',
+                    gamma: note.gamma.isInfinity(),
+                    sigma: note.sigma.isInfinity(),
                 }
             );
         }
@@ -412,8 +420,9 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
             throw customError(
                 ERROR_TYPES.NOT_ON_CURVE,
                 {
-                    message: `Is gamma on the curve?: ${!proofUtils.isOnCurve(note.gamma)}
-                    Is sigma on the curve?: ${!proofUtils.isOnCurve(note.sigma)}`,
+                    message: 'A note group element is not on the curve',
+                    gammaOnCurve: proofUtils.isOnCurve(note.gamma),
+                    sigmaOnCurve: proofUtils.isOnCurve(note.sigma),
                 }
             );
         }
@@ -423,8 +432,9 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
         throw customError(
             ERROR_TYPES.KPUBLIC_MALFORMED,
             {
-                message: `K_public is equal to or greater than  
-                ${bn128.curve.n}`,
+                message: 'kPublic is too big',
+                kPublic,
+                maxValue: bn128.curve.n,
             }
         );
     }
@@ -433,8 +443,9 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
         throw customError(
             ERROR_TYPES.M_TOO_BIG,
             {
-                message: `m (the number of input notes) is greater than the total 
-                number of notes. m: ${m}, number of notes: ${notes.length}`,
+                message: 'm (input note number) is greater than the total number of notes',
+                m,
+                numberNotes: notes.length,
             }
         );
     }

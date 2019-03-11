@@ -38,9 +38,10 @@ bilateralSwap.constructProof = (notes, sender) => {
             throw customError(
                 ERROR_TYPES.NOT_ON_CURVE,
                 {
-                    data: `Is gamma on the curve?: ${gammaOnCurve}
-                    Is sigma on the curve?: ${sigmaOnCurve}
-                    One of these group elements is not on the bn128 curve`,
+                    message: 'A group element is not on the bn128 curve',
+                    gammaOnCurve,
+                    sigmaOnCurve,
+                    note,
                 }
             );
         }

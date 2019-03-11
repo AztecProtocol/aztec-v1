@@ -40,7 +40,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const kBarArray = [];
     const numNotes = 3;
 
-    proofUtils.checkNumNotesNoThrow(proofData, numNotes, errors);
+    proofUtils.checkNumNotes(proofData, numNotes, false, errors);
 
     // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
     const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
