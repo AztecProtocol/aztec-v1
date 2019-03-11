@@ -1,9 +1,9 @@
+const { constants: { H_X, H_Y } } = require('@aztec/dev-utils');
 const chai = require('chai');
 const crypto = require('crypto');
 
 const BN = require('bn.js');
 const bn128 = require('../../src/bn128');
-const { H_X, H_Y } = require('../../src/params');
 
 const { expect } = chai;
 
@@ -54,27 +54,29 @@ describe('bn128 tests', () => {
         expect(lhs.fromRed().eq(rhs.fromRed())).to.equal(true);
     });
 
-    it('recoverMessage correctly recovers a note message', () => {
+    it('recoverMessage correctly recovers a note message', async () => {
         const k = new BN(300);
         const gamma = bn128.curve.g;
         const gammaK = bn128.curve.g.mul(k);
-        expect(bn128.recoverMessage(gamma, gammaK)).to.equal(300);
+        const result = await bn128.recoverMessage(gamma, gammaK);
+        expect(result).to.equal(300);
     });
 
-    it('recoverMessage returns 1 for point at infinity', () => {
+    it('recoverMessage returns 1 for point at infinity', async () => {
         const gamma = bn128.curve.g.add(bn128.curve.g.neg());
         const gammaK = gamma;
-        expect(bn128.recoverMessage(gamma, gammaK)).to.equal(1);
+        const result = await bn128.recoverMessage(gamma, gammaK);
+        expect(result).to.equal(1);
     });
 
-    it('recoverMessage will throw if cannot find a solution from 0 to K_MAX', () => {
+    it('recoverMessage will throw if cannot find a solution from 0 to K_MAX', async () => {
         const k = new BN(999);
         const gamma = bn128.curve.g;
         const gammaK = bn128.curve.g.mul(k);
         try {
-            bn128.recoverMessage(gamma, gammaK);
+            await bn128.recoverMessage(gamma, gammaK);
         } catch (e) {
-            expect(e.message).to.equal('could not find k!');
+            expect(e.message).to.contain('could not find k!');
         }
     });
 });

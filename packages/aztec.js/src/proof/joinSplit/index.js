@@ -4,6 +4,7 @@
  * @module proof.joinSplit
  */
 
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
@@ -18,6 +19,9 @@ const Keccak = require('../../keccak');
 const sign = require('../../sign');
 
 const { groupReduction } = bn128;
+const { outputCoder, inputCoder } = abiEncoder;
+const joinSplitEncode = inputCoder.joinSplit;
+
 
 const joinSplit = {};
 joinSplit.extractor = extractor;
@@ -261,7 +265,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         );
     });
     const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = abiEncoder.joinSplit.encode(
+    const proofData = joinSplitEncode(
         proofDataRaw,
         m,
         challenge,
@@ -270,7 +274,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         outputOwners,
         outputNotes
     );
-    const expectedOutput = `0x${abiEncoder.outputCoder.encodeProofOutputs([{
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
         publicOwner,

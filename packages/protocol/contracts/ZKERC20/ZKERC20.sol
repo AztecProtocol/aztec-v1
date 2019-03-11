@@ -1,61 +1,26 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import "../ACE/ACE.sol";
+import "../libs/LibEIP712.sol";
 
-library EIP712Utils {
-
-    bytes32 private constant EIP_DOMAIN_TYPEHASH = keccak256(
-        "EIP712Domain(string name, string version, address verifyingContract)"
-    );
-
-    function constructDomainHash(
-        bytes32 contractName,
-        bytes32 version
-    ) internal view returns (bytes32 domainHash) {
-        bytes32 versionHash = keccak256(abi.encode(version));
-        bytes32 contractNameHash = keccak256(abi.encode(contractName));
-        bytes32 domainTypeHash = EIP_DOMAIN_TYPEHASH;
-        assembly {
-            let m := mload(0x40)
-            mstore(m, domainTypeHash)
-            mstore(add(m, 0x20), contractNameHash)
-            mstore(add(m, 0x40), versionHash)
-            mstore(add(m, 0x60), address) // verifying contract
-            domainHash := keccak256(m, 0x80)
-        }
-    }
-
-    function recoverSignature(
-        bytes32 signatureMessage,
-        bytes memory signature
-    ) internal view returns (address signer) {
-        bool result;
-        assembly {
-            let r := mload(add(signature, 0x20))
-            let s := mload(add(signature, 0x40))
-            let v := byte(0, mload(add(signature, 0x60)))
-            let m := mload(0x40)
-            mstore(m, signatureMessage)
-            mstore(add(m, 0x20), v)
-            mstore(add(m, 0x40), r)
-            mstore(add(m, 0x60), s)
-            result := and(
-                and(
-                    eq(mload(signature), 0x41),
-                    or(eq(v, 27), eq(v, 28))
-                ),
-                staticcall(gas, 0x01, m, 0x80, m, 0x20)
-            )
-            signer := mload(m)
-        }
-        require(result, "signature recovery failed!");
-        require(signer != address(0), "signer address cannot be 0");
-    }
-}
-
-contract ZKERC20 {
-
+contract ZKERC20 is LibEIP712 {
     using NoteUtils for bytes;
+    using SafeMath for uint256;
+    
+    // Hash for the EIP712 Note Signature schema
+    /* solhint-disable */
+    bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
+        "NoteSignature(",
+        "bytes32 noteHash,",
+        "address spender,",
+        "bool status",
+        ")"
+    ));
+
+    // EIP712 Domain Name value
+    string constant internal EIP712_DOMAIN_NAME = "ZKERC20";
 
     ACE public ace;
     ERC20 public linkedToken;
@@ -65,14 +30,8 @@ contract ZKERC20 {
     string public name;
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
-    bytes32 public domainHash;
-
-    bytes32 private constant NOTE_SIGNATURE_TYPEHASH = keccak256(
-        "NoteSignature(bytes32 noteHash, address spender, bool status)"
-    );
 
     event LogCreateNoteRegistry(address noteRegistry);
-
     event LogCreateZKERC20(
         bool canMint,
         bool canBurn,
@@ -81,12 +40,12 @@ contract ZKERC20 {
         address linkedToken,
         address ace
     );
-
     event LogCreateNote(bytes32 indexed _noteHash, address indexed _owner, bytes _metadata);
     event LogDestroyNote(bytes32 indexed _noteHash, address indexed _owner, bytes _metadata);
     event LogConvertTokens(address indexed _owner, uint256 _value);
     event LogRedeemTokens(address indexed _owner, uint256 _value);
 
+    /* solhint-enable */
     constructor(
         string memory _name,
         bool _canMint,
@@ -108,7 +67,6 @@ contract ZKERC20 {
             _scalingFactor,
             _linkedTokenAddress
         ));
-        domainHash = EIP712Utils.constructDomainHash("ZKERC20", "0.1.0");
         emit LogCreateNoteRegistry(address(noteRegistry));
         emit LogCreateZKERC20(
             _canMint,
@@ -148,7 +106,7 @@ contract ZKERC20 {
         bytes memory outputNotes,
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
-        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
             (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
             require(
                 confidentialApproved[noteHash][msg.sender] == true,
@@ -186,13 +144,15 @@ contract ZKERC20 {
 
         require(status == 1, "only unspent notes can be approved");
 
-        // validate EIP-712 signature
-        address signer = EIP712Utils.recoverSignature(
-            constructSignatureMessage(
-                _noteHash,
-                _spender,
-                _status
-            ),
+        // validate EIP712 signature
+        bytes32 hashStruct = keccak256(abi.encode(
+            NOTE_SIGNATURE_TYPEHASH,
+            _noteHash,
+            _spender,
+            status
+        ));
+        address signer = recoverSignature(
+            hashEIP712Message(hashStruct),
             _signature
         );
         require(signer == noteOwner, "the note owner did not sign this message!");
@@ -200,34 +160,16 @@ contract ZKERC20 {
     }
 
     function logInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
             (address owner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
             emit LogDestroyNote(noteHash, owner, metadata);
         }
     }
 
     function logOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < outputNotes.getLength(); i = i.add(1)) {
             (address owner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
             emit LogCreateNote(noteHash, owner, metadata);
         }
-    }
-
-    function constructSignatureMessage(
-        bytes32 noteHash,
-        address spender,
-        bool status
-    ) internal view returns (bytes32) {
-        bytes32 structHash = keccak256(abi.encode(
-            NOTE_SIGNATURE_TYPEHASH,
-            noteHash,
-            spender,
-            status
-        ));
-        return keccak256(abi.encodePacked(
-            "\x19\x01",
-            domainHash,
-            structHash
-        ));
     }
 }

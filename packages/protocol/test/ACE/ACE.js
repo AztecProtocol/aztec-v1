@@ -9,8 +9,8 @@ const { exceptions } = require('@aztec/dev-utils');
 const {
     abiEncoder,
     note,
-    proof,
     secp256k1,
+    proof,
 } = require('aztec.js');
 const {
     constants: {
@@ -19,17 +19,18 @@ const {
 } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
+const { joinSplit: { encodeJoinSplitTransaction } } = proof;
+
 
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
-
+const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
+
 contract('ACE', (accounts) => {
-    // Creating a collection of tests that should pass
     describe('initialization tests', () => {
         let ace;
         beforeEach(async () => {
@@ -90,7 +91,7 @@ contract('ACE', (accounts) => {
             const outputNotes = notes.slice(0, 2);
             const kPublic = 40;
             const publicOwner = aztecAccounts[0].address;
-            ({ proofData, expectedOutput } = proof.joinSplit.encodeJoinSplitTransaction({
+            ({ proofData, expectedOutput } = encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],

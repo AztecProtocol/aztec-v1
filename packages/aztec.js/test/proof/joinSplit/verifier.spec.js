@@ -1,4 +1,5 @@
 /* eslint-disable prefer-arrow-callback */
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
@@ -11,7 +12,6 @@ const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const verifier = require('../../../src/proof/joinSplit/verifier');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
-const { K_MAX } = require('../../../src/params');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const { ERROR_TYPES } = utils.constants;

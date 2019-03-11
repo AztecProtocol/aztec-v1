@@ -65,13 +65,10 @@ $ npm run test
 ## Example
 
 ```node
-const note = require('./src/note');
-const proof = require('./proof/joinSplit');
-const secp256k1 = require('./secp256k1');
-const sign = require('./sign');
+const { note, proof, secp256k1 } = require('aztec.js');
 
-// address of confidential AZTEC - DAI smart contract
-const aztecContract = '0x0000';
+// dummy address of confidential AZTEC - DAI smart contract
+const validatorAddress = '0x76581320dCdFFC93E2FFFF7DADfE668Ba55796a9';
 
 const accounts = [
     secp256k1.generateAccount(),
@@ -91,26 +88,16 @@ const outputNotes = [
 const kPublic = -10; // input notes contain 10 fewer than output notes = deposit of 10 public tokens
 const sender = accounts[0].address; // address of transaction sender
 
-// proofData and challenge are ABI-encoded and ready to be used as inputs to an AZTEC smart contract
-const { proofData, challenge } = proof.constructProof([...inputNotes, ...outputNotes], inputNotes.length, sender, kPublic);
+// proofData can be directly fed into an ZKERC20.sol contract's confidentialTransfer method
+const { proofData } = proof.joinSplit.encodeJoinSplitTransaction({
+    inputNotes: inputNotes,
+    outputNotes: outputNotes,
+    senderAddress: sender,
+    inputNoteOwners: [accounts[0], accounts[0]],
+    publicOwner: sender,
+    kPublic: kPublic,
+    validatorAddress: validatorAddress
+});
 
-// construct EIP712-compatible ECDSA signatures over input notes, required to spend input notes
-const inputSignatures = [
-    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey),
-    sign.signNote(proofData[0], challenge, sender, aztecContract, accounts[0].privateKey),
-];
-
-const outputOwners = [accounts[1].address, accounts[1].address];
-
-// transactionData's members can be directly fed into an AZTECERC20Bridge.sol contract's confidentialTransfer method
-const transactionData = {
-    proofData,
-    m: inputNotes.length,
-    challenge,
-    inputSignatures,
-    outputOwners,
-    metadata: note.encodeMetadata(outputNotes),
-};
-
-return transactionData;
+console.log('proofData', proofData);
 ```
