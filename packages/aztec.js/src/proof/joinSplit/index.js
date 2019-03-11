@@ -4,7 +4,6 @@
  * @module proof.joinSplit
  */
 
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
