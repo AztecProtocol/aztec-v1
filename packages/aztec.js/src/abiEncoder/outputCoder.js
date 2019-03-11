@@ -64,7 +64,6 @@ outputCoder.decodeNotes = (notes, isOutput) => {
 };
 
 outputCoder.decodeProofOutput = (proofOutput) => {
-    // const byteLength = parseInt(proofOutput.slice(0x00, 0x40), 16);
     const inputNotesOffset = parseInt(proofOutput.slice(0x40, 0x80), 16);
     const outputNotesOffset = parseInt(proofOutput.slice(0x80, 0xc0), 16);
     const publicOwner = `0x${proofOutput.slice(0xd8, 0x100)}`;
@@ -114,7 +113,7 @@ outputCoder.encodeOutputNote = (note) => {
 };
 
 outputCoder.encodeInputNote = (note) => {
-    const encoded = [...new Array(7)];
+    const encoded = [...new Array(6)];
     encoded[0] = padLeft('a0', 64);
     encoded[1] = padLeft(note.owner.slice(2), 64);
     encoded[2] = padLeft(note.noteHash.slice(2), 64);
@@ -159,7 +158,7 @@ outputCoder.encodeProofOutput = ({
     } else {
         formattedValue = padLeft(publicValue.toString(16), 64);
     }
-    const encoded = [...new Array(6)];
+    const encoded = [...new Array(7)];
     encoded[0] = padLeft((0x80 + ((encodedInputNotes.length + encodedOutputNotes.length) / 2)).toString(16), 64);
     encoded[1] = padLeft('a0', 64);
     encoded[2] = padLeft((0xa0 + (encodedInputNotes.length / 2)).toString(16), 64);

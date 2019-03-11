@@ -10,12 +10,15 @@ const EC = require('elliptic');
 const crypto = require('crypto');
 
 const {
-    FIELD_MODULUS,
-    GROUP_MODULUS,
-    H_X,
-    H_Y,
-    K_MAX,
-} = require('../params');
+    constants: {
+        FIELD_MODULUS,
+        GROUP_MODULUS,
+        H_X,
+        H_Y,
+        K_MAX,
+    },
+} = require('@aztec/dev-utils');
+const decodePoint = require('./decodePoint');
 
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 
@@ -91,19 +94,9 @@ bn128.recoverMessage = function recoverMessage(gamma, gammaK) {
     if (gammaK.isInfinity()) {
         return 1;
     }
-    let accumulator = gamma;
-    let k = 1;
-    while (k < bn128.K_MAX) {
-        if (accumulator.eq(gammaK)) {
-            break;
-        }
-        accumulator = accumulator.add(gamma);
-        k += 1;
-    }
-    if (k === bn128.K_MAX) {
-        throw new Error('could not find k!');
-    }
-    return k;
+    const a = decodePoint.serializePointForMcl(gamma);
+    const b = decodePoint.serializePointForMcl(gammaK);
+    return decodePoint.decode(a, b, bn128.K_MAX);
 };
 
 /**

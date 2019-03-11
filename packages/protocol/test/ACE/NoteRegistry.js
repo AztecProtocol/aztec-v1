@@ -23,8 +23,8 @@ const { outputCoder } = abiEncoder;
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
 const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
 JoinSplit.abi = JoinSplitInterface.abi;

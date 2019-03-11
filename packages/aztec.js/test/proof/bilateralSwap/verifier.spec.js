@@ -1,4 +1,5 @@
 /* global, beforeEach, it:true */
+const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
