@@ -39,7 +39,7 @@
     "web3-utils": "1.0.0-beta.37"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.3.0-beta.1",
+    "@aztec/dev-utils": "file:../dev-utils",
     "babel-cli": "^6.26.0",
     "babel-plugin-add-module-exports": "^1.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",

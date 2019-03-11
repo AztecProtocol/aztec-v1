@@ -35,7 +35,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     const numNotes = 3;
 
     // Error checking
-    proofUtils.checkNumNotesAndThrow(notes, numNotes);
+    proofUtils.checkNumNotes(notes, numNotes, true);
 
     proofUtils.parseInputs(notes, sender);
     // Array to store bk values later
@@ -66,9 +66,10 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             throw customError(
                 ERROR_TYPES.NOT_ON_CURVE,
                 {
-                    data: `Is gamma on the curve?: ${gammaOnCurve}
-                    Is sigma on the curve?: ${sigmaOnCurve}
-                    One of these group elements is not on the bn128 curve`,
+                    message: 'A group element is not on the bn128 curve',
+                    gammaOnCurve,
+                    sigmaOnCurve,
+                    note,
                 }
             );
         }
