@@ -19,16 +19,10 @@ const { ERROR_TYPES } = utils.constants;
 
 describe('AZTEC bilateral swap verifier tests', () => {
     describe('success states', () => {
-        let testNotes;
-        let sender;
-
-        beforeEach(() => {
-            testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
-
-            sender = randomHex(20);
-        });
-
         it('bilateralProof.constructProof creates a valid bilateral swap proof', () => {
+            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const sender = randomHex(20);
+
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(true);
@@ -37,6 +31,9 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
         it('validate that the kbar relations are satisfied i.e. kbar1 = kbar3 and kbar2 = kbar4', () => {
             const errors = [];
+            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const sender = randomHex(20);
+
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);
             const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
             const formattedChallenge = new BN(challenge.slice(2), 16);
@@ -63,25 +60,14 @@ describe('AZTEC bilateral swap verifier tests', () => {
     });
 
     describe('failure states', () => {
-        let testNotes;
-        let sender;
-        let parseInputs;
-
-        beforeEach(() => {
+        it('will REJECT if malformed challenge', () => {
             // to test failure states we need to pass in bad data to verifier
             // so we need to turn off proof.parseInputs
-            parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-            testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const sender = randomHex(20);
 
-            sender = randomHex(20);
-        });
-
-        afterEach(() => {
-            parseInputs.restore();
-        });
-
-        it('will REJECT if malformed challenge', () => {
             const { proofData } = bilateralProof.constructProof(testNotes, sender);
             const fakeChallenge = `0x${crypto.randomBytes(31).toString('hex')}`;
 
@@ -90,15 +76,21 @@ describe('AZTEC bilateral swap verifier tests', () => {
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for random note values', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
             const randomNotes = proofUtils.makeTestNotes(
                 [proofUtils.generateNoteValue(),
                     proofUtils.generateNoteValue()],
                 [proofUtils.generateNoteValue(),
                     proofUtils.generateNoteValue()]
             );
+
+            const sender = randomHex(20);
+
             const { proofData, challenge } = bilateralProof.constructProof(randomNotes, sender);
 
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
@@ -106,10 +98,15 @@ describe('AZTEC bilateral swap verifier tests', () => {
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if bilateral swap note balancing relationship not satisfied', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
             const unbalancedNotes = proofUtils.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
+            const sender = randomHex(20);
+
             const { proofData, challenge } = bilateralProof.constructProof(unbalancedNotes, sender);
 
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
@@ -117,12 +114,18 @@ describe('AZTEC bilateral swap verifier tests', () => {
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for random proof data', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
             const proofData = [...Array(4)]
                 .map(() => [...Array(6)]
                     .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
+
+            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const sender = randomHex(20);
 
             const { challenge } = bilateralProof.constructProof(testNotes, sender);
 
@@ -130,9 +133,15 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const sender = randomHex(20);
+
             const { proofData } = bilateralProof.constructProof(testNotes, sender);
             proofData[0][0] = `0x${padLeft('05', 64)}`;
             proofData[0][1] = `0x${padLeft('05', 64)}`;
@@ -147,9 +156,15 @@ describe('AZTEC bilateral swap verifier tests', () => {
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
             expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const sender = randomHex(20);
+
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);
             proofData[0][0] = `0x${padLeft('', 64)}`; // kBar
             proofData[0][1] = `0x${padLeft('', 64)}`; // aBar
@@ -160,9 +175,13 @@ describe('AZTEC bilateral swap verifier tests', () => {
             expect(errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
             expect(errors[1]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
             expect(errors[2]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if blinding factor computed from points not on the curve', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const sender = randomHex(20);
+
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
@@ -202,6 +221,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             expect(errors[10]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
             expect(errors[11]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
             expect(errors[12]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
     });
 });
