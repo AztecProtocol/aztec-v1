@@ -9,12 +9,7 @@ const { expect } = chai;
 
 
 describe('Dividend computation proof construction tests', () => {
-    let testNotes;
-    let sender;
-    let za;
-    let zb;
-
-    beforeEach(() => {
+    it('dividendComputation.constructProof outputs proof data with correct number of proof variables and is well formed', () => {
         /*
         Test case:
         - k_in = 90
@@ -25,14 +20,11 @@ describe('Dividend computation proof construction tests', () => {
         - zb = 100
         */
 
-        testNotes = proofUtils.makeTestNotes([90], [4, 50]);
-        za = 100;
-        zb = 5;
+        const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+        const za = 100;
+        const zb = 5;
 
-        sender = web3Utils.randomHex(20);
-    });
-
-    it('dividendComputation.constructProof outputs proof data with correct number of proof variables and is well formed', () => {
+        const sender = web3Utils.randomHex(20);
         const { proofDataUnformatted, proofData, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
         const numProofDataElements = 18;
 

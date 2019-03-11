@@ -10,16 +10,10 @@ const { expect } = chai;
 
 
 describe('AZTEC bilateral swap proof construction tests', () => {
-    let testNotes;
-    let sender;
-
-    beforeEach(() => {
-        testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
-
-        sender = randomHex(20);
-    });
-
     it('checking that the proof logic creates a proof where blinding scalar relations are satisfied', () => {
+
+        const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+
         // i.e. bk1 = bk3 and bk2 = bk4
         const finalHash = new Keccak();
 
@@ -40,6 +34,9 @@ describe('AZTEC bilateral swap proof construction tests', () => {
     });
 
     it('bilateralProof.constructProof creates a proof with well-formed outputs', () => {
+        const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+        const sender = randomHex(20);
+
         const { proofData } = bilateralProof.constructProof(testNotes, sender);
         expect(proofData.length).to.equal(4);
         expect(proofData[0].length).to.equal(6);

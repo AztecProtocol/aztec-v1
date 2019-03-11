@@ -22,12 +22,7 @@ function randomAddress() {
 
 describe('Dividend computation verifier tests', () => {
     describe('success states', () => {
-        let testNotes;
-        let sender;
-        let za;
-        let zb;
-
-        beforeEach(() => {
+        it('dividendComputation.constructProof creates a valid dividend computation proof', () => {
             /*
             Test case:
             - k_in = 90
@@ -38,14 +33,11 @@ describe('Dividend computation verifier tests', () => {
             - zb = 100
             */
 
-            testNotes = proofUtils.makeTestNotes([90], [4, 50]);
-            za = 100;
-            zb = 5;
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const za = 100;
+            const zb = 5;
 
-            sender = randomAddress();
-        });
-
-        it('dividendComputation.constructProof creates a valid dividend computation proof', () => {
+            const sender = randomAddress();
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
             const { valid } = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
             expect(valid).to.equal(true);
@@ -54,13 +46,9 @@ describe('Dividend computation verifier tests', () => {
 
 
     describe('failure states', () => {
-        let testNotes;
-        let sender;
-        let za;
-        let zb;
-        let parseInputs;
+        it('will REJECT for unsatisfied proof relations', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-        beforeEach(() => {
             /*
             Test case:
             - k_in = 90
@@ -71,23 +59,11 @@ describe('Dividend computation verifier tests', () => {
             - zb = 100
             */
 
-            testNotes = proofUtils.makeTestNotes([90], [4, 50]);
-            za = 100;
-            zb = 5;
+            const za = 100;
+            const zb = 5;
 
-            // Turning off proof construction/verification input safety checks
-            // to allow thorough testing of internal algo and check it throws
-            // for bad inputs
-            parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const sender = randomAddress();
 
-            sender = randomAddress();
-        });
-
-        afterEach(() => {
-            parseInputs.restore();
-        });
-
-        it('will REJECT for unsatisfied proof relations', () => {
             const wrongRelationship = proofUtils.makeTestNotes([90], [4, 49]);
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(wrongRelationship, za, zb, sender);
 
@@ -102,9 +78,28 @@ describe('Dividend computation verifier tests', () => {
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for fake challenge', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
             const zeroes = `${padLeft('0', 64)}`;
@@ -123,9 +118,28 @@ describe('Dividend computation verifier tests', () => {
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for fake proof data', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
             const fakeProofData = [...Array(3)]
@@ -142,10 +156,29 @@ describe('Dividend computation verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
 
         it('will REJECT for z_a > k_max', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const zaLarge = K_MAX + za;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, zaLarge, zb, sender);
 
@@ -161,9 +194,28 @@ describe('Dividend computation verifier tests', () => {
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(ERROR_TYPES.ZA_TOO_BIG);
             expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for z_b > k_max', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const zbLarge = K_MAX + zb;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zbLarge, sender);
 
@@ -179,9 +231,28 @@ describe('Dividend computation verifier tests', () => {
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(ERROR_TYPES.ZB_TOO_BIG);
             expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if point not on the curve', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
             // Setting the x coordiante of gamma to zero
@@ -198,9 +269,28 @@ describe('Dividend computation verifier tests', () => {
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
             expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if blinding factor at infinity', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
             proofDataUnformatted[0][0] = `0x${padLeft('05', 64)}`;
             proofDataUnformatted[0][1] = `0x${padLeft('05', 64)}`;
@@ -222,9 +312,28 @@ describe('Dividend computation verifier tests', () => {
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
             expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if blinding factor computed from invalid point', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
             proofDataUnformatted[0][0] = `0x${padLeft('', 64)}`;
             proofDataUnformatted[0][1] = `0x${padLeft('', 64)}`;
@@ -249,6 +358,7 @@ describe('Dividend computation verifier tests', () => {
             expect(errors[3]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
             expect(errors[4]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
             expect(errors[5]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
     });
 });
