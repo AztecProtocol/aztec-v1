@@ -1,6 +1,4 @@
 /* global, beforeEach, it:true */
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
-const BN = require('bn.js');
 const chai = require('chai');
 const { randomHex } = require('web3-utils');
 
@@ -13,7 +11,6 @@ const { expect } = chai;
 
 describe('AZTEC bilateral swap proof construction tests', () => {
     it('checking that the proof logic creates a proof where blinding scalar relations are satisfied', () => {
-
         const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
 
         // i.e. bk1 = bk3 and bk2 = bk4
