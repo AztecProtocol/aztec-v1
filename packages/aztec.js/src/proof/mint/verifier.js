@@ -8,56 +8,13 @@ const BN = require('bn.js');
 
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
+const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
 const zero = new BN(0).toRed(groupReduction);
 
 const verifier = {};
 
-function hexToGroupScalar(hex, errors, canBeZero = false) {
-    const hexBn = new BN(hex.slice(2), 16);
-    if (!hexBn.lt(bn128.curve.n)) {
-        errors.push(verifier.ERRORS.SCALAR_TOO_BIG);
-    }
-    if (!canBeZero && hexBn.eq(new BN(0))) {
-        errors.push(verifier.ERRORS.SCALAR_ZERO);
-    }
-    return hexBn.toRed(groupReduction);
-}
-
-function hexToGroupElement(xHex, yHex, errors) {
-    let x = new BN(xHex.slice(2), 16);
-    let y = new BN(yHex.slice(2), 16);
-    if (!x.lt(bn128.curve.p)) {
-        errors.push(verifier.ERRORS.X_TOO_BIG);
-    }
-    if (!y.lt(bn128.curve.p)) {
-        errors.push(verifier.ERRORS.Y_TOO_BIG);
-    }
-    x = x.toRed(bn128.curve.red);
-    y = y.toRed(bn128.curve.red);
-    const lhs = y.redSqr();
-    const rhs = x.redSqr().redMul(x).redAdd(bn128.curve.b);
-    if (!lhs.fromRed().eq(rhs.fromRed())) {
-        errors.push(verifier.ERRORS.NOT_ON_CURVE);
-    }
-    return bn128.curve.point(x, y);
-}
-
-/**
- * @enum {ERRORS}
- * @memberof module:proof.mint.verifier
- * @description enum to track verification errors. We want to accumulate all errors instead of throwing at the first
- */
-verifier.ERRORS = {
-    SCALAR_TOO_BIG: 'group scalar is not modulo the bn128 group order!',
-    SCALAR_ZERO: 'group scalar cannot equal zero!',
-    X_TOO_BIG: 'group element x coordinate is not modulo the bn128 field order!',
-    Y_TOO_BIG: 'group element y coordinate is not modulo the bn128 field order!',
-    NOT_ON_CURVE: 'group element is not on bn128 curve!',
-    BAD_BLINDING_FACTOR: 'blinding factor is at infinity or is zero!',
-    CHALLENGE_RESPONSE_FAIL: 'challenge does not match challenge response',
-};
 
 /**
  * Convert ABI encoded proof transcript back into BN.js form (for scalars) and elliptic.js form (for points)
@@ -70,9 +27,9 @@ verifier.ERRORS = {
  * @param {string[]} errors container for discovered errors
  */
 verifier.convertTranscript = (proofData, challengeHex, errors) => {
-    const challenge = hexToGroupScalar(challengeHex, errors);
+    const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
     const n = proofData.length;
-    const kPublic = hexToGroupScalar(proofData[proofData.length - 1][0], errors, true);
+    const kPublic = proofUtils.hexToGroupScalar(proofData[proofData.length - 1][0], errors, true);
     let runningKBar = zero.redSub(kPublic).redMul(challenge);
     const rollingHash = new Keccak();
 
@@ -89,7 +46,7 @@ verifier.convertTranscript = (proofData, challengeHex, errors) => {
                 errors.push(verifier.ERRORS.SCALAR_ZERO);
             }
         } else {
-            kBar = hexToGroupScalar(note[0], errors);
+            kBar = proofUtils.hexToGroupScalar(note[0], errors);
             if (i >= m) {
                 runningKBar = runningKBar.redSub(kBar);
             } else {
@@ -98,9 +55,9 @@ verifier.convertTranscript = (proofData, challengeHex, errors) => {
         }
         const result = {
             kBar,
-            aBar: hexToGroupScalar(note[1], errors),
-            gamma: hexToGroupElement(note[2], note[3], errors),
-            sigma: hexToGroupElement(note[4], note[5], errors),
+            aBar: proofUtils.hexToGroupScalar(note[1], errors),
+            gamma: proofUtils.hexToGroupElement(note[2], note[3], errors),
+            sigma: proofUtils.hexToGroupElement(note[4], note[5], errors),
         };
         rollingHash.append(result.gamma);
         rollingHash.append(result.sigma);
