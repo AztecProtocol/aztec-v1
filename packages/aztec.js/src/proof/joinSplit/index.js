@@ -4,13 +4,13 @@
  * @module proof.joinSplit
  */
 
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 const extractor = require('./extractor');
 const helpers = require('./helpers');
 const verifier = require('./verifier');
+const proofUtils = require('../proofUtils');
 
 const abiEncoder = require('../../abiEncoder');
 const bn128 = require('../../bn128');
@@ -59,90 +59,11 @@ joinSplit.generateBlindingScalars = (n, m) => {
     return scalars;
 };
 
-/**
- * Compute the Fiat-Shamir heuristic-ified challenge variable.
- *   Separated out into a distinct method so that we can stub this for extractor tests
- *
- * @method computeChallenge
- * @memberof proof.joinSplit
- * @param {string} sender Ethereum address of transaction sender
- * @param {string} kPublic public commitment being added to proof
- * @param {number} m number of input notes
- * @param {Object[]} notes array of AZTEC notes
- * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
- */
-joinSplit.computeChallenge = (...challengeVariables) => {
-    const hash = new Keccak();
-
-    const recurse = (inputs) => {
-        inputs.forEach((challengeVar) => {
-            if (typeof (challengeVar) === 'string') {
-                hash.appendBN(new BN(challengeVar.slice(2), 16));
-            } else if (typeof (challengeVar) === 'number') {
-                hash.appendBN(new BN(challengeVar));
-            } else if (BN.isBN(challengeVar)) {
-                hash.appendBN(challengeVar.umod(bn128.curve.n));
-            } else if (Array.isArray(challengeVar)) {
-                recurse(challengeVar);
-            } else if (challengeVar.gamma) {
-                hash.append(challengeVar.gamma);
-                hash.append(challengeVar.sigma);
-            } else if (challengeVar.B) {
-                hash.append(challengeVar.B);
-            } else {
-                throw new Error(`I don't know how to add ${challengeVar} to hash`);
-            }
-        });
-    };
-    recurse(challengeVariables);
-
-    return hash.keccak(groupReduction);
-};
-
-function isOnCurve(point) {
-    const lhs = point.y.redSqr();
-    const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.curve.b);
-    return (lhs.fromRed().eq(rhs.fromRed()));
-}
-
-/**
- * Validate proof inputs are well formed
- *
- * @method parseInputs
- * @memberof proof.joinSplit
- * @param {Object[]} notes array of AZTEC notes
- * @param {number} m number of input notes
- * @param {string} sender Ethereum address of transaction sender
- * @param {string} kPublic public commitment being added to proof
- */
-joinSplit.parseInputs = (notes, m, sender, kPublic) => {
-    notes.forEach((note) => {
-        if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
-            throw new Error('viewing key malformed');
-        }
-        if (!note.k.fromRed().lt(new BN(K_MAX))) {
-            throw new Error('note value malformed');
-        }
-        if (note.gamma.isInfinity() || note.sigma.isInfinity()) {
-            throw new Error('point at infinity');
-        }
-        if (!isOnCurve(note.gamma) || !isOnCurve(note.sigma)) {
-            throw new Error('point not on curve');
-        }
-    });
-
-    if (!kPublic.lt(bn128.curve.n)) {
-        throw new Error('kPublic value malformed');
-    }
-    if (m > notes.length) {
-        throw new Error('m is greater than note array length');
-    }
-};
 
 /**
  * Construct AZTEC join-split proof transcript
  *
- * @method constructJoinSplit
+ * @method constructProof
  * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
@@ -150,7 +71,7 @@ joinSplit.parseInputs = (notes, m, sender, kPublic) => {
  * @param {string} kPublic public commitment being added to proof
  * @returns {Object} proof data and challenge
  */
-joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
+joinSplit.constructProof = (notes, m, sender, kPublic) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
     // convert kPublic into a BN instance if it is not one
@@ -162,9 +83,8 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
     } else {
         kPublicBn = new BN(kPublic);
     }
-    joinSplit.parseInputs(notes, m, sender, kPublicBn);
+    proofUtils.parseInputs(notes, sender, m, kPublicBn);
 
-    // construct initial hash of note commitments
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
         rollingHash.append(note.sigma);
@@ -198,7 +118,7 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
         };
     });
 
-    const challenge = joinSplit.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
@@ -225,7 +145,7 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
 /**
  * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
  *
- * @method constructJoinSplit
+ * @method constructProof
  * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
@@ -236,7 +156,7 @@ joinSplit.constructJoinSplit = (notes, m, sender, kPublic) => {
 joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
-    // convert kPublic into a BN instance if it is not one
+
     let kPublicBn;
     if (BN.isBN(kPublic)) {
         kPublicBn = kPublic;
@@ -245,9 +165,8 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
     } else {
         kPublicBn = new BN(kPublic);
     }
-    joinSplit.parseInputs(notes, m, sender, kPublicBn);
+    proofUtils.parseInputs(notes, sender, m, kPublicBn);
 
-    // construct initial hash of note commitments
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
         rollingHash.append(note.sigma);
@@ -281,7 +200,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
         };
     });
 
-    const challenge = joinSplit.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();

@@ -1,31 +1,37 @@
 /**
  * Verifies AZTEC bilateral swap zero-knowledge proofs
  *
- * @module proof
+ * @module proof.bilateralSwap
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
+const utils = require('@aztec/dev-utils');
+
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
-
-const helpers = require('./helpers');
-
-const { groupReduction } = bn128;
+const proofUtils = require('../proofUtils');
 
 const verifier = {};
-
+const { ERROR_TYPES } = utils.constants;
+const { groupReduction } = bn128;
 
 /**
  * Verify AZTEC bilateral swap proof transcript
  *
- * @method verifyBilateralSwap
- * @param {Object[]} proofData - proofData array of AZTEC notes
- * @param {BN} challenge - challenge variable used in zero-knowledge protocol 
- * @returns {number} - returns 1 if proof is validated, throws an error if not
+ * @method verifyProof
+ * @memberof module:proof.bilateralSwap
+ * @param {Object[]} proofData - AZTEC bilateralSwap zero-knowledge proof data
+ * @param {string} challengeHex - hex-string formatted proof challenge
+ * @param {string} sender - Ethereum address of transaction sender
+ * @returns {boolean, string[]} valid, errors - valid describes whether the proof verification is valid, 
+ * errors is an array of all errors that were caught
  */
-verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
-    const proofDataBn = helpers.toBnAndAppendPoints(proofData);
-    const formattedChallenge = new BN(challenge.slice(2), 16);
+verifier.verifyProof = (proofData, challengeHex, sender) => {
+    const errors = [];
+
+    const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
+
+    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
 
     const finalHash = new Keccak();
 
@@ -38,33 +44,12 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
 
     const kBarArray = [];
 
-    // Validate that the commitments lie on the bn128 curve
-    proofDataBn.forEach((proofElement) => {
-        bn128.curve.validate(proofElement[6]); // checking gamma point
-        bn128.curve.validate(proofElement[7]); // checking sigma point
-    });
-
     proofDataBn.map((proofElement, i) => {
         let kBar = proofElement[0];
         const aBar = proofElement[1];
         const gamma = proofElement[6];
         const sigma = proofElement[7];
         let B;
-
-        // Only check these conditions for the input notes, because
-        // the output notes automatically have kBar set to 0
-
-        if (i <= 1) {
-            // Check if the scalar kBar is zero, if it is then throw
-            if (kBar.fromRed().eq(new BN(0))) {
-                throw new Error('A scalar is zero');
-            }
-
-            // Check if the scalar aBar is zero, if it is then throw
-            if (aBar.fromRed().eq(new BN(0))) {
-                throw new Error('A scalar is zero');
-            }
-        }
 
         /*
         Explanation of the below if/else
@@ -77,18 +62,23 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
 
         // Maker notes
         if (i <= 1) {
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
+            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
         } else { // taker notes
             kBar = kBarArray[i - 2];
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
+            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
         }
 
-        // Check if the blinding factor is infinity, if it is then throw
         if (B.isInfinity()) {
-            throw new Error('B is infinity');
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.appendBN(new BN(0));
+            finalHash.appendBN(new BN(0));
+        } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.append(B);
+        } else {
+            finalHash.append(B);
         }
 
-        finalHash.append(B);
         kBarArray.push(kBar);
 
         return {
@@ -100,11 +90,15 @@ verifier.verifyBilateralSwap = (proofData, challenge, sender) => {
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
-    if (finalChallenge !== challenge) {
-        throw new Error('proof validation failed');
-    } else {
-        return true;
+    if (finalChallenge !== challengeHex) {
+        errors.push(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
     }
+
+    const valid = errors.length === 0;
+    return {
+        valid,
+        errors,
+    };
 };
 
 module.exports = verifier;

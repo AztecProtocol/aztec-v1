@@ -4,10 +4,15 @@ const BN = require('bn.js');
 const chai = require('chai');
 const { padLeft, sha3 } = require('web3-utils');
 const crypto = require('crypto');
+const sinon = require('sinon');
+const utils = require('@aztec/dev-utils');
 
 
 const bn128 = require('../../../src/bn128');
 const dividendComputation = require('../../../src/proof/dividendComputation');
+const proofUtils = require('../../../src/proof/proofUtils');
+
+const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
@@ -17,12 +22,7 @@ function randomAddress() {
 
 describe('Dividend computation verifier tests', () => {
     describe('success states', () => {
-        let testNotes;
-        let sender;
-        let za;
-        let zb;
-
-        beforeEach(() => {
+        it('dividendComputation.constructProof creates a valid dividend computation proof', () => {
             /*
             Test case:
             - k_in = 90
@@ -33,29 +33,22 @@ describe('Dividend computation verifier tests', () => {
             - zb = 100
             */
 
-            testNotes = dividendComputation.helpers.makeTestNotes([90], [4, 50]);
-            za = 100;
-            zb = 5;
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const za = 100;
+            const zb = 5;
 
-            // Dummy, random sender address for proof of concept
-            sender = randomAddress();
-        });
-
-        it('dividendComputation.constructProof creates a valid dividend computation proof', () => {
+            const sender = randomAddress();
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
-            const result = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
-            expect(result).to.equal(true);
+            const { valid } = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
+            expect(valid).to.equal(true);
         });
     });
 
 
     describe('failure states', () => {
-        let testNotes;
-        let sender;
-        let za;
-        let zb;
+        it('will REJECT for unsatisfied proof relations', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-        beforeEach(() => {
             /*
             Test case:
             - k_in = 90
@@ -66,41 +59,47 @@ describe('Dividend computation verifier tests', () => {
             - zb = 100
             */
 
-            testNotes = dividendComputation.helpers.makeTestNotes([90], [4, 50]);
-            za = 100;
-            zb = 5;
+            const za = 100;
+            const zb = 5;
 
-            // Dummy, random sender address for proof of concept
-            sender = randomAddress();
-        });
+            const sender = randomAddress();
 
-        it('will REJECT for incorrect number of input notes', () => {
-            const tooManyNotes = dividendComputation.helpers.makeTestNotes([90, 1], [4, 50]);
-
-            let message = '';
-            try {
-                dividendComputation.constructProof(tooManyNotes, za, zb, sender);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('incorrect number of notes');
-        });
-
-        it('will REJECT for unsatisfied proof relations', () => {
-            const wrongRelationship = dividendComputation.helpers.makeTestNotes([90], [4, 49]);
+            const wrongRelationship = proofUtils.makeTestNotes([90], [4, 49]);
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(wrongRelationship, za, zb, sender);
 
-            let message = '';
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                challenge,
+                sender,
+                za,
+                zb
+            );
 
-            try {
-                dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('proof validation failed');
+            expect(valid).to.equal(false);
+            expect(errors.length).to.equal(1);
+            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for fake challenge', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
             const zeroes = `${padLeft('0', 64)}`;
@@ -108,95 +107,233 @@ describe('Dividend computation verifier tests', () => {
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const fakeChallenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            let message = '';
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                fakeChallenge,
+                sender,
+                za,
+                zb
+            );
 
-            try {
-                dividendComputation.verifier.verifyProof(proofDataUnformatted, fakeChallenge, sender, za, zb);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('proof validation failed');
+            expect(valid).to.equal(false);
+            expect(errors.length).to.equal(1);
+            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for fake proof data', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
             const fakeProofData = [...Array(3)]
                 .map(() => [...Array(6)]
                     .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
 
-            let message = '';
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                fakeProofData,
+                challenge,
+                sender,
+                za,
+                zb
+            );
 
-            try {
-                dividendComputation.verifier.verifyProof(fakeProofData, challenge, sender, za, zb);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('point not on curve');
+            expect(valid).to.equal(false);
+            expect(errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
 
         it('will REJECT for z_a > k_max', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const zaLarge = K_MAX + za;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, zaLarge, zb, sender);
 
-            let message = '';
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                challenge,
+                sender,
+                zaLarge,
+                zb
+            );
 
-            try {
-                dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, zaLarge, zb);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('z_a is greater than or equal to kMax');
+            expect(valid).to.equal(false);
+            expect(errors.length).to.equal(2);
+            expect(errors[0]).to.equal(ERROR_TYPES.ZA_TOO_BIG);
+            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT for z_b > k_max', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const zbLarge = K_MAX + zb;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zbLarge, sender);
-            let message = '';
 
-            try {
-                dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zbLarge);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('z_b is greater than or equal to kMax');
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                challenge,
+                sender,
+                za,
+                zbLarge
+            );
+
+            expect(valid).to.equal(false);
+            expect(errors.length).to.equal(2);
+            expect(errors[0]).to.equal(ERROR_TYPES.ZB_TOO_BIG);
+            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if point not on the curve', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
             // Setting the x coordiante of gamma to zero
             proofDataUnformatted[0][2] = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-            let message = '';
-            try {
-                dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('point not on curve');
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                challenge,
+                sender,
+                za,
+                zb
+            );
+            expect(valid).to.equal(false);
+            expect(errors.length).to.equal(2);
+            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if blinding factor at infinity', () => {
-            const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
+            const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
             proofDataUnformatted[0][0] = `0x${padLeft('05', 64)}`;
             proofDataUnformatted[0][1] = `0x${padLeft('05', 64)}`;
             proofDataUnformatted[0][2] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
             proofDataUnformatted[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
             proofDataUnformatted[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
             proofDataUnformatted[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            const challenge = `0x${padLeft('0a', 64)}`;
 
-            let message = '';
-            try {
-                dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('proof validation failed');
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                challenge,
+                sender,
+                za,
+                zb
+            );
+
+            expect(valid).to.equal(false);
+            expect(errors.length).to.equal(2);
+            expect(errors[0]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
 
         it('will REJECT if blinding factor computed from invalid point', () => {
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            /*
+            Test case:
+            - k_in = 90
+            - Interest rate = 5%
+            - k_out = 4
+            - k_res = 5
+            - za = 5
+            - zb = 100
+            */
+
+            const za = 100;
+            const zb = 5;
+
+            const sender = randomAddress();
+            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
             proofDataUnformatted[0][0] = `0x${padLeft('', 64)}`;
             proofDataUnformatted[0][1] = `0x${padLeft('', 64)}`;
@@ -205,13 +342,23 @@ describe('Dividend computation verifier tests', () => {
             proofDataUnformatted[0][4] = `0x${padLeft('', 64)}`;
             proofDataUnformatted[0][5] = `0x${padLeft('', 64)}`;
 
-            let message = '';
-            try {
-                dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
-            } catch (err) {
-                ({ message } = err);
-            }
-            expect(message).to.equal('point not on curve');
+            const { valid, errors } = dividendComputation.verifier.verifyProof(
+                proofDataUnformatted,
+                challenge,
+                sender,
+                za,
+                zb
+            );
+
+            expect(valid).to.equal(false);
+            expect(errors.length).to.equal(6);
+            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[2]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(errors[3]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(errors[4]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            expect(errors[5]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            parseInputs.restore();
         });
     });
 });

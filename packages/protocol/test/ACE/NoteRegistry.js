@@ -8,7 +8,6 @@ const {
     proof,
     abiEncoder,
     secp256k1,
-    sign,
     note,
 // eslint-disable-next-line import/no-unresolved
 } = require('aztec.js');
@@ -18,9 +17,8 @@ const {
     },
 } = require('@aztec/dev-utils');
 
-const { joinSplit: aztecProof } = proof;
-const { outputCoder, inputCoder } = abiEncoder;
-const joinSplitEncode = inputCoder.joinSplit;
+const { joinSplit } = proof;
+const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
@@ -30,51 +28,6 @@ const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSpl
 const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
 
 JoinSplit.abi = JoinSplitInterface.abi;
-
-
-function encodeJoinSplitTransaction({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-    inputNoteOwners,
-    publicOwner,
-    kPublic,
-    validatorAddress,
-}) {
-    const m = inputNotes.length;
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = aztecProof.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
-
-    const inputSignatures = inputNotes.map((inputNote, index) => {
-        const { privateKey } = inputNoteOwners[index];
-        return sign.signACENote(
-            proofDataRaw[index],
-            challenge,
-            senderAddress,
-            validatorAddress,
-            privateKey
-        );
-    });
-    const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = joinSplitEncode(
-        proofDataRaw,
-        m,
-        challenge,
-        publicOwner,
-        inputSignatures,
-        outputOwners,
-        outputNotes
-    );
-    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue: kPublic,
-    }]).slice(0x42)}`;
-    return { proofData, expectedOutput };
-}
 
 contract('NoteRegistry', (accounts) => {
     describe('success states', () => {
@@ -102,7 +55,7 @@ contract('NoteRegistry', (accounts) => {
             const aztecJoinSplit = await JoinSplit.new();
             await ace.setProof(1, aztecJoinSplit.address, true);
             const publicOwner = accounts[0];
-            proofs[0] = encodeJoinSplitTransaction({
+            proofs[0] = joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes: notes.slice(0, 2),
                 senderAddress: accounts[0],
@@ -111,7 +64,7 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: -10,
                 validatorAddress: aztecJoinSplit.address,
             });
-            proofs[1] = encodeJoinSplitTransaction({
+            proofs[1] = joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
                 outputNotes: notes.slice(2, 4),
                 senderAddress: accounts[0],
@@ -120,7 +73,7 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: -40,
                 validatorAddress: aztecJoinSplit.address,
             });
-            proofs[2] = encodeJoinSplitTransaction({
+            proofs[2] = joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes: notes.slice(6, 8),
                 senderAddress: accounts[0],
@@ -129,7 +82,7 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: -130,
                 validatorAddress: aztecJoinSplit.address,
             });
-            proofs[3] = encodeJoinSplitTransaction({
+            proofs[3] = joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(6, 8),
                 outputNotes: notes.slice(4, 6),
                 senderAddress: accounts[0],
@@ -138,7 +91,7 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: 40,
                 validatorAddress: aztecJoinSplit.address,
             });
-            proofs[4] = encodeJoinSplitTransaction({
+            proofs[4] = joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes: [notes[0], notes[3]],
                 senderAddress: accounts[0],
@@ -147,7 +100,7 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: -30,
                 validatorAddress: aztecJoinSplit.address,
             });
-            proofs[5] = encodeJoinSplitTransaction({
+            proofs[5] = joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [notes[0], notes[3]],
                 outputNotes: [notes[1], notes[2]],
                 senderAddress: accounts[0],

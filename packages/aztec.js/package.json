@@ -1,6 +1,6 @@
 {
   "name": "aztec.js",
-  "version": "0.4.1",
+  "version": "0.4.0-beta.21",
   "author": "AZTEC",
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
@@ -33,13 +33,14 @@
     "elliptic": "^6.4.1",
     "ethereumjs-abi": "^0.6.6",
     "ethereumjs-util": "^6.0.0",
+    "performance": "^1.1.1",
     "web3-eth-abi": "1.0.0-beta.37",
     "web3-eth-accounts": "1.0.0-beta.37",
     "web3-utils": "1.0.0-beta.37",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.3.2",
+    "@aztec/dev-utils": "^1.3.0-beta.2",
     "babel-cli": "^6.26.0",
     "babel-plugin-add-module-exports": "^1.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",

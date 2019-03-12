@@ -5,11 +5,16 @@ const chai = require('chai');
 const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
+const utils = require('@aztec/dev-utils');
+
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const verifier = require('../../../src/proof/joinSplit/verifier');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
+const proofUtils = require('../../../src/proof/proofUtils');
+
+const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
@@ -58,12 +63,12 @@ function randomAddress() {
 describe('AZTEC verifier tests', function describeVerifier() {
     describe('success states', function success() {
         this.timeout(10000);
-        it('proof.constructJoinSplit creates a valid join-split proof', () => {
+        it('proof.constructProof creates a valid join-split proof', () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, -10);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, -10);
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.pairingGammas.mul(trapdoor).eq(result.pairingSigmas.neg())).to.equal(true);
             expect(result.valid).to.equal(true);
@@ -76,7 +81,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, kPublic);
 
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.pairingGammas.mul(trapdoor).eq(result.pairingSigmas.neg())).to.equal(true);
@@ -91,7 +96,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, kPublic);
 
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.pairingGammas).to.equal(undefined);
@@ -107,7 +112,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
 
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, kPublic);
 
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.pairingGammas.mul(trapdoor).eq(result.pairingSigmas.neg())).to.equal(true);
@@ -118,7 +123,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const { kIn, kOut } = generateBalancedNotes(20, 3);
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, 0);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.pairingGammas.mul(trapdoor).eq(result.pairingSigmas.neg())).to.equal(true);
             expect(result.valid).to.equal(true);
@@ -128,7 +133,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, 0);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.pairingGammas.mul(trapdoor).eq(result.pairingSigmas.neg())).to.equal(true);
             expect(result.valid).to.equal(true);
@@ -142,7 +147,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
         beforeEach(() => {
             // to test failure states we need to pass in bad data to verifier
             // so we need to turn off proof.parseInputs
-            parseInputs = sinon.stub(proof, 'parseInputs').callsFake(() => { });
+            parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
         });
 
         afterEach(() => {
@@ -162,10 +167,10 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const { valid, errors } = verifier.verifyProof(proofData, 1, challenge, sender);
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(4);
-            expect(errors[0]).to.equal(verifier.ERRORS.SCALAR_ZERO);
-            expect(errors[1]).to.equal(verifier.ERRORS.NOT_ON_CURVE);
-            expect(errors[2]).to.equal(verifier.ERRORS.NOT_ON_CURVE);
-            expect(errors[3]).to.equal(verifier.ERRORS.BAD_BLINDING_FACTOR);
+            expect(errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(errors[1]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[2]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(errors[3]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
         });
 
         it('will REJECT if malformed challenge', () => {
@@ -177,12 +182,12 @@ describe('AZTEC verifier tests', function describeVerifier() {
             });
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
-            const { proofData } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+            const { proofData } = proof.constructProof(commitments, m, sender, kPublic);
 
             const result = verifier.verifyProof(proofData, m, `0x${crypto.randomBytes(31).toString('hex')}`, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(1);
-            expect(result.errors[0]).to.equal(verifier.ERRORS.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if notes do not balance', () => {
@@ -191,12 +196,12 @@ describe('AZTEC verifier tests', function describeVerifier() {
 
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, 0);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
 
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(1);
-            expect(result.errors[0]).to.equal(verifier.ERRORS.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT for random proof data', () => {
@@ -206,7 +211,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const sender = randomAddress();
             const result = verifier.verifyProof(proofData, 1, `0x${crypto.randomBytes(31).toString('hex')}`, sender);
             expect(result.valid).to.equal(false);
-            expect(result.errors).to.contain(verifier.ERRORS.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if kPublic > group modulus', () => {
@@ -215,32 +220,32 @@ describe('AZTEC verifier tests', function describeVerifier() {
             kIn.push(100);
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, kPublic);
 
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(1);
-            expect(result.errors[0]).to.equal(verifier.ERRORS.SCALAR_TOO_BIG);
+            expect(result.errors[0]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
         });
 
         it('will REJECT if note value response is 0', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData, challenge } = proof.constructJoinSplit(commitments, m, sender, 0);
+            const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
             proofData[0][0] = '0x';
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(2);
-            expect(result.errors[0]).to.equal(verifier.ERRORS.SCALAR_ZERO);
-            expect(result.errors[1]).to.equal(verifier.ERRORS.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(result.errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData } = proof.constructJoinSplit(commitments, m, sender, 0);
+            const { proofData } = proof.constructProof(commitments, m, sender, 0);
             proofData[0][0] = `0x${padLeft('05', 64)}`;
             proofData[0][1] = `0x${padLeft('05', 64)}`;
             proofData[0][2] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
@@ -251,15 +256,15 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(2);
-            expect(result.errors[0]).to.equal(verifier.ERRORS.BAD_BLINDING_FACTOR);
-            expect(result.errors[1]).to.equal(verifier.ERRORS.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            expect(result.errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor computed from invalid point', () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
-            const { proofData } = proof.constructJoinSplit(commitments, m, sender, 0);
+            const { proofData } = proof.constructProof(commitments, m, sender, 0);
             proofData[0][0] = `0x${padLeft('', 64)}`;
             proofData[0][1] = `0x${padLeft('', 64)}`;
             proofData[0][2] = `0x${padLeft('', 64)}`;
@@ -271,14 +276,14 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(8);
 
-            expect(result.errors[0]).to.equal(verifier.ERRORS.SCALAR_ZERO);
-            expect(result.errors[1]).to.equal(verifier.ERRORS.SCALAR_ZERO);
-            expect(result.errors[2]).to.equal(verifier.ERRORS.SCALAR_ZERO);
-            expect(result.errors[3]).to.equal(verifier.ERRORS.NOT_ON_CURVE);
-            expect(result.errors[4]).to.equal(verifier.ERRORS.NOT_ON_CURVE);
-            expect(result.errors[5]).to.equal(verifier.ERRORS.SCALAR_ZERO);
-            expect(result.errors[6]).to.equal(verifier.ERRORS.BAD_BLINDING_FACTOR);
-            expect(result.errors[7]).to.equal(verifier.ERRORS.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(result.errors[1]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(result.errors[2]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(result.errors[3]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(result.errors[4]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(result.errors[5]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
+            expect(result.errors[6]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            expect(result.errors[7]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
         });
     });
 });
