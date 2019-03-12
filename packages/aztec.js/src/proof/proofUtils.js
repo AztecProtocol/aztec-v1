@@ -5,7 +5,7 @@
  */
 
 const BN = require('bn.js');
-const utils = require('@aztec/dev-utils');
+const { errors, constants, constants: { K_MAX } } = require('@aztec/dev-utils');
 const crypto = require('crypto');
 
 const bn128 = require('../bn128');
@@ -15,11 +15,10 @@ const notesConstruct = require('../note');
 
 
 const { groupReduction } = bn128;
-const { K_MAX } = require('../params');
 
 const proofUtils = {};
-const { customError } = utils.errors;
-const { ERROR_TYPES } = utils.constants;
+const { customError } = errors;
+const { ERROR_TYPES } = constants;
 
 const zero = new BN(0).toRed(groupReduction);
 
