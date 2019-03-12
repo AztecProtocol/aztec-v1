@@ -9,6 +9,7 @@ const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const extractor = require('../../../src/proof/joinSplit/extractor');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
+const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
@@ -40,7 +41,7 @@ function randomAddress() {
  *
  * We stub proof.computeChallenge with a 'random oracle' - something that spits out random challenges instead of using hashes.
  * We also stub proof.generateBlindingScalars with a function that always returns the same set of blinding scalars.
- * This ensures that when we call proof.constructJoinSplit two times, with the same notes, we have the same input string
+ * This ensures that when we call proof.constructProof two times, with the same notes, we have the same input string
  * for both proofs.
  *
  * Finally, once we have our two proof transcripts we call extractor.extractWitness
@@ -64,7 +65,7 @@ describe('AZTEC extractor tests', () => {
         generateBlindingScalars = sinon.stub(proof, 'generateBlindingScalars').callsFake(() => blindingScalars);
 
         // It's a random oracle! ...sort of, if you squint a bit.
-        computeChallenge = sinon.stub(proof, 'computeChallenge').callsFake(() => {
+        computeChallenge = sinon.stub(proofUtils, 'computeChallenge').callsFake(() => {
             return new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
         });
     });
@@ -85,13 +86,13 @@ describe('AZTEC extractor tests', () => {
         const {
             proofData: firstTranscript,
             challenge: firstChallenge,
-        } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+        } = proof.constructProof(commitments, m, sender, kPublic);
 
         // and now let's get a second proof over the same input string
         const {
             proofData: secondTranscript,
             challenge: secondChallenge,
-        } = proof.constructJoinSplit(commitments, m, sender, kPublic);
+        } = proof.constructProof(commitments, m, sender, kPublic);
 
         const witnesses = extractor.extractWitness(
             [firstTranscript, secondTranscript],

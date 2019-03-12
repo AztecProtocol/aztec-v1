@@ -1,13 +1,20 @@
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
+/**
+ * Verifies AZTEC dividend computations
+ *
+ * @module proof.dividendComputation
+*/
+
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-
+const utils = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
-const helpers = require('./helpers');
+const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
+const { ERROR_TYPES, K_MAX } = utils.constants;
+
 
 const verifier = {};
 
@@ -17,29 +24,31 @@ const verifier = {};
  *
  * @method verifyProof
  * @param {Object[]} proofData - proofData array of AZTEC notes
- * @param {BN} challenge - challenge variable used in zero-knowledge protocol
- * @returns {number} - returns 1 if proof is validated, throws an error if not
+ * @param {string} challenge - challenge variable used in zero-knowledge protocol
+ * @param {string} sender - Ethereum address
+ * @param {integer} za - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {integer} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @returns {boolean, string[]} valid, errors - valid describes whether the proof verification is valid, 
+ * errors is an array of all errors that were caught
  */
 verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
+    const errors = [];
+
     let zaBN;
     let zbBN;
     const K_MAXBN = new BN(K_MAX);
     const kBarArray = [];
+    const numNotes = 3;
 
-    // toBnAndAppendPoints appends gamma and sigma to the end of proofdata as well
-    const proofDataBn = helpers.toBnAndAppendPoints(proofData);
+    // Used to check the number of notes. Boolean argument specifies whether the 
+    // check should throw if not satisfied, or if we seek to collect all errors 
+    // and only throw at the end. Here, set to false - only throw at end
+    proofUtils.checkNumNotes(proofData, numNotes, false, errors);
+
+    // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
+    const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
 
     const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
-
-    // Check that proof data lies on the bn128 curve
-    proofDataBn.forEach((proofElement) => {
-        const gammaOnCurve = bn128.curve.validate(proofElement[6]); // checking gamma point
-        const sigmaOnCurve = bn128.curve.validate(proofElement[7]); // checking sigma point
-
-        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
-            throw new Error('point not on curve');
-        }
-    });
 
     // convert to bn.js instances if not already
     if (BN.isBN(za)) {
@@ -56,11 +65,11 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     // Check that za and zb are less than k_max
     if (zaBN.gte(K_MAXBN)) {
-        throw new Error('z_a is greater than or equal to kMax');
+        errors.push(ERROR_TYPES.ZA_TOO_BIG);
     }
 
     if (zbBN.gte(K_MAXBN)) {
-        throw new Error('z_b is greater than or equal to kMax');
+        errors.push(ERROR_TYPES.ZB_TOO_BIG);
     }
 
     const rollingHash = new Keccak();
@@ -87,7 +96,6 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         const gamma = proofElement[6];
         const sigma = proofElement[7];
         let B;
-
 
         if (i === 0) { // input note
             const kBarX = kBar.redMul(x); // xbk = bk*x
@@ -124,7 +132,14 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         }
 
         if (B === null) {
-            throw new Error('undefined blinding factor');
+            errors.push(ERROR_TYPES.BLINDING_FACTOR_IS_NULL);
+        } else if (B.isInfinity()) {
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.appendBN(new BN(0));
+            finalHash.appendBN(new BN(0));
+        } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
+            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            finalHash.append(B);
         } else {
             finalHash.append(B);
         }
@@ -140,10 +155,14 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (finalChallenge !== challenge) {
-        throw new Error('proof validation failed');
-    } else {
-        return true;
+        errors.push(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
     }
+    const valid = errors.length === 0;
+
+    return {
+        valid,
+        errors,
+    };
 };
 
 module.exports = verifier;

@@ -40,7 +40,7 @@ contract('Join Split ABI Encoder', (accounts) => {
             const {
                 proofData,
                 challenge,
-            } = aztec.proof.joinSplit.constructJoinSplit([...inputNotes, ...outputNotes], m, accounts[0], 0);
+            } = aztec.proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = aztecAccounts[index];
                 return aztec.sign.signACENote(

@@ -22,7 +22,7 @@ function encodeBilateralSwapTransaction({
     const {
         proofData: proofDataRaw,
         challenge,
-    } = bilateralSwap.constructBilateralSwap([...inputNotes, ...outputNotes], senderAddress);
+    } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
     const inputOwners = inputNotes.map(m => m.owner);
     const outputOwners = outputNotes.map(n => n.owner);
 

@@ -3,10 +3,13 @@ const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
+const utils = require('@aztec/dev-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
+
+const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
@@ -46,7 +49,7 @@ function validateGroupElement(xHex, yHex) {
 }
 
 describe('AZTEC proof construction tests', () => {
-    it('proof.constructJoinSplit creates a proof with well-formed outputs', () => {
+    it('proof.constructProof creates a proof with well-formed outputs', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
@@ -54,7 +57,7 @@ describe('AZTEC proof construction tests', () => {
         const k = getKPublic(kIn, kOut);
         const kPublic = bn128.curve.n.add(new BN(k)).umod(bn128.curve.n);
 
-        const { proofData, challenge } = proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
+        const { proofData, challenge } = proof.constructProof(commitments, m, randomAddress(), kPublic);
 
         expect(proofData.length).to.equal(5);
         expect(challenge.length).to.equal(66);
@@ -68,7 +71,7 @@ describe('AZTEC proof construction tests', () => {
         expect(new BN(proofData[proofData.length - 1][0].slice(2), 16).eq(kPublic)).to.equal(true);
     });
 
-    it('proof.constructJoinSplit will throw if kPublic is malformed', () => {
+    it('proof.constructProof will throw if kPublic is malformed', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
@@ -76,39 +79,39 @@ describe('AZTEC proof construction tests', () => {
         const kPublic = bn128.curve.n.add(new BN(100));
 
         try {
-            proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
+            proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('kPublic value malformed');
+            expect(err.message).to.equal(ERROR_TYPES.KPUBLIC_MALFORMED);
         }
     });
 
-    it('proof.constructJoinSplit will throw if m is malformed', () => {
+    it('proof.constructProof will throw if m is malformed', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
 
         try {
-            proof.constructJoinSplit(commitments, 500, randomAddress(), kPublic);
+            proof.constructProof(commitments, 500, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('m is greater than note array length');
+            expect(err.message).to.equal(ERROR_TYPES.M_TOO_BIG);
         }
     });
 
-    it('proof.constructJoinSplit will throw if point not on curve', () => {
+    it('proof.constructProof will throw if point not on curve', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         commitments[0].gamma.x = new BN(bn128.curve.p.add(new BN(100))).toRed(bn128.curve.red);
         try {
-            proof.constructJoinSplit(commitments, 500, randomAddress(), kPublic);
+            proof.constructProof(commitments, 500, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('point not on curve');
+            expect(err.message).to.equal(ERROR_TYPES.NOT_ON_CURVE);
         }
     });
 
-    it('proof.constructJoinSplit will throw if point at infinity', () => {
+    it('proof.constructProof will throw if point at infinity', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -116,36 +119,36 @@ describe('AZTEC proof construction tests', () => {
         commitments[0].gamma = commitments[0].gamma.add(commitments[0].gamma.neg());
         let message = '';
         try {
-            proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
+            proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
             ({ message } = err);
         }
-        expect(message).to.contain('point at infinity');
+        expect(message).to.equal(ERROR_TYPES.POINT_AT_INFINITY);
     });
 
-    it('proof.constructJoinSplit will throw if viewing key response is 0', () => {
+    it('proof.constructProof will throw if viewing key response is 0', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         commitments[0].a = new BN(0).toRed(bn128.groupReduction);
         try {
-            proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
+            proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('viewing key malformed');
+            expect(err.message).to.equal(ERROR_TYPES.VIEWING_KEY_MALFORMED);
         }
     });
 
-    it('proof.constructJoinSplit will throw if value > K_MAX', () => {
+    it('proof.constructProof will throw if value > K_MAX', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         commitments[0].k = new BN(K_MAX + 1).toRed(bn128.groupReduction);
         try {
-            proof.constructJoinSplit(commitments, m, randomAddress(), kPublic);
+            proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.contain('note value malformed');
+            expect(err.message).to.equal(ERROR_TYPES.NOTE_VALUE_TOO_BIG);
         }
     });
 });

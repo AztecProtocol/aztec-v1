@@ -1,73 +1,59 @@
 /**
  * Constructs AZTEC bilateral swap zero-knowledge proofs
  *
- * @module proof
+ * @module proof.bilateralSwap
  */
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const Keccak = require('../../keccak');
+const utils = require('@aztec/dev-utils');
+const crypto = require('crypto');
+
 const bn128 = require('../../bn128');
 
-const helpers = require('./helpers');
 const verifier = require('./verifier');
-
-const { groupReduction } = bn128;
+const proofUtils = require('../proofUtils');
 
 const bilateralSwap = {};
-bilateralSwap.helpers = helpers;
 bilateralSwap.verifier = verifier;
 
+const { customError } = utils.errors;
+const { ERROR_TYPES } = utils.constants;
 
-/**
- * Compute the Fiat-Shamir heuristic-ified challenge variable.
- *   Separated out into a distinct method so that we can stub this for extractor tests
- *
- * @method computeChallenge
- * @param {string} sender Ethereum address of transaction sender
- * @param {number} m number of input notes
- * @param {Object[]} notes array of AZTEC notes
- * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
- */
-bilateralSwap.computeChallenge = (...challengeVariables) => {
-    const hash = new Keccak();
-
-    const recurse = (inputs) => {
-        inputs.forEach((challengeVar) => {
-            if (typeof (challengeVar) === 'string') {
-                hash.appendBN(new BN(challengeVar.slice(2), 16));
-            } else if (typeof (challengeVar) === 'number') {
-                hash.appendBN(new BN(challengeVar));
-            } else if (BN.isBN(challengeVar)) {
-                hash.appendBN(challengeVar.umod(bn128.curve.n));
-            } else if (Array.isArray(challengeVar)) {
-                recurse(challengeVar);
-            } else if (challengeVar.gamma) {
-                hash.append(challengeVar.gamma);
-                hash.append(challengeVar.sigma);
-            } else if (challengeVar.B) {
-                hash.append(challengeVar.B);
-            } else {
-                throw new Error(`I don't know how to add ${challengeVar} to hash`);
-            }
-        });
-    };
-    recurse(challengeVariables);
-
-    return hash.keccak(groupReduction);
-};
 /**
  * Construct AZTEC bilateral swap proof transcript
  *
  * @method constructProof
- * @param {Note[]} notes array of AZTEC notes
+ * @param {Object[], sender} notes array of AZTEC notes, sender address
  * @returns {{ proofData: string[], challenge: string }} - proof data and challenge
  */
-bilateralSwap.constructBilateralSwap = (notes, sender) => {
+bilateralSwap.constructProof = (notes, sender) => {
     const bkArray = [];
+
+    // Check that proof data lies on the bn128 curve
+    notes.forEach((note) => {
+        const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
+        const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
+
+        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
+            throw customError(
+                ERROR_TYPES.NOT_ON_CURVE,
+                {
+                    message: 'A group element is not on the bn128 curve',
+                    gammaOnCurve,
+                    sigmaOnCurve,
+                    note,
+                }
+            );
+        }
+    });
+
+    proofUtils.parseInputs(notes, sender);
+
     const blindingFactors = notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
         let B;
+
 
         /*
         Explanation of the below if/else
@@ -94,15 +80,17 @@ bilateralSwap.constructBilateralSwap = (notes, sender) => {
         };
     });
 
-    const challenge = bilateralSwap.computeChallenge(sender, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar;
 
+        // Only set the first 2 values of kBar - the third and fourth are later inferred
+        // from a cryptographic relation. Set the third and fourth to random values
         if (i <= 1) {
             kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
         } else {
-            kBar = 0;
+            kBar = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
         }
 
         const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
