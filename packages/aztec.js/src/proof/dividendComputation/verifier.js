@@ -40,6 +40,9 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const kBarArray = [];
     const numNotes = 3;
 
+    // Used to check the number of notes. Boolean argument specifies whether the 
+    // check should throw if not satisfied, or if we seek to collect all errors 
+    // and only throw at the end. Here, set to false - only throw at end
     proofUtils.checkNumNotes(proofData, numNotes, false, errors);
 
     // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
