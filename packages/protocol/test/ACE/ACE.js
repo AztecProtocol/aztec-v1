@@ -1,7 +1,7 @@
 /* global artifacts, expect, contract, beforeEach, web3, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const { padLeft, sha3 } = require('web3-utils');
+const { padLeft, keccak256 } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
@@ -23,7 +23,7 @@ JoinSplit.abi = JoinSplitInterface.abi;
 contract('ACE', (accounts) => {
     // the proof is represented as an uint24 that compresses 3 uint8s:
     // 1 * 256**(2) + 0 * 256**(1) + 1 * 256**(0)
-    const joinSplitProof = 65537;
+    const JOIN_SPLIT_PROOF = 65537;
 
     // Creating a collection of tests that should pass
     describe('initialization tests', () => {
@@ -42,13 +42,13 @@ contract('ACE', (accounts) => {
 
         it('can set a proof', async () => {
             const aztecJoinSplit = await JoinSplit.new();
-            await ace.setProof(joinSplitProof, aztecJoinSplit.address);
-            const resultValidatorAddress = await ace.getValidatorAddress(joinSplitProof);
+            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
+            const resultValidatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
             expect(resultValidatorAddress).to.equal(aztecJoinSplit.address);
         });
 
         it('cannot set a proof if not owner', async () => {
-            await truffleAssert.reverts(ace.setProof(joinSplitProof, accounts[1], {
+            await truffleAssert.reverts(ace.setProof(JOIN_SPLIT_PROOF, accounts[1], {
                 from: accounts[1],
             }));
         });
@@ -65,6 +65,7 @@ contract('ACE', (accounts) => {
         let notes = [];
         let ace;
         let proofData;
+        let proofOutput;
         let proofHash;
         let expectedOutput;
 
@@ -79,11 +80,11 @@ contract('ACE', (accounts) => {
             ];
             await ace.setCommonReferenceString(CRS);
             const aztecJoinSplit = await JoinSplit.new();
-            await ace.setProof(joinSplitProof, aztecJoinSplit.address);
+            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             const inputNotes = notes.slice(2, 4);
             const outputNotes = notes.slice(0, 2);
-            const kPublic = 40;
             const publicOwner = aztecAccounts[0].address;
+            const kPublic = 40;
             ({ proofData, expectedOutput } = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes,
                 outputNotes,
@@ -93,42 +94,39 @@ contract('ACE', (accounts) => {
                 kPublic,
                 validatorAddress: aztecJoinSplit.address,
             }));
-            const proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
+            proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
             proofHash = outputCoder.hashProofOutput(proofOutput);
         });
 
-        it('will validate a join-split transaction', async () => {
-            const { receipt } = await ace.validateProof(joinSplitProof, accounts[0], proofData);
+        it.only('will validate a join-split transaction', async () => {
+            const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
             expect(receipt.status).to.equal(true);
             const hashData = [
                 padLeft(proofHash.slice(2), 64),
-                padLeft('01', 64),
+                padLeft(JOIN_SPLIT_PROOF.toString(16), 64),
                 padLeft(accounts[0].slice(2), 64),
             ].join('');
-            const validatedProofsSlot = 9;
-            const storageHash = [
-                padLeft(sha3(`0x${hashData}`).slice(2), 64),
-                padLeft(validatedProofsSlot.toString(16), 64),
-            ].join('');
-            const storagePtr = sha3(`0x${storageHash}`).slice(2);
-            console.log('await web3.eth.getStorageAt(ace.address)', await web3.eth.getStorageAt(ace.address));
-            const result = await web3.eth.getStorageAt(ace.address, new BN(storagePtr, 16));
-            expect(Number(result)).to.equal(Number('0x01'));
+            const validatedProofHash = keccak256(`0x${hashData}`);
+            console.log('proofOutput', proofOutput);
+            console.log('proofHash', proofHash);
+            console.log('validatedProofHash', validatedProofHash);
+            const result = await ace.validatedProofs(validatedProofHash);
+            expect(result).to.equal(true);
         });
 
         it('validateProofByHash will return true for a previously validated proof', async () => {
-            const { receipt } = await ace.validateProof(joinSplitProof, accounts[0], proofData);
+            const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
             expect(receipt.status).to.equal(true);
-            const result = await ace.validateProofByHash(joinSplitProof, proofHash, accounts[0]);
+            const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
             expect(result).to.equal(true);
         });
 
         it('clearProofByHashes will clear previously set proofs', async () => {
-            await ace.validateProof(joinSplitProof, accounts[0], proofData);
-            const firstResult = await ace.validateProofByHash(joinSplitProof, proofHash, accounts[0]);
+            await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+            const firstResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
             expect(firstResult).to.equal(true);
-            await ace.clearProofByHashes(1, [proofHash]);
-            const secondResult = await ace.validateProofByHash(joinSplitProof, proofHash, accounts[0]);
+            await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]);
+            const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
             expect(secondResult).to.equal(false);
         });
     });
@@ -154,7 +152,7 @@ contract('ACE', (accounts) => {
             ];
             await ace.setCommonReferenceString(CRS);
             const aztecJoinSplit = await JoinSplit.new();
-            await ace.setProof(joinSplitProof, aztecJoinSplit.address);
+            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             const publicOwner = accounts[0];
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -260,42 +258,42 @@ contract('ACE', (accounts) => {
         });
 
         it('will can update a note registry with output notes', async () => {
-            const { receipt: aceReceipt } = await ace.validateProof(joinSplitProof, accounts[0], proofs[0].proofData);
+            const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[0].proofData);
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(formattedProofOutput, 1, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });
 
         it('can update a note registry by consuming input notes, with kPublic negative', async () => {
-            await ace.validateProof(joinSplitProof, accounts[0], proofs[0].proofData);
-            await ace.updateNoteRegistry(`0x${proofOutputs[0].slice(0x40)}`, 1, accounts[0]);
-            const { receipt: aceReceipt } = await ace.validateProof(joinSplitProof, accounts[0], proofs[1].proofData);
+            await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[0].proofData);
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, `0x${proofOutputs[0].slice(0x40)}`, accounts[0]);
+            const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[1].proofData);
             const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(formattedProofOutput, 1, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });
 
         it('can update a note registry by consuming input notes, with kPublic positive', async () => {
-            await ace.validateProof(joinSplitProof, accounts[0], proofs[2].proofData);
-            await ace.updateNoteRegistry(`0x${proofOutputs[2].slice(0x40)}`, 1, accounts[0]);
+            await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData);
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, `0x${proofOutputs[2].slice(0x40)}`, accounts[0]);
 
-            const { receipt: aceReceipt } = await ace.validateProof(joinSplitProof, accounts[0], proofs[3].proofData);
+            const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[3].proofData);
             const formattedProofOutput = `0x${proofOutputs[3].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(formattedProofOutput, 1, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });
 
         it('can update a note registry with kPublic = 0', async () => {
-            await ace.validateProof(joinSplitProof, accounts[0], proofs[4].proofData);
-            await ace.updateNoteRegistry(`0x${proofOutputs[4].slice(0x40)}`, 1, accounts[0]);
+            await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[4].proofData);
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, `0x${proofOutputs[4].slice(0x40)}`, accounts[0]);
 
-            const { receipt: aceReceipt } = await ace.validateProof(joinSplitProof, accounts[0], proofs[5].proofData);
+            const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[5].proofData);
             const formattedProofOutput = `0x${proofOutputs[5].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(formattedProofOutput, 1, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);

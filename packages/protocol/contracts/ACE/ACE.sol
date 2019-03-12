@@ -1,6 +1,9 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
+import "../interfaces/IAZTEC.sol";
 
 import "../utils/IntegerUtils.sol";
 import "../utils/NoteUtils.sol";
@@ -13,13 +16,13 @@ import "../utils/SafeMaths.sol";
  * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
  *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
  **/
-contract ACE {
+contract ACE is IAZTEC {
     using IntegerUtils for uint256;
     using NoteUtils for bytes;
     using ProofUtils for uint24;
+    using SafeMath for uint256;
     using SafeMath8 for uint8;
 
-    /* solhint-disable */
     event SetCommonReferenceString(bytes32[6] _commonReferenceString);
     event SetProof(
         uint8 indexed epoch, 
@@ -36,12 +39,12 @@ contract ACE {
         address owner;
     }
     struct Flags {
+        bool active;
         bool canMint;
         bool canBurn;
         bool canConvert;
     }
     struct NoteRegistry {
-        bool active;
         ERC20 linkedToken;
         uint256 scalingFactor;
         uint256 totalSupply;
@@ -50,7 +53,6 @@ contract ACE {
         mapping(bytes32 => Note) notes;
         mapping(address => mapping(bytes32 => uint256)) publicApprovals;
     }
-    /* solhint-enable */
 
     // The commonReferenceString contains one G1 group element and one G2 group element,
     // that are created via the AZTEC protocol's trusted setup. All zero-knowledge proofs supported
@@ -59,8 +61,6 @@ contract ACE {
 
     // TODO: add a consensus mechanism! This contract is for testing purposes only until then
     address public owner;
-
-    mapping(bytes32 => bool) private validatedProofs;
 
     // Every user has their own note registry
     mapping(address => NoteRegistry) internal registries;
@@ -73,6 +73,9 @@ contract ACE {
 
     // latest proof epoch accepted by this contract
     uint8 public latestEpoch = 1;
+
+    // keep track of validated balanced proofs
+    mapping(bytes32 => bool) public validatedProofs;
     
     /**
     * @dev contract constructor. Sets the owner of ACE, the flags, the linked token address and
@@ -85,16 +88,16 @@ contract ACE {
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
     *      linked to `_proof`. The validator smart contract will have the following interface:
-    * ```
-    *     function validate(
-    *         bytes _proofData,
-    *         address _sender,
-    *         bytes32[6] _commonReferenceString
-    *     ) public returns (bytes)
-    * ```
+    *      
+    *      function validate(
+    *          bytes _proofData, 
+    *          address _sender, 
+    *          bytes32[6] _commonReferenceString
+    *      ) public returns (bytes)
+    *
     * @param _proof the AZTEC proof object
     * @param _sender the Ethereum address of the original transaction sender. It is explicitly assumed that
-    *   an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
     * Unnamed param is the AZTEC zero-knowledge proof data
     * @return a `bytes proofOutputs` variable formatted according to the Cryptography Engine standard
     */
@@ -106,11 +109,14 @@ contract ACE {
         // validate that the provided _proof object maps to a corresponding validator and also that
         // the validator is not disabled
         address validatorAddress = extractValidatorAddress(_proof);
+        
+        bytes memory proofOutputs;
         assembly {
-            let memPtr := mload(0x40)
-            let _proofData := add(0x04, calldataload(0x44)) // calldata location of start of `proofData`
+            // the first evm word of the 3rd function param is the abi encoded location of proof data
+            let proofDataLocation := add(0x04, calldataload(0x44))
 
             // manually construct validator calldata map
+            let memPtr := mload(0x40)
             mstore(add(memPtr, 0x04), 0x100) // location in calldata of the start of `bytes _proofData` (0x100)
             mstore(add(memPtr, 0x24), _sender)
             mstore(add(memPtr, 0x44), sload(commonReferenceString_slot))
@@ -119,38 +125,44 @@ contract ACE {
             mstore(add(memPtr, 0xa4), sload(add(0x03, commonReferenceString_slot)))
             mstore(add(memPtr, 0xc4), sload(add(0x04, commonReferenceString_slot)))
             mstore(add(memPtr, 0xe4), sload(add(0x05, commonReferenceString_slot)))
-            calldatacopy(add(memPtr, 0x104), _proofData, add(calldataload(_proofData), 0x20))
+
+            // 0x104 because there's an address, the length 6 and the static array items
+            let destination := add(memPtr, 0x104)
+            // note that we offset by 0x20 because the first word is the length of the dynamic bytes array
+            let proofDataSize := add(calldataload(proofDataLocation), 0x20)
+            // copy the calldata into memory so we can call the validator contract
+            calldatacopy(destination, proofDataLocation, proofDataSize)
 
             // call our validator smart contract, and validate the call succeeded
-            if iszero(staticcall(gas, validatorAddress, memPtr, add(calldataload(_proofData), 0x124), 0x00, 0x00)) {
-                mstore(0x00, 400) revert(0x00, 0x20) // call failed - proof is invalid!
+            let callSize := add(proofDataSize, 0x104)
+            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00) 
+            case 0 {
+                mstore(0x00, 400) revert(0x00, 0x20) // call failed because proof is invalid
             }
-            returndatacopy(memPtr, 0x00, returndatasize) // copy returndata to memory
-            let returnStart := memPtr
-            let proofOutputs := add(memPtr, mload(memPtr)) // proofOutputs points to the start of return data
-            memPtr := add(add(memPtr, 0x20), returndatasize)
-            // does this proof satisfy a balancing relationship? If it does, we need to record the proof
-            mstore(0x00, _proof)
-            // mstore(0x20, balancedProofs_slot)
-            if sload(keccak256(0x00, 0x40)) { // index `balanceProofs[_proof]`
-                // we must iterate over each `proofOutput` and record the proof hash
-                let numProofOutputs := mload(add(proofOutputs, 0x20))
-                for { let i := 0 } lt(i, numProofOutputs) { i := add(i, 0x01) } {
-                    // get the location in memory of `proofOutput`
-                    let loc := add(proofOutputs, mload(add(add(proofOutputs, 0x40), mul(i, 0x20))))
-                    let proofHash := keccak256(loc, add(mload(loc), 0x20)) // hash the proof output
-                    // combine the following: proofHash, _proof, msg.sender
-                    // hashing the above creates a unique key that we can log against this proof, in `validatedProofs`
-                    mstore(memPtr, proofHash)
-                    mstore(add(memPtr, 0x20), _proof)
-                    mstore(add(memPtr, 0x40), caller)
-                    mstore(0x00, keccak256(memPtr, 0x60)) mstore(0x20, validatedProofs_slot)
-                    sstore(keccak256(0x00, 0x40), 0x01)
-                }
-            }
-            return(returnStart, returndatasize) // return `proofOutputs` to caller
+            // copy returndata to memory
+            returndatacopy(memPtr, 0x00, returndatasize)
+
+            // store the proof outputs in memory
+            mstore(0x40, add(memPtr, returndatasize))
+            // the first evm word in the memory pointer is the abi encoded location of the actual returned data
+            proofOutputs := add(memPtr, mload(memPtr))
         }
+
+        // if this proof satisfies a balancing relationship, we need to record the proof hash
+        (, uint8 category, ) = _proof.getProofComponents();
+        if (category == uint8(ProofCategory.BALANCED)) {
+            uint256 length = proofOutputs.getLength();
+            for (uint256 i = 0; i < length; i = i.add(1)) {
+                bytes32 proofHash = keccak256(proofOutputs.get(i));
+                bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+                emit LogValidatedProofHash(validatedProofHash);
+                validatedProofs[validatedProofHash] = true;
+            }
+        }
+        return proofOutputs;
     }
+
+    event LogValidatedProofHash(bytes32 validatedProofHash);
 
     /**
     * @dev Clear storage variables set when validating zero-knowledge proofs.
@@ -162,31 +174,20 @@ contract ACE {
     *      two confidential assets.
     *      This method allows the calling smart contract to recover most of the gas spent by setting `validatedProofs`
     * @param _proof the AZTEC proof object
-    * Unnamed param is a dynamic array of proof hashes
+    * @param _proofHashes dynamic array of proof hashes
     */
-    function clearProofByHashes(uint24 _proof, bytes32[] calldata) external {
-        assembly {
-            let memPtr := mload(0x40)
-            let proofHashes := add(0x04, calldataload(0x24))
-            let length := calldataload(proofHashes)
-            mstore(add(memPtr, 0x20), _proof)
-            mstore(add(memPtr, 0x40), caller)
-            mstore(0x20, validatedProofs_slot)
-            for { let i := 0 } lt(i, length) { i := add(i, 0x01) } {
-                let proofHash := calldataload(add(add(proofHashes, mul(i, 0x20)), 0x20))
-                if iszero(proofHash) {
-                    mstore(0x00, 400)
-                    revert(0x00, 0x20)
-                }
-                mstore(memPtr, proofHash)
-                mstore(0x00, keccak256(memPtr, 0x60))
-                sstore(keccak256(0x00, 0x40), 0x00)
-            }
+    function clearProofByHashes(uint24 _proof, bytes32[] calldata _proofHashes) external {
+        uint256 length = _proofHashes.length;
+        for (uint256 i = 0; i < length; i = i.add(1)) {
+            bytes32 proofHash = _proofHashes[i];
+            require(proofHash != bytes32(0x0), "expected no empty proof hash");
+            bytes32 validatedProofHash = keccak256(abi.encodePacked(proofHash, _proof, msg.sender));
+            validatedProofs[validatedProofHash] = false;
         }
     }
 
     /**
-    * @dev Set the common reference string
+    * @dev Set the common reference string.
     *      If the trusted setup is re-run, we will need to be able to change the crs
     * @param _commonReferenceString the new commonReferenceString
     */
@@ -251,7 +252,7 @@ contract ACE {
     }
 
     /**
-     * @dev Increments the latestEpoch storage variable.
+     * @dev Increments the `latestEpoch` storage variable.
      */
     function incrementLatestEpoch() public {
         require(msg.sender == owner, "only the owner can update the latest epoch");
@@ -266,14 +267,14 @@ contract ACE {
         bool _canBurn,
         bool _canConvert
     ) public {
-        require(registries[msg.sender].active == false, "address already has a linked note registry");
+        require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
         NoteRegistry memory registry = NoteRegistry({
-            active: true,
-            scalingFactor: _scalingFactor,
             linkedToken: ERC20(_linkedToken),
+            scalingFactor: _scalingFactor,
             totalSupply: 0,
             confidentialTotalSupply: bytes32(0x0),
             flags: Flags({
+                active: true,
                 canMint: _canMint,
                 canBurn: _canBurn,
                 canConvert: _canConvert
@@ -283,13 +284,13 @@ contract ACE {
     }
 
     function updateNoteRegistry(
-        bytes memory _proofOutput, 
-        uint24 _proof, 
+        uint24 _proof,
+        bytes memory _proofOutput,
         address _proofSender
     ) public returns (bool) {
         NoteRegistry storage registry = registries[msg.sender];
-        require(registry.active == true, "note registry does not exist for the given address");
-        bytes32 proofHash = _proofOutput.hashProofOutput();
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        bytes32 proofHash = keccak256(_proofOutput);
         require(
             validateProofByHash(_proof, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
@@ -303,24 +304,19 @@ contract ACE {
         updateInputNotes(inputNotes);
         updateOutputNotes(outputNotes);
 
-
         if (publicValue != 0) {
             require(registry.flags.canMint == false, "mintable assets cannot be converted into public tokens");
             require(registry.flags.canBurn == false, "burnable assets cannot be converted into public tokens");
             require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens");
             if (publicValue < 0) {
-                registry.totalSupply += uint256(-publicValue);
+                registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
                 require(
                     registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
                     "public owner has not validated a transfer of tokens"
                 );
                 registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
                 require(
-                    registry.linkedToken.transferFrom(
-                        publicOwner, 
-                        address(this), 
-                        uint256(-publicValue)
-                    ), 
+                    registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
                     "transfer failed"
                 );
             } else {
@@ -334,38 +330,28 @@ contract ACE {
 
     function mint(bytes memory _proofOutput, address _proofSender) public returns (bool) {
         NoteRegistry storage registry = registries[msg.sender];
-        require(registry.active == false, "note registry does not exist for the given address");
+        require(registry.flags.active == false, "note registry does not exist for the given address");
         require(registry.flags.canMint == true, "this asset is not mintable");
-        bytes32 proofHash = _proofOutput.hashProofOutput();
+        bytes32 proofHash = keccak256(_proofOutput);
         require(
-            validateProofByHash(1, proofHash, _proofSender) == true,
+            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true, 
             "ACE has not validated a matching proof"
-        );
-        (
-            bytes memory inputNotes,
-            bytes memory outputNotes,
-            ,
-            int256 publicValue
-        ) = _proofOutput.extractProofOutput();
+        ); 
+        
+        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutput.extractProofOutput();
         require(publicValue == 0, "mint transactions cannot have a public value");
-
         require(outputNotes.getLength() > 0, "mint transactions require at least one output note");
-        require(inputNotes.getLength() == 1, "mint transactions can only have one input note");
-        (
-            ,
-            bytes32 noteHash,
-        ) = outputNotes.get(0).extractNote();
+        require(inputNotes.getLength() == JOIN_SPLIT_PROOF, "mint transactions can only have one input note");
+        
+        (, bytes32 noteHash, ) = outputNotes.get(0).extractNote();
         require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
-        (
-            ,
-            noteHash,
-        ) = inputNotes.get(0).extractNote();
-
+       
+        (, noteHash, ) = inputNotes.get(0).extractNote();
         registry.confidentialTotalSupply = noteHash;
 
-        for (uint i = 1; i < outputNotes.getLength(); i += 1) {
-            address _owner;
-            (_owner, noteHash, ) = outputNotes.get(i).extractNote();
+        for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
+            address noteOwner;
+            (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry.notes[noteHash];
             require(note.status == 0, "output note exists");
             note.status = uint8(1);
@@ -373,17 +359,17 @@ contract ACE {
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
             note.createdOn = now.uintToBytes(5);
-            note.owner = _owner;
+            note.owner = noteOwner;
         }
     }
 
     function burn(bytes memory _proofOutput, address _proofSender) public returns (bool) {
         NoteRegistry storage registry = registries[msg.sender];
-        require(registry.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canBurn == true, "this asset is not burnable");
-        bytes32 proofHash = _proofOutput.hashProofOutput();
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canBurn == true, "asset not burnable");
+        bytes32 proofHash = keccak256(_proofOutput);
         require(
-            validateProofByHash(1, proofHash, _proofSender) == true,
+            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
         );
         (
@@ -408,12 +394,12 @@ contract ACE {
 
         registry.confidentialTotalSupply = noteHash;
 
-        for (uint i = 1; i < inputNotes.getLength(); i += 1) {
-            address _owner;
-            (_owner, noteHash, ) = outputNotes.get(i).extractNote();
+        for (uint i = 1; i < inputNotes.getLength(); i = i.add(1)) {
+            address noteOwner;
+            (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry.notes[noteHash];
             require(note.status == 1, "input note does not exist");
-            require(note.owner == _owner, "input note owner does not match");
+            require(note.owner == noteOwner, "input note owner does not match");
             note.status = uint8(2);
             // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
@@ -496,7 +482,7 @@ contract ACE {
     }
 
     function updateInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
             (address _owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];
@@ -511,7 +497,7 @@ contract ACE {
     }
 
     function updateOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
+        for (uint i = 0; i < outputNotes.getLength(); i = i.add(1)) {
             (address _owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];

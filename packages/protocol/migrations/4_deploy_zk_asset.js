@@ -4,7 +4,7 @@ const { isUndefined } = require('lodash');
 
 const ACE = artifacts.require('./ACE.sol');
 const ERC20Mintable = artifacts.require('./ERC20Mintable.sol');
-const ZKERC20 = artifacts.require('./ZKERC20.sol');
+const ZkAsset = artifacts.require('./ZkAsset.sol');
 
 module.exports = (deployer, network) => {
     if (isUndefined(ACE) || isUndefined(ACE.address)) {
@@ -19,20 +19,12 @@ module.exports = (deployer, network) => {
         }
         return deployer.deploy(ERC20Mintable).then(({ address: erc20Address }) => {
             const aceAddress = ACE.address;
-            const canMint = false;
-            const canBurn = false;
-            const canConvert = true;
-            const isOpen = true;
             return deployer.deploy(
-                ZKERC20,
+                ZkAsset,
                 'Cocoa',
-                canMint,
-                canBurn,
-                canConvert,
-                ERC20_SCALING_FACTOR,
-                erc20Address,
                 aceAddress,
-                isOpen
+                erc20Address,
+                ERC20_SCALING_FACTOR
             );
         });
     });
