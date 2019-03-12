@@ -10,11 +10,11 @@ const utils = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
-const { K_MAX } = require('../../params');
 const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
-const { ERROR_TYPES } = utils.constants;
+const { ERROR_TYPES, K_MAX } = utils.constants;
+
 
 const verifier = {};
 

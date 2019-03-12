@@ -98,7 +98,7 @@ describe('inputCoder tests', () => {
             const {
                 proofData,
                 challenge,
-            } = bilateralProof.constructBilateralSwap([...inputNotes, ...outputNotes], senderAddress);
+            } = bilateralProof.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
             const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
@@ -162,7 +162,7 @@ describe('inputCoder tests', () => {
             const {
                 proofData,
                 challenge,
-            } = joinSplitProof.constructJoinSplit([...inputNotes, ...outputNotes], m, senderAddress, 0);
+            } = joinSplitProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const { privateKey } = accounts[index];

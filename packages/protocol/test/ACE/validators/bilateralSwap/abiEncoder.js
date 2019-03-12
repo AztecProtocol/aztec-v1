@@ -43,7 +43,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
             const {
                 proofData,
                 challenge,
-            } = aztec.proof.bilateralSwap.constructBilateralSwap([...inputNotes, ...outputNotes], accounts[0]);
+            } = aztec.proof.bilateralSwap.constructProof([...inputNotes, ...outputNotes], accounts[0]);
 
             const inputOwners = inputNotes.map(m => m.owner);
             const outputOwners = outputNotes.map(n => n.owner);
