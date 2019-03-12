@@ -7,12 +7,11 @@ import "../interfaces/IAZTEC.sol";
 import "../interfaces/IEIP712.sol";
 import "../utils/ProofUtils.sol";
 
-contract ZKERC20 is IAZTEC, IEIP712 {
+contract ZkAsset is IAZTEC, IEIP712 {
     using NoteUtils for bytes;
     using ProofUtils for uint24;
     using SafeMath for uint256;
     
-    /* solhint-disable */
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
         "bytes32 noteHash,",
@@ -20,7 +19,7 @@ contract ZKERC20 is IAZTEC, IEIP712 {
         "bool status",
         ")"
     ));
-    string constant internal EIP712_DOMAIN_NAME = "ZKERC20";
+    string constant internal EIP712_DOMAIN_NAME = "ZkAsset";
 
     ACE public ace;
     ERC20 public linkedToken;
@@ -29,45 +28,31 @@ contract ZKERC20 is IAZTEC, IEIP712 {
     string public name;
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
-    
-    bool public isOpen;
-    address public owner;
-    mapping(uint8 => bool) public epochs;
-    mapping(uint8 => mapping(uint8 => bool)) proofs;
-    bool private epochsInitialized;
-    mapping(uint8 => bool) private proofsInitialized;
 
-    event CreateNoteRegistry(address noteRegistry);
-    event CreateZKERC20(
-        bool canMint,
-        bool canBurn,
-        bool canConvert,
-        uint256 scalingFactor,
-        address linkedToken,
-        address ace,
-        bool isOpen
+    event CreateZkAsset(
+        string name,
+        address indexed aceAddress,
+        address indexed linkedTokenAddress,
+        uint256 scalingFactor
     );
+    event CreateNoteRegistry(uint256 noteRegistryId);
     event CreateNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
     event DestroyNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
     event ConvertTokens(address indexed owner, uint256 value);
     event RedeemTokens(address indexed owner, uint256 value);
-    /* solhint-enable */
 
     constructor(
         string memory _name,
-        bool _canMint,
-        bool _canBurn,
-        bool _canConvert,
-        uint256 _scalingFactor,
-        address _linkedTokenAddress,
         address _aceAddress,
-        bool _isOpen
+        address _linkedTokenAddress,
+        uint256 _scalingFactor
     ) public {
         name = _name;
         flags = ACE.Flags({
-            canMint: _canMint, 
-            canBurn: _canBurn, 
-            canConvert: _canConvert
+            active: true,
+            canMint: false,
+            canBurn: false,
+            canConvert: true
         });
         scalingFactor = _scalingFactor;
         ace = ACE(_aceAddress);
@@ -75,65 +60,23 @@ contract ZKERC20 is IAZTEC, IEIP712 {
         ace.createNoteRegistry(
             _linkedTokenAddress,
             _scalingFactor,
-            _canMint,
-            _canBurn,
-            _canConvert
+            false,
+            false,
+            true
         );
-        isOpen = _isOpen;
-        if (!_isOpen) {
-            owner = msg.sender;
-        }
-        emit CreateZKERC20(
-            _canMint,
-            _canBurn,
-            _canConvert,
-            _scalingFactor,
-            _linkedTokenAddress,
+        emit CreateZkAsset(
+            _name,
             _aceAddress,
-            _isOpen
+            _linkedTokenAddress,
+            _scalingFactor
         );
-    }
-
-    function setEpochs(uint8[] calldata _epochs) external {
-        require(isOpen == false, "expected the asset to not be open");
-        require(msg.sender == owner, "only the owner can set the epochs");
-        require(epochsInitialized == false, "expected epoch to not be initialized");
-        
-        uint256 length = _epochs.length;
-        require(length <= 255, "there can only be 255 epochs at maximum");
-
-        for (uint256 i = 0; i < length; i = i.add(1)) {
-            uint8 epoch = _epochs[i];
-            epochs[epoch] = true;
-        }
-        epochsInitialized = true;
-    }
-
-    function setProofsForEpoch(
-        uint8 _epoch,
-        uint8[] calldata ids
-    ) external {
-        require(isOpen == false, "expected the asset to not be open");
-        require(msg.sender == owner, "only the owner can set the epoch proofs");
-        require(epochs[_epoch] == true, "expected epoch to be supported");
-        require(proofsInitialized[_epoch] == false, "expected proofs to not be initialized for given epoch");
-        
-        uint256 length = ids.length;
-        require(length <= 255, "there can only be 255 proofs at maximum");
-
-        uint8 balancedCategory = uint8(ProofCategory.BALANCED);
-        for (uint256 i = 0; i < length; i = i.add(1)) {
-            uint8 id = ids[i];
-            proofs[balancedCategory][id] = true;
-        }
-        proofsInitialized[_epoch] = true;
     }
     
     function confidentialTransfer(bytes calldata _proofData) external returns (bool) {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid");
         bytes memory proofOutput = proofOutputs.get(0);
-        require(ace.updateNoteRegistry(proofOutput, 1, address(this)), "could not update note registry");
+        require(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proofOutput, address(this)), "could not update note registry");
         
         (bytes memory inputNotes,
         bytes memory outputNotes,
@@ -150,7 +93,7 @@ contract ZKERC20 is IAZTEC, IEIP712 {
         }
     }
 
-    function confidentialTransferFrom(uint16 _proofId, bytes calldata _proofOutput) external returns (bool) {
+    function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external returns (bool) {
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -166,7 +109,7 @@ contract ZKERC20 is IAZTEC, IEIP712 {
         }
 
         require(
-            ace.updateNoteRegistry(_proofOutput, _proofId, msg.sender),
+            ace.updateNoteRegistry(_proof, _proofOutput, msg.sender),
             "could not update note registry"
         );
 
@@ -202,16 +145,6 @@ contract ZKERC20 is IAZTEC, IEIP712 {
         );
         require(signer == noteOwner, "the note owner did not sign this message");
         confidentialApproved[_noteHash][_spender] = _status;
-    }
-
-    function supportsProof(uint24 _proof) public view returns (bool) {
-        if (isOpen) {
-            return true;
-        }
-        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-        require(epochs[epoch] == true, "expected epoch to be supported");
-        require(category == uint8(ProofCategory.BALANCED), "ZKERC20 only supports balanced proofs");
-        return proofs[epoch][id];
     }
 
     function logInputNotes(bytes memory inputNotes) internal {

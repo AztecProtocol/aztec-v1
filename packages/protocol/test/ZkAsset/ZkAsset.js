@@ -23,18 +23,18 @@ const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
-const ZKERC20 = artifacts.require('./contracts/ZKERC20/ZKERC20');
+const ZkAsset = artifacts.require('./contracts/ZkAsset/ZkAsset');
 
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('ZKERC20', (accounts) => {
+contract('ZkAsset', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
         let ace;
         let erc20;
-        let zkerc20;
+        let zkAsset;
         let scalingFactor;
         let aztecJoinSplit;
         const proofs = [];
@@ -116,14 +116,15 @@ contract('ZKERC20', (accounts) => {
             });
 
             erc20 = await ERC20Mintable.new();
-            zkerc20 = await ZKERC20.new(
+            zkAsset = await ZkAsset.new(
                 'Cocoa',
                 false,
                 false,
                 true,
                 10,
                 erc20.address,
-                ace.address
+                ace.address,
+                true
             );
 
             scalingFactor = new BN(10);
@@ -162,25 +163,25 @@ contract('ZKERC20', (accounts) => {
 
         it('will can update a note registry with output notes', async () => {
             // const { receipt } = await ace.validateProof(1, accounts[0], proofs[0].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[0].proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[0].proofData);
             expect(receipt.status).to.equal(true);
         });
 
         it('can update a note registry by consuming input notes, with kPublic negative', async () => {
-            await zkerc20.confidentialTransfer(proofs[0].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[1].proofData);
+            await zkAsset.confidentialTransfer(proofs[0].proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[1].proofData);
             expect(receipt.status).to.equal(true);
         });
 
         it('can update a note registry by consuming input notes, with kPublic positive', async () => {
-            await zkerc20.confidentialTransfer(proofs[2].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[3].proofData);
+            await zkAsset.confidentialTransfer(proofs[2].proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[3].proofData);
             expect(receipt.status).to.equal(true);
         });
 
         it('can update a note registry with kPublic = 0', async () => {
-            await zkerc20.confidentialTransfer(proofs[4].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[5].proofData);
+            await zkAsset.confidentialTransfer(proofs[4].proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[5].proofData);
             expect(receipt.status).to.equal(true);
         });
     });
