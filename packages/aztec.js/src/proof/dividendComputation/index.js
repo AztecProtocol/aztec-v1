@@ -34,7 +34,9 @@ dividendComputation.verifier = verifier;
 dividendComputation.constructProof = (notes, za, zb, sender) => {
     const numNotes = 3;
 
-    // Error checking
+    // Used to check the number of input notes. Boolean argument specifies whether the 
+    // check should throw if not satisfied, or if we seek to collect all errors 
+    // and only throw at the end. Here, set to true - immediately throw if error
     proofUtils.checkNumNotes(notes, numNotes, true);
 
     proofUtils.parseInputs(notes, sender);
