@@ -155,14 +155,11 @@ contract ACE is IAZTEC {
             for (uint256 i = 0; i < length; i = i.add(1)) {
                 bytes32 proofHash = keccak256(proofOutputs.get(i));
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
-                emit LogValidatedProofHash(validatedProofHash);
                 validatedProofs[validatedProofHash] = true;
             }
         }
         return proofOutputs;
     }
-
-    event LogValidatedProofHash(bytes32 validatedProofHash);
 
     /**
     * @dev Clear storage variables set when validating zero-knowledge proofs.
@@ -181,7 +178,7 @@ contract ACE is IAZTEC {
         for (uint256 i = 0; i < length; i = i.add(1)) {
             bytes32 proofHash = _proofHashes[i];
             require(proofHash != bytes32(0x0), "expected no empty proof hash");
-            bytes32 validatedProofHash = keccak256(abi.encodePacked(proofHash, _proof, msg.sender));
+            bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
             validatedProofs[validatedProofHash] = false;
         }
     }
@@ -221,16 +218,8 @@ contract ACE is IAZTEC {
         bytes32 _proofHash,
         address _sender
     ) public view returns (bool) {
-        assembly {
-            let memPtr := mload(0x40)
-            mstore(memPtr, _proofHash)
-            mstore(add(memPtr, 0x20), _proof)
-            mstore(add(memPtr, 0x40), _sender)
-            mstore(0x00, keccak256(memPtr, 0x60))
-            mstore(0x20, validatedProofs_slot)
-            mstore(memPtr, sload(keccak256(0x00, 0x40)))
-            return(memPtr, 0x20)
-        }
+        bytes32 validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender));
+        return validatedProofs[validatedProofHash];
     }
 
     /**
@@ -261,7 +250,7 @@ contract ACE is IAZTEC {
     }
 
     function createNoteRegistry(
-        address _linkedToken,
+        address _linkedTokenAddress,
         uint256 _scalingFactor,
         bool _canMint,
         bool _canBurn,
@@ -269,7 +258,7 @@ contract ACE is IAZTEC {
     ) public {
         require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
         NoteRegistry memory registry = NoteRegistry({
-            linkedToken: ERC20(_linkedToken),
+            linkedToken: ERC20(_linkedTokenAddress),
             scalingFactor: _scalingFactor,
             totalSupply: 0,
             confidentialTotalSupply: bytes32(0x0),
@@ -287,7 +276,7 @@ contract ACE is IAZTEC {
         uint24 _proof,
         bytes memory _proofOutput,
         address _proofSender
-    ) public returns (bool) {
+    ) public {
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
         bytes32 proofHash = keccak256(_proofOutput);
@@ -310,22 +299,20 @@ contract ACE is IAZTEC {
             require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens");
             if (publicValue < 0) {
                 registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
-                require(
-                    registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
-                    "public owner has not validated a transfer of tokens"
-                );
-                registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
-                require(
-                    registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
-                    "transfer failed"
-                );
+                // require(
+                //     registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
+                //     "public owner has not validated a transfer of tokens"
+                // );
+                // registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
+                // require(
+                //     registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
+                //     "transfer failed"
+                // );
             } else {
                 registry.totalSupply -= uint256(publicValue);
                 require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
             }
         }
-
-        return true;
     }
 
     function mint(bytes memory _proofOutput, address _proofSender) public returns (bool) {
@@ -408,10 +395,12 @@ contract ACE is IAZTEC {
         }
     }
 
-    function publicApprove(bytes32 proofHash, uint256 value) public returns (bool) {
+    /** 
+    * @dev This should be called from an asset contract.
+    */
+    function publicApprove(address _spender, bytes32 _proofHash, uint256 _value) public {
         NoteRegistry storage registry = registries[msg.sender];
-        registry.publicApprovals[msg.sender][proofHash] = value;
-        return true;
+        registry.publicApprovals[_spender][_proofHash] = _value;
     }
 
     /**
@@ -423,7 +412,7 @@ contract ACE is IAZTEC {
     }
 
     /**
-     * @dev Returns the registry for a given address
+     * @dev Returns the registry for a given address.
      */
     function getRegistry(address _owner) public view returns (
         ERC20 _linkedToken,
@@ -447,15 +436,15 @@ contract ACE is IAZTEC {
     }
 
     /**
-     * @dev Returns the note for a given address and note hash
+     * @dev Returns the note for a given address and note hash.
      */
-    function getNote(address _owner, bytes32 _noteHash) public view returns (
+    function getNote(address _registryOwner, bytes32 _noteHash) public view returns (
         uint8 _status,
         bytes5 _createdOn,
         bytes5 _destroyedOn,
         address _noteOwner
     ) {
-        NoteRegistry storage registry = registries[_owner];
+        NoteRegistry storage registry = registries[_registryOwner];
         Note storage note = registry.notes[_noteHash];
         return (
             note.status,
@@ -482,7 +471,8 @@ contract ACE is IAZTEC {
     }
 
     function updateInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
+        uint256 length = inputNotes.getLength();
+        for (uint i = 0; i < length; i = i.add(1)) {
             (address _owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];
@@ -497,7 +487,8 @@ contract ACE is IAZTEC {
     }
 
     function updateOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i = i.add(1)) {
+        uint256 length = outputNotes.getLength();
+        for (uint i = 0; i < length; i = i.add(1)) {
             (address _owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];

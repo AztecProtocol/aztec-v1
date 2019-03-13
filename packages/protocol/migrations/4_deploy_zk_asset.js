@@ -21,7 +21,6 @@ module.exports = (deployer, network) => {
             const aceAddress = ACE.address;
             return deployer.deploy(
                 ZkAsset,
-                'Cocoa',
                 aceAddress,
                 erc20Address,
                 ERC20_SCALING_FACTOR

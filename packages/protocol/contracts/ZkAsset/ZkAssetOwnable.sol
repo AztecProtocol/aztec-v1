@@ -1,19 +1,19 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./ZkAsset.sol";
+import "../utils/ProofUtils.sol";
 
 contract ZkAssetOwnable is ZkAsset {
-    
+    using ProofUtils for uint24;
+
     address public owner;
-    mapping(uint8 => uint256) proofs;
+    mapping(uint8 => uint256) public proofs;
 
     constructor(
-        string memory _name,
         address _aceAddress,
         address _linkedTokenAddress,
         uint256 _scalingFactor
     ) public ZkAsset(
-        _name,
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor
@@ -28,28 +28,17 @@ contract ZkAssetOwnable is ZkAsset {
         require(msg.sender == owner, "only the owner can set the epoch proofs");
         proofs[_epoch] = _proofs;
     }
-    
-    // function confidentialTransfer(bytes calldata _proofData) external returns (bool) {
 
-    // }
+    function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
+        supportsProof(_proof);
+        super.confidentialTransferFrom(_proof, _proofOutput);
+    }
 
-    // function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external returns (bool) {
-
-    // }
-
-    // function confidentialApprove(
-    //     bytes32 _noteHash,
-    //     address _spender,
-    //     bool _status,
-    //     bytes memory _signature
-    // ) public returns (bool) {
-
-    // }
-
-    // function supportsProof(uint24 _proof) public view returns (bool) {
-    //     (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-    //     require(proofs[epoch] == true, "expected epoch to be supported");
-    //     require(category == uint8(ProofCategory.BALANCED), "ZkAsset only supports balanced proofs");
-    //     return proofs[epoch][id];
-    // }
+    function supportsProof(uint24 _proof) public view returns (bool) {
+        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
+        require(category == uint8(ProofCategory.BALANCED), "this asset only supports balanced proofs");
+        uint8 bit = uint8(proofs[epoch] >> id & 1);
+        require(bit == 1, "expected proof to be supported");
+        return bit == 1;
+    }
 }
