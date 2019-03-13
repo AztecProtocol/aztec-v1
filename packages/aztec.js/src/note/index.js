@@ -4,7 +4,6 @@ const crypto = require('crypto');
 
 const bn128 = require('../bn128');
 const secp256k1 = require('../secp256k1');
-const ecdsa = require('../secp256k1/ecdsa');
 const setup = require('../setup');
 const utils = require('./utils');
 const { noteCoder } = require('../abiEncoder');
@@ -268,7 +267,7 @@ note.create = (spendingPublicKey, value) => {
     const k = padLeft(web3Utils.toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;
-    const owner = ecdsa.accountFromPublicKey(spendingPublicKey);
+    const owner = secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
     return new Note(null, viewingKey, owner);
 };
 
