@@ -4,7 +4,7 @@ const chai = require('chai');
 const { randomHex } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
-const proof = require('../../../src/proof/mint');
+const proof = require('../../../src/proof/burn');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
@@ -29,15 +29,15 @@ function validateGroupElement(xHex, yHex) {
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
-describe('Mint proof construction tests', () => {
+describe.only('Burn proof construction tests', () => {
     it('proof.constructProof creates a proof with well-formed outputs', () => {
-        const newTotalMinted = 50;
-        const oldTotalMinted = 30;
-        const mintOne = 10;
-        const mintTwo = 10;
+        const newTotalBurned = 50;
+        const oldTotalBurned = 30;
+        const burnOne = 10;
+        const burnTwo = 10;
 
-        const kIn = [newTotalMinted];
-        const kOut = [oldTotalMinted, mintOne, mintTwo];
+        const kIn = [newTotalBurned];
+        const kOut = [oldTotalBurned, burnOne, burnTwo];
         const sender = randomHex(20);
         const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
@@ -56,13 +56,13 @@ describe('Mint proof construction tests', () => {
     });
 
     it('proof.constructProof will throw if point not on curve', () => {
-        const newTotalMinted = 50;
-        const oldTotalMinted = 30;
-        const mintOne = 10;
-        const mintTwo = 10;
+        const newTotalBurned = 50;
+        const oldTotalBurned = 30;
+        const burnOne = 10;
+        const burnTwo = 10;
 
-        const kIn = [newTotalMinted];
-        const kOut = [oldTotalMinted, mintOne, mintTwo];
+        const kIn = [newTotalBurned];
+        const kOut = [oldTotalBurned, burnOne, burnTwo];
         const sender = randomHex(20);
         const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
@@ -75,13 +75,13 @@ describe('Mint proof construction tests', () => {
     });
 
     it('proof.constructProof will throw if point at infinity', () => {
-        const newTotalMinted = 50;
-        const oldTotalMinted = 30;
-        const mintOne = 10;
-        const mintTwo = 10;
+        const newTotalBurned = 50;
+        const oldTotalBurned = 30;
+        const burnOne = 10;
+        const burnTwo = 10;
 
-        const kIn = [newTotalMinted];
-        const kOut = [oldTotalMinted, mintOne, mintTwo];
+        const kIn = [newTotalBurned];
+        const kOut = [oldTotalBurned, burnOne, burnTwo];
         const sender = randomHex(20);
         const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
@@ -96,13 +96,13 @@ describe('Mint proof construction tests', () => {
     });
 
     it('proof.constructProof will throw if viewing key response is 0', () => {
-        const newTotalMinted = 50;
-        const oldTotalMinted = 30;
-        const mintOne = 10;
-        const mintTwo = 10;
+        const newTotalBurned = 50;
+        const oldTotalBurned = 30;
+        const burnOne = 10;
+        const burnTwo = 10;
 
-        const kIn = [newTotalMinted];
-        const kOut = [oldTotalMinted, mintOne, mintTwo];
+        const kIn = [newTotalBurned];
+        const kOut = [oldTotalBurned, burnOne, burnTwo];
         const sender = randomHex(20);
         const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
@@ -115,13 +115,13 @@ describe('Mint proof construction tests', () => {
     });
 
     it('proof.constructProof will throw if value > K_MAX', () => {
-        const newTotalMinted = 50;
-        const oldTotalMinted = 30;
-        const mintOne = 10;
-        const mintTwo = 10;
+        const newTotalBurned = 50;
+        const oldTotalBurned = 30;
+        const burnOne = 10;
+        const burnTwo = 10;
 
-        const kIn = [newTotalMinted];
-        const kOut = [oldTotalMinted, mintOne, mintTwo];
+        const kIn = [newTotalBurned];
+        const kOut = [oldTotalBurned, burnOne, burnTwo];
         const sender = randomHex(20);
         const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
