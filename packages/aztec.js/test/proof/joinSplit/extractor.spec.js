@@ -58,11 +58,11 @@ describe('AZTEC extractor tests', () => {
     beforeEach(() => {
         nIn = 5;
         nOut = 5;
-        blindingScalars = proof.generateBlindingScalars(nIn + nOut, nIn);
+        blindingScalars = proofUtils.generateBlindingScalars(nIn + nOut, nIn);
 
         // We want a satisfying proof over the same input string, so we want the same set of blinding scalars.
         // Stub proof.generateBlindingScalars to always return the same set of scalars.
-        generateBlindingScalars = sinon.stub(proof, 'generateBlindingScalars').callsFake(() => blindingScalars);
+        generateBlindingScalars = sinon.stub(proofUtils, 'generateBlindingScalars').callsFake(() => blindingScalars);
 
         // It's a random oracle! ...sort of, if you squint a bit.
         computeChallenge = sinon.stub(proofUtils, 'computeChallenge').callsFake(() => {

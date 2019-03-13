@@ -34,7 +34,7 @@ verifier.verifyProof = (proofData, m, challengeHex, sender) => {
         kPublic,
         notes,
         challenge,
-    } = proofUtils.convertTranscript(proofData, m, challengeHex, errors);
+    } = proofUtils.convertTranscript(proofData, m, challengeHex, errors, 'joinSplit');
 
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));

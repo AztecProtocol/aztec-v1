@@ -36,7 +36,6 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
         rollingHash,
         notes,
         challenge,
-        kPublic,
     } = proofUtils.convertTranscript(proofData, m, challengeHex, errors, 'mint');
 
     const finalHash = new Keccak();
