@@ -1,13 +1,11 @@
-const path = require('path');
-
-const abiEncoder = require(path.join(__dirname, 'abiEncoder'));
-const bn128 = require(path.join(__dirname, 'bn128'));
-const keccak = require(path.join(__dirname, 'keccak'));
-const note = require(path.join(__dirname, 'note'));
-const proof = require(path.join(__dirname, 'proof'));
-const secp256k1 = require(path.join(__dirname, 'secp256k1'));
-const setup = require(path.join(__dirname, 'setup'));
-const sign = require(path.join(__dirname, 'sign'));
+const abiEncoder = require('./abiEncoder');
+const bn128 = require('./bn128');
+const keccak = require('./keccak');
+const note = require('./note');
+const proof = require('./proof');
+const secp256k1 = require('./secp256k1');
+const setup = require('./setup');
+const sign = require('./sign');
 
 module.exports = {
     abiEncoder,
