@@ -4,21 +4,16 @@
  * @module proof.mint
  */
 
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 
-const abiEncoder = require('../../abiEncoder');
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
-const sign = require('../../sign');
 
 const { groupReduction } = bn128;
-const { outputCoder, inputCoder } = abiEncoder;
-const mintEncode = inputCoder.mint;
 
 
 const mint = {};
@@ -58,46 +53,6 @@ mint.generateBlindingScalars = (n) => {
 };
 
 /**
- * Compute the Fiat-Shamir heuristic-ified challenge variable.
- *   Separated out into a distinct method so that we can stub this for extractor tests
- *
- * @method computeChallenge
- * @memberof proof.mint
- * @param {string} sender Ethereum address of transaction sender
- * @param {string} kPublic public commitment being added to proof
- * @param {number} m number of input notes
- * @param {Object[]} notes array of AZTEC notes
- * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
- */
-mint.computeChallenge = (...challengeVariables) => {
-    const hash = new Keccak();
-
-    const recurse = (inputs) => {
-        inputs.forEach((challengeVar) => {
-            if (typeof (challengeVar) === 'string') {
-                hash.appendBN(new BN(challengeVar.slice(2), 16));
-            } else if (typeof (challengeVar) === 'number') {
-                hash.appendBN(new BN(challengeVar));
-            } else if (BN.isBN(challengeVar)) {
-                hash.appendBN(challengeVar.umod(bn128.curve.n));
-            } else if (Array.isArray(challengeVar)) {
-                recurse(challengeVar);
-            } else if (challengeVar.gamma) {
-                hash.append(challengeVar.gamma);
-                hash.append(challengeVar.sigma);
-            } else if (challengeVar.B) {
-                hash.append(challengeVar.B);
-            } else {
-                throw new Error(`I don't know how to add ${challengeVar} to hash`);
-            }
-        });
-    };
-    recurse(challengeVariables);
-
-    return hash.keccak(groupReduction);
-};
-
-/**
  * Construct AZTEC mint proof transcript
  *
  * @method constructProof
@@ -110,6 +65,7 @@ mint.computeChallenge = (...challengeVariables) => {
 mint.constructProof = (notes, sender) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
+    const m = 1;
 
     proofUtils.parseInputs(notes, sender);
 
@@ -119,17 +75,18 @@ mint.constructProof = (notes, sender) => {
         rollingHash.append(note.sigma);
     });
 
-    // define 'running' blinding factor for the k-parameter in final note
+    let x = new BN(0).toRed(groupReduction);
+    x = rollingHash.keccak(groupReduction);
+
     let runningBk = new BN(0).toRed(groupReduction);
 
-    const blindingScalars = mint.generateBlindingScalars(notes.length);
+    const blindingScalars = proofUtils.generateBlindingScalars(notes.length, m);
 
     const blindingFactors = notes.map((note, i) => {
         let B;
-        let x = new BN(0).toRed(groupReduction);
         const { bk, ba } = blindingScalars[i];
-        const m = 1;
-        if ((i + 1) > m) {
+
+        if ((i + 1) > m) { // if it's an output note
             // get next iteration of our rolling hash
             x = rollingHash.keccak(groupReduction);
             const xbk = bk.redMul(x);
@@ -137,9 +94,10 @@ mint.constructProof = (notes, sender) => {
             runningBk = runningBk.redSub(bk);
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
         } else {
-            runningBk = runningBk.redAdd(bk);
+            runningBk = runningBk.redSub(bk);
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         }
+
         return {
             bk,
             ba,
@@ -148,7 +106,7 @@ mint.constructProof = (notes, sender) => {
         };
     });
 
-    const challenge = mint.computeChallenge(sender, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
         const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
