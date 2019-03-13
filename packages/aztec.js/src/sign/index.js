@@ -14,11 +14,11 @@ const {
     },
 } = require('@aztec/dev-utils');
 const eip712 = require('./eip712');
-const ecdsa = require('../secp256k1/ecdsa');
+const secp256k1 = require('../secp256k1');
 
 // For backwards compatibility. TODO: remove
 const defaultDomainParams = {
-    name: 'AZTECERC20BRIDGE_DOMAIN',
+    name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
     version: '1',
 };
 
@@ -65,7 +65,7 @@ sign.signNote = function signNote(note, challenge, senderAddress, verifyingContr
         },
     };
     const message = eip712.encodeTypedData(messageBase);
-    const signature = ecdsa.signMessage(message, privateKey);
+    const signature = secp256k1.ecdsa.signMessage(message, privateKey);
     return signature;
 };
 
@@ -92,7 +92,7 @@ sign.signACENote = function signACENote(note, challenge, senderAddress, verifyin
         },
     };
     const message = eip712.encodeTypedData(messageBase);
-    const signature = ecdsa.signMessage(message, privateKey);
+    const signature = secp256k1.ecdsa.signMessage(message, privateKey);
     return signature;
 };
 
@@ -118,8 +118,8 @@ sign.recoverAddress = function recoverAddress(note, challenge, senderAddress, ve
         },
     };
     const message = eip712.encodeTypedData(messageBase);
-    const publicKey = ecdsa.recoverPublicKey(message, signature[1], signature[2], signature[0]);
-    const address = ecdsa.accountFromPublicKey(publicKey);
+    const publicKey = secp256k1.ecdsa.recoverPublicKey(message, signature[1], signature[2], signature[0]);
+    const address = secp256k1.ecdsa.accountFromPublicKey(publicKey);
     return address;
 };
 
