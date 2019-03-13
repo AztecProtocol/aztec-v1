@@ -97,7 +97,7 @@ outputCoder.getProofOutput = (proofOutputsHex, i) => {
 };
 
 outputCoder.hashProofOutput = (proofOutput) => {
-    return sha3(`0x${proofOutput}`);
+    return sha3(`0x${proofOutput.slice(0x40)}`);
 };
 
 outputCoder.encodeOutputNote = (note) => {
