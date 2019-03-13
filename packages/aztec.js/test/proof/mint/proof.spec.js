@@ -29,7 +29,7 @@ function validateGroupElement(xHex, yHex) {
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
-describe.only('AZTEC mint proof construction tests', () => {
+describe('AZTEC mint proof construction tests', () => {
     it('proof.constructProof creates a proof with well-formed outputs', () => {
         const newTotalMinted = 50;
         const oldTotalMinted = 30;
@@ -42,11 +42,7 @@ describe.only('AZTEC mint proof construction tests', () => {
         const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
         const { proofData, challenge } = proof.constructProof(testNotes, sender);
-
         const numNotes = 4;
-        console.log('challenge: ', challenge);
-        console.log('proofData: ', proofData);
-
 
         expect(proofData.length).to.equal(numNotes);
         expect(challenge.length).to.equal(66);
