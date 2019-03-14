@@ -1,9 +1,9 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./JoinSplitABIEncoder.sol";
-import "../../../libs/LibEIP712.sol";
+import "../../../interfaces/IEIP712.sol";
 
-contract JoinSplitInterface is LibEIP712 {
+contract JoinSplitInterface is IEIP712 {
     /* solhint-disable-next-line var-name-mixedcase */
     bytes32 public EIP712_DOMAIN_HASH;
 
@@ -35,7 +35,7 @@ contract JoinSplitInterface is LibEIP712 {
  * family of AZTEC zero-knowledge proofs
  * and the AZTEC token standard, stay tuned for updates!
  **/
-contract JoinSplit is LibEIP712 {
+contract JoinSplit is IEIP712 {
 
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.

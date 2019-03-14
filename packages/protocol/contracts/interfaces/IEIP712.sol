@@ -18,7 +18,7 @@ pragma solidity >=0.5.0 <0.6.0;
   Forked from https://github.com/0xProject/0x-monorepo
 */
 
-contract LibEIP712 {
+contract IEIP712 {
 
     // EIP191 header for EIP712 prefix
     string constant internal EIP191_HEADER = "\x19\x01";
@@ -86,17 +86,20 @@ contract LibEIP712 {
 
     /// @dev Extracts the address of the signer with ECDSA.
     /// @param _message The EIP712 message.
-    /// @param _signature The ECDSA values, r, c and v.
+    /// @param _signature The ECDSA values, v, r and s.
     /// @return The address of the message signer.
     function recoverSignature(
         bytes32 _message,
         bytes memory _signature
-    ) internal view returns (address _signer) {
+    ) internal returns (address _signer) {
         bool result;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
         assembly {
-            let r := mload(add(_signature, 0x20))
-            let s := mload(add(_signature, 0x40))
-            let v := byte(0, mload(add(_signature, 0x60)))
+            v := mload(add(_signature, 0x20))
+            r := mload(add(_signature, 0x40))
+            s := mload(add(_signature, 0x60))
             let memPtr := mload(0x40)
             mstore(memPtr, _message)
             mstore(add(memPtr, 0x20), v)
@@ -104,14 +107,14 @@ contract LibEIP712 {
             mstore(add(memPtr, 0x60), s)
             result := and(
                 and(
-                    eq(mload(_signature), 0x41),
+                    eq(mload(_signature), 0x60),
                     or(eq(v, 27), eq(v, 28))
                 ),
                 staticcall(gas, 0x01, memPtr, 0x80, memPtr, 0x20)
             )
             _signer := mload(memPtr)
         }
-        require(result, "signature recovery failed!");
+        require(result, "signature recovery failed");
         require(_signer != address(0), "signer address cannot be 0");
     }
 }
