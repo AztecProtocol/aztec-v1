@@ -1,15 +1,11 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const ethUtil = require('ethereumjs-util');
-const { padLeft } = require('web3-utils');
-const crypto = require('crypto');
-
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const { constants: { CRS }, constants } = require('@aztec/dev-utils');
+const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
+const { constants: { CRS } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -163,7 +159,6 @@ contract('ZKERC20', (accounts) => {
         it('will can update a note registry with output notes', async () => {
             // const { receipt } = await ace.validateProof(1, accounts[0], proofs[0].proofData);
             const { receipt } = await zkerc20.confidentialTransfer(proofs[0].proofData);
-            // console.log(proofs[0].proofData);
             expect(receipt.status).to.equal(true);
         });
 
@@ -182,50 +177,6 @@ contract('ZKERC20', (accounts) => {
         it('can update a note registry with kPublic = 0', async () => {
             await zkerc20.confidentialTransfer(proofs[4].proofData);
             const { receipt } = await zkerc20.confidentialTransfer(proofs[5].proofData);
-            expect(receipt.status).to.equal(true);
-        });
-
-        it.only('can successfully call confidential approve', async () => {
-            const domainParams = sign.generateAZTECDomainParams(aztecJoinSplit.address, constants.ACE_DOMAIN_PARAMS);
-            const { privateKey } = aztecAccounts.slice(0, 1)[0];
-
-            const spender = aztecJoinSplit.address;
-            const status = true;
-            const noteHash = `0x${padLeft((ethUtil.keccak256(notes.slice(0, 1))).toString('hex'), 64)}`;
-
-            const message = {
-                noteHash,
-                spender,
-                status,
-            };
-
-
-            const schema = constants.NOTE_SIGNATURE;
-
-            const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
-
-            // const v = signature[0].slice(signature[0].length - 2);
-            // console.log('v: ', v);
-            // process.exit(0);
-            const v = `${padLeft((signature[0].slice(2)).toString('hex'), 64)}`;
-
-
-            const r = `${padLeft((signature[1].slice(2)).toString('hex'), 64)}`;
-
-            console.log('r: ', r);
-            const s = `${padLeft((signature[2].slice(2)).toString('hex'), 64)}`;
-
-            /*
-            Beware: The LibEIP712.sol smart contract which .confidentialApprove() relies on expects 
-            the ECDSA parameters (v, r and s) in a different order to which the Javascript 
-            ECDSA signing function outputs them. Hence, need to rearrange order
-            */
-
-            const singleArraySignature = r.concat(s, v);
-            console.log('signature input: ', singleArraySignature);
-
-            const { receipt } = await zkerc20.confidentialApprove(noteHash, spender, status, `0x${singleArraySignature}`);
-            console.log('receipt: ', receipt);
             expect(receipt.status).to.equal(true);
         });
     });
