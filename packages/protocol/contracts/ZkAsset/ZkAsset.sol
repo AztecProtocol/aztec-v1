@@ -19,7 +19,7 @@ contract ZkAsset is IZkAsset, IAZTEC, IEIP712 {
         "bool status",
         ")"
     ));
-    string constant internal EIP712_DOMAIN_NAME = "ZkAsset";
+    string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
 
     ACE public ace;
     ERC20 public linkedToken;
@@ -98,9 +98,12 @@ contract ZkAsset is IZkAsset, IAZTEC, IEIP712 {
             hashEIP712Message(hashStruct),
             _signature
         );
+        emit LogSigner(signer);
         require(signer == noteOwner, "the note owner did not sign this message");
         confidentialApproved[_noteHash][_spender] = _status;
     }
+
+    event LogSigner(address signer);
 
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
         (bytes memory inputNotes,

@@ -6,11 +6,11 @@ contract ZkAssetOwnableTest {
 
     ZkAssetOwnable public zkAssetOwnable;
 
-    function setZkAssetOwnableAddress(address _zkAssetOwnableAddress) public {
+    function setZkAssetOwnableAddress(address _zkAssetOwnableAddress) external {
         zkAssetOwnable = ZkAssetOwnable(_zkAssetOwnableAddress);
     } 
 
-    function callConfidentialTransferApprove(uint24 _proof, bytes memory _proofOutput) public {
+    function callConfidentialTransferApprove(uint24 _proof, bytes calldata _proofOutput) external {
         // throws if not approval had not been given before
         zkAssetOwnable.confidentialTransferFrom(_proof, _proofOutput);
     }
