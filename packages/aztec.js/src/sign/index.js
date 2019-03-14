@@ -57,38 +57,10 @@ sign.signStructuredData = function signStructuredData(domainParams, schema, mess
         domain: domainParams,
         message,
     };
-    const message = eip712.encodeTypedData(messageBase);
-    const signature = secp256k1.ecdsa.signMessage(message, privateKey);
-    return signature;
+    const encodedTypedData = eip712.encodeTypedData(typedData);
+    const signature = secp256k1.ecdsa.signMessage(encodedTypedData, privateKey);
+    return { signature, encodedTypedData };
 };
-
-/**
- * create an EIP712 ECDSA signature over an AZTEC note according to AZTEC Cryptography Engine Spec
- * @method signACENote
- * @memberof module:sign
- * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
- * @param {string} challenge AZTEC zero-knowledge proof challenge variable
- * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
- * @param {string} verifyingContract address of target contract
- * @param {string} privateKey the private key of message signer
- * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
- */
-sign.signACENote = function signACENote(note, challenge, senderAddress, verifyingContract, privateKey) {
-    const messageBase = {
-        ...ACE_NOTE_SIGNATURE,
-        domain: sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS),
-        message: {
-            proofId: 1,
-            note: [note[2], note[3], note[4], note[5]],
-            challenge,
-            sender: senderAddress,
-        },
-    };
-    const message = eip712.encodeTypedData(messageBase);
-    const signature = secp256k1.ecdsa.signMessage(message, privateKey);
-    return signature;
-};
-
 
 /**
  * recover the Ethereum address of an EIP712 AZTEC note signature

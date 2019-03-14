@@ -11,7 +11,6 @@ const {
 
 const BN = require('bn.js');
 const crypto = require('crypto');
-const { constants: { ACE_DOMAIN_PARAMS } } = require('@aztec/dev-utils');
 const chai = require('chai');
 const { padLeft, sha3 } = require('web3-utils');
 const ethUtil = require('ethereumjs-util');
@@ -23,7 +22,7 @@ const secp256k1 = require('../../src/secp256k1');
 
 const { expect } = chai;
 
-describe.only('sign tests', () => {
+describe('sign tests', () => {
     let accounts;
 
     beforeEach(() => {
@@ -44,7 +43,7 @@ describe.only('sign tests', () => {
 
         it('will generate correct AZTEC domain params', () => {
             expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
-                name: 'AZTECERC20BRIDGE_DOMAIN',
+                name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
                 version: '1',
                 verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
             });
@@ -55,7 +54,7 @@ describe.only('sign tests', () => {
             const result = eip712.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
             const messageData = [
                 sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
-                sha3('AZTECERC20BRIDGE_DOMAIN').slice(2),
+                sha3('AZTEC_CRYPTOGRAPHY_ENGINE').slice(2),
                 sha3('1').slice(2),
                 padLeft('cccccccccccccccccccccccccccccccccccccccc', 64),
             ];
@@ -114,9 +113,10 @@ describe.only('sign tests', () => {
             const schema = ACE_NOTE_SIGNATURE;
 
             const { privateKey, publicKey } = accounts[0];
-            const { signature, encodeTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
-
-            const messageHash = Buffer.from(encodeTypedData.slice(2), 'hex');
+            const { signature, encodedTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+            console.log('encoded typed data: ', encodedTypedData);
+            console.log('signature: ', signature);
+            const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
             const v = parseInt(signature[0], 16); // has to be in number format
             const r = Buffer.from(signature[1].slice(2), 'hex');
@@ -148,9 +148,9 @@ describe.only('sign tests', () => {
 
             const { privateKey, publicKey } = accounts[0];
 
-            const { signature, encodeTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+            const { signature, encodedTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
 
-            const messageHash = Buffer.from(encodeTypedData.slice(2), 'hex');
+            const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
             const v = parseInt(signature[0], 16); // has to be in number format
             const r = Buffer.from(signature[1].slice(2), 'hex');
@@ -179,9 +179,9 @@ describe.only('sign tests', () => {
             const schema = AZTEC_NOTE_SIGNATURE;
             const { privateKey, publicKey } = accounts[0];
 
-            const { signature, encodeTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+            const { signature, encodedTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
 
-            const messageHash = Buffer.from(encodeTypedData.slice(2), 'hex');
+            const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
             const v = parseInt(signature[0], 16); // has to be in number format
             const r = Buffer.from(signature[1].slice(2), 'hex');
@@ -190,32 +190,5 @@ describe.only('sign tests', () => {
             const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
-describe('sign tests', () => {
-    const domainTypes = {
-        EIP712Domain: [
-            { name: 'name', type: 'string' },
-            { name: 'version', type: 'string' },
-            { name: 'verifyingContract', type: 'address' },
-        ],
-    };
-    it('will generate correct AZTEC domain params', () => {
-        expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
-            name: ACE_DOMAIN_PARAMS.name,
-            version: ACE_DOMAIN_PARAMS.version,
-            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-        });
-    });
-
-    it('AZTEC domain params resolves to expected message', () => {
-        const message = sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
-        const result = eip712.encodeMessageData(domainTypes, 'EIP712Domain', message);
-        const messageData = [
-            sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
-            sha3(ACE_DOMAIN_PARAMS.name).slice(2),
-            sha3(ACE_DOMAIN_PARAMS.version).slice(2),
-            padLeft('cccccccccccccccccccccccccccccccccccccccc', 64),
-        ];
-        const expected = (messageData.join(''));
-        expect(result).to.equal(expected);
     });
 });
