@@ -91,7 +91,7 @@ contract IEIP712 {
     function recoverSignature(
         bytes32 _message,
         bytes memory _signature
-    ) internal returns (address _signer) {
+    ) internal view returns (address _signer) {
         bool result;
         uint8 v;
         bytes32 r;

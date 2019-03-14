@@ -299,15 +299,15 @@ contract ACE is IAZTEC {
             require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens");
             if (publicValue < 0) {
                 registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
-                // require(
-                //     registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
-                //     "public owner has not validated a transfer of tokens"
-                // );
-                // registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
-                // require(
-                //     registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
-                //     "transfer failed"
-                // );
+                require(
+                    registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
+                    "public owner has not validated a transfer of tokens"
+                );
+                registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
+                require(
+                    registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
+                    "transfer failed"
+                );
             } else {
                 registry.totalSupply -= uint256(publicValue);
                 require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");

@@ -1,13 +1,12 @@
 /* global artifacts, beforeEach, contract, expect,it, web3 */
 // ### External Dependencies
 const BN = require('bn.js');
-const ethUtil = require('ethereumjs-util');
 const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const { constants: { AZTEC_NOTE_SIGNATURE_V2, CRS } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -41,9 +40,7 @@ contract('ZkAssetOwnable', (accounts) => {
     const proofs = [];
     let proofHashes = [];
     let proofOutputs = [];
-    let signature;
     const tokensTransferred = new BN(100000);
-    let v; let r; let s;
 
     beforeEach(async () => {
         ace = await ACE.new({ from: accounts[0] });
@@ -132,27 +129,38 @@ contract('ZkAssetOwnable', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
-        it.skip('should have a contract update a note registry with output notes', async () => {
+        it.only('should have an approved contract update a note registry with output notes', async () => {
             await zkAssetOwnable.setProofs(epoch, filter);
             await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
 
-            Promise.all([0.1].map((i) => {
-                // [v, r, s] = secp256k1.ecdsa.signMessage(ethUtil.keccak256('HelloWorld'), aztecAccounts[0].privateKey);
-                // signature = [v, r.slice(2), s.slice(2)].join('');
-                signature = sign.signACENote()
-                signature = '0x...';
+            await Promise.all([0, 1].map((i) => {
+                const domain = {
+                    name: 'ZK_ASSET',
+                    version: '1',
+                    verifyingContract: zkAssetOwnable.address,
+                };
+                const schema = AZTEC_NOTE_SIGNATURE_V2;
+                const message = {
+                    noteHash: notes[i].noteHash,
+                    spender: zkAssetOwnableTest.address,
+                    status: true,
+                };
+                const { privateKey } = aztecAccounts[i];
+                const { hashStruct, signature } = sign.signStructuredData(domain, schema, message, privateKey); // eslint-disable-line no-unused-vars
+                const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
+                console.log('v', signature[0]); console.log('r', signature[1]); console.log('s', signature[2]);
                 return zkAssetOwnable.confidentialApprove(
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
                     true,
-                    signature,
+                    concatenatedSignature,
                     { from: aztecAccounts[i].address }
                 );
             }));
 
-            await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
-            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs[1]);
-            expect(receipt.status).to.equal(true);
+            // await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
+            // const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs[1]);
+            // expect(receipt.status).to.equal(true);
         });
     });
 
@@ -169,10 +177,10 @@ contract('ZkAssetOwnable', (accounts) => {
             await zkAssetOwnable.setProofs(epoch, filter);
             await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
 
-            Promise.all([0.1].map((i) => {
+            await Promise.all([0.1].map((i) => {
                 // [v, r, s] = secp256k1.ecdsa.signMessage(ethUtil.keccak256('HelloWorld'), aztecAccounts[0].privateKey);
                 // signature = [v, r.slice(2), s.slice(2)].join('');
-                signature = '0x...';
+                const signature = '0x...';
                 return zkAssetOwnable.confidentialApprove(
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,

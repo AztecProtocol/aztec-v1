@@ -69,11 +69,7 @@ module.exports = {
         },
         primaryType: 'ACE_NOTE_SIGNATURE',
     },
-    ACE_DOMAIN_PARAMS: {
-        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
-        version: '1',
-    },
-    NOTE_SIGNATURE: {
+    AZTEC_NOTE_SIGNATURE_V2: {
         types: {
             NOTE_SIGNATURE: [
                 { name: 'noteHash', type: 'bytes32' },
