@@ -95,36 +95,6 @@ describe.only('sign tests', () => {
             expect(signature[2].length - 2).to.equal(expectedNumCharacters);
         });
 
-        it.only('new signing technique generates same signature as old technique', () => {
-            const verifyingContract = proofUtils.randomAddress();
-            const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
-            const senderAddress = proofUtils.randomAddress();
-            const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-            const domainParams = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
-
-            const message = {
-                proofId: 1,
-                note: noteString,
-                challenge,
-                sender: senderAddress,
-            };
-
-            const schema = ACE_NOTE_SIGNATURE;
-
-            const { privateKey } = accounts[0];
-
-            const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
-            console.log('signature new technique: ', signature);
-
-            const oldSignature = sign.signACENote(noteString, challenge, senderAddress, verifyingContract, privateKey);
-            console.log('signature old technique: ', oldSignature);
-
-            expect(signature[0]).to.equal(oldSignature[0]);
-            expect(signature[1]).to.equal(oldSignature[1]);
-            expect(signature[2]).to.equal(oldSignature[2]);
-        });
-
         it('check public key is correctly recovered from signature params', () => {
             const verifyingContract = proofUtils.randomAddress();
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
