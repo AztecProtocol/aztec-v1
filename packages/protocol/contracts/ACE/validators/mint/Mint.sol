@@ -1,14 +1,15 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./MintABIEncoder.sol";
 import "../../../libs/LibEIP712.sol";
+// import "./MintABIEncoder.sol";
+// import "../../../libs    /LibEIP712.sol";
 
 contract MintInterface is LibEIP712 {
     /* solhint-disable-next-line var-name-mixedcase */
     bytes32 public EIP712_DOMAIN_HASH;
 
     constructor() public {}
-    
+
     function validateMint(
         bytes calldata, // proof data
         address, // sender address
@@ -36,7 +37,6 @@ contract MintInterface is LibEIP712 {
  * and the AZTEC token standard, stay tuned for updates!
  **/
 contract Mint is LibEIP712 {
-
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
@@ -79,6 +79,11 @@ contract Mint is LibEIP712 {
                 let n := calldataload(notes)
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x124), gen_order)
+                mstore(0x00, 0x01)
+                revert(0x00, 0x20)
+
+                // mstore(0x00, 0x01)
+                // revert(0x00, 0x20)
 
                 // validate m <= n
                 if gt(m, n) { mstore(0x00, 404) revert(0x00, 0x20) }
@@ -92,13 +97,13 @@ contract Mint is LibEIP712 {
                 return(0x00, 0x80) */
                 hashCommitments(notes, n)
                 let b := add(0x320, mul(n, 0x80))
+                mstore(0x00, 0x01)
+                revert(0x00, 0x20)
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
                 //  which adds some minor alterations
 
-                mstore(0x00, n)
-                revert(0x00, 0x20)
                 /*
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
@@ -312,6 +317,7 @@ contract Mint is LibEIP712 {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
+
             }
 
             /**
@@ -384,6 +390,6 @@ contract Mint is LibEIP712 {
 
         // if we've reached here, we've validated the join split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        MintABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
+        // MintABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
     }
 }
