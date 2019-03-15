@@ -5,10 +5,10 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "../interfaces/IAZTEC.sol";
 
-import "../utils/IntegerUtils.sol";
-import "../utils/NoteUtils.sol";
-import "../utils/ProofUtils.sol";
-import "../utils/SafeMaths.sol";
+import "../libs/IntegerUtils.sol";
+import "../libs/NoteUtils.sol";
+import "../libs/ProofUtils.sol";
+import "../libs/SafeMaths.sol";
 
 /**
  * @title The AZTEC Cryptography Engine

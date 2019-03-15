@@ -24,34 +24,9 @@ module.exports = {
     /**
      *  The domain and signature constants below are related to EIP712
      */ 
-    AZTEC_RINKEBY_DOMAIN_PARAMS: {
-        name: 'AZTEC_RINKEBY_DOMAIN',
+    ACE_DOMAIN_PARAMS: {
+        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
         version: '1',
-        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
-    },
-    AZTEC_MAINNET_DOMAIN_PARAMS: {
-        name: 'AZTEC_MAINNET_DOMAIN',
-        version: '1',
-        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
-    },
-    AZTEC_TEST_DOMAIN_PARAMS: {
-        name: 'AZTEC_TEST_DOMAIN_PARAMS',
-        version: '0.1.1',
-    },
-    AZTEC_NOTE_SIGNATURE: {
-        types: {
-            AZTEC_NOTE_SIGNATURE: [
-                { name: 'note', type: 'bytes32[4]' },
-                { name: 'challenge', type: 'uint256' },
-                { name: 'sender', type: 'address' },
-            ],
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
-        },
-        primaryType: 'AZTEC_NOTE_SIGNATURE',
     },
     ACE_NOTE_SIGNATURE: {
         types: {
@@ -69,9 +44,34 @@ module.exports = {
         },
         primaryType: 'ACE_NOTE_SIGNATURE',
     },
+    AZTEC_RINKEBY_DOMAIN_PARAMS: {
+        name: 'AZTEC_RINKEBY_DOMAIN',
+        version: '1',
+        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
+    },
+    AZTEC_MAINNET_DOMAIN_PARAMS: {
+        name: 'AZTEC_MAINNET_DOMAIN',
+        version: '1',
+        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
+    },
+    AZTEC_NOTE_SIGNATURE: {
+        types: {
+            AZTEC_NOTE_SIGNATURE: [
+                { name: 'note', type: 'bytes32[4]' },
+                { name: 'challenge', type: 'uint256' },
+                { name: 'sender', type: 'address' },
+            ],
+            EIP712Domain: [
+                { name: 'name', type: 'string' },
+                { name: 'version', type: 'string' },
+                { name: 'verifyingContract', type: 'address' },
+            ],
+        },
+        primaryType: 'AZTEC_NOTE_SIGNATURE',
+    },
     AZTEC_NOTE_SIGNATURE_V2: {
         types: {
-            NOTE_SIGNATURE: [
+            NoteSignature: [
                 { name: 'noteHash', type: 'bytes32' },
                 { name: 'spender', type: 'address' },
                 { name: 'status', type: 'bool' },
@@ -82,7 +82,7 @@ module.exports = {
                 { name: 'verifyingContract', type: 'address' },
             ],
         },
-        primaryType: 'NOTE_SIGNATURE',
+        primaryType: 'NoteSignature',
     },
     /**
      * Common reference string
