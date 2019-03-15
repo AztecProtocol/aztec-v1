@@ -73,14 +73,14 @@ sign.signStructuredData = function signStructuredData(domainParams, schema, mess
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
 sign.signStructuredData = function signStructuredData(domain, schema, message, privateKey) {
-    const typedData = {
+    const data = {
         domain,
         ...schema,
         message,
     };
-    const hashStruct = eip712.encodeTypedData(typedData);
-    const signature = secp256k1.ecdsa.signMessage(hashStruct, privateKey);
-    return { hashStruct, signature };
+    const typedData = eip712.encodeTypedData(data);
+    const signature = secp256k1.ecdsa.signMessage(typedData, privateKey);
+    return { typedData, signature };
 };
 
 /**

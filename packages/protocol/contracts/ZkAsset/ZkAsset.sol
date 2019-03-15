@@ -5,21 +5,29 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./IZkAsset.sol";
 import "../ACE/ACE.sol";
 import "../interfaces/IAZTEC.sol";
-import "../interfaces/IEIP712.sol";
-import "../utils/ProofUtils.sol";
+import "../libs/LibEIP712.sol";
+import "../libs/ProofUtils.sol";
 
-contract ZkAsset is IZkAsset, IAZTEC, IEIP712 {
+contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
     
+    // EIP191 header for EIP712 prefix
+    string constant internal EIP191_HEADER = "\x19\x01";
+
+    // EIP712 Domain Name value
+    string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
+
+    // EIP712 Domain Version value
+    string constant internal EIP712_DOMAIN_VERSION = "1";
+
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
-        "bytes32 noteHash,",
-        "address spender,",
-        "bool status",
+            "bytes32 noteHash,",
+            "address spender,",
+            "bool status",
         ")"
     ));
-    string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
 
     ACE public ace;
     ERC20 public linkedToken;
@@ -33,6 +41,12 @@ contract ZkAsset is IZkAsset, IAZTEC, IEIP712 {
         address _linkedTokenAddress,
         uint256 _scalingFactor
     ) public {
+        EIP712_DOMAIN_HASH = keccak256(abi.encodePacked(
+            EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
+            keccak256(bytes(EIP712_DOMAIN_NAME)),
+            keccak256(bytes(EIP712_DOMAIN_VERSION)),
+            bytes32(uint256(address(this)))
+        ));
         flags = ACE.Flags({
             active: true,
             canMint: false,
@@ -94,16 +108,18 @@ contract ZkAsset is IZkAsset, IAZTEC, IEIP712 {
             _spender,
             status
         ));
+        bytes32 msgHash = hashEIP712Message(hashStruct);
         address signer = recoverSignature(
-            hashEIP712Message(hashStruct),
+            msgHash,
             _signature
         );
-        emit LogSigner(signer);
         require(signer == noteOwner, "the note owner did not sign this message");
         confidentialApproved[_noteHash][_spender] = _status;
     }
 
-    event LogSigner(address signer);
+    event LogState(bool approved, bytes32 noteHash, address sender);
+    // event LogMyInputNotes(bytes inputNotes);
+    event LogProofOutput(bytes proofOutput);
 
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
         (bytes memory inputNotes,
@@ -111,26 +127,31 @@ contract ZkAsset is IZkAsset, IAZTEC, IEIP712 {
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
         
-        uint256 length = inputNotes.getLength();
-        for (uint i = 0; i < length; i = i.add(1)) {
-            (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
-            require(
-                confidentialApproved[noteHash][msg.sender] == true,
-                "sender does not have approval to spend input note"
-            );
-        }
+        (, bytes32 noteHash, ) = inputNotes.get(0).extractNote();
+        // emit LogMyInputNotes(inputNotes);
+        emit LogState(confidentialApproved[noteHash][msg.sender], noteHash, msg.sender);
+        emit LogProofOutput(_proofOutput);
 
-        ace.updateNoteRegistry(_proof, _proofOutput, msg.sender);
+        // uint256 length = inputNotes.getLength();
+        // for (uint i = 0; i < length; i = i.add(1)) {
+        //     (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
+        //     require(
+        //         confidentialApproved[noteHash][msg.sender] == true,
+        //         "sender does not have approval to spend input note"
+        //     );
+        // }
 
-        logInputNotes(inputNotes);
-        logOutputNotes(outputNotes);
+        // ace.updateNoteRegistry(_proof, _proofOutput, msg.sender);
 
-        if (publicValue < 0) {
-            emit ConvertTokens(publicOwner, uint256(-publicValue));
-        }
-        if (publicValue > 0) {
-            emit RedeemTokens(publicOwner, uint256(publicValue));
-        }
+        // logInputNotes(inputNotes);
+        // logOutputNotes(outputNotes);
+
+        // if (publicValue < 0) {
+        //     emit ConvertTokens(publicOwner, uint256(-publicValue));
+        // }
+        // if (publicValue > 0) {
+        //     emit RedeemTokens(publicOwner, uint256(publicValue));
+        // }
     }
 
     function publicApprove(bytes32 _proofHash, uint256 _value) public {

@@ -1,4 +1,4 @@
-/* global artifacts, beforeEach, contract, expect,it, web3 */
+/* global artifacts, beforeEach, contract, expect,it */
 // ### External Dependencies
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
@@ -33,8 +33,8 @@ contract('ZkAssetOwnable', (accounts) => {
     let zkAssetOwnableTest;
 
     let aztecAccounts = [];
-    const epoch = 100;
-    const filter = 17; // 12 + 4 + 1
+    const epoch = 1;
+    const filter = 17; // 16 + 1
     let notes = [];
     let scalingFactor;
     const proofs = [];
@@ -45,13 +45,6 @@ contract('ZkAssetOwnable', (accounts) => {
     beforeEach(async () => {
         ace = await ACE.new({ from: accounts[0] });
         aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-        Promise.all(aztecAccounts.map(({ address }) => {
-            return web3.eth.sendTransaction({
-                from: accounts[0],
-                to: address,
-                value: web3.utils.toWei('0.5'),
-            });
-        }));
         notes = [
             ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
@@ -133,7 +126,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await zkAssetOwnable.setProofs(epoch, filter);
             await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
 
-            await Promise.all([0, 1].map((i) => {
+            await Promise.all([0].map((i) => {
                 const domain = {
                     name: 'ZK_ASSET',
                     version: '1',
@@ -146,21 +139,28 @@ contract('ZkAssetOwnable', (accounts) => {
                     status: true,
                 };
                 const { privateKey } = aztecAccounts[i];
-                const { hashStruct, signature } = sign.signStructuredData(domain, schema, message, privateKey); // eslint-disable-line no-unused-vars
+                const { typedData, signature } = sign.signStructuredData(domain, schema, message, privateKey); // eslint-disable-line no-unused-vars
                 const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
-                console.log('v', signature[0]); console.log('r', signature[1]); console.log('s', signature[2]);
                 return zkAssetOwnable.confidentialApprove(
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
                     true,
-                    concatenatedSignature,
-                    { from: aztecAccounts[i].address }
+                    concatenatedSignature
                 );
             }));
 
-            // await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
-            // const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs[1]);
-            // expect(receipt.status).to.equal(true);
+            const confidentialApproved = await zkAssetOwnable.confidentialApproved(notes[0].noteHash, zkAssetOwnableTest.address);
+            console.log('zkAssetOwnableTest.address', zkAssetOwnableTest.address);
+            console.log('confidentialApproved', confidentialApproved);
+
+            await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
+            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, `0x${proofOutputs[1]}`);
+            expect(receipt.status).to.equal(true);
+            
+            console.log('proofOutput', proofOutputs[1]);
+            console.log('notes[0].noteHash', notes[0].noteHash);
+
+            expect(true).to.equal(false);
         });
     });
 
@@ -171,28 +171,6 @@ contract('ZkAssetOwnable', (accounts) => {
                 zkAssetOwnable.setProofs(epoch, filter, opts),
                 'only the owner can set the epoch proofs'
             );
-        });
-
-        it.skip('should fail to update a note registry with output notes', async () => {
-            await zkAssetOwnable.setProofs(epoch, filter);
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
-
-            await Promise.all([0.1].map((i) => {
-                // [v, r, s] = secp256k1.ecdsa.signMessage(ethUtil.keccak256('HelloWorld'), aztecAccounts[0].privateKey);
-                // signature = [v, r.slice(2), s.slice(2)].join('');
-                const signature = '0x...';
-                return zkAssetOwnable.confidentialApprove(
-                    notes[i].noteHash,
-                    zkAssetOwnableTest.address,
-                    true,
-                    signature,
-                    { from: aztecAccounts[i].address }
-                );
-            }));
-
-            // await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
-            // const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs[1]);
-            // expect(receipt.status).to.equal(true);
         });
     });
 });

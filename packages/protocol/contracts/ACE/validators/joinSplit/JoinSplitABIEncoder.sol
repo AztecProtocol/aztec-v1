@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../../interfaces/IEIP712.sol";
+import "../../../libs/LibEIP712.sol";
 
 library JoinSplitABIEncoder {
     /**
@@ -240,7 +240,7 @@ library JoinSplitABIEncoder {
 }
 
 
-contract JoinSplitABIEncoderTest is IEIP712 {
+contract JoinSplitABIEncoderTest is LibEIP712 {
 
     function validateJoinSplit(
         bytes calldata, 

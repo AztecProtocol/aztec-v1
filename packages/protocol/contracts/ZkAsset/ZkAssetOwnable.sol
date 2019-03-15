@@ -1,11 +1,13 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./ZkAsset.sol";
-import "../utils/ProofUtils.sol";
+import "../libs/ProofUtils.sol";
+import "../libs/SafeMaths.sol";
 
 contract ZkAssetOwnable is ZkAsset {
     using ProofUtils for uint24;
-
+    using SafeMath8 for uint8;
+    
     address public owner;
     mapping(uint8 => uint256) public proofs;
 
@@ -30,15 +32,18 @@ contract ZkAssetOwnable is ZkAsset {
     }
 
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
-        supportsProof(_proof);
+        bool result = supportsProof(_proof);
+        require(result == true, "expected proof to be supported");
         super.confidentialTransferFrom(_proof, _proofOutput);
     }
 
+    // @dev Return whether the proof is supported or not by this asset. Note that we have
+    //      to subtract 1 from the proof id because the original representation is uint8,
+    //      but here that id is considered to be an exponent
     function supportsProof(uint24 _proof) public view returns (bool) {
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
         require(category == uint8(ProofCategory.BALANCED), "this asset only supports balanced proofs");
-        uint8 bit = uint8(proofs[epoch] >> id & 1);
-        require(bit == 1, "expected proof to be supported");
+        uint8 bit = uint8(proofs[epoch] >> (id.sub(1)) & 1);
         return bit == 1;
     }
 }
