@@ -27,6 +27,38 @@ joinSplit.extractor = extractor;
 joinSplit.helpers = helpers;
 joinSplit.verifier = verifier;
 
+/**
+ * Generate random blinding scalars, conditional on the AZTEC join-split proof statement
+ *   Separated out into a distinct method so that we can stub this for extractor tests
+ *
+ * @method generateBlindingScalars
+ * @memberof proof.joinSplit
+ * @param {number} n number of notes
+ * @param {number} m number of input notes
+ */
+joinSplit.generateBlindingScalars = (n, m) => {
+    let runningBk = new BN(0).toRed(groupReduction);
+    const scalars = [...Array(n)].map((v, i) => {
+        let bk = bn128.randomGroupScalar();
+        const ba = bn128.randomGroupScalar();
+        if (i === (n - 1)) {
+            if (n === m) {
+                bk = new BN(0).toRed(groupReduction).redSub(runningBk);
+            } else {
+                bk = runningBk;
+            }
+        }
+
+        if ((i + 1) > m) {
+            runningBk = runningBk.redSub(bk);
+        } else {
+            runningBk = runningBk.redAdd(bk);
+        }
+        return { bk, ba };
+    });
+    return scalars;
+};
+
 
 /**
  * Construct AZTEC join-split proof transcript
@@ -61,7 +93,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
     // define 'running' blinding factor for the k-parameter in final note
     let runningBk = new BN(0).toRed(groupReduction);
 
-    const blindingScalars = proofUtils.generateBlindingScalars(notes.length, m);
+    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
 
     const blindingFactors = notes.map((note, i) => {
         let B;
@@ -87,6 +119,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
     });
 
     const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
+
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
         const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();

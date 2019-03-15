@@ -9,6 +9,7 @@ const { padLeft } = require('web3-utils');
 
 const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
+const joinSplit = require('../joinSplit');
 
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
@@ -80,7 +81,7 @@ mint.constructProof = (notes, sender) => {
 
     let runningBk = new BN(0).toRed(groupReduction);
 
-    const blindingScalars = proofUtils.generateBlindingScalars(notes.length, m);
+    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
 
     const blindingFactors = notes.map((note, i) => {
         let B;
