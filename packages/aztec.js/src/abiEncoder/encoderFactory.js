@@ -98,6 +98,10 @@ encoderFactory.encode = (config, abiParams, proofType) => {
         abiEncodedParameters = [config.M, config.CHALLENGE, config.PUBLIC_OWNER, ...offsets, ...encodedParameters];
     } else if (proofType === 'dividendComputation') {
         abiEncodedParameters = [config.CHALLENGE, config.ZA, config.ZB, ...offsets, ...encodedParameters];
+    } else if (proofType === 'mint') {
+        abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
+    } else if (proofType === 'burn') {
+        abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
     } else {
         throw new Error('incorrect proof name input');
     }
