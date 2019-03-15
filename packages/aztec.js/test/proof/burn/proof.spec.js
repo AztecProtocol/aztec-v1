@@ -29,7 +29,7 @@ function validateGroupElement(xHex, yHex) {
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
-describe.only('Burn proof construction tests', () => {
+describe('Burn proof construction tests', () => {
     it('proof.constructProof creates a proof with well-formed outputs', () => {
         const newTotalBurned = 50;
         const oldTotalBurned = 30;

@@ -16,7 +16,7 @@ const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
-describe.only('Burn proof verifier tests', () => {
+describe('Burn proof verifier tests', () => {
     describe('success states', () => {
         it('proof.constructProof creates a valid join-split proof', () => {
             const newTotalBurned = 50;
