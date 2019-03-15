@@ -4,7 +4,7 @@ const {
     abiEncoder: { outputCoder, inputCoder },
     secp256k1,
     note,
-    proof: { mint },
+    proof,
 } = require('aztec.js');
 
 const { constants: { CRS }, exceptions } = require('@aztec/dev-utils');
@@ -28,17 +28,17 @@ function encodeMintTransaction({
     const {
         proofData: proofDataRaw,
         challenge,
-    } = mint.constructProof([...inputNotes, ...outputNotes], senderAddress);
+    } = proof.mint.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
     const inputOwners = inputNotes.map(m => m.owner);
     const outputOwners = outputNotes.map(n => n.owner);
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
-    const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
+    // const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
 
     const proofData = mintInputEncode(
-        proofDataRawFormatted,
+        proofDataRaw,
         challenge,
         inputOwners,
         outputOwners,
@@ -54,11 +54,13 @@ function encodeMintTransaction({
     return { proofData, expectedOutput, challenge };
 }
 
-contract('Mint', (accounts) => {
+contract.only('Mint', (accounts) => {
     let mintContract;
     // Creating a collection of tests that should pass
     describe('success states', () => {
         let aztecAccounts = [];
+        // console.log('proof module: ', proof);
+        // console.log('aztec module: ', note);
 
         beforeEach(async () => {
             mintContract = await Mint.new({
@@ -68,7 +70,7 @@ contract('Mint', (accounts) => {
             aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
         });
 
-        it('successfully validates encoding of an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
+        it.only('successfully validates encoding of a mint proof zero-knowledge proof', async () => {
             const noteValues = [50, 30, 10, 10];
             const notes = aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
@@ -80,7 +82,6 @@ contract('Mint', (accounts) => {
             const inputOwners = inputNotes.map(n => n.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
-
             const { proofData, expectedOutput, challenge } = encodeMintTransaction({
                 inputNotes,
                 outputNotes,
@@ -89,11 +90,11 @@ contract('Mint', (accounts) => {
                 validatorAddress: mintContract.address,
             });
 
-            console.log('proof data: ', proofData);
-            console.log('accounts[0]: ', accounts[0]);
-            console.log('CRS: ', CRS);
+            // console.log('proof data: ', proofData);
+            // console.log('accounts[0]: ', accounts[0]);
+            // console.log('CRS: ', CRS);
 
-            // console.log('challenge: ', challenge);
+            // console.log('challenge: ', challenge);            
 
             const result = await mintContract.validateMint(proofData, accounts[0], CRS, {
                 from: accounts[0],
