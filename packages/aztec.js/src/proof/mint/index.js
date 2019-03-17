@@ -77,7 +77,6 @@ mint.constructProof = (notes, sender) => {
     });
 
     let x = new BN(0).toRed(groupReduction);
-    x = rollingHash.keccak(groupReduction);
 
     let runningBk = new BN(0).toRed(groupReduction);
 

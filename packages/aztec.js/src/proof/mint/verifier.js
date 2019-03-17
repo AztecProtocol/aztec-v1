@@ -19,7 +19,7 @@ const { groupReduction } = bn128;
 const verifier = {};
 
 /**
- * Verify an AZTEC zero-knowledge proof
+ * Verify an AZTEC mint zero-knowledge proof
  *
  * @method verifyProof
  * @memberof module:proof.mint.verifier
@@ -43,7 +43,6 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
     finalHash.data = [...finalHash.data, ...rollingHash.data];
 
     let x = new BN(0).toRed(groupReduction);
-    x = rollingHash.keccak(groupReduction);
 
     let pairingGammas;
     let pairingSigmas;
