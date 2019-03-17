@@ -4,7 +4,7 @@ const {
     abiEncoder: { outputCoder },
     secp256k1,
     note,
-    proof: { mint },
+    proof: { adjustSupply },
 } = require('aztec.js');
 
 const { constants: { CRS }, exceptions } = require('@aztec/dev-utils');
@@ -13,25 +13,25 @@ const { padLeft, sha3 } = require('web3-utils');
 
 
 // ### Artifacts
-const Mint = artifacts.require('./contracts/ACE/validators/mint/Mint');
-const MintInterface = artifacts.require('./contracts/ACE/validators/mint/Mint/MintInterface');
+const AdjustSupply = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply/AdjustSupplyInterface');
 
-Mint.abi = MintInterface.abi;
+AdjustSupply.abi = AdjustSupplyInterface.abi;
 
-contract('Mint', (accounts) => {
-    let mintContract;
+contract('AdjustSupply', (accounts) => {
+    let adjustSupplyContract;
     describe('success states', () => {
         let aztecAccounts = [];
 
         beforeEach(async () => {
-            mintContract = await Mint.new({
+            adjustSupplyContract = await AdjustSupply.new({
                 from: accounts[0],
             });
             const numNotes = 4;
             aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
         });
 
-        it('successfully validates encoding of a mint proof zero-knowledge proof', async () => {
+        it('successfully validates encoding of a adjustSupply proof zero-knowledge proof', async () => {
             const noteValues = [50, 30, 10, 10];
             const notes = aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
@@ -42,13 +42,13 @@ contract('Mint', (accounts) => {
             const publicOwner = '0x0000000000000000000000000000000000000000';
             const publicValue = 0;
 
-            const { proofData, expectedOutput } = mint.encodeMintTransaction({
+            const { proofData, expectedOutput } = adjustSupply.encodeAdjustSupplyTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
             });
 
-            const result = await mintContract.validateMint(proofData, accounts[0], CRS, {
+            const result = await adjustSupplyContract.validateAdjustSupply(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -73,12 +73,11 @@ contract('Mint', (accounts) => {
             expect(decoded[0].publicValue).to.equal(publicValue);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await mintContract.validateMint.estimateGas(proofData, accounts[0], CRS, {
+            const gasUsed = await adjustSupplyContract.validateAdjustSupply.estimateGas(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
             console.log('gas used = ', gasUsed);
         });
-        
     });
 });

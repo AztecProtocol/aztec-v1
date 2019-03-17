@@ -9,23 +9,23 @@ const sinon = require('sinon');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const bn128 = require('../../../src/bn128');
-const proof = require('../../../src/proof/burn');
-const verifier = require('../../../src/proof/burn/verifier');
+const proof = require('../../../src/proof/adjustSupply');
+const verifier = require('../../../src/proof/adjustSupply/verifier');
 
 const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
-describe('Burn proof verifier tests', () => {
+describe('AdjustSupply proof verification tests', () => {
     describe('success states', () => {
         it('proof.constructProof creates a valid join-split proof', () => {
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned, burnOne, burnTwo];
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted, mintOne, mintTwo];
             const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
@@ -35,28 +35,12 @@ describe('Burn proof verifier tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates burn proof with 0 notes burned i.e. no notes are actually burned', () => {
-            const newTotalBurned = 50;
-            const oldTotalBurned = 50;
+        it('validates adjustSupply proof with 0 notes minted i.e. no notes are actually minted', () => {
+            const newTotalMinted = 50;
+            const oldTotalMinted = 50;
 
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned];
-
-            const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes(kIn, kOut);
-
-            const { proofData, challenge } = proof.constructProof(testNotes, sender);
-
-            const result = verifier.verifyProof(proofData, challenge, sender);
-            expect(result.valid).to.equal(true);
-        });
-
-        it('validates burn proof with large number of burned notes', () => {
-            const newTotalBurned = 100;
-            const oldTotalBurned = 10;
-
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted];
 
             const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes(kIn, kOut);
@@ -67,14 +51,30 @@ describe('Burn proof verifier tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates burning without any previous burned number of tokens', () => {
-            const newTotalBurned = 50;
-            const oldTotalBurned = 0;
-            const burnOne = 25;
-            const burnTwo = 25;
+        it('validates adjustSupply proof with large number of minted notes', () => {
+            const newTotalMinted = 100;
+            const oldTotalMinted = 10;
 
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned, burnOne, burnTwo];
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+
+            const sender = proofUtils.randomAddress();
+            const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+
+            const { proofData, challenge } = proof.constructProof(testNotes, sender);
+
+            const result = verifier.verifyProof(proofData, challenge, sender);
+            expect(result.valid).to.equal(true);
+        });
+
+        it('validates minting without any previous minted number of tokens', () => {
+            const newTotalMinted = 50;
+            const oldTotalMinted = 0;
+            const mintOne = 25;
+            const mintTwo = 25;
+
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted, mintOne, mintTwo];
             const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes(kIn, kOut);
 
@@ -115,12 +115,12 @@ describe('Burn proof verifier tests', () => {
         it('will REJECT if malformed challenge', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender);
@@ -135,13 +135,13 @@ describe('Burn proof verifier tests', () => {
         it('will REJECT if notes do not balance', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const newTotalBurned = 500; // 500 + oldTotalBurned + burnOne + burnTwo;
+            const newTotalMinted = 500; // 500 + oldTotalMinted + mintOne + mintTwo;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
@@ -170,12 +170,12 @@ describe('Burn proof verifier tests', () => {
         it('will REJECT if note value response is 0', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
@@ -192,12 +192,12 @@ describe('Burn proof verifier tests', () => {
         it('will REJECT if blinding factor is at infinity', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender);
@@ -220,12 +220,12 @@ describe('Burn proof verifier tests', () => {
         it('will REJECT if blinding factor computed from invalid point', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender, 0);

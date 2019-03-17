@@ -321,8 +321,8 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
  * @returns { notes: Object[], rollingHash: Hash, challenge: string, kPublic: BN} necessary proof variables in required format
  */
 proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) => {
-    if (proofType !== 'joinSplit' && proofType !== 'mint' && proofType !== 'burn') {
-        throw new Error('Enter joinsplit, mint or burn in string format as the proofType variable');
+    if (proofType !== 'joinSplit' && proofType !== 'adjustSupply' && proofType !== 'burn') {
+        throw new Error('Enter joinsplit, adjustSupply or burn in string format as the proofType variable');
     }
 
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);

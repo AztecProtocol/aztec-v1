@@ -1,14 +1,14 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "../../../libs/LibEIP712.sol";
-import "./MintABIEncoder.sol";
+import "./AdjustSupplyABIEncoder.sol";
 
-contract MintInterface is LibEIP712 {
+contract AdjustSupplyInterface is LibEIP712 {
     /* solhint-disable-next-line var-name-mixedcase */
 
     constructor() public {}
 
-    function validateMint(
+    function validateAdjustSupply(
         bytes calldata, // proof data
         address, // sender address
         uint[6] calldata // common reference string
@@ -34,23 +34,23 @@ contract MintInterface is LibEIP712 {
  * family of AZTEC zero-knowledge proofs
  * and the AZTEC token standard, stay tuned for updates!
  **/
-contract Mint is LibEIP712 {
+contract AdjustSupply is LibEIP712 {
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
      * @notice See AZTECInterface for how method calls should be constructed.
      * 'Cost' of raw elliptic curve primitives for a transaction:
      * 260,700 gas + (124,500 * number of input notes) + (167,600 * number of output notes).
-     * For a basic 'Mint' with 2 inputs and 2 outputs = 844,900 gas.
+     * For a basic 'AdjustSupply' with 2 inputs and 2 outputs = 844,900 gas.
      * AZTEC is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     function() external payable {
         assembly {
             // We don't check for function signatures,
-            // there's only one function that ever gets called: validateMint()
+            // there's only one function that ever gets called: validateAdjustSupply()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract
             // through a compatible ABI
-            validateMint()
+            validateAdjustSupply()
 
             /**
              * New calldata map
@@ -69,7 +69,7 @@ contract Mint is LibEIP712 {
              * 0x1c4:0x1e4    = offset in byte array to outputOwners
              * 0x1e4:0x204    = offset in byte array to metadata
              */
-            function validateMint() {
+            function validateAdjustSupply() {
                 mstore(0x80, calldataload(0x44))
                 mstore(0xa0, calldataload(0x64))
                 let notes := add(0x104, calldataload(0x144)) // get the length of notes
@@ -211,7 +211,7 @@ contract Mint is LibEIP712 {
                 }
 
                 // If the AZTEC protocol is implemented correctly then any input notes were previously outputs of
-                // a Mint transaction. We can inductively assume that all input notes
+                // a AdjustSupply transaction. We can inductively assume that all input notes
                 // are well-formed AZTEC commitments and do not need to validate the implicit range proof
                 // This is not the case for any output commitments, so if (m < n) call validatePairing()
                 if lt(m, n) {
@@ -362,6 +362,6 @@ contract Mint is LibEIP712 {
 
         // if we've reached here, we've validated the join split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        MintABIEncoder.encodeAndExit();
+        AdjustSupplyABIEncoder.encodeAndExit();
     }
 }

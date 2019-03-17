@@ -4,20 +4,20 @@ const {
     abiEncoder: { outputCoder },
     secp256k1,
     note,
-    proof: { mint },
+    proof: { adjustSupply },
 } = require('aztec.js');
 const { constants: { CRS } } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/mint/MintABIEncoderTest');
+const ABIEncoder = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupplyABIEncoderTest');
 
-contract('Mint ABI Encoder', (accounts) => {
-    let mintAbiEncoder;
+contract('AdjustSupply ABI Encoder', (accounts) => {
+    let adjustSupplyAbiEncoder;
 
     describe('success states', () => {
         beforeEach(async () => {
-            mintAbiEncoder = await ABIEncoder.new({
+            adjustSupplyAbiEncoder = await ABIEncoder.new({
                 from: accounts[0],
             });
         });
@@ -36,13 +36,13 @@ contract('Mint ABI Encoder', (accounts) => {
 
             const senderAddress = accounts[0];
 
-            const { proofData } = mint.encodeMintTransaction({
+            const { proofData } = adjustSupply.encodeAdjustSupplyTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
             });
 
-            const result = await mintAbiEncoder.validateMint(proofData, senderAddress, CRS, {
+            const result = await adjustSupplyAbiEncoder.validateAdjustSupply(proofData, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -74,7 +74,7 @@ contract('Mint ABI Encoder', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await mintAbiEncoder.validateMint.estimateGas(proofData, senderAddress, CRS, {
+            const gasUsed = await adjustSupplyAbiEncoder.validateAdjustSupply.estimateGas(proofData, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
