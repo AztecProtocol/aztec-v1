@@ -22,7 +22,7 @@ contract('Mint ABI Encoder', (accounts) => {
             });
         });
 
-        it.only('successfully encodes output of a join split proof', async () => {
+        it('successfully encodes output of a join split proof', async () => {
             const numNotes = 4;
             const noteValues = [50, 30, 10, 10];
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());

@@ -13,6 +13,10 @@ const joinSplit = require('../joinSplit');
 
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
+const {
+    inputCoder,
+    outputCoder,
+} = require('../../abiEncoder');
 
 const { groupReduction } = bn128;
 
@@ -52,6 +56,41 @@ mint.generateBlindingScalars = (n) => {
     });
     return scalars;
 };
+
+mint.encodeMintTransaction = ({
+    inputNotes,
+    outputNotes,
+    senderAddress,
+}) => {
+    const {
+        proofData: proofDataRaw,
+        challenge,
+    } = mint.constructProof([...inputNotes, ...outputNotes], senderAddress);
+
+    const inputOwners = inputNotes.map(m => m.owner);
+    const outputOwners = outputNotes.map(n => n.owner);
+    const publicOwner = '0x0000000000000000000000000000000000000000';
+    const publicValue = 0;
+
+    // const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
+
+    const proofData = inputCoder.mint(
+        proofDataRaw,
+        challenge,
+        inputOwners,
+        outputOwners,
+        outputNotes
+    );
+
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
+        inputNotes,
+        outputNotes,
+        publicOwner,
+        publicValue,
+    }]).slice(0x42)}`;
+    return { proofData, expectedOutput, challenge };
+};
+
 
 /**
  * Construct AZTEC mint proof transcript
