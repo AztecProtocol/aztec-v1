@@ -67,7 +67,7 @@ inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, out
     return encoderFactory.encode(configs, abiParams, 'dividendComputation');
 };
 
-inputCoder.mint = (proofData, challenge, inputOwners, outputOwners, metadata) => {
+inputCoder.adjustSupply = (proofData, challenge, inputOwners, outputOwners, metadata) => {
     const configs = {
         CHALLENGE: challenge.slice(2),
         PROOF_DATA: encoderFactory.encodeProofData(proofData),
@@ -83,7 +83,7 @@ inputCoder.mint = (proofData, challenge, inputOwners, outputOwners, metadata) =>
         'METADATA',
     ];
 
-    return encoderFactory.encode(configs, abiParams, 'mint');
+    return encoderFactory.encode(configs, abiParams, 'adjustSupply');
 };
 
 module.exports = inputCoder;

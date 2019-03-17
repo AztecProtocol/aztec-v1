@@ -2,7 +2,7 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "../../../libs/LibEIP712.sol";
 
-library MintABIEncoder {
+library AdjustSupplyABIEncoder {
     /**
      * Calldata map
      * 0x04:0x24      = calldata location of proofData byte array
@@ -208,9 +208,9 @@ library MintABIEncoder {
     }
 }
 
-contract MintABIEncoderTest is LibEIP712 {
+contract AdjustSupplyABIEncoderTest is LibEIP712 {
 
-    function validateMint(
+    function validateAdjustSupply(
         bytes calldata, 
         address, 
         uint[6] calldata
@@ -219,6 +219,6 @@ contract MintABIEncoderTest is LibEIP712 {
         view 
         returns (bytes memory) 
     {
-        MintABIEncoder.encodeAndExit();
+        AdjustSupplyABIEncoder.encodeAndExit();
     }
 }
