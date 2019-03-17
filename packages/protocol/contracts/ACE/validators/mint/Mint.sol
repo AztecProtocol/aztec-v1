@@ -1,12 +1,10 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "../../../libs/LibEIP712.sol";
-// import "./MintABIEncoder.sol";
-// import "../../../libs    /LibEIP712.sol";
+import "./MintABIEncoder.sol";
 
 contract MintInterface is LibEIP712 {
     /* solhint-disable-next-line var-name-mixedcase */
-    bytes32 public EIP712_DOMAIN_HASH;
 
     constructor() public {}
 
@@ -17,7 +15,7 @@ contract MintInterface is LibEIP712 {
     ) 
         external 
         pure 
-        returns (bytes32) // returns a series of transfer instructions
+        returns (bytes memory) // returns a series of transfer instructions
     {}
 }
 
@@ -226,8 +224,7 @@ contract Mint is LibEIP712 {
                 // Hash this block to reconstruct the initial challenge and validate that they match
 
                 let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
-                mstore(0x00, expected)
-                return(0x00, 0x20)
+
                 if iszero(eq(expected, challenge)) {
 
                     // No! Bad! No soup for you!
@@ -365,6 +362,6 @@ contract Mint is LibEIP712 {
 
         // if we've reached here, we've validated the join split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        // MintABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
+        MintABIEncoder.encodeAndExit();
     }
 }

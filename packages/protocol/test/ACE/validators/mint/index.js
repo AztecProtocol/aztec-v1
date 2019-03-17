@@ -4,7 +4,7 @@ const {
     abiEncoder: { outputCoder, inputCoder },
     secp256k1,
     note,
-    proof,
+    proof: { mint },
 } = require('aztec.js');
 
 const { constants: { CRS }, exceptions } = require('@aztec/dev-utils');
@@ -20,40 +20,6 @@ const MintInterface = artifacts.require('./contracts/ACE/validators/mint/Mint/Mi
 
 Mint.abi = MintInterface.abi;
 
-function encodeMintTransaction({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-}) {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = proof.mint.constructProof([...inputNotes, ...outputNotes], senderAddress);
-
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
-    const publicOwner = '0x0000000000000000000000000000000000000000';
-    const publicValue = 0;
-
-    // const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
-
-    const proofData = mintInputEncode(
-        proofDataRaw,
-        challenge,
-        inputOwners,
-        outputOwners,
-        outputNotes
-    );
-
-    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-    }]).slice(0x42)}`;
-    return { proofData, expectedOutput, challenge };
-}
-
 contract('Mint', (accounts) => {
     let mintContract;
     describe('success states', () => {
@@ -67,7 +33,7 @@ contract('Mint', (accounts) => {
             aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
         });
 
-        it.only('validate smart contract verification algo', async () => {
+        it.only('successfully validates encoding of a mint proof zero-knowledge proof', async () => {
             const noteValues = [50, 30, 10, 10];
             const notes = aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
@@ -75,8 +41,10 @@ contract('Mint', (accounts) => {
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 4);
+            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicValue = 0;
 
-            const { proofData, challenge } = mint.encodeMintTransaction({
+            const { proofData, expectedOutput } = mint.encodeMintTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
@@ -86,44 +54,8 @@ contract('Mint', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             });
-
-
-            const gasUsed = await mintContract.validateMint.estimateGas(proofData, accounts[0], CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-            console.log('gas used = ', gasUsed);
-
-            expect(result).to.equal(challenge);
-        });
-
-        it('successfully validates encoding of a mint proof zero-knowledge proof', async () => {
-            const noteValues = [50, 30, 10, 10];
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
-
-            const inputNotes = notes.slice(0, 1);
-            const outputNotes = notes.slice(1, 4);
-
-            const inputOwners = inputNotes.map(n => n.owner);
-
-            const { proofData, expectedOutput, challenge } = encodeMintTransaction({
-                inputNotes,
-                outputNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners: inputOwners,
-                validatorAddress: mintContract.address,
-            });
-
-            const result = await mintContract.validateMint(proofData, accounts[0], CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-            console.log('result: ', result);
 
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-            console.log('decoded: ', decoded);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
@@ -138,12 +70,9 @@ contract('Mint', (accounts) => {
             expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].inputNotes[0].noteHash).to.equal(inputNotes[0].noteHash);
             expect(decoded[0].inputNotes[0].owner).to.equal(inputNotes[0].owner.toLowerCase());
-            expect(decoded[0].inputNotes[1].gamma.eq(inputNotes[1].gamma)).to.equal(true);
-            expect(decoded[0].inputNotes[1].sigma.eq(inputNotes[1].sigma)).to.equal(true);
-            expect(decoded[0].inputNotes[1].noteHash).to.equal(inputNotes[1].noteHash);
-            expect(decoded[0].inputNotes[1].owner).to.equal(inputNotes[1].owner.toLowerCase());
 
-            expect(decoded[0].publicValue).to.equal(40);
+            expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
+            expect(decoded[0].publicValue).to.equal(publicValue);
             expect(result).to.equal(expectedOutput);
 
             const gasUsed = await mintContract.validateMint.estimateGas(proofData, accounts[0], CRS, {
