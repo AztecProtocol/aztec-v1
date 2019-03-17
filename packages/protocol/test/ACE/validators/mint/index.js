@@ -54,13 +54,10 @@ function encodeMintTransaction({
     return { proofData, expectedOutput, challenge };
 }
 
-contract.only('Mint', (accounts) => {
+contract('Mint', (accounts) => {
     let mintContract;
-    // Creating a collection of tests that should pass
     describe('success states', () => {
         let aztecAccounts = [];
-        // console.log('proof module: ', proof);
-        // console.log('aztec module: ', note);
 
         beforeEach(async () => {
             mintContract = await Mint.new({
@@ -70,7 +67,37 @@ contract.only('Mint', (accounts) => {
             aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
         });
 
-        it.only('successfully validates encoding of a mint proof zero-knowledge proof', async () => {
+        it.only('validate smart contract verification algo', async () => {
+            const noteValues = [50, 30, 10, 10];
+            const notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            const inputNotes = notes.slice(0, 1);
+            const outputNotes = notes.slice(1, 4);
+
+            const { proofData, challenge } = mint.encodeMintTransaction({
+                inputNotes,
+                outputNotes,
+                senderAddress: accounts[0],
+            });
+
+            const result = await mintContract.validateMint(proofData, accounts[0], CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+
+
+            const gasUsed = await mintContract.validateMint.estimateGas(proofData, accounts[0], CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+            console.log('gas used = ', gasUsed);
+
+            expect(result).to.equal(challenge);
+        });
+
+        it('successfully validates encoding of a mint proof zero-knowledge proof', async () => {
             const noteValues = [50, 30, 10, 10];
             const notes = aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
@@ -80,7 +107,6 @@ contract.only('Mint', (accounts) => {
             const outputNotes = notes.slice(1, 4);
 
             const inputOwners = inputNotes.map(n => n.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
 
             const { proofData, expectedOutput, challenge } = encodeMintTransaction({
                 inputNotes,
@@ -90,21 +116,14 @@ contract.only('Mint', (accounts) => {
                 validatorAddress: mintContract.address,
             });
 
-            // console.log('proof data: ', proofData);
-            // console.log('accounts[0]: ', accounts[0]);
-            // console.log('CRS: ', CRS);
-
-            // console.log('challenge: ', challenge);            
-
             const result = await mintContract.validateMint(proofData, accounts[0], CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
-
             console.log('result: ', result);
-            process.exit(1);
 
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            console.log('decoded: ', decoded);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
