@@ -21,6 +21,21 @@ const ZkAssetOwnableTest = artifacts.require('./contracts/ZkAsset/ZkAssetOwnable
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
+const signNote = (verifyingContract, noteHash, spender, status, privateKey) => {
+    const domain = {
+        name: 'ZK_ASSET',
+        version: '1',
+        verifyingContract,
+    };
+    const schema = AZTEC_NOTE_SIGNATURE_V2;
+    const message = {
+        noteHash,
+        spender,
+        status,
+    };
+    return sign.signStructuredData(domain, schema, message, privateKey);
+};
+
 contract('ZkAssetOwnable', (accounts) => {
     // the proof is represented as an uint24 that compresses 3 uint8s:
     // 1 * 256**(2) + 0 * 256**(1) + 1 * 256**(0)
@@ -34,7 +49,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
     let aztecAccounts = [];
     const epoch = 1;
-    const filter = 17; // 16 + 1
+    const filter = 17; // 16 + 1, recall that 1 is PROOF_JOIN_SPLIT because of 1 * 256**(0)
     let notes = [];
     let scalingFactor;
     const proofs = [];
@@ -104,42 +119,39 @@ contract('ZkAssetOwnable', (accounts) => {
                 opts
             );
         }));
-        await zkAssetOwnable.publicApprove(
+        await ace.publicApprove(
+            zkAssetOwnable.address,
             proofHashes[0],
             10,
             { from: accounts[0] }
         );
-        await zkAssetOwnable.publicApprove(
+        await ace.publicApprove(
+            zkAssetOwnable.address,
             proofHashes[1],
             40,
             { from: accounts[1] }
         );
     });
 
-    describe.only('success states', () => {
+    describe('success states', () => {
         it('should set a new proof bit filter', async () => {
             const { receipt } = await zkAssetOwnable.setProofs(epoch, filter);
             expect(receipt.status).to.equal(true);
         });
 
-        it.only('should have an approved contract update a note registry with output notes', async () => {
+        it('should have an approved contract update a note registry with output notes', async () => {
             await zkAssetOwnable.setProofs(epoch, filter);
             await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
 
-            await Promise.all([0].map((i) => {
-                const domain = {
-                    name: 'ZK_ASSET',
-                    version: '1',
-                    verifyingContract: zkAssetOwnable.address,
-                };
-                const schema = AZTEC_NOTE_SIGNATURE_V2;
-                const message = {
-                    noteHash: notes[i].noteHash,
-                    spender: zkAssetOwnableTest.address,
-                    status: true,
-                };
-                const { privateKey } = aztecAccounts[i];
-                const { typedData, signature } = sign.signStructuredData(domain, schema, message, privateKey); // eslint-disable-line no-unused-vars
+            await Promise.all([0, 1].map((i) => {
+                // eslint-disable-next-line no-unused-vars
+                const { typedData, signature } = signNote(
+                    zkAssetOwnable.address,
+                    notes[i].noteHash,
+                    zkAssetOwnableTest.address,
+                    true,
+                    aztecAccounts[i].privateKey
+                );
                 const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
                 return zkAssetOwnable.confidentialApprove(
                     notes[i].noteHash,
@@ -149,18 +161,14 @@ contract('ZkAssetOwnable', (accounts) => {
                 );
             }));
 
-            const confidentialApproved = await zkAssetOwnable.confidentialApproved(notes[0].noteHash, zkAssetOwnableTest.address);
-            console.log('zkAssetOwnableTest.address', zkAssetOwnableTest.address);
-            console.log('confidentialApproved', confidentialApproved);
-
             await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
-            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, `0x${proofOutputs[1]}`);
-            expect(receipt.status).to.equal(true);
-            
-            console.log('proofOutput', proofOutputs[1]);
-            console.log('notes[0].noteHash', notes[0].noteHash);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, proofs[1].proofData);
 
-            expect(true).to.equal(false);
+            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(
+                JOIN_SPLIT_PROOF,
+                `0x${proofOutputs[1].slice(0x40)}`
+            );
+            expect(receipt.status).to.equal(true);
         });
     });
 
@@ -170,6 +178,64 @@ contract('ZkAssetOwnable', (accounts) => {
             await truffleAssert.reverts(
                 zkAssetOwnable.setProofs(epoch, filter, opts),
                 'only the owner can set the epoch proofs'
+            );
+        });
+
+        it('should fail to approve a contract', async () => {
+            await zkAssetOwnable.setProofs(epoch, filter);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
+
+            // eslint-disable-next-line no-unused-vars
+            const { typedData, signature } = signNote(
+                zkAssetOwnable.address,
+                notes[0].noteHash,
+                zkAssetOwnableTest.address,
+                true,
+                aztecAccounts[0].privateKey
+            );
+            const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
+            await truffleAssert.reverts(
+                zkAssetOwnable.confidentialApprove(
+                    notes[2].noteHash, // wrong note hash
+                    zkAssetOwnableTest.address,
+                    true,
+                    concatenatedSignature
+                ),
+                'only unspent notes can be approved'
+            );
+        });
+
+        it('should have an approved contract fail to update a note registry with output notes', async () => {
+            await zkAssetOwnable.setProofs(epoch, filter);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
+
+            await Promise.all([0, 1].map((i) => {
+                // eslint-disable-next-line no-unused-vars
+                const { typedData, signature } = signNote(
+                    zkAssetOwnable.address,
+                    notes[i].noteHash,
+                    zkAssetOwnableTest.address,
+                    true,
+                    aztecAccounts[i].privateKey
+                );
+                const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
+                return zkAssetOwnable.confidentialApprove(
+                    notes[i].noteHash,
+                    zkAssetOwnableTest.address,
+                    true,
+                    concatenatedSignature
+                );
+            }));
+
+            await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, proofs[1].proofData);
+
+            await truffleAssert.reverts(
+                zkAssetOwnableTest.callConfidentialTransferFrom(
+                    JOIN_SPLIT_PROOF + 1, // adding 1 removes the join split proof from the proof object
+                    `0x${proofOutputs[1].slice(0x40)}`
+                ),
+                'expected proof to be supported'
             );
         });
     });

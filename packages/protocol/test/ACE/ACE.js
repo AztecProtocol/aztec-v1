@@ -233,21 +233,25 @@ contract('ACE', (accounts) => {
             proofOutputs = proofs.map(({ expectedOutput }) => outputCoder.getProofOutput(expectedOutput, 0));
             const proofHashes = proofOutputs.map(proofOutput => outputCoder.hashProofOutput(proofOutput));
             await ace.publicApprove(
+                accounts[0],
                 proofHashes[0],
                 10,
                 { from: accounts[0] }
             );
             await ace.publicApprove(
+                accounts[0],
                 proofHashes[1],
                 40,
                 { from: accounts[1] }
             );
             await ace.publicApprove(
+                accounts[0],
                 proofHashes[2],
                 130,
                 { from: accounts[2] }
             );
             await ace.publicApprove(
+                accounts[0],
                 proofHashes[4],
                 30,
                 { from: accounts[3] }
@@ -257,28 +261,28 @@ contract('ACE', (accounts) => {
         it('should update a note registry with output notes', async () => {
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[0].proofData);
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });
 
         it('should update a note registry by consuming input notes, with kPublic negative', async () => {
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[0].proofData);
-            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, `0x${proofOutputs[0].slice(0x40)}`, accounts[0]);
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], `0x${proofOutputs[0].slice(0x40)}`);
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[1].proofData);
             const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });
 
         it('should update a note registry by consuming input notes, with kPublic positive', async () => {
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData);
-            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, `0x${proofOutputs[2].slice(0x40)}`, accounts[0]);
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], `0x${proofOutputs[2].slice(0x40)}`);
 
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[3].proofData);
             const formattedProofOutput = `0x${proofOutputs[3].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
@@ -286,11 +290,11 @@ contract('ACE', (accounts) => {
 
         it('should update a note registry with kPublic = 0', async () => {
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[4].proofData);
-            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, `0x${proofOutputs[4].slice(0x40)}`, accounts[0]);
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], `0x${proofOutputs[4].slice(0x40)}`);
 
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[5].proofData);
             const formattedProofOutput = `0x${proofOutputs[5].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);

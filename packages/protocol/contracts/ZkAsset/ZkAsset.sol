@@ -75,7 +75,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         require(proofOutputs.length != 0, "proof invalid");
         bytes memory proofOutput = proofOutputs.get(0);
 
-        ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proofOutput, address(this));
+        ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
         
         (bytes memory inputNotes,
         bytes memory outputNotes,
@@ -100,7 +100,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     ) public {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
-
         // validate EIP712 signature
         bytes32 hashStruct = keccak256(abi.encode(
             NOTE_SIGNATURE_TYPEHASH,
@@ -117,45 +116,32 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         confidentialApproved[_noteHash][_spender] = _status;
     }
 
-    event LogState(bool approved, bytes32 noteHash, address sender);
-    // event LogMyInputNotes(bytes inputNotes);
-    event LogProofOutput(bytes proofOutput);
-
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
         
-        (, bytes32 noteHash, ) = inputNotes.get(0).extractNote();
-        // emit LogMyInputNotes(inputNotes);
-        emit LogState(confidentialApproved[noteHash][msg.sender], noteHash, msg.sender);
-        emit LogProofOutput(_proofOutput);
+        uint256 length = inputNotes.getLength();
+        for (uint i = 0; i < length; i = i.add(1)) {
+            (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
+            require(
+                confidentialApproved[noteHash][msg.sender] == true,
+                "sender does not have approval to spend input note"
+            );
+        }
 
-        // uint256 length = inputNotes.getLength();
-        // for (uint i = 0; i < length; i = i.add(1)) {
-        //     (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
-        //     require(
-        //         confidentialApproved[noteHash][msg.sender] == true,
-        //         "sender does not have approval to spend input note"
-        //     );
-        // }
+        ace.updateNoteRegistry(_proof, msg.sender, _proofOutput);
 
-        // ace.updateNoteRegistry(_proof, _proofOutput, msg.sender);
+        logInputNotes(inputNotes);
+        logOutputNotes(outputNotes);
 
-        // logInputNotes(inputNotes);
-        // logOutputNotes(outputNotes);
-
-        // if (publicValue < 0) {
-        //     emit ConvertTokens(publicOwner, uint256(-publicValue));
-        // }
-        // if (publicValue > 0) {
-        //     emit RedeemTokens(publicOwner, uint256(publicValue));
-        // }
-    }
-
-    function publicApprove(bytes32 _proofHash, uint256 _value) public {
-        ace.publicApprove(msg.sender, _proofHash, _value);
+        if (publicValue < 0) {
+            emit ConvertTokens(publicOwner, uint256(-publicValue));
+        }
+        if (publicValue > 0) {
+            emit RedeemTokens(publicOwner, uint256(publicValue));
+        }
     }
 
     function logInputNotes(bytes memory inputNotes) internal {
