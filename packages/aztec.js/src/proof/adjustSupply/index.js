@@ -83,11 +83,24 @@ adjustSupply.encodeAdjustSupplyTransaction = ({
     );
 
     const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
+        inputNotes: [{
+            ...outputNotes[0],
+            forceMetadata: true,
+        }],
+        outputNotes: [{
+            ...inputNotes[0],
+            forceNoMetadata: true,
+        }],
         publicOwner,
         publicValue,
-    }]).slice(0x42)}`;
+    },
+    {
+        inputNotes: [],
+        outputNotes: outputNotes.slice(1),
+        publicOwner,
+        publicValue,
+    },
+    ]).slice(0x42)}`;
     return { proofData, expectedOutput, challenge };
 };
 
