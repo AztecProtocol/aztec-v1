@@ -4,7 +4,7 @@ const chai = require('chai');
 const { randomHex } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
-const proof = require('../../../src/proof/adjustSupply');
+const proof = require('../../../src/proof/mint');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
@@ -29,7 +29,7 @@ function validateGroupElement(xHex, yHex) {
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
-describe('AdjustSupply proof construction tests', () => {
+describe('Mint proof construction tests', () => {
     it('proof.constructProof creates a proof with well-formed outputs', () => {
         const newTotalMinted = 50;
         const oldTotalMinted = 30;

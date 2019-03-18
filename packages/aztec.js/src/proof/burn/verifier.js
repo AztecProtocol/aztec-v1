@@ -1,8 +1,8 @@
 /**
- * Verification algorithm for AZTEC adjustSupply zero-knowledge proofs
+ * Verification algorithm for AZTEC burn zero-knowledge proofs
  *
  * @namespace verifier
- * @memberof module:proof.adjustSupply
+ * @memberof module:proof.burn
  */
 const utils = require('@aztec/dev-utils');
 const BN = require('bn.js');
@@ -19,10 +19,10 @@ const { groupReduction } = bn128;
 const verifier = {};
 
 /**
- * Verify an AZTEC adjustSupply zero-knowledge proof
+ * Verify an AZTEC burn zero-knowledge proof
  *
  * @method verifyProof
- * @memberof module:proof.adjustSupply.verifier
+ * @memberof module:proof.burn.verifier
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
  * @param {number} m number of input notes
  * @param {string} challengeHex hex-string formatted proof challenge
@@ -36,7 +36,7 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
         rollingHash,
         notes,
         challenge,
-    } = proofUtils.convertTranscript(proofData, m, challengeHex, errors, 'adjustSupply');
+    } = proofUtils.convertTranscript(proofData, m, challengeHex, errors, 'burn');
 
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));

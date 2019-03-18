@@ -1,7 +1,7 @@
 /**
  * Constructs AZTEC join-split zero-knowledge proofs
  *
- * @module proof.adjustSupply
+ * @module proof.burn
  */
 
 const BN = require('bn.js');
@@ -21,8 +21,8 @@ const {
 const { groupReduction } = bn128;
 
 
-const adjustSupply = {};
-adjustSupply.verifier = verifier;
+const burn = {};
+burn.verifier = verifier;
 
 /**
  * Generate random blinding scalars, conditional on the AZTEC join-split proof statement
@@ -33,7 +33,7 @@ adjustSupply.verifier = verifier;
  * @param {number} n number of notes
  * @param {number} m number of input notes
  */
-adjustSupply.generateBlindingScalars = (n) => {
+burn.generateBlindingScalars = (n) => {
     const m = 1;
     let runningBk = new BN(0).toRed(groupReduction);
     const scalars = [...Array(n)].map((v, i) => {
@@ -57,15 +57,19 @@ adjustSupply.generateBlindingScalars = (n) => {
     return scalars;
 };
 
-adjustSupply.encodeAdjustSupplyTransaction = ({
-    inputNotes,
-    outputNotes,
+burn.encodeBurnTransaction = ({
+    newTotalBurned,
+    oldTotalBurned,
+    adjustedNotes,
     senderAddress,
 }) => {
     const {
         proofData: proofDataRaw,
         challenge,
-    } = adjustSupply.constructProof([...inputNotes, ...outputNotes], senderAddress);
+    } = burn.constructProof([...newTotalBurned, ...oldTotalBurned, ...adjustedNotes], senderAddress);
+
+    const inputNotes = newTotalBurned;
+    const outputNotes = [...oldTotalBurned, ...adjustedNotes];
 
     const inputOwners = inputNotes.map(m => m.owner);
     const outputOwners = outputNotes.map(n => n.owner);
@@ -74,7 +78,7 @@ adjustSupply.encodeAdjustSupplyTransaction = ({
 
     // const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
 
-    const proofData = inputCoder.adjustSupply(
+    const proofData = inputCoder.burn(
         proofDataRaw,
         challenge,
         inputOwners,
@@ -106,16 +110,16 @@ adjustSupply.encodeAdjustSupplyTransaction = ({
 
 
 /**
- * Construct AZTEC adjustSupply proof transcript
+ * Construct AZTEC burn proof transcript
  *
  * @method constructProof
- * @memberof proof.adjustSupply
+ * @memberof proof.burn
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
  * @returns {Object} proof data and challenge
  */
-adjustSupply.constructProof = (notes, sender) => {
+burn.constructProof = (notes, sender) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
     const m = 1;
@@ -179,4 +183,4 @@ adjustSupply.constructProof = (notes, sender) => {
     };
 };
 
-module.exports = adjustSupply;
+module.exports = burn;
