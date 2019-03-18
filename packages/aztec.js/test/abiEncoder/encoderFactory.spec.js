@@ -166,18 +166,15 @@ describe('inputCoder tests', () => {
             } = joinSplitProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const { privateKey } = accounts[index];
-
-                const domainParams = sign.generateAZTECDomainParams(contractAddress, constants.AZTEC_TEST_DOMAIN_PARAMS);
-
+                const domain = sign.generateAZTECDomainParams(contractAddress, constants.AZTEC_TEST_DOMAIN_PARAMS);
+                const schema = constants.AZTEC_NOTE_SIGNATURE;
                 const message = {
                     note: proofData[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
                 };
-                const schema = constants.AZTEC_NOTE_SIGNATURE;
-
-                const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+                const { privateKey } = accounts[index];
+                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
 

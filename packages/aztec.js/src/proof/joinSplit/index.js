@@ -6,7 +6,7 @@
 
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const { constants } = require('@aztec/dev-utils');
+const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const extractor = require('./extractor');
 const helpers = require('./helpers');
@@ -18,10 +18,9 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const sign = require('../../sign');
 
-const { groupReduction } = bn128;
 const { outputCoder, inputCoder } = abiEncoder;
+const { groupReduction } = bn128;
 const joinSplitEncode = inputCoder.joinSplit;
-
 
 const joinSplit = {};
 joinSplit.extractor = extractor;
@@ -255,20 +254,16 @@ joinSplit.encodeJoinSplitTransaction = ({
     } = joinSplit.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
 
     const inputSignatures = inputNotes.map((inputNote, index) => {
-        const { privateKey } = inputNoteOwners[index];
-
-        const domainParams = sign.generateAZTECDomainParams(validatorAddress, constants.ACE_DOMAIN_PARAMS);
-
+        const domain = sign.generateAZTECDomainParams(validatorAddress, constants.ACE_DOMAIN_PARAMS);
+        const schema = constants.ACE_NOTE_SIGNATURE;
         const message = {
-            proofId: 1,
+            proof: JOIN_SPLIT_PROOF,
             note: proofDataRaw[index].slice(2, 6),
             challenge,
             sender: senderAddress,
         };
-
-        const schema = constants.ACE_NOTE_SIGNATURE;
-
-        const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+        const { privateKey } = inputNoteOwners[index];
+        const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
         return signature;
     });
 

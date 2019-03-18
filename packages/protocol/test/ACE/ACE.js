@@ -7,24 +7,20 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const { constants: { CRS }, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
 
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ACE', (accounts) => {
-    // the proof is represented as an uint24 that compresses 3 uint8s:
-    // 1 * 256**(2) + 0 * 256**(1) + 1 * 256**(0)
-    const JOIN_SPLIT_PROOF = 65537;
-
     // Creating a collection of tests that should pass
     describe('initialization tests', () => {
         let ace;
@@ -101,9 +97,11 @@ contract('ACE', (accounts) => {
         it('should validate a join-split transaction', async () => {
             const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
             expect(receipt.status).to.equal(true);
+
+            const hex = parseInt(JOIN_SPLIT_PROOF, 10).toString(16);
             const hashData = [
                 padLeft(proofHash.slice(2), 64),
-                padLeft(JOIN_SPLIT_PROOF.toString(16), 64),
+                padLeft(hex, 64),
                 padLeft(accounts[0].slice(2), 64),
             ].join('');
             const validatedProofHash = keccak256(`0x${hashData}`);
@@ -122,9 +120,9 @@ contract('ACE', (accounts) => {
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
             const firstResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
             expect(firstResult).to.equal(true);
-            // await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]);
-            // const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
-            // expect(secondResult).to.equal(false);
+            await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]);
+            const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
+            expect(secondResult).to.equal(false);
         });
     });
 

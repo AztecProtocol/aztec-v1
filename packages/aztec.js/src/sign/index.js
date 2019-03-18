@@ -15,7 +15,7 @@ const eip712 = require('./eip712');
 const secp256k1 = require('../secp256k1');
 
 // For backwards compatibility. TODO: remove
-const defaultDomainParams = {
+const defaultDomain = {
     name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
     version: '1',
 };
@@ -24,7 +24,7 @@ const sign = {};
 sign.eip712 = eip712;
 
 /**
- * generate EIP712 domain parameters for AZTECERC20Bridge.sol
+ * Generate EIP712 domain parameters for AZTECERC20Bridge.sol
  * @method generateAZTECDomainParams
  * @memberof module:sign
  * @param {string} verifyingContract address of target contract
@@ -32,38 +32,17 @@ sign.eip712 = eip712;
  */
 sign.generateAZTECDomainParams = function generateAZTECDomainParams(
     verifyingContract,
-    domainParams = defaultDomainParams
+    domain = defaultDomain
 ) {
     return {
-        name: domainParams.name,
-        version: domainParams.version,
+        name: domain.name,
+        version: domain.version,
         verifyingContract,
     };
 };
 
 /**
- * create an EIP712 ECDSA signature over structured data
- * @method signStructuredData
- * @memberof module:sign
- * @param {string[]} domainParams variables required for the domain hash part of the signature
- * @param {string} schema JSON object that defines the structured data of the signature
- * @param {string} message the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
- * @param {string} privateKey the private key of message signer
- * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
- */
-sign.signStructuredData = function signStructuredData(domainParams, schema, message, privateKey) {
-    const typedData = {
-        ...schema,
-        domain: domainParams,
-        message,
-    };
-    const encodedTypedData = eip712.encodeTypedData(typedData);
-    const signature = secp256k1.ecdsa.signMessage(encodedTypedData, privateKey);
-    return { signature, encodedTypedData };
-};
-
-/**
- * create an EIP712 ECDSA signature over structured data
+ * Create an EIP712 ECDSA signature over structured data
  * @method signStructuredData
  * @memberof module:sign
  * @param {string} schema JSON object that defines the structured data of the signature
@@ -73,18 +52,18 @@ sign.signStructuredData = function signStructuredData(domainParams, schema, mess
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
 sign.signStructuredData = function signStructuredData(domain, schema, message, privateKey) {
-    const data = {
+    const typedData = {
         domain,
         ...schema,
         message,
     };
-    const typedData = eip712.encodeTypedData(data);
-    const signature = secp256k1.ecdsa.signMessage(typedData, privateKey);
-    return { typedData, signature };
+    const encodedTypedData = eip712.encodeTypedData(typedData);
+    const signature = secp256k1.ecdsa.signMessage(encodedTypedData, privateKey);
+    return { signature, encodedTypedData };
 };
 
 /**
- * recover the Ethereum address of an EIP712 AZTEC note signature
+ * Recover the Ethereum address of an EIP712 AZTEC note signature
  * @method recoverAddress
  * @memberof module:sign
  * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)

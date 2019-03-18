@@ -5,7 +5,7 @@ const BN = require('bn.js');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const { constants: { CRS }, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -20,10 +20,6 @@ const ZkAsset = artifacts.require('./contracts/ZkAsset/ZkAsset');
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAsset', (accounts) => {
-    // the proof is represented as an uint24 that compresses 3 uint8s:
-    // 1 * 256**(2) + 0 * 256**(1) + 1 * 256**(0)
-    const JOIN_SPLIT_PROOF = 65537;
-
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];

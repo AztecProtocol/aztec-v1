@@ -3,19 +3,21 @@
 const aztec = require('aztec.js');
 const { constants: { CRS, K_MAX } } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
-const { constants } = require('@aztec/dev-utils');
+
+// ### Internal Dependencies
+const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { sign } = aztec;
 
 const { outputCoder, inputCoder } = aztec.abiEncoder;
 const joinSplitEncode = inputCoder.joinSplit;
+
 // ### Artifacts
 const ABIEncoder = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitABIEncoderTest');
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
-
 
 contract('Join Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
@@ -47,19 +49,16 @@ contract('Join Split ABI Encoder', (accounts) => {
                 challenge,
             } = aztec.proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const { privateKey } = aztecAccounts[index];
-
-                const domainParams = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.ACE_DOMAIN_PARAMS);
-
+                const domain = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.ACE_DOMAIN_PARAMS);
+                const schema = constants.ACE_NOTE_SIGNATURE;
                 const message = {
-                    proofId: 1,
+                    proof: JOIN_SPLIT_PROOF,
                     note: proofData[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
                 };
-                const schema = constants.ACE_NOTE_SIGNATURE;
-
-                const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+                const { privateKey } = aztecAccounts[index];
+                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
             const publicOwner = aztecAccounts[0].address;

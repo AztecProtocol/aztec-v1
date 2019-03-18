@@ -6,7 +6,7 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const { constants: { AZTEC_NOTE_SIGNATURE_V2, CRS } } = require('@aztec/dev-utils');
+const { constants: { AZTEC_NOTE_SIGNATURE_V2, CRS }, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -37,10 +37,6 @@ const signNote = (verifyingContract, noteHash, spender, status, privateKey) => {
 };
 
 contract('ZkAssetOwnable', (accounts) => {
-    // the proof is represented as an uint24 that compresses 3 uint8s:
-    // 1 * 256**(2) + 0 * 256**(1) + 1 * 256**(0)
-    const JOIN_SPLIT_PROOF = 65537;
-
     let ace;
     let aztecJoinSplit;
     let erc20;
@@ -185,8 +181,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await zkAssetOwnable.setProofs(epoch, filter);
             await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
 
-            // eslint-disable-next-line no-unused-vars
-            const { typedData, signature } = signNote(
+            const { signature } = signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
@@ -210,8 +205,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
 
             await Promise.all([0, 1].map((i) => {
-                // eslint-disable-next-line no-unused-vars
-                const { typedData, signature } = signNote(
+                const { signature } = signNote(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,

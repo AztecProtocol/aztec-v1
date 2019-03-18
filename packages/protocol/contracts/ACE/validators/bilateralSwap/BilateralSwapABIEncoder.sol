@@ -35,13 +35,13 @@ library BilateralSwapABIEncoder {
             // 0x00 - 0x160  = scratch data for EIP712 signature computation and note hash computation
             // ACE_NOTE_SIGNATURE struct hash variables
             // 0x80 = struct hash
-            // 0xa0 = proofId (1)
+            // 0xa0 = proof object (65537)
             // 0xc0 = noteHash
             // 0xe0 = challenge
             // 0x100 = sender
             // struct hash of 'ACE_NOTE_SIGNATURE'
             mstore(0x80, 0x6c1a087ea32e7586c4241d8ad29826c79af0e5ae5c44ca4be88caa5a18b99446)
-            mstore(0xa0, 0x01)
+            mstore(0xa0, 0x10001)
             mstore(0xe0, calldataload(0x124)) // challenge
             mstore(0x100, calldataload(0x24))
 
