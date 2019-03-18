@@ -20,9 +20,9 @@ const CRS = [
  *
  * @module params
  */
-module.exports = {
+const constants = {
     /**
-     *  The domain and signature constants below are related to EIP712
+     *  The domain and signature constants related to EIP712
      */ 
     ACE_DOMAIN_PARAMS: {
         name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
@@ -31,7 +31,7 @@ module.exports = {
     ACE_NOTE_SIGNATURE: {
         types: {
             ACE_NOTE_SIGNATURE: [
-                { name: 'proofId', type: 'uint16' },
+                { name: 'proof', type: 'uint24' },
                 { name: 'note', type: 'bytes32[4]' },
                 { name: 'challenge', type: 'uint256' },
                 { name: 'sender', type: 'address' },
@@ -100,22 +100,39 @@ module.exports = {
      * when used for DAI token, 1 AZTEC note value = 0.1 DAI
      */
     ERC20_SCALING_FACTOR: new BN('100000000000000000', 10),
+    /** 
+     * Error codes for use during proof construction
+     */
+    ERROR_TYPES: {
+        SCALAR_TOO_BIG: 'SCALAR_TOO_BIG',
+        SCALAR_IS_ZERO: 'SCALAR_IS_ZERO',
+        X_TOO_BIG: 'X_TOO_BIG',
+        Y_TOO_BIG: 'Y_TOO_BIG',
+        NOT_ON_CURVE: 'NOT_ON_CURVE',
+        BAD_BLINDING_FACTOR: 'BAD_BLINDING_FACTOR',
+        KPUBLIC_MALFORMED: 'KPUBLIC_MALFORMED',
+        VIEWING_KEY_MALFORMED: 'VIEWING_KEY_MALFORMED',
+        M_TOO_BIG: 'M_TOO_BIG',
+        BAD_K: 'BAD_K',
+        GAMMA_IS_INFINITY: 'GAMMA_IS_INFINTY',
+        SIGMA_IS_INFINTY: 'SIGMA_IS_INFINITY',
+        NO_ADD_CHALLENGEVAR: 'NO_ADD_CHALLENGEVAR',
+        INCORRECT_NOTE_NUMBER: 'INCORRECT_NOTE_NUMBER',
+        GAMMA_SIGMA_NOT_ON_CURVE: 'GAMMA_SIGMA_NOT_ON_CURVE',
+        CHALLENGE_RESPONSE_FAIL: 'CHALLENGE_RESPONSE_FAIL',
+        KA_TOO_BIG: 'KA_TOO_BIG',
+        KB_TOO_BIG: 'KB_TOO_BIG',
+        ZA_TOO_BIG: 'ZA_TOO_BIG',
+        ZB_TOO_BIG: 'ZB_TOO_BIG',
+        BLINDING_FACTOR_IS_NULL: 'BLINDING_FACTOR_IS_NULL',
+        POINT_AT_INFINITY: 'POINT_AT_INFINITY',
+        NOTE_VALUE_TOO_BIG: 'NOTE_VALUE_TOO_BIG',
+        SHOULD_THROW_IS_UNDEFINED: 'SHOULD_THROW_IS_UNDEFINED',
+    },
     /**
      * Dummy network id used in contract testing
      */
     FAKE_NETWORK_ID: 100,
-    /** Maximum value that can be held in an AZTEC Note
-     *  @constant K_MAX
-     *  @type {string}
-     *  @default 1048576
-     */
-    K_MAX: 1048576,
-    /** Minimum value of an AZTEC Note
-     *  @constant K_MIN
-     *  @type {string}
-     *  @default 0
-     */
-    K_MIN: 0,
     /** modulus of bn128 curve's finite field (p)
      *  @constant FIELD_MODULUS
      *  @type {BN}
@@ -144,6 +161,18 @@ module.exports = {
      *  @default 8489654445897228341090914135473290831551238522473825886865492707826370766375
      */
     H_Y,
+    /** Maximum value that can be held in an AZTEC Note
+     *  @constant K_MAX
+     *  @type {string}
+     *  @default 1048576
+     */
+    K_MAX: 1048576,
+    /** Minimum value of an AZTEC Note
+     *  @constant K_MIN
+     *  @type {string}
+     *  @default 0
+     */
+    K_MIN: 0,
     /** bytes32-formatted trusted setup public key
      *  @constant t2
      *  @type {BN}
@@ -159,33 +188,6 @@ module.exports = {
      * Generic burning Etheruem address
      */
     ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
-    /** 
-     * error codes for use during proof construction
-     */
-    ERROR_TYPES: {
-        SCALAR_TOO_BIG: 'SCALAR_TOO_BIG',
-        SCALAR_IS_ZERO: 'SCALAR_IS_ZERO',
-        X_TOO_BIG: 'X_TOO_BIG',
-        Y_TOO_BIG: 'Y_TOO_BIG',
-        NOT_ON_CURVE: 'NOT_ON_CURVE',
-        BAD_BLINDING_FACTOR: 'BAD_BLINDING_FACTOR',
-        KPUBLIC_MALFORMED: 'KPUBLIC_MALFORMED',
-        VIEWING_KEY_MALFORMED: 'VIEWING_KEY_MALFORMED',
-        M_TOO_BIG: 'M_TOO_BIG',
-        BAD_K: 'BAD_K',
-        GAMMA_IS_INFINITY: 'GAMMA_IS_INFINTY',
-        SIGMA_IS_INFINTY: 'SIGMA_IS_INFINITY',
-        NO_ADD_CHALLENGEVAR: 'NO_ADD_CHALLENGEVAR',
-        INCORRECT_NOTE_NUMBER: 'INCORRECT_NOTE_NUMBER',
-        GAMMA_SIGMA_NOT_ON_CURVE: 'GAMMA_SIGMA_NOT_ON_CURVE',
-        CHALLENGE_RESPONSE_FAIL: 'CHALLENGE_RESPONSE_FAIL',
-        KA_TOO_BIG: 'KA_TOO_BIG',
-        KB_TOO_BIG: 'KB_TOO_BIG',
-        ZA_TOO_BIG: 'ZA_TOO_BIG',
-        ZB_TOO_BIG: 'ZB_TOO_BIG',
-        BLINDING_FACTOR_IS_NULL: 'BLINDING_FACTOR_IS_NULL',
-        POINT_AT_INFINITY: 'POINT_AT_INFINITY',
-        NOTE_VALUE_TOO_BIG: 'NOTE_VALUE_TOO_BIG',
-        SHOULD_THROW_IS_UNDEFINED: 'SHOULD_THROW_IS_UNDEFINED',
-    },
 };
+
+module.exports = constants;

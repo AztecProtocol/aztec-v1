@@ -6,6 +6,9 @@ const {
         AZTEC_TEST_DOMAIN_PARAMS,
         AZTEC_NOTE_SIGNATURE,
     },
+    proofs: {
+        JOIN_SPLIT_PROOF,
+    },
 } = require('@aztec/dev-utils');
 
 
@@ -14,6 +17,7 @@ const crypto = require('crypto');
 const chai = require('chai');
 const { padLeft, sha3 } = require('web3-utils');
 const ethUtil = require('ethereumjs-util');
+
 const proofUtils = require('../../src/proof/proofUtils');
 const sign = require('../../src/sign');
 const eip712 = require('../../src/sign/eip712');
@@ -71,20 +75,16 @@ describe('sign tests', () => {
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const domainParams = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
-
+            const domain = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
+            const schema = ACE_NOTE_SIGNATURE;
             const message = {
-                proofId: 1,
+                proof: JOIN_SPLIT_PROOF,
                 note: noteString,
                 challenge,
                 sender: senderAddress,
             };
-
-            const schema = ACE_NOTE_SIGNATURE;
-
             const { privateKey } = accounts[0];
-
-            const { signature } = sign.signStructuredData(domainParams, schema, message, privateKey);
+            const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
 
             const expectedLength = 3;
             const expectedNumCharacters = 64; // v, r and s should be 32 bytes
@@ -101,19 +101,17 @@ describe('sign tests', () => {
             const senderAddress = proofUtils.randomAddress();
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-            const domainParams = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
 
+            const domain = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
+            const schema = ACE_NOTE_SIGNATURE;
             const message = {
-                proofId: 1,
+                proof: JOIN_SPLIT_PROOF,
                 note: noteString,
                 challenge,
                 sender: senderAddress,
             };
-
-            const schema = ACE_NOTE_SIGNATURE;
-
             const { privateKey, publicKey } = accounts[0];
-            const { signature, encodedTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+            const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
             console.log('encoded typed data: ', encodedTypedData);
             console.log('signature: ', signature);
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
@@ -123,7 +121,6 @@ describe('sign tests', () => {
             const s = Buffer.from(signature[2].slice(2), 'hex');
 
             const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
-
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
     });
@@ -135,23 +132,19 @@ describe('sign tests', () => {
             const senderAddress = proofUtils.randomAddress();
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-            const domainParams = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
-
+            
+            const domain = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
+            const schema = ACE_NOTE_SIGNATURE;
             const message = {
-                proofId: 1,
+                proof: JOIN_SPLIT_PROOF,
                 note: noteString,
                 challenge,
                 sender: senderAddress,
             };
-
-            const schema = ACE_NOTE_SIGNATURE;
-
             const { privateKey, publicKey } = accounts[0];
-
-            const { signature, encodedTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+            const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
 
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
-
             const v = parseInt(signature[0], 16); // has to be in number format
             const r = Buffer.from(signature[1].slice(2), 'hex');
             const s = Buffer.from(signature[2].slice(2), 'hex');
@@ -168,21 +161,18 @@ describe('sign tests', () => {
             const senderAddress = proofUtils.randomAddress();
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-            const domainParams = sign.generateAZTECDomainParams(verifyingContract, AZTEC_TEST_DOMAIN_PARAMS);
 
+            const domain = sign.generateAZTECDomainParams(verifyingContract, AZTEC_TEST_DOMAIN_PARAMS);
+            const schema = AZTEC_NOTE_SIGNATURE;
             const message = {
                 note: noteString,
                 challenge,
                 sender: senderAddress,
             };
-
-            const schema = AZTEC_NOTE_SIGNATURE;
             const { privateKey, publicKey } = accounts[0];
-
-            const { signature, encodedTypedData } = sign.signStructuredData(domainParams, schema, message, privateKey);
+            const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
 
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
-
             const v = parseInt(signature[0], 16); // has to be in number format
             const r = Buffer.from(signature[1].slice(2), 'hex');
             const s = Buffer.from(signature[2].slice(2), 'hex');
