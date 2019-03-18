@@ -7,7 +7,9 @@ const HexString = require('./HexString');
 const bilateralProof = require('../../src/proof/bilateralSwap');
 const joinSplitProof = require('../../src/proof/joinSplit');
 const dividendComputationProof = require('../../src/proof/dividendComputation');
-const mintProof = require('../../src/proof/adjustSupply');
+const mintProof = require('../../src/proof/mint');
+const burnProof = require('../../src/proof/burn');
+
 
 const abiEncoder = require('../../src/abiEncoder');
 const secp256k1 = require('../../src/secp256k1');
@@ -236,8 +238,8 @@ describe('inputCoder tests', () => {
     });
 
 
-    describe('adjustSupply tests work', () => {
-        it('adjustSupply is correctly formatted', () => {
+    describe('mint tests work', () => {
+        it('mint is correctly formatted', () => {
             // Setup
             let accounts = [];
             let notes = [];
@@ -263,7 +265,7 @@ describe('inputCoder tests', () => {
             const inputOwners = inputNotes.map(n => n.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
-            const result = new HexString(abiEncoder.inputCoder.adjustSupply(
+            const result = new HexString(abiEncoder.inputCoder.mint(
                 proofData,
                 challenge,
                 inputOwners,

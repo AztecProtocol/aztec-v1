@@ -9,14 +9,14 @@ const sinon = require('sinon');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const bn128 = require('../../../src/bn128');
-const proof = require('../../../src/proof/adjustSupply');
-const verifier = require('../../../src/proof/adjustSupply/verifier');
+const proof = require('../../../src/proof/mint');
+const verifier = require('../../../src/proof/mint/verifier');
 
 const { ERROR_TYPES } = utils.constants;
 
 const { expect } = chai;
 
-describe('AdjustSupply proof verification tests', () => {
+describe('Mint proof verification tests', () => {
     describe('success states', () => {
         it('proof.constructProof creates a valid join-split proof', () => {
             const newTotalMinted = 50;
@@ -35,7 +35,7 @@ describe('AdjustSupply proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates adjustSupply proof with 0 notes minted i.e. no notes are actually minted', () => {
+        it('validates mint proof with 0 notes minted i.e. no notes are actually minted', () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 50;
 
@@ -51,7 +51,7 @@ describe('AdjustSupply proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates adjustSupply proof with large number of minted notes', () => {
+        it('validates mint proof with large number of minted notes', () => {
             const newTotalMinted = 100;
             const oldTotalMinted = 10;
 

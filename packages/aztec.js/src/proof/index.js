@@ -1,13 +1,15 @@
 const bilateralSwap = require('./bilateralSwap');
 const joinSplit = require('./joinSplit');
 const dividendComputation = require('./dividendComputation');
-const adjustSupply = require('./adjustSupply');
+const mint = require('./mint');
+const burn = require('./burn');
 const proofUtils = require('./proofUtils');
 
 module.exports = {
     bilateralSwap,
     joinSplit,
     dividendComputation,
-    adjustSupply,
+    mint,
+    burn,
     proofUtils,
 };
