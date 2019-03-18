@@ -132,22 +132,26 @@ contract('ZkAsset', (accounts) => {
                     opts
                 );
             }));
-            await zkAsset.publicApprove(
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[0],
                 10,
                 { from: accounts[0] }
             );
-            await zkAsset.publicApprove(
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[1],
                 40,
                 { from: accounts[1] }
             );
-            await zkAsset.publicApprove(
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[2],
                 130,
                 { from: accounts[2] }
             );
-            await zkAsset.publicApprove(
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[4],
                 30,
                 { from: accounts[3] }

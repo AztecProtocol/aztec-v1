@@ -274,8 +274,8 @@ contract ACE is IAZTEC {
 
     function updateNoteRegistry(
         uint24 _proof,
-        bytes memory _proofOutput,
-        address _proofSender
+        address _proofSender,
+        bytes memory _proofOutput
     ) public {
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
@@ -398,9 +398,9 @@ contract ACE is IAZTEC {
     /** 
     * @dev This should be called from an asset contract.
     */
-    function publicApprove(address _spender, bytes32 _proofHash, uint256 _value) public {
-        NoteRegistry storage registry = registries[msg.sender];
-        registry.publicApprovals[_spender][_proofHash] = _value;
+    function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
+        NoteRegistry storage registry = registries[_registryOwner];
+        registry.publicApprovals[msg.sender][_proofHash] = _value;
     }
 
     /**
