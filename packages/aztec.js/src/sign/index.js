@@ -6,11 +6,7 @@
  * @memberof module:sign
  */
 
-const {
-    constants: {
-        AZTEC_NOTE_SIGNATURE,
-    },
-} = require('@aztec/dev-utils');
+const { constants: { AZTEC_NOTE_SIGNATURE } } = require('@aztec/dev-utils');
 const eip712 = require('./eip712');
 const secp256k1 = require('../secp256k1');
 

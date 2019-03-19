@@ -23,14 +23,16 @@ contract ACE is IAZTEC {
     using SafeMath for uint256;
     using SafeMath8 for uint8;
 
-    bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
-        "ACE_NOTE_SIGNATURE(",
-            "uint24 proof,",
-            "bytes32[4] note,",
-            "uint256 challenge,",
-            "address sender",
-        ")"
-    ));
+    // bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
+    //     "ACENoteSignature(",
+    //         "uint24 proof,",
+    //         "bytes32[4] note,",
+    //         "uint256 challenge,",
+    //         "address sender",
+    //     ")"
+    // ));
+    bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH =
+        0x21853faea366a53b2f6a3cbf1da39ef94d2dbb994639a58005781220badbd5de;
 
     event SetCommonReferenceString(bytes32[6] _commonReferenceString);
     event SetProof(
@@ -94,8 +96,6 @@ contract ACE is IAZTEC {
         owner = msg.sender;
     }
 
-    event DebugValidator(bytes32 foo);
-
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
     *      linked to `_proof`. The validator smart contract will have the following interface:
@@ -120,7 +120,6 @@ contract ACE is IAZTEC {
         // validate that the provided _proof object maps to a corresponding validator and also that
         // the validator is not disabled
         address validatorAddress = extractValidatorAddress(_proof);
-        // emit DebugValidator(ACE_NOTE_SIGNATURE_TYPE_HASH);
         bytes memory proofOutputs;
         assembly {
             // the first evm word of the 3rd function param is the abi encoded location of proof data
@@ -147,7 +146,7 @@ contract ACE is IAZTEC {
             let callSize := add(proofDataSize, 0x104)
             switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00) 
             case 0 {
-                // mstore(0x00, 400) revert(0x00, 0x20) // call failed because proof is invalid
+                mstore(0x00, 400) revert(0x00, 0x20) // call failed because proof is invalid
             }
 
             // copy returndata to memory
@@ -161,19 +160,6 @@ contract ACE is IAZTEC {
 
         // if this proof satisfies a balancing relationship, we need to record the proof hash
         (, uint8 category, ) = _proof.getProofComponents();
-
-        // emit DebugState(_proof, _sender, _proofData);
-        // emit DebugProofData(_proofData);
-
-        bytes memory proofOutput = proofOutputs.get(0);
-        // emit DebugProofOutput(proofOutput);
-
-        bytes32 proofHashZ = keccak256(proofOutput);
-        // emit DebugProofHash(proofHashZ);
-
-        bytes32 validatedProofHashZ = keccak256(abi.encode(proofHashZ, _proof, msg.sender));
-        // emit DebugValidatedProofHash(validatedProofHashZ);
-        
         if (category == uint8(ProofCategory.BALANCED)) {
             uint256 length = proofOutputs.getLength();
             for (uint256 i = 0; i < length; i = i.add(1)) {
@@ -184,12 +170,6 @@ contract ACE is IAZTEC {
         }
         return proofOutputs;
     }
-
-    // event DebugState(uint24 proof, address sender, bytes proofData);
-    event DebugProofData(bytes proofData);
-    event DebugProofOutput(bytes proofOutput);
-    event DebugProofHash(bytes32 proofHash);
-    event DebugValidatedProofHash(bytes32 validatedProofHash);
 
     /**
     * @dev Clear storage variables set when validating zero-knowledge proofs.

@@ -35,17 +35,6 @@ contract JoinSplitInterface is LibEIP712 {
  * and the AZTEC token standard, stay tuned for updates!
  **/
 contract JoinSplit is LibEIP712 {
-    // bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
-    //     "ACE_NOTE_SIGNATURE(",
-    //         "uint24 proof,",
-    //         "bytes32[4] note,",
-    //         "uint256 challenge,",
-    //         "address sender",
-    //     ")"
-    // ));
-    bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = 
-        0x4ad696921d88a50b3a73bd963c372d81f8b350184a0cebe14b81e5c928e2b49e;
-
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
@@ -58,7 +47,6 @@ contract JoinSplit is LibEIP712 {
 
 
     function() external payable {
-        bytes32 typeHash = ACE_NOTE_SIGNATURE_TYPE_HASH;
         bytes32 domainHash = EIP712_DOMAIN_HASH;
         assembly {
             // We don't check for function signatures,
@@ -398,6 +386,6 @@ contract JoinSplit is LibEIP712 {
     
         // if we've reached here, we've validated the join split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        JoinSplitABIEncoder.encodeAndExit(typeHash, domainHash);
+        JoinSplitABIEncoder.encodeAndExit(domainHash);
     }
 }

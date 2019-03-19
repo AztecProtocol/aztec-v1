@@ -112,8 +112,6 @@ describe('sign tests', () => {
             };
             const { privateKey, publicKey } = accounts[0];
             const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
-            console.log('encoded typed data: ', encodedTypedData);
-            console.log('signature: ', signature);
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
             const v = parseInt(signature[0], 16); // has to be in number format
@@ -125,14 +123,13 @@ describe('sign tests', () => {
         });
     });
 
-    describe('EIP712 implementation tests for AZTEC_NOTE_SIGNATURE', () => {
-        it('for AZTEC_NOTE_SIGNATURE, check public key is correctly recovered from signature params', () => {
+    describe('EIP712 implementation tests for ACE_NOTE_SIGNATURE', () => {
+        it('for ACE_NOTE_SIGNATURE, check public key is correctly recovered from signature params', () => {
             const verifyingContract = proofUtils.randomAddress();
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
             const senderAddress = proofUtils.randomAddress();
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-            
             const domain = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
             const schema = ACE_NOTE_SIGNATURE;
             const message = {
@@ -154,7 +151,7 @@ describe('sign tests', () => {
         });
     });
 
-    describe('EIP712 implementation tests for NOTE_SIGNATURE', () => {
+    describe('EIP712 implementation tests for AZTEC_NOTE_SIGNATURE', () => {
         it('for AZTEC_NOTE_SIGNATURE, check public key is correctly recovered from signature params', () => {
             const verifyingContract = proofUtils.randomAddress();
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
