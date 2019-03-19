@@ -41,7 +41,7 @@ library BilateralSwapABIEncoder {
             // 0x100 = sender
             // type hash of 'ACE_NOTE_SIGNATURE'
             mstore(0x80, 0x21853faea366a53b2f6a3cbf1da39ef94d2dbb994639a58005781220badbd5df)
-            mstore(0xa0, 0x10001)
+            mstore(0xa0, 0x10002)
             mstore(0xe0, calldataload(0x124)) // challenge
             mstore(0x100, calldataload(0x24))
 
