@@ -15,7 +15,7 @@ contract ERC20Mintable is ERC20 {
     * @param _value The amount of tokens to adjustSupply.
     * @return A boolean that indicates if the operation was successful.
     */
-    function adjustSupply(address _to, uint256 _value) public returns (bool) {
+    function mint(address _to, uint256 _value) public returns (bool) {
         _mint(_to, _value);
         return true;
     }
