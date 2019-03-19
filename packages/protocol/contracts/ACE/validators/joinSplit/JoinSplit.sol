@@ -14,8 +14,7 @@ contract JoinSplitInterface is LibEIP712 {
         address, 
         uint[6] calldata
     ) 
-        external 
-        pure 
+        external view
         returns (bytes memory) 
     {}
 }
@@ -36,7 +35,6 @@ contract JoinSplitInterface is LibEIP712 {
  * and the AZTEC token standard, stay tuned for updates!
  **/
 contract JoinSplit is LibEIP712 {
-
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction will throw.
@@ -46,14 +44,16 @@ contract JoinSplit is LibEIP712 {
      * For a basic 'joinSplit' with 2 inputs and 2 outputs = 844,900 gas.
      * AZTEC is written in YUL to enable manual memory management and for other efficiency savings.
      **/
+
+
     function() external payable {
+        bytes32 domainHash = EIP712_DOMAIN_HASH;
         assembly {
             // We don't check for function signatures,
             // there's only one function that ever gets called: validateJoinSplit()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract
             // through a compatible ABI
             validateJoinSplit()
-
             /**
              * New calldata map
              * 0x04:0x24      = calldata location of proofData byte array
@@ -93,11 +93,7 @@ contract JoinSplit is LibEIP712 {
                 mstore(0x2c0, kn)
                 mstore(0x2e0, m)
                 mstore(0x300, calldataload(0x164))
-                /* mstore(0x00, m)
-                mstore(0x20, n)
-                mstore(0x40, kn)
-                mstore(0x60, calldataload(0x24))
-                return(0x00, 0x80) */
+
                 kn := mulmod(sub(gen_order, kn), challenge, gen_order) // we actually want c*k_{public}
                 hashCommitments(notes, n)
                 let b := add(0x320, mul(n, 0x80))
@@ -111,133 +107,136 @@ contract JoinSplit is LibEIP712 {
                 //  which adds some minor alterations
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
 
-                // Get the calldata index of this note
-                let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
+                    // Get the calldata index of this note
+                    let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
 
-                // Define variables k, a and c.
-                // If i <= m then
-                //   k = kBar_i
-                //   a = aBar_i
-                //   c = challenge
-                // If i > m then we add a modification for the pairing optimization
-                //   k = kBar_i * x_i
-                //   a = aBar_i * x_i
-                //   c = challenge * x_i
-                // Set j = i - (m + 1).
-                // x_0 = 1
-                // x_1 = keccak256(input string)
-                // all other x_{j} = keccak256(x_{j-1})
-                // The reason for doing this is that the point  \sigma_i^{-cx_j} can be re-used in the pairing check
-                // Instead of validating e(\gamma_i, t_2) == e(\sigma_i, g_2) for all i = [m+1,\ldots,n]
-                // We validate e(\Pi_{i=m+1}^{n}\gamma_i^{-cx_j}, t_2) == e(\Pi_{i=m+1}^{n}\sigma_i^{cx_j}, g_2).
-                // x_j is a pseudorandom variable whose entropy source is the input string, allowing for
-                // a sum of commitment points to be evaluated in one pairing comparison
-                let k
-                let a := calldataload(add(noteIndex, 0x20))
-                let c := challenge
+                    // Define variables k, a and c.
+                    // If i <= m then
+                    //   k = kBar_i
+                    //   a = aBar_i
+                    //   c = challenge
+                    // If i > m then we add a modification for the pairing optimization
+                    //   k = kBar_i * x_i
+                    //   a = aBar_i * x_i
+                    //   c = challenge * x_i
+                    // Set j = i - (m + 1).
+                    // x_0 = 1
+                    // x_1 = keccak256(input string)
+                    // all other x_{j} = keccak256(x_{j-1})
+                    // The reason for doing this is that the point  \sigma_i^{-cx_j} can be re-used in the pairing check
+                    // Instead of validating e(\gamma_i, t_2) == e(\sigma_i, g_2) for all i = [m+1,\ldots,n]
+                    // We validate e(\Pi_{i=m+1}^{n}\gamma_i^{-cx_j}, t_2) == e(\Pi_{i=m+1}^{n}\sigma_i^{cx_j}, g_2).
+                    // x_j is a pseudorandom variable whose entropy source is the input string, allowing for
+                    // a sum of commitment points to be evaluated in one pairing comparison
+                    let k
+                    let a := calldataload(add(noteIndex, 0x20))
+                    let c := challenge
 
-                // We don't transmit kBar_{n-1} in the proof to save space, instead we derive it from the
-                // homomorphic sum condition: \sum_{i=0}^{m-1}\bar{k}_i = \sum_{i=m}^{n-1}\bar{k}_i + k_{public}c, 
-                // We can recover \bar{k}_{n-1}.
-                // If m=n then \bar{k}_{n-1} = \sum_{i=0}^{n-1}\bar{k}_i + k_{public}
-                // else \bar{k}_{n-1} = \sum_{i=0}^{m-1}\bar{k}_i - \sum_{i=m}^{n-1}\bar{k}_i - k_{public}
-                switch eq(add(i, 0x01), n)
-                case 1 {
-                    k := kn
+                    // We don't transmit kBar_{n-1} in the proof to save space, instead we derive it from the
+                    // homomorphic sum condition: \sum_{i=0}^{m-1}\bar{k}_i = \sum_{i=m}^{n-1}\bar{k}_i + k_{public}c, 
+                    // We can recover \bar{k}_{n-1}.
+                    // If m=n then \bar{k}_{n-1} = \sum_{i=0}^{n-1}\bar{k}_i + k_{public}
+                    // else \bar{k}_{n-1} = \sum_{i=0}^{m-1}\bar{k}_i - \sum_{i=m}^{n-1}\bar{k}_i - k_{public}
+                    switch eq(add(i, 0x01), n)
+                    case 1 {
+                        k := kn
 
-                    // if all notes are input notes, invert k
-                    if eq(m, n) {
-                        k := sub(gen_order, k)
+                        // if all notes are input notes, invert k
+                        if eq(m, n) {
+                            k := sub(gen_order, k)
+                        }
                     }
-                }
-                case 0 { k := calldataload(noteIndex) }
+                    case 0 { k := calldataload(noteIndex) }
 
-                // Check this commitment is well formed...
-                validateCommitment(noteIndex, k, a)
+                    // Check this commitment is well formed...
+                    validateCommitment(noteIndex, k, a)
 
-                // If i > m then this is an output note.
-                // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-                switch gt(add(i, 0x01), m)
-                case 1 {
+                    // If i > m then this is an output note.
+                    // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
+                    switch gt(add(i, 0x01), m)
+                    case 1 {
 
-                    // before we update k, update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
-                    kn := addmod(kn, sub(gen_order, k), gen_order)
-                    let x := mod(mload(0x00), gen_order)
-                    k := mulmod(k, x, gen_order)
-                    a := mulmod(a, x, gen_order)
-                    c := mulmod(challenge, x, gen_order)
+                        // before we update k, update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
+                        kn := addmod(kn, sub(gen_order, k), gen_order)
+                        let x := mod(mload(0x00), gen_order)
+                        k := mulmod(k, x, gen_order)
+                        a := mulmod(a, x, gen_order)
+                        c := mulmod(challenge, x, gen_order)
 
-                    // calculate x_{j+1}
-                    mstore(0x00, keccak256(0x00, 0x20))
-                }
-                case 0 {
+                        // calculate x_{j+1}
+                        mstore(0x00, keccak256(0x00, 0x20))
+                    }
+                    case 0 {
 
-                    // nothing to do here except update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
-                    kn := addmod(kn, k, gen_order)
-                }
-            
-                // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
-                // Memory map:
-                // 0x20: \gamma_iX
-                // 0x40: \gamma_iY
-                // 0x60: k_i
-                // 0x80: hX
-                // 0xa0: hY
-                // 0xc0: a_i
-                // 0xe0: \sigma_iX
-                // 0x100: \sigma_iY
-                // 0x120: -c
-                calldatacopy(0xe0, add(noteIndex, 0x80), 0x40)
-                calldatacopy(0x20, add(noteIndex, 0x40), 0x40)
-                mstore(0x120, sub(gen_order, c)) 
-                mstore(0x60, k)
-                mstore(0xc0, a)
+                        // nothing to do here except update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
+                        kn := addmod(kn, k, gen_order)
+                    }
+                
+                    // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
+                    // Memory map:
+                    // 0x20: \gamma_iX
+                    // 0x40: \gamma_iY
+                    // 0x60: k_i
+                    // 0x80: hX
+                    // 0xa0: hY
+                    // 0xc0: a_i
+                    // 0xe0: \sigma_iX
+                    // 0x100: \sigma_iY
+                    // 0x120: -c
+                    calldatacopy(0xe0, add(noteIndex, 0x80), 0x40)
+                    calldatacopy(0x20, add(noteIndex, 0x40), 0x40)
+                    mstore(0x120, sub(gen_order, c)) 
+                    mstore(0x60, k)
+                    mstore(0xc0, a)
 
-                // Call bn128 scalar multiplication precompiles
-                // Represent point + multiplication scalar in 3 consecutive blocks of memory
-                // Store \sigma_i^{-c} at 0x1a0:0x200
-                // Store \gamma_i^{k} at 0x120:0x160
-                // Store h^{a} at 0x160:0x1a0
-                let result := staticcall(gas, 7, 0xe0, 0x60, 0x1a0, 0x40)
-                result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x120, 0x40))
-                result := and(result, staticcall(gas, 7, 0x80, 0x60, 0x160, 0x40))
+                    // Call bn128 scalar multiplication precompiles
+                    // Represent point + multiplication scalar in 3 consecutive blocks of memory
+                    // Store \sigma_i^{-c} at 0x1a0:0x200
+                    // Store \gamma_i^{k} at 0x120:0x160
+                    // Store h^{a} at 0x160:0x1a0
+                    let result := staticcall(gas, 7, 0xe0, 0x60, 0x1a0, 0x40)
+                    result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x120, 0x40))
+                    result := and(result, staticcall(gas, 7, 0x80, 0x60, 0x160, 0x40))
 
-                // Call bn128 group addition precompiles
-                // \gamma_i^{k} and h^{a} in memory block 0x120:0x1a0
-                // Store result of addition at 0x160:0x1a0
-                result := and(result, staticcall(gas, 6, 0x120, 0x80, 0x160, 0x40))
+                    // Call bn128 group addition precompiles
+                    // \gamma_i^{k} and h^{a} in memory block 0x120:0x1a0
+                    // Store result of addition at 0x160:0x1a0
+                    result := and(result, staticcall(gas, 6, 0x120, 0x80, 0x160, 0x40))
 
-                // \gamma_i^{k}h^{a} and \sigma^{-c} in memory block 0x160:0x1e0
-                // Store resulting point B at memory index b
-                result := and(result, staticcall(gas, 6, 0x160, 0x80, b, 0x40))
+                    // \gamma_i^{k}h^{a} and \sigma^{-c} in memory block 0x160:0x1e0
+                    // Store resulting point B at memory index b
+                    result := and(result, staticcall(gas, 6, 0x160, 0x80, b, 0x40))
 
-                // We have \sigma^{-c} at 0x1a0:0x200
-                // And \sigma_{acc} at 0x1e0:0x200
-                // If i = m + 1 (i.e. first output note)
-                // then we set \gamma_{acc} and \sigma_{acc} to \gamma_i, -\sigma_i
-                if eq(i, m) {
-                    mstore(0x260, mload(0x20))
-                    mstore(0x280, mload(0x40))
-                    mstore(0x1e0, mload(0xe0))
-                    mstore(0x200, sub(0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47, mload(0x100)))
-                }
+                    // We have \sigma^{-c} at 0x1a0:0x200
+                    // And \sigma_{acc} at 0x1e0:0x200
+                    // If i = m + 1 (i.e. first output note)
+                    // then we set \gamma_{acc} and \sigma_{acc} to \gamma_i, -\sigma_i
+                    if eq(i, m) {
+                        mstore(0x260, mload(0x20))
+                        mstore(0x280, mload(0x40))
+                        mstore(0x1e0, mload(0xe0))
+                        mstore(
+                            0x200,
+                            sub(0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47, mload(0x100))
+                        )
+                    }
 
-                // If i > m + 1 (i.e. subsequent output notes)
-                // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
-                // we then calculate \gamma^{cx} and add into \gamma_{acc}
-                if gt(i, m) {
-                    mstore(0x60, c)
-                    result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
+                    // If i > m + 1 (i.e. subsequent output notes)
+                    // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
+                    // we then calculate \gamma^{cx} and add into \gamma_{acc}
+                    if gt(i, m) {
+                        mstore(0x60, c)
+                        result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
 
-                    // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
-                    result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
+                        // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
+                        result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
 
-                    // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
-                    result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40))
-                }
+                        // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
+                        result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40))
+                    }
 
-                // throw transaction if any calls to precompiled contracts failed
-                if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
+                    // throw transaction if any calls to precompiled contracts failed
+                    if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
 
@@ -384,9 +383,9 @@ contract JoinSplit is LibEIP712 {
                 mstore(0x00, keccak256(0x320, mul(n, 0x80)))
             }
         }
-
+    
         // if we've reached here, we've validated the join split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        JoinSplitABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
+        JoinSplitABIEncoder.encodeAndExit(domainHash);
     }
 }

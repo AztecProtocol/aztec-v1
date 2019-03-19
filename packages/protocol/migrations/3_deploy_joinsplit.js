@@ -7,9 +7,8 @@ JoinSplit.abi = JoinSplitInterface.abi;
 
 module.exports = (deployer) => {
     return deployer.deploy(JoinSplit).then(async ({ address: joinSplitAddress }) => {
-        const proofId = 1;
-        const isBalanced = true;
+        const proof = 65537;
         const ace = await ACE.at(ACE.address);
-        await ace.setProof(proofId, joinSplitAddress, isBalanced);
+        await ace.setProof(proof, joinSplitAddress);
     });
 };
