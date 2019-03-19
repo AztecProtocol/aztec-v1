@@ -4,6 +4,19 @@ import "../../../libs/LibEIP712.sol";
 
 library JoinSplitABIEncoder {
 
+    // Keeping it as a constant because computing it yields an out of gas error
+    //
+    // bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
+    //     "ACENoteSignature(",
+    //         "uint24 proof,",
+    //         "bytes32[4] note,",
+    //         "uint256 challenge,",
+    //         "address sender",
+    //     ")"
+    // ));
+    bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = 
+        0x21853faea366a53b2f6a3cbf1da39ef94d2dbb994639a58005781220badbd5df;
+
     /**
      * Calldata map
      * 0x04:0x24      = calldata location of proofData byte array
@@ -24,9 +37,8 @@ library JoinSplitABIEncoder {
      * 0x1e4:0x204    = offset in byte array to metadata
      */
 
-    function encodeAndExit(bytes32 typeHash, bytes32 domainHash) internal view {
-        // bytes32 typeHash = ACE_NOTE_SIGNATURE_TYPE_HASH;
-        // emit Debug(typeHash);
+    function encodeAndExit(bytes32 domainHash) internal view {
+        bytes32 typeHash = ACE_NOTE_SIGNATURE_TYPE_HASH;
         assembly {
             // set up initial variables
             let notes := add(0x104, calldataload(0x184))
@@ -135,10 +147,10 @@ library JoinSplitABIEncoder {
                 mstore(s, 0xa0)
                 // store note owner in `s + 0x20`. If ECDSA recovery fails, or signing address is `0`, throw an error
                 if or(
-                iszero(mload(add(s, 0x20))),
-                iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x20), 0x20))
+                    iszero(mload(add(s, 0x20))),
+                    iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x20), 0x20))
                 ) {
-                mstore(0x00, 400) revert(0x00, 0x20)
+                    mstore(0x00, 400) revert(0x00, 0x20)
                 }
                 // store note hash in `s + 0x40`
                 mstore(add(s, 0x40), mload(0xc0))
@@ -146,25 +158,25 @@ library JoinSplitABIEncoder {
                 mstore(add(s, 0x60), 0x40)
                 // store compressed note coordinate gamma in `s + 0x80`
                 mstore(
-                add(s, 0x80),
-                or(
-                    calldataload(add(noteIndex, 0x40)),
-                    mul(
-                    and(calldataload(add(noteIndex, 0x60)), 0x01),
-                    0x8000000000000000000000000000000000000000000000000000000000000000
+                    add(s, 0x80),
+                    or(
+                        calldataload(add(noteIndex, 0x40)),
+                        mul(
+                            and(calldataload(add(noteIndex, 0x60)), 0x01),
+                            0x8000000000000000000000000000000000000000000000000000000000000000
+                        )
                     )
-                )
                 )
                 // store compressed note coordinate sigma in `s + 0xa0`
                 mstore(
-                add(s, 0xa0),
-                or(
-                    calldataload(add(noteIndex, 0x80)),
-                    mul(
-                    and(calldataload(add(noteIndex, 0xa0)), 0x01),
-                    0x8000000000000000000000000000000000000000000000000000000000000000
+                    add(s, 0xa0),
+                    or(
+                        calldataload(add(noteIndex, 0x80)),
+                        mul(
+                            and(calldataload(add(noteIndex, 0xa0)), 0x01),
+                            0x8000000000000000000000000000000000000000000000000000000000000000
+                        )
                     )
-                )
                 )
                 // compute the relative offset to index this note in our returndata
                 mstore(add(add(inputPtr, 0x40), mul(i, 0x20)), sub(s, inputPtr)) // relative offset to note
@@ -236,7 +248,6 @@ library JoinSplitABIEncoder {
             let notesLength := sub(s, 0x280)
             mstore(0x1e0, add(0x80, notesLength)) // store length of proofOutput at 0x160
             mstore(0x180, add(0xe0, notesLength)) // store length of proofOutputs at 0x100
-            // mstore(0x00 , notesLength) return(0x00, 0x20)
             mstore(0x160, 0x20)
             return(0x160, add(0x120, notesLength)) // return the final byte array
         }
@@ -245,15 +256,6 @@ library JoinSplitABIEncoder {
 
 
 contract JoinSplitABIEncoderTest is LibEIP712 {
-    bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
-        "ACE_NOTE_SIGNATURE(",
-            "uint24 proof,",
-            "bytes32[4] note,",
-            "uint256 challenge,",
-            "address sender",
-        ")"
-    ));
-
     function validateJoinSplit(
         bytes calldata, 
         address, 
@@ -262,6 +264,6 @@ contract JoinSplitABIEncoderTest is LibEIP712 {
         external view
         returns (bytes memory) 
     {
-        JoinSplitABIEncoder.encodeAndExit(ACE_NOTE_SIGNATURE_TYPE_HASH, EIP712_DOMAIN_HASH);
+        JoinSplitABIEncoder.encodeAndExit(EIP712_DOMAIN_HASH);
     }
 }

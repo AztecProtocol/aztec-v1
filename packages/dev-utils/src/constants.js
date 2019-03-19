@@ -30,7 +30,7 @@ const constants = {
     },
     ACE_NOTE_SIGNATURE: {
         types: {
-            ACE_NOTE_SIGNATURE: [
+            ACENoteSignature: [
                 { name: 'proof', type: 'uint24' },
                 { name: 'note', type: 'bytes32[4]' },
                 { name: 'challenge', type: 'uint256' },
@@ -42,7 +42,7 @@ const constants = {
                 { name: 'verifyingContract', type: 'address' },
             ],
         },
-        primaryType: 'ACE_NOTE_SIGNATURE',
+        primaryType: 'ACENoteSignature',
     },
     AZTEC_RINKEBY_DOMAIN_PARAMS: {
         name: 'AZTEC_RINKEBY_DOMAIN',
@@ -56,7 +56,7 @@ const constants = {
     },
     AZTEC_NOTE_SIGNATURE: {
         types: {
-            AZTEC_NOTE_SIGNATURE: [
+            AZTECNoteSignature: [
                 { name: 'note', type: 'bytes32[4]' },
                 { name: 'challenge', type: 'uint256' },
                 { name: 'sender', type: 'address' },
@@ -67,7 +67,7 @@ const constants = {
                 { name: 'verifyingContract', type: 'address' },
             ],
         },
-        primaryType: 'AZTEC_NOTE_SIGNATURE',
+        primaryType: 'AZTECNoteSignature',
     },
     AZTEC_NOTE_SIGNATURE_V2: {
         types: {
