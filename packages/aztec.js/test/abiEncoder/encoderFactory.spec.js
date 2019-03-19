@@ -1,6 +1,7 @@
 const { constants: { K_MAX } } = require('@aztec/dev-utils');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const HexString = require('./HexString');
 
@@ -165,8 +166,16 @@ describe('inputCoder tests', () => {
             } = joinSplitProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
+                const domain = sign.generateAZTECDomainParams(contractAddress, constants.AZTEC_TEST_DOMAIN_PARAMS);
+                const schema = constants.AZTEC_NOTE_SIGNATURE;
+                const message = {
+                    note: proofData[index].slice(2, 6),
+                    challenge,
+                    sender: senderAddress,
+                };
                 const { privateKey } = accounts[index];
-                return sign.signNote(proofData[index], challenge, senderAddress, contractAddress, privateKey, 100);
+                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+                return signature;
             });
 
             const publicOwner = accounts[0].address;

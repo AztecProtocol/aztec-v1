@@ -1,6 +1,6 @@
 {
   "name": "@aztec/dev-utils",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "author": "AZTEC",
   "description": "Dev utils to be shared across AZTEC packages",
   "license": "LGPL-3.0",

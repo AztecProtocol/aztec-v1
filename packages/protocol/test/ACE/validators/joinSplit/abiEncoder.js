@@ -4,15 +4,20 @@ const aztec = require('aztec.js');
 const { constants: { CRS, K_MAX } } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
+// ### Internal Dependencies
+const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+
+const { sign } = aztec;
+
 const { outputCoder, inputCoder } = aztec.abiEncoder;
 const joinSplitEncode = inputCoder.joinSplit;
+
 // ### Artifacts
 const ABIEncoder = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitABIEncoderTest');
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
-
 
 contract('Join Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
@@ -23,6 +28,7 @@ contract('Join Split ABI Encoder', (accounts) => {
     describe('success states', () => {
         beforeEach(async () => {
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
+
             notes = aztecAccounts.map(({ publicKey }) => {
                 return aztec.note.create(publicKey, randomNoteValue());
             });
@@ -37,19 +43,23 @@ contract('Join Split ABI Encoder', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
+
             const {
                 proofData,
                 challenge,
             } = aztec.proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const { privateKey } = aztecAccounts[index];
-                return aztec.sign.signACENote(
-                    proofData[index],
+                const domain = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.ACE_DOMAIN_PARAMS);
+                const schema = constants.ACE_NOTE_SIGNATURE;
+                const message = {
+                    proof: JOIN_SPLIT_PROOF,
+                    note: proofData[index].slice(2, 6),
                     challenge,
-                    senderAddress,
-                    joinSplitAbiEncoder.address,
-                    privateKey
-                );
+                    sender: senderAddress,
+                };
+                const { privateKey } = aztecAccounts[index];
+                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+                return signature;
             });
             const publicOwner = aztecAccounts[0].address;
             const outputOwners = outputNotes.map(n => n.owner);

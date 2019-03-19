@@ -4,6 +4,7 @@
  * @module proofUtils
  */
 
+const { padLeft } = require('web3-utils');
 const BN = require('bn.js');
 const { errors: { customError }, constants, constants: { K_MAX } } = require('@aztec/dev-utils');
 const crypto = require('crypto');
@@ -165,6 +166,10 @@ proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
     });
     const challenge = finalHash.keccak(groupReduction);
     return { blindingFactors, challenge };
+};
+
+proofUtils.randomAddress = () => {
+    return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
 };
 
 /**

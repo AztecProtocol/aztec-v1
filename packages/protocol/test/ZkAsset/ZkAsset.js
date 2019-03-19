@@ -5,39 +5,34 @@ const BN = require('bn.js');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const { constants: { CRS }, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const ACE = artifacts.require('./contracts/ACE/ACE');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
-const ZKERC20 = artifacts.require('./contracts/ZKERC20/ZKERC20');
-const NoteRegistry = artifacts.require('./contracts/ACE/NoteRegistry');
+const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
+const ZkAsset = artifacts.require('./contracts/ZkAsset/ZkAsset');
+
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-
-contract('ZKERC20', (accounts) => {
+contract('ZkAsset', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
         let ace;
         let erc20;
-        let zkerc20;
+        let zkAsset;
         let scalingFactor;
         let aztecJoinSplit;
-        let noteRegistry;
-        let noteRegistryAddress;
         const proofs = [];
         const tokensTransferred = new BN(100000);
 
         beforeEach(async () => {
-            ace = await ACE.new({
-                from: accounts[0],
-            });
+            ace = await ACE.new({ from: accounts[0] });
             aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             notes = [
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
@@ -45,7 +40,7 @@ contract('ZKERC20', (accounts) => {
             ];
             await ace.setCommonReferenceString(CRS);
             aztecJoinSplit = await JoinSplit.new();
-            await ace.setProof(1, aztecJoinSplit.address, true);
+            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -110,73 +105,75 @@ contract('ZKERC20', (accounts) => {
             });
 
             erc20 = await ERC20Mintable.new();
-            zkerc20 = await ZKERC20.new(
-                'Cocoa',
-                false,
-                false,
-                true,
-                10,
+            scalingFactor = new BN(10);
+            zkAsset = await ZkAsset.new(
+                ace.address,
                 erc20.address,
-                ace.address
+                scalingFactor
             );
 
-            noteRegistryAddress = await zkerc20.noteRegistry();
-            noteRegistry = await NoteRegistry.at(noteRegistryAddress);
-            scalingFactor = new BN(10);
-            await Promise.all(accounts.map(account => erc20.mint(
-                account,
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            )));
-            await Promise.all(accounts.map(account => erc20.approve(
-                noteRegistryAddress,
-                scalingFactor.mul(tokensTransferred),
-                { from: account, gas: 4700000 }
-            )));
-            // approving tokens
-            await noteRegistry.publicApprove(
+            await Promise.all(accounts.map((account) => {
+                const opts = { from: accounts[0], gas: 4700000 };
+                return erc20.mint(
+                    account,
+                    scalingFactor.mul(tokensTransferred),
+                    opts
+                );
+            }));
+            await Promise.all(accounts.map((account) => {
+                const opts = { from: account, gas: 4700000 };
+                return erc20.approve(
+                    ace.address,
+                    scalingFactor.mul(tokensTransferred),
+                    opts
+                );
+            }));
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[0],
                 10,
                 { from: accounts[0] }
             );
-            await noteRegistry.publicApprove(
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[1],
                 40,
                 { from: accounts[1] }
             );
-            await noteRegistry.publicApprove(
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[2],
                 130,
                 { from: accounts[2] }
             );
-            await noteRegistry.publicApprove(
+            await ace.publicApprove(
+                zkAsset.address,
                 proofHashes[4],
                 30,
                 { from: accounts[3] }
             );
         });
 
-        it('will can update a note registry with output notes', async () => {
-            // const { receipt } = await ace.validateProof(1, accounts[0], proofs[0].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[0].proofData);
+        it('should update a note registry with output notes', async () => {
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[0].proofData);
             expect(receipt.status).to.equal(true);
         });
 
-        it('can update a note registry by consuming input notes, with kPublic negative', async () => {
-            await zkerc20.confidentialTransfer(proofs[0].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[1].proofData);
+        it('should update a note registry by consuming input notes, with kPublic negative', async () => {
+            await zkAsset.confidentialTransfer(proofs[0].proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[1].proofData);
             expect(receipt.status).to.equal(true);
         });
 
-        it('can update a note registry by consuming input notes, with kPublic positive', async () => {
-            await zkerc20.confidentialTransfer(proofs[2].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[3].proofData);
+        it('should update a note registry by consuming input notes, with kPublic positive', async () => {
+            await zkAsset.confidentialTransfer(proofs[2].proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[3].proofData);
             expect(receipt.status).to.equal(true);
         });
 
-        it('can update a note registry with kPublic = 0', async () => {
-            await zkerc20.confidentialTransfer(proofs[4].proofData);
-            const { receipt } = await zkerc20.confidentialTransfer(proofs[5].proofData);
+        it('should update a note registry with kPublic = 0', async () => {
+            await zkAsset.confidentialTransfer(proofs[4].proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(proofs[5].proofData);
             expect(receipt.status).to.equal(true);
         });
     });
