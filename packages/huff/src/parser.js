@@ -279,7 +279,13 @@ parser.processMacroInternal = (
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
-                ({ macros, templateName } = parser.parseTemplate(templateName, macros, index));
+                console.log('I think a template? opvalue = ', op.value);
+                console.log('template arguments = ', templateArguments);
+                const parsedName = parser.substituteTemplateArguments([op.value], templateRegExps);
+                if (parsedName.length !== 1) {
+                    throw new Error('cannot parse template invokation ', parsedName);
+                }
+                ({ macros, templateName } = parser.parseTemplate(parsedName[0], macros, index));
                 const result = parser.processMacroInternal(templateName, offset, [], macros, map, jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
                 jumptable[index] = result.unmatchedJumps;

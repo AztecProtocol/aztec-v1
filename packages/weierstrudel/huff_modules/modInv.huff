@@ -1,0 +1,443 @@
+#include "constants.huff"
+#include "modInvHelpers.huff"
+// compute a modular inverse of a variable 'z', a variable in the finite field of bn128 coordinates
+// to do this, we need to exponentiate z by (p-2)
+// p-2 = 0x30644E72E131A029B85045B68181585D97816A916871CA8D3C208C16D87CFD45
+// this can be broken down into the following bit sequences:
+/*
+    
+    110000
+    011
+    0010001
+    00111
+    00111
+    0010111
+    00001               // nb if we find another '10011' this is worth combining
+    0011
+    0001101
+    0000000101
+    0011011
+    1
+    0000101
+    0000010001
+    011011
+    01101
+    00000011
+    0000001
+    01011
+    000010111           // last occurance of '23'
+    011                 // last occurance of '3' n.b. (if we find another 11001 can combine this = next sequence)
+    001
+    01111
+    0000001011
+    010101
+    0010001
+    01101
+    0000111
+    000111              // last occurance of '7'
+    0010101         
+    0001101             // last occurance of '13'
+    001111              // last occurance of '15'
+    00001
+    0000010001          // last occurance of '17'
+    1                   // last occurance of '1'
+    000001011           // last occurance of '11'
+    011011              // last occurance of '27'
+    000011111
+    0011111             // last occurance of '31'
+    10101               // last occurance of '21'
+    000101              // last occurance of '5'
+*/
+
+// algorithm can be broken into two steps:
+// step 1: use addition chains to create the following variables:
+// z 3z 5z 7z 9z 11z 15z 17z 21z 23z 27z 31z
+// then, push 48z on the stack (21z+27z)
+// step 2: use 'square and multiply' to perform modular exponentiation,
+// using the lookup 'table' in step 1 to minimize required multiplications.
+
+// we store our 'lookup table' on the stack to save on gas
+// The ordering of the lookup table is as follows:
+// 3z 23z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+// this allows us to consume lookup table values in the order of their last occurance
+
+// the general structure of the step 2 is as follows:
+// starting stack state:
+// t p 3z 23z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+// (t = accumulator variable, p = modulus of bn128 prime field)
+// we perform <x> squarings, where <x> is the number of squarings required before
+// a multiplication is needed. Because our exponent is fixed, we can hardcode this.
+// When a multiplication is required, the required lookup value is either duplicated, or 
+// consumed entirely if it is no longer needed
+
+
+// this is the reverse order of our stack
+// 5 21 31 27 11 1 17 15 13 7 23 3 
+
+// we want our actual stack to look like this:
+// 3 23 7 13 15 17 1 11 27 31 21 5
+
+// 3z 23z 7z 13z 15z 17z 1z 11z 27z 31z 21z 5z
+
+
+// we also want 24 - can get from 11 and 13
+#define macro INITIALIZE_PRIMES = takes(1) returns(12) {
+    P() dup1 dup1 dup1 dup1
+    // p p p p p z
+    swap5
+    // z p p p p p
+    dup2 dup1 dup1 dup1 dup1 dup1
+}
+
+#define macro CREATE_LOOKUP_ADDITION_CHAIN = takes(0) returns(13) {
+    // we want the following stack state:
+    // 23z 3z 7z 13z 15z 17z 1z 11z 27z 31z 21z 5z
+    // (12 elements)
+    // start by pushing 11 instances of 'p' onto the stack, 
+    // inserting 'z' into its appropriate position
+    INITIALIZE_PRIMES()
+    // p p p p p p z p p p p p
+    // create 2z and 4z (needed for addition chain)
+    dup1 dup8 dup1 mulmod
+    // 2z p p p p p p z p p p p p
+    dup2 dup2 dup1 mulmod
+    // 4z 2z p p p p p p z p p p p p
+    dup3 dup10 dup4 mulmod swap4 // (3z)
+    // p 4z 2z p 3z p p p p z p p p p p
+    dup5 dup4 mulmod swap14 // (5z)
+    // p 4z 2z p 3z p p p p z p p p p 5z
+    dup15 dup4 mulmod swap5 // (7z)
+    // p 4z 2z p 3z 7z p p p z p p p p 5z
+    dup6 dup3 mulmod swap10 // (11z)
+    
+    dup11 dup4 mulmod swap6 // (13z)
+    dup7 dup4 mulmod swap7 // (15z)
+    dup8 dup4 mulmod swap8 // (17z)
+    dup9 dup3 mulmod swap13 // (21z)
+    // p 4z 2z p 3z 7z 13z 15z 17z z 11z p p 21z 5
+    swap1   // 4z p 2z
+    swap2   // 2z p 4z
+    dup14 mulmod // 23z 4z p 3z 7z 13z 15z 17z z 11z p p 21z 5
+    swap2 // (23z, consume 2z)
+    // p 4z 23z 3z 7z 13z 15z 17z z 11z p p 21z 5z
+    dup3 dup3 mulmod swap10 // (27z)
+    // p 4z 23z 3z 7z 13z 15z 17z z 11z 27z p 21z 5z
+    swap1 // 4z p 23z 3z 7z 13z 15z 17z z 11z 27z p 21z 5z
+    dup11 mulmod // 31z 23z 3z 7z 13z 15z 17z z 11z 27z p 21z 5z
+    swap10 // (31z, consume 4z)
+    // p 23z 3z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+    dup1 dup11 dup14 mulmod // (get 48z, the start of our 'main loop')
+    // 48z p 23z 3z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+}
+
+// hmm missing some squarings
+#define macro MODINV_SQUARE_AND_MULTIPLY = takes(13) returns(0) {
+    // starting stack state:
+    // t p 23z 3z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+    GET_4_P<dup2>() SQR_3()
+    // t p p 23z 3z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+    dup5 mulmod // (need 3z)
+    GET_8_P<dup2>() SQR_7() dup9 mulmod // (17z)
+    GET_6_P<dup2>() SQR_5() dup6 mulmod // (7z)
+    GET_6_P<dup2>() SQR_5() dup6 mulmod // (7z)
+    GET_8_P<dup2>() SQR_7() dup4 mulmod // (23z)
+    GET_6_P<dup2>() SQR_5() dup10 mulmod // (z)
+    GET_5_P<dup2>() SQR_4() dup5 mulmod // (3z)
+    GET_8_P<dup2>() SQR_7() dup7 mulmod // (13z)
+    GET_11_P<dup2>() SQR_10() dup15 mulmod // (5z)
+    GET_8_P<dup2>() SQR_7() dup12 mulmod // (27z)
+    GET_2_P<dup2>() SQR_1() dup10 mulmod // (z)
+    GET_8_P<dup2>() SQR_7() dup15 mulmod // (5z)
+    GET_11_P<dup2>() SQR_10() dup9 mulmod // (17z)
+    GET_7_P<dup2>() SQR_6() dup12 mulmod // (27z)
+    GET_6_P<dup2>() SQR_5() dup7 mulmod // (13z)
+    GET_9_P<dup2>() SQR_8() dup5 mulmod // (3z)
+    GET_8_P<dup2>() SQR_7() dup10 mulmod // (z)
+    GET_6_P<dup2>() SQR_5() dup11 mulmod // (11z)
+    GET_9_P<dup2>() SQR_9()
+    // t p 23z 3z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+    // we want to multiply by 23z, and consume 3z as it's no longer needed
+    dup2 swap3 mulmod
+
+    GET_3_P<dup2>() SQR_3()
+    // t p 3z 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+    dup2 swap3 mulmod // (3z, consume it)
+    // t p 7z 13z 15z 17z z 11z 27z 31z 21z 5z
+    GET_4_P<dup2>() SQR_3() dup8 mulmod // (z) // 115
+    GET_6_P<dup2>() SQR_5() dup6 mulmod // (15z)
+    GET_11_P<dup2>() SQR_10() dup9 mulmod // (11z)
+    GET_7_P<dup2>() SQR_6() dup12 mulmod // (21z)
+    GET_8_P<dup2>() SQR_7() dup7 mulmod // (17z)
+    GET_6_P<dup2>() SQR_5() dup5 mulmod // (13z)
+    GET_8_P<dup2>() SQR_7() dup4 mulmod // (7z) 79
+    GET_6_P<dup2>() SQR_6() dup2 swap3 mulmod // (7z, consume)
+    // t p 13z 15z 17z z 11z 27z 31z 21z 5z
+    GET_8_P<dup2>() SQR_7() dup11 mulmod // (21z)
+    GET_7_P<dup2>() SQR_7() dup2 swap3 mulmod // (13z, consume)
+    GET_6_P<dup2>() SQR_6() dup2 swap3 mulmod // (15z, consume)
+    // t p 17z z 11z 27z 31z 21z 5z
+    GET_6_P<dup2>() SQR_5() dup5 mulmod // (z)
+    GET_10_P<dup2>() SQR_10() dup2 swap3 mulmod // (17z, consume)
+    GET_1_P<dup2>() SQR_1() dup2 swap3 mulmod // (z, consume)
+    GET_9_P<dup2>() SQR_9() dup2 swap3 mulmod // (11z, consume)
+    GET_6_P<dup2>() SQR_6() dup2 swap3 mulmod // (27z, consume)
+    // t p 31z 21z 5z
+    GET_10_P<dup2>() SQR_9() dup4 mulmod // (31z)
+    GET_7_P<dup2>() SQR_7() dup2 swap3 mulmod // (31z, consume)
+    GET_5_P<dup2>() SQR_5() dup2 swap3 mulmod // (21z, consume)
+    GET_6_P<dup2>() SQR_6()
+    // t p 5z
+    swap1 swap2 mulmod // (5z, consume)
+    // tadaa. Final stack state: t, our modular inverse
+}
+
+#define macro MODINV = takes(0) returns(1) {
+    CREATE_LOOKUP_ADDITION_CHAIN()
+    MODINV_SQUARE_AND_MULTIPLY()
+}
+
+
+template <x_calldata,y_calldata,x_memory,y_memory>
+#define macro UPDATE_POINT = takes(4) returns(0) {
+    // zT' zAcc p p p p zT
+}
+
+#define macro INV_LOC = takes(0) returns(1) { 0x00 }
+
+template <p,x_loc,x_mem,y_loc,y_mem>
+#define macro MONTGOMERY_BATCH_INVERSE = takes(0) returns(0) {
+    // z3 z1z2z3 z2 z1z2 z1
+    // Z3 Z2 Z1
+    // Z3' z3 Z2' z2 Z1'
+    // Z3' = Z1Z2Z3
+    // Z2' = Z1Z2
+    // Z1' = Z1
+
+    // z1z2z3 z3 z1z2 z2 z1
+    // z1z2' z3 z1' z2 1
+    // Z4 Z3 Z2 Z1
+    // z1z2z3| z4 z1z2| z3 z1 z2 1
+    // hmm
+    // I a5 z5 a4 z4 a3 z3 a2 z2 a1 z1
+    // 
+    P()
+    0x24 calldataload // z2
+    <p> dup1 dup1 dup1  // p p p p z1
+    dup1 dup6 0x04 calldataload mulmod // z1z2 p p p p z2
+    dup2 dup1 dup1 dup1 0x44 calldataload // z3 p p p p z1z3 p p p p z2
+    0x44 calldataload // z3 z1z2 p p p p z2
+    dup3 dup1 dup1 dup1 // p p p p z2 z0 p p p p z1
+    0x
+    dup11             // z1 p p p p z2 z0 p p p p z1
+    0x44 calldataload // z3 z1 p p p p z2 z0 p p p p z1
+    dup3 dup1 dup1 dup1 // p p p p z3 z1 p p p p z2 z0 p p p p z1
+    dup1 dup12 dup8 mulmod // z1z2 p p p p z3 z1 p p p p z2 z0 p p p p z1
+    0x64 calldataload // z4 z1z2 p p p p z3 z1 p p p p z2 z0 p p p p z1
+    dup3 dup1 dup1 dup1 // p p p p z4 z1z2 p p p p z3 ...
+    dup1 dup12 dup8 mulmod // z1z2z3 p p p p z4 z1z2 p p p p z3 ...
+    // ...
+    MODINV() INV_LOC() mstore // z1z2..zn-1 p p p p zn
+
+    INV_LOC() mload mulmod // zA p p p zn
+    dup2 dup2 dup1 mulmod // zzA zA p p p zn
+    dup2 dup2 <x_loc> calldataload // x zzA p zzA zA p p p
+    mulmod <x_mem> mstore // zzA zA p p p
+    mulmod <y_loc> calldataload // y zzzA p p
+    mulmod <y_mem> mstore // p zA zn p p p p zn-1
+
+    // ... zA p p p p zn p p p p zn-1
+    dup5 mulmod // zA' p p p  zn
+    INV_LOC() mload mulmod // zA'' p p zn
+    dup2 dup2 dup1 mulmod dup3 dup2 <x_loc> calldataload mulmod <x_mem> mstore
+    // zzA zA p p 
+    mulmod // zzzA p zn
+    <y_loc> calldataload mulmod <y_mem> mstore
+    // zn zn-1 p zA
+    mulmod // zn zA p p p p zn-1
+    swap5 // p zA p p p zn zn-1 // bleeeeurgh
+
+    // zt za p p p p zn
+    // zt zn p p p p za
+    // zt p p p za (ermmmm)
+
+    // to start with, zt = 1
+    // and zn = 1
+    // next, zn = Z(n-1) (and so on and so on)
+    // I p p p zn za
+    // zn p p p I za
+    // za p p p I zn
+    // I zn p p p zn' za'
+    // zn' zn p p p I za'
+    // zn'' p p I za'
+    // za' p p I zn' (and so on)
+
+    // waaaait a minute, I can roll I' into zn
+
+    // za p p p zn'
+    // za' p p zn'
+    // x zza' p zza' za' p p zn'
+    // zn' zn p p p p za
+    // zn'' p p p za
+    // za p p p zn''
+    // zn'' zn p p p p za
+
+    // so the pattern is zn p p p p za
+    // where zn is needed for za
+    // so I p p p z1z2z3z4 z5 p p p p z2z1z3 z4 p p p p z1z2 z3 p p p p z1
+
+    // <calldata_location> mload calldataload
+    // <p> dup1 dup1 dup1
+    // <calldata_location> mload <point_size*2> add calldataload   // z3 p p p p z1
+    // dup2 dup7 <calldata_location> mload <point_size> add calldataload mulmod // z1z2 z3 p p p p z1
+    // dup3 dup1 dup1 dup1 // p p p p z1z2 z3 p p p p z1 z2 p p p p z1
+ 
+    // <calldata_location> mload <point_size> add calldataload // z4 p p p p z1z2 z3 p p p p z1
+    // dup2 dup7 dup9 mulmod // z1z2z3 z4 p p p p z1z2 z3 p p p p z1 
+
+
+    // dup3 dup1 dup1 dup1
+    // <calldata_location> mload <point_size> add calldataload
+    // dup3 dup1 dup1 dup1
+    // dup2 dup7 dup9 mulmod
+}
+
+#define macro MONTY__INITIAL_OFFSET = takes(0) returns(1) {
+    0x20
+}
+
+#define macro MONTY__CALLDATA_ITERATOR = takes(0) returns(1) { 0x00 }
+#define macro MONTY__CALLDATA_ADJUSTOR = takes(0) returns(1) { 0x20 }
+
+template <calldata_location,point_size>
+#define macro MONTY_LOAD_1 = takes(0) returns(0) {
+    //                    z4 p p p p z1z2 z3 p p p p z2
+    // starting position: zi p p p p za zi' p p p p za'
+
+    // will make: z3 p p p p z2 z1
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1 // p p p p
+    <point_size*9> <calldata_location> mload sub calldataload // z_i p p p p
+}
+
+template <calldata_location,point_size>
+#define macro MONTY_LOAD_10 = takes(0) returns(0) {
+    // starting position: zi p p p p za
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1 // p p p p
+    <point_size*9> <calldata_location> mload sub calldataload // z_i p p p p
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size*8> <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size*7> <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size*6> <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size*5> <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size*4> <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size*3> <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size*2> jumpdest <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    <point_size> jumpdest <calldata_location> mload sub calldataload
+    jumpdest
+    dup2 dup7 dup9 mulmod
+    dup3 dup1 dup1 dup1
+    jumpdest jumpdest jumpdest <calldata_location> mload jumpdest calldataload
+    jumpdest
+    // TODO: I'm padding bytecode with 'jumpdest' ops for the last two iterations
+    // to keep the number of bytes of code per iteration constant
+    // (so that we can add offsets to a jump label and get to a value jump dest)
+    // (the problem arises because <point_size> = push2(0x60) and <point_size*3>=push3(0x120))
+    // we should upgrade the compiler to be able to force push ops to have a constant number of bytes
+}
+
+
+#define macro MONTY_LOAD = takes(0) returns(0) {
+    // we want to get the element of calldata that points to the last point
+    
+    // monty_load__start:
+    // z4 p p p p z1z2 z3 p p p p z1 z2
+    0x80 calldatasize sub calldataload       // z2
+    0x20 calldatasize sub calldataload       // z1 z2
+    P() dup1 dup1 dup1                  // p p p p z1 z2
+    0xe0 calldatasize sub calldataload       // z3 p p p p z1 z2
+    // dup1 dup6 0x20 calldatasize sub calldataload mulmod // z1z2 p p p p z3
+    // 0xe0 calldatasize sub calldataload      // z3 z1z2 p p p p z3
+    // 0x20 calldatasize sub calldataload       // z1 l
+    // P() dup1 dup1 dup1      // p p p p z1 1
+    // 0xe0 calldatasize sub calldataload // z3 p p p p z1 l
+    // dup2 0x80 calldatasize sub calldataload dup8 mulmod // z2 z3 p p p p z1 L
+    // dup3 dup1 dup1 dup1 0x140 calldatasize sub calldataload // z4 z2 z3 p p p p z1
+    0x140 calldatasize sub   //
+    dup1 MONTY__CALLDATA_ITERATOR() mstore  // store next calldata location at the iterator
+
+    MONTY__INITIAL_OFFSET() eq monty_load__end jumpi
+
+    // note: we're loading points in a very odd order...
+    monty_load__loop:
+        // how many points are remaining? 
+        0x60 MONTY__INITIAL_OFFSET() MONTY__CALLDATA_ITERATOR() mload sub div // this is the # of points remaining
+        0x01 add
+        // i = number of remaining points
+        // if i > 10, i = 10. Else, i = i
+        10 dup2 gt // i>10 i
+        10 mul        // (i>10 ? 10:0) i
+        swap1         // i  (i>10 ? 10:0)
+        10 dup2 lt    // i<10 i (i>10 ? 10:0)
+        mul           // (i<10 ? i:0) (i>10 ? 10:0)
+
+        add           // j
+        dup1 MONTY__CALLDATA_ADJUSTOR() mstore
+        10 sub        // 10 - j
+        __codesize(MONTY_LOAD_1<0x00,0x60>) mul
+        monty_load_10__start add jump // lol like this will work
+        monty_load_10__start:
+        MONTY_LOAD_10<MONTY__CALLDATA_ITERATOR,0x60>()
+        MONTY__CALLDATA_ADJUSTOR() mload 0x20 mul MONTY__CALLDATA_ITERATOR() mload sub MONTY__CALLDATA_ITERATOR() mstore
+        MONTY__CALLDATA_ITERATOR() mload MONTY__INITIAL_OFFSET() sub monty_load__loop jumpi
+}
+
+template <calldata_location,x_offset,y_offset>
+#define macro MONTY_NORMALIZE_1 = takes(0) returns(0) {
+    // zn' zn p p p p za
+    mulmod // zn p p p za
+    swap4  // za p p p zn
+    dup5 mulmod // za p p zn
+    dup2 dup2 dup1 mulmod // zza za p p zn
+    dup3 dup2 <calldata_location> mload <x_offset> add calldataload mulmod // x zza za p p zn
+    msize mstore
+    mulmod <calldata_location> mload <y_offset> add calldataload mulmod
+    msize mstore
+}
+
+#define macro MONTY_NORMALIZE_10 = takes(0) returns(0) {
+    MONTY_NORMALIZE_1<calldata_location, 0x00, 0x20>()
+    MONTY_NORMALIZE_1<calldata_location, 0x60, 0x80>()
+    MONTY_NORMALIZE_1<calldata_location, 0xc0, 0xe0>()
+    MONTY_NORMALIZE_1<calldata_location, 0x100, 0x120>()
+    MONTY_NORMALIZE_1<calldata_location, 0x160, 0x180>()
+    MONTY_NORMALIZE_1<calldata_location, 0x1c0, 0x1e0>()
+    MONTY_NORMALIZE_1<calldata_location, 0x200, 0x220>()
+    MONTY_NORMALIZE_1<calldata_location, 0x260, 0x280>()
+    MONTY_NORMALIZE_1<calldata_location, 0x2c0, 0x2e0>()
+    MONTY_NORMALIZE_1<calldata_location, 0x300, 0x320>()
+}

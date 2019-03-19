@@ -36,6 +36,7 @@ regex.isolateTemplate = (val) => {
 };
 
 regex.containsOperators = (input) => {
+    console.log('checking containsOperators on ', input);
     return operators.test(input);
 };
 

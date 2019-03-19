@@ -1,0 +1,136 @@
+#include "modInvHelpers.huff"
+
+#define macro BIDMODEXP__MODULUS = takes(0) returns(1) { 0x40 calldataload }
+#define macro BIGMODEXP__EXPONENT = takes(0) returns(1) { 0x20 calldataload }
+#define macro BIGMODEXP__SCALAR = takes(0) returns(1) { 0x00 calldataload }
+#define macro ONE_LOC = takes(0) returns(1) { 0x200 }
+#define macro THREE_LOC = takes(0) returns(1) { 0x220 }
+#define macro FIVE_LOC = takes(0) returns(1) { 0x240 }
+#define macro SEVEN_LOC = takes(0) returns(1) { 0x260 }
+#define macro NINE_LOC = takes(0) returns(1) { 0x280 }
+#define macro ELEVEN_LOC = takes(0) returns(1) { 0x2a0 }
+#define macro THIRTEEN_LOC = takes(0) returns(1) { 0x2c0 }
+#define macro FIFTEEN_LOC = takes(0) returns(1) { 0x2e0 }
+
+#define macro COMPUTE_ADDITION_CHAIN = takes(0) returns(0) {
+    // compute z 3z 5z 7z 9z 11z 13z 15z
+    BIGMODEXP__MODULUS() // p
+    BIGMODEXP__SCALAR() // z p
+    dup1 ONE_LOC() mstore
+    dup2 dup2 dup1 mulmod // 2z z p
+
+
+    dup3 dup1 dup1 dup1 dup1 dup1 dup1
+    // p p p p p p p 2z z p
+    swap8   // z p p p p p p 2z p p
+    dup8 mulmod // 3z p p p p p 2z p p
+    dup1 THREE_LOC() mstore
+    dup7 mulmod
+    dup1 FIVE_LOC() mstore // 5z p p p p 2z p p
+    dup6 mulmod dup1 SEVEN_LOC() mstore // 7z p p p 2z p p
+    dup5 mulmod dup1 NINE_LOC() mstore // 9z p p 2z p p
+    dup4 mulmod dup1 ELEVEN_LOC() mstore // 11z p 2z p
+    dup3 mulmod dup1 THIRTEEN_LOC() mstore // 13z 2z p p
+    mulmod msize mstore           // p
+}
+
+#define jumptable BIGMODEXP__JUMP_TABLE {
+    bme__zero bme__one bme__two bme__three bme__four
+    bme__five bme__six bme__seven bme__eight bme__nine
+    bme__ten bme__eleven bme__twelve bme__thirteen bme__fourteen
+    bme__fifteen
+}
+
+#define macro BIGMODEXP = takes(0) returns(0) {
+    COMPUTE_ADDITION_CHAIN()    // p
+    0x01                        // t p
+    BIGMODEXP__EXPONENT()       // e t p
+
+    __tablesize(BIGMODEXP__JUMP_TABLE) __tablestart(BIGMODEXP__JUMP_TABLE) 0x00 codecopy
+
+    dup1 BIGMODEXP__TABLE_MASK() and 224 shr mload jump
+
+    zero:   // e t p
+        dup1 keep_going jumpi
+            pop swap1 pop // t
+            0x00 mstore 0x20 0x00 return
+        keep_going:
+            4 shl swap1
+            GET_4_P<dup3>() SQR_4() swap1
+            dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    one:    // e t p
+        4 shl swap1   // t e p
+        GET_5_P<dup3>() SQR_4() ONE_LOC() mload mulmod // t e p
+        swap1   // e t p
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    two:    // 0010
+        4 shl swap1
+        GET_5_P<dup3>() SQR_3() ONE_LOC() mload mulmod
+        SQR_1() swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    three: // 0011
+        4 shl swap1
+        GET_5_P<dup3>() SQR_4() THREE_LOC() mload mulmod
+        swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    four: // 0100
+        4 shl swap1
+        GET_5_P<dup3>() SQR_2() ONE_LOC() mload mulmod
+        SQR_2() swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    five: // 0101
+        4 shl swap1
+        GET_5_P<dup3>() SQR_4() FIVE_LOC() mload mulmod
+        swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    six: // 0110
+        4 shl swap1
+        GET_5_P<dup3>() SQR_3() THREE_LOC() mload mulmod
+        SQR_1() swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    seven:  // 0111
+        4 shl swap1
+        GET_5_P<dup3>() SQR_4() SEVEN_LOC() mload mulmod
+        swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    eight:  // 1000
+        4 shl swap1
+        GET_5_P<dup3>() SQR_1() ONE_LOC() mload mulmod
+        SQR_3() swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    nine:   // 1001
+        4 shl swap1
+        GET_5_P<dup3>() SQR_4() NINE_LOC() mload mulmod
+        swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    ten:    // 1010
+        4 shl swap1
+        GET_5_P<dup3>() SQR_3() FIVE_LOC() mload mulmod
+        SQR_1() swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    eleven: // 1011
+        4 shl swap1
+        GET_5_P<dup3>() SQR_4() ELEVEN_LOC() mload mulmod
+        swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    twelve: // 1100
+        4 shl swap1
+        GET_5_P<dup3>() SQR_2() THREE() mload mulmod
+        SQR_2() swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    thirteen: // 1101
+        4 shl swap1
+        GET_5_P<dup3>() SQR_4() THIRTEEN_LOC() mload mulmod
+        swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    fourteen: // 1110
+        4 shl swap1
+        GET_5_P<dup3>() SQR_3() SEVEN_LOC() mload mulmod
+        SQR_1() swap1
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+    fifteen: // 1111
+        4 shl swap1
+        GET_5_P<dup3>() SQR_3() FIFTEEN_LOC() mload mulmod
+        swap1   // e t p
+        dup1 BIGMODEXP__TABLE_MASK() and 244 shr mload jump
+}

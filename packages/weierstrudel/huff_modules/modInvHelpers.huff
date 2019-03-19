@@ -1,0 +1,100 @@
+
+template <get_p>
+#define macro GET_1_P = takes(0) returns(0) {
+    <get_p> swap1
+}
+
+template <get_p>
+#define macro GET_2_P = takes(0) returns(0) {
+    <get_p> dup1 swap2
+}
+
+template <get_p>
+#define macro GET_3_P = takes(0) returns(0) {
+    <get_p> dup1 dup1 swap3
+}
+
+template <get_p>
+#define macro GET_4_P = takes(0) returns(0) {
+    <get_p> dup1 dup1 dup1 swap4
+}
+
+template <get_p>
+#define macro GET_5_P = takes(0) returns(0) {
+    <get_p> dup1 dup1 dup1 dup1 swap5
+}
+
+template <get_p>
+#define macro GET_6_P = takes(2) returns(8) {
+    <get_p> dup1 dup1 dup1 dup1 dup1 swap6
+}
+
+template <get_p>
+#define macro GET_7_P = takes(2) returns(9) {
+    <get_p> dup1 dup1 dup1 dup1 dup1 dup1 swap7
+}
+
+template <get_p>
+#define macro GET_8_P = takes(2) returns(10) {
+    <get_p> dup1 dup1 dup1 dup1 dup1 dup1 dup1 swap8
+}
+
+template <get_p>
+#define macro GET_9_P = takes(2) returns(11) {
+    <get_p> dup1 dup1 dup1 dup1 dup1 dup1 dup1 dup1 swap9
+}
+
+template <get_p>
+#define macro GET_10_P = takes(2) returns(12) {
+    <get_p> dup1 dup1 dup1 dup1 dup1 dup1 dup1 dup1 dup1 swap10
+}
+
+template <get_p>
+#define macro GET_11_P = takes(2) returns(13) {
+    <get_p> dup1 dup1 dup1 dup1 dup1 dup1 dup1 dup1 dup1 dup1 swap11
+}
+
+#define macro SQR_1 = takes(2) returns(1) {
+    dup1 mulmod
+}
+
+#define macro SQR_2 = takes(3) returns(1) {
+    dup1 mulmod dup1 mulmod
+}
+
+#define macro SQR_3 = takes(4) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod
+}
+
+#define macro SQR_4 = takes(5) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+}
+
+#define macro SQR_5 = takes(6) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+}
+
+#define macro SQR_6 = takes(7) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+    dup1 mulmod
+}
+
+#define macro SQR_7 = takes(8) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+    dup1 mulmod dup1 mulmod
+}
+
+#define macro SQR_8 = takes(9) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+    dup1 mulmod dup1 mulmod dup1 mulmod
+}
+
+#define macro SQR_9 = takes(10) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+}
+
+#define macro SQR_10 = takes(11) returns(1) {
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+    dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod dup1 mulmod
+}
