@@ -23,14 +23,7 @@ contract ACE is IAZTEC {
     using SafeMath for uint256;
     using SafeMath8 for uint8;
 
-    // bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
-    //     "ACENoteSignature(",
-    //         "uint24 proof,",
-    //         "bytes32[4] note,",
-    //         "uint256 challenge,",
-    //         "address sender",
-    //     ")"
-    // ));
+    // keccak256 hash of "ACENoteSignature(uint24 proof, bytes32[4] note, uint256 challenge, address sender)"
     bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH =
         0x21853faea366a53b2f6a3cbf1da39ef94d2dbb994639a58005781220badbd5de;
 
@@ -319,7 +312,7 @@ contract ACE is IAZTEC {
                     "transfer failed"
                 );
             } else {
-                registry.totalSupply -= uint256(publicValue);
+                registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
                 require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
             }
         }
