@@ -77,7 +77,6 @@ contract JoinSplit is LibEIP712 {
                 mstore(0x2c0, kn)
                 mstore(0x2e0, m)
                 mstore(0x300, calldataload(0x164))
-
                 kn := mulmod(sub(gen_order, kn), challenge, gen_order) // we actually want c*k_{public}
                 hashCommitments(notes, n)
                 let b := add(0x320, mul(n, 0x80))
