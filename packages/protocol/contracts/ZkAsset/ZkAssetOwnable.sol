@@ -2,7 +2,7 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./ZkAsset.sol";
 import "../libs/ProofUtils.sol";
-import "../libs/SafeMaths.sol";
+import "../libs/SafeMath8.sol";
 
 contract ZkAssetOwnable is ZkAsset {
     using ProofUtils for uint24;
