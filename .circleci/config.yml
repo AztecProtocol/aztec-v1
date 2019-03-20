@@ -5,6 +5,7 @@ jobs:
         working_directory: ~/repo
         docker:
             - image: circleci/node:9
+            - image: trufflesuite/ganache-cli:v6.4.1
         steps:
             - checkout
             - run:
@@ -37,7 +38,7 @@ jobs:
         working_directory: ~/repo
         docker:
             - image: circleci/node:9
-            - image: trufflesuite/ganache-cli:v6.2.5
+            - image: trufflesuite/ganache-cli:v6.4.1
               command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
         steps:
             - restore_cache:
@@ -46,6 +47,19 @@ jobs:
             - run:
                 name: "Test Packages"
                 command: ./node_modules/.bin/lerna run test
+    coverage:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:9
+            - image: trufflesuite/ganache-cli:v6.4.1
+              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
+        steps:
+            - restore_cache:
+                keys: 
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Cover Packages"
+                command: ./node_modules/.bin/lerna run coverage
 workflows:
     version: 2
     main:
@@ -63,6 +77,13 @@ workflows:
             - test:
                 requires:
                     - build
+                filters:
+                    branches:
+                        ignore: gh-pages
+            - coverage:
+                requires:
+                    - build
+                    - test
                 filters:
                     branches:
                         ignore: gh-pages

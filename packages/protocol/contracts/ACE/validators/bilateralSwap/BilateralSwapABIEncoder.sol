@@ -1,6 +1,5 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-
 library BilateralSwapABIEncoder {
     /**
     * New calldata map
@@ -216,20 +215,5 @@ library BilateralSwapABIEncoder {
             mstore(0x160, 0x20)
             return(0x160, add(0x120, notesLength)) // return the final byte array
         }
-    }
-}
-
-
-contract BilateralSwapABIEncoderTest {
-    function validateBilateralSwap(
-        bytes calldata, 
-        address, 
-        uint[6] calldata
-    ) 
-        external 
-        pure 
-        returns (bytes memory) 
-    {
-        BilateralSwapABIEncoder.encodeAndExit();
     }
 }
