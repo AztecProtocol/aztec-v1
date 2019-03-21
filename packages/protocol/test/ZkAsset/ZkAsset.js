@@ -5,7 +5,7 @@ const BN = require('bn.js');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants: { CRS }, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -38,7 +38,7 @@ contract('ZkAsset', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
-            await ace.setCommonReferenceString(CRS);
+            await ace.setCommonReferenceString(constants.CRS);
             aztecJoinSplit = await JoinSplit.new();
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 

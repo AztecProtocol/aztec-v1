@@ -6,7 +6,7 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const { constants: { AZTEC_NOTE_SIGNATURE_V2, CRS }, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -27,7 +27,7 @@ const signNote = (verifyingContract, noteHash, spender, status, privateKey) => {
         version: '1',
         verifyingContract,
     };
-    const schema = AZTEC_NOTE_SIGNATURE_V2;
+    const schema = constants.eip712.AZTEC_NOTE_SIGNATURE_V2;
     const message = {
         noteHash,
         spender,
@@ -60,7 +60,7 @@ contract('ZkAssetOwnable', (accounts) => {
             ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
         ];
-        await ace.setCommonReferenceString(CRS);
+        await ace.setCommonReferenceString(constants.CRS);
         aztecJoinSplit = await JoinSplit.new();
         await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
