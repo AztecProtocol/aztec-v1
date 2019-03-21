@@ -1,6 +1,6 @@
 {
   "name": "aztec.js",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "author": "AZTEC",
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
@@ -40,7 +40,7 @@
     "websocket": "^1.0.28"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.5.0",
+    "@aztec/dev-utils": "^1.5.1",
     "babel-cli": "^6.26.0",
     "babel-plugin-add-module-exports": "^1.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
