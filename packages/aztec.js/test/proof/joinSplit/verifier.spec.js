@@ -14,7 +14,7 @@ const verifier = require('../../../src/proof/joinSplit/verifier');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const proofUtils = require('../../../src/proof/proofUtils');
 
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 
 const { expect } = chai;
 
@@ -167,10 +167,10 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const { valid, errors } = verifier.verifyProof(proofData, 1, challenge, sender);
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(4);
-            expect(errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(errors[1]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[2]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[3]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            expect(errors[0]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(errors[1]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[2]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[3]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
         });
 
         it('will REJECT if malformed challenge', () => {
@@ -187,7 +187,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const result = verifier.verifyProof(proofData, m, `0x${crypto.randomBytes(31).toString('hex')}`, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(1);
-            expect(result.errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if notes do not balance', () => {
@@ -201,7 +201,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(1);
-            expect(result.errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT for random proof data', () => {
@@ -211,7 +211,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const sender = randomAddress();
             const result = verifier.verifyProof(proofData, 1, `0x${crypto.randomBytes(31).toString('hex')}`, sender);
             expect(result.valid).to.equal(false);
-            expect(result.errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors).to.contain(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if kPublic > group modulus', () => {
@@ -225,7 +225,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(1);
-            expect(result.errors[0]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
+            expect(result.errors[0]).to.equal(errorTypes.SCALAR_TOO_BIG);
         });
 
         it('will REJECT if note value response is 0', () => {
@@ -237,8 +237,8 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(2);
-            expect(result.errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(result.errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
@@ -256,8 +256,8 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const result = verifier.verifyProof(proofData, m, challenge, sender);
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(2);
-            expect(result.errors[0]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
-            expect(result.errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
+            expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('will REJECT if blinding factor computed from invalid point', () => {
@@ -276,14 +276,14 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(false);
             expect(result.errors.length).to.equal(8);
 
-            expect(result.errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(result.errors[1]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(result.errors[2]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(result.errors[3]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(result.errors[4]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(result.errors[5]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(result.errors[6]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
-            expect(result.errors[7]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(result.errors[0]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(result.errors[1]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(result.errors[2]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(result.errors[3]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(result.errors[4]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(result.errors[5]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(result.errors[6]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
+            expect(result.errors[7]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
     });
 });

@@ -1,10 +1,12 @@
 
 const {
     constants: {
-        ACE_DOMAIN_PARAMS,
-        ACE_NOTE_SIGNATURE,
-        AZTEC_TEST_DOMAIN_PARAMS,
-        AZTEC_NOTE_SIGNATURE,
+        eip712: {
+            ACE_DOMAIN_PARAMS,
+            ACE_NOTE_SIGNATURE,
+            AZTEC_TEST_DOMAIN_PARAMS,
+            AZTEC_NOTE_SIGNATURE,
+        },
     },
     proofs: {
         JOIN_SPLIT_PROOF,
