@@ -8,7 +8,7 @@ import "../interfaces/IAZTEC.sol";
 import "../libs/IntegerUtils.sol";
 import "../libs/NoteUtils.sol";
 import "../libs/ProofUtils.sol";
-import "../libs/SafeMaths.sol";
+import "../libs/SafeMath8.sol";
 
 /**
  * @title The AZTEC Cryptography Engine
