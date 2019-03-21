@@ -49,7 +49,7 @@ fi
 ./node_modules/.bin/truffle test "$@"
 
 if [ "$MODE" = "coverage" ]; then
-  ./node_modules/.bin/istanbul report html
+  ./node_modules/.bin/istanbul report html lcov
   
   if [ "$CONTINUOUS_INTEGRATION" = true ]; then
     cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
