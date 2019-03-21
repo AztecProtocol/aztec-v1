@@ -142,7 +142,7 @@ constants.eip712 = {
         name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
         version: '1',
     },
-    ACE_NOTE_SIGNATURE: {
+    JOIN_SPLIT_SIGNATURE: {
         types: {
             ACENoteSignature: [
                 { name: 'proof', type: 'uint24' },
@@ -168,22 +168,7 @@ constants.eip712 = {
         version: '1',
         salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
     },
-    AZTEC_NOTE_SIGNATURE: {
-        types: {
-            AZTECNoteSignature: [
-                { name: 'note', type: 'bytes32[4]' },
-                { name: 'challenge', type: 'uint256' },
-                { name: 'sender', type: 'address' },
-            ],
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
-        },
-        primaryType: 'AZTECNoteSignature',
-    },
-    AZTEC_NOTE_SIGNATURE_V2: {
+    NOTE_SIGNATURE: {
         types: {
             NoteSignature: [
                 { name: 'noteHash', type: 'bytes32' },
