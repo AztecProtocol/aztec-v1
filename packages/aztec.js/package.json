@@ -31,8 +31,9 @@
     "babel-runtime": "^6.26.0",
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.1",
-    "ethereumjs-abi": "^0.6.6",
+    "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
+    "hash.js": "^1.1.7",
     "web3-eth-abi": "1.0.0-beta.37",
     "web3-eth-accounts": "1.0.0-beta.37",
     "web3-utils": "1.0.0-beta.37",
@@ -65,8 +66,8 @@
   "scripts": {
     "clean": "./node_modules/.bin/rimraf -rf ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./lib || true",
     "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "test": "NODE_ENV=TEST ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:coverage": "NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "test": "./node_modules/.bin/cross-env NODE_ENV=TEST ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "coverage": "./node_modules/.bin/cross-env NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
     "build": "./node_modules/.bin/rimraf ./lib && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
     "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",
     "publish:docs": "npm run build:docs && ./node_modules/.bin/push-dir --dir ./docs --branch gh-pages --remote origin --cleanup"

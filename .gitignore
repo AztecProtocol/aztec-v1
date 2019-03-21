@@ -1,7 +1,9 @@
 # folders
+.0x-artifacts/
 .idea/
 .nyc_output/
 .vscode/
+artifacts/
 build/
 coverage/
 coverageEnv/
@@ -16,18 +18,11 @@ node_modules/
 coverage.json
 lerna-debug.log*
 npm-debug.log*
+scTopics
 yarn-debug.log*
 yarn-error.log*
 
 # packages
-packages/protocol/demo/dbDevelopment.json
-packages/protocol/demo/dbKovan.json
-packages/protocol/demo/dbMainNet.json
-packages/protocol/demo/dbRinkeby.json
-packages/protocol/demo/dbRopsten.json
-packages/protocol/demo/dbTest.json
-packages/protocol/demo/testWallets.json
-packages/protocol/demo/wallets.json
 packages/weierstrudel/debug.txt
 packages/weierstrudel/log.txt
 packages/weierstrudel/js_snippets/hashToPoint.js

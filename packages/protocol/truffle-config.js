@@ -1,6 +1,20 @@
 require('dotenv').config();
-const { toWei, toHex } = require('web3-utils');
+const { CoverageSubprovider } = require('@0x/sol-coverage');
+const { RevertTraceSubprovider, TruffleArtifactAdapter } = require('@0x/sol-trace');
+const { GanacheSubprovider } = require('@0x/subproviders');
 const HDWalletProvider = require('truffle-hdwallet-provider');
+const Web3 = require('web3');
+const ProviderEngine = require('web3-provider-engine');
+const { toWei, toHex } = require('web3-utils');
+
+const compilerConfig = require('./compiler');
+
+// Get the address of the first account in Ganache
+async function getFirstAddress() {
+    const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+    const addresses = await web3.eth.getAccounts();
+    return addresses[0];
+}
 
 // You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file
 // Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
@@ -24,31 +38,71 @@ function createProvider(network) {
     };
 }
 
-const kovanProvider = process.env.SOLIDITY_COVERAGE
-    ? undefined
-    : createProvider('kovan');
+let kovanProvider = {};
+let rinkebyProvider = {};
+let mainnetProvider = {};
+let ropstenProvider = {};
 
-const rinkebyProvider = process.env.SOLIDITY_COVERAGE
-    ? undefined
-    : createProvider('rinkeby');
+const projectRoot = '';
+const coverageSubproviderConfig = {
+    isVerbose: true,
+    ignoreFilesGlobs: ['**/node_modules/**', '**/interfaces/**', '**/test/**'],
+};
+const defaultFromAddress = getFirstAddress();
+const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);
+const provider = new ProviderEngine();
 
-const mainnetProvider = process.env.SOLIDITY_COVERAGE
-    ? undefined
-    : createProvider('mainnet');
+switch (process.env.MODE) {
+    case 'coverage':
+        global.coverageSubprovider = new CoverageSubprovider(
+            artifactAdapter,
+            defaultFromAddress,
+            coverageSubproviderConfig
+        );
+        provider.addProvider(global.coverageSubprovider);
+        break;
+    case 'trace':
+        provider.addProvider(new RevertTraceSubprovider(
+            artifactAdapter,
+            defaultFromAddress,
+            coverageSubproviderConfig
+        ));
+        break;
+    default:
+        kovanProvider = createProvider('kovan');
+        rinkebyProvider = createProvider('rinkeby');
+        mainnetProvider = createProvider('mainnet');
+        ropstenProvider = createProvider('ropsten');
+        break;
+}
 
-const ropstenProvider = process.env.SOLIDITY_COVERAGE
-    ? undefined
-    : createProvider('ropsten');
+let ganacheSubprovider = {};
+ganacheSubprovider = new GanacheSubprovider();
+provider.addProvider(ganacheSubprovider);
+
+provider.start((err) => {
+    if (err !== undefined) {
+        console.log(err);
+        process.exit(1);
+    }
+});
+
+/**
+ * HACK: Truffle providers should have `send` function, while `ProviderEngine` creates providers with `sendAsync`,
+ * but it can be easily fixed by assigning `sendAsync` to `send`.
+ */
+provider.send = provider.sendAsync.bind(provider);
 
 module.exports = {
     compilers: {
         solc: {
-            version: '0.5.4',
+            version: compilerConfig.solcVersion,
             settings: {
                 optimizer: {
-                    enabled: true,
+                    enabled: false,
                     runs: 200,
                 },
+                evmVersion: 'petersburg',
             },
         },
     },
@@ -58,18 +112,11 @@ module.exports = {
     },
     networks: {
         development: {
-            host: '127.0.0.1',
+            provider,
             gas: 4700000,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,
-        },
-        coverage: {
-            host: '127.0.0.1',
-            gas: 0xfffffffffff,
-            gasPrice: toHex(toWei('1', 'gwei')),
-            network_id: '*', // eslint-disable-line camelcase
-            port: 8555,
         },
         kovan: {
             provider: kovanProvider,
