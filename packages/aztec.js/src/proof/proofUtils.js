@@ -19,7 +19,7 @@ const { groupReduction } = bn128;
 
 const proofUtils = {};
 // const { customError } = errors;
-const { ERROR_TYPES } = constants;
+const { errorTypes } = constants;
 
 const zero = new BN(0).toRed(groupReduction);
 
@@ -62,7 +62,7 @@ proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
     if (shouldThrow) {
         if (notes.length !== numNotes) {
             throw customError(
-                ERROR_TYPES.INCORRECT_NOTE_NUMBER,
+                errorTypes.INCORRECT_NOTE_NUMBER,
                 {
                     message: 'Incorrect number of input notes',
                     expectedNumber: numNotes,
@@ -72,11 +72,11 @@ proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
         }
     } else if (!shouldThrow) {
         if (notes.length !== numNotes) {
-            errors.push(ERROR_TYPES.INCORRECT_NOTE_NUMBER);
+            errors.push(errorTypes.INCORRECT_NOTE_NUMBER);
         }
     } else {
         throw customError(
-            ERROR_TYPES.SHOULD_THROW_IS_UNDEFINED,
+            errorTypes.SHOULD_THROW_IS_UNDEFINED,
             {
                 message: 'shouldThrow input argument not defined (3rd input argument)',
                 shouldThrow,
@@ -237,10 +237,10 @@ proofUtils.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge
 proofUtils.hexToGroupScalar = (hex, errors, canBeZero = false) => {
     const hexBn = new BN(hex.slice(2), 16);
     if (!hexBn.lt(bn128.curve.n)) {
-        errors.push(ERROR_TYPES.SCALAR_TOO_BIG);
+        errors.push(errorTypes.SCALAR_TOO_BIG);
     }
     if (!canBeZero && hexBn.eq(new BN(0))) {
-        errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
+        errors.push(errorTypes.SCALAR_IS_ZERO);
     }
     return hexBn.toRed(groupReduction);
 };
@@ -258,17 +258,17 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
     let x = new BN(xHex.slice(2), 16);
     let y = new BN(yHex.slice(2), 16);
     if (!x.lt(bn128.curve.p)) {
-        errors.push(ERROR_TYPES.X_TOO_BIG);
+        errors.push(errorTypes.X_TOO_BIG);
     }
     if (!y.lt(bn128.curve.p)) {
-        errors.push(ERROR_TYPES.Y_TOO_BIG);
+        errors.push(errorTypes.Y_TOO_BIG);
     }
     x = x.toRed(bn128.curve.red);
     y = y.toRed(bn128.curve.red);
     const lhs = y.redSqr();
     const rhs = x.redSqr().redMul(x).redAdd(bn128.curve.b);
     if (!lhs.fromRed().eq(rhs.fromRed())) {
-        errors.push(ERROR_TYPES.NOT_ON_CURVE);
+        errors.push(errorTypes.NOT_ON_CURVE);
     }
     return bn128.curve.point(x, y);
 };
@@ -300,7 +300,7 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors) => {
                 kBar = runningKBar;
             }
             if (kBar.fromRed().eq(new BN(0))) {
-                errors.push(ERROR_TYPES.SCALAR_IS_ZERO);
+                errors.push(errorTypes.SCALAR_IS_ZERO);
             }
         } else {
             kBar = proofUtils.hexToGroupScalar(note[0], errors);
@@ -361,7 +361,7 @@ proofUtils.computeChallenge = (...challengeVariables) => {
                 hash.append(challengeVar.B);
             } else {
                 throw customError(
-                    ERROR_TYPES.NO_ADD_CHALLENGEVAR,
+                    errorTypes.NO_ADD_CHALLENGEVAR,
                     {
                         message: 'Can not add the challenge variable to the hash',
                         challengeVar,
@@ -390,7 +390,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
     notes.forEach((note) => {
         if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
             throw customError(
-                ERROR_TYPES.VIEWING_KEY_MALFORMED,
+                errorTypes.VIEWING_KEY_MALFORMED,
                 {
                     message: 'Viewing key is malformed',
                     viewingKey: note.a.fromRed(),
@@ -402,7 +402,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
 
         if (!note.k.fromRed().lt(new BN(K_MAX))) {
             throw customError(
-                ERROR_TYPES.NOTE_VALUE_TOO_BIG,
+                errorTypes.NOTE_VALUE_TOO_BIG,
                 {
                     message: 'Note value is equal to or greater than K_Max',
                     noteValue: note.k.fromRed(),
@@ -413,7 +413,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
 
         if (note.gamma.isInfinity() || note.sigma.isInfinity()) {
             throw customError(
-                ERROR_TYPES.POINT_AT_INFINITY,
+                errorTypes.POINT_AT_INFINITY,
                 {
                     message: 'One of the note points is at infinity',
                     gamma: note.gamma.isInfinity(),
@@ -424,7 +424,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
 
         if (!proofUtils.isOnCurve(note.gamma) || !proofUtils.isOnCurve(note.sigma)) {
             throw customError(
-                ERROR_TYPES.NOT_ON_CURVE,
+                errorTypes.NOT_ON_CURVE,
                 {
                     message: 'A note group element is not on the curve',
                     gammaOnCurve: proofUtils.isOnCurve(note.gamma),
@@ -436,7 +436,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
 
     if (!kPublic.lt(bn128.curve.n)) {
         throw customError(
-            ERROR_TYPES.KPUBLIC_MALFORMED,
+            errorTypes.KPUBLIC_MALFORMED,
             {
                 message: 'kPublic is too big',
                 kPublic,
@@ -447,7 +447,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
 
     if (m > notes.length) {
         throw customError(
-            ERROR_TYPES.M_TOO_BIG,
+            errorTypes.M_TOO_BIG,
             {
                 message: 'm (input note number) is greater than the total number of notes',
                 m,

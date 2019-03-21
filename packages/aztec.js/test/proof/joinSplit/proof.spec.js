@@ -9,7 +9,7 @@ const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 
 const { expect } = chai;
 
@@ -81,7 +81,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.equal(ERROR_TYPES.KPUBLIC_MALFORMED);
+            expect(err.message).to.equal(errorTypes.KPUBLIC_MALFORMED);
         }
     });
 
@@ -94,7 +94,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructProof(commitments, 500, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.equal(ERROR_TYPES.M_TOO_BIG);
+            expect(err.message).to.equal(errorTypes.M_TOO_BIG);
         }
     });
 
@@ -107,7 +107,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructProof(commitments, 500, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.equal(ERROR_TYPES.NOT_ON_CURVE);
+            expect(err.message).to.equal(errorTypes.NOT_ON_CURVE);
         }
     });
 
@@ -123,7 +123,7 @@ describe('AZTEC proof construction tests', () => {
         } catch (err) {
             ({ message } = err);
         }
-        expect(message).to.equal(ERROR_TYPES.POINT_AT_INFINITY);
+        expect(message).to.equal(errorTypes.POINT_AT_INFINITY);
     });
 
     it('proof.constructProof will throw if viewing key response is 0', () => {
@@ -135,7 +135,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.equal(ERROR_TYPES.VIEWING_KEY_MALFORMED);
+            expect(err.message).to.equal(errorTypes.VIEWING_KEY_MALFORMED);
         }
     });
 
@@ -148,7 +148,7 @@ describe('AZTEC proof construction tests', () => {
         try {
             proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
-            expect(err.message).to.equal(ERROR_TYPES.NOTE_VALUE_TOO_BIG);
+            expect(err.message).to.equal(errorTypes.NOTE_VALUE_TOO_BIG);
         }
     });
 });

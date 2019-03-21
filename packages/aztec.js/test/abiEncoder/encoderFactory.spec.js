@@ -167,7 +167,7 @@ describe('inputCoder tests', () => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(contractAddress, constants.AZTEC_TEST_DOMAIN_PARAMS);
-                const schema = constants.AZTEC_NOTE_SIGNATURE;
+                const schema = constants.eip712.AZTEC_NOTE_SIGNATURE;
                 const message = {
                     note: proofData[index].slice(2, 6),
                     challenge,
