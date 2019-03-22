@@ -345,7 +345,7 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
-                const schema = constants.eip712.ACE_NOTE_SIGNATURE;
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -396,7 +396,7 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
-                const schema = constants.eip712.ACE_NOTE_SIGNATURE;
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -444,7 +444,7 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
-                const schema = constants.eip712.ACE_NOTE_SIGNATURE;
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -488,7 +488,7 @@ contract('JoinSplit', (accounts) => {
 
             const inputSignatures = commitments.slice(0, 2).map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
-                const schema = constants.eip712.ACE_NOTE_SIGNATURE;
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -527,7 +527,7 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
 
             const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
-            const schema = constants.eip712.ACE_NOTE_SIGNATURE;
+            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: JOIN_SPLIT_PROOF,
                 note: [proofDataRaw[0][2], proofDataRaw[0][3], proofDataRaw[0][4], proofDataRaw[0][5]],

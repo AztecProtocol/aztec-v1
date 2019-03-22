@@ -27,7 +27,7 @@ const signNote = (verifyingContract, noteHash, spender, status, privateKey) => {
         version: '1',
         verifyingContract,
     };
-    const schema = constants.eip712.AZTEC_NOTE_SIGNATURE_V2;
+    const schema = constants.eip712.NOTE_SIGNATURE;
     const message = {
         noteHash,
         spender,
