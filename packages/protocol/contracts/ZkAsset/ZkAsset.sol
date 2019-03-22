@@ -100,18 +100,23 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     ) public {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
-        // validate EIP712 signature
-        bytes32 hashStruct = keccak256(abi.encode(
-            NOTE_SIGNATURE_TYPEHASH,
-            _noteHash,
-            _spender,
-            status
-        ));
-        bytes32 msgHash = hashEIP712Message(hashStruct);
-        address signer = recoverSignature(
-            msgHash,
-            _signature
-        );
+        address signer;
+        if (_signature.length != 0) {
+            // validate EIP712 signature
+            bytes32 hashStruct = keccak256(abi.encode(
+                NOTE_SIGNATURE_TYPEHASH,
+                _noteHash,
+                _spender,
+                status
+            ));
+            bytes32 msgHash = hashEIP712Message(hashStruct);
+            signer = recoverSignature(
+                msgHash,
+                _signature
+            );
+        } else {
+            signer = msg.sender;
+        }
         require(signer == noteOwner, "the note owner did not sign this message");
         confidentialApproved[_noteHash][_spender] = _status;
     }
