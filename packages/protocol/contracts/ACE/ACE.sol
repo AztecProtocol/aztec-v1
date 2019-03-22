@@ -23,9 +23,9 @@ contract ACE is IAZTEC {
     using SafeMath for uint256;
     using SafeMath8 for uint8;
 
-    // keccak256 hash of "ACENoteSignature(uint24 proof, bytes32[4] note, uint256 challenge, address sender)"
-    bytes32 constant internal ACE_NOTE_SIGNATURE_TYPE_HASH =
-        0x21853faea366a53b2f6a3cbf1da39ef94d2dbb994639a58005781220badbd5de;
+    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32[4] note,uint256 challenge,address sender)"
+    bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
+        0x904692743a9f431a791d777dd8d42e18e79888579fa6807b5f17b14020210e30;
 
     event SetCommonReferenceString(bytes32[6] _commonReferenceString);
     event SetProof(

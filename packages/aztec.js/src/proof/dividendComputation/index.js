@@ -15,7 +15,7 @@ const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
 const { customError } = utils.errors;
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 
 const dividendComputation = {};
 dividendComputation.verifier = verifier;
@@ -66,7 +66,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
 
         if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
             throw customError(
-                ERROR_TYPES.NOT_ON_CURVE,
+                errorTypes.NOT_ON_CURVE,
                 {
                     message: 'A group element is not on the bn128 curve',
                     gammaOnCurve,

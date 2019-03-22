@@ -12,7 +12,7 @@ const bn128 = require('../../../src/bn128');
 const dividendComputation = require('../../../src/proof/dividendComputation');
 const proofUtils = require('../../../src/proof/proofUtils');
 
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 
 const { expect } = chai;
 
@@ -77,7 +77,7 @@ describe('Dividend computation verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -117,7 +117,7 @@ describe('Dividend computation verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -155,7 +155,7 @@ describe('Dividend computation verifier tests', () => {
             );
 
             expect(valid).to.equal(false);
-            expect(errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors).to.contain(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -192,8 +192,8 @@ describe('Dividend computation verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
-            expect(errors[0]).to.equal(ERROR_TYPES.ZA_TOO_BIG);
-            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.ZA_TOO_BIG);
+            expect(errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -229,8 +229,8 @@ describe('Dividend computation verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
-            expect(errors[0]).to.equal(ERROR_TYPES.ZB_TOO_BIG);
-            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.ZB_TOO_BIG);
+            expect(errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -267,8 +267,8 @@ describe('Dividend computation verifier tests', () => {
             );
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
-            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -310,8 +310,8 @@ describe('Dividend computation verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
-            expect(errors[0]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
-            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
+            expect(errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -352,12 +352,12 @@ describe('Dividend computation verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(6);
-            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[1]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[2]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(errors[3]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(errors[4]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
-            expect(errors[5]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[2]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(errors[3]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(errors[4]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
+            expect(errors[5]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
     });

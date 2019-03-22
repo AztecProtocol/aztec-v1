@@ -49,8 +49,8 @@ contract('Join Split ABI Encoder', (accounts) => {
                 challenge,
             } = aztec.proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.ACE_DOMAIN_PARAMS);
-                const schema = constants.ACE_NOTE_SIGNATURE;
+                const domain = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofData[index].slice(2, 6),

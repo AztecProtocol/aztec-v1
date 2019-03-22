@@ -254,8 +254,8 @@ joinSplit.encodeJoinSplitTransaction = ({
     } = joinSplit.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
 
     const inputSignatures = inputNotes.map((inputNote, index) => {
-        const domain = sign.generateAZTECDomainParams(validatorAddress, constants.ACE_DOMAIN_PARAMS);
-        const schema = constants.ACE_NOTE_SIGNATURE;
+        const domain = sign.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
+        const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
         const message = {
             proof: JOIN_SPLIT_PROOF,
             note: proofDataRaw[index].slice(2, 6),

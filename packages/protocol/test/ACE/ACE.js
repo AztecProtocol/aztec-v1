@@ -7,7 +7,7 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants: { CRS }, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -31,9 +31,9 @@ contract('ACE', (accounts) => {
         });
 
         it('should set the common reference string', async () => {
-            await ace.setCommonReferenceString(CRS, { from: accounts[0] });
+            await ace.setCommonReferenceString(constants.CRS, { from: accounts[0] });
             const result = await ace.getCommonReferenceString();
-            expect(result).to.deep.equal(CRS);
+            expect(result).to.deep.equal(constants.CRS);
         });
 
         it('should set a proof', async () => {
@@ -50,7 +50,7 @@ contract('ACE', (accounts) => {
         });
 
         it('should not set the common reference string if not owner', async () => {
-            await truffleAssert.reverts(ace.setCommonReferenceString(CRS, {
+            await truffleAssert.reverts(ace.setCommonReferenceString(constants.CRS, {
                 from: accounts[1],
             }));
         });
@@ -74,7 +74,7 @@ contract('ACE', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
-            await ace.setCommonReferenceString(CRS);
+            await ace.setCommonReferenceString(constants.CRS);
             const aztecJoinSplit = await JoinSplit.new();
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             const inputNotes = notes.slice(2, 4);
@@ -145,7 +145,7 @@ contract('ACE', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
-            await ace.setCommonReferenceString(CRS);
+            await ace.setCommonReferenceString(constants.CRS);
             const aztecJoinSplit = await JoinSplit.new();
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             const publicOwner = accounts[0];

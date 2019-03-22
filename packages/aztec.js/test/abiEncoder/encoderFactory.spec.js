@@ -1,7 +1,6 @@
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
+const { constants, proofs } = require('@aztec/dev-utils');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
-const { constants } = require('@aztec/dev-utils');
 
 const HexString = require('./HexString');
 
@@ -17,7 +16,7 @@ const sign = require('../../src/sign');
 const { expect } = chai;
 
 function randomNoteValue() {
-    return Math.floor(Math.random() * Math.floor(K_MAX));
+    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
 }
 
 function randomBytes(numBytes) {
@@ -167,8 +166,9 @@ describe('inputCoder tests', () => {
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(contractAddress, constants.AZTEC_TEST_DOMAIN_PARAMS);
-                const schema = constants.AZTEC_NOTE_SIGNATURE;
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
+                    proof: proofs.JOIN_SPLIT_PROOF,
                     note: proofData[index].slice(2, 6),
                     challenge,
                     sender: senderAddress,
