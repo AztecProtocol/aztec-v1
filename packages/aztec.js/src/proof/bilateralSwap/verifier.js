@@ -12,7 +12,7 @@ const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
 
 const verifier = {};
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 const { groupReduction } = bn128;
 
 /**
@@ -69,11 +69,11 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
         }
 
         if (B.isInfinity()) {
-            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            errors.push(errorTypes.BAD_BLINDING_FACTOR);
             finalHash.appendBN(new BN(0));
             finalHash.appendBN(new BN(0));
         } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
-            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            errors.push(errorTypes.BAD_BLINDING_FACTOR);
             finalHash.append(B);
         } else {
             finalHash.append(B);
@@ -91,7 +91,7 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (finalChallenge !== challengeHex) {
-        errors.push(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+        errors.push(errorTypes.CHALLENGE_RESPONSE_FAIL);
     }
 
     const valid = errors.length === 0;

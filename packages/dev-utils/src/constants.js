@@ -22,113 +22,14 @@ const CRS = [
  */
 const constants = {
     /**
-     *  The domain and signature constants related to EIP712
-     */ 
-    ACE_DOMAIN_PARAMS: {
-        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
-        version: '1',
-    },
-    ACE_NOTE_SIGNATURE: {
-        types: {
-            ACENoteSignature: [
-                { name: 'proof', type: 'uint24' },
-                { name: 'note', type: 'bytes32[4]' },
-                { name: 'challenge', type: 'uint256' },
-                { name: 'sender', type: 'address' },
-            ],
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
-        },
-        primaryType: 'ACENoteSignature',
-    },
-    AZTEC_RINKEBY_DOMAIN_PARAMS: {
-        name: 'AZTEC_RINKEBY_DOMAIN',
-        version: '1',
-        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
-    },
-    AZTEC_MAINNET_DOMAIN_PARAMS: {
-        name: 'AZTEC_MAINNET_DOMAIN',
-        version: '1',
-        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
-    },
-    AZTEC_NOTE_SIGNATURE: {
-        types: {
-            AZTECNoteSignature: [
-                { name: 'note', type: 'bytes32[4]' },
-                { name: 'challenge', type: 'uint256' },
-                { name: 'sender', type: 'address' },
-            ],
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
-        },
-        primaryType: 'AZTECNoteSignature',
-    },
-    AZTEC_NOTE_SIGNATURE_V2: {
-        types: {
-            NoteSignature: [
-                { name: 'noteHash', type: 'bytes32' },
-                { name: 'spender', type: 'address' },
-                { name: 'status', type: 'bool' },
-            ],
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
-        },
-        primaryType: 'NoteSignature',
-    },
-    /**
      * Common reference string
      */
     CRS,
-    /**
-     * Address of the DAI stablecoin contract on Ethereum
-     * @constant DAI_ADDRESS
-     * @type {string}
-     * @default '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'
-     */
-    DAI_ADDRESS: '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359', // address of the mainNet DAI smart contract
     /**
      * Generic scaling factor that maps between AZTEC note values and ERC20 token balances.
      * when used for DAI token, 1 AZTEC note value = 0.1 DAI
      */
     ERC20_SCALING_FACTOR: new BN('100000000000000000', 10),
-    /** 
-     * Error codes for use during proof construction
-     */
-    ERROR_TYPES: {
-        SCALAR_TOO_BIG: 'SCALAR_TOO_BIG',
-        SCALAR_IS_ZERO: 'SCALAR_IS_ZERO',
-        X_TOO_BIG: 'X_TOO_BIG',
-        Y_TOO_BIG: 'Y_TOO_BIG',
-        NOT_ON_CURVE: 'NOT_ON_CURVE',
-        BAD_BLINDING_FACTOR: 'BAD_BLINDING_FACTOR',
-        KPUBLIC_MALFORMED: 'KPUBLIC_MALFORMED',
-        VIEWING_KEY_MALFORMED: 'VIEWING_KEY_MALFORMED',
-        M_TOO_BIG: 'M_TOO_BIG',
-        BAD_K: 'BAD_K',
-        GAMMA_IS_INFINITY: 'GAMMA_IS_INFINTY',
-        SIGMA_IS_INFINTY: 'SIGMA_IS_INFINITY',
-        NO_ADD_CHALLENGEVAR: 'NO_ADD_CHALLENGEVAR',
-        INCORRECT_NOTE_NUMBER: 'INCORRECT_NOTE_NUMBER',
-        GAMMA_SIGMA_NOT_ON_CURVE: 'GAMMA_SIGMA_NOT_ON_CURVE',
-        CHALLENGE_RESPONSE_FAIL: 'CHALLENGE_RESPONSE_FAIL',
-        KA_TOO_BIG: 'KA_TOO_BIG',
-        KB_TOO_BIG: 'KB_TOO_BIG',
-        ZA_TOO_BIG: 'ZA_TOO_BIG',
-        ZB_TOO_BIG: 'ZB_TOO_BIG',
-        BLINDING_FACTOR_IS_NULL: 'BLINDING_FACTOR_IS_NULL',
-        POINT_AT_INFINITY: 'POINT_AT_INFINITY',
-        NOTE_VALUE_TOO_BIG: 'NOTE_VALUE_TOO_BIG',
-        SHOULD_THROW_IS_UNDEFINED: 'SHOULD_THROW_IS_UNDEFINED',
-    },
     /**
      * Dummy network id used in contract testing
      */
@@ -184,10 +85,104 @@ const constants = {
      *  @default 1024
      */
     SIGNATURES_PER_FILE: 1024,
+};
+
+/**
+ * Common addresses
+ */
+constants.addresses = {
+    /**
+     * Address of the DAI smart contract on Ethereum
+     * @constant DAI_ADDRESS
+     * @type {string}
+     * @default '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'
+     */
+    DAI_ADDRESS: '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359',
     /**
      * Generic burning Etheruem address
      */
     ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
+};
+
+/** 
+ * Error codes for use during proof construction
+ */
+constants.errorTypes = {
+    SCALAR_TOO_BIG: 'SCALAR_TOO_BIG',
+    SCALAR_IS_ZERO: 'SCALAR_IS_ZERO',
+    X_TOO_BIG: 'X_TOO_BIG',
+    Y_TOO_BIG: 'Y_TOO_BIG',
+    NOT_ON_CURVE: 'NOT_ON_CURVE',
+    BAD_BLINDING_FACTOR: 'BAD_BLINDING_FACTOR',
+    KPUBLIC_MALFORMED: 'KPUBLIC_MALFORMED',
+    VIEWING_KEY_MALFORMED: 'VIEWING_KEY_MALFORMED',
+    M_TOO_BIG: 'M_TOO_BIG',
+    BAD_K: 'BAD_K',
+    GAMMA_IS_INFINITY: 'GAMMA_IS_INFINTY',
+    SIGMA_IS_INFINTY: 'SIGMA_IS_INFINITY',
+    NO_ADD_CHALLENGEVAR: 'NO_ADD_CHALLENGEVAR',
+    INCORRECT_NOTE_NUMBER: 'INCORRECT_NOTE_NUMBER',
+    GAMMA_SIGMA_NOT_ON_CURVE: 'GAMMA_SIGMA_NOT_ON_CURVE',
+    CHALLENGE_RESPONSE_FAIL: 'CHALLENGE_RESPONSE_FAIL',
+    KA_TOO_BIG: 'KA_TOO_BIG',
+    KB_TOO_BIG: 'KB_TOO_BIG',
+    ZA_TOO_BIG: 'ZA_TOO_BIG',
+    ZB_TOO_BIG: 'ZB_TOO_BIG',
+    BLINDING_FACTOR_IS_NULL: 'BLINDING_FACTOR_IS_NULL',
+    POINT_AT_INFINITY: 'POINT_AT_INFINITY',
+    NOTE_VALUE_TOO_BIG: 'NOTE_VALUE_TOO_BIG',
+    SHOULD_THROW_IS_UNDEFINED: 'SHOULD_THROW_IS_UNDEFINED',
+};
+
+/**
+ * Domains, schemas and signature related to EIP712
+ */
+constants.eip712 = {
+    ACE_DOMAIN_PARAMS: {
+        name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
+        version: '1',
+    },
+    JOIN_SPLIT_SIGNATURE: {
+        types: {
+            JoinSplitSignature: [
+                { name: 'proof', type: 'uint24' },
+                { name: 'note', type: 'bytes32[4]' },
+                { name: 'challenge', type: 'uint256' },
+                { name: 'sender', type: 'address' },
+            ],
+            EIP712Domain: [
+                { name: 'name', type: 'string' },
+                { name: 'version', type: 'string' },
+                { name: 'verifyingContract', type: 'address' },
+            ],
+        },
+        primaryType: 'JoinSplitSignature',
+    },
+    AZTEC_RINKEBY_DOMAIN_PARAMS: {
+        name: 'AZTEC_RINKEBY_DOMAIN',
+        version: '1',
+        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
+    },
+    AZTEC_MAINNET_DOMAIN_PARAMS: {
+        name: 'AZTEC_MAINNET_DOMAIN',
+        version: '1',
+        salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
+    },
+    NOTE_SIGNATURE: {
+        types: {
+            NoteSignature: [
+                { name: 'noteHash', type: 'bytes32' },
+                { name: 'spender', type: 'address' },
+                { name: 'status', type: 'bool' },
+            ],
+            EIP712Domain: [
+                { name: 'name', type: 'string' },
+                { name: 'version', type: 'string' },
+                { name: 'verifyingContract', type: 'address' },
+            ],
+        },
+        primaryType: 'NoteSignature',
+    },
 };
 
 module.exports = constants;

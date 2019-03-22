@@ -10,7 +10,6 @@ const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const { proof: { joinSplit: { encodeJoinSplitTransaction } } } = aztec;
 const { sign } = aztec;
-const { CRS } = constants;
 const joinSplitInputEncode = aztec.abiEncoder.inputCoder.joinSplit;
 const { outputCoder } = aztec.abiEncoder;
 
@@ -57,7 +56,7 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], CRS, opts);
+            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, opts);
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
@@ -82,7 +81,7 @@ contract('JoinSplit', (accounts) => {
             expect(decoded[0].publicValue).to.equal(40);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, accounts[0], CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, accounts[0], constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
 
@@ -105,10 +104,10 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], CRS, opts);
+            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, opts);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, accounts[0], CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, accounts[0], constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
 
@@ -128,7 +127,7 @@ contract('JoinSplit', (accounts) => {
                 validatorAddress: joinSplitContract.address,
             });
 
-            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, {
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, {
                 from: senderAddress,
                 gas: 4000000,
             });
@@ -140,7 +139,7 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
 
@@ -164,10 +163,10 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts);
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
 
@@ -190,10 +189,10 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts);
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
 
@@ -216,10 +215,10 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts);
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
 
@@ -246,10 +245,10 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts);
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
 
@@ -276,10 +275,10 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts);
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, CRS, opts);
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
     });
@@ -324,7 +323,7 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(fakeProofData, senderAddress, CRS, opts));
+            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(fakeProofData, senderAddress, constants.CRS, opts));
         });
 
         it('validates failure for random proof data', async () => {
@@ -345,8 +344,8 @@ contract('JoinSplit', (accounts) => {
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
-                const schema = constants.ACE_NOTE_SIGNATURE;
+                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -375,7 +374,7 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts));
+            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('validate failure for zero input note value', async () => {
@@ -396,8 +395,8 @@ contract('JoinSplit', (accounts) => {
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
-                const schema = constants.ACE_NOTE_SIGNATURE;
+                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -423,7 +422,7 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts));
+            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('validate failure for zero output note value', async () => {
@@ -444,8 +443,8 @@ contract('JoinSplit', (accounts) => {
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
-                const schema = constants.ACE_NOTE_SIGNATURE;
+                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -471,7 +470,7 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts));
+            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('validate failure when using a fake trusted setup key', async () => {
@@ -488,8 +487,8 @@ contract('JoinSplit', (accounts) => {
             } = aztec.proof.joinSplit.constructJoinSplitModified(commitments, m, accounts[0], 0, publicOwner);
 
             const inputSignatures = commitments.slice(0, 2).map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
-                const schema = constants.ACE_NOTE_SIGNATURE;
+                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
                     note: proofDataRaw[index].slice(2, 6),
@@ -515,7 +514,7 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts));
+            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('validate failure when points not on curve', async () => {
@@ -527,8 +526,8 @@ contract('JoinSplit', (accounts) => {
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
             const senderAddress = accounts[0];
 
-            const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.ACE_DOMAIN_PARAMS);
-            const schema = constants.ACE_NOTE_SIGNATURE;
+            const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
+            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: JOIN_SPLIT_PROOF,
                 note: [proofDataRaw[0][2], proofDataRaw[0][3], proofDataRaw[0][4], proofDataRaw[0][5]],
@@ -554,7 +553,7 @@ contract('JoinSplit', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, CRS, opts));
+            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
     });
 });

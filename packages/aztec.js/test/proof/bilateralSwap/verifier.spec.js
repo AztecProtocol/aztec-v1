@@ -14,7 +14,7 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 
 const { expect } = chai;
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 
 
 describe('AZTEC bilateral swap verifier tests', () => {
@@ -75,7 +75,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -97,7 +97,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -113,7 +113,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
 
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
-            expect(errors[0]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -132,7 +132,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
 
             expect(valid).to.equal(false);
-            expect(errors).to.contain(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors).to.contain(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -154,8 +154,8 @@ describe('AZTEC bilateral swap verifier tests', () => {
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
-            expect(errors[0]).to.equal(ERROR_TYPES.BAD_BLINDING_FACTOR);
-            expect(errors[1]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
+            expect(errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -172,9 +172,9 @@ describe('AZTEC bilateral swap verifier tests', () => {
             const { valid, errors } = bilateralProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(3);
-            expect(errors[0]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(errors[1]).to.equal(ERROR_TYPES.SCALAR_IS_ZERO);
-            expect(errors[2]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(errors[1]).to.equal(errorTypes.SCALAR_IS_ZERO);
+            expect(errors[2]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
@@ -208,19 +208,19 @@ describe('AZTEC bilateral swap verifier tests', () => {
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(13);
 
-            expect(errors[0]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[1]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[2]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
-            expect(errors[3]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[4]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[5]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
-            expect(errors[6]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[7]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[8]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
-            expect(errors[9]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[10]).to.equal(ERROR_TYPES.NOT_ON_CURVE);
-            expect(errors[11]).to.equal(ERROR_TYPES.SCALAR_TOO_BIG);
-            expect(errors[12]).to.equal(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+            expect(errors[0]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[1]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[2]).to.equal(errorTypes.SCALAR_TOO_BIG);
+            expect(errors[3]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[4]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[5]).to.equal(errorTypes.SCALAR_TOO_BIG);
+            expect(errors[6]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[7]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[8]).to.equal(errorTypes.SCALAR_TOO_BIG);
+            expect(errors[9]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[10]).to.equal(errorTypes.NOT_ON_CURVE);
+            expect(errors[11]).to.equal(errorTypes.SCALAR_TOO_BIG);
+            expect(errors[12]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
     });

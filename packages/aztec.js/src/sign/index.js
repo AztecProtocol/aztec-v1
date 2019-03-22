@@ -6,7 +6,7 @@
  * @memberof module:sign
  */
 
-const { constants: { AZTEC_NOTE_SIGNATURE } } = require('@aztec/dev-utils');
+const { constants, proofs } = require('@aztec/dev-utils');
 const eip712 = require('./eip712');
 const secp256k1 = require('../secp256k1');
 
@@ -71,9 +71,10 @@ sign.signStructuredData = function signStructuredData(domain, schema, message, p
  */
 sign.recoverAddress = function recoverAddress(note, challenge, senderAddress, verifyingContract, signature) {
     const messageBase = {
-        ...AZTEC_NOTE_SIGNATURE,
+        ...constants.eip712.JOIN_SPLIT_SIGNATURE,
         domain: sign.generateAZTECDomainParams(verifyingContract),
         message: {
+            proof: proofs.JOIN_SPLIT_PROOF,
             note: [note[2], note[3], note[4], note[5]],
             challenge,
             sender: senderAddress,

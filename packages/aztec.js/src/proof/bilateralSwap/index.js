@@ -17,7 +17,7 @@ const bilateralSwap = {};
 bilateralSwap.verifier = verifier;
 
 const { customError } = utils.errors;
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 
 /**
  * Construct AZTEC bilateral swap proof transcript
@@ -36,7 +36,7 @@ bilateralSwap.constructProof = (notes, sender) => {
 
         if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
             throw customError(
-                ERROR_TYPES.NOT_ON_CURVE,
+                errorTypes.NOT_ON_CURVE,
                 {
                     message: 'A group element is not on the bn128 curve',
                     gammaOnCurve,

@@ -1,5 +1,5 @@
 /* global artifacts */
-const { constants: { DAI_ADDRESS, ERC20_SCALING_FACTOR } } = require('@aztec/dev-utils');
+const { constants: { addresses, ERC20_SCALING_FACTOR } } = require('@aztec/dev-utils');
 const { isUndefined } = require('lodash');
 
 const ACE = artifacts.require('./ACE.sol');
@@ -15,7 +15,7 @@ module.exports = (deployer, network) => {
     /* eslint-disable no-new */
     new Promise(() => {
         if (network === 'mainnet') {
-            return Promise.resolve({ address: DAI_ADDRESS });
+            return Promise.resolve({ address: addresses.DAI_ADDRESS });
         }
         return deployer.deploy(ERC20Mintable).then(({ address: erc20Address }) => {
             const aceAddress = ACE.address;

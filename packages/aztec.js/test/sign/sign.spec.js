@@ -1,16 +1,5 @@
 
-const {
-    constants: {
-        ACE_DOMAIN_PARAMS,
-        ACE_NOTE_SIGNATURE,
-        AZTEC_TEST_DOMAIN_PARAMS,
-        AZTEC_NOTE_SIGNATURE,
-    },
-    proofs: {
-        JOIN_SPLIT_PROOF,
-    },
-} = require('@aztec/dev-utils');
-
+const { constants, proofs } = require('@aztec/dev-utils');
 
 const BN = require('bn.js');
 const crypto = require('crypto');
@@ -67,7 +56,7 @@ describe('sign tests', () => {
         });
     });
 
-    describe('EIP712 implementation tests for ACE_NOTE_SIGNATURE', () => {
+    describe('EIP712 implementation tests for JOIN_SPLIT_SIGNATURE', () => {
         it('check that the signature outputted is well formed', () => {
             const verifyingContract = proofUtils.randomAddress();
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
@@ -75,10 +64,10 @@ describe('sign tests', () => {
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const domain = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
-            const schema = ACE_NOTE_SIGNATURE;
+            const domain = sign.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
-                proof: JOIN_SPLIT_PROOF,
+                proof: proofs.JOIN_SPLIT_PROOF,
                 note: noteString,
                 challenge,
                 sender: senderAddress,
@@ -102,10 +91,10 @@ describe('sign tests', () => {
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const domain = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
-            const schema = ACE_NOTE_SIGNATURE;
+            const domain = sign.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
-                proof: JOIN_SPLIT_PROOF,
+                proof: proofs.JOIN_SPLIT_PROOF,
                 note: noteString,
                 challenge,
                 sender: senderAddress,
@@ -114,62 +103,6 @@ describe('sign tests', () => {
             const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
-            const v = parseInt(signature[0], 16); // has to be in number format
-            const r = Buffer.from(signature[1].slice(2), 'hex');
-            const s = Buffer.from(signature[2].slice(2), 'hex');
-
-            const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
-            expect(publicKeyRecover).to.equal(publicKey.slice(4));
-        });
-    });
-
-    describe('EIP712 implementation tests for ACE_NOTE_SIGNATURE', () => {
-        it('for ACE_NOTE_SIGNATURE, check public key is correctly recovered from signature params', () => {
-            const verifyingContract = proofUtils.randomAddress();
-            const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
-            const senderAddress = proofUtils.randomAddress();
-            const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-            const domain = sign.generateAZTECDomainParams(verifyingContract, ACE_DOMAIN_PARAMS);
-            const schema = ACE_NOTE_SIGNATURE;
-            const message = {
-                proof: JOIN_SPLIT_PROOF,
-                note: noteString,
-                challenge,
-                sender: senderAddress,
-            };
-            const { privateKey, publicKey } = accounts[0];
-            const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
-
-            const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
-            const v = parseInt(signature[0], 16); // has to be in number format
-            const r = Buffer.from(signature[1].slice(2), 'hex');
-            const s = Buffer.from(signature[2].slice(2), 'hex');
-
-            const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
-            expect(publicKeyRecover).to.equal(publicKey.slice(4));
-        });
-    });
-
-    describe('EIP712 implementation tests for AZTEC_NOTE_SIGNATURE', () => {
-        it('for AZTEC_NOTE_SIGNATURE, check public key is correctly recovered from signature params', () => {
-            const verifyingContract = proofUtils.randomAddress();
-            const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
-            const senderAddress = proofUtils.randomAddress();
-            const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
-
-            const domain = sign.generateAZTECDomainParams(verifyingContract, AZTEC_TEST_DOMAIN_PARAMS);
-            const schema = AZTEC_NOTE_SIGNATURE;
-            const message = {
-                note: noteString,
-                challenge,
-                sender: senderAddress,
-            };
-            const { privateKey, publicKey } = accounts[0];
-            const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
-
-            const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
             const v = parseInt(signature[0], 16); // has to be in number format
             const r = Buffer.from(signature[1].slice(2), 'hex');
             const s = Buffer.from(signature[2].slice(2), 'hex');
