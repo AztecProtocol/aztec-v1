@@ -2,18 +2,9 @@ pragma solidity >=0.5.0 <0.6.0;
 
 library JoinSplitABIEncoder {
 
-    // Keeping it as a constant because computing it yields an out of gas error
-    //
-    // bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
-    //     "ACENoteSignature(",
-    //         "uint24 proof,",
-    //         "bytes32[4] note,",
-    //         "uint256 challenge,",
-    //         "address sender",
-    //     ")"
-    // ));
-    bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = 
-        0x21853faea366a53b2f6a3cbf1da39ef94d2dbb994639a58005781220badbd5df;
+    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32[4] note,uint256 challenge,address sender)"
+    bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
+        0x904692743a9f431a791d777dd8d42e18e79888579fa6807b5f17b14020210e30;
 
     /**
      * Calldata map
