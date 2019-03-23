@@ -531,7 +531,7 @@ contract ACE is IAZTEC {
 
     function updateInputNotes(bytes memory inputNotes) internal {
         uint256 length = inputNotes.getLength();
-        for (uint i = 0; i < length; i = i.add(1)) {
+        for (uint256 i = 0; i < length; i++) {
             (address _owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];
@@ -541,13 +541,13 @@ contract ACE is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.uintToBytes(5);
+            note.destroyedOn = now.toBytes5();
         }
     }
 
     function updateOutputNotes(bytes memory outputNotes) internal {
         uint256 length = outputNotes.getLength();
-        for (uint i = 0; i < length; i = i.add(1)) {
+        for (uint256 i = 0; i < length; i++) {
             (address _owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];
@@ -556,7 +556,7 @@ contract ACE is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.uintToBytes(5);
+            note.createdOn = now.toBytes5();
             note.owner = _owner;
         }
     }

@@ -31,6 +31,10 @@ contract BilateralSwap {
             // this contract through a comp\atible ABI
             validateBilateralSwap()
 
+            // if we get to here, the proof is valid. We now 'fall through' the assembly block
+            // and into JoinSplitABI.validateJoinSplit()
+            // reset the free memory pointer because we're touching Solidity code again
+            mstore(0x40, 0x60)
             /**
              * New calldata map
              * 0x04:0x24      = calldata location of proofData byte array 
