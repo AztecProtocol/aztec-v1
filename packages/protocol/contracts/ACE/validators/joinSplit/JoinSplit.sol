@@ -38,6 +38,12 @@ contract JoinSplit is LibEIP712 {
             // We still assume calldata is offset by 4 bytes so that we can represent this contract
             // through a compatible ABI
             validateJoinSplit()
+
+            // if we get to here, the proof is valid. We now 'fall through' the assembly block
+            // and into JoinSplitABI.validateJoinSplit()
+            // reset the free memory pointer because we're touching Solidity code again
+            mstore(0x40, 0x60)
+
             /**
              * New calldata map
              * 0x04:0x24      = calldata location of proofData byte array
