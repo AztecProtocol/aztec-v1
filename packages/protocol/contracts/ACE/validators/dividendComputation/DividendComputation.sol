@@ -30,6 +30,11 @@ contract DividendComputation {
             // represent this contract through a compatible ABI
             validateDividendComputation()
 
+            // if we get to here, the proof is valid. We now 'fall through' the assembly block
+            // and into JoinSplitABI.validateJoinSplit()
+            // reset the free memory pointer because we're touching Solidity code again
+            mstore(0x40, 0x60)
+
             /**
              * New calldata map
              * 0x04:0x24      = calldata location of proofData byte array  // proof data byte array

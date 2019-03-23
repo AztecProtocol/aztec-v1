@@ -1,16 +1,12 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
-library IntegerUtils {
-    using SafeMath for uint256;
-    
-    function uintToBytes(uint256 num, uint256 size) internal pure returns (bytes5 output) {
-        bytes memory b = new bytes(5);
-        for (uint i = 0; i < size; i = i.add(1)) {
-            b[i] = byte(uint8(num / (2**(8*(size - 1 - i)))));
+library IntegerUtils {    
+    function toBytes5(uint256 num) internal pure returns (bytes5 output) {
+        bool valid;
+        assembly {
+            valid := iszero(and(num, not(0xffffffffff)))
+            output := num
         }
-        assembly { output := mload(add(b, 32)) }
-        return output;
+        require(valid, "toBytes5 failed, value has more than 5 bytes of data!");
     }
 }
