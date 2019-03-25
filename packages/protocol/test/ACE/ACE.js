@@ -6,7 +6,7 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
+const { abiEncoder, note, proof, secp256k1, bn128 } = require('aztec.js');
 const { constants, proofs: { JOIN_SPLIT_PROOF, MINT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
@@ -134,11 +134,13 @@ contract('ACE', (accounts) => {
         let proofData;
         let proofHash;
         let proofOutput;
+        let oldTotalMinted;
         let aztecAccounts;
         let notes;
+        let noteHash;
         let expectedOutput;
 
-        it.only('able to set the mint proof verification address', async () => {
+        it('able to set the mint proof verification address', async () => {
             ace = await ACE.new({
                 from: accounts[0],
             });
@@ -152,7 +154,14 @@ contract('ACE', (accounts) => {
             });
 
             const newTotalMinted = notes.slice(0, 1);
-            const oldTotalMinted = notes.slice(1, 2);
+
+            // Creating a note where k = 0, a = 1
+            const dummyAccount = secp256k1.generateAccount();
+            oldTotalMinted = note.create(dummyAccount.publicKey, 0);
+            oldTotalMinted.a = padLeft(new BN(1, 16).umod(bn128.curve.n).toString(16), 64);
+            console.log('actual notehash: ', oldTotalMinted.noteHash);
+
+
             const adjustedNotes = notes.slice(2, 4);
 
             ({ proofData, expectedOutput } = proof.mint.encodeMintTransaction({
@@ -163,11 +172,12 @@ contract('ACE', (accounts) => {
             }));
 
             proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
+            console.log('expected output: ', expectedOutput);
+
             proofHash = outputCoder.hashProofOutput(proofOutput);
 
             await ace.setCommonReferenceString(constants.CRS);
             const { receipt } = await ace.setProof(MINT_PROOF, aztecMint.address);
-
             expect(receipt.status).to.equal(true);
         });
 
@@ -178,41 +188,28 @@ contract('ACE', (accounts) => {
             const canBurn = true;
             const canConvert = false; // minting at the moment is just for private assets
 
-            const dummyAccount = secp256k1.generateAccount();
-            console.log('dummy public key: ', dummyAccount.publicKey);
-            const confidentialTotalSupply = note.create(dummyAccount.publicKey, 0);
-            confidentialTotalSupply.a = 1;
 
-            console.log('confidential total supply note: ', confidentialTotalSupply.a);
-
-            const noteHash = note.utils.getNoteHash(confidentialTotalSupply.gamma, confidentialTotalSupply.sigma);
+            noteHash = note.utils.getNoteHash(oldTotalMinted.gamma, oldTotalMinted.sigma);
             console.log('note hash: ', noteHash);
-
-            console.log('erc20.address: ', erc20.address);
-            console.log('scaling factor: ', scalingFactor);
-            console.log('canMint: ', canMint);
-            console.log('canConvert: ', canConvert);
-            console.log('note hash: ', noteHash.slice(2));
-
-            await ace.createNoteRegistry(
+            const { receipt } = await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
                 canMint,
                 canBurn,
                 canConvert,
-                noteHash.slice(2),
+                noteHash,
                 { from: accounts[0] }
             );
-
             console.log('created the note registry');
-            // new total minted = 50
-            // old total minted = 30
-            // mintOne = 10
-            // mintTwo = 10
+            expect(receipt.status).to.equal(true);
+        });
 
+        it('can successfully call the mint function', async () => {
             const { receipt } = await ace.mint(MINT_PROOF, proofData, accounts[0]);
-            console.log('logs: ', receipt.logs);
-            console.log('successfully minted');
+            const { logs } = receipt;
+            console.log('logs: ', logs);
+            expect(receipt.status).to.equal(true);
+            console.log('note hash: ', noteHash);
         });
     });
 
