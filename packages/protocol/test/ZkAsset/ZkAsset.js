@@ -109,7 +109,10 @@ contract('ZkAsset', (accounts) => {
             zkAsset = await ZkAsset.new(
                 ace.address,
                 erc20.address,
-                scalingFactor
+                scalingFactor,
+                false,
+                false,
+                true
             );
 
             await Promise.all(accounts.map((account) => {

@@ -5,7 +5,10 @@ contract IZkAsset {
     event CreateZkAsset(
         address indexed aceAddress,
         address indexed linkedTokenAddress,
-        uint256 scalingFactor
+        uint256 scalingFactor,
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert
     );
     event CreateNoteRegistry(uint256 noteRegistryId);
     event CreateNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
