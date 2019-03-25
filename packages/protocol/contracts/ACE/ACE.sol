@@ -35,6 +35,16 @@ contract ACE is IAZTEC {
         address validatorAddress
     );
     event IncrementLatestEpoch(uint8 newLatestEpoch);
+    event NoteRegistryStatus(address creatorAddress);
+    event ProofHash(bytes32 proofHash);
+    event ProofHash2(bytes32 proofHash);
+    event ProofHash3(bytes32 proofHash);
+    event Length(uint256 length);
+    event NumOutputNotes(uint numOutputNotes);
+    event NumInputNotes(uint numInputNotes);
+
+    event Category(uint8 category);
+
 
     struct Note {
         uint8 status;
@@ -72,7 +82,7 @@ contract ACE is IAZTEC {
     // `validators`contains the addresses of the contracts that validate specific proof types
     mapping(uint8 => mapping(uint8 => mapping(uint8 => address))) public validators;
 
-    // a list of invalidated proof ids, helpful to blacklist buggy old versions
+    // a list of invalidated proof ids, helpfuI'l to blacklist buggy old versions
     mapping(uint8 => mapping(uint8 => mapping(uint8 => bool))) internal disabledValidators;
 
     // latest proof epoch accepted by this contract
@@ -80,6 +90,9 @@ contract ACE is IAZTEC {
 
     // keep track of validated balanced proofs
     mapping(bytes32 => bool) public validatedProofs;
+
+    // keep track of validated mint/burn proofs
+    mapping(bytes32 => bool) public validatedMintBurnProofs;
     
     /**
     * @dev contract constructor. Sets the owner of ACE, the flags, the linked token address and
@@ -160,7 +173,19 @@ contract ACE is IAZTEC {
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
                 validatedProofs[validatedProofHash] = true;
             }
+        } else if (category == uint8(1)) {
+            // emit Category(category);
+            // TODO
+            uint256 length = proofOutputs.getLength();
+            emit Length(length);
+            for (uint256 i = 0; i < length; i = i.add(1)) {
+                bytes32 proofHash = keccak256(proofOutputs.get(i));
+                bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+                emit ProofHash(validatedProofHash);
+                validatedProofs[validatedProofHash] = true;
+            }
         }
+
         return proofOutputs;
     }
 
@@ -257,14 +282,15 @@ contract ACE is IAZTEC {
         uint256 _scalingFactor,
         bool _canMint,
         bool _canBurn,
-        bool _canConvert
+        bool _canConvert,
+        bytes32 _confidentialTotalSupply
     ) public {
         require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
         NoteRegistry memory registry = NoteRegistry({
             linkedToken: ERC20(_linkedTokenAddress),
             scalingFactor: _scalingFactor,
             totalSupply: 0,
-            confidentialTotalSupply: bytes32(0x0),
+            confidentialTotalSupply: _confidentialTotalSupply,
             flags: Flags({
                 active: true,
                 canMint: _canMint,
@@ -273,6 +299,7 @@ contract ACE is IAZTEC {
             })
         });
         registries[msg.sender] = registry;
+        emit NoteRegistryStatus(msg.sender);
     }
 
     function updateNoteRegistry(
@@ -317,27 +344,47 @@ contract ACE is IAZTEC {
             }
         }
     }
-
-    function mint(bytes memory _proofOutput, address _proofSender) public returns (bool) {
+    // TODO: Check that this is correct - inputting the entire proofOutput object here
+    function mint(uint24 _proof, bytes memory _proofData, address _proofSender) public returns (bool) {
+        
         NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == false, "note registry does not exist for the given address");
+        require(registry.flags.active == true, "note registry does not exist for the given address");
         require(registry.flags.canMint == true, "this asset is not mintable");
-        bytes32 proofHash = keccak256(_proofOutput);
-        require(
-            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true, 
-            "ACE has not validated a matching proof"
-        ); 
         
-        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutput.extractProofOutput();
+        // Check that it's a mintable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        // TODO: replace the magic number 1 below with ProofCategory.MINT
+        require(category == 1, "this is not a mint proof");
+
+        bytes memory _proofOutputs = validateProof(_proof, _proofSender, _proofData);
+
+        bytes memory _proofOutputTotals = _proofOutputs[0];
+        bytes memory _proofOutputNotes = _proofOutputs[1];
+
+        // Dealing with totals
+        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutputTotals.extractProofOutput();
         require(publicValue == 0, "mint transactions cannot have a public value");
-        require(outputNotes.getLength() > 0, "mint transactions require at least one output note");
-        require(inputNotes.getLength() == JOIN_SPLIT_PROOF, "mint transactions can only have one input note");
         
-        (, bytes32 noteHash, ) = outputNotes.get(0).extractNote();
-        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
-       
-        (, noteHash, ) = inputNotes.get(0).extractNote();
-        registry.confidentialTotalSupply = noteHash;
+        uint numOutputNotes = outputNotes.getLength();
+        uint numInputNotes = inputNotes.getLength();
+
+
+        require(numOutputNotes == 1, "totals must have one output note");
+        require(numInputNotes == 1, "totals must have one input note");
+        /*
+        // Dealing with individual notes
+        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutputNotes.extractProofOutput();
+        require(publicValue == 0, "mint transactions cannot have a public value");
+        
+        uint numOutputNotes = outputNotes.getLength();
+        uint numInputNotes = inputNotes.getLength();
+
+        emit NumOutputNotes(numOutputNotes);
+        emit NumInputNotes(numInputNotes);
+
+        require(numOutputNotes >= 1, "must have at least one output note");
+        require(numInputNotes == 0, "second proofOutput object can not have input notes");
 
         for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
             address noteOwner;
@@ -351,15 +398,23 @@ contract ACE is IAZTEC {
             note.createdOn = now.uintToBytes(5);
             note.owner = noteOwner;
         }
+        */
     }
 
-    function burn(bytes memory _proofOutput, address _proofSender) public returns (bool) {
+    function burn(uint24 _proof, bytes memory _proofOutput, address _proofSender) public returns (bool) {
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
         require(registry.flags.canBurn == true, "asset not burnable");
+
+        // Check that it's a burnable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        // TODO: replace the magic number 1 below with ProofCategory.MINT
+        require(category == 2, "this is not a burn proof");
+
         bytes32 proofHash = keccak256(_proofOutput);
         require(
-            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true,
+            validateProofByHash(_proof, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
         );
         (
@@ -370,8 +425,14 @@ contract ACE is IAZTEC {
         ) = _proofOutput.extractProofOutput();
         require(publicValue == 0, "mint transactions cannot have a public value");
 
-        require(inputNotes.getLength() > 0, "burn transactions require at least one input note");
-        require(outputNotes.getLength() == 1, "burn transactions can only have one output note");
+        uint numOutputNotes = outputNotes.getLength();
+        uint numInputNotes = inputNotes.getLength();
+
+        emit NumOutputNotes(numOutputNotes);
+        emit NumInputNotes(numInputNotes);
+
+        require(numInputNotes > 0, "burn transactions require at least one input note");
+        require(numOutputNotes == 1, "burn transactions can only have one output note");
         (
             ,
             bytes32 noteHash,

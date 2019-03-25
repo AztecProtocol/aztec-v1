@@ -7,7 +7,7 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const { constants, proofs: { JOIN_SPLIT_PROOF, MINT_PROOF } } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -16,9 +16,12 @@ const ACE = artifacts.require('./contracts/ACE/ACE');
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
-
+const AdjustSupply = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupplyInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
+AdjustSupply.abi = AdjustSupplyInterface.abi;
+
 
 contract('ACE', (accounts) => {
     // Creating a collection of tests that should pass
@@ -56,7 +59,7 @@ contract('ACE', (accounts) => {
         });
     });
 
-    describe('success states', () => {
+    describe('joinsplit success states', () => {
         let aztecAccounts = [];
         let notes = [];
         let ace;
@@ -123,6 +126,93 @@ contract('ACE', (accounts) => {
             await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]);
             const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
             expect(secondResult).to.equal(false);
+        });
+    });
+
+    describe.only('adjust supply success states', () => {
+        let ace;
+        let proofData;
+        let proofHash;
+        let proofOutput;
+        let aztecAccounts;
+        let notes;
+        let expectedOutput;
+
+        it.only('able to set the mint proof verification address', async () => {
+            ace = await ACE.new({
+                from: accounts[0],
+            });
+            const aztecMint = await AdjustSupply.new();
+
+            aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+
+            const noteValues = [50, 0, 30, 20];
+            notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            const newTotalMinted = notes.slice(0, 1);
+            const oldTotalMinted = notes.slice(1, 2);
+            const adjustedNotes = notes.slice(2, 4);
+
+            ({ proofData, expectedOutput } = proof.mint.encodeMintTransaction({
+                newTotalMinted,
+                oldTotalMinted,
+                adjustedNotes,
+                senderAddress: accounts[0],
+            }));
+
+            proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
+            proofHash = outputCoder.hashProofOutput(proofOutput);
+
+            await ace.setCommonReferenceString(constants.CRS);
+            const { receipt } = await ace.setProof(MINT_PROOF, aztecMint.address);
+
+            expect(receipt.status).to.equal(true);
+        });
+
+        it('should create a note registry with an AZTEC note of 0 representing total mint', async () => {
+            const erc20 = await ERC20Mintable.new(); // this is the linked ERC20
+            const scalingFactor = new BN(10);
+            const canMint = true;
+            const canBurn = true;
+            const canConvert = false; // minting at the moment is just for private assets
+
+            const dummyAccount = secp256k1.generateAccount();
+            console.log('dummy public key: ', dummyAccount.publicKey);
+            const confidentialTotalSupply = note.create(dummyAccount.publicKey, 0);
+            confidentialTotalSupply.a = 1;
+
+            console.log('confidential total supply note: ', confidentialTotalSupply.a);
+
+            const noteHash = note.utils.getNoteHash(confidentialTotalSupply.gamma, confidentialTotalSupply.sigma);
+            console.log('note hash: ', noteHash);
+
+            console.log('erc20.address: ', erc20.address);
+            console.log('scaling factor: ', scalingFactor);
+            console.log('canMint: ', canMint);
+            console.log('canConvert: ', canConvert);
+            console.log('note hash: ', noteHash.slice(2));
+
+            await ace.createNoteRegistry(
+                erc20.address,
+                scalingFactor,
+                canMint,
+                canBurn,
+                canConvert,
+                noteHash.slice(2),
+                { from: accounts[0] }
+            );
+
+            console.log('created the note registry');
+            // new total minted = 50
+            // old total minted = 30
+            // mintOne = 10
+            // mintTwo = 10
+
+            const { receipt } = await ace.mint(MINT_PROOF, proofData, accounts[0]);
+            console.log('logs: ', receipt.logs);
+            console.log('successfully minted');
         });
     });
 
@@ -203,7 +293,6 @@ contract('ACE', (accounts) => {
                 kPublic: 0, // perfectly balanced...
                 validatorAddress: aztecJoinSplit.address,
             });
-
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
             const canMint = false;
