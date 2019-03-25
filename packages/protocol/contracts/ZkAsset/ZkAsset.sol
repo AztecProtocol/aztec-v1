@@ -39,7 +39,10 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     constructor(
         address _aceAddress,
         address _linkedTokenAddress,
-        uint256 _scalingFactor
+        uint256 _scalingFactor,
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert
     ) public {
         EIP712_DOMAIN_HASH = keccak256(abi.encodePacked(
             EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
@@ -59,14 +62,17 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         ace.createNoteRegistry(
             _linkedTokenAddress,
             _scalingFactor,
-            false,
-            false,
-            true
+            _canMint, // false,
+            _canBurn, // false,
+            _canConvert // true
         );
         emit CreateZkAsset(
             _aceAddress,
             _linkedTokenAddress,
-            _scalingFactor
+            _scalingFactor,
+            _canMint,
+            _canBurn,
+            _canConvert
         );
     }
     

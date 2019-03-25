@@ -11,12 +11,18 @@ contract ZkAssetDetailed is ZkAsset {
         address _aceAddress,
         address _linkedTokenAddress,
         uint256 _scalingFactor,
+        bool _canMint,
+        bool _canBurn,
+        bool _canConvert,
         string memory _name,
         string memory _symbol
     ) public ZkAsset(
         _aceAddress,
         _linkedTokenAddress,
-        _scalingFactor
+        _scalingFactor,
+        _canMint,
+        _canBurn,
+        _canConvert
     ) {
         name = _name;
         symbol = _symbol;

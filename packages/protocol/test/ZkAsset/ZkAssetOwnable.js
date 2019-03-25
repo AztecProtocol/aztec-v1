@@ -95,7 +95,10 @@ contract('ZkAssetOwnable', (accounts) => {
         zkAssetOwnable = await ZkAssetOwnable.new(
             ace.address,
             erc20.address,
-            scalingFactor
+            scalingFactor,
+            false,
+            false,
+            true
         );
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
 
