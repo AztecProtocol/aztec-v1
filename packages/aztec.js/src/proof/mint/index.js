@@ -66,10 +66,10 @@ mint.encodeMintTransaction = ({
     const {
         proofData: proofDataRaw,
         challenge,
-    } = mint.constructProof([...newTotalMinted, ...oldTotalMinted, ...adjustedNotes], senderAddress);
+    } = mint.constructProof([newTotalMinted, oldTotalMinted, ...adjustedNotes], senderAddress);
 
-    const inputNotes = newTotalMinted;
-    const outputNotes = [...oldTotalMinted, ...adjustedNotes];
+    const inputNotes = [newTotalMinted];
+    const outputNotes = [oldTotalMinted, ...adjustedNotes];
 
     const inputOwners = inputNotes.map(m => m.owner);
     const outputOwners = outputNotes.map(n => n.owner);

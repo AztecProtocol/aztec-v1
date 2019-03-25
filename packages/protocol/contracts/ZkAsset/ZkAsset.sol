@@ -61,8 +61,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             _scalingFactor,
             false,
             false,
-            true,
-            0x0
+            true
         );
         emit CreateZkAsset(
             _aceAddress,
