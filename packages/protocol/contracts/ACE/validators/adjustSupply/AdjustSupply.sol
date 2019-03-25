@@ -81,16 +81,15 @@ contract AdjustSupply is LibEIP712 {
 
                 // validate m <= n
                 if gt(m, n) { mstore(0x00, 404) revert(0x00, 0x20) }
-
+                
+                let kn := calldataload(sub(add(notes, mul(calldataload(notes), 0xc0)), 0xa0))
 
                 // add sender final hash table
                 mstore(0x2a0, calldataload(0x24))
 
-                /* mstore(0x00, m)
-                mstore(0x20, n)
-                mstore(0x40, kn)
-                mstore(0x60, calldataload(0x24))
-                return(0x00, 0x80) */
+                kn := mulmod(sub(gen_order, kn), challenge, gen_order) // we actually want c*k_{public}
+
+
                 hashCommitments(notes, n)  // notes = length of proof data array, n = number of notes
                 let b := add(0x2c0, mul(n, 0x80))
 
@@ -121,9 +120,20 @@ contract AdjustSupply is LibEIP712 {
                 // We validate e(\Pi_{i=m+1}^{n}\gamma_i^{-cx_j}, t_2) == e(\Pi_{i=m+1}^{n}\sigma_i^{cx_j}, g_2).
                 // x_j is a pseudorandom variable whose entropy source is the input string, allowing for
                 // a sum of commitment points to be evaluated in one pairing comparison
-                let k := calldataload(noteIndex)
+                let k
                 let a := calldataload(add(noteIndex, 0x20))
                 let c := challenge
+                
+                switch eq(add(i, 0x01), n)
+                    case 1 {
+                        k := kn
+
+                        // if all notes are input notes, invert k
+                        if eq(m, n) {
+                            k := sub(gen_order, k)
+                        }
+                    }
+                    case 0 { k := calldataload(noteIndex) }
 
 
                 // Check this commitment is well formed...
@@ -135,6 +145,7 @@ contract AdjustSupply is LibEIP712 {
                 switch gt(add(i, 0x01), m)
                 case 1 {
                     // before we update k, update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
+                    kn := addmod(kn, sub(gen_order, k), gen_order)
                     let x := mod(mload(0x00), gen_order)
                     k := mulmod(k, x, gen_order)
                     a := mulmod(a, x, gen_order)
@@ -142,6 +153,12 @@ contract AdjustSupply is LibEIP712 {
 
                     // calculate x_{j+1}
                     mstore(0x00, keccak256(0x00, 0x20))
+                }
+
+                case 0 {
+
+                        // nothing to do here except update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
+                    kn := addmod(kn, k, gen_order)
                 }
 
                 // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i

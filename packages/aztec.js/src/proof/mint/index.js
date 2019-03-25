@@ -150,7 +150,7 @@ mint.constructProof = (notes, sender) => {
             runningBk = runningBk.redSub(bk);
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
         } else {
-            runningBk = runningBk.redSub(bk);
+            runningBk = runningBk.redAdd(bk);
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         }
 
@@ -165,9 +165,12 @@ mint.constructProof = (notes, sender) => {
     const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
-        const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
+        let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
         const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
-
+        if (i === (notes.length - 1)) {
+            const kPublic = new BN(0);
+            kBar = kPublic;
+        }
         return [
             `0x${padLeft(kBar.toString(16), 64)}`,
             `0x${padLeft(aBar.toString(16), 64)}`,
