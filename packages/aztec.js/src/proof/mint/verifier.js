@@ -12,7 +12,7 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
 
-const { ERROR_TYPES } = utils.constants;
+const { errorTypes } = utils.constants;
 
 const { groupReduction } = bn128;
 
@@ -70,11 +70,11 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
             pairingSigmas = pairingSigmas.add(sigma);
         }
         if (B.isInfinity()) {
-            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            errors.push(errorTypes.BAD_BLINDING_FACTOR);
             finalHash.appendBN(new BN(0));
             finalHash.appendBN(new BN(0));
         } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
-            errors.push(ERROR_TYPES.BAD_BLINDING_FACTOR);
+            errors.push(errorTypes.BAD_BLINDING_FACTOR);
             finalHash.append(B);
         } else {
             finalHash.append(B);
@@ -84,7 +84,7 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
     const finalChallenge = `0x${padLeft(challengeResponse.toString(16), 64)}`;
 
     if (finalChallenge !== challengeHex) {
-        errors.push(ERROR_TYPES.CHALLENGE_RESPONSE_FAIL);
+        errors.push(errorTypes.CHALLENGE_RESPONSE_FAIL);
     }
     const valid = errors.length === 0;
     return {
