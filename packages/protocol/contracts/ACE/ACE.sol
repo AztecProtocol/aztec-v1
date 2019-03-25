@@ -37,11 +37,11 @@ contract ACE is IAZTEC {
     event IncrementLatestEpoch(uint8 newLatestEpoch);
     event NoteRegistryStatus(address creatorAddress);
     event ProofHash(bytes32 proofHash);
-    event ProofHash2(bytes32 proofHash);
-    event ProofHash3(bytes32 proofHash);
     event Length(uint256 length);
     event NumOutputNotes(uint numOutputNotes);
     event NumInputNotes(uint numInputNotes);
+    event ProofOutputs(bytes proofOutputs);
+    event NoteHash(bytes32 noteHash);
 
     event Category(uint8 category);
 
@@ -299,6 +299,7 @@ contract ACE is IAZTEC {
             })
         });
         registries[msg.sender] = registry;
+        emit NoteHash(_confidentialTotalSupply);
         emit NoteRegistryStatus(msg.sender);
     }
 
@@ -345,7 +346,7 @@ contract ACE is IAZTEC {
         }
     }
     // TODO: Check that this is correct - inputting the entire proofOutput object here
-    function mint(uint24 _proof, bytes memory _proofData, address _proofSender) public returns (bool) {
+    function mint(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bytes memory) {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
@@ -357,37 +358,31 @@ contract ACE is IAZTEC {
         // TODO: replace the magic number 1 below with ProofCategory.MINT
         require(category == 1, "this is not a mint proof");
 
-        bytes memory _proofOutputs = validateProof(_proof, _proofSender, _proofData);
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
 
-        bytes memory _proofOutputTotals = _proofOutputs[0];
-        bytes memory _proofOutputNotes = _proofOutputs[1];
+        // Dealing with totals first
+        (bytes memory inputNotesTotal, bytes memory outputNotesTotal, , int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
+        require(publicValueTotal == 0, "mint transactions cannot have a public value");
+        require(outputNotesTotal.getLength() == 1, "totals must have one output note");
+        require(inputNotesTotal.getLength() == 1, "totals must have one input note");
+    
+        // Check the previous confidentialTotalSupply, and then assign the new one
+        (, bytes32 noteHash, ) = outputNotesTotal.get(0).extractNote();
+        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
+        emit NoteHash(noteHash);
+        (, bytes32 noteHashSecond, ) = inputNotesTotal.get(0).extractNote();
+        registry.confidentialTotalSupply = noteHashSecond;
 
-        // Dealing with totals
-        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutputTotals.extractProofOutput();
-        require(publicValue == 0, "mint transactions cannot have a public value");
-        
-        uint numOutputNotes = outputNotes.getLength();
-        uint numInputNotes = inputNotes.getLength();
 
-
-        require(numOutputNotes == 1, "totals must have one output note");
-        require(numInputNotes == 1, "totals must have one input note");
-        /*
         // Dealing with individual notes
-        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutputNotes.extractProofOutput();
+        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutputs.get(1).extractProofOutput();
         require(publicValue == 0, "mint transactions cannot have a public value");
-        
-        uint numOutputNotes = outputNotes.getLength();
-        uint numInputNotes = inputNotes.getLength();
-
-        emit NumOutputNotes(numOutputNotes);
-        emit NumInputNotes(numInputNotes);
-
-        require(numOutputNotes >= 1, "must have at least one output note");
-        require(numInputNotes == 0, "second proofOutput object can not have input notes");
+        require(outputNotes.getLength() >= 1, "must have at least one output note");
+        require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
 
         for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
             address noteOwner;
+            bytes32 noteHash;
             (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry.notes[noteHash];
             require(note.status == 0, "output note exists");
@@ -398,7 +393,7 @@ contract ACE is IAZTEC {
             note.createdOn = now.uintToBytes(5);
             note.owner = noteOwner;
         }
-        */
+        
     }
 
     function burn(uint24 _proof, bytes memory _proofOutput, address _proofSender) public returns (bool) {
