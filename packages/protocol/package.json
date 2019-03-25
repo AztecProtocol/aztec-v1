@@ -68,6 +68,7 @@
     "lint": "npm run lint:js && npm run lint:sol",
     "test:sol": "scripts/test.sh",
     "test": "scripts/test.sh",
+    "trace": "scripts/trace.sh",
     "coverage": "scripts/coverage.sh",
     "compile": "./node_modules/.bin/truffle compile --all",
     "build:artifacts": "node scripts/artifacts.js"
