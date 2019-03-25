@@ -35,7 +35,7 @@ contract ACE is IAZTEC {
         address validatorAddress
     );
     event IncrementLatestEpoch(uint8 newLatestEpoch);
-    event NoteRegistryStatus(address creatorAddress);
+    event NoteRegistryStatus(address creatorAddress, bool _canMint, bool _canBurn, bool _canConvert);
     event ProofHash(bytes32 proofHash);
     event Length(uint256 length);
     event NumOutputNotes(uint numOutputNotes);
@@ -62,7 +62,8 @@ contract ACE is IAZTEC {
         ERC20 linkedToken;
         uint256 scalingFactor;
         uint256 totalSupply;
-        bytes32 confidentialTotalSupply;
+        bytes32 confidentialTotalMinted;
+        bytes32 confidentialTotalBurned;
         Flags flags;
         mapping(bytes32 => Note) notes;
         mapping(address => mapping(bytes32 => uint256)) publicApprovals;
@@ -290,7 +291,8 @@ contract ACE is IAZTEC {
             scalingFactor: _scalingFactor,
             totalSupply: 0,
             confidentialTotalMinted: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
-            // above hash is for a note with k = 0, a = 1
+            confidentialTotalBurned: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
+            // above hashes are for note with k = 0, a = 1. Mint and burn counters start at 0
             flags: Flags({
                 active: true,
                 canMint: _canMint,
@@ -299,7 +301,7 @@ contract ACE is IAZTEC {
             })
         });
         registries[msg.sender] = registry;
-        emit NoteRegistryStatus(msg.sender);
+        emit NoteRegistryStatus(msg.sender, _canMint, _canBurn, _canConvert);
     }
 
     function updateNoteRegistry(
@@ -345,7 +347,7 @@ contract ACE is IAZTEC {
         }
     }
     // TODO: Check that this is correct - inputting the entire proofOutput object here
-    function mint(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bytes memory) {
+    function mint(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bytes memory, bytes memory) {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
@@ -366,13 +368,11 @@ contract ACE is IAZTEC {
         require(inputNotesTotal.getLength() == 1, "totals must have one input note");
     
         // Check the previous confidentialTotalSupply, and then assign the new one
-        (, bytes32 noteHash, ) = inputNotesTotal.get(0).extractNote();
-        emit NoteHash(noteHash);
-        
+        (, bytes32 noteHash, ) = inputNotesTotal.get(0).extractNote();        
 
-        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
+        require(noteHash == registry.confidentialTotalMinted, "provided total supply note does not match");
         (, bytes32 noteHashSecond, ) = outputNotesTotal.get(0).extractNote();
-        registry.confidentialTotalSupply = noteHashSecond;
+        registry.confidentialTotalMinted = noteHashSecond;
 
 
         // Dealing with individual notes
@@ -394,8 +394,11 @@ contract ACE is IAZTEC {
             note.createdOn = now.uintToBytes(5);
             note.owner = noteOwner;
         }
+
+        return(outputNotesTotal, outputNotes);
     }
 
+    /*
     function burn(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bool) {
         
         NoteRegistry storage registry = registries[msg.sender];
@@ -421,9 +424,9 @@ contract ACE is IAZTEC {
         emit NoteHash(noteHash);
         
 
-        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
+        require(noteHash == registry.confidentialTotalBurned, "provided total supply note does not match");
         (, bytes32 noteHashSecond, ) = outputNotesTotal.get(0).extractNote();
-        registry.confidentialTotalSupply = noteHashSecond;
+        registry.confidentialTotalBurned = noteHashSecond;
 
 
         // Dealing with individual notes
@@ -446,6 +449,7 @@ contract ACE is IAZTEC {
             note.owner = noteOwner;
         }
     }
+    */
 
     /** 
     * @dev This should be called from an asset contract.
@@ -470,7 +474,8 @@ contract ACE is IAZTEC {
         ERC20 _linkedToken,
         uint256 _scalingFactor,
         uint256 _totalSupply,
-        bytes32 _confidentialTotalSupply,
+        bytes32 _confidentialTotalMinted,
+        bytes32 _confidentialTotalBurned,
         bool _canMint,
         bool _canBurn,
         bool _canConvert
@@ -480,7 +485,8 @@ contract ACE is IAZTEC {
             registry.linkedToken,
             registry.scalingFactor,
             registry.totalSupply,
-            registry.confidentialTotalSupply,
+            registry.confidentialTotalMinted,
+            registry.confidentialTotalBurned,
             registry.flags.canMint,
             registry.flags.canBurn,
             registry.flags.canConvert
