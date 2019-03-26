@@ -145,7 +145,6 @@ describe('Mint proof verification tests', () => {
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
-            console.log('original challenge: ', challenge);
             const result = verifier.verifyProof(proofData, challenge, sender);
 
             expect(result.valid).to.equal(false);

@@ -4,9 +4,9 @@
   "author": "AZTEC",
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
-  "main": "./lib",
+  "main": "./src",
   "files": [
-    "/lib"
+    "/src"
   ],
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
   "keywords": [

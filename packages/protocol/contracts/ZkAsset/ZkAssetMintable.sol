@@ -13,7 +13,6 @@ import "../libs/ProofUtils.sol";
 
 contract ZkAssetMintable is ZkAsset {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
-    event CompletedMint(bool result);
     
     address public owner;
 
@@ -32,29 +31,19 @@ contract ZkAssetMintable is ZkAsset {
         _canBurn,
         _canConvert
     ) {
-        owner = msg.sender;
     }
-
-        // ace.createNoteRegistry(
-        //     _linkedTokenAddress,
-        //     _scalingFactor,
-        //     false,
-        //     false,
-        //     true
-        // );
 
     function confidentialMint(uint24 _proof, bytes calldata _proofData) external {
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory outputNotesTotal, 
-        bytes memory outputNotes) = ace.mint(_proof, _proofData, address(this));
-        emit CompletedMint(true);
+        (bytes memory newTotalMinted, 
+        bytes memory mintedNotes) = ace.mint(_proof, _proofData, address(this));
 
-        (address owner,
+        (,
         bytes32 noteHash,
-        bytes memory metadata) = outputNotesTotal.extractNote();
+        bytes memory metadata) = newTotalMinted.extractNote();
 
-        logOutputNotes(outputNotes);
+        logOutputNotes(mintedNotes);
         emit UpdateTotalMinted(noteHash, metadata);
     }
 }

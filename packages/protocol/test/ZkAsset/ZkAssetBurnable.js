@@ -1,9 +1,9 @@
-/* global artifacts, expect, contract, beforeEach, it:true */
+/* global artifacts, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
 const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
-
+const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
@@ -20,7 +20,7 @@ const ZkAssetBurnable = artifacts.require('./contracts/ZkAsset/ZkAssetBurnable')
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 
-contract.only('ZkAssetBurnable', (accounts) => {
+contract('ZkAssetBurnable', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
@@ -30,7 +30,6 @@ contract.only('ZkAssetBurnable', (accounts) => {
         let zkAssetBurnable;
         let scalingFactor;
         let aztecAdjustSupply;
-        let oldTotalBurned;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -44,16 +43,17 @@ contract.only('ZkAssetBurnable', (accounts) => {
             aztecAdjustSupply = await AdjustSupply.new();
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
 
-            const newTotalBurned = notes[0];
-            const adjustedNotes = notes.slice(2, 4);
-
             // Creating a fixed note
             const a = padLeft('1', 64);
             const k = padLeft('0', 8);
             const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
             const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            oldTotalBurned = note.fromViewKey(viewingKey);
+            const zeroNote = note.fromViewKey(viewingKey);
             // TODO: add default note to common reference string
+
+            const newTotalBurned = notes[0];
+            const oldTotalBurned = zeroNote;
+            const adjustedNotes = notes.slice(2, 4);
 
             const canMint = true;
             const canBurn = true;
@@ -78,14 +78,10 @@ contract.only('ZkAssetBurnable', (accounts) => {
                 adjustedNotes,
                 senderAddress: zkAssetBurnable.address,
             }));
-
-            console.log('sender address: ', accounts[0]);
-            console.log('zkAsset address: ', zkAssetBurnable.address);
         });
 
-        it('should complete a burn operation', async () => {
-            const { receipt } = await zkAssetBurnable.confidentialBurn(BURN_PROOF, proofData);
-            expect(receipt.status).to.equal(true);
+        it('should revert a called burn operation - no notes in the ZkAsset note registry', async () => {
+            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofData));
         });
     });
 });

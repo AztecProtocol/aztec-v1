@@ -35,16 +35,6 @@ contract ACE is IAZTEC {
         address validatorAddress
     );
     event IncrementLatestEpoch(uint8 newLatestEpoch);
-    event NoteRegistryStatus(address creatorAddress, bool _canMint, bool _canBurn, bool _canConvert);
-    event ProofHash(bytes32 proofHash);
-    event Length(uint256 length);
-    event NumOutputNotes(uint numOutputNotes);
-    event NumInputNotes(uint numInputNotes);
-    event ProofOutputs(bytes proofOutputs);
-    event NoteHash(bytes32 noteHash);
-
-    event Category(uint8 category);
-
 
     struct Note {
         uint8 status;
@@ -91,9 +81,6 @@ contract ACE is IAZTEC {
 
     // keep track of validated balanced proofs
     mapping(bytes32 => bool) public validatedProofs;
-
-    // keep track of validated mint/burn proofs
-    mapping(bytes32 => bool) public validatedMintBurnProofs;
     
     /**
     * @dev contract constructor. Sets the owner of ACE, the flags, the linked token address and
@@ -174,19 +161,7 @@ contract ACE is IAZTEC {
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
                 validatedProofs[validatedProofHash] = true;
             }
-        } else if (category == uint8(1)) {
-            // emit Category(category);
-            // TODO
-            uint256 length = proofOutputs.getLength();
-            emit Length(length);
-            for (uint256 i = 0; i < length; i = i.add(1)) {
-                bytes32 proofHash = keccak256(proofOutputs.get(i));
-                bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
-                emit ProofHash(validatedProofHash);
-                validatedProofs[validatedProofHash] = true;
-            }
-        }
-
+        } 
         return proofOutputs;
     }
 
@@ -210,6 +185,154 @@ contract ACE is IAZTEC {
             bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
             validatedProofs[validatedProofHash] = false;
         }
+    }
+
+    /**
+    * @dev Mint AZTEC notes, for a fully private asset
+    *      
+    * @param _proof the AZTEC proof object
+    * @param _proofData the mint proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function mint(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory, bytes memory) {
+        
+        NoteRegistry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canMint == true, "this asset is not mintable");
+        
+        // Check that it's a mintable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        // TODO: replace the magic number 1 below with ProofCategory.MINT
+        require(category == 1, "this is not a mint proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+
+        // Dealing with notes representing totals
+        (bytes memory oldTotal,  // inputNotesTotal
+        bytes memory newTotal, // outputNotesTotal
+        ,
+        int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
+
+        require(publicValueTotal == 0, "mint transactions cannot have a public value");
+        require(newTotal.getLength() == 1, "new total minted must be represented by one note");
+        require(oldTotal.getLength() == 1, "old total minted must be represented by one note");
+    
+        // Check the previous confidentialTotalSupply, and then assign the new one
+        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
+
+        require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total supply note does not match");
+        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
+        registry.confidentialTotalMinted = newTotalNoteHash;
+
+
+        // Dealing with minted notes
+        (bytes memory inputNotes, // input notes
+        bytes memory mintedNotes, // output notes
+        ,
+        int256 publicValue
+        ) = _proofOutputs.get(1).extractProofOutput();
+
+        require(publicValue == 0, "mint transactions cannot have a public value");
+        require(mintedNotes.getLength() >= 1, "must have at least one minted note");
+        require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
+
+        for (uint i = 1; i < mintedNotes.getLength(); i = i.add(1)) {
+            address noteOwner;
+            bytes32 noteHash;
+            (noteOwner, noteHash, ) = mintedNotes.get(i).extractNote();
+            Note storage note = registry.notes[noteHash];
+            require(note.status == 0, "output note exists");
+            note.status = uint8(1);
+            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.createdOn = now.uintToBytes(5);
+            note.owner = noteOwner;
+        }
+
+        return(newTotal, mintedNotes);
+    }
+
+    /**
+    * @dev Burn AZTEC notes, for a fully private asset
+    *      
+    * @param _proof the AZTEC proof object
+    * @param _proofData the burn proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function burn(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory, bytes memory) {
+        
+        NoteRegistry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canBurn == true, "this asset is not burnable");
+        
+        // Check that it's a burnable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        // TODO: replace the magic number 1 below with ProofCategory.BURN
+        require(category == 2, "this is not a burn proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        
+        // Dealing with notes representing totals
+        (bytes memory oldTotal, // input notes
+        bytes memory newTotal, // output notes
+        ,
+        int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
+
+        require(publicValueTotal == 0, "burn transactions cannot have a public value");
+        require(newTotal.getLength() == 1, "new total minted must be represented by one note");
+        require(oldTotal.getLength() == 1, "old total minted must be represented by one note");
+    
+        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
+        require(oldTotalNoteHash == registry.confidentialTotalBurned, "provided total supply note does not match");
+        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
+        registry.confidentialTotalBurned = newTotalNoteHash;
+
+
+        // Dealing with burned notes
+        (bytes memory inputNotes,
+        bytes memory burnedNotes,
+        ,
+        int256 publicValue) = _proofOutputs.get(1).extractProofOutput();
+
+        require(publicValue == 0, "burn transactions cannot have a public value");
+        require(burnedNotes.getLength() >= 1, "must have at least one note to be burned");
+        require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
+
+        // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
+        for (uint i = 1; i < burnedNotes.getLength(); i = i.add(1)) {
+            address _noteOwner;
+            bytes32 noteHash;
+            (_noteOwner, noteHash, ) = burnedNotes.get(i).extractNote();
+            Note storage note = registry.notes[noteHash];
+            require(note.status == 1, "note to be burned does not exist");
+            require(note.owner == _noteOwner, "input note owner does not match");
+            note.status = uint8(2); // status of 2 represents destruction
+
+            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
+            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
+            // solhint-disable-next-line not-rely-on-time
+            note.destroyedOn = now.uintToBytes(5);
+        }
+        return(newTotal, burnedNotes);
     }
 
     /**
@@ -301,7 +424,6 @@ contract ACE is IAZTEC {
             })
         });
         registries[msg.sender] = registry;
-        emit NoteRegistryStatus(msg.sender, _canMint, _canBurn, _canConvert);
     }
 
     function updateNoteRegistry(
@@ -345,107 +467,6 @@ contract ACE is IAZTEC {
                 require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
             }
         }
-    }
-    // TODO: Check that this is correct - inputting the entire proofOutput object here
-    function mint(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bytes memory, bytes memory) {
-        
-        NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canMint == true, "this asset is not mintable");
-        
-        // Check that it's a mintable proof
-        (, uint8 category, ) = _proof.getProofComponents();
-
-        // TODO: replace the magic number 1 below with ProofCategory.MINT
-        require(category == 1, "this is not a mint proof");
-
-        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
-
-        // Dealing with totals first
-        (bytes memory inputNotesTotal, bytes memory outputNotesTotal, , int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
-        require(publicValueTotal == 0, "mint transactions cannot have a public value");
-        require(outputNotesTotal.getLength() == 1, "totals must have one output note");
-        require(inputNotesTotal.getLength() == 1, "totals must have one input note");
-    
-        // Check the previous confidentialTotalSupply, and then assign the new one
-        (, bytes32 noteHash, ) = inputNotesTotal.get(0).extractNote();        
-
-        require(noteHash == registry.confidentialTotalMinted, "provided total supply note does not match");
-        (, bytes32 noteHashSecond, ) = outputNotesTotal.get(0).extractNote();
-        registry.confidentialTotalMinted = noteHashSecond;
-
-
-        // Dealing with individual notes
-        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutputs.get(1).extractProofOutput();
-        require(publicValue == 0, "mint transactions cannot have a public value");
-        require(outputNotes.getLength() >= 1, "must have at least one output note");
-        require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
-
-        for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
-            address noteOwner;
-            bytes32 noteHash;
-            (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
-            Note storage note = registry.notes[noteHash];
-            require(note.status == 0, "output note exists");
-            note.status = uint8(1);
-            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.uintToBytes(5);
-            note.owner = noteOwner;
-        }
-
-        return(outputNotesTotal, outputNotes);
-    }
-
-    function burn(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bytes memory, bytes memory) {
-        
-        NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canBurn == true, "this asset is not burnable");
-        
-        // Check that it's a burnable proof
-        (, uint8 category, ) = _proof.getProofComponents();
-
-        // TODO: replace the magic number 1 below with ProofCategory.BURN
-        require(category == 2, "this is not a burn proof");
-
-        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
-        
-        // Dealing with totals first - there are two bytes proofOutput objects
-        (bytes memory inputNotesTotal, bytes memory outputNotesTotal, , int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
-        require(publicValueTotal == 0, "mint transactions cannot have a public value");
-        require(outputNotesTotal.getLength() == 1, "totals must have one output note");
-        require(inputNotesTotal.getLength() == 1, "totals must have one input note");
-    
-        (, bytes32 noteHash, ) = inputNotesTotal.get(0).extractNote();        
-        require(noteHash == registry.confidentialTotalBurned, "provided total supply note does not match");
-        (, bytes32 noteHashSecond, ) = outputNotesTotal.get(0).extractNote();
-        registry.confidentialTotalBurned = noteHashSecond;
-
-
-        // Dealing with individual notes
-        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutputs.get(1).extractProofOutput();
-        require(publicValue == 0, "mint transactions cannot have a public value");
-        require(outputNotes.getLength() >= 1, "must have at least one output note");
-        require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
-
-        // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
-        for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
-            address _noteOwner;
-            bytes32 noteHash;
-            (_noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
-            Note storage note = registry.notes[noteHash];
-            require(note.status == 1, "note to be burned does not exist");
-            require(note.owner == _noteOwner, "input note owner does not match");
-            note.status = uint8(2); // status of 2 represents destruction
-
-            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.uintToBytes(5);
-        }
-        return(outputNotesTotal, outputNotes);
     }
 
     /** 
