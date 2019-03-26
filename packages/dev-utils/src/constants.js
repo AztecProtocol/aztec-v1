@@ -1,6 +1,7 @@
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
+const { padLeft } = require('./utils');
 
+// Pre-compute the commonly used values
 const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
 const H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
 const t2 = [
@@ -8,11 +9,6 @@ const t2 = [
     `0x${padLeft('8d554bf59102bbb961ba81107ec71785ef9ce6638e5332b6c1a58b87447d181', 64)}`,
     `0x${padLeft('204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2', 64)}`,
     `0x${padLeft('2cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc', 64)}`,
-];
-const CRS = [
-    `0x${padLeft(H_X.toString(16), 64)}`,
-    `0x${padLeft(H_Y.toString(16), 64)}`,
-    ...t2,
 ];
 
 /**
@@ -24,7 +20,11 @@ const constants = {
     /**
      * Common reference string
      */
-    CRS,
+    CRS: [
+        `0x${padLeft(H_X.toString(16), 64)}`,
+        `0x${padLeft(H_Y.toString(16), 64)}`,
+        ...t2,
+    ],
     /**
      * Generic scaling factor that maps between AZTEC note values and ERC20 token balances.
      * when used for DAI token, 1 AZTEC note value = 0.1 DAI

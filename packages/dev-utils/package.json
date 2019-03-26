@@ -8,8 +8,7 @@
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
-    "bn.js": "^4.11.8",
-    "web3-utils": "1.0.0-beta.37"
+    "bn.js": "^4.11.8"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
