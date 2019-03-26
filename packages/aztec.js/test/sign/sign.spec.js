@@ -68,7 +68,7 @@ describe('sign tests', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                note: noteString,
+                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
                 challenge,
                 sender: senderAddress,
             };
@@ -95,7 +95,7 @@ describe('sign tests', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                note: noteString,
+                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
                 challenge,
                 sender: senderAddress,
             };
