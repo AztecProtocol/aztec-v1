@@ -57,30 +57,18 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 To fiddle with cryptography engine and create your own AZTEC notes:
 
 ```bash
-$ npm install aztec.js --save
+$ yarn add aztec.js
 ```
 
 Other goodies:
 
 ```bash
-$ npm install @aztec/contract-artifacts
-$ npm install @aztec/contract-addresses
-$ npm install @aztec/dev-utils
+$ yarn add @aztec/contract-artifacts
+$ yarn add @aztec/contract-addresses
+$ yarn add @aztec/dev-utils
 ```
 
-To see a demo, head to the protocol package:
-
-```bash
-$ cd packages/protocol
-```
-
-Make sure you use your own private keys instead of the defaults in `demo/accounts.json`. Then:
-
-```bash
-$ npm install
-$ truffle migrate --network rinkeby
-$ npm run demo:rinkeby
-```
+To see a demo, head to this [tutorial](https://medium.com/aztec-protocol/how-to-code-your-own-confidential-token-on-ethereum-4a8c045c8651).
 
 For more information, check out our [documentation](https://aztecprotocol.github.io/AZTEC/).
 
@@ -88,23 +76,26 @@ For more information, check out our [documentation](https://aztecprotocol.github
 
 ### Requirements
 
-- node ^4.0.0 and npm^2.14.2
-- solidity 0.4.24
+- node >=6.12
+- yarn 1.9.4
+- solidity >=0.5.0 <0.6.0
 
 ### Pre Requisites
 
+Make sure you are using Yarn v1.9.4. To install using npm:
+
 ```bash
-$ npm install lerna@^3.10.6 --global
-$ npm install truffle@^5.0.0 --global
+npm install yarn@1.9.4
+```
+
+Then install dependencies:
+
+```bash
+$ yarn install
+$ yarn global add lerna
 ```
 
 ### Build
-
-To install the node modules in all packages:
-
-```bash
-$ npm run bootstrap
-```
 
 To build all packages:
 

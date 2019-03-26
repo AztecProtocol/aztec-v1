@@ -7,7 +7,7 @@ Smart contract compilation artifacts for the latest version of AZTEC.
 Install the module:
 
 ```bash
-$ npm install @aztec/contract-artifacts --global
+$ yarn add @aztec/contract-artifacts
 ```
 
 And import it in your project:
@@ -25,17 +25,17 @@ Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting 
 ### Install Modules
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ### Build
 
 ```bash
-$ npm run build
+$ yarn build
 ```
 
 ### Clean
 
 ```bash
-$ npm run clean
+$ yarn clean
 ```

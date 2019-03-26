@@ -53,7 +53,7 @@ Of course! `weierstrudel` is open-source software, licensed under LGPL-3.0. Howe
 
 ### **Benchmarks**
 
-Gas estimates can be obtained by running `npm run benchmark`. For reference, the scalar multiplication precompile costs `40,000` gas per point. This is excluding the overheads of having to make a contract call per point when using the precompiles, as well as calling the point addition precompile to combine points into a single sum.
+Gas estimates can be obtained by running `yarn benchmark`. For reference, the scalar multiplication precompile costs `40,000` gas per point. This is excluding the overheads of having to make a contract call per point when using the precompiles, as well as calling the point addition precompile to combine points into a single sum.
 
 | Number of points | Approximate gas cost (average of 10 runs) | Cost per point |
 | ---------------- | ----------------------------------------- | -------------- |
@@ -79,7 +79,7 @@ Gas estimates can be obtained by running `npm run benchmark`. For reference, the
 
 ### **Usage**
 
-Run weierstrudel tests via `npm run test`  
-Run reference javascript methods via `npm run jstest`  
-Run weierstrudel benchmarks via `npm run benchmark`  
-Compile the weierstrudel smart contract via `npm run compile`
+Run weierstrudel tests via `yarn test`
+Run reference javascript methods via `yarn jstest`
+Run weierstrudel benchmarks via `yarn benchmark`
+Compile the weierstrudel smart contract via `yarn compile`

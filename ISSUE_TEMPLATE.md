@@ -28,7 +28,7 @@
 <!--- Include as many relevant details about the environment you experienced the bug in -->
 
 * AZTEC packages and their versions:
-* Node and npm version:
+* Node and yarn version:
 * Truffle version:
 * Lerna version:
 * Operating System and version (desktop or mobile):

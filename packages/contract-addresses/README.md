@@ -7,7 +7,7 @@ Addresses of deployed AZTEC contracts on Ethereum mainnet and testnets
 Install the module:
 
 ```bash
-$ npm install @aztec/contract-addresses --global
+$ yarn add @aztec/contract-addresses
 ```
 
 And import it in your project:
@@ -25,17 +25,17 @@ Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting 
 ### Install Modules
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ### Build
 
 ```bash
-$ npm run build
+$ yarn build
 ```
 
 ### Clean
 
 ```bash
-$ npm run clean
+$ yarn clean
 ```

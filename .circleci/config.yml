@@ -5,20 +5,20 @@ jobs:
         working_directory: ~/repo
         docker:
             - image: circleci/node:10.15.3
-            - image: trufflesuite/ganache-cli:v6.4.1
         steps:
             - checkout
             - run:
                 name: "Update NPM"
                 command: sudo npm install -g npm@6.7.0
             - run:
+                name: "Install Yarn"
+                command: sudo npm install yarn@1.9.4 --global
+            - run:
                 name: "Bootstrap Monorepo"
-                command: |
-                  npm install
-                  npm run bootstrap
+                command: yarn install
             - run:
                 name: "Build Packages"
-                command: ./node_modules/.bin/lerna run build
+                command: lerna run build
             - save_cache:
                 key: repo-{{ .Environment.CIRCLE_SHA1 }}
                 paths:
@@ -33,7 +33,7 @@ jobs:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Lint Packages"
-                command: ./node_modules/.bin/lerna run lint
+                command: lerna run lint
     test:
         working_directory: ~/repo
         docker:
@@ -46,7 +46,7 @@ jobs:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Test Packages"
-                command: ./node_modules/.bin/lerna run test
+                command: lerna run test
     coverage:
         working_directory: ~/repo
         docker:
@@ -59,7 +59,7 @@ jobs:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Cover Packages"
-                command: ./node_modules/.bin/lerna run coverage
+                command: lerna run coverage
 workflows:
     version: 2
     main:
