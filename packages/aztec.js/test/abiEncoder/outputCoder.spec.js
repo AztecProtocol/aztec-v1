@@ -44,28 +44,30 @@ describe('abiEncoder.outputCoder tests', () => {
     it('outputCoder can encode output note', () => {
         const encoded = new HexString(outputCoder.encodeOutputNote(notes[0]));
         expect(isHex(encoded)).to.equal(true);
-        expect(encoded.hexLength()).to.equal(0xe1);
+        expect(encoded.hexLength()).to.equal(0x101);
 
-        expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(0xe1 - 0x20);
-        expect(encoded.slice(0x20, 0x40)).to.equal(padLeft(notes[0].owner.slice(2), 64));
-        expect(encoded.slice(0x40, 0x60)).to.equal(padLeft(notes[0].noteHash.slice(2), 64));
-        expect(clean(encoded.slice(0x60, 0x80))).to.equal('61');
-        expect(bn128.decompressHex(encoded.slice(0x80, 0xa0)).eq(notes[0].gamma)).to.equal(true);
-        expect(bn128.decompressHex(encoded.slice(0xa0, 0xc0)).eq(notes[0].sigma)).to.equal(true);
-        expect(secp256k1.decompressHex(encoded.slice(0xc0)).eq(notes[0].ephemeral.getPublic())).to.equal(true);
+        expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(0xe1);
+        expect(clean(encoded.slice(0x20, 0x40))).to.equal('1');
+        expect(encoded.slice(0x40, 0x60)).to.equal(padLeft(notes[0].owner.slice(2), 64));
+        expect(encoded.slice(0x60, 0x80)).to.equal(padLeft(notes[0].noteHash.slice(2), 64));
+        expect(clean(encoded.slice(0x80, 0xa0))).to.equal('61');
+        expect(bn128.decompressHex(encoded.slice(0xa0, 0xc0)).eq(notes[0].gamma)).to.equal(true);
+        expect(bn128.decompressHex(encoded.slice(0xc0, 0xe0)).eq(notes[0].sigma)).to.equal(true);
+        expect(secp256k1.decompressHex(encoded.slice(0xe0)).eq(notes[0].ephemeral.getPublic())).to.equal(true);
     });
 
     it('outputCoder can encode input note', () => {
         const encoded = new HexString(outputCoder.encodeInputNote(notes[0]));
         expect(isHex(encoded)).to.equal(true);
-        expect(encoded.hexLength()).to.equal(0xc0);
+        expect(encoded.hexLength()).to.equal(0xe0);
 
-        expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(0xc0 - 0x20);
-        expect((encoded.slice(0x20, 0x40))).to.equal(padLeft(notes[0].owner.slice(2), 64));
-        expect(encoded.slice(0x40, 0x60)).to.equal(padLeft(notes[0].noteHash.slice(2), 64));
-        expect(clean(encoded.slice(0x60, 0x80))).to.equal('40');
-        expect(bn128.decompressHex(encoded.slice(0x80, 0xa0)).eq(notes[0].gamma)).to.equal(true);
-        expect(bn128.decompressHex(encoded.slice(0xa0, 0xc0)).eq(notes[0].sigma)).to.equal(true);
+        expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(0xc0);
+        expect(clean(encoded.slice(0x20, 0x40))).to.equal('1');
+        expect((encoded.slice(0x40, 0x60))).to.equal(padLeft(notes[0].owner.slice(2), 64));
+        expect(encoded.slice(0x60, 0x80)).to.equal(padLeft(notes[0].noteHash.slice(2), 64));
+        expect(clean(encoded.slice(0x80, 0xa0))).to.equal('40');
+        expect(bn128.decompressHex(encoded.slice(0xa0, 0xc0)).eq(notes[0].gamma)).to.equal(true);
+        expect(bn128.decompressHex(encoded.slice(0xc0, 0xe0)).eq(notes[0].sigma)).to.equal(true);
     });
 
     it('outputCoder can encode notes', () => {
