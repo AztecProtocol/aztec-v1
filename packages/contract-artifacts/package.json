@@ -11,18 +11,15 @@
     "require-dir": "^1.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-add-module-exports": "^1.0.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-minify": "^0.5.0",
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
     "cross-env": "^5.2.0",
-    "eslint": "^5.8.0",
+    "eslint": "^5.12.1",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.2.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.12.4",
     "fixpack": "^2.3.1",
     "shx": "^0.3.2"
@@ -51,7 +48,7 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
-    "build": "yarn clean && cross-env BABEL_ENV=production babel ./src --copy-files --out-dir ./lib",
+    "build": "yarn clean && babel ./src --out-dir ./lib --root-mode upward --copy-files",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path ../../.eslintignore ."
   }
