@@ -21,7 +21,7 @@ const ZkAssetMintable = artifacts.require('./contracts/ZkAsset/ZkAssetMintable')
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 
 contract('ZkAssetMintable', (accounts) => {
-    describe.only('success states', () => {
+    describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
         let ace;
@@ -30,12 +30,11 @@ contract('ZkAssetMintable', (accounts) => {
         let zkAssetMintable;
         let scalingFactor;
         let aztecAdjustSupply;
-        let oldTotalMinted;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create one
+            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
             notes = aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
             });
@@ -44,16 +43,17 @@ contract('ZkAssetMintable', (accounts) => {
             aztecAdjustSupply = await AdjustSupply.new();
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
 
-            const newTotalMinted = notes[0];
-            const adjustedNotes = notes.slice(2, 4);
-
             // Creating a fixed note
             const a = padLeft('1', 64);
             const k = padLeft('0', 8);
             const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
             const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            oldTotalMinted = note.fromViewKey(viewingKey);
+            const zeroNote = note.fromViewKey(viewingKey);
             // TODO: add default note to common reference string
+
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = zeroNote;
+            const adjustedNotes = notes.slice(2, 4);
 
             const canMint = true;
             const canBurn = true;
@@ -78,12 +78,9 @@ contract('ZkAssetMintable', (accounts) => {
                 adjustedNotes,
                 senderAddress: zkAssetMintable.address,
             }));
-
-            console.log('sender address: ', accounts[0]);
-            console.log('zkAsset address: ', zkAssetMintable.address);
         });
 
-        it.only('should complete a mint operation', async () => {
+        it('should complete a mint operation', async () => {
             const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, proofData);
             expect(receipt.status).to.equal(true);
         });

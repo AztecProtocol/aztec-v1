@@ -25,7 +25,6 @@ AdjustSupply.abi = AdjustSupplyInterface.abi;
 
 
 contract('ACE', (accounts) => {
-    // Creating a collection of tests that should pass
     describe('initialization tests', () => {
         let ace;
         beforeEach(async () => {
@@ -72,7 +71,6 @@ contract('ACE', (accounts) => {
         beforeEach(async () => {
             ace = await ACE.new({
                 from: accounts[0],
-                gas: 7000000,
             });
             aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             notes = [
@@ -133,14 +131,10 @@ contract('ACE', (accounts) => {
 
     describe('can successfully mint and burn', () => {
         let ace;
-        let proofData;
-        let proofOutput;
-        let oldTotalMinted;
+        let zeroNote;
         let aztecAccounts;
         let notes;
-        let noteHash;
         const proofs = [];
-        let expectedOutput;
         let aztecAdjustSupply;
 
         beforeEach(async () => {
@@ -151,27 +145,26 @@ contract('ACE', (accounts) => {
             const gasUsed = await ACE.new.estimateGas({
                 from: accounts[0],
             });
-            console.log('gas used: ', gasUsed);
+            console.log('gas used in deploying ACE: ', gasUsed);
 
             aztecAdjustSupply = await AdjustSupply.new();
 
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create one
+            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
             notes = aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
             });
-
-            const newTotalMinted = notes[0];
 
             // Creating a fixed note
             const a = padLeft('1', 64);
             const k = padLeft('0', 8);
             const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
             const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            oldTotalMinted = note.fromViewKey(viewingKey);
-            ({ noteHash } = oldTotalMinted); // TODO: add default note to common reference string
+            zeroNote = note.fromViewKey(viewingKey); // TODO: add default note to common reference string
 
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = zeroNote;
             const adjustedNotes = notes.slice(2, 4);
 
             proofs[0] = proof.mint.encodeMintTransaction({
@@ -182,7 +175,7 @@ contract('ACE', (accounts) => {
             });
 
             const newTotalBurned = notes[0];
-            const oldTotalBurned = oldTotalMinted; // i.e. zero
+            const oldTotalBurned = zeroNote; // i.e. zero
 
             proofs[1] = proof.burn.encodeBurnTransaction({
                 newTotalBurned,
@@ -191,13 +184,11 @@ contract('ACE', (accounts) => {
                 senderAddress: accounts[0],
             });
 
-            proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
 
-            const erc20 = await ERC20Mintable.new(); // this is the linked ERC20
+            const erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(10);
             const canMint = true;
             const canBurn = true;
@@ -224,7 +215,7 @@ contract('ACE', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
     });
-    
+
 
     describe('note registry', async () => {
         let aztecAccounts = [];
