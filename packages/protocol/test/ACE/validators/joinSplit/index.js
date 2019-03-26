@@ -337,7 +337,6 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
             const {
-                proofData: proofDataRaw,
                 challenge,
             } = aztec.proof.joinSplit.constructJoinSplitModified(
                 [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
@@ -348,7 +347,7 @@ contract('JoinSplit', (accounts) => {
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
-                    note: proofDataRaw[index].slice(2, 6),
+                    noteHash: inputNote.noteHash,
                     challenge,
                     sender: senderAddress,
                 };
@@ -399,7 +398,7 @@ contract('JoinSplit', (accounts) => {
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
-                    note: proofDataRaw[index].slice(2, 6),
+                    noteHash: inputNote.noteHash,
                     challenge,
                     sender: senderAddress,
                 };
@@ -447,7 +446,7 @@ contract('JoinSplit', (accounts) => {
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
-                    note: proofDataRaw[index].slice(2, 6),
+                    noteHash: inputNote.noteHash,
                     challenge,
                     sender: senderAddress,
                 };
@@ -491,7 +490,7 @@ contract('JoinSplit', (accounts) => {
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
-                    note: proofDataRaw[index].slice(2, 6),
+                    noteHash: inputNote.noteHash,
                     challenge,
                     sender: senderAddress,
                 };
@@ -526,11 +525,12 @@ contract('JoinSplit', (accounts) => {
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
             const senderAddress = accounts[0];
 
+            const noteHash = sha3(`0x${padLeft('1', 64)}${padLeft('0', 256)}`, 'hex');
             const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: JOIN_SPLIT_PROOF,
-                note: [proofDataRaw[0][2], proofDataRaw[0][3], proofDataRaw[0][4], proofDataRaw[0][5]],
+                noteHash,
                 challenge,
                 sender: senderAddress,
             };

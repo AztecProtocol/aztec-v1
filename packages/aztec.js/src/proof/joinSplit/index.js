@@ -258,7 +258,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
         const message = {
             proof: JOIN_SPLIT_PROOF,
-            note: proofDataRaw[index].slice(2, 6),
+            noteHash: inputNote.noteHash,
             challenge,
             sender: senderAddress,
         };

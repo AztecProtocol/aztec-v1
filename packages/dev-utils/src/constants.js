@@ -146,7 +146,7 @@ constants.eip712 = {
         types: {
             JoinSplitSignature: [
                 { name: 'proof', type: 'uint24' },
-                { name: 'note', type: 'bytes32[4]' },
+                { name: 'noteHash', type: 'bytes32' },
                 { name: 'challenge', type: 'uint256' },
                 { name: 'sender', type: 'address' },
             ],

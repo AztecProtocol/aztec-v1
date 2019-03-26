@@ -2,9 +2,10 @@ pragma solidity >=0.5.0 <0.6.0;
 
 library JoinSplitABIEncoder {
 
-    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32[4] note,uint256 challenge,address sender)"
+    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
     bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
-        0x904692743a9f431a791d777dd8d42e18e79888579fa6807b5f17b14020210e30;
+        0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
+        // 0x904692743a9f431a791d777dd8d42e18e79888579fa6807b5f17b14020210e30;
 
     /**
      * Calldata map
@@ -89,6 +90,16 @@ library JoinSplitABIEncoder {
             // 0xa0 - 0xc0 = compressed note coordinate `sigma` (part of `data`)
             // 0xc0 - ???? = remaining note metadata
 
+            // structure of a `note` (new)
+            // 0x00 - 0x20 = size of `note`
+            // 0x20 - 0x40 = type
+            // 0x40 - 0x60 = `owner`
+            // 0x60 - 0x80 = `noteHash`
+            // 0x80 - 0xa0 = size of note `data`
+            // 0xa0 - 0xc0 = compressed note coordinate `gamma` (part of `data`)
+            // 0xc0 - 0xe0 = compressed note coordinate `sigma` (part of `data`)
+            // 0xe0 - ???? = remaining note metadata
+
             // `proofOutputs` must form a monolithic block of memory that we can return.
             // `s` points to the memory location of the start of the current note
             // `inputPtr` points to the start of the current `notes` dynamic bytes array
@@ -110,7 +121,8 @@ library JoinSplitABIEncoder {
             case 0 {
                 mstore(0x260, kPublic)
             }
-
+            // (0x280 = challenge)
+            // (0x2a0 = proofOutput metadata)
             let inputPtr := 0x280                                 // point to inputNotes
             mstore(add(inputPtr, 0x20), m)                        // number of input notes
             // set note pointer, offsetting lookup indices for each input note
@@ -121,10 +133,11 @@ library JoinSplitABIEncoder {
                 // get pointer to input signatures
                 let signatureIndex := add(signatures, mul(i, 0x60))
                 // copy note data to 0x00 - 0x80
-                calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
-
+                mstore(0x00, 0x01) // note type
+                calldatacopy(0x20, add(noteIndex, 0x40), 0x80) // get gamma, sigma
                 // construct EIP712 signature parameters
-                mstore(0xc0, keccak256(0x00, 0x80)) // note hash
+                mstore(0xc0, keccak256(0x00, 0xa0)) // note hash
+                mstore(0x80, typeHash)              // typeHash - eip signature params
                 // construct EIP712 signature message
                 mstore(0x160, keccak256(0x80, 0xa0))
                 mstore(0x00, keccak256(0x13e, 0x42))
@@ -133,21 +146,25 @@ library JoinSplitABIEncoder {
                 calldatacopy(0x40, add(signatureIndex, 0x20), 0x40) // copy r, s into memory
 
                 // store note length in `s`
-                mstore(s, 0xa0)
+                mstore(s, 0xc0)
+                // store note type (1)
+                mstore(add(s, 0x20), 0x01)
                 // store note owner in `s + 0x20`. If ECDSA recovery fails, or signing address is `0`, throw an error
+                mstore(0x80, typeHash)
+                mstore(0xa0, 0x10001)
                 if or(
-                    iszero(mload(add(s, 0x20))),
-                    iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x20), 0x20))
+                    iszero(mload(add(s, 0x40))),
+                    iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x40), 0x20))
                 ) {
                     mstore(0x00, 400) revert(0x00, 0x20)
                 }
-                // store note hash in `s + 0x40`
-                mstore(add(s, 0x40), mload(0xc0))
+                // store note hash in `s + 0x60`
+                mstore(add(s, 0x60), mload(0xc0))
                 // store note metadata length in `s + 0x60` (just the coordinates)
-                mstore(add(s, 0x60), 0x40)
+                mstore(add(s, 0x80), 0x40)
                 // store compressed note coordinate gamma in `s + 0x80`
                 mstore(
-                    add(s, 0x80),
+                    add(s, 0xa0),
                     or(
                         calldataload(add(noteIndex, 0x40)),
                         mul(
@@ -158,7 +175,7 @@ library JoinSplitABIEncoder {
                 )
                 // store compressed note coordinate sigma in `s + 0xa0`
                 mstore(
-                    add(s, 0xa0),
+                    add(s, 0xc0),
                     or(
                         calldataload(add(noteIndex, 0x80)),
                         mul(
@@ -171,7 +188,7 @@ library JoinSplitABIEncoder {
                 mstore(add(add(inputPtr, 0x40), mul(i, 0x20)), sub(s, inputPtr)) // relative offset to note
         
                 // increase s by note length
-                s := add(s, 0xc0)
+                s := add(s, 0xe0)
             }
 
             // transition between input and output notes
@@ -191,40 +208,43 @@ library JoinSplitABIEncoder {
                 let metadataLength := calldataload(add(sub(metadata, 0x40), metadataIndex))
 
                 // copy note data to 0x00 - 0x80
-                calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
+                mstore(0x00, 0x01) // note type
+                calldatacopy(0x20, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
                 // store note length in `s`
-                mstore(s, add(0xa0, metadataLength))
+                mstore(s, add(0xc0, metadataLength))
+                // store note type (1)
+                mstore(add(s, 0x20), 0x01)
                 // store the owner of the note in `s + 0x20`
-                mstore(add(s, 0x20), calldataload(add(outputOwners, mul(sub(i, m), 0x20))))
+                mstore(add(s, 0x40), calldataload(add(outputOwners, mul(sub(i, m), 0x20))))
                 // store note hash
-                mstore(add(s, 0x40), keccak256(0x00, 0x80))
+                mstore(add(s, 0x60), keccak256(0x00, 0xa0))
                 // store note metadata length if `s + 0x60`
-                mstore(add(s, 0x60), add(0x40, metadataLength))
+                mstore(add(s, 0x80), add(0x40, metadataLength))
                 // store compressed note coordinate gamma in `s + 0x80`
                 mstore(
-                    add(s, 0x80),
+                    add(s, 0xa0),
                     or(
-                        mload(0x00),
+                        mload(0x20),
                         mul(
-                            and(mload(0x20), 0x01),
+                            and(mload(0x40), 0x01),
                             0x8000000000000000000000000000000000000000000000000000000000000000
                         )
                     )
                 )
                 // store compressed note coordinate sigma in `s + 0xa0`
                 mstore(
-                add(s, 0xa0),
+                add(s, 0xc0),
                 or(
-                    mload(0x40),
+                    mload(0x60),
                     mul(
-                        and(mload(0x60), 0x01),
+                        and(mload(0x80), 0x01),
                         0x8000000000000000000000000000000000000000000000000000000000000000
                     )
                 )
                 )
                 // copy metadata into `s + 0xc0`
-                calldatacopy(add(s, 0xc0), add(metadataIndex, sub(metadata, 0x20)), metadataLength)
+                calldatacopy(add(s, 0xe0), add(metadataIndex, sub(metadata, 0x20)), metadataLength)
                 // compute the relative offset to index this note in our returndata
                 mstore(add(add(inputPtr, 0x40), mul(sub(i, m), 0x20)), sub(s, inputPtr)) // relative offset to note
 

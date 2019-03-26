@@ -106,12 +106,21 @@ library NoteUtils {
         assembly {
             // memory map of a note:
             // 0x00 - 0x20 : byte length of note
-            // 0x20 - 0x40 : owner
-            // 0x40 - 0x60 : noteHash
-            // 0x60 - 0x80 : start of metadata byte array
-            owner := mload(add(_note, 0x20))
-            noteHash := mload(add(_note, 0x40))
-            metadata := add(_note, 0x60)
+            // 0x20 - 0x40 : note type
+            // 0x40 - 0x60 : owner
+            // 0x60 - 0x80 : noteHash
+            // 0x80 - 0xa0 : start of metadata byte array
+            owner := mload(add(_note, 0x40))
+            noteHash := mload(add(_note, 0x60))
+            metadata := add(_note, 0x80)
+        }
+    }
+
+    function getNoteType(bytes memory _note) internal pure returns (
+        uint256 noteType
+    ) {
+        assembly {
+            noteType := mload(add(_note, 0x20))
         }
     }
 
