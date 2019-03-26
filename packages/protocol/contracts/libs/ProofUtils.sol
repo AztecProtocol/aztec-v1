@@ -14,7 +14,6 @@ library ProofUtils {
             category := and(div(proof, 0x100), 0xff)
             epoch := and(div(proof, 0x10000), 0xff)
         }
-        require(category < 4, "category uint8 has to be at least 0 and at maximum 3");
         return (epoch, category, id);
     }
 }

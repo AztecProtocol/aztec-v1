@@ -86,7 +86,10 @@ library NoteUtils {
             // 0x80 - 0xa0 : publicValue
             inputNotes := add(_proofOutput, mload(add(_proofOutput, 0x20)))
             outputNotes := add(_proofOutput, mload(add(_proofOutput, 0x40)))
-            publicOwner := mload(add(_proofOutput, 0x60))
+            publicOwner := and(
+                mload(add(_proofOutput, 0x60)),
+                0xffffffffffffffffffffffffffffffffffffffff
+            )
             publicValue := mload(add(_proofOutput, 0x80))
         }
     }
@@ -110,7 +113,10 @@ library NoteUtils {
             // 0x40 - 0x60 : owner
             // 0x60 - 0x80 : noteHash
             // 0x80 - 0xa0 : start of metadata byte array
-            owner := mload(add(_note, 0x40))
+            owner := and(
+                mload(add(_note, 0x40)),
+                0xffffffffffffffffffffffffffffffffffffffff
+            )
             noteHash := mload(add(_note, 0x60))
             metadata := add(_note, 0x80)
         }
@@ -121,15 +127,6 @@ library NoteUtils {
     ) {
         assembly {
             noteType := mload(add(_note, 0x20))
-        }
-    }
-
-    function hashProofOutput(bytes memory proofOutput) internal pure returns (
-        bytes32 proofHash
-    ) {
-        assembly {
-            let len := add(mload(proofOutput), 0x20)
-            proofHash := keccak256(proofOutput, len)
         }
     }
 }
