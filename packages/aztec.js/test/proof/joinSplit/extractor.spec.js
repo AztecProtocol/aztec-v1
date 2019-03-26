@@ -49,7 +49,7 @@ function randomAddress() {
  *
  * N.B. This is also why re-using blinding scalars for multiple proofs leaks secrets, so don't try this at home, or in production.
  */
-describe('AZTEC extractor tests', () => {
+describe('join split extractor tests', () => {
     let blindingScalars;
     let nIn;
     let nOut;

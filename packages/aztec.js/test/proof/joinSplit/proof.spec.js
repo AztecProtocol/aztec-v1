@@ -48,7 +48,7 @@ function validateGroupElement(xHex, yHex) {
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
-describe('AZTEC proof construction tests', () => {
+describe('join split proof construction tests', () => {
     it('proof.constructProof creates a proof with well-formed outputs', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());

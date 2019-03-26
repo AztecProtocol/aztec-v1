@@ -7,10 +7,7 @@
 const BN = require('bn.js');
 const crypto = require('crypto');
 const elliptic = require('elliptic');
-const Web3EthAccounts = require('web3-eth-accounts');
 const web3Utils = require('web3-utils');
-
-const web3EthAccounts = new Web3EthAccounts();
 
 /**
  * @typedef {Object} Account
@@ -25,7 +22,7 @@ const secp256k1 = {};
  * The elliptic.js ec object
  * @memberof module:secp256k1
  */
-secp256k1.ec = new elliptic.ec("secp256k1"); // eslint-disable-line
+secp256k1.ec = new elliptic.ec('secp256k1'); // eslint-disable-line new-cap
 
 secp256k1.curve = secp256k1.ec.curve;
 /**
@@ -227,29 +224,6 @@ secp256k1.ecdsa.recoverPublicKey = (hash, r, s, v) => {
         vn < 2 ? vn : 1 - (vn % 2)
     );
     return ecPublicKey;
-};
-
-/**
- * Compares signatures from this module with those signed by web3. For debug and test purposes  
- * (we don't use web3 because we want a different preamble for eip712 signatures)
- *
- * @method web3Comparison
- * @memberof module:secp256k1.ecdsa
- * @returns {Object} ecdsa module signature and web3 signature
- */
-secp256k1.ecdsa.web3Comparison = () => {
-    const account = web3EthAccounts.create();
-    const { privateKey } = account;
-    const initialMessage = account.address;
-    const web3Sig = account.sign(account.address, '');
-    const initialBuffer = Buffer.from(web3Utils.hexToBytes(initialMessage, 'hex'));
-    const preamble = Buffer.from(`\x19Ethereum Signed Message:\n${initialBuffer.length}`);
-    const messageBuffer = Buffer.concat([preamble, initialBuffer]);
-    const hashedMessage = web3Utils.sha3(messageBuffer);
-
-    const result = secp256k1.ecdsa.signMessage(hashedMessage, privateKey);
-
-    return ({ result, web3Sig });
 };
 
 module.exports = secp256k1;

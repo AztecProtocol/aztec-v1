@@ -1,9 +1,7 @@
-const chai = require('chai');
-const web3Utils = require('web3-utils');
+const { expect } = require('chai');
 const abi = require('ethereumjs-abi');
 const ethUtil = require('ethereumjs-util');
-
-const { expect } = chai;
+const { padLeft, sha3 } = require('web3-utils');
 
 const eip712 = require('../../src/sign/eip712');
 
@@ -11,6 +9,8 @@ describe('eip712.js tests', () => {
     let simple;
     let complex;
     let alphabetical;
+
+
     before(() => {
         simple = {
             types: {
@@ -22,7 +22,7 @@ describe('eip712.js tests', () => {
             },
             primaryType: 'Foo',
             message: {
-                first: '0x13',
+                first: padLeft('0x13', 64),
                 second: 104344,
                 third: '0x1234567890abcdef10121234567890abcdef1012',
             },
@@ -52,7 +52,7 @@ describe('eip712.js tests', () => {
             types: {
                 Inner: [
                     { name: 'quibbleRating', type: 'bytes32' },
-                    { name: 'flimflamHeirarchy', type: 'uint[4]' },
+                    { name: 'flimflamHierarchy', type: 'uint[4]' },
                 ],
                 Outer: [
                     { name: 'marbleCredentials', type: 'Inner' },
@@ -65,8 +65,8 @@ describe('eip712.js tests', () => {
                 name: 'Reginald Fitzgerald De Vienne III',
                 eloRating: '1007',
                 marbleCredentials: {
-                    quibbleRating: '0x2329',
-                    flimflamHeirarchy: [
+                    quibbleRating: padLeft('0x2329', 64),
+                    flimflamHierarchy: [
                         100,
                         813,
                         '21888242871839275222246405745257275088696311157297823662689037894645226208583',
@@ -77,36 +77,36 @@ describe('eip712.js tests', () => {
         };
     });
 
-    it('encodeData will correctly encode a basic struct', () => {
+    it('encodeData correctly encodes a basic struct', () => {
         const encoded = eip712.encodeMessageData(simple.types, simple.primaryType, simple.message);
         // eslint-disable-next-line max-len
-        expect(encoded).to.equal('3aa81b362119d90fa0c62bc9627b5aa3913f2821cd4dbbb7fed0b834f269320f130000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000197980000000000000000000000001234567890abcdef10121234567890abcdef1012');
+        expect(encoded).to.equal('3aa81b362119d90fa0c62bc9627b5aa3913f2821cd4dbbb7fed0b834f269320f000000000000000000000000000000000000000000000000000000000000001300000000000000000000000000000000000000000000000000000000000197980000000000000000000000001234567890abcdef10121234567890abcdef1012');
     });
 
-    it('encodeData will correctly encode a nested struct', () => {
+    it('encodeData correctly encodes a nested struct', () => {
         const encoded = eip712.encodeMessageData(complex.types, complex.primaryType, complex.message);
         // eslint-disable-next-line max-len
-        const expected = 'f505260b29d1bf974a79d4f92bebd39e552fc31c4df25dc2b3e98a25d49ed602679512f8772affce32ccd374be5d0c367b7b304b6dbd787d40ca15c00903403300000000000000000000000000000000000000000000000000000000000003ef78ed341ebf9be7a0a46427169757b760f4620b5b3030af1efb8e210a8a22e78b';
+        const expected = '99fba8a7eab6e8407a7acee7f898be72d4589e0fd271036ed30e6ae36286ae9c3b79092acab3d97cb4866d99f6920e64033b2c7165e46855ec2bd998daaf25bc00000000000000000000000000000000000000000000000000000000000003ef78ed341ebf9be7a0a46427169757b760f4620b5b3030af1efb8e210a8a22e78b';
         expect(encoded).to.equal(expected);
     });
 
-    it('encodeStruct will correctly encode a struct', () => {
+    it('encodeStruct correctly encodes a struct', () => {
         const encoded = eip712.encodeStruct(simple.primaryType, simple.types);
         expect(encoded).to.equal('Foo(bytes32 first,uint256 second,address third)');
     });
 
-    it('encodeStruct will correctly order struct strings alphabetically', () => {
+    it('encodeStruct correctly orders struct strings alphabetically', () => {
         const encodedAlphabetical = eip712.encodeStruct(alphabetical.primaryType, alphabetical.types);
         expect(encodedAlphabetical).to.equal('Top(ZZZ zfoo,AAA aBar)AAA(bytes32 bar)ZZZ(uint foo)');
     });
 
     it('hashStruct correctly calculates the keccak256 hash of a struct', () => {
-        const hashed = web3Utils.sha3(`0x${eip712.encodeMessageData(simple.types, simple.primaryType, simple.message)}`);
+        const hashed = sha3(`0x${eip712.encodeMessageData(simple.types, simple.primaryType, simple.message)}`);
         const typeData = 'Foo(bytes32 first,uint256 second,address third)';
-        const typedHash = web3Utils.sha3(typeData);
+        const typedHash = sha3(typeData);
         // eslint-disable-next-line max-len
-        const encodedData = '0x130000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000197980000000000000000000000001234567890abcdef10121234567890abcdef1012';
-        const expected = web3Utils.sha3(`${typedHash}${encodedData.slice(2)}`);
+        const encodedData = '0x000000000000000000000000000000000000000000000000000000000000001300000000000000000000000000000000000000000000000000000000000197980000000000000000000000001234567890abcdef10121234567890abcdef1012';
+        const expected = sha3(`${typedHash}${encodedData.slice(2)}`);
         expect(hashed).to.equal(expected);
     });
 });

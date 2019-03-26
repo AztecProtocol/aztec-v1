@@ -6,11 +6,13 @@
  */
 
 const { padLeft, sha3 } = require('web3-utils');
-const web3EthAbi = require('web3-eth-abi');
+const { AbiCoder } = require('web3-eth-abi');
 
 function padKeccak256(data) {
     return padLeft(sha3(data).slice(2), 64);
 }
+
+const abiCoder = new AbiCoder();
 
 const eip712 = {};
 
@@ -58,9 +60,9 @@ eip712.encodeMessageData = function encodeMessageData(types, primaryType, messag
             return `${acc}${padKeccak256(message[name])}`;
         }
         if (type.includes('[')) {
-            return `${acc}${padKeccak256(web3EthAbi.encodeParameter(type, message[name]))}`;
+            return `${acc}${padKeccak256(abiCoder.encodeParameter(type, message[name]))}`;
         }
-        return `${acc}${web3EthAbi.encodeParameters([type], [message[name]]).slice(2)}`;
+        return `${acc}${abiCoder.encodeParameters([type], [message[name]]).slice(2)}`;
     }, padKeccak256(eip712.encodeStruct(primaryType, types)));
 };
 

@@ -60,7 +60,7 @@ function randomAddress() {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
-describe('AZTEC verifier tests', function describeVerifier() {
+describe('join split verifier tests', function describeVerifier() {
     describe('success states', function success() {
         this.timeout(10000);
         it('proof.constructProof creates a valid join-split proof', () => {

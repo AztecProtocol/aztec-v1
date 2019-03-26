@@ -13,9 +13,8 @@
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
     "hash.js": "^1.1.7",
-    "web3-eth-abi": "1.0.0-beta.37",
-    "web3-eth-accounts": "1.0.0-beta.37",
-    "web3-utils": "1.0.0-beta.37",
+    "web3-eth-abi": "1.0.0-beta.50",
+    "web3-utils": "1.0.0-beta.50",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
