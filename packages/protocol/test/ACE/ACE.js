@@ -6,7 +6,7 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof, secp256k1, bn128 } = require('aztec.js');
+const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
 const { constants, proofs: { JOIN_SPLIT_PROOF, MINT_PROOF, BURN_PROOF } } = require('@aztec/dev-utils');
 const crypto = require('crypto');
 
@@ -72,7 +72,7 @@ contract('ACE', (accounts) => {
         beforeEach(async () => {
             ace = await ACE.new({
                 from: accounts[0],
-                gas: 7000000
+                gas: 7000000,
             });
             aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             notes = [
@@ -131,7 +131,7 @@ contract('ACE', (accounts) => {
         });
     });
 
-    describe.only('can successfully mint', () => {
+    describe('can successfully mint and burn', () => {
         let ace;
         let proofData;
         let proofOutput;
@@ -139,6 +139,7 @@ contract('ACE', (accounts) => {
         let aztecAccounts;
         let notes;
         let noteHash;
+        const proofs = [];
         let expectedOutput;
         let aztecAdjustSupply;
 
@@ -146,6 +147,12 @@ contract('ACE', (accounts) => {
             ace = await ACE.new({
                 from: accounts[0],
             });
+
+            const gasUsed = await ACE.new.estimateGas({
+                from: accounts[0],
+            });
+            console.log('gas used: ', gasUsed);
+
             aztecAdjustSupply = await AdjustSupply.new();
 
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
@@ -167,76 +174,57 @@ contract('ACE', (accounts) => {
 
             const adjustedNotes = notes.slice(2, 4);
 
-            ({ proofData, expectedOutput } = proof.mint.encodeMintTransaction({
+            proofs[0] = proof.mint.encodeMintTransaction({
                 newTotalMinted,
                 oldTotalMinted,
                 adjustedNotes,
                 senderAddress: accounts[0],
-            }));
+            });
 
-            proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
+            const newTotalBurned = notes[0];
+            const oldTotalBurned = oldTotalMinted; // i.e. zero
 
-            await ace.setCommonReferenceString(constants.CRS);
-            await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
-            await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
-        });
-
-        it.only('successful call to the mint function', async () => {
-            const erc20 = await ERC20Mintable.new(); // this is the linked ERC20
-            const scalingFactor = new BN(10);
-            const canMint = true;
-            const canBurn = true;
-            const canConvert = false; // minting at the moment is just for private assets
-
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canMint,
-                canBurn,
-                canConvert,
-                { from: accounts[0] }
-            );
-
-            const { receipt } = await ace.mint(MINT_PROOF, proofData, accounts[0]);
-            expect(receipt.status).to.equal(true);
-        });
-
-        it('successful call to the burn function', async () => {
-            // 1. Create a note registry
-            // 2. Mint AZTEC notes
-            // 3. Burn AZTEC notes (performing opposite to initial, burning all)
-
-            const erc20 = await ERC20Mintable.new(); // this is the linked ERC20
-            const scalingFactor = new BN(10);
-            const canMint = true;
-            const canBurn = true;
-            const canConvert = false; // minting at the moment is just for private assets
-
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canMint,
-                canBurn,
-                canConvert,
-                { from: accounts[0] }
-            );
-
-            const newTotalBurned = 
-
-            const ({ proofData, expectedOutput } = proof.burn.encodeBurnTransaction({
+            proofs[1] = proof.burn.encodeBurnTransaction({
                 newTotalBurned,
                 oldTotalBurned,
                 adjustedNotes,
                 senderAddress: accounts[0],
-            }));
+            });
 
+            proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
 
-            await ace.mint(MINT_PROOF, proofData, accounts[0]);
-            const { receipt } = await ace.burn(BURN_PROOF, proofData, accounts[0]);
+            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
+            await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
+
+            const erc20 = await ERC20Mintable.new(); // this is the linked ERC20
+            const scalingFactor = new BN(10);
+            const canMint = true;
+            const canBurn = true;
+            const canConvert = false; // minting at the moment is just for private assets
+
+            await ace.createNoteRegistry(
+                erc20.address,
+                scalingFactor,
+                canMint,
+                canBurn,
+                canConvert,
+                { from: accounts[0] }
+            );
+        });
+
+        it('successful call to the mint function', async () => {
+            const { receipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
+            expect(receipt.status).to.equal(true);
+        });
+
+        it('successful burning of the minting notes', async () => {
+            await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
+            const { receipt } = await ace.burn(BURN_PROOF, proofs[1].proofData, accounts[0]);
             expect(receipt.status).to.equal(true);
         });
     });
-
+    
 
     describe('note registry', async () => {
         let aztecAccounts = [];

@@ -398,32 +398,27 @@ contract ACE is IAZTEC {
         return(outputNotesTotal, outputNotes);
     }
 
-    /*
-    function burn(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bool) {
+    function burn(uint24 _proof, bytes calldata _proofData, address _proofSender) external returns (bytes memory, bytes memory) {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canMint == true, "this asset is not mintable");
+        require(registry.flags.canBurn == true, "this asset is not burnable");
         
         // Check that it's a burnable proof
         (, uint8 category, ) = _proof.getProofComponents();
 
         // TODO: replace the magic number 1 below with ProofCategory.BURN
-        require(category == 2, "this is not a mint proof");
+        require(category == 2, "this is not a burn proof");
 
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
-
-        // Dealing with totals first
+        
+        // Dealing with totals first - there are two bytes proofOutput objects
         (bytes memory inputNotesTotal, bytes memory outputNotesTotal, , int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
         require(publicValueTotal == 0, "mint transactions cannot have a public value");
         require(outputNotesTotal.getLength() == 1, "totals must have one output note");
         require(inputNotesTotal.getLength() == 1, "totals must have one input note");
     
-        // Check the previous confidentialTotalSupply, and then assign the new one
-        (, bytes32 noteHash, ) = inputNotesTotal.get(0).extractNote();
-        emit NoteHash(noteHash);
-        
-
+        (, bytes32 noteHash, ) = inputNotesTotal.get(0).extractNote();        
         require(noteHash == registry.confidentialTotalBurned, "provided total supply note does not match");
         (, bytes32 noteHashSecond, ) = outputNotesTotal.get(0).extractNote();
         registry.confidentialTotalBurned = noteHashSecond;
@@ -435,21 +430,23 @@ contract ACE is IAZTEC {
         require(outputNotes.getLength() >= 1, "must have at least one output note");
         require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
 
+        // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
         for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
-            address noteOwner;
+            address _noteOwner;
             bytes32 noteHash;
-            (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
+            (_noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry.notes[noteHash];
-            require(note.status == 0, "output note exists");
-            note.status = uint8(1);
+            require(note.status == 1, "note to be burned does not exist");
+            require(note.owner == _noteOwner, "input note owner does not match");
+            note.status = uint8(2); // status of 2 represents destruction
+
             // AZTEC uses timestamps to measure the age of a note on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.uintToBytes(5);
-            note.owner = noteOwner;
+            note.destroyedOn = now.uintToBytes(5);
         }
+        return(outputNotesTotal, outputNotes);
     }
-    */
 
     /** 
     * @dev This should be called from an asset contract.
