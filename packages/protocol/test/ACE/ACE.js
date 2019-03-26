@@ -161,7 +161,7 @@ contract('ACE', (accounts) => {
             const k = padLeft('0', 8);
             const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
             const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            zeroNote = note.fromViewKey(viewingKey); // TODO: add default note to common reference string
+            zeroNote = note.fromViewKey(viewingKey);
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
