@@ -70,6 +70,7 @@
     "test": "scripts/test.sh",
     "trace": "scripts/trace.sh",
     "coverage": "scripts/coverage.sh",
+    "profile": "scripts/profile.sh",
     "compile": "./node_modules/.bin/truffle compile --all",
     "build:artifacts": "node scripts/artifacts.js"
   }
