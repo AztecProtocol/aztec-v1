@@ -1,4 +1,15 @@
+
+// .eslintrc.js
+const path = require('path')
+
 module.exports = {
+    "settings": {
+        'import/resolver': {
+            'eslint-import-resolver-lerna': {
+                packages: path.resolve(__dirname, './packages')
+            },
+        },
+    },
     "extends": "airbnb-base",
     "env": {
         "browser": true,

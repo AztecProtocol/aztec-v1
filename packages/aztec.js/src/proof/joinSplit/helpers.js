@@ -26,16 +26,15 @@ function generateCommitment(k) {
 // constructs an AZTEC commitment directly from the setup algorithm's trapdoor key.
 // Used for testing purposes only; we don't know the trapdoor key for the real deal.
 function generateFakeCommitment(k, trapdoor) {
+    const commitment = generateCommitment(k);
     const kBn = new BN(k).toRed(bn128.groupReduction);
     const mu = bn128.h.mul(trapdoor.redSub(kBn).redInvm());
-    const a = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
-    const gamma = mu.mul(a);
-    const sigma = gamma.mul(kBn).add(bn128.h.mul(a));
+    const gamma = mu.mul(commitment.a);
+    const sigma = gamma.mul(kBn).add(bn128.h.mul(commitment.a));
     return {
+        ...commitment,
         gamma,
         sigma,
-        a,
-        k: kBn,
     };
 }
 

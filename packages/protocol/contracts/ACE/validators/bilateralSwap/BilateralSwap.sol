@@ -22,7 +22,8 @@ contract BilateralSwap {
      * @notice See BilateralSwapInterface for how method calls should be constructed.
      * AZTECBilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
      **/
-    function() external payable {
+    // solhint-disable payable-fallback
+    function() external {
         assembly {
 
             // We don't check for function signatures, there's only one function that 
