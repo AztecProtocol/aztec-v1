@@ -54,8 +54,7 @@ contract('ZkAssetMintable', (accounts) => {
             const oldTotalMinted = zeroNote;
             const adjustedNotes = notes.slice(2, 4);
 
-            const canMint = true;
-            const canBurn = true;
+            const canMintAndBurn = true;
             const canConvert = false;
 
 
@@ -65,8 +64,7 @@ contract('ZkAssetMintable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canMint,
-                canBurn,
+                canMintAndBurn,
                 canConvert,
                 { from: accounts[0] }
             );

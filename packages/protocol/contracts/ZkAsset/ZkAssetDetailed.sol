@@ -11,8 +11,7 @@ contract ZkAssetDetailed is ZkAsset {
         address _aceAddress,
         address _linkedTokenAddress,
         uint256 _scalingFactor,
-        bool _canMint,
-        bool _canBurn,
+        bool _canMintAndBurn,
         bool _canConvert,
         string memory _name,
         string memory _symbol
@@ -20,8 +19,7 @@ contract ZkAssetDetailed is ZkAsset {
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor,
-        _canMint,
-        _canBurn,
+        _canMintAndBurn,
         _canConvert
     ) {
         name = _name;
