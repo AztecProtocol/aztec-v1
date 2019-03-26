@@ -53,7 +53,7 @@ contract('Join Split ABI Encoder', (accounts) => {
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
-                    note: proofData[index].slice(2, 6),
+                    noteHash: inputNote.noteHash,
                     challenge,
                     sender: senderAddress,
                 };
