@@ -66,10 +66,10 @@ burn.encodeBurnTransaction = ({
     const {
         proofData: proofDataRaw,
         challenge,
-    } = burn.constructProof([...newTotalBurned, ...oldTotalBurned, ...adjustedNotes], senderAddress);
+    } = burn.constructProof([newTotalBurned, oldTotalBurned, ...adjustedNotes], senderAddress);
 
-    const inputNotes = newTotalBurned;
-    const outputNotes = [...oldTotalBurned, ...adjustedNotes];
+    const inputNotes = [newTotalBurned];
+    const outputNotes = [oldTotalBurned, ...adjustedNotes];
 
     const inputOwners = inputNotes.map(m => m.owner);
     const outputOwners = outputNotes.map(n => n.owner);
@@ -165,8 +165,13 @@ burn.constructProof = (notes, sender) => {
     const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
-        const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
+        let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
         const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+
+        if (i === (notes.length - 1)) {
+            const kPublic = new BN(0);
+            kBar = kPublic;
+        }
 
         return [
             `0x${padLeft(kBar.toString(16), 64)}`,
