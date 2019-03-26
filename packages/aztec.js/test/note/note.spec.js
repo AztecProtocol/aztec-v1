@@ -71,7 +71,7 @@ describe('note tests', () => {
         expect(new BN(sharedSecrets[3].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[3].a.fromRed())).to.equal(true);
     });
 
-    it('note.exportNote will produce k, a values of 0 for a note created from a note public key', () => {
+    it('note.exportNote produces k, a values of 0 for a note created from a note public key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const publicKey = note.getPublic();
         const imported = notes.fromPublicKey(publicKey);
@@ -82,7 +82,7 @@ describe('note tests', () => {
         expect(result.publicKey).to.equal(publicKey);
     });
 
-    it('Note constructor will throw if given a public key and a viewing key', () => {
+    it('Note constructor throws if given a public key and a viewing key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const { publicKey, viewingKey } = note.exportNote();
         let message = '';
@@ -94,7 +94,7 @@ describe('note tests', () => {
         expect(message).to.equal('expected one of publicKey or viewingKey, not both');
     });
 
-    it('Note constructor will throw if given a non-string public key', () => {
+    it('Note constructor throws if given a non-string public key', () => {
         let message = '';
         try {
             notes.Note({ foo: 'bar' }, null);
@@ -104,7 +104,7 @@ describe('note tests', () => {
         expect(message).to.equal('expected key type object to be of type string');
     });
 
-    it('Note constructor will throw if given an incorect length public key', () => {
+    it('Note constructor throws if given an incorect length public key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const { publicKey } = note.exportNote();
         let message = '';
@@ -116,7 +116,7 @@ describe('note tests', () => {
         expect(message).to.equal('invalid public key length, expected 200, got 206');
     });
 
-    it('Note constructor will throw if given a non-string viewing key', () => {
+    it('Note constructor throws if given a non-string viewing key', () => {
         let message = '';
         try {
             notes.Note(null, { foo: 'bar' });
@@ -126,7 +126,7 @@ describe('note tests', () => {
         expect(message).to.equal('expected key type object to be of type string');
     });
 
-    it('Note constructor will throw if given an incorect length viewing key', () => {
+    it('Note constructor throws if given an incorect length viewing key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const { viewingKey } = note.exportNote();
         let message = '';

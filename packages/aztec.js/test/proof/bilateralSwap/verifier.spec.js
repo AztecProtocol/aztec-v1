@@ -17,7 +17,7 @@ const { expect } = chai;
 const { errorTypes } = utils.constants;
 
 
-describe('AZTEC bilateral swap verifier tests', () => {
+describe('bilateral swap verifier tests', () => {
     describe('success states', () => {
         it('bilateralProof.constructProof creates a valid bilateral swap proof', () => {
             const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
@@ -60,7 +60,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
     });
 
     describe('failure states', () => {
-        it('will REJECT if malformed challenge', () => {
+        it('REJECTS if malformed challenge', () => {
             // to test failure states we need to pass in bad data to verifier
             // so we need to turn off proof.parseInputs
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
@@ -79,7 +79,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for random note values', () => {
+        it('REJECTS for random note values', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             const randomNotes = proofUtils.makeTestNotes(
@@ -101,7 +101,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if bilateral swap note balancing relationship not satisfied', () => {
+        it('REJECTS if bilateral swap note balancing relationship not satisfied', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             const unbalancedNotes = proofUtils.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
@@ -117,7 +117,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for random proof data', () => {
+        it('REJECTS for random proof data', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             const proofData = [...Array(4)]
@@ -136,7 +136,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor is at infinity', () => {
+        it('REJECTS if blinding factor is at infinity', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
@@ -159,7 +159,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', () => {
+        it('REJECTS if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
@@ -178,7 +178,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor computed from points not on the curve', () => {
+        it('REJECTS if blinding factor computed from points not on the curve', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
             const sender = randomHex(20);
 

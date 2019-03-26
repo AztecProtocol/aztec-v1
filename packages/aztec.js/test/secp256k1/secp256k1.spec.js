@@ -41,11 +41,4 @@ describe('ecdsa tests', () => {
         const res = secp256k1.ecdsa.recoverPublicKey(hash, r, s, v);
         expect(res.eq(secp256k1.ec.keyFromPublic(publicKey.slice(2), 'hex').getPublic())).to.equal(true);
     });
-
-    it('signs the same signatures as web3?', async () => {
-        const { result: [v, r, s], web3Sig } = secp256k1.ecdsa.web3Comparison();
-        expect(r === web3Sig.r);
-        expect(s === web3Sig.s);
-        expect(v === web3Sig.v);
-    });
 });

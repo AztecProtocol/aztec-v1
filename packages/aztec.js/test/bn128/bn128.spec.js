@@ -69,7 +69,7 @@ describe('bn128 tests', () => {
         expect(result).to.equal(1);
     });
 
-    it('recoverMessage will throw if cannot find a solution from 0 to K_MAX', async () => {
+    it('recoverMessage throws if cannot find a solution from 0 to K_MAX', async () => {
         const k = new BN(999);
         const gamma = bn128.curve.g;
         const gammaK = bn128.curve.g.mul(k);

@@ -10,11 +10,11 @@ describe('regex tests', () => {
         const result = regex.sliceCommas(source);
         expect(result).to.deep.equal(['a', 'ba', 'c', 'd']);
     });
-    it('sliceCommas will correctly return string if no commas', () => {
+    it('sliceCommas correctly returns string if no commas', () => {
         expect(regex.sliceCommas('foo')).to.deep.equal(['foo']);
         expect(regex.sliceCommas('')).to.deep.equal([]);
     });
-    it('endOfData will return true if file has no data', () => {
+    it('endOfData returns true if file has no data', () => {
         const source = `
         
             
@@ -24,7 +24,7 @@ describe('regex tests', () => {
         const result = regex.endOfData(source);
         expect(result).to.equal(true);
     });
-    it('endOfData will return false if file has data', () => {
+    it('endOfData returns false if file has data', () => {
         const source = `
         
             
@@ -35,7 +35,7 @@ describe('regex tests', () => {
         expect(result).to.equal(false);
     });
 
-    it('countEmptyChars will get number of spaces', () => {
+    it('countEmptyChars gets number of spaces', () => {
         const source = ` 
          dup4 
         dup5`;
@@ -45,7 +45,7 @@ describe('regex tests', () => {
         expect(regex.countEmptyChars('a b c')).to.equal(0);
     });
 
-    it('isolateTemplate will identify template name', () => {
+    it('isolateTemplate identifies template name', () => {
         let result = regex.isolateTemplate('foo<bar, baz, bip<ab<cd<e>>>>');
         expect(result).to.deep.equal(['foo', ['bar, baz, bip', ['ab', ['cd', ['e']]]]]);
         result = regex.isolateTemplate('foo<bar>');
@@ -54,14 +54,14 @@ describe('regex tests', () => {
         expect(result).to.deep.equal(['foo']);
     });
 
-    it('containsOperators will correctly test if operators exist', () => {
+    it('containsOperators correctly tests if operators exist', () => {
         expect(regex.containsOperators('abc + def')).to.equal(true);
         expect(regex.containsOperators('abc - def')).to.equal(true);
         expect(regex.containsOperators('abc * def')).to.equal(true);
         expect(regex.containsOperators('abc , def')).to.equal(false);
     });
 
-    it('isLiteral will correctly test if string is a literal', () => {
+    it('isLiteral correctly tests if string is a literal', () => {
         expect(regex.isLiteral('A+B')).to.equal(true);
         expect(regex.isLiteral('A + 0x10')).to.equal(true);
         expect(regex.isLiteral('0x12345')).to.equal(true);

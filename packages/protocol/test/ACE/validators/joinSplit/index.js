@@ -523,7 +523,14 @@ contract('JoinSplit', (accounts) => {
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const challenge = sha3(challengeString, 'hex');
             const m = 1;
-            const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
+            const proofDataRaw = [[
+                `0x${padLeft('132', 64)}`,
+                padLeft('0x0', 64),
+                padLeft('0x0', 64),
+                padLeft('0x0', 64),
+                padLeft('0x0', 64),
+                padLeft('0x0', 64),
+            ]];
             const senderAddress = accounts[0];
 
             const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);

@@ -25,7 +25,7 @@ describe('parser tests', () => {
             getId.restore();
         });
 
-        it('processMacroLiteral will convert literals to BN form', () => {
+        it('processMacroLiteral converts literals to BN form', () => {
             let source = '0x2234';
             expect(parser.processMacroLiteral(source, {}).toString(16)).to.equal(new BN('2234', 16).toString(16));
             source = '356';
@@ -40,7 +40,7 @@ describe('parser tests', () => {
             expect(parser.processMacroLiteral(source, macros).toString(16)).to.equal(new BN('1e2a2', 16).toString(16));
         });
 
-        it('processTemplateLiteral will convert template literals to BN form', () => {
+        it('processTemplateLiteral converts template literals to BN form', () => {
             const source = 'FOO+0x1234-222*BAR';
             const macros = {
                 FOO: {
@@ -55,7 +55,7 @@ describe('parser tests', () => {
             expect(parser.processTemplateLiteral(source, macros).toString(16)).to.equal(result.toString(16));
         });
 
-        it('parseTemplate will convert template call into macro ops', () => {
+        it('parseTemplate converts template call into macro ops', () => {
             let result = parser.parseTemplate('dup4', {});
             const keys = Object.keys(result.macros);
             expect(keys.length).to.equal(1);
@@ -221,7 +221,7 @@ describe('parser tests', () => {
         afterEach(() => {
             parseMacro.restore();
         });
-        it('parser will currectly identify templates and macros', () => {
+        it('parser correctly identifies templates and macros', () => {
             const source = `
 
             #define macro FIRST = takes(0) returns(1) {
@@ -244,7 +244,7 @@ describe('parser tests', () => {
             expect(keys[1]).to.equal('SECOND');
         });
 
-        it('removeComments will strip comments', () => {
+        it('removeComments strips comments', () => {
             const source = `
                   foo bar // this is a comment.
                 dup4 mulmod /* and here is another comment
@@ -272,7 +272,7 @@ describe('parser tests', () => {
             expect(result.sourcemap.length).to.equal(result.bytecode.length / 2);
         });
 
-        it('frozen version of MAIN_TWO_ENDO_MOD macro is correctly compiled', () => {
+        it('correctly compiles the frozen version of the MAIN_TWO_ENDO_MOD macro', () => {
             const result = parser.compileMacro('MAIN_TWO_ENDO_MOD', './main_loop.huff', pathToTestData);
             const expected = fs.readFileSync(path.posix.resolve(pathToTestData, 'compiled.txt'), 'utf8');
             expect(result.bytecode).to.equal(expected);

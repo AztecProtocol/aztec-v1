@@ -71,7 +71,7 @@ describe('join split proof construction tests', () => {
         expect(new BN(proofData[proofData.length - 1][0].slice(2), 16).eq(kPublic)).to.equal(true);
     });
 
-    it('proof.constructProof will throw if kPublic is malformed', () => {
+    it('proof.constructProof throws if kPublic is malformed', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
@@ -85,7 +85,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if m is malformed', () => {
+    it('proof.constructProof throws if m is malformed', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -98,7 +98,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if point not on curve', () => {
+    it('proof.constructProof throws if point not on curve', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -111,7 +111,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if point at infinity', () => {
+    it('proof.constructProof throws if point at infinity', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -126,7 +126,7 @@ describe('join split proof construction tests', () => {
         expect(message).to.equal(errorTypes.POINT_AT_INFINITY);
     });
 
-    it('proof.constructProof will throw if viewing key response is 0', () => {
+    it('proof.constructProof throws if viewing key response is 0', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -139,7 +139,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if value > K_MAX', () => {
+    it('proof.constructProof throws if value > K_MAX', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);

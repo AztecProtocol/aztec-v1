@@ -21,7 +21,7 @@ import "../../../interfaces/JoinSplitInterface.sol";
 contract JoinSplit is LibEIP712 {
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
-     * If the proof is not valid, the transaction will throw.
+     * If the proof is not valid, the transaction throws.
      * @notice See AZTECInterface for how method calls should be constructed.
      * 'Cost' of raw elliptic curve primitives for a transaction:
      * 260,700 gas + (124,500 * number of input notes) + (167,600 * number of output notes).
@@ -303,7 +303,7 @@ contract JoinSplit is LibEIP712 {
             /**
              * @dev check that this note's points are on the altbn128 curve(y^2 = x^3 + 3)
              * and that signatures 'k' and 'a' are modulo the order of the curve.
-             * Transaction will throw if this is not the case.
+             * Transaction throws if this is not the case.
              * @param note the calldata loation of the note
              **/
             function validateCommitment(note, k, a) {

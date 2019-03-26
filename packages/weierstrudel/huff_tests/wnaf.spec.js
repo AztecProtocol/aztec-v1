@@ -31,7 +31,7 @@ describe('wnaf', function describe() {
         wnaf = new Runtime(testHelper, pathToTestData);
     });
 
-    it('macro WNAF_GREEDY__COMPUTE will correctly calculate w=5 endo split wnafs for multiple scalars', async () => {
+    it('macro WNAF_GREEDY__COMPUTE correctly calculates w=5 endo split wnafs for multiple scalars', async () => {
         const scalars = [
             bn128Reference.randomScalar(),
             bn128Reference.randomScalar(),

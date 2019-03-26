@@ -32,7 +32,7 @@ function fakeSignature() {
 }
 
 describe('inputCoder tests', () => {
-    describe('General functionality: metadata encoding, signature encoding...', () => {
+    describe('general functionality: metadata encoding, signature encoding...', () => {
         it('encodeMetadata works', () => {
             // Setup
             const numNotes = 4;

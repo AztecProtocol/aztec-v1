@@ -154,9 +154,9 @@ describe('join split verifier tests', function describeVerifier() {
             parseInputs.restore();
         });
 
-        it('will REJECT if points not on curve', () => {
+        it('REJECTS if points not on curve', () => {
             // we can construct 'proof' where all points and scalars are zero.
-            // The challenge response will be correctly reconstructed, but the proof should still be invalid
+            // The challenge response is correctly reconstructed, but the proof should still be invalid
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
             const sender = randomAddress();
@@ -173,7 +173,7 @@ describe('join split verifier tests', function describeVerifier() {
             expect(errors[3]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
         });
 
-        it('will REJECT if malformed challenge', () => {
+        it('REJECTS if malformed challenge', () => {
             const kIn = [...Array(5)].map(() => generateNoteValue());
             const kOut = [...Array(5)].map(() => generateNoteValue());
 
@@ -190,7 +190,7 @@ describe('join split verifier tests', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if notes do not balance', () => {
+        it('REJECTS if notes do not balance', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             kIn.push(1);
 
@@ -204,7 +204,7 @@ describe('join split verifier tests', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT for random proof data', () => {
+        it('REJECTS for random proof data', () => {
             const proofData = [...Array(4)]
                 .map(() => [...Array(6)]
                     .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
@@ -214,7 +214,7 @@ describe('join split verifier tests', function describeVerifier() {
             expect(result.errors).to.contain(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if kPublic > group modulus', () => {
+        it('REJECTS if kPublic > group modulus', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const kPublic = bn128.curve.n.add(new BN(100));
             kIn.push(100);
@@ -228,7 +228,7 @@ describe('join split verifier tests', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.SCALAR_TOO_BIG);
         });
 
-        it('will REJECT if note value response is 0', () => {
+        it('REJECTS if note value response is 0', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
@@ -241,7 +241,7 @@ describe('join split verifier tests', function describeVerifier() {
             expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if blinding factor is at infinity', () => {
+        it('REJECTS if blinding factor is at infinity', () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
@@ -260,7 +260,7 @@ describe('join split verifier tests', function describeVerifier() {
             expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if blinding factor computed from invalid point', () => {
+        it('REJECTS if blinding factor computed from invalid point', () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();

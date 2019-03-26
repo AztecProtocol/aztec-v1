@@ -138,7 +138,7 @@ describe('grammar tests', () => {
             expect(result[2]).to.equal('a,b , defg');
         });
 
-        it('will not think token without parentheses is a macro call', () => {
+        it('doesn\'t think token without parentheses is a macro call', () => {
             const source = `
                 FOO_CALL awoer 23 
                 ddds

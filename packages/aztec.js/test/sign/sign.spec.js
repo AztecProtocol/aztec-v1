@@ -34,7 +34,7 @@ describe('sign tests', () => {
             ],
         };
 
-        it('will generate correct AZTEC domain params', () => {
+        it('generates correct AZTEC domain params', () => {
             expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
                 name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
                 version: '1',

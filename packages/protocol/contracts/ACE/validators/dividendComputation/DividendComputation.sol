@@ -17,7 +17,7 @@ import "../../../interfaces/DividendComputationInterface.sol";
 contract DividendComputation {
     /**
      * @dev This will take any dividend calculation proof data and attempt to verify it in zero-knowledge
-     * If the proof is not valid, the transaction will throw.
+     * If the proof is not valid, the transaction throws.
      * @notice See DividendComputationInterface for how method calls should be constructed.
      * DividendComputation is written in YUL to enable manual memory management and for other efficiency savings.
      **/
@@ -316,7 +316,7 @@ contract DividendComputation {
             /**
              * @dev check that this note's points are on the altbn128 curve(y^2 = x^3 + 3)
              * and that signatures 'k' and 'a' are modulo the order of the curve. 
-             * Transaction will throw if this is not the case.
+             * Transaction throws if this is not the case.
              * @param note the calldata loation of the note
              **/
             function validateCommitment(note, k, a) {

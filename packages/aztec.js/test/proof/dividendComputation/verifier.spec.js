@@ -46,7 +46,7 @@ describe('Dividend computation verifier tests', () => {
 
 
     describe('failure states', () => {
-        it('will REJECT for unsatisfied proof relations', () => {
+        it('REJECTS for unsatisfied proof relations', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
@@ -81,7 +81,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for fake challenge', () => {
+        it('REJECTS for fake challenge', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
@@ -121,7 +121,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for fake proof data', () => {
+        it('REJECTS for fake proof data', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
@@ -160,7 +160,7 @@ describe('Dividend computation verifier tests', () => {
         });
 
 
-        it('will REJECT for z_a > k_max', () => {
+        it('REJECTS for z_a > k_max', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
@@ -197,7 +197,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for z_b > k_max', () => {
+        it('REJECTS for z_b > k_max', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
@@ -234,7 +234,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if point not on the curve', () => {
+        it('REJECTS if point not on the curve', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
@@ -272,7 +272,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor at infinity', () => {
+        it('REJECTS if blinding factor at infinity', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
@@ -315,7 +315,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor computed from invalid point', () => {
+        it('REJECTS if blinding factor computed from invalid point', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
 
             /*
