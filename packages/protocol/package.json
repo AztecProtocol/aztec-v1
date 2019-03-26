@@ -69,6 +69,7 @@
     "test:sol": "scripts/test.sh",
     "test": "scripts/test.sh",
     "coverage": "scripts/coverage.sh",
+    "profile": "scripts/profile.sh",
     "compile": "./node_modules/.bin/truffle compile --all",
     "build:artifacts": "node scripts/artifacts.js"
   }

@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { CoverageSubprovider } = require('@0x/sol-coverage');
+const { ProfilerSubprovider } = require('@0x/sol-profiler');
 const { RevertTraceSubprovider, TruffleArtifactAdapter } = require('@0x/sol-trace');
 const { GanacheSubprovider } = require('@0x/subproviders');
 const HDWalletProvider = require('truffle-hdwallet-provider');
@@ -53,6 +54,16 @@ const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.s
 const provider = new ProviderEngine();
 
 switch (process.env.MODE) {
+    case 'profile':
+        global.profilerSubprovider = new ProfilerSubprovider(
+            artifactAdapter,
+            defaultFromAddress,
+            true
+        );
+        // global.profilerSubprovider.stop();
+        provider.addProvider(global.profilerSubprovider);
+        // provider.addProvider(new RpcProvider({ rpcUrl: 'http://localhost:8545' }));
+        break;
     case 'coverage':
         global.coverageSubprovider = new CoverageSubprovider(
             artifactAdapter,
