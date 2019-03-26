@@ -19,8 +19,7 @@ module.exports = (deployer, network) => {
         }
         return deployer.deploy(ERC20Mintable).then(({ address: erc20Address }) => {
             const aceAddress = ACE.address;
-            const canMint = false;
-            const canBurn = false;
+            const canMintAndBurn = false;
             const canConvert = true;
 
             return deployer.deploy(
@@ -28,8 +27,7 @@ module.exports = (deployer, network) => {
                 aceAddress,
                 erc20Address,
                 ERC20_SCALING_FACTOR,
-                canMint,
-                canBurn,
+                canMintAndBurn,
                 canConvert
             );
         });

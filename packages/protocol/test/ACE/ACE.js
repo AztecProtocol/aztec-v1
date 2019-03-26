@@ -190,15 +190,13 @@ contract('ACE', (accounts) => {
 
             const erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(10);
-            const canMint = true;
-            const canBurn = true;
+            const canMintAndBurn = true;
             const canConvert = false; // minting at the moment is just for private assets
 
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMint,
-                canBurn,
+                canMintAndBurn,
                 canConvert,
                 { from: accounts[0] }
             );

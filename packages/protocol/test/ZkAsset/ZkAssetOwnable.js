@@ -92,13 +92,14 @@ contract('ZkAssetOwnable', (accounts) => {
 
         erc20 = await ERC20Mintable.new();
         scalingFactor = new BN(10);
+        const canMintAndBurn = false;
+        const canConvert = true;
         zkAssetOwnable = await ZkAssetOwnable.new(
             ace.address,
             erc20.address,
             scalingFactor,
-            false,
-            false,
-            true
+            canMintAndBurn,
+            canConvert
         );
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
 

@@ -44,8 +44,7 @@ contract ACE is IAZTEC {
     }
     struct Flags {
         bool active;
-        bool canMint;
-        bool canBurn;
+        bool canMintAndBurn;
         bool canConvert;
     }
     struct NoteRegistry {
@@ -206,7 +205,7 @@ contract ACE is IAZTEC {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canMint == true, "this asset is not mintable");
+        require(registry.flags.canMintAndBurn == true, "this asset is not mintable");
         
         // Check that it's a mintable proof
         (, uint8 category, ) = _proof.getProofComponents();
@@ -280,7 +279,7 @@ contract ACE is IAZTEC {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canBurn == true, "this asset is not burnable");
+        require(registry.flags.canMintAndBurn == true, "this asset is not burnable");
         
         // Check that it's a burnable proof
         (, uint8 category, ) = _proof.getProofComponents();
@@ -402,8 +401,7 @@ contract ACE is IAZTEC {
     function createNoteRegistry(
         address _linkedTokenAddress,
         uint256 _scalingFactor,
-        bool _canMint,
-        bool _canBurn,
+        bool _canMintAndBurn,
         bool _canConvert
     ) public {
         require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
@@ -416,8 +414,7 @@ contract ACE is IAZTEC {
             // above hashes are for note with k = 0, a = 1. Mint and burn counters start at 0
             flags: Flags({
                 active: true,
-                canMint: _canMint,
-                canBurn: _canBurn,
+                canMintAndBurn: _canMintAndBurn,
                 canConvert: _canConvert
             })
         });
@@ -446,8 +443,6 @@ contract ACE is IAZTEC {
         updateOutputNotes(outputNotes);
 
         if (publicValue != 0) {
-            require(registry.flags.canMint == false, "mintable assets cannot be converted into public tokens");
-            require(registry.flags.canBurn == false, "burnable assets cannot be converted into public tokens");
             require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens");
             if (publicValue < 0) {
                 registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
@@ -492,8 +487,7 @@ contract ACE is IAZTEC {
         uint256 _totalSupply,
         bytes32 _confidentialTotalMinted,
         bytes32 _confidentialTotalBurned,
-        bool _canMint,
-        bool _canBurn,
+        bool _canMintAndBurn,
         bool _canConvert
     ) {
         NoteRegistry memory registry = registries[_owner];
@@ -503,8 +497,7 @@ contract ACE is IAZTEC {
             registry.totalSupply,
             registry.confidentialTotalMinted,
             registry.confidentialTotalBurned,
-            registry.flags.canMint,
-            registry.flags.canBurn,
+            registry.flags.canMintAndBurn,
             registry.flags.canConvert
         );
     }

@@ -106,13 +106,16 @@ contract('ZkAsset', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
+
+            const canMintAndBurn = false;
+            const canConvert = true;
+
             zkAsset = await ZkAsset.new(
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                false,
-                false,
-                true
+                canMintAndBurn,
+                canConvert
             );
 
             await Promise.all(accounts.map((account) => {
