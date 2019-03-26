@@ -8936,7 +8936,7 @@ truffle-hdwallet-provider@^1.0.4:
     bindings "^1.3.1"
     websocket "^1.0.28"
 
-truffle@^5.0.8:
+truffle@^5.0.9:
   version "5.0.9"
   resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.0.9.tgz#e0e8c943aafd3ccd02634c15c27d306509a18055"
   dependencies:
