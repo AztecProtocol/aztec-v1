@@ -4,9 +4,14 @@
   "version": "independent",
   "command": {
       "publish": {
-          "ignoreChanges": ["test/**/*", "*.md", "scripts", "lib"]
+          "ignoreChanges": [
+              "*.md",
+              "lib",
+              "scripts",
+              "test/**/*"
+          ]
       }
   },
-  "npmClient": "npm",
+  "npmClient": "yarn",
   "useWorkspaces": true
 }

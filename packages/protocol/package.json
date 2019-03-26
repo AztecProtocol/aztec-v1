@@ -52,7 +52,7 @@
     "istanbul": "^0.4.5",
     "lodash": "^4.17.11",
     "mocha": "^5.2.0",
-    "rimraf": "^2.6.3",
+    "shx": "^0.3.2",
     "solc": "^0.5.6",
     "solhint": "1.5.0",
     "truffle": "^5.0.8",
@@ -62,15 +62,15 @@
     "web3-utils": "1.0.0-beta.37"
   },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf -rf ./.0x-artifacts ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json || true",
-    "lint:js": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "lint:sol": "./node_modules/.bin/solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
-    "lint": "npm run lint:js && npm run lint:sol",
+    "clean": "shx rm -rf ./.0x-artifacts ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json || true",
+    "lint:js": "eslint --ignore-path ../../.eslintignore .",
+    "lint:sol": "solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
+    "lint": "yarn lint:js && yarn lint:sol",
     "test:sol": "scripts/test.sh",
     "test": "scripts/test.sh",
     "trace": "scripts/trace.sh",
     "coverage": "scripts/coverage.sh",
-    "compile": "./node_modules/.bin/truffle compile --all",
+    "compile": "truffle compile --all",
     "build:artifacts": "node scripts/artifacts.js"
   }
 }

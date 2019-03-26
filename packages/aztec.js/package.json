@@ -25,7 +25,7 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "engines": {
-    "npm": ">=4"
+    "node": ">=6.12"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
@@ -60,16 +60,16 @@
     "mocha": "^5.2.0",
     "nyc": "^13.3.0",
     "push-dir": "^0.4.1",
-    "rimraf": "^2.6.3",
+    "shx": "^0.3.2",
     "sinon": "^7.2.3"
   },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf -rf ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./lib || true",
-    "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "test": "./node_modules/.bin/cross-env NODE_ENV=TEST ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "coverage": "./node_modules/.bin/cross-env NODE_ENV=TEST ./node_modules/.bin/nyc ./node_modules/.bin/mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "build": "./node_modules/.bin/rimraf ./lib && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
-    "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",
-    "publish:docs": "npm run build:docs && ./node_modules/.bin/push-dir --dir ./docs --branch gh-pages --remote origin --cleanup"
+    "clean": "shx rm -rf ./lib ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./lib || true",
+    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "test": "cross-env NODE_ENV=TEST mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "coverage": "cross-env NODE_ENV=TEST nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "build": "yarn clean && cross-env BABEL_ENV=production babel ./src --copy-files --out-dir ./lib",
+    "build:docs": "jsdoc -c ./.jsdoc.json",
+    "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --remote origin --cleanup"
   }
 }

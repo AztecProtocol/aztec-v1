@@ -32,9 +32,9 @@
     "mocha": "^5.2.0"
   },
   "scripts": {
-    "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "test": "./node_modules/.bin/mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:js": "./node_modules/.bin/mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
+    "test:js": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
     "compile": "node ./compile.js",
     "benchmark": "node ./benchmark.js"
   }
