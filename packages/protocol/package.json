@@ -10,11 +10,9 @@
     "openzeppelin-solidity": "2.1.2"
   },
   "devDependencies": {
-    "@0x/sol-compiler": "^3.1.3",
     "@0x/sol-coverage": "^3.0.0",
     "@0x/sol-profiler": "^3.1.2",
     "@0x/sol-trace": "^2.0.8",
-    "@0x/sol-tracing-utils": "^6.0.8",
     "@0x/subproviders": "^4.0.2",
     "@aztec/dev-utils": "^1.6.0",
     "aztec.js": "^0.6.0",
@@ -74,6 +72,7 @@
     "lint": "yarn lint:js && yarn lint:sol",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
+    "profile": "scripts/profile.sh",
     "test": "scripts/test.sh",
     "test:sol": "scripts/test.sh",
     "trace": "scripts/trace.sh"
