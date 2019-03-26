@@ -1,6 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../interfaces/IAZTEC.sol";
 import "../interfaces/IERC20.sol";
@@ -10,15 +11,6 @@ import "../libs/NoteUtils.sol";
 import "../libs/ProofUtils.sol";
 import "../libs/SafeMath8.sol";
 
-interface Foo {
-    function blah() external pure returns (bool);
-}
-
-contract Bar {
-    function baz(address fooAddress) public pure returns (bool) {
-        return Foo(fooAddress).blah();
-    }
-}
 
 /**
  * @title The AZTEC Cryptography Engine
