@@ -6,22 +6,35 @@ const secp256k1 = require('../secp256k1');
 
 const outputCoder = {};
 
+outputCoder.decodeNote = (note) => {
+    const length = parseInt(note.slice(0x00, 0x40), 16);
+    if (length === 0xe1) {
+        return outputCoder.decodeOutputNote(note);
+    }
+    if (length === 0xc0) {
+        return outputCoder.decodeInputNote(note);
+    }
+    throw new Error(`unknown note length ${length}`);
+};
+
 outputCoder.decodeOutputNote = (note) => {
     const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length !== 0xc1) {
+    if (length !== 0xe1) {
         throw new Error(`invalid length of ${length.toString(16)}`);
     }
-    const owner = `0x${note.slice(0x58, 0x80)}`;
-    const noteHash = `0x${note.slice(0x80, 0xc0)}`;
-    const metadataLength = parseInt(note.slice(0xc0, 0x100), 16);
+    const noteType = parseInt(note.slice(0x40, 0x80), 16);
+    const owner = `0x${note.slice(0x98, 0xc0)}`;
+    const noteHash = `0x${note.slice(0xc0, 0x100)}`;
+    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
     if (metadataLength !== 0x61) {
         throw new Error(`invalid metadata length of ${metadataLength}`);
     }
-    const gamma = bn128.decompressHex(note.slice(0x100, 0x140));
-    const sigma = bn128.decompressHex(note.slice(0x140, 0x180));
+    const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
+    const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
 
-    const ephemeral = secp256k1.decompressHex(note.slice(0x180, 0x1c2));
+    const ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     return {
+        noteType,
         owner,
         noteHash,
         gamma,
@@ -32,18 +45,20 @@ outputCoder.decodeOutputNote = (note) => {
 
 outputCoder.decodeInputNote = (note) => {
     const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length !== 0xa0) {
+    if (length !== 0xc0) {
         throw new Error(`invalid input note length of ${length.toString(16)}`);
     }
-    const owner = `0x${note.slice(0x58, 0x80)}`;
-    const noteHash = `0x${note.slice(0x80, 0xc0)}`;
-    const metadataLength = parseInt(note.slice(0xc0, 0x100), 16);
+    const noteType = parseInt(note.slice(0x40, 0x80), 16);
+    const owner = `0x${note.slice(0x98, 0xc0)}`;
+    const noteHash = `0x${note.slice(0xc0, 0x100)}`;
+    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
     if (metadataLength !== 0x40) {
         throw new Error(`invalid metadata length of ${metadataLength}`);
     }
-    const gamma = bn128.decompressHex(note.slice(0x100, 0x140));
-    const sigma = bn128.decompressHex(note.slice(0x140, 0x180));
+    const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
+    const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
     return {
+        noteType,
         owner,
         noteHash,
         gamma,
@@ -52,14 +67,11 @@ outputCoder.decodeInputNote = (note) => {
 };
 
 
-outputCoder.decodeNotes = (notes, isOutput) => {
+outputCoder.decodeNotes = (notes) => {
     const n = parseInt(notes.slice(0x40, 0x80), 16);
     return [...new Array(n)].map((x, i) => {
         const noteOffset = parseInt(notes.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
-        if (isOutput) {
-            return outputCoder.decodeOutputNote(notes.slice(noteOffset * 2));
-        }
-        return outputCoder.decodeInputNote(notes.slice(noteOffset * 2));
+        return outputCoder.decodeNote(notes.slice(noteOffset * 2));
     });
 };
 
@@ -68,8 +80,8 @@ outputCoder.decodeProofOutput = (proofOutput) => {
     const outputNotesOffset = parseInt(proofOutput.slice(0x80, 0xc0), 16);
     const publicOwner = `0x${proofOutput.slice(0xd8, 0x100)}`;
     const publicValue = new BN(proofOutput.slice(0x100, 0x140), 16).fromTwos(256).toNumber();
-    const inputNotes = outputCoder.decodeNotes(proofOutput.slice(inputNotesOffset * 2), false);
-    const outputNotes = outputCoder.decodeNotes(proofOutput.slice(outputNotesOffset * 2), true);
+    const inputNotes = outputCoder.decodeNotes(proofOutput.slice(inputNotesOffset * 2));
+    const outputNotes = outputCoder.decodeNotes(proofOutput.slice(outputNotesOffset * 2));
 
     return {
         inputNotes,
@@ -102,24 +114,26 @@ outputCoder.hashProofOutput = (proofOutput) => {
 
 outputCoder.encodeOutputNote = (note) => {
     const encoded = [...new Array(7)];
-    encoded[0] = padLeft('c1', 64);
-    encoded[1] = padLeft(note.owner.slice(2), 64);
-    encoded[2] = padLeft(note.noteHash.slice(2), 64);
-    encoded[3] = padLeft('61', 64);
-    encoded[4] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
-    encoded[5] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-    encoded[6] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
+    encoded[0] = padLeft('e1', 64);
+    encoded[1] = padLeft('1', 64);
+    encoded[2] = padLeft(note.owner.slice(2), 64);
+    encoded[3] = padLeft(note.noteHash.slice(2), 64);
+    encoded[4] = padLeft('61', 64);
+    encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
+    encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
+    encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
     return encoded.join('');
 };
 
 outputCoder.encodeInputNote = (note) => {
     const encoded = [...new Array(6)];
-    encoded[0] = padLeft('a0', 64);
-    encoded[1] = padLeft(note.owner.slice(2), 64);
-    encoded[2] = padLeft(note.noteHash.slice(2), 64);
-    encoded[3] = padLeft('40', 64);
-    encoded[4] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
-    encoded[5] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
+    encoded[0] = padLeft('c0', 64);
+    encoded[1] = padLeft('1', 64);
+    encoded[2] = padLeft(note.owner.slice(2), 64);
+    encoded[3] = padLeft(note.noteHash.slice(2), 64);
+    encoded[4] = padLeft('40', 64);
+    encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
+    encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
     return encoded.join('');
 };
 

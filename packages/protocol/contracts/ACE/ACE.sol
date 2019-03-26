@@ -10,6 +10,16 @@ import "../libs/NoteUtils.sol";
 import "../libs/ProofUtils.sol";
 import "../libs/SafeMath8.sol";
 
+interface Foo {
+    function blah() external pure returns (bool);
+}
+
+contract Bar {
+    function baz(address fooAddress) public pure returns (bool) {
+        return Foo(fooAddress).blah();
+    }
+}
+
 /**
  * @title The AZTEC Cryptography Engine
  * @author AZTEC
@@ -221,6 +231,8 @@ contract ACE is IAZTEC {
         bytes32 _proofHash,
         address _sender
     ) public view returns (bool) {
+        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
+        require(disabledValidators[epoch][category][id] == false, "this proof id has been invalidated!");
         bytes32 validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender));
         return validatedProofs[validatedProofHash];
     }

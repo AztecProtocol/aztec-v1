@@ -6,18 +6,16 @@ const encoderFactory = require('./encoderFactory');
 const inputCoder = {};
 
 
-inputCoder.bilateralSwap = (proofData, challenge, inputOwners, outputOwners, metadata) => {
+inputCoder.bilateralSwap = (proofData, challenge, owners, metadata) => {
     const configs = {
         CHALLENGE: challenge.slice(2),
         PROOF_DATA: encoderFactory.encodeProofData(proofData),
-        INPUT_OWNERS: encoderFactory.encodeInputOwners(inputOwners),
-        OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(outputOwners),
+        OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(owners),
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
     const abiParams = [
         'PROOF_DATA',
-        'INPUT_OWNERS',
         'OUTPUT_OWNERS',
         'METADATA',
     ];

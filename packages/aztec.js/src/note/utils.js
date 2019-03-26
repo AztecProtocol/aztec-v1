@@ -35,11 +35,12 @@ utils.getSharedSecret = (ephemeralPoint, privateKey) => {
  * @returns {string} sha3 hash in hex-string format
  */
 utils.getNoteHash = (gamma, sigma) => {
+    const noteType = padLeft('1', 64);
     const gammaX = padLeft(gamma.x.fromRed().toString(16), 64);
     const gammaY = padLeft(gamma.y.fromRed().toString(16), 64);
     const sigmaX = padLeft(sigma.x.fromRed().toString(16), 64);
     const sigmaY = padLeft(sigma.y.fromRed().toString(16), 64);
-    return sha3(`0x${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
+    return sha3(`0x${noteType}${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
 };
 
 module.exports = utils;
