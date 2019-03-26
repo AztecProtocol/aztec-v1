@@ -211,8 +211,7 @@ contract ACE is IAZTEC {
         // Check that it's a mintable proof
         (, uint8 category, ) = _proof.getProofComponents();
 
-        // TODO: replace the magic number 1 below with ProofCategory.MINT
-        require(category == 1, "this is not a mint proof");
+        require(category == uint8(ProofCategory.MINT), "this is not a mint proof");
 
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
 
@@ -286,8 +285,7 @@ contract ACE is IAZTEC {
         // Check that it's a burnable proof
         (, uint8 category, ) = _proof.getProofComponents();
 
-        // TODO: replace the magic number 1 below with ProofCategory.BURN
-        require(category == 2, "this is not a burn proof");
+        require(category == uint8(ProofCategory.BURN), "this is not a burn proof");
 
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
         

@@ -49,7 +49,6 @@ contract('ZkAssetMintable', (accounts) => {
             const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
             const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
             const zeroNote = note.fromViewKey(viewingKey);
-            // TODO: add default note to common reference string
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
