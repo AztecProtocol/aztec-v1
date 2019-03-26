@@ -1,31 +1,10 @@
 {
   "name": "aztec.js",
+  "description": "AZTEC cryptography library",
   "version": "0.6.0",
   "author": "AZTEC",
-  "description": "AZTEC cryptography library",
-  "license": "LGPL-3.0",
-  "main": "./lib",
-  "files": [
-    "/lib"
-  ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
-  "keywords": [
-    "aztec",
-    "cryptography",
-    "privacy",
-    "protocol",
-    "ethereum",
-    "blockchain"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
-  },
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
-  },
-  "engines": {
-    "node": ">=6.12"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
@@ -56,6 +35,7 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.12.4",
+    "fixpack": "^2.3.1",
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.3.0",
@@ -63,13 +43,35 @@
     "shx": "^0.3.2",
     "sinon": "^7.2.3"
   },
+  "engines": {
+    "node": ">=6.12"
+  },
+  "files": [
+    "/lib"
+  ],
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "keywords": [
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol"
+  ],
+  "license": "LGPL-3.0",
+  "main": "./lib",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
   "scripts": {
-    "clean": "shx rm -rf ./lib ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./lib || true",
-    "lint": "eslint --ignore-path ../../.eslintignore .",
-    "test": "cross-env NODE_ENV=TEST mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "coverage": "cross-env NODE_ENV=TEST nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
     "build": "yarn clean && cross-env BABEL_ENV=production babel ./src --copy-files --out-dir ./lib",
     "build:docs": "jsdoc -c ./.jsdoc.json",
-    "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --remote origin --cleanup"
+    "clean": "shx rm -rf ./lib ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./lib || true",
+    "coverage": "cross-env NODE_ENV=TEST nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --remote origin --cleanup",
+    "test": "cross-env NODE_ENV=TEST mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
   }
 }

@@ -1,26 +1,8 @@
 {
   "name": "@aztec/contract-addresses",
+  "description": "Addresses of deployed AZTEC contracts on Ethereum mainnet and testnets",
   "version": "1.1.1",
   "author": "AZTEC",
-  "description": "Addresses of deployed AZTEC contracts on Ethereum mainnet and testnets",
-  "license": "LGPL-3.0",
-  "main": "./lib",
-  "files": [
-    "/lib"
-  ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
-  "keywords": [
-    "aztec",
-    "cryptography",
-    "privacy",
-    "protocol",
-    "ethereum",
-    "blockchain"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
-  },
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
@@ -42,11 +24,34 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.2.0",
     "eslint-plugin-react": "^7.12.4",
+    "fixpack": "^2.3.1",
     "shx": "^0.3.2"
   },
+  "engines": {
+    "node": ">=6.12"
+  },
+  "files": [
+    "/lib"
+  ],
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "keywords": [
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol"
+  ],
+  "license": "LGPL-3.0",
+  "main": "./lib",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
   "scripts": {
+    "build": "npm run clean && cross-env BABEL_ENV=production babel ./src --copy-files --out-dir ./lib",
     "clean": "shx rm -rf ./lib",
-    "lint": "eslint --ignore-path ../../.eslintignore .",
-    "build": "npm run clean && cross-env BABEL_ENV=production babel ./src --copy-files --out-dir ./lib"
+    "lint": "eslint --ignore-path ../../.eslintignore ."
   }
 }

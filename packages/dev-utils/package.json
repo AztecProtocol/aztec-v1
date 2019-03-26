@@ -1,33 +1,14 @@
 {
   "name": "@aztec/dev-utils",
+  "description": "Dev utils to be shared across AZTEC packages",
   "version": "1.6.0",
   "author": "AZTEC",
-  "description": "Dev utils to be shared across AZTEC packages",
-  "license": "LGPL-3.0",
-  "main": "./lib",
-  "files": [
-    "/lib"
-  ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
-  "keywords": [
-    "aztec",
-    "cryptography",
-    "privacy",
-    "protocol",
-    "ethereum",
-    "blockchain"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
-  },
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
     "bn.js": "^4.11.8",
-    "chai": "^4.2.0",
     "web3-utils": "1.0.0-beta.37"
   },
   "devDependencies": {
@@ -44,11 +25,34 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.2.0",
     "eslint-plugin-react": "^7.12.4",
+    "fixpack": "^2.3.1",
     "shx": "^0.3.2"
   },
+  "engines": {
+    "node": ">=6.12"
+  },
+  "files": [
+    "/lib"
+  ],
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "keywords": [
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol"
+  ],
+  "license": "LGPL-3.0",
+  "main": "./lib",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
   "scripts": {
+    "build": "yarn clean && cross-env BABEL_ENV=production babel ./src --copy-files --out-dir ./lib",
     "clean": "shx rm -rf ./lib",
-    "lint": "eslint --ignore-path ../../.eslintignore .",
-    "build": "yarn clean && cross-env BABEL_ENV=production babel ./src --copy-files --out-dir ./lib"
+    "lint": "eslint --ignore-path ../../.eslintignore ."
   }
 }

@@ -1,22 +1,8 @@
 {
   "name": "@aztec/weierstrudel",
+  "description": "Highly optimized smart contract that performs elliptic curve scalar multiplication",
   "version": "0.1.0",
   "author": "AZTEC",
-  "description": "Highly optimized smart contract that performs elliptic curve scalar multiplication",
-  "license": "LGPL-3.0",
-  "main": "./index.js",
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
-  "keywords": [
-    "huff",
-    "ethereum",
-    "evm",
-    "smart",
-    "contracts"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
-  },
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
@@ -29,13 +15,28 @@
     "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "fixpack": "^2.3.1",
     "mocha": "^5.2.0"
   },
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "evm",
+    "huff",
+    "smart-contracts"
+  ],
+  "license": "LGPL-3.0",
+  "main": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
   "scripts": {
+    "benchmark": "node ./benchmark.js",
+    "compile": "node ./compile.js",
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:js": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "compile": "node ./compile.js",
-    "benchmark": "node ./benchmark.js"
+    "test:js": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec"
   }
 }

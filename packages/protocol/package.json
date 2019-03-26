@@ -1,25 +1,8 @@
 {
   "name": "@aztec/protocol",
+  "description": "AZTEC smart contract repository",
   "version": "0.4.3",
   "author": "AZTEC",
-  "description": "AZTEC smart contract repository",
-  "license": "LGPL-3.0",
-  "files": [
-    "/contracts"
-  ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
-  "keywords": [
-    "aztec",
-    "cryptography",
-    "privacy",
-    "protocol",
-    "ethereum",
-    "blockchain"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
-  },
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
@@ -47,6 +30,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.0",
     "eslint-plugin-react": "^7.12.4",
     "ethereumjs-util": "^6.1.0",
+    "fixpack": "^2.3.1",
     "fs-extra": "^7.0.1",
     "ganache-cli": "^6.4.1",
     "istanbul": "^0.4.5",
@@ -61,16 +45,37 @@
     "web3": "1.0.0-beta.37",
     "web3-utils": "1.0.0-beta.37"
   },
+  "engines": {
+    "node": ">=6.12"
+  },
+  "files": [
+    "/contracts"
+  ],
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "keywords": [
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol"
+  ],
+  "license": "LGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
   "scripts": {
+    "build:artifacts": "node scripts/artifacts.js",
     "clean": "shx rm -rf ./.0x-artifacts ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json || true",
+    "compile": "truffle compile --all",
+    "coverage": "scripts/coverage.sh",
+    "lint": "yarn lint:js && yarn lint:sol",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
-    "lint": "yarn lint:js && yarn lint:sol",
-    "test:sol": "scripts/test.sh",
     "test": "scripts/test.sh",
-    "trace": "scripts/trace.sh",
-    "coverage": "scripts/coverage.sh",
-    "compile": "truffle compile --all",
-    "build:artifacts": "node scripts/artifacts.js"
+    "test:sol": "scripts/test.sh",
+    "trace": "scripts/trace.sh"
   }
 }
