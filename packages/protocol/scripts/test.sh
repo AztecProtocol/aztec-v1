@@ -48,7 +48,7 @@ fi
 ./node_modules/.bin/truffle version
 ./node_modules/.bin/truffle test "$@"
 
-if [ "$MODE" = "coverage" ]; then
+if [ "$MODE" = "coverage" ] || ["$MODE" = "prfile"]; then
   ./node_modules/.bin/istanbul report html lcov
   
   if [ "$CONTINUOUS_INTEGRATION" = true ]; then
