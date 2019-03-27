@@ -63,11 +63,11 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
-    "build": "yarn clean && babel ./src --out-dir ./lib --root-mode upward --copy-files",
-    "build:docs": "jsdoc -c ./.jsdoc.json",
+    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "build:docs": "jsdoc --configure ./.jsdoc.json",
     "clean": "shx rm -rf ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./docs ./lib || true",
     "coverage": "cross-env NODE_ENV=TEST nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "lint": "eslint --ignore-path ../../.eslintignore ./",
     "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --remote origin --cleanup",
     "test": "cross-env NODE_ENV=TEST mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
   }

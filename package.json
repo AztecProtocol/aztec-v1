@@ -3,6 +3,7 @@
   "devDependencies": {
     "fixpack": "^2.3.1",
     "lerna": "^3.13.1",
+    "npm-run-all": "^4.1.5",
     "wsrun": "^3.6.4"
   },
   "engines": {
@@ -10,9 +11,16 @@
   },
   "private": true,
   "scripts": {
-    "fixpack": "lerna exec -- yarn fixpack; fixpack",
-    "lint": "wsrun lint $PKG --fast-exit --parallel --exclude-missing",
-    "remove_node_modules": "lerna clean --yes; rm -rf node_modules"
+    "build": "lerna link && wsrun --exclude-missing --fast-exit --package $PKG --recursive --stages build",
+    "clean": "wsrun --exclude-missing --fast-exit --package $PKG --parallel clean",
+    "fixpack": "lerna exec --parallel -- yarn fixpack; fixpack",
+    "install:all": "yarn install",
+    "lerna": "lerna",
+    "lint": "wsrun --exclude-missing --fast-exit --package $PKG --parallel lint",
+    "rebuild": "run-s clean build",
+    "remove_node_modules": "lerna clean --yes; rm -rf node_modules",
+    "test": "wsrun --exclude-missing --fast-exit --package $PKG --serial test",
+    "wsrun": "wsrun"
   },
   "workspaces": [
     "packages/*"
