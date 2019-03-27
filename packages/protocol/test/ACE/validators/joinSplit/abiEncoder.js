@@ -1,11 +1,16 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const aztec = require('aztec.js');
-const { constants: { CRS, K_MAX } } = require('@aztec/dev-utils');
+const {
+    constants: { CRS, K_MAX },
+} = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const { sign } = aztec;
 
@@ -44,12 +49,17 @@ contract('Join Split ABI Encoder', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const {
-                proofData,
-                challenge,
-            } = aztec.proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
+            const { proofData, challenge } = aztec.proof.joinSplit.constructProof(
+                [...inputNotes, ...outputNotes],
+                m,
+                accounts[0],
+                0,
+            );
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const domain = sign.generateAZTECDomainParams(
+                    joinSplitAbiEncoder.address,
+                    constants.eip712.ACE_DOMAIN_PARAMS,
+                );
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: JOIN_SPLIT_PROOF,
@@ -62,7 +72,7 @@ contract('Join Split ABI Encoder', (accounts) => {
                 return signature;
             });
             const publicOwner = aztecAccounts[0].address;
-            const outputOwners = outputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
             const data = joinSplitEncode(
                 proofData,
                 m,
@@ -70,7 +80,7 @@ contract('Join Split ABI Encoder', (accounts) => {
                 publicOwner,
                 inputSignatures,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const result = await joinSplitAbiEncoder.validateJoinSplit(data, senderAddress, CRS, {
@@ -78,12 +88,14 @@ contract('Join Split ABI Encoder', (accounts) => {
                 gas: 4000000,
             });
 
-            const expected = outputCoder.encodeProofOutputs([{
-                inputNotes,
-                outputNotes,
-                publicOwner,
-                publicValue: 0,
-            }]);
+            const expected = outputCoder.encodeProofOutputs([
+                {
+                    inputNotes,
+                    outputNotes,
+                    publicOwner,
+                    publicValue: 0,
+                },
+            ]);
 
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);

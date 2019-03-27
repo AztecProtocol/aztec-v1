@@ -36,7 +36,6 @@ const referenceCurve = new EC.curve.short({
     g: ['1', '2'],
 });
 
-
 describe('bn128 main loop', function describe() {
     this.timeout(10000);
     let main;
@@ -49,12 +48,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -74,18 +73,17 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-
     it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of TWO points', async () => {
         const numPoints = 2;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -110,12 +108,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -140,12 +138,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -170,12 +168,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -200,12 +198,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -230,12 +228,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -260,12 +258,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -290,12 +288,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -320,12 +318,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -350,12 +348,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -375,18 +373,17 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-
     it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of TWLEVE points', async () => {
         const numPoints = 12;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -411,12 +408,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -441,12 +438,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {
@@ -471,12 +468,12 @@ describe('bn128 main loop', function describe() {
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
         const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
+            return [
                 ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
+                { index: i * 2 * 32, value: points[i].x },
+                { index: (i * 2 + 1) * 32, value: points[i].y },
+                { index: numPoints * 64 + i * 32, value: scalars[i] },
+            ];
         }, []);
         const expected = points.reduce((acc, { x, y }, i) => {
             if (!acc) {

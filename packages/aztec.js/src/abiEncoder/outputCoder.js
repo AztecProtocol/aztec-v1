@@ -51,11 +51,10 @@ outputCoder.decodeInputNote = (note) => {
     };
 };
 
-
 outputCoder.decodeNotes = (notes, isOutput) => {
     const n = parseInt(notes.slice(0x40, 0x80), 16);
     return [...new Array(n)].map((x, i) => {
-        const noteOffset = parseInt(notes.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
+        const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
         if (isOutput) {
             return outputCoder.decodeOutputNote(notes.slice(noteOffset * 2));
         }
@@ -84,16 +83,16 @@ outputCoder.decodeProofOutputs = (proofOutputsHex) => {
 
     const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
     return [...new Array(numOutputs)].map((x, i) => {
-        const outputOffset = parseInt(proofOutputs.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
+        const outputOffset = parseInt(proofOutputs.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
         return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
     });
 };
 
 outputCoder.getProofOutput = (proofOutputsHex, i) => {
     const proofOutputs = proofOutputsHex.slice(2);
-    const offset = parseInt(proofOutputs.slice(0x40 + (0x40 * i), 0x80 + (0x40 * i)), 16);
-    const length = parseInt(proofOutputs.slice((offset * 2) - 0x40, (offset * 2)), 16);
-    return proofOutputs.slice((offset * 2) - 0x40, (offset * 2) + (length * 2));
+    const offset = parseInt(proofOutputs.slice(0x40 + 0x40 * i, 0x80 + 0x40 * i), 16);
+    const length = parseInt(proofOutputs.slice(offset * 2 - 0x40, offset * 2), 16);
+    return proofOutputs.slice(offset * 2 - 0x40, offset * 2 + length * 2);
 };
 
 outputCoder.hashProofOutput = (proofOutput) => {
@@ -126,30 +125,28 @@ outputCoder.encodeInputNote = (note) => {
 outputCoder.encodeNotes = (notes, isOutput) => {
     let encodedNotes;
     if (isOutput) {
-        encodedNotes = notes.map(note => outputCoder.encodeOutputNote(note, isOutput));
+        encodedNotes = notes.map((note) => outputCoder.encodeOutputNote(note, isOutput));
     } else {
-        encodedNotes = notes.map(note => outputCoder.encodeInputNote(note, isOutput));
+        encodedNotes = notes.map((note) => outputCoder.encodeInputNote(note, isOutput));
     }
-    const offsetToData = 0x40 + (0x20 * encodedNotes.length);
-    const noteLengths = encodedNotes.reduce((acc, p) => {
-        return [...acc, acc[acc.length - 1] + (p.length / 2)];
-    }, [offsetToData]);
+    const offsetToData = 0x40 + 0x20 * encodedNotes.length;
+    const noteLengths = encodedNotes.reduce(
+        (acc, p) => {
+            return [...acc, acc[acc.length - 1] + p.length / 2];
+        },
+        [offsetToData],
+    );
 
     const encoded = [
         padLeft((noteLengths.slice(-1)[0] - 0x20).toString(16), 64),
         padLeft(notes.length.toString(16), 64),
-        ...noteLengths.slice(0, -1).map(n => padLeft(n.toString(16), 64)),
+        ...noteLengths.slice(0, -1).map((n) => padLeft(n.toString(16), 64)),
         ...encodedNotes,
     ];
     return encoded.join('');
 };
 
-outputCoder.encodeProofOutput = ({
-    inputNotes,
-    outputNotes,
-    publicOwner,
-    publicValue,
-}) => {
+outputCoder.encodeProofOutput = ({ inputNotes, outputNotes, publicOwner, publicValue }) => {
     const encodedInputNotes = outputCoder.encodeNotes(inputNotes, false);
     const encodedOutputNotes = outputCoder.encodeNotes(outputNotes, true);
     let formattedValue;
@@ -159,9 +156,9 @@ outputCoder.encodeProofOutput = ({
         formattedValue = padLeft(publicValue.toString(16), 64);
     }
     const encoded = [...new Array(7)];
-    encoded[0] = padLeft((0x80 + ((encodedInputNotes.length + encodedOutputNotes.length) / 2)).toString(16), 64);
+    encoded[0] = padLeft((0x80 + (encodedInputNotes.length + encodedOutputNotes.length) / 2).toString(16), 64);
     encoded[1] = padLeft('a0', 64);
-    encoded[2] = padLeft((0xa0 + (encodedInputNotes.length / 2)).toString(16), 64);
+    encoded[2] = padLeft((0xa0 + encodedInputNotes.length / 2).toString(16), 64);
     encoded[3] = padLeft(publicOwner.slice(2), 64);
     encoded[4] = formattedValue;
     encoded[5] = encodedInputNotes;
@@ -170,16 +167,19 @@ outputCoder.encodeProofOutput = ({
 };
 
 outputCoder.encodeProofOutputs = (proofOutputs) => {
-    const encodedProofOutputs = proofOutputs.map(proofOutput => outputCoder.encodeProofOutput(proofOutput));
-    const offsetToData = 0x40 + (0x20 * proofOutputs.length);
-    const proofLengths = encodedProofOutputs.reduce((acc, p) => {
-        return [...acc, acc[acc.length - 1] + (p.length / 2)];
-    }, [offsetToData]);
+    const encodedProofOutputs = proofOutputs.map((proofOutput) => outputCoder.encodeProofOutput(proofOutput));
+    const offsetToData = 0x40 + 0x20 * proofOutputs.length;
+    const proofLengths = encodedProofOutputs.reduce(
+        (acc, p) => {
+            return [...acc, acc[acc.length - 1] + p.length / 2];
+        },
+        [offsetToData],
+    );
 
     const encoded = [
         padLeft((proofLengths.slice(-1)[0] - 0x20).toString(16), 64),
         padLeft(proofOutputs.length.toString(16), 64),
-        ...proofLengths.slice(0, -1).map(n => padLeft(n.toString(16), 64)),
+        ...proofLengths.slice(0, -1).map((n) => padLeft(n.toString(16), 64)),
         ...encodedProofOutputs,
     ];
     return `0x${encoded.join('')}`.toLowerCase();

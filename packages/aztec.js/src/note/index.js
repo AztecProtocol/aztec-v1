@@ -40,9 +40,8 @@ function createSharedSecret(publicKeyHex) {
  * @param {string} publicKey hex-formatted public key
  * @param {string} viewingKey hex-formatted viewing key
  * @param {string} owner Ethereum address of note owner
- * @classdesc A class for AZTEC zero-knowledge notes.
- *   Notes have public keys and viewing keys.  
- *   The viewing key is required to use note in an AZTEC zero-knowledge proof
+ * @classdesc A class for AZTEC zero-knowledge notes. Notes have public keys and viewing keys. The viewing key is
+ *   required to use note in an AZTEC zero-knowledge proof
  */
 function Note(publicKey, viewingKey, owner = '0x') {
     if (publicKey && viewingKey) {
@@ -54,8 +53,8 @@ function Note(publicKey, viewingKey, owner = '0x') {
      */
     this.owner = owner;
     if (publicKey) {
-        if (typeof (publicKey) !== 'string') {
-            throw new Error(`expected key type ${typeof (publicKey)} to be of type string`);
+        if (typeof publicKey !== 'string') {
+            throw new Error(`expected key type ${typeof publicKey} to be of type string`);
         }
         if (publicKey.length !== 200) {
             throw new Error(`invalid public key length, expected 200, got ${publicKey.length}`);
@@ -81,15 +80,15 @@ function Note(publicKey, viewingKey, owner = '0x') {
          */
         this.sigma = bn128.curve.decodePoint(publicKey.slice(68, 134), 'hex');
         /**
-         * Note's ephemeral key, a secp256k1 group element. A note owner can use this point
-         * to compute the note's viewing key.
+         * Note's ephemeral key, a secp256k1 group element. A note owner can use this point to compute the note's
+         * viewing key.
          * @member {Point}
          */
         this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
     }
     if (viewingKey) {
-        if (typeof (viewingKey) !== 'string') {
-            throw new Error(`expected key type ${typeof (viewingKey)} to be of type string`);
+        if (typeof viewingKey !== 'string') {
+            throw new Error(`expected key type ${typeof viewingKey} to be of type string`);
         }
         if (viewingKey.length !== 140) {
             throw new Error(`invalid viewing key length, expected 140, got ${viewingKey.length}`);
@@ -98,13 +97,12 @@ function Note(publicKey, viewingKey, owner = '0x') {
         this.k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
         const { x, y } = setup.readSignatureSync(this.k.toNumber());
         const mu = bn128.curve.point(x, y);
-        this.gamma = (mu.mul(this.a));
+        this.gamma = mu.mul(this.a);
         this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
         this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
     }
     /**
-     * keccak256 hash of note coordinates, aligned in 32-byte chunks.  
-     *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
+     * keccak256 hash of note coordinates, aligned in 32-byte chunks. Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
      * @member {string}
      */
     this.noteHash = getNoteHash(this.gamma, this.sigma);
@@ -287,7 +285,8 @@ note.encodeMetadata = (noteArray) => {
 };
 
 /**
- * Export the Note class as part of the note module. We shouldn't really use this directly, but useful for testing purposes
+ * Export the Note class as part of the note module. We shouldn't really use this directly, but useful for testing
+ * purposes
  *
  * @memberof module:note
  */

@@ -5,7 +5,10 @@ const BN = require('bn.js');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -15,7 +18,6 @@ const ACE = artifacts.require('./contracts/ACE/ACE');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 const ZkAsset = artifacts.require('./contracts/ZkAsset/ZkAsset');
-
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
@@ -106,52 +108,24 @@ contract('ZkAsset', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
-            zkAsset = await ZkAsset.new(
-                ace.address,
-                erc20.address,
-                scalingFactor
-            );
+            zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
 
-            await Promise.all(accounts.map((account) => {
-                const opts = { from: accounts[0], gas: 4700000 };
-                return erc20.mint(
-                    account,
-                    scalingFactor.mul(tokensTransferred),
-                    opts
-                );
-            }));
-            await Promise.all(accounts.map((account) => {
-                const opts = { from: account, gas: 4700000 };
-                return erc20.approve(
-                    ace.address,
-                    scalingFactor.mul(tokensTransferred),
-                    opts
-                );
-            }));
-            await ace.publicApprove(
-                zkAsset.address,
-                proofHashes[0],
-                10,
-                { from: accounts[0] }
+            await Promise.all(
+                accounts.map((account) => {
+                    const opts = { from: accounts[0], gas: 4700000 };
+                    return erc20.mint(account, scalingFactor.mul(tokensTransferred), opts);
+                }),
             );
-            await ace.publicApprove(
-                zkAsset.address,
-                proofHashes[1],
-                40,
-                { from: accounts[1] }
+            await Promise.all(
+                accounts.map((account) => {
+                    const opts = { from: account, gas: 4700000 };
+                    return erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
+                }),
             );
-            await ace.publicApprove(
-                zkAsset.address,
-                proofHashes[2],
-                130,
-                { from: accounts[2] }
-            );
-            await ace.publicApprove(
-                zkAsset.address,
-                proofHashes[4],
-                30,
-                { from: accounts[3] }
-            );
+            await ace.publicApprove(zkAsset.address, proofHashes[0], 10, { from: accounts[0] });
+            await ace.publicApprove(zkAsset.address, proofHashes[1], 40, { from: accounts[1] });
+            await ace.publicApprove(zkAsset.address, proofHashes[2], 130, { from: accounts[2] });
+            await ace.publicApprove(zkAsset.address, proofHashes[4], 30, { from: accounts[3] });
         });
 
         it('should update a note registry with output notes', async () => {

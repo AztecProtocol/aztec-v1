@@ -23,8 +23,8 @@ const { groupReduction } = bn128;
  * @param {Object[]} proofData - AZTEC bilateralSwap zero-knowledge proof data
  * @param {string} challengeHex - hex-string formatted proof challenge
  * @param {string} sender - Ethereum address of transaction sender
- * @returns {boolean, string[]} valid, errors - valid describes whether the proof verification is valid, 
- * errors is an array of all errors that were caught
+ * @returns {boolean, string[]} valid, errors - valid describes whether the proof verification is valid, errors is an
+ * array of all errors that were caught
  */
 verifier.verifyProof = (proofData, challengeHex, sender) => {
     const errors = [];
@@ -55,17 +55,24 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
         Explanation of the below if/else
         - The purpose is to set kBar1 = kBar3 and kBar2 = kBar4
         - i is used as an indexing variable, to keep track of whether we are at a maker note or taker note
-        - All kBars are stored in a kBarArray. When we arrive at the taker notes, we set bk equal to the bk of the corresponding 
-          maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the kBarArray, and setting the current
-          kBar equal to the element at the resulting position.
+        - All kBars are stored in a kBarArray. When we arrive at the taker notes, we set bk equal to the bk of the
+          corresponding maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the kBarArray, and
+          setting the current kBar equal to the element at the resulting position.
         */
 
         // Maker notes
         if (i <= 1) {
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
-        } else { // taker notes
+            B = gamma
+                .mul(kBar)
+                .add(bn128.h.mul(aBar))
+                .add(sigma.mul(challenge).neg());
+        } else {
+            // taker notes
             kBar = kBarArray[i - 2];
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
+            B = gamma
+                .mul(kBar)
+                .add(bn128.h.mul(aBar))
+                .add(sigma.mul(challenge).neg());
         }
 
         if (B.isInfinity()) {

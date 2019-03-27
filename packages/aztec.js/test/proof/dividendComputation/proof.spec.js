@@ -7,9 +7,8 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
-
 describe('Dividend computation proof construction tests', () => {
-    it('dividendComputation.constructProof outputs proof data with correct number of proof variables and is well formed', () => {
+    it('outputs proof data with correct number of proof variables and is well formed', () => {
         /*
         Test case:
         - k_in = 90
@@ -25,7 +24,12 @@ describe('Dividend computation proof construction tests', () => {
         const zb = 5;
 
         const sender = web3Utils.randomHex(20);
-        const { proofDataUnformatted, proofData, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
+        const { proofDataUnformatted, proofData, challenge } = dividendComputation.constructProof(
+            testNotes,
+            za,
+            zb,
+            sender,
+        );
         const numProofDataElements = 18;
 
         expect(proofDataUnformatted.length).to.equal(3);

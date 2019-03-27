@@ -25,11 +25,18 @@ describe('keccak tests', () => {
         keccak.append(bn128.curve.point(new BN(points[1][0], 16), new BN(points[1][1], 16)));
         const hash = keccak.keccak();
 
-        const expected = sha3(points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'), 'hex').slice(2);
+        const expected = sha3(
+            points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'),
+            'hex',
+        ).slice(2);
 
         expect(hash[0]).to.equal(expected);
-        expect(keccak.keccak(bn128.groupReduction).fromRed().toString(16))
-            .to.equal(new BN(sha3(`0x${expected}`).slice(2), 16).umod(bn128.curve.n).toString(16));
+        expect(
+            keccak
+                .keccak(bn128.groupReduction)
+                .fromRed()
+                .toString(16),
+        ).to.equal(new BN(sha3(`0x${expected}`).slice(2), 16).umod(bn128.curve.n).toString(16));
     });
 
     it('keccak correctly hashes a set of BN big numbers', () => {
@@ -40,7 +47,9 @@ describe('keccak tests', () => {
         ];
 
         const keccak = new Keccak();
-        numbers.forEach((n) => { keccak.appendBN(new BN(n, 16)); });
+        numbers.forEach((n) => {
+            keccak.appendBN(new BN(n, 16));
+        });
         keccak.keccak();
 
         const expected = sha3(numbers.reduce((r, n) => `${r}${padLeft(n, 64)}`, '0x'), 'hex').slice(2);

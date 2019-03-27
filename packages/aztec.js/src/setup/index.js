@@ -1,15 +1,16 @@
 /**
- * Read in points from the trusted setup points database.
- * NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY AZTEC ON A SINGLE DEVICE AND
- *   IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY.
- *   We will be launching our multiparty computation trusted setup protocol shortly, where mulitple entities
- *   create the trusted setup database and only one of them must act honestly in order for the setup database to be secure.
- *   If you wish to participate please let us know at hello@aztecprotocol.com
+ * Read in points from the trusted setup points database. NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY
+ * AZTEC ON A SINGLE DEVICE AND IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY. We will be launching our multiparty
+ * computation trusted setup protocol shortly, where mulitple entities create the trusted setup database and only one of
+ * them must act honestly in order for the setup database to be secure. If you wish to participate please let us know at
+ * hello@aztecprotocol.com
  *
  * @module setup
  */
 
-const { constants: { SIGNATURES_PER_FILE } } = require('@aztec/dev-utils');
+const {
+    constants: { SIGNATURES_PER_FILE },
+} = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const fs = require('fs');
 const path = require('path');
@@ -21,9 +22,8 @@ const partialPath = path.posix.resolve(__dirname, '../setupDatabase');
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 
 /**
- * Decompress a 256-bit representation of a bn128 G1 element.
- *   The first 254 bits define the x-coordinate. The most significant bit defines whether the
- *   y-coordinate is odd
+ * Decompress a 256-bit representation of a bn128 G1 element. The first 254 bits define the x-coordinate. The most
+ *   significant bit defines whether the y-coordinate is odd
  *
  * @method decompress
  * @param {BN} compressed 256-bit compressed coordinate in BN form
@@ -32,9 +32,18 @@ const compressionMask = new BN('800000000000000000000000000000000000000000000000
 setup.decompress = (compressed) => {
     const yBit = compressed.testn(255);
     const x = compressed.maskn(255).toRed(bn128.curve.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(bn128.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
@@ -72,14 +81,14 @@ setup.readSignature = (inputValue) => {
     return new Promise((resolve, reject) => {
         const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
 
-        const fileName = path.posix.resolve(partialPath, `data${(((fileNum) * SIGNATURES_PER_FILE) - 1)}.dat`);
+        const fileName = path.posix.resolve(partialPath, `data${fileNum * SIGNATURES_PER_FILE - 1}.dat`);
         fs.readFile(fileName, (err, data) => {
             if (err) {
                 return reject(err);
             }
             // each file starts at 0 (0, 1024, 2048 etc)
-            const min = ((fileNum - 1) * SIGNATURES_PER_FILE);
-            const bytePosition = ((value - min) * 32);
+            const min = (fileNum - 1) * SIGNATURES_PER_FILE;
+            const bytePosition = (value - min) * 32;
             // eslint-disable-next-line new-cap
             const signatureBuf = new Buffer.alloc(32);
             data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
@@ -101,12 +110,12 @@ setup.readSignatureSync = (inputValue) => {
     const value = Number(inputValue);
     const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
 
-    const fileName = path.posix.resolve(partialPath, `data${(((fileNum) * SIGNATURES_PER_FILE) - 1)}.dat`);
+    const fileName = path.posix.resolve(partialPath, `data${fileNum * SIGNATURES_PER_FILE - 1}.dat`);
     const data = fs.readFileSync(fileName);
 
     // each file starts at 0 (0, 1024, 2048 etc)
-    const min = ((fileNum - 1) * SIGNATURES_PER_FILE);
-    const bytePosition = ((value - min) * 32);
+    const min = (fileNum - 1) * SIGNATURES_PER_FILE;
+    const bytePosition = (value - min) * 32;
     // eslint-disable-next-line new-cap
     const signatureBuf = new Buffer.alloc(32);
     data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);

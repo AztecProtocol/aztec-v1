@@ -1,5 +1,5 @@
 /**
- * Module to ECDSA signatures over structured data,  
+ * Module to ECDSA signatures over structured data,
  *   following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
  * @namespace sign
@@ -26,10 +26,7 @@ sign.eip712 = eip712;
  * @param {string} verifyingContract address of target contract
  * @returns {Object} EIP712 Domain type object
  */
-sign.generateAZTECDomainParams = function generateAZTECDomainParams(
-    verifyingContract,
-    domain = defaultDomain
-) {
+sign.generateAZTECDomainParams = function generateAZTECDomainParams(verifyingContract, domain = defaultDomain) {
     return {
         name: domain.name,
         version: domain.version,

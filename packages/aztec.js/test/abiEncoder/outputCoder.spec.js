@@ -1,4 +1,6 @@
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
+const {
+    constants: { K_MAX },
+} = require('@aztec/dev-utils');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
@@ -33,8 +35,7 @@ describe('abiEncoder.outputCoder tests', () => {
         });
     });
 
-    afterEach(() => {
-    });
+    afterEach(() => {});
 
     it('isHex works', () => {
         expect(isHex('0123456789abcdefABCDEF')).to.equal(true);
@@ -61,7 +62,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(encoded.hexLength()).to.equal(0xc0);
 
         expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(0xc0 - 0x20);
-        expect((encoded.slice(0x20, 0x40))).to.equal(padLeft(notes[0].owner.slice(2), 64));
+        expect(encoded.slice(0x20, 0x40)).to.equal(padLeft(notes[0].owner.slice(2), 64));
         expect(encoded.slice(0x40, 0x60)).to.equal(padLeft(notes[0].noteHash.slice(2), 64));
         expect(clean(encoded.slice(0x60, 0x80))).to.equal('40');
         expect(bn128.decompressHex(encoded.slice(0x80, 0xa0)).eq(notes[0].gamma)).to.equal(true);
@@ -78,10 +79,10 @@ describe('abiEncoder.outputCoder tests', () => {
 
         let sum = 0x40;
         for (let i = 0; i < length; i += 1) {
-            const location = parseInt(encoded.slice(0x40 + (i * 0x20), 0x60 + (i * 0x20)), 16);
+            const location = parseInt(encoded.slice(0x40 + i * 0x20, 0x60 + i * 0x20), 16);
             const byteLength = parseInt(encoded.slice(location, location + 0x20), 16);
             const encodedNote = encoded.slice(location, location + 0x20 + byteLength);
-            sum += (byteLength + 0x40);
+            sum += byteLength + 0x40;
             expect(encodedNote).to.equal(outputCoder.encodeOutputNote(inputNotes[i]));
         }
         expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(sum - 0x20);
@@ -93,12 +94,14 @@ describe('abiEncoder.outputCoder tests', () => {
         const outputNotes = [notes[2], notes[3], notes[4]];
         const publicOwner = accounts[5].address;
         const publicValue = randomNoteValue();
-        const encoded = new HexString(outputCoder.encodeProofOutput({
-            inputNotes,
-            outputNotes,
-            publicOwner,
-            publicValue,
-        }));
+        const encoded = new HexString(
+            outputCoder.encodeProofOutput({
+                inputNotes,
+                outputNotes,
+                publicOwner,
+                publicValue,
+            }),
+        );
         expect(isHex(encoded)).to.equal(true);
         const encodedLength = parseInt(encoded.slice(0x00, 0x20), 16);
         const inputsLocation = parseInt(encoded.slice(0x20, 0x40), 16);
@@ -108,31 +111,38 @@ describe('abiEncoder.outputCoder tests', () => {
         const inputsLength = parseInt(encoded.slice(inputsLocation, inputsLocation + 0x20), 16);
         const outputsLength = parseInt(encoded.slice(outputsLocation, outputsLocation + 0x20), 16);
         const encodedInputNotes = new HexString(encoded.slice(inputsLocation, inputsLocation + 0x20 + inputsLength));
-        const encodedOutputNotes = new HexString(encoded.slice(outputsLocation, outputsLocation + 0x20 + outputsLength));
+        const encodedOutputNotes = new HexString(
+            encoded.slice(outputsLocation, outputsLocation + 0x20 + outputsLength),
+        );
         const totalLength = encodedInputNotes.hexLength() + encodedOutputNotes.hexLength() + 0xa0;
 
         expect(encodedLength).to.equal(encoded.hexLength() - 0x20);
         expect(recoveredOwner).to.equal(padLeft(publicOwner.slice(2), 64));
         expect(recoveredValue).to.equal(publicValue);
         expect(parseInt(encoded.slice(inputsLocation + 0x20, inputsLocation + 0x40), 16)).to.equal(inputNotes.length);
-        expect(parseInt(encoded.slice(outputsLocation + 0x20, outputsLocation + 0x40), 16)).to.equal(outputNotes.length);
+        expect(parseInt(encoded.slice(outputsLocation + 0x20, outputsLocation + 0x40), 16)).to.equal(
+            outputNotes.length,
+        );
         expect(String(encodedInputNotes)).to.equal(outputCoder.encodeNotes(inputNotes, false));
         expect(String(encodedOutputNotes)).to.equal(outputCoder.encodeNotes(outputNotes, true));
         expect(encoded.hexLength()).to.equal(totalLength);
     });
 
     it('outputCoder can encode proof outputs', () => {
-        const proofs = [{
-            inputNotes: [notes[0], notes[1]],
-            outputNotes: [notes[2], notes[3]],
-            publicOwner: accounts[4].address,
-            publicValue: randomNoteValue(),
-        }, {
-            inputNotes: [notes[5], notes[6]],
-            outputNotes: [notes[7], notes[8]],
-            publicOwner: accounts[9].address,
-            publicValue: randomNoteValue(),
-        }];
+        const proofs = [
+            {
+                inputNotes: [notes[0], notes[1]],
+                outputNotes: [notes[2], notes[3]],
+                publicOwner: accounts[4].address,
+                publicValue: randomNoteValue(),
+            },
+            {
+                inputNotes: [notes[5], notes[6]],
+                outputNotes: [notes[7], notes[8]],
+                publicOwner: accounts[9].address,
+                publicValue: randomNoteValue(),
+            },
+        ];
         const encoded = new HexString(outputCoder.encodeProofOutputs(proofs).slice(2));
         expect(isHex(encoded)).to.equal(true);
 
@@ -142,11 +152,11 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(numProofs).to.equal(2);
         let sum = 0x40;
         for (let i = 0; i < numProofs; i += 1) {
-            const location = parseInt(encoded.slice(0x40 + (i * 0x20), 0x60 + (i * 0x20)), 16);
+            const location = parseInt(encoded.slice(0x40 + i * 0x20, 0x60 + i * 0x20), 16);
             const byteLength = parseInt(encoded.slice(location, location + 0x20), 16);
             const proofOutput = encoded.slice(location, location + 0x20 + byteLength);
             expect(proofOutput).to.equal(outputCoder.encodeProofOutput(proofs[i]).toLowerCase());
-            sum += (byteLength + 0x40);
+            sum += byteLength + 0x40;
         }
         expect(encodedLength).to.equal(sum - 0x20);
         expect(encoded.hexLength()).to.equal(sum);
@@ -212,19 +222,21 @@ describe('abiEncoder.outputCoder tests', () => {
         }
     });
 
-
     it('outputCoder can decode proof outputs', () => {
-        const proofOutputs = [{
-            inputNotes: [notes[0], notes[1]],
-            outputNotes: [notes[2], notes[3]],
-            publicOwner: notes[3].owner,
-            publicValue: 123456789,
-        }, {
-            inputNotes: [notes[4], notes[5]],
-            outputNotes: [notes[7], notes[6]],
-            publicOwner: notes[8].owner,
-            publicValue: 987654321,
-        }];
+        const proofOutputs = [
+            {
+                inputNotes: [notes[0], notes[1]],
+                outputNotes: [notes[2], notes[3]],
+                publicOwner: notes[3].owner,
+                publicValue: 123456789,
+            },
+            {
+                inputNotes: [notes[4], notes[5]],
+                outputNotes: [notes[7], notes[6]],
+                publicOwner: notes[8].owner,
+                publicValue: 987654321,
+            },
+        ];
         const encoded = outputCoder.encodeProofOutputs(proofOutputs);
         const result = outputCoder.decodeProofOutputs(encoded);
         expect(result.length).to.equal(proofOutputs.length);
@@ -240,8 +252,9 @@ describe('abiEncoder.outputCoder tests', () => {
                 expect(result[i].inputNotes[j].noteHash).to.equal(proofOutputs[i].inputNotes[j].noteHash);
             }
             for (let j = 0; j < result[i].outputNotes.length; j += 1) {
-                expect(result[i].outputNotes[j].ephemeral.eq(proofOutputs[i].outputNotes[j].ephemeral.getPublic()))
-                    .to.equal(true);
+                expect(
+                    result[i].outputNotes[j].ephemeral.eq(proofOutputs[i].outputNotes[j].ephemeral.getPublic()),
+                ).to.equal(true);
                 expect(result[i].outputNotes[j].gamma.eq(proofOutputs[i].outputNotes[j].gamma)).to.equal(true);
                 expect(result[i].outputNotes[j].sigma.eq(proofOutputs[i].outputNotes[j].sigma)).to.equal(true);
                 expect(result[i].outputNotes[j].owner).to.equal(proofOutputs[i].outputNotes[j].owner.toLowerCase());

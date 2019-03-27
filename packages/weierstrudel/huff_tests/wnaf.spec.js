@@ -60,7 +60,6 @@ describe('wnaf', function describe() {
             { index: 32 * 11, value: scalars[3] },
         ];
 
-
         let { stack } = await wnaf('WNAF_START_LOCATION', [], [], calldata, 1);
         const wnafStartLocation = stack[0].toNumber();
 
@@ -75,16 +74,16 @@ describe('wnaf', function describe() {
             const { k1, k2 } = endomorphism.endoSplit(s);
             return [...acc, k2, k1];
         }, []);
-        const referenceWnafs = endoScalars.map(s => referenceWnaf.wnaf(s));
+        const referenceWnafs = endoScalars.map((s) => referenceWnaf.wnaf(s));
         for (let i = 0; i < 128; i += 1) {
-            const baseOffset = wnafStartLocation + (i * wnafSizeOfEntry);
+            const baseOffset = wnafStartLocation + i * wnafSizeOfEntry;
             const count = memory[baseOffset + 0x1f] || 0;
-            const referenceCount = referenceWnafs.filter(w => (w[i] && w[i].gt(new BN(0)))).length;
+            const referenceCount = referenceWnafs.filter((w) => w[i] && w[i].gt(new BN(0))).length;
             expect(count).to.equal(referenceCount * 2);
 
             for (let j = 0; j < referenceCount; j += 2) {
                 const offset = baseOffset - wnafSizeOfEntry - 2 - j;
-                const wnafEntry = ((memory[offset] << 8) + memory[offset + 1]);
+                const wnafEntry = (memory[offset] << 8) + memory[offset + 1];
                 const t1 = wnafEntry - pointTableStartLocation;
                 const pointIndex = Math.floor(t1 / 0x400);
                 const wnafValue = ((t1 >> 5) & 0x1f) + 1;

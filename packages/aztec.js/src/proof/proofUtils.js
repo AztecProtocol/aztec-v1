@@ -6,14 +6,17 @@
 
 const { padLeft } = require('web3-utils');
 const BN = require('bn.js');
-const { errors: { customError }, constants, constants: { K_MAX } } = require('@aztec/dev-utils');
+const {
+    errors: { customError },
+    constants,
+    constants: { K_MAX },
+} = require('@aztec/dev-utils');
 const crypto = require('crypto');
 
 const bn128 = require('../bn128');
 const Keccak = require('../keccak');
 const secp256k1 = require('../secp256k1');
 const notesConstruct = require('../note');
-
 
 const { groupReduction } = bn128;
 
@@ -27,13 +30,13 @@ const zero = new BN(0).toRed(groupReduction);
  * Make test notes
  * @method makeTestNotes
  * @memberof module:proofUtils
- * @param {string[]} makerNoteValues - array of maker note values 
+ * @param {string[]} makerNoteValues - array of maker note values
  * @param {string[]} makerNoteValues - array of taker note values
  * @returns {[Notes{}]} - array of AZTEC notes
  */
 proofUtils.makeTestNotes = (makerNoteValues, takerNoteValues) => {
     const noteValues = [...makerNoteValues, ...takerNoteValues];
-    return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
+    return noteValues.map((value) => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 
 /**
@@ -47,47 +50,39 @@ proofUtils.generateNoteValue = () => {
 };
 
 /**
- * Checks the number of notes. Depending on the boolean argument, shouldThrow, 
- * will either 1) immediately throw if incorrect number, or 2) push the error to 
- * a supplied array of errors
+ * Checks the number of notes. Depending on the boolean argument, shouldThrow, will either 1) immediately throw if
+ * incorrect number, or 2) push the error to a supplied array of errors
  * @method checkNumNotes
  * @memberof module:proofUtils
  * @param {Object[]} notes - array of AZTEC notes
  * @param {integer} numNotes - desired number of notes
  * @param {boolean} shouldThrow - choose whether the tx should be thrown or the error simply recorded
  * @param {boolean} errors - input error recording array, set a default value
-
+ *
  */
 proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
     if (shouldThrow) {
         if (notes.length !== numNotes) {
-            throw customError(
-                errorTypes.INCORRECT_NOTE_NUMBER,
-                {
-                    message: 'Incorrect number of input notes',
-                    expectedNumber: numNotes,
-                    actualNumber: notes.length,
-                }
-            );
+            throw customError(errorTypes.INCORRECT_NOTE_NUMBER, {
+                message: 'Incorrect number of input notes',
+                expectedNumber: numNotes,
+                actualNumber: notes.length,
+            });
         }
     } else if (!shouldThrow) {
         if (notes.length !== numNotes) {
             errors.push(errorTypes.INCORRECT_NOTE_NUMBER);
         }
     } else {
-        throw customError(
-            errorTypes.SHOULD_THROW_IS_UNDEFINED,
-            {
-                message: 'shouldThrow input argument not defined (3rd input argument)',
-                shouldThrow,
-            }
-        );
+        throw customError(errorTypes.SHOULD_THROW_IS_UNDEFINED, {
+            message: 'shouldThrow input argument not defined (3rd input argument)',
+            shouldThrow,
+        });
     }
 };
 
 /**
- * Converts proof data to bn.js format, calculates gamma and sigma 
- * then appends these to the end
+ * Converts proof data to bn.js format, calculates gamma and sigma then appends these to the end
  * @method convertToBNAndAppendPoints
  * @memberof module:proofUtils
  * @param {string[]} proofData - array of proof data from proof construction
@@ -109,24 +104,14 @@ proofUtils.convertToBNAndAppendPoints = (proofData, errors) => {
         const kBar = proofUtils.hexToGroupScalar(proofElement[0], errors);
         const aBar = proofUtils.hexToGroupScalar(proofElement[1], errors);
 
-        return [
-            kBar,
-            aBar,
-            xGamma,
-            yGamma,
-            xSigma,
-            ySigma,
-            gamma,
-            sigma,
-        ];
+        return [kBar, aBar, xGamma, yGamma, xSigma, ySigma, gamma, sigma];
     });
 
     return proofDataBn;
 };
 
 /**
- * Computes the blinding factors and challenge from note array and final hash
- * Used for testing purposes
+ * Computes the blinding factors and challenge from note array and final hash Used for testing purposes
  * @method getBlindingFactorsAndChallenge
  * @memberof module:proofUtils
  * @param {string[]} noteArray - array of proof data from proof construction
@@ -143,9 +128,9 @@ proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
         Explanation of the below if/else
         - The purpose is to set bk1 = bk3 and bk2 = bk4
         - i is used as an indexing variable, to keep track of whether we are at a maker note or taker note
-        - All bks are stored in a bkArray. When we arrive at the taker notes, we set bk equal to the bk of the corresponding 
-          maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the bkArray, and setting the current
-          bk equal to the element at the resulting position.
+        - All bks are stored in a bkArray. When we arrive at the taker notes, we set bk equal to the bk of the
+          corresponding maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the bkArray, and
+          setting the current bk equal to the element at the resulting position.
         */
 
         // Taker notes
@@ -173,8 +158,7 @@ proofUtils.randomAddress = () => {
 };
 
 /**
- * Recovers the blinding factors and challenge
- * Used for testing purposes
+ * Recovers the blinding factors and challenge Used for testing purposes
  * @method getBlindingFactorsAndChallenge
  * @memberof module:proofUtils
  * @param {string[]} proofDataBn - array of proof data from proof construction
@@ -201,9 +185,9 @@ proofUtils.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge
         Explanation of the below if/else
         - The purpose is to set kBar1 = kBar3 and kBar2 = kBar4
         - i is used as an indexing variable, to keep track of whether we are at a maker note or taker note
-        - All kBars are stored in a kBarArray. When we arrive at the taker notes, we set bk equal to the bk of the corresponding 
-          maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the kBarArray, and setting the current
-          kBar equal to the element at the resulting position.
+        - All kBars are stored in a kBarArray. When we arrive at the taker notes, we set bk equal to the bk of the
+          corresponding maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the kBarArray, and
+          setting the current kBar equal to the element at the resulting position.
         */
 
         // Taker notes
@@ -211,7 +195,10 @@ proofUtils.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge
             kBar = kBarArray[i - 2];
         }
 
-        const B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(formattedChallenge).neg());
+        const B = gamma
+            .mul(kBar)
+            .add(bn128.h.mul(aBar))
+            .add(sigma.mul(formattedChallenge).neg());
 
         finalHash.append(B);
         kBarArray.push(kBar);
@@ -266,7 +253,10 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
     x = x.toRed(bn128.curve.red);
     y = y.toRed(bn128.curve.red);
     const lhs = y.redSqr();
-    const rhs = x.redSqr().redMul(x).redAdd(bn128.curve.b);
+    const rhs = x
+        .redSqr()
+        .redMul(x)
+        .redAdd(bn128.curve.b);
     if (!lhs.fromRed().eq(rhs.fromRed())) {
         errors.push(errorTypes.NOT_ON_CURVE);
     }
@@ -282,7 +272,8 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
  * @param {number} m number of input notes
  * @param {string} challengeHex hex-string formatted proof challenge
  * @param {string[]} errors container for discovered errors
- * @returns { notes: Object[], rollingHash: Hash, challenge: string, kPublic: BN} necessary proof variables in required format
+ * @returns { notes: Object[], rollingHash: Hash, challenge: string, kPublic: BN} necessary proof variables in required
+ * format
  */
 proofUtils.convertTranscript = (proofData, m, challengeHex, errors) => {
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
@@ -328,10 +319,9 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors) => {
     };
 };
 
-
 /**
- * Compute the Fiat-Shamir heuristic-ified challenge variable.
- *   Separated out into a distinct method so that we can stub this for extractor tests
+ * Compute the Fiat-Shamir heuristic-ified challenge variable. Separated out into a distinct method so that we can stub
+ *   this for extractor tests
  *
  * @method computeChallenge
  * @memberof proofUtils
@@ -346,9 +336,9 @@ proofUtils.computeChallenge = (...challengeVariables) => {
 
     const recurse = (inputs) => {
         inputs.forEach((challengeVar) => {
-            if (typeof (challengeVar) === 'string') {
+            if (typeof challengeVar === 'string') {
                 hash.appendBN(new BN(challengeVar.slice(2), 16));
-            } else if (typeof (challengeVar) === 'number') {
+            } else if (typeof challengeVar === 'number') {
                 hash.appendBN(new BN(challengeVar));
             } else if (BN.isBN(challengeVar)) {
                 hash.appendBN(challengeVar.umod(bn128.curve.n));
@@ -360,14 +350,11 @@ proofUtils.computeChallenge = (...challengeVariables) => {
             } else if (challengeVar.B) {
                 hash.append(challengeVar.B);
             } else {
-                throw customError(
-                    errorTypes.NO_ADD_CHALLENGEVAR,
-                    {
-                        message: 'Can not add the challenge variable to the hash',
-                        challengeVar,
-                        type: typeof (challengeVar),
-                    }
-                );
+                throw customError(errorTypes.NO_ADD_CHALLENGEVAR, {
+                    message: 'Can not add the challenge variable to the hash',
+                    challengeVar,
+                    type: typeof challengeVar,
+                });
             }
         });
     };
@@ -389,71 +376,53 @@ proofUtils.computeChallenge = (...challengeVariables) => {
 proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
     notes.forEach((note) => {
         if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
-            throw customError(
-                errorTypes.VIEWING_KEY_MALFORMED,
-                {
-                    message: 'Viewing key is malformed',
-                    viewingKey: note.a.fromRed(),
-                    criteria: `Viewing key should be less than ${bn128.curve.n} 
+            throw customError(errorTypes.VIEWING_KEY_MALFORMED, {
+                message: 'Viewing key is malformed',
+                viewingKey: note.a.fromRed(),
+                criteria: `Viewing key should be less than ${bn128.curve.n}
                     and greater than zero`,
-                }
-            );
+            });
         }
 
         if (!note.k.fromRed().lt(new BN(K_MAX))) {
-            throw customError(
-                errorTypes.NOTE_VALUE_TOO_BIG,
-                {
-                    message: 'Note value is equal to or greater than K_Max',
-                    noteValue: note.k.fromRed(),
-                    K_MAX,
-                }
-            );
+            throw customError(errorTypes.NOTE_VALUE_TOO_BIG, {
+                message: 'Note value is equal to or greater than K_Max',
+                noteValue: note.k.fromRed(),
+                K_MAX,
+            });
         }
 
         if (note.gamma.isInfinity() || note.sigma.isInfinity()) {
-            throw customError(
-                errorTypes.POINT_AT_INFINITY,
-                {
-                    message: 'One of the note points is at infinity',
-                    gamma: note.gamma.isInfinity(),
-                    sigma: note.sigma.isInfinity(),
-                }
-            );
+            throw customError(errorTypes.POINT_AT_INFINITY, {
+                message: 'One of the note points is at infinity',
+                gamma: note.gamma.isInfinity(),
+                sigma: note.sigma.isInfinity(),
+            });
         }
 
         if (!proofUtils.isOnCurve(note.gamma) || !proofUtils.isOnCurve(note.sigma)) {
-            throw customError(
-                errorTypes.NOT_ON_CURVE,
-                {
-                    message: 'A note group element is not on the curve',
-                    gammaOnCurve: proofUtils.isOnCurve(note.gamma),
-                    sigmaOnCurve: proofUtils.isOnCurve(note.sigma),
-                }
-            );
+            throw customError(errorTypes.NOT_ON_CURVE, {
+                message: 'A note group element is not on the curve',
+                gammaOnCurve: proofUtils.isOnCurve(note.gamma),
+                sigmaOnCurve: proofUtils.isOnCurve(note.sigma),
+            });
         }
     });
 
     if (!kPublic.lt(bn128.curve.n)) {
-        throw customError(
-            errorTypes.KPUBLIC_MALFORMED,
-            {
-                message: 'kPublic is too big',
-                kPublic,
-                maxValue: bn128.curve.n,
-            }
-        );
+        throw customError(errorTypes.KPUBLIC_MALFORMED, {
+            message: 'kPublic is too big',
+            kPublic,
+            maxValue: bn128.curve.n,
+        });
     }
 
     if (m > notes.length) {
-        throw customError(
-            errorTypes.M_TOO_BIG,
-            {
-                message: 'm (input note number) is greater than the total number of notes',
-                m,
-                numberNotes: notes.length,
-            }
-        );
+        throw customError(errorTypes.M_TOO_BIG, {
+            message: 'm (input note number) is greater than the total number of notes',
+            m,
+            numberNotes: notes.length,
+        });
     }
 };
 
@@ -467,8 +436,11 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
  */
 proofUtils.isOnCurve = (point) => {
     const lhs = point.y.redSqr();
-    const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.curve.b);
-    return (lhs.fromRed().eq(rhs.fromRed()));
+    const rhs = point.x
+        .redSqr()
+        .redMul(point.x)
+        .redAdd(bn128.curve.b);
+    return lhs.fromRed().eq(rhs.fromRed());
 };
 
 module.exports = proofUtils;

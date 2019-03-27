@@ -34,14 +34,7 @@ describe('grammar tests', () => {
             const template = source.match(grammar.topLevel.TEMPLATE);
             source = source.slice(template.index + template[0].length);
             const result = source.match(grammar.topLevel.MACRO);
-            expect(result).to.deep.equal([
-                macro,
-                'macro',
-                'TEST',
-                '3',
-                '2',
-                macroBody,
-            ]);
+            expect(result).to.deep.equal([macro, 'macro', 'TEST', '3', '2', macroBody]);
         });
 
         it('can strip a line', () => {
@@ -138,7 +131,7 @@ describe('grammar tests', () => {
             expect(result[2]).to.equal('a,b , defg');
         });
 
-        it('doesn\'t think token without parentheses is a macro call', () => {
+        it("doesn't think token without parentheses is a macro call", () => {
             const source = `
                 FOO_CALL awoer 23 
                 ddds

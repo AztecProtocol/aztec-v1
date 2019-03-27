@@ -5,13 +5,7 @@ const EC = require('elliptic');
 const path = require('path');
 
 const { Runtime } = require('../../huff');
-const {
-    n,
-    lambda,
-    p,
-    beta,
-    randomPoint,
-} = require('../js_snippets/bn128_reference');
+const { n, lambda, p, beta, randomPoint } = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
 const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
@@ -35,7 +29,12 @@ describe('endomorphism split', () => {
         const k = new BN(crypto.randomBytes(32), 16).umod(n);
         const { stack } = await endomorphism('ENDOMORPHISM', [k]);
         expect(stack.length).to.equal(2);
-        expect(stack[1].sub(stack[0].mul(lambda)).umod(n).eq(k.umod(n))).to.equal(true);
+        expect(
+            stack[1]
+                .sub(stack[0].mul(lambda))
+                .umod(n)
+                .eq(k.umod(n)),
+        ).to.equal(true);
         expect(stack[1].bitLength() <= 127).to.equal(true);
         expect(stack[0].bitLength() <= 127).to.equal(true);
 
@@ -43,10 +42,7 @@ describe('endomorphism split', () => {
 
         const point = referenceCurve.point(pointData.x, pointData.y);
 
-        const endoPoint = referenceCurve.point(
-            pointData.x.mul(beta).umod(p),
-            p.sub(pointData.y)
-        );
+        const endoPoint = referenceCurve.point(pointData.x.mul(beta).umod(p), p.sub(pointData.y));
 
         const expected = point.mul(k);
 

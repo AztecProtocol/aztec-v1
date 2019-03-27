@@ -8,7 +8,6 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
-
 describe('bilateral swap proof construction tests', () => {
     it('checking that the proof logic creates a proof where blinding scalar relations are satisfied', () => {
         const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
@@ -23,10 +22,10 @@ describe('bilateral swap proof construction tests', () => {
 
         const { blindingFactors } = proofUtils.getBlindingFactorsAndChallenge(testNotes, finalHash);
 
-        const testk1 = (blindingFactors[0].bk).toString(16);
-        const testk2 = (blindingFactors[1].bk).toString(16);
-        const testk3 = (blindingFactors[2].bk).toString(16);
-        const testk4 = (blindingFactors[3].bk).toString(16);
+        const testk1 = blindingFactors[0].bk.toString(16);
+        const testk2 = blindingFactors[1].bk.toString(16);
+        const testk3 = blindingFactors[2].bk.toString(16);
+        const testk4 = blindingFactors[3].bk.toString(16);
 
         expect(testk1).to.equal(testk3);
         expect(testk2).to.equal(testk4);

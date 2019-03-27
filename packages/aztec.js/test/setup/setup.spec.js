@@ -1,4 +1,6 @@
-const { constants: { K_MAX, K_MIN } } = require('@aztec/dev-utils');
+const {
+    constants: { K_MAX, K_MIN },
+} = require('@aztec/dev-utils');
 const chai = require('chai');
 const BN = require('bn.js');
 
@@ -8,14 +10,14 @@ const bn128 = require('../../src/bn128');
 const { expect } = chai;
 
 describe('setup.js tests', () => {
-    it('setup.readSignature retrieves well-formed elliptic curve points', async () => {
+    it('retrieves well-formed elliptic curve points', async () => {
         const k = Math.floor(Math.random() * (K_MAX - K_MIN + 1)) + K_MIN;
         const point = await setup.readSignature(k);
         expect(BN.isBN(point.x)).to.equal(true);
         expect(BN.isBN(point.y)).to.equal(true);
     });
 
-    it('setup.readSignature throws if asked for a point > K_MAX', async () => {
+    it('throws if asked for a point > K_MAX', async () => {
         const k = K_MAX * 2;
         let message = '';
         try {
@@ -26,26 +28,26 @@ describe('setup.js tests', () => {
         expect(message).to.contain('no such file or directory');
     });
 
-    it('setup.compress correctly compresses coordinate with even y', () => {
+    it('correctly compresses coordinate with even y', () => {
         const compressed = setup.compress(new BN(2), new BN(4));
         expect(compressed.eq(new BN(2))).to.equal(true);
     });
 
-    it('setup.compress correctly compresses coordinate with odd y', () => {
+    it('correctly compresses coordinate with odd y', () => {
         let compressed = setup.compress(new BN(2), new BN(1));
         expect(compressed.testn(255)).to.equal(true);
         compressed = compressed.maskn(255);
         expect(compressed.eq(new BN(2))).to.equal(true);
     });
 
-    it('setup.decompress correctly decompresses a compressed coordinate', () => {
+    it('correctly decompresses a compressed coordinate', () => {
         const point = bn128.randomPoint();
         const { x, y } = setup.decompress(setup.compress(point.x.fromRed(), point.y.fromRed()));
         expect(x.eq(point.x.fromRed())).to.equal(true);
         expect(y.eq(point.y.fromRed())).to.equal(true);
     });
 
-    it('setup.decompress throws when given malformed input', () => {
+    it('throws when given malformed input', () => {
         let message = '';
         try {
             // this produces a value that is not a quadratic residue

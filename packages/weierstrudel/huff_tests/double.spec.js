@@ -26,7 +26,6 @@ const testHelper = `
 }
 `;
 
-
 function sliceMemory(memArray) {
     const numWords = Math.ceil(memArray.length / 32);
     const result = [];
@@ -60,7 +59,6 @@ describe('bn128 double', () => {
         expect(z2.umod(p).eq(reference.z)).to.equal(true);
         expect(z2Mem.eq(z2)).to.equal(true);
     });
-
 
     it('macro DOUBLE__MAIN correctly calculates point doubling (inverted y)', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();

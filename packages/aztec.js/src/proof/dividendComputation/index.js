@@ -2,7 +2,7 @@
  * Constructs AZTEC dividend computations
  *
  * @module proof.dividendComputation
-*/
+ */
 
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
@@ -20,7 +20,6 @@ const { errorTypes } = utils.constants;
 const dividendComputation = {};
 dividendComputation.verifier = verifier;
 
-
 /**
  * Construct AZTEC dividend computation proof transcript
  *
@@ -34,8 +33,8 @@ dividendComputation.verifier = verifier;
 dividendComputation.constructProof = (notes, za, zb, sender) => {
     const numNotes = 3;
 
-    // Used to check the number of input notes. Boolean argument specifies whether the 
-    // check should throw if not satisfied, or if we seek to collect all errors 
+    // Used to check the number of input notes. Boolean argument specifies whether the
+    // check should throw if not satisfied, or if we seek to collect all errors
     // and only throw at the end. Here, set to true - immediately throw if error
     proofUtils.checkNumNotes(notes, numNotes, true);
 
@@ -64,16 +63,13 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
         const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
 
-        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
-            throw customError(
-                errorTypes.NOT_ON_CURVE,
-                {
-                    message: 'A group element is not on the bn128 curve',
-                    gammaOnCurve,
-                    sigmaOnCurve,
-                    note,
-                }
-            );
+        if (gammaOnCurve === false || sigmaOnCurve === false) {
+            throw customError(errorTypes.NOT_ON_CURVE, {
+                message: 'A group element is not on the bn128 curve',
+                gammaOnCurve,
+                sigmaOnCurve,
+                note,
+            });
         }
     });
 
@@ -91,7 +87,8 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         let B;
 
         // Calculating the blinding factors
-        if (i === 0) { // input note
+        if (i === 0) {
+            // input note
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
             x = rollingHash.keccak(groupReduction);
@@ -99,7 +96,8 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             bkArray.push(bk);
         }
 
-        if (i === 1) { // output note
+        if (i === 1) {
+            // output note
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
@@ -107,12 +105,13 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             bkArray.push(bk);
         }
 
-        if (i === 2) { // residual note
+        if (i === 2) {
+            // residual note
             const zbRed = zbBN.toRed(groupReduction);
             const zaRed = zaBN.toRed(groupReduction);
 
             // bk_3 = (z_b)(bk_1) - (z_a)(bk_2)
-            bk = (zbRed.redMul(bkArray[0])).redSub(zaRed.redMul(bkArray[1]));
+            bk = zbRed.redMul(bkArray[0]).redSub(zaRed.redMul(bkArray[1]));
 
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
@@ -131,8 +130,14 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
 
     const challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
     const proofDataUnformatted = blindingFactors.map((blindingFactor, i) => {
-        const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
-        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+        const kBar = notes[i].k
+            .redMul(challenge)
+            .redAdd(blindingFactor.bk)
+            .fromRed();
+        const aBar = notes[i].a
+            .redMul(challenge)
+            .redAdd(blindingFactor.ba)
+            .fromRed();
 
         return [
             `0x${padLeft(kBar.toString(16), 64)}`,

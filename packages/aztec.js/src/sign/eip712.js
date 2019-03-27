@@ -1,5 +1,5 @@
 /**
- * Module to construct ECDSA messages for structured data,  
+ * Module to construct ECDSA messages for structured data,
  * following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
  * @module sign.eip712
@@ -27,17 +27,28 @@ const eip712 = {};
  * @returns {string} encoded type string
  */
 eip712.encodeStruct = function encodeStruct(primaryType, types) {
-    const findTypes = type => [type].concat(types[type].reduce((acc, { type: typeKey }) => {
-        if (types[typeKey] && acc.indexOf(typeKey) === -1) {
-            return [...acc, ...findTypes(typeKey)];
-        }
-        return acc;
-    }, []));
-    return [primaryType].concat(findTypes(primaryType)
-        .sort((a, b) => a.localeCompare(b))
-        .filter(a => a !== primaryType))
-        .reduce((acc, key) => `${acc}${key}(${types[key]
-            .reduce((iacc, { name, type }) => `${iacc}${type} ${name},`, '').slice(0, -1)})`, '');
+    const findTypes = (type) =>
+        [type].concat(
+            types[type].reduce((acc, { type: typeKey }) => {
+                if (types[typeKey] && acc.indexOf(typeKey) === -1) {
+                    return [...acc, ...findTypes(typeKey)];
+                }
+                return acc;
+            }, []),
+        );
+    return [primaryType]
+        .concat(
+            findTypes(primaryType)
+                .sort((a, b) => a.localeCompare(b))
+                .filter((a) => a !== primaryType),
+        )
+        .reduce(
+            (acc, key) =>
+                `${acc}${key}(${types[key]
+                    .reduce((iacc, { name, type }) => `${iacc}${type} ${name},`, '')
+                    .slice(0, -1)})`,
+            '',
+        );
 };
 
 /**
@@ -75,7 +86,9 @@ eip712.encodeMessageData = function encodeMessageData(types, primaryType, messag
  */
 eip712.encodeTypedData = function encodeTypeData(typedData) {
     const domainHash = padKeccak256(`0x${eip712.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain)}`);
-    const structHash = padKeccak256(`0x${eip712.encodeMessageData(typedData.types, typedData.primaryType, typedData.message)}`);
+    const structHash = padKeccak256(
+        `0x${eip712.encodeMessageData(typedData.types, typedData.primaryType, typedData.message)}`,
+    );
     return `0x${padKeccak256(`0x1901${domainHash}${structHash}`)}`;
 };
 

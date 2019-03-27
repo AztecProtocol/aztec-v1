@@ -1,10 +1,8 @@
-
 const { padLeft } = require('web3-utils');
 
 const encoderFactory = require('./encoderFactory');
 
 const inputCoder = {};
-
 
 inputCoder.bilateralSwap = (proofData, challenge, inputOwners, outputOwners, metadata) => {
     const configs = {
@@ -15,12 +13,7 @@ inputCoder.bilateralSwap = (proofData, challenge, inputOwners, outputOwners, met
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'INPUT_OWNERS',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'bilateralSwap');
 };
@@ -36,12 +29,7 @@ inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, o
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'INPUT_SIGNATURES',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'INPUT_SIGNATURES', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'joinSplit');
 };
@@ -57,12 +45,7 @@ inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, out
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'INPUT_OWNERS',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'dividendComputation');
 };

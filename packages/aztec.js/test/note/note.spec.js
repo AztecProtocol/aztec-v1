@@ -1,4 +1,6 @@
-const { constants: { GROUP_MODULUS } } = require('@aztec/dev-utils');
+const {
+    constants: { GROUP_MODULUS },
+} = require('@aztec/dev-utils');
 const chai = require('chai');
 const crypto = require('crypto');
 const web3Utils = require('web3-utils');

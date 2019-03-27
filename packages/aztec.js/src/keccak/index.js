@@ -15,10 +15,12 @@ function Keccak() {
 }
 
 function hashStrings(inputArr) {
-    const input = `${inputArr.map((i) => {
-        const res = padLeft(i, 64);
-        return res;
-    }).join('')}`;
+    const input = `${inputArr
+        .map((i) => {
+            const res = padLeft(i, 64);
+            return res;
+        })
+        .join('')}`;
     return sha3(`0x${input}`, 'hex').slice(2);
 }
 

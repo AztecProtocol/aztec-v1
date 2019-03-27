@@ -63,16 +63,23 @@ secp256k1.generateAccount = function generateAccount() {
 secp256k1.randomPoint = function randomPoint() {
     function recurse() {
         const x = new BN(crypto.randomBytes(32), 16).toRed(secp256k1.ec.curve.red);
-        const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.ec.curve.b);
+        const y2 = x
+            .redSqr()
+            .redMul(x)
+            .redIAdd(secp256k1.ec.curve.b);
         const y = y2.redSqrt();
-        if (y.redSqr(y).redSub(y2).cmp(secp256k1.ec.curve.a)) {
+        if (
+            y
+                .redSqr(y)
+                .redSub(y2)
+                .cmp(secp256k1.ec.curve.a)
+        ) {
             return recurse();
         }
         return secp256k1.ec.curve.point(x, y);
     }
     return recurse();
 };
-
 
 /**
  * Decompress a 256-bit representation of a secp256k1 G1 element.
@@ -85,9 +92,18 @@ secp256k1.randomPoint = function randomPoint() {
  */
 secp256k1.decompress = (compressed, yBit) => {
     const x = compressed.maskn(255).toRed(secp256k1.curve.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(secp256k1.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
@@ -96,7 +112,6 @@ secp256k1.decompress = (compressed, yBit) => {
     }
     return { x: x.fromRed(), y };
 };
-
 
 /**
  * Decompress a 256-bit representation of a secp256k1 G1 element.
@@ -113,9 +128,18 @@ secp256k1.decompressHex = (compressed) => {
     }
     const x = new BN(compressed.slice(0, 64), 16).toRed(secp256k1.curve.red);
     const yBit = new BN(compressed.slice(64, 66), 16);
-    const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(secp256k1.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
@@ -125,11 +149,10 @@ secp256k1.decompressHex = (compressed) => {
     return secp256k1.curve.point(x.fromRed(), y);
 };
 
-
 /**
  * Compress a secp256k1 point into 33 bytes.
  *
-* @method compress
+ * @method compress
  * @param {Point} point secp256k1 group element
  * @returns {string} hex-formatted compressed point
  */
@@ -153,7 +176,7 @@ secp256k1.ecdsa = {};
  */
 secp256k1.ecdsa.accountFromPublicKey = (publicKey) => {
     let publicHash;
-    if (typeof (publicKey) === 'string') {
+    if (typeof publicKey === 'string') {
         publicHash = web3Utils.sha3(`0x${publicKey.slice(4)}`);
     } else {
         const ecKey = secp256k1.ec.keyFromPublic(publicKey);
@@ -163,7 +186,6 @@ secp256k1.ecdsa.accountFromPublicKey = (publicKey) => {
     const address = web3Utils.toChecksumAddress(`0x${publicHash.slice(-40)}`);
     return address;
 };
-
 
 /**
  * Sign a message hash with a given private key
@@ -175,8 +197,8 @@ secp256k1.ecdsa.accountFromPublicKey = (publicKey) => {
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
 secp256k1.ecdsa.signMessage = (hash, privateKey) => {
-    const signature = secp256k1
-        .ec.keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
+    const signature = secp256k1.ec
+        .keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
         .sign(Buffer.from(hash.slice(2), 'hex'), { canonical: true });
     return [
         `0x${web3Utils.padLeft(Number(27 + Number(signature.recoveryParam)).toString(16), 64)}`,
@@ -184,7 +206,6 @@ secp256k1.ecdsa.signMessage = (hash, privateKey) => {
         `0x${web3Utils.padLeft(signature.s.toString(16), 64)}`,
     ];
 };
-
 
 /**
  * Verify an ECDSA signature against a publickey
@@ -200,7 +221,11 @@ secp256k1.ecdsa.signMessage = (hash, privateKey) => {
 secp256k1.ecdsa.verifyMessage = (hash, r, s, publicKey) => {
     const rBn = new BN(r.slice(2), 16);
     const sBn = new BN(s.slice(2), 16);
-    return secp256k1.ec.verify(hash.slice(2), { r: rBn, s: sBn }, secp256k1.ec.keyFromPublic(publicKey.slice(2), 'hex'));
+    return secp256k1.ec.verify(
+        hash.slice(2),
+        { r: rBn, s: sBn },
+        secp256k1.ec.keyFromPublic(publicKey.slice(2), 'hex'),
+    );
 };
 
 /**
@@ -221,7 +246,7 @@ secp256k1.ecdsa.recoverPublicKey = (hash, r, s, v) => {
     const ecPublicKey = secp256k1.ec.recoverPubKey(
         Buffer.from(web3Utils.padLeft(hash.slice(2), 64), 'hex'),
         { r: rBn, s: sBn },
-        vn < 2 ? vn : 1 - (vn % 2)
+        vn < 2 ? vn : 1 - (vn % 2),
     );
     return ecPublicKey;
 };

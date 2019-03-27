@@ -4,6 +4,10 @@ const customError = (errorType, data) => {
     return error;
 };
 
+// const abc = 5;
+// const abcd = 5;
+// const abcdev = 5;
+
 module.exports = {
     customError,
 };

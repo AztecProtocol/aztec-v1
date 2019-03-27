@@ -49,7 +49,9 @@ const networkToAddresses = {
  */
 export function getContractAddressesForNetwork(networkId) {
     if (isUndefined(networkToAddresses[networkId])) {
-        throw new Error(`Unknown network id (${networkId}). No known AZTEC contracts have been deployed on this network.`);
+        throw new Error(
+            `Unknown network id (${networkId}). No known AZTEC contracts have been deployed on this network.`,
+        );
     }
     return networkToAddresses[networkId];
 }

@@ -7,11 +7,7 @@ const CONTRACTS_DIR = './build/contracts/';
 const ARTIFACTS_DIR = '../contract-artifacts/artifacts/';
 const ARTIFACTS_DIR_AUX = '../contract-artifacts/artifacts-aux/';
 
-const excludedContracts = [
-    'JoinSplitABIEncoderTest.json',
-    'Migrations.json',
-    'SafeMath.json',
-];
+const excludedContracts = ['JoinSplitABIEncoderTest.json', 'Migrations.json', 'SafeMath.json'];
 
 if (!fs.existsSync(CONTRACTS_DIR)) {
     console.error('Please use truffle to compile your contract first');
@@ -44,12 +40,14 @@ const isDuplicate = async (filename) => {
         return false;
     }
     const previousContent = JSON.parse(await fs.readFile(path.join(ARTIFACTS_DIR, filename), 'utf-8'));
-    return content.abi === previousContent.abi
-        && content.bytecode === previousContent.bytecode
-        && content.compiler === previousContent.compiler
-        && content.deployedBytecode === previousContent.deployedBytecode
-        && content.schemaVersion === previousContent.schemaVersion
-        && content.updatedAt === previousContent.updatedAt;
+    return (
+        content.abi === previousContent.abi &&
+        content.bytecode === previousContent.bytecode &&
+        content.compiler === previousContent.compiler &&
+        content.deployedBytecode === previousContent.deployedBytecode &&
+        content.schemaVersion === previousContent.schemaVersion &&
+        content.updatedAt === previousContent.updatedAt
+    );
 };
 
 const compileArtifacts = async () => {

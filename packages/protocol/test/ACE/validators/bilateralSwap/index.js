@@ -4,8 +4,12 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { proof: { bilateralSwap } } = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const {
+    proof: { bilateralSwap },
+} = require('aztec.js');
+const {
+    constants: { CRS },
+} = require('@aztec/dev-utils');
 
 // ### Artifacts
 const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
@@ -13,36 +17,35 @@ const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilat
 
 BilateralSwap.abi = BilateralSwapInterface.abi;
 
-
-function encodeBilateralSwapTransaction({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-}) {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
+function encodeBilateralSwapTransaction({ inputNotes, outputNotes, senderAddress }) {
+    const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+        [...inputNotes, ...outputNotes],
+        senderAddress,
+    );
+    const inputOwners = inputNotes.map((m) => m.owner);
+    const outputOwners = outputNotes.map((n) => n.owner);
 
     const proofData = aztec.abiEncoder.inputCoder.bilateralSwap(
         proofDataRaw,
         challenge,
         inputOwners,
         outputOwners,
-        outputNotes
+        outputNotes,
     );
 
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-    }]).slice(0x42)}`;
+    const expectedOutput = `0x${aztec.abiEncoder.outputCoder
+        .encodeProofOutputs([
+            {
+                inputNotes,
+                outputNotes,
+                publicOwner,
+                publicValue,
+            },
+        ])
+        .slice(0x42)}`;
     return { proofData, expectedOutput };
 }
 
@@ -60,9 +63,7 @@ contract('Bilateral Swap', (accounts) => {
             const noteValues = [10, 20, 10, 20];
 
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
-            notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
-            ];
+            notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i]))];
         });
 
         it('successfully validate output encoding for bilateral proof in zero-knowledge', async () => {
@@ -79,9 +80,7 @@ contract('Bilateral Swap', (accounts) => {
                 gas: 4000000,
             });
 
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(
-                `0x${padLeft('0', 64)}${result.slice(2)}`
-            );
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);

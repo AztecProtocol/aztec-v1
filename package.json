@@ -1,13 +1,17 @@
 {
   "name": "aztec-monorepo",
   "devDependencies": {
-    "lerna": "^3.13.1"
+    "fixpack": "^2.3.1",
+    "lerna": "^3.13.1",
+    "wsrun": "^3.6.4"
   },
   "engines": {
     "node": ">=6.12"
   },
   "private": true,
   "scripts": {
+    "fixpack": "lerna exec -- yarn fixpack; fixpack",
+    "lint": "wsrun lint $PKG --fast-exit --parallel --exclude-missing",
     "remove_node_modules": "lerna clean --yes; rm -rf node_modules"
   },
   "workspaces": [

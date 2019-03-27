@@ -20,14 +20,10 @@ const constants = {
     /**
      * Common reference string
      */
-    CRS: [
-        `0x${padLeft(H_X.toString(16), 64)}`,
-        `0x${padLeft(H_Y.toString(16), 64)}`,
-        ...t2,
-    ],
+    CRS: [`0x${padLeft(H_X.toString(16), 64)}`, `0x${padLeft(H_Y.toString(16), 64)}`, ...t2],
     /**
-     * Generic scaling factor that maps between AZTEC note values and ERC20 token balances.
-     * when used for DAI token, 1 AZTEC note value = 0.1 DAI
+     * Generic scaling factor that maps between AZTEC note values and ERC20 token balances. when used for DAI token, 1
+     * AZTEC note value = 0.1 DAI
      */
     ERC20_SCALING_FACTOR: new BN('100000000000000000', 10),
     /**
@@ -37,29 +33,33 @@ const constants = {
     /** modulus of bn128 curve's finite field (p)
      *  @constant FIELD_MODULUS
      *  @type {BN}
-     *  @default 21888242871839275222246405745257275088696311157297823662689037894645226208583
+     *  @default
+     *  21888242871839275222246405745257275088696311157297823662689037894645226208583
      */
     FIELD_MODULUS: new BN('21888242871839275222246405745257275088696311157297823662689037894645226208583', 10),
     /** modulus of bn128's elliptic curve group (n)
      *  @constant GROUP_MODULUS
      *  @type {BN}
-     *  @default 21888242871839275222246405745257275088548364400416034343698204186575808495617
+     *  @default
+     *  21888242871839275222246405745257275088548364400416034343698204186575808495617
      */
     GROUP_MODULUS: new BN('21888242871839275222246405745257275088548364400416034343698204186575808495617', 10),
     /**
-     * X-Coordinate of AZTEC's second generator point 'h'.
-     *      Created by taking the keccak256 hash of the asci string 'just read the instructions', right-padded to 32 bytes.  
-     *      i.e: 0x6A75737420726561642074686520696E737472756374696F6E73000000000000.  
-     *      H_X is the result of this hash, modulo the elliptic curve group modulus n.
+     * X-Coordinate of AZTEC's second generator point 'h'. Created by taking the keccak256 hash of the ascii string
+     *      'just read the instructions', right-padded to 32 bytes. i.e:
+     *      0x6A75737420726561642074686520696E737472756374696F6E73000000000000. H_X is the result of this hash, modulo
+     *      the elliptic curve group modulus n.
      *  @constant H_X
      *  @type {BN}
-     *  @default 7673901602397024137095011250362199966051872585513276903826533215767972925880
+     *  @default
+     *  7673901602397024137095011250362199966051872585513276903826533215767972925880
      */
     H_X,
     /** Y-Coordinate of AZTEC's second generator point 'h'. Created from odd-valued root of (H_X^{3} + 3)
      *  @constant H_Y
      *  @type {BN}
-     *  @default 8489654445897228341090914135473290831551238522473825886865492707826370766375
+     *  @default
+     *  8489654445897228341090914135473290831551238522473825886865492707826370766375
      */
     H_Y,
     /** Maximum value that can be held in an AZTEC Note
@@ -104,7 +104,7 @@ constants.addresses = {
     ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
 };
 
-/** 
+/**
  * Error codes for use during proof construction
  */
 constants.errorTypes = {

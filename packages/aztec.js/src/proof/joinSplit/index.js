@@ -6,7 +6,10 @@
 
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const extractor = require('./extractor');
 const helpers = require('./helpers');
@@ -41,7 +44,7 @@ joinSplit.generateBlindingScalars = (n, m) => {
     const scalars = [...Array(n)].map((v, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
-        if (i === (n - 1)) {
+        if (i === n - 1) {
             if (n === m) {
                 bk = new BN(0).toRed(groupReduction).redSub(runningBk);
             } else {
@@ -49,7 +52,7 @@ joinSplit.generateBlindingScalars = (n, m) => {
             }
         }
 
-        if ((i + 1) > m) {
+        if (i + 1 > m) {
             runningBk = runningBk.redSub(bk);
         } else {
             runningBk = runningBk.redAdd(bk);
@@ -58,7 +61,6 @@ joinSplit.generateBlindingScalars = (n, m) => {
     });
     return scalars;
 };
-
 
 /**
  * Construct AZTEC join-split proof transcript
@@ -99,7 +101,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
         let B;
         let x = new BN(0).toRed(groupReduction);
         const { bk, ba } = blindingScalars[i];
-        if ((i + 1) > m) {
+        if (i + 1 > m) {
             // get next iteration of our rolling hash
             x = rollingHash.keccak(groupReduction);
             const xbk = bk.redMul(x);
@@ -121,9 +123,15 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
     const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
-        let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
-        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
-        if (i === (notes.length - 1)) {
+        let kBar = notes[i].k
+            .redMul(challenge)
+            .redAdd(blindingFactor.bk)
+            .fromRed();
+        const aBar = notes[i].a
+            .redMul(challenge)
+            .redAdd(blindingFactor.ba)
+            .fromRed();
+        if (i === notes.length - 1) {
             kBar = kPublicBn;
         }
         return [
@@ -140,7 +148,6 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
 };
-
 
 /**
  * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
@@ -181,7 +188,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
         let B;
         let x = new BN(0).toRed(groupReduction);
         const { bk, ba } = blindingScalars[i];
-        if ((i + 1) > m) {
+        if (i + 1 > m) {
             // get next iteration of our rolling hash
             x = rollingHash.keccak(groupReduction);
             const xbk = bk.redMul(x);
@@ -203,9 +210,15 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
     const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
-        let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
-        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
-        if (i === (notes.length - 1)) {
+        let kBar = notes[i].k
+            .redMul(challenge)
+            .redAdd(blindingFactor.bk)
+            .fromRed();
+        const aBar = notes[i].a
+            .redMul(challenge)
+            .redAdd(blindingFactor.ba)
+            .fromRed();
+        if (i === notes.length - 1) {
             kBar = kPublicBn;
         }
         return [
@@ -225,7 +238,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
 
 /**
  * Encode a join split transaction
- * 
+ *
  * @method encodeJoinSplitTransaction
  * @memberof module:proof.joinSplit.helpers
  * @param {Object} values
@@ -248,10 +261,13 @@ joinSplit.encodeJoinSplitTransaction = ({
     validatorAddress,
 }) => {
     const m = inputNotes.length;
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = joinSplit.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
+    const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+        [...inputNotes, ...outputNotes],
+        m,
+        senderAddress,
+        kPublic,
+        publicOwner,
+    );
 
     const inputSignatures = inputNotes.map((inputNote, index) => {
         const domain = sign.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -267,7 +283,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         return signature;
     });
 
-    const outputOwners = outputNotes.map(n => n.owner);
+    const outputOwners = outputNotes.map((n) => n.owner);
     const proofData = joinSplitEncode(
         proofDataRaw,
         m,
@@ -275,14 +291,18 @@ joinSplit.encodeJoinSplitTransaction = ({
         publicOwner,
         inputSignatures,
         outputOwners,
-        outputNotes
-    );
-    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-        inputNotes,
         outputNotes,
-        publicOwner,
-        publicValue: kPublic,
-    }]).slice(0x42)}`;
+    );
+    const expectedOutput = `0x${outputCoder
+        .encodeProofOutputs([
+            {
+                inputNotes,
+                outputNotes,
+                publicOwner,
+                publicValue: kPublic,
+            },
+        ])
+        .slice(0x42)}`;
     return { proofData, expectedOutput };
 };
 

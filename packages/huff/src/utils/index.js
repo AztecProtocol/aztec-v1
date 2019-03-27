@@ -3,7 +3,7 @@ const BN = require('bn.js');
 const utils = {};
 
 utils.formatEvenBytes = (bytes) => {
-    if ((Math.floor(bytes.length / 2) * 2) !== bytes.length) {
+    if (Math.floor(bytes.length / 2) * 2 !== bytes.length) {
         return `0${bytes}`;
     }
     return bytes;
@@ -14,16 +14,15 @@ utils.toHex = (integer) => {
 };
 
 utils.padNBytes = (hex, numBytes) => {
-    if (hex.length > (numBytes * 2)) {
+    if (hex.length > numBytes * 2) {
         throw new Error(`value ${hex} has more than ${numBytes} bytes!`);
     }
     let result = hex;
-    while (result.length < (numBytes * 2)) {
+    while (result.length < numBytes * 2) {
         result = `0${result}`;
     }
     return result;
 };
-
 
 utils.normalize = (number) => {
     const max = new BN(2).pow(new BN(256));

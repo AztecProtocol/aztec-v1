@@ -1,4 +1,3 @@
-
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
@@ -6,13 +5,14 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const {
+    constants: { CRS },
+} = require('@aztec/dev-utils');
 
 // ### Artifacts
 const BilateralSwapAbiEncoder = artifacts.require(
-    './contracts/ACE/validators/bilateralSwap/BilateralSwapABIEncoderTest'
+    './contracts/ACE/validators/bilateralSwap/BilateralSwapABIEncoderTest',
 );
-
 
 contract('Bilateral ABI Encoder', (accounts) => {
     let bilateralSwapAbiEncoder;
@@ -25,9 +25,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
 
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
 
-            notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
-            ];
+            notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i]))];
 
             bilateralSwapAbiEncoder = await BilateralSwapAbiEncoder.new({
                 from: accounts[0],
@@ -40,20 +38,20 @@ contract('Bilateral ABI Encoder', (accounts) => {
             const senderAddress = accounts[0];
             const publicOwner = '0x0000000000000000000000000000000000000000';
             const publicValue = new BN(0);
-            const {
-                proofData,
-                challenge,
-            } = aztec.proof.bilateralSwap.constructProof([...inputNotes, ...outputNotes], accounts[0]);
+            const { proofData, challenge } = aztec.proof.bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                accounts[0],
+            );
 
-            const inputOwners = inputNotes.map(m => m.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
             const data = aztec.abiEncoder.inputCoder.bilateralSwap(
                 proofData,
                 challenge,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, CRS, {
@@ -61,16 +59,16 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 gas: 4000000,
             });
 
-            const expected = aztec.abiEncoder.outputCoder.encodeProofOutputs([{
-                inputNotes,
-                outputNotes,
-                publicOwner,
-                publicValue,
-            }]);
+            const expected = aztec.abiEncoder.outputCoder.encodeProofOutputs([
+                {
+                    inputNotes,
+                    outputNotes,
+                    publicOwner,
+                    publicValue,
+                },
+            ]);
 
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(
-                `0x${padLeft('0', 64)}${result.slice(2)}`
-            );
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);

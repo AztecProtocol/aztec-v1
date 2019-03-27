@@ -6,12 +6,7 @@ const path = require('path');
 const { Runtime } = require('../../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
 
-
-const {
-    beta,
-    p,
-    n,
-} = bn128Reference;
+const { beta, p, n } = bn128Reference;
 const { expect } = chai;
 const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
@@ -28,11 +23,13 @@ const referenceCurve = new EC.curve.short({
     g: ['1', '2'],
 });
 
-
 function splitPoint(x, y) {
     return {
         x: p.sub(x),
-        xEndo: p.sub(x).mul(beta).umod(p),
+        xEndo: p
+            .sub(x)
+            .mul(beta)
+            .umod(p),
         yNeg: y,
         y: p.sub(y),
     };
@@ -43,11 +40,10 @@ function getComparisonTable(x, y, z) {
     const point = referenceCurve.point(normalized.x.fromRed(), normalized.y.fromRed());
     const table = [point];
     for (let i = 1; i < 8; i += 1) {
-        table[i] = point.mul(new BN((i * 2) + 1));
+        table[i] = point.mul(new BN(i * 2 + 1));
     }
     return table;
 }
-
 
 function sliceMemory(memArray) {
     const numWords = Math.ceil(memArray.length / 32);
@@ -68,20 +64,21 @@ function sliceMemory(memArray) {
 } */
 
 function generatePoints(num) {
-    return [...new Array(num)].map(() => bn128Reference.randomPoint()).map(point => ({ x: point.x, y: point.y, z: new BN(1) }));
+    return [...new Array(num)]
+        .map(() => bn128Reference.randomPoint())
+        .map((point) => ({ x: point.x, y: point.y, z: new BN(1) }));
 }
 
 function generateCalldata(points) {
-    const formattedPoints = points.reduce((calldata, { x, y }, i) => [
-        ...calldata,
-        { index: (i * 64), value: x },
-        { index: (i * 64) + 32, value: y },
-    ], []);
+    const formattedPoints = points.reduce(
+        (calldata, { x, y }, i) => [...calldata, { index: i * 64, value: x }, { index: i * 64 + 32, value: y }],
+        [],
+    );
     const offset = formattedPoints.length * 32;
-    const scalars = points.reduce((s, x, i) => [
-        ...s,
-        { index: offset + (i * 32), value: bn128Reference.randomScalar() },
-    ], []);
+    const scalars = points.reduce(
+        (s, x, i) => [...s, { index: offset + i * 32, value: bn128Reference.randomScalar() }],
+        [],
+    );
     return [...formattedPoints, ...scalars];
 }
 
@@ -101,12 +98,12 @@ function validateTables(points, memory, referenceTables, expectedZ, tableOffset)
 
     for (let i = 0; i < baseTable.length; i += 64) {
         const expected = referenceTables[Math.round(i / 64)];
-        const referencePoint = points[numPoints - 1 - Math.round((i) / 64)];
+        const referencePoint = points[numPoints - 1 - Math.round(i / 64)];
         const comparisonTable = getComparisonTable(referencePoint.x, referencePoint.y, referencePoint.z);
         for (let j = 0; j < 16; j += 2) {
             const resultPoint = bn128Reference.toAffine({
                 x: p.sub(baseTable[i + j]),
-                y: (baseTable[i + j + 1]),
+                y: baseTable[i + j + 1],
                 z: resultZ,
             });
             expect(comparisonTable[j / 2].x.fromRed().eq(resultPoint.x.fromRed())).to.equal(true);
@@ -178,17 +175,14 @@ describe('bn128 precompute table full', () => {
         tableOffset = stack[0].toNumber();
     });
 
-    it('macro PRECOMPUTE_TABLE__NORMALIZE correctly normalizes a poin\'ts x/y coordinates', async () => {
+    it("macro PRECOMPUTE_TABLE__NORMALIZE correctly normalizes a poin'ts x/y coordinates", async () => {
         const point = bn128Reference.randomPointJacobian();
         const zd = bn128Reference.randomFieldElement();
         const zz = zd.mul(zd).umod(p);
         const zzz = zd.mul(zz).umod(p);
         const scaledX = point.x.mul(zz).umod(p);
         const scaledY = point.y.mul(zzz).umod(p);
-        const { stack } = await precomputeTable(
-            'NORMALIZE_TEST',
-            [point.z, point.x, point.y, zd]
-        );
+        const { stack } = await precomputeTable('NORMALIZE_TEST', [point.z, point.x, point.y, zd]);
         expect(stack.length).to.equal(7);
         expect(stack[0].eq(zzz)).to.equal(true);
         expect(stack[1].eq(p)).to.equal(true);
@@ -201,25 +195,39 @@ describe('bn128 precompute table full', () => {
 
     it('macro PRECOMPUTE_TABLE__RESCALE_SLICE has correct code size', async () => {
         const input = [...new Array(100)].map(() => new BN(1));
-        const { bytecode } = await precomputeTable('PRECOMPUTE_TABLE__RESCALE_SLICE_CODESIZE_EXPECTED', input, [], [], 1);
+        const { bytecode } = await precomputeTable(
+            'PRECOMPUTE_TABLE__RESCALE_SLICE_CODESIZE_EXPECTED',
+            input,
+            [],
+            [],
+            1,
+        );
 
         const { stack } = await precomputeTable('PRECOMPUTE_TABLE__RESCALE_SLICE_CODESIZE', [], [], []);
         expect(bytecode.length / 2).to.equal(stack[0].toNumber());
     });
-
 
     it('macro PRECOMPUTE_TABLE__RESCALE correctly performs point rescaling', async () => {
         const p1 = bn128Reference.randomPoint();
         const dz = bn128Reference.randomPoint(); // mock up some random dz factors
         const dz2 = [dz.x.mul(dz.x).umod(p), dz.y.mul(dz.y).umod(p)];
         const dz3 = [dz2[0].mul(dz.x).umod(p), dz2[1].mul(dz.y).umod(p)];
-        const { stack, memory } = await precomputeTable(
-            'PRECOMPUTE_TABLE__RESCALE_WRAPPER',
-            [p, p1.x, p1.y, p, dz3[0], p, p, dz2[0], p, dz2[1], dz3[1]]
-        );
+        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__RESCALE_WRAPPER', [
+            p,
+            p1.x,
+            p1.y,
+            p,
+            dz3[0],
+            p,
+            p,
+            dz2[0],
+            p,
+            dz2[1],
+            dz3[1],
+        ]);
         const expected = splitPoint(
             p1.x.mul(dz2[0].mul(dz2[1]).umod(p)).umod(p),
-            p1.y.mul(dz3[0].mul(dz3[1]).umod(p)).umod(p)
+            p1.y.mul(dz3[0].mul(dz3[1]).umod(p)).umod(p),
         );
         const result = sliceMemory(memory);
         expect(result[0].eq(expected.x)).to.equal(true);
@@ -246,12 +254,9 @@ describe('bn128 precompute table full', () => {
             [p, p1.x, p1.y, dz2[0], dz3[0]],
             [],
             [],
-            1
+            1,
         );
-        const expected = splitPoint(
-            p1.x.mul(dz2[0]).umod(p),
-            p1.y.mul(dz3[0]).umod(p)
-        );
+        const expected = splitPoint(p1.x.mul(dz2[0]).umod(p), p1.y.mul(dz3[0]).umod(p));
         const result = sliceMemory(memory);
         expect(result[0].eq(expected.x)).to.equal(true);
         expect(result[1].eq(expected.y)).to.equal(true);
@@ -271,7 +276,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(1);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -280,7 +291,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(2);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -289,7 +306,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(3);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -298,7 +321,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(4);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -307,7 +336,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(5);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -316,7 +351,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(6);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -325,7 +366,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(7);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -334,7 +381,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(8);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -343,7 +396,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(9);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -352,7 +411,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(10);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -360,7 +425,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(11);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -369,7 +440,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(12);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -378,7 +455,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(13);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -387,7 +470,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(14);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });
@@ -396,7 +485,13 @@ describe('bn128 precompute table full', () => {
         const { points, globalZ, referenceTables } = generateTables(15);
         const calldata = generateCalldata(points);
 
-        const { stack, memory } = await precomputeTable('PRECOMPUTE_TABLE__COMPUTE_WRAPPER', inputStack, [], calldata, 1);
+        const { stack, memory } = await precomputeTable(
+            'PRECOMPUTE_TABLE__COMPUTE_WRAPPER',
+            inputStack,
+            [],
+            calldata,
+            1,
+        );
         expect(stack.length).to.equal(3);
         validateTables(points, memory, referenceTables, globalZ, tableOffset);
     });

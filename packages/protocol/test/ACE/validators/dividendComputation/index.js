@@ -4,35 +4,37 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const {
+    constants: { CRS },
+} = require('@aztec/dev-utils');
 
 const dividendInputEncode = aztec.abiEncoder.inputCoder.dividendComputation;
 
 // ### Artifacts
 const dividend = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputation');
-const dividendInterface = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputationInterface');
+const dividendInterface = artifacts.require(
+    './contracts/ACE/validators/dividendComputation/DividendComputationInterface',
+);
 
 dividend.abi = dividendInterface.abi;
 
+function encodeDividendComputationTransaction({ inputNotes, outputNotes, za, zb, senderAddress }) {
+    const { proofData: proofDataRaw, challenge } = aztec.proof.dividendComputation.constructProof(
+        [...inputNotes, ...outputNotes],
+        za,
+        zb,
+        senderAddress,
+    );
 
-function encodeDividendComputationTransaction({
-    inputNotes,
-    outputNotes,
-    za,
-    zb,
-    senderAddress,
-}) {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = aztec.proof.dividendComputation.constructProof([...inputNotes, ...outputNotes], za, zb, senderAddress);
-
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
+    const inputOwners = inputNotes.map((m) => m.owner);
+    const outputOwners = outputNotes.map((n) => n.owner);
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
-    const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
+    const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([
+        proofDataRaw.slice(6, 12),
+        proofDataRaw.slice(12, 18),
+    ]);
 
     const proofData = dividendInputEncode(
         proofDataRawFormatted,
@@ -41,15 +43,19 @@ function encodeDividendComputationTransaction({
         zb,
         inputOwners,
         outputOwners,
-        outputNotes
+        outputNotes,
     );
 
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-    }]).slice(0x42)}`;
+    const expectedOutput = `0x${aztec.abiEncoder.outputCoder
+        .encodeProofOutputs([
+            {
+                inputNotes,
+                outputNotes,
+                publicOwner,
+                publicValue,
+            },
+        ])
+        .slice(0x42)}`;
     return { proofData, expectedOutput, challenge };
 }
 
@@ -71,9 +77,7 @@ contract('Dividend Computation', (accounts) => {
             za = 100;
             zb = 5;
 
-            notes = [
-                ...dividendAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
-            ];
+            notes = [...dividendAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i]))];
         });
 
         it('successfully validates output coding of AZTEC dividend computation zero-knowledge proof', async () => {
@@ -95,9 +99,7 @@ contract('Dividend Computation', (accounts) => {
                 gas: 4000000,
             });
 
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(
-                `0x${padLeft('0', 64)}${result.slice(2)}`
-            );
+            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
@@ -117,10 +119,15 @@ contract('Dividend Computation', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result).to.equal(expectedOutput);
 
-            const gasUsed = await dividendContract.validateDividendComputation.estimateGas(proofData, accounts[0], CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            });
+            const gasUsed = await dividendContract.validateDividendComputation.estimateGas(
+                proofData,
+                accounts[0],
+                CRS,
+                {
+                    from: accounts[0],
+                    gas: 4000000,
+                },
+            );
             console.log('gas used = ', gasUsed);
         });
     });

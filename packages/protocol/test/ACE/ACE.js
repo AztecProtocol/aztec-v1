@@ -7,7 +7,10 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -16,7 +19,6 @@ const ACE = artifacts.require('./contracts/ACE/ACE');
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
-
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
@@ -44,15 +46,19 @@ contract('ACE', (accounts) => {
         });
 
         it('should not set a proof if not owner', async () => {
-            await truffleAssert.reverts(ace.setProof(JOIN_SPLIT_PROOF, accounts[1], {
-                from: accounts[1],
-            }));
+            await truffleAssert.reverts(
+                ace.setProof(JOIN_SPLIT_PROOF, accounts[1], {
+                    from: accounts[1],
+                }),
+            );
         });
 
         it('should not set the common reference string if not owner', async () => {
-            await truffleAssert.reverts(ace.setCommonReferenceString(constants.CRS, {
-                from: accounts[1],
-            }));
+            await truffleAssert.reverts(
+                ace.setCommonReferenceString(constants.CRS, {
+                    from: accounts[1],
+                }),
+            );
         });
     });
 
@@ -209,57 +215,36 @@ contract('ACE', (accounts) => {
             const canMint = false;
             const canBurn = false;
             const canConvert = true;
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canMint,
-                canBurn,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canMint, canBurn, canConvert, {
+                from: accounts[0],
+            });
 
-            await Promise.all(accounts.map(account => erc20.mint(
-                account,
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            )));
-            await Promise.all(accounts.map(account => erc20.approve(
-                ace.address,
-                scalingFactor.mul(tokensTransferred),
-                { from: account, gas: 4700000 }
-            ))); // approving tokens
+            await Promise.all(
+                accounts.map((account) =>
+                    erc20.mint(account, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 }),
+                ),
+            );
+            await Promise.all(
+                accounts.map((account) =>
+                    erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: account, gas: 4700000 }),
+                ),
+            ); // approving tokens
             proofOutputs = proofs.map(({ expectedOutput }) => outputCoder.getProofOutput(expectedOutput, 0));
-            const proofHashes = proofOutputs.map(proofOutput => outputCoder.hashProofOutput(proofOutput));
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[0],
-                10,
-                { from: accounts[0] }
-            );
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[1],
-                40,
-                { from: accounts[1] }
-            );
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[2],
-                130,
-                { from: accounts[2] }
-            );
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[4],
-                30,
-                { from: accounts[3] }
-            );
+            const proofHashes = proofOutputs.map((proofOutput) => outputCoder.hashProofOutput(proofOutput));
+            await ace.publicApprove(accounts[0], proofHashes[0], 10, { from: accounts[0] });
+            await ace.publicApprove(accounts[0], proofHashes[1], 40, { from: accounts[1] });
+            await ace.publicApprove(accounts[0], proofHashes[2], 130, { from: accounts[2] });
+            await ace.publicApprove(accounts[0], proofHashes[4], 30, { from: accounts[3] });
         });
 
         it('should update a note registry with output notes', async () => {
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[0].proofData);
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(
+                JOIN_SPLIT_PROOF,
+                accounts[0],
+                formattedProofOutput,
+            );
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });
@@ -269,7 +254,11 @@ contract('ACE', (accounts) => {
             await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], `0x${proofOutputs[0].slice(0x40)}`);
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[1].proofData);
             const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(
+                JOIN_SPLIT_PROOF,
+                accounts[0],
+                formattedProofOutput,
+            );
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
         });
@@ -280,7 +269,11 @@ contract('ACE', (accounts) => {
 
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[3].proofData);
             const formattedProofOutput = `0x${proofOutputs[3].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(
+                JOIN_SPLIT_PROOF,
+                accounts[0],
+                formattedProofOutput,
+            );
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
@@ -292,7 +285,11 @@ contract('ACE', (accounts) => {
 
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[5].proofData);
             const formattedProofOutput = `0x${proofOutputs[5].slice(0x40)}`;
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput);
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(
+                JOIN_SPLIT_PROOF,
+                accounts[0],
+                formattedProofOutput,
+            );
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);

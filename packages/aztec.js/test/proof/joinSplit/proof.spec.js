@@ -1,4 +1,6 @@
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
+const {
+    constants: { K_MAX },
+} = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
@@ -18,10 +20,7 @@ function generateNoteValue() {
 }
 
 function getKPublic(kIn, kOut) {
-    return kOut.reduce(
-        (acc, v) => acc - v,
-        kIn.reduce((acc, v) => acc + v, 0)
-    );
+    return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
 }
 
 function randomAddress() {
@@ -43,13 +42,16 @@ function validateGroupElement(xHex, yHex) {
     expect(y.gt(new BN(0))).to.equal(true);
     expect(x.lt(bn128.curve.p)).to.equal(true);
     expect(y.lt(bn128.curve.p)).to.equal(true);
-    const lhs = x.mul(x).mul(x).add(new BN(3));
+    const lhs = x
+        .mul(x)
+        .mul(x)
+        .add(new BN(3));
     const rhs = y.mul(y);
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
 describe('join split proof construction tests', () => {
-    it('proof.constructProof creates a proof with well-formed outputs', () => {
+    it('creates a proof with well-formed outputs', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
@@ -63,7 +65,7 @@ describe('join split proof construction tests', () => {
         expect(challenge.length).to.equal(66);
         validateGroupScalar(challenge);
         proofData.forEach((note, i) => {
-            validateGroupScalar(note[0], i === (proofData.length - 1));
+            validateGroupScalar(note[0], i === proofData.length - 1);
             validateGroupScalar(note[1]);
             validateGroupElement(note[2], note[3]);
             validateGroupElement(note[4], note[5]);
@@ -71,7 +73,7 @@ describe('join split proof construction tests', () => {
         expect(new BN(proofData[proofData.length - 1][0].slice(2), 16).eq(kPublic)).to.equal(true);
     });
 
-    it('proof.constructProof throws if kPublic is malformed', () => {
+    it('throws if kPublic is malformed', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
@@ -85,7 +87,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof throws if m is malformed', () => {
+    it('throws if m is malformed', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -98,7 +100,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof throws if point not on curve', () => {
+    it('throws if point not on curve', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -111,7 +113,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof throws if point at infinity', () => {
+    it('throws if point at infinity', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -126,7 +128,7 @@ describe('join split proof construction tests', () => {
         expect(message).to.equal(errorTypes.POINT_AT_INFINITY);
     });
 
-    it('proof.constructProof throws if viewing key response is 0', () => {
+    it('throws if viewing key response is 0', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -139,7 +141,7 @@ describe('join split proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof throws if value > K_MAX', () => {
+    it('throws if value > K_MAX', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);

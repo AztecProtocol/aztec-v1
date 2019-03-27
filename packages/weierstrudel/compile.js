@@ -24,10 +24,7 @@ const contract = {
     deployedBytecode: `0x${bytecode}`,
 };
 
-fs.writeFileSync(
-    path.posix.resolve(__dirname, './weierstrudel.json'),
-    JSON.stringify(contract)
-);
+fs.writeFileSync(path.posix.resolve(__dirname, './weierstrudel.json'), JSON.stringify(contract));
 
 compiler('weierstrudel_project.json', pathToData);
 
