@@ -45,7 +45,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
     let aztecAccounts = [];
     const epoch = 1;
-    const filter = 17; // 16 + 1, recall that 1 is PROOF_JOIN_SPLIT because of 1 * 256**(0)
+    const filter = 17; // 16 + 1, recall that 1 is the join split validator because of 1 * 256**(0)
     let notes = [];
     let scalingFactor;
     const proofs = [];
@@ -226,7 +226,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callConfidentialTransferFrom(
-                    JOIN_SPLIT_PROOF + 1, // adding 1 removes the join split proof from the proof object
+                    parseInt(JOIN_SPLIT_PROOF, 10) + 1, // adding 1 changes the proof id from the proof object
                     `0x${proofOutputs[1].slice(0x40)}`
                 ),
                 'expected proof to be supported'
