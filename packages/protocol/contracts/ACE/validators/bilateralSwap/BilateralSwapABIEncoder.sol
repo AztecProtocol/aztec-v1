@@ -40,13 +40,13 @@ library BilateralSwapABIEncoder {
             // 0x00 - 0x160  = scratch data for EIP712 signature computation and note hash computation
             // JOIN_SPLIT_SIGNATURE struct hash variables
             // 0x80 = type hash
-            // 0xa0 = proof object (65537)
+            // 0xa0 = proof object (65794)
             // 0xc0 = noteHash
             // 0xe0 = challenge
             // 0x100 = sender
             // type hash of 'JOIN_SPLIT_SIGNATURE'
             mstore(0x80, typeHash)
-            mstore(0xa0, 0x10002)
+            mstore(0xa0, 0x10102)
             mstore(0xe0, calldataload(0x124)) // challenge
             mstore(0x100, calldataload(0x24))
 

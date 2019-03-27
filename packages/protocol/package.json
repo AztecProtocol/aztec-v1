@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "author": "AZTEC",
   "description": "AZTEC smart contract repository",
   "license": "LGPL-3.0",
@@ -33,8 +33,8 @@
     "@0x/sol-trace": "^2.0.8",
     "@0x/sol-tracing-utils": "^6.0.8",
     "@0x/subproviders": "^4.0.2",
-    "@aztec/dev-utils": "^1.5.2",
-    "aztec.js": "^0.5.5",
+    "@aztec/dev-utils": "^1.6.0",
+    "aztec.js": "^0.6.0",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.3",
     "bn.js": "^4.11.8",
@@ -68,6 +68,7 @@
     "lint": "npm run lint:js && npm run lint:sol",
     "test:sol": "scripts/test.sh",
     "test": "scripts/test.sh",
+    "trace": "scripts/trace.sh",
     "coverage": "scripts/coverage.sh",
     "compile": "./node_modules/.bin/truffle compile --all",
     "build:artifacts": "node scripts/artifacts.js"
