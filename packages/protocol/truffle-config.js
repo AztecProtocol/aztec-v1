@@ -55,7 +55,7 @@ const projectRoot = '';
 const isVerbose = true;
 const coverageSubproviderConfig = {
     isVerbose,
-    ignoreFilesGlobs: ["**/node_modules/**", "**/interfaces/**", "**/test/**"],
+    ignoreFilesGlobs: ['**/node_modules/**', '**/interfaces/**', '**/test/**'],
 };
 const defaultFromAddress = getFirstAddress();
 const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);

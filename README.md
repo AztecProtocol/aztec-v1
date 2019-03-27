@@ -32,25 +32,25 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 ### JavaScript Packages
 
-| Package | Version | Description |
-| ------- | ------- | ----------- |
-| [`aztec.js`](/packages/aztec.js) | [![npm](https://img.shields.io/npm/v/aztec.js.svg)](https://www.npmjs.com/package/aztec.js) | An aggregate package combining many smaller utility packages for interacting with the AZTEC Protocol |
-| [`@aztec/contract-artifacts`](/packages/contract-artifacts) | [![npm](https://img.shields.io/npm/v/@aztec/contract-artifacts.svg)](https://www.npmjs.com/package/@aztec/contract-artifacts) | AZTEC smart contract compiled artifacts |
-| [`@aztec/contract-addresses`](/packages/contract-addresses) | [![npm](https://img.shields.io/npm/v/@aztec/contract-addresses.svg)](https://www.npmjs.com/package/@aztec/contract-addresses) | A tiny utility library for getting known deployed contract addresses for a particular network |
-| [`@aztec/dev-utils`](/packages/dev-utils) | [![npm](https://img.shields.io/npm/v/@aztec/dev-utils.svg)](https://www.npmjs.com/package/@aztec/dev-utils) | Dev utils to be shared across AZTEC projects and packages |
+| Package                                                     | Version                                                                                                                       | Description                                                                                          |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [`aztec.js`](/packages/aztec.js)                            | [![npm](https://img.shields.io/npm/v/aztec.js.svg)](https://www.npmjs.com/package/aztec.js)                                   | An aggregate package combining many smaller utility packages for interacting with the AZTEC Protocol |
+| [`@aztec/contract-artifacts`](/packages/contract-artifacts) | [![npm](https://img.shields.io/npm/v/@aztec/contract-artifacts.svg)](https://www.npmjs.com/package/@aztec/contract-artifacts) | AZTEC smart contract compiled artifacts                                                              |
+| [`@aztec/contract-addresses`](/packages/contract-addresses) | [![npm](https://img.shields.io/npm/v/@aztec/contract-addresses.svg)](https://www.npmjs.com/package/@aztec/contract-addresses) | A tiny utility library for getting known deployed contract addresses for a particular network        |
+| [`@aztec/dev-utils`](/packages/dev-utils)                   | [![npm](https://img.shields.io/npm/v/@aztec/dev-utils.svg)](https://www.npmjs.com/package/@aztec/dev-utils)                   | Dev utils to be shared across AZTEC projects and packages                                            |
 
 ### Solidity Packages
 
-| Package | Version | Description |
-| ------- | ------- | ----------- |
+| Package                                 | Version                                                                                                   | Description                            |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | [`@aztec/protocol`](/packages/protocol) | [![npm](https://img.shields.io/npm/v/@aztec/protocol.svg)](https://www.npmjs.com/package/@aztec/protocol) | AZTEC solidity smart contracts & tests |
 
 ### Private Packages
 
-| Package                                            | Description                                                                      |
-| -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [`@aztec/huff`](/packages/huff)                    | DSL for low-level Ethereum smart contract programming                            |
-| [`@aztec/weierstrudel`](/packages/weierstrudel)    | Efficient elliptic curve arithmetic for smart contracts                          |
+| Package                                         | Description                                             |
+| ----------------------------------------------- | ------------------------------------------------------- |
+| [`@aztec/huff`](/packages/huff)                 | DSL for low-level Ethereum smart contract programming   |
+| [`@aztec/weierstrudel`](/packages/weierstrudel) | Efficient elliptic curve arithmetic for smart contracts |
 
 ## Usage :hammer_and_pick:
 
@@ -76,9 +76,9 @@ For more information, check out our [documentation](https://aztecprotocol.github
 
 ### Requirements
 
-- node >=6.12
-- yarn >= 1.15.2
-- solidity >=0.5.0 <0.6.0
+-   node >=6.12
+-   yarn >= 1.15.2
+-   solidity >=0.5.0 <0.6.0
 
 ### Pre Requisites
 
@@ -155,17 +155,17 @@ $ lerna run test --scope aztec.js
 
 ### What is the AZTEC Protocol?
 
-The protocol enables transactions of value, where the *values* of the transaction are encrypted. The AZTEC protocol smart contract validator, ```AZTEC.sol```, validates a unique zero-knowledge proof that determines the legitimacy of a transaction via a combination of **homomorphic encryption** and **range proofs**.
+The protocol enables transactions of value, where the _values_ of the transaction are encrypted. The AZTEC protocol smart contract validator, `AZTEC.sol`, validates a unique zero-knowledge proof that determines the legitimacy of a transaction via a combination of **homomorphic encryption** and **range proofs**.
 
 ### What is encrypted 'value'?
 
-Instead of balances, the protocol uses AZTEC **notes**. A note encrypts a number that represents a value (for example a number of ERC-20 tokens). Each note has an owner, defined via an Ethereum address. In order to *spend* a note the owner must provide a valid ECDSA signature attesting to this.
+Instead of balances, the protocol uses AZTEC **notes**. A note encrypts a number that represents a value (for example a number of ERC-20 tokens). Each note has an owner, defined via an Ethereum address. In order to _spend_ a note the owner must provide a valid ECDSA signature attesting to this.
 
 ### What does this enable?
 
 #### Confidential representations of ERC20-tokens
 
-The AZTEC protocol can enable confidential transactions for *any* generic digital asset on Ethereum, including *existing* assets. [For our proof of concept implementation of the AZTEC protocol](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F), we attached an AZTEC token to MakerDAO's DAI token. This smart contract can be used to convert DAI from its public ERC-20 form into a confidential AZTEC note form.
+The AZTEC protocol can enable confidential transactions for _any_ generic digital asset on Ethereum, including _existing_ assets. [For our proof of concept implementation of the AZTEC protocol](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F), we attached an AZTEC token to MakerDAO's DAI token. This smart contract can be used to convert DAI from its public ERC-20 form into a confidential AZTEC note form.
 
 #### Fully confidential digital assets
 
@@ -185,7 +185,7 @@ Read the AZTEC paper [here](https://github.com/AztecProtocol/AZTEC/blob/master/A
 
 #### The Trusted Setup
 
-Our proof of concept uses a trusted setup generated by our team internally. Whilst we would like to think you can trust us implicitly, we have developed a method of performing the trusted setup via multiparty computation. Each participant generates a piece of *toxic waste* that must be destroyed. Only *one* participant must destroy their toxic waste for the protocol to be secure and the trusted setup process can scale indefinitely. We will be releasing our full specification for the trusted setup protocol shortly.
+Our proof of concept uses a trusted setup generated by our team internally. Whilst we would like to think you can trust us implicitly, we have developed a method of performing the trusted setup via multiparty computation. Each participant generates a piece of _toxic waste_ that must be destroyed. Only _one_ participant must destroy their toxic waste for the protocol to be secure and the trusted setup process can scale indefinitely. We will be releasing our full specification for the trusted setup protocol shortly.
 
 ### Are AZTEC transactions anonymous as well as confidential?
 
