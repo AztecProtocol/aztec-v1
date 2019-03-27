@@ -187,7 +187,7 @@ contract ACE is IAZTEC {
     }
 
     /**
-    * @dev Mint AZTEC notes, for a fully private asset
+    * @dev Mint AZTEC notes
     *      
     * @param _proof the AZTEC proof object
     * @param _proofData the mint proof construction data
@@ -213,6 +213,7 @@ contract ACE is IAZTEC {
         require(category == uint8(ProofCategory.MINT), "this is not a mint proof");
 
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        require(_proofOutputs.getLength() > 0, "call to validateProof failed");
 
         // Dealing with notes representing totals
         (bytes memory oldTotal,  // inputNotesTotal
@@ -243,25 +244,12 @@ contract ACE is IAZTEC {
         require(mintedNotes.getLength() >= 1, "must have at least one minted note");
         require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
 
-        for (uint i = 1; i < mintedNotes.getLength(); i = i.add(1)) {
-            address noteOwner;
-            bytes32 noteHash;
-            (noteOwner, noteHash, ) = mintedNotes.get(i).extractNote();
-            Note storage note = registry.notes[noteHash];
-            require(note.status == 0, "output note exists");
-            note.status = uint8(1);
-            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.uintToBytes(5);
-            note.owner = noteOwner;
-        }
-
+        updateOutputNotes(mintedNotes);
         return(newTotal, mintedNotes);
     }
 
     /**
-    * @dev Burn AZTEC notes, for a fully private asset
+    * @dev Burn AZTEC notes
     *      
     * @param _proof the AZTEC proof object
     * @param _proofData the burn proof construction data
@@ -315,20 +303,7 @@ contract ACE is IAZTEC {
         require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
 
         // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
-        for (uint i = 1; i < burnedNotes.getLength(); i = i.add(1)) {
-            address _noteOwner;
-            bytes32 noteHash;
-            (_noteOwner, noteHash, ) = burnedNotes.get(i).extractNote();
-            Note storage note = registry.notes[noteHash];
-            require(note.status == 1, "note to be burned does not exist");
-            require(note.owner == _noteOwner, "input note owner does not match");
-            note.status = uint8(2); // status of 2 represents destruction
-
-            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.uintToBytes(5);
-        }
+        updateInputNotes(burnedNotes);
         return(newTotal, burnedNotes);
     }
 
@@ -444,20 +419,39 @@ contract ACE is IAZTEC {
 
         if (publicValue != 0) {
             require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens");
-            if (publicValue < 0) {
-                registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
+
+            // if the public value is negative (i.e. value being transferred from an ERC20 into the note registry)
+            if (publicValue < 0) { // if public value is negative - extracting value from the note registry
+                registry.totalSupply = registry.totalSupply.add(uint256(-publicValue)); // subtracting value from registry total supply
                 require(
+                    // require that tokens of at least this value have previously been approved to be transferred
                     registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
                     "public owner has not validated a transfer of tokens"
                 );
+                 
+                // decrement the number of tokens approved for this owner and proofHash
                 registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
                 require(
+                    // transferring public value from the publicOwner, to this note registry
                     registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
                     "transfer failed"
                 );
-            } else {
-                registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
-                require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
+            } else { // transferring value out of the system
+                if (registry.totalSupply < uint256(publicValue)) {
+                    require( // the only way this situation should occur is if AZTEC notes have been minted
+                        registry.flags.canMintAndBurn == true,
+                        "this asset should have no requirement to supplement tokens"
+                    );
+
+                    uint256 supplement = uint256(publicValue).sub(registry.totalSupply);
+                    supplementTokens(supplement, publicOwner);
+
+        
+                } else {
+                    registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
+                    // transferring publicValue to the linked public ERC20 token
+                    require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
+                }
             }
         }
     }
@@ -528,6 +522,29 @@ contract ACE is IAZTEC {
     */
     function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
+    }
+
+        /**
+    * @dev Call transferFrom on a linked ERC20 token. Used in cases where the ACE's mint
+    * function is called but the token balance of the note registry in question is
+    * insufficient
+    * @param _value the value to be transferred
+    */
+    function supplementTokens(uint256 _value, address publicOwner) internal {
+        // supplementTokens() should only be called when _value > 0
+        require(_value > uint(0), "supplement tokens can only be called on a positive value");
+        NoteRegistry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canConvert == true, "note registry does not have conversion rights");
+        
+        // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
+        require(registry.flags.canMintAndBurn == true, "note registry does not have mint and burn rights");
+
+        require(
+            // transferring public value from the publicOwner, to this note registry
+            registry.linkedToken.transferFrom(msg.sender, publicOwner, _value), 
+            "transfer failed"
+        );
     }
 
     function extractValidatorAddress(uint24 _proof) internal view returns (address) {

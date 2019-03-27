@@ -6,7 +6,7 @@ contract IZkAsset {
         address indexed aceAddress,
         address indexed linkedTokenAddress,
         uint256 scalingFactor,
-        bool _canMintAndBurn,
+        bool indexed _canMintAndBurn,
         bool _canConvert
     );
     event CreateNoteRegistry(uint256 noteRegistryId);
