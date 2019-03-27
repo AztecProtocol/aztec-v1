@@ -29,9 +29,9 @@ contract ACE is IAZTEC {
 
     event SetCommonReferenceString(bytes32[6] _commonReferenceString);
     event SetProof(
-        uint8 indexed epoch, 
-        uint8 indexed category, 
-        uint8 indexed id, 
+        uint8 indexed epoch,
+        uint8 indexed category,
+        uint8 indexed id,
         address validatorAddress
     );
     event IncrementLatestEpoch(uint8 newLatestEpoch);
@@ -80,7 +80,7 @@ contract ACE is IAZTEC {
 
     // keep track of validated balanced proofs
     mapping(bytes32 => bool) public validatedProofs;
-    
+
     /**
     * @dev contract constructor. Sets the owner of ACE, the flags, the linked token address and
     *      the scaling factor.
@@ -92,10 +92,10 @@ contract ACE is IAZTEC {
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
     *      linked to `_proof`. The validator smart contract will have the following interface:
-    *      
+    *
     *      function validate(
-    *          bytes _proofData, 
-    *          address _sender, 
+    *          bytes _proofData,
+    *          address _sender,
     *          bytes32[6] _commonReferenceString
     *      ) public returns (bytes)
     *
@@ -137,7 +137,7 @@ contract ACE is IAZTEC {
             calldatacopy(destination, proofDataLocation, proofDataSize)
             // call our validator smart contract, and validate the call succeeded
             let callSize := add(proofDataSize, 0x104)
-            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00) 
+            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00)
             case 0 {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed because proof is invalid
             }
@@ -308,7 +308,7 @@ contract ACE is IAZTEC {
                 );
                 registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
                 require(
-                    registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
+                    registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)),
                     "transfer failed"
                 );
             } else {
@@ -324,18 +324,18 @@ contract ACE is IAZTEC {
         require(registry.flags.canMint == true, "this asset is not mintable");
         bytes32 proofHash = keccak256(_proofOutput);
         require(
-            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true, 
+            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
-        ); 
-        
+        );
+
         (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutput.extractProofOutput();
         require(publicValue == 0, "mint transactions cannot have a public value");
         require(outputNotes.getLength() > 0, "mint transactions require at least one output note");
         require(inputNotes.getLength() == JOIN_SPLIT_PROOF, "mint transactions can only have one input note");
-        
+
         (, bytes32 noteHash, ) = outputNotes.get(0).extractNote();
         require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
-       
+
         (, noteHash, ) = inputNotes.get(0).extractNote();
         registry.confidentialTotalSupply = noteHash;
 
@@ -398,7 +398,7 @@ contract ACE is IAZTEC {
         }
     }
 
-    /** 
+    /**
     * @dev This should be called from an asset contract.
     */
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
@@ -456,7 +456,7 @@ contract ACE is IAZTEC {
             note.owner
         );
     }
-    
+
     /**
     * @dev Returns the common reference string.
     * We use a custom getter for `commonReferenceString` - the default getter created by making the storage

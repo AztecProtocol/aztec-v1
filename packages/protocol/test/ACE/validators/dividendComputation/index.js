@@ -11,10 +11,8 @@ const {
 const dividendInputEncode = aztec.abiEncoder.inputCoder.dividendComputation;
 
 // ### Artifacts
-const dividend = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputation');
-const dividendInterface = artifacts.require(
-    './contracts/ACE/validators/dividendComputation/DividendComputationInterface',
-);
+const dividend = artifacts.require('./DividendComputation');
+const dividendInterface = artifacts.require('./DividendComputationInterface');
 
 dividend.abi = dividendInterface.abi;
 

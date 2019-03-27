@@ -18,7 +18,7 @@ const { outputCoder, inputCoder } = aztec.abiEncoder;
 const joinSplitEncode = inputCoder.joinSplit;
 
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitABIEncoderTest');
+const ABIEncoder = artifacts.require('./JoinSplitABIEncoderTest');
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));

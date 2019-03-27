@@ -10,9 +10,7 @@ const {
 } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const BilateralSwapAbiEncoder = artifacts.require(
-    './contracts/ACE/validators/bilateralSwap/BilateralSwapABIEncoderTest',
-);
+const BilateralSwapAbiEncoder = artifacts.require('BilateralSwapABIEncoderTest');
 
 contract('Bilateral ABI Encoder', (accounts) => {
     let bilateralSwapAbiEncoder;

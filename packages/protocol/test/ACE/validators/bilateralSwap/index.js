@@ -12,8 +12,8 @@ const {
 } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
-const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwapInterface');
+const BilateralSwap = artifacts.require('./BilateralSwap');
+const BilateralSwapInterface = artifacts.require('./BilateralSwapInterface');
 
 BilateralSwap.abi = BilateralSwapInterface.abi;
 

@@ -21,8 +21,8 @@ const joinSplitInputEncode = aztec.abiEncoder.inputCoder.joinSplit;
 const { outputCoder } = aztec.abiEncoder;
 
 // ### Artifacts
-const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 

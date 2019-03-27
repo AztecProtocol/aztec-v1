@@ -9,9 +9,7 @@ const {
 } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const ABIEncoder = artifacts.require(
-    './contracts/ACE/validators/dividendComputation/DividendComputationABIEncoderTest',
-);
+const ABIEncoder = artifacts.require('./DividendComputationABIEncoderTest');
 
 contract('Dividend Computation ABI Encoder', (accounts) => {
     let DividendComputationAbiEncoder;

@@ -14,12 +14,12 @@ const {
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
-const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const ACE = artifacts.require('./contracts/ACE/ACE');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
-const ZkAssetOwnable = artifacts.require('./contracts/ZkAsset/ZkAssetOwnable');
-const ZkAssetOwnableTest = artifacts.require('./contracts/ZkAsset/ZkAssetOwnableTest');
+const ACE = artifacts.require('./ACE');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
+const ZkAssetOwnable = artifacts.require('./ZkAssetOwnable');
+const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 

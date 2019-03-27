@@ -2,7 +2,7 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "../ACE/ACE.sol";
+import "../ERC1723/ACE.sol";
 import "../interfaces/IAZTEC.sol";
 import "../interfaces/IZkAsset.sol";
 import "../libs/LibEIP712.sol";
@@ -11,7 +11,7 @@ import "../libs/ProofUtils.sol";
 contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
-    
+
     // EIP191 header for EIP712 prefix
     string constant internal EIP191_HEADER = "\x19\x01";
 
@@ -69,14 +69,14 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             _scalingFactor
         );
     }
-    
+
     function confidentialTransfer(bytes memory _proofData) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid");
         bytes memory proofOutput = proofOutputs.get(0);
 
         ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
-        
+
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -126,7 +126,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         bytes memory outputNotes,
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
-        
+
         uint256 length = inputNotes.getLength();
         for (uint i = 0; i < length; i = i.add(1)) {
             (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();

@@ -72,7 +72,7 @@
     "coverage": "scripts/coverage.sh",
     "lint": "yarn lint:js && yarn lint:sol",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
-    "lint:sol": "solhint --config ../../.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
+    "lint:sol": "solhint --ignore-path ../../.solhintignore \"contracts/**/*.sol\"",
     "profile": "scripts/profile.sh",
     "test": "scripts/test.sh",
     "test:sol": "scripts/test.sh",
