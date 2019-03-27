@@ -12,7 +12,7 @@ jobs:
                 command: sudo npm install -g npm@6.7.0
             - run:
                 name: "Install Yarn"
-                command: sudo npm install yarn@1.9.4 --global
+                command: sudo npm install -g yarn@1.9.4
             - run:
                 name: "Bootstrap Monorepo"
                 command: yarn install
@@ -42,7 +42,7 @@ jobs:
               command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
         steps:
             - restore_cache:
-                keys: 
+                keys:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Test Packages"
@@ -55,7 +55,7 @@ jobs:
               command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
         steps:
             - restore_cache:
-                keys: 
+                keys:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Cover Packages"
