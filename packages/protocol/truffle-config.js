@@ -10,15 +10,22 @@ const { toWei, toHex } = require('web3-utils');
 
 const compilerConfig = require('./compiler');
 
-// Get the address of the first account in Ganache
+/**
+ * Get the address of the first account in Ganache
+ */
 async function getFirstAddress() {
     const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
     const addresses = await web3.eth.getAccounts();
     return addresses[0];
 }
 
-// You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file
-// Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
+/**
+ * You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file. Feel free to replace PRIVATE_KEY with a MNEMONIC
+ * to use an hd wallet.
+ *
+ * @param network name of the Ethereum network to connect to
+ */
+
 function createProvider(network) {
     if (process.env.CIRCLECI) {
         return {};
@@ -48,7 +55,7 @@ const projectRoot = '';
 const isVerbose = true;
 const coverageSubproviderConfig = {
     isVerbose,
-    ignoreFilesGlobs: ['**/node_modules/**', '**/interfaces/**', '**/test/**'],
+    ignoreFilesGlobs: ["**/node_modules/**", "**/interfaces/**", "**/test/**"],
 };
 const defaultFromAddress = getFirstAddress();
 const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);
@@ -100,18 +107,8 @@ module.exports = {
     compilers: {
         solc: {
             version: compilerConfig.solcVersion,
-            settings: {
-                optimizer: {
-                    enabled: false,
-                    runs: 200,
-                },
-                evmVersion: 'petersburg',
-            },
+            settings: compilerConfig.compilerSettings,
         },
-    },
-    mocha: {
-        enableTimeouts: false,
-        reporter: 'spec',
     },
     networks: {
         development: {
