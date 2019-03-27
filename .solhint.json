@@ -1,5 +1,6 @@
 {
-    "extends": "default",
+    "extends": "solhint:default",
+    "plugins": [],
     "rules": {
         "indent": ["error", 4],
         "bracket-align": false,
@@ -12,4 +13,4 @@
         "separate-by-one-line-in-contract": false,
         "two-lines-top-level-separator": false
     }
-}
+  }

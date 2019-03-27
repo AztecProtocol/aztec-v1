@@ -1569,7 +1569,7 @@ agentkeepalive@^3.4.1:
   dependencies:
     humanize-ms "^1.2.1"
 
-ajv@^6.5.5, ajv@^6.9.1:
+ajv@^6.5.5, ajv@^6.6.1, ajv@^6.9.1:
   version "6.10.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.10.0.tgz#90d0d54439da587cd7e843bfb7045f50bd22bdf1"
   dependencies:
@@ -3148,7 +3148,7 @@ cors@^2.8.1:
     object-assign "^4"
     vary "^1"
 
-cosmiconfig@^5.1.0:
+cosmiconfig@^5.0.7, cosmiconfig@^5.1.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/cosmiconfig/-/cosmiconfig-5.2.0.tgz#45038e4d28a7fe787203aede9c25bca4a08b12c8"
   dependencies:
@@ -3545,10 +3545,6 @@ dir-glob@2.0.0:
     arrify "^1.0.1"
     path-type "^3.0.0"
 
-dir-to-object@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/dir-to-object/-/dir-to-object-2.0.0.tgz#29723e9bd1c3e58e4f307bd04ff634c0370c8f8a"
-
 doctrine@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-1.5.0.tgz#379dce730f6166f76cefa4e6707a159b02c5a6fa"
@@ -3670,7 +3666,7 @@ elliptic@^6.0.0, elliptic@^6.2.3, elliptic@^6.4.0, elliptic@^6.4.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-emoji-regex@^7.0.1, emoji-regex@^7.0.2, emoji-regex@^7.0.3:
+emoji-regex@^7.0.1, emoji-regex@^7.0.2:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-7.0.3.tgz#933a04052860c85e83c122479c4748a8e4c72156"
 
@@ -3916,12 +3912,6 @@ espree@^5.0.1:
     acorn "^6.0.7"
     acorn-jsx "^5.0.0"
     eslint-visitor-keys "^1.0.0"
-
-esprima-extract-comments@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/esprima-extract-comments/-/esprima-extract-comments-1.1.0.tgz#0dacab567a5900240de6d344cf18c33617becbc9"
-  dependencies:
-    esprima "^4.0.0"
 
 esprima@2.7.x, esprima@^2.7.1:
   version "2.7.3"
@@ -4423,13 +4413,6 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-extract-comments@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/extract-comments/-/extract-comments-1.1.0.tgz#b90bca033a056bd69b8ba1c6b6b120fc2ee95c18"
-  dependencies:
-    esprima-extract-comments "^1.1.0"
-    parse-code-context "^1.0.0"
-
 extsprintf@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.3.0.tgz#96918440e3041a7a414f8c52e3c574eb3c3e1e05"
@@ -4917,17 +4900,6 @@ glob@7.1.2:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-glob@7.1.3, glob@^7.0.0, glob@^7.0.3, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@~7.1.3:
-  version "7.1.3"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.3.tgz#3960832d3f1574108342dafd3a67b332c0969df1"
-  dependencies:
-    fs.realpath "^1.0.0"
-    inflight "^1.0.4"
-    inherits "2"
-    minimatch "^3.0.4"
-    once "^1.3.0"
-    path-is-absolute "^1.0.0"
-
 glob@^5.0.15:
   version "5.0.15"
   resolved "https://registry.yarnpkg.com/glob/-/glob-5.0.15.tgz#1bc936b9e02f4a603fcc222ecf7633d30b8b93b1"
@@ -4935,6 +4907,17 @@ glob@^5.0.15:
     inflight "^1.0.4"
     inherits "2"
     minimatch "2 || 3"
+    once "^1.3.0"
+    path-is-absolute "^1.0.0"
+
+glob@^7.0.0, glob@^7.0.3, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@~7.1.3:
+  version "7.1.3"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.3.tgz#3960832d3f1574108342dafd3a67b332c0969df1"
+  dependencies:
+    fs.realpath "^1.0.0"
+    inflight "^1.0.4"
+    inherits "2"
+    minimatch "^3.0.4"
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
@@ -7224,10 +7207,6 @@ parse-asn1@^5.0.0:
     pbkdf2 "^3.0.3"
     safe-buffer "^5.1.1"
 
-parse-code-context@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/parse-code-context/-/parse-code-context-1.0.0.tgz#718c295c593d0d19a37f898473268cc75e98de1e"
-
 parse-github-repo-url@^1.3.0:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/parse-github-repo-url/-/parse-github-repo-url-1.4.1.tgz#9e7d8bb252a6cb6ba42595060b7bf6df3dbc1f50"
@@ -7437,25 +7416,7 @@ prepend-http@^1.0.1:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"
 
-prettier-linter-helpers@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/prettier-linter-helpers/-/prettier-linter-helpers-1.0.0.tgz#d23d41fe1375646de2d0104d3454a3008802cf7b"
-  dependencies:
-    fast-diff "^1.1.2"
-
-prettier-plugin-solidity@^1.0.0-alpha.4:
-  version "1.0.0-alpha.20"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-solidity/-/prettier-plugin-solidity-1.0.0-alpha.20.tgz#1f13d60ba46b85faa36e0204aa1a6413b816fb62"
-  dependencies:
-    dir-to-object "^2.0.0"
-    emoji-regex "^7.0.3"
-    escape-string-regexp "^1.0.5"
-    extract-comments "^1.1.0"
-    prettier "^1.15.3"
-    solidity-parser-antlr "^0.4.0"
-    string-width "^3.0.0"
-
-prettier@^1.14.3, prettier@^1.15.3:
+prettier@^1.14.3:
   version "1.16.4"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.16.4.tgz#73e37e73e018ad2db9c76742e2647e21790c9717"
 
@@ -8457,23 +8418,25 @@ solc@^0.5.5, solc@^0.5.6:
     tmp "0.0.33"
     yargs "^11.0.0"
 
-solhint@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/solhint/-/solhint-1.5.0.tgz#02a097c0b989b6c6d423629ac8297a9a045ba8bf"
+solhint@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/solhint/-/solhint-2.0.0.tgz#67aa3499d2427a3a6abe8600f4a920aa9720a83f"
+  integrity sha512-K1QW6an/MSYEsR4KfM07xu1kIsV7WroH5fLosP+KMN76hoVHqYDrRr7rFEkjX63HGxYHqS7tzGcE2veIVINKyw==
   dependencies:
+    ajv "^6.6.1"
     antlr4 "4.7.1"
     commander "2.18.0"
+    cosmiconfig "^5.0.7"
     eslint "^5.6.0"
     fast-diff "^1.1.2"
-    glob "7.1.3"
+    glob "^7.1.3"
     ignore "^4.0.6"
+    js-yaml "^3.12.0"
     lodash "^4.17.11"
-    prettier-linter-helpers "^1.0.0"
   optionalDependencies:
     prettier "^1.14.3"
-    prettier-plugin-solidity "^1.0.0-alpha.4"
 
-solidity-parser-antlr@^0.4.0, solidity-parser-antlr@^0.4.2:
+solidity-parser-antlr@^0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/solidity-parser-antlr/-/solidity-parser-antlr-0.4.2.tgz#b862eba5936e7a90b4f5f1c8eb1d33fe86650f78"
 
@@ -9744,19 +9707,6 @@ web3-shh@1.0.0-beta.50:
 web3-utils@1.0.0-beta.35:
   version "1.0.0-beta.35"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.35.tgz#ced9e1df47c65581c441c5f2af76b05a37a273d7"
-  dependencies:
-    bn.js "4.11.6"
-    eth-lib "0.1.27"
-    ethjs-unit "0.1.6"
-    number-to-bn "1.7.0"
-    randomhex "0.1.5"
-    underscore "1.8.3"
-    utf8 "2.1.1"
-
-web3-utils@1.0.0-beta.37:
-  version "1.0.0-beta.37"
-  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.37.tgz#ab868a90fe5e649337e38bdaf72133fcbf4d414d"
-  integrity sha512-kA1fyhO8nKgU21wi30oJQ/ssvu+9srMdjOTKbHYbQe4ATPcr5YNwwrxG3Bcpbu1bEwRUVKHCkqi+wTvcAWBdlQ==
   dependencies:
     bn.js "4.11.6"
     eth-lib "0.1.27"
