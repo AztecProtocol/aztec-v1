@@ -8,15 +8,15 @@ contract IAZTEC {
         BURN,
         UTILITY
     }
-    // proofEpoch = 1 | proofCategory = 0 | proofId = 1
-    // 1 * 256**(2) + 0 * 256**(1) ++ 1 * 256**(0)
-    uint24 public constant JOIN_SPLIT_PROOF = 65537;
-
     // proofEpoch = 1 | proofCategory = 1 | proofId = 1
-    // (1 * 256**(2)) + (1 * 256**(1)) + (1 * 256**(0))
-    uint24 public constant MINT_PROOF = 65793;
+    // 1 * 256**(2) + 1 * 256**(1) ++ 1 * 256**(0)
+    uint24 public constant JOIN_SPLIT_PROOF = 65793;
 
     // proofEpoch = 1 | proofCategory = 2 | proofId = 1
     // (1 * 256**(2)) + (2 * 256**(1)) + (1 * 256**(0))
-    uint24 public constant BURN_PROOF = 66049;
+    uint24 public constant MINT_PROOF = 66049;
+
+    // proofEpoch = 1 | proofCategory = 3 | proofId = 1
+    // (1 * 256**(2)) + (3 * 256**(1)) + (1 * 256**(0))
+    uint24 public constant BURN_PROOF = 66305;
 }

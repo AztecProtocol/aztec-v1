@@ -4,8 +4,8 @@
  * epoch and the category by 16 and 8 bits, respectively.
  */
 module.exports = {
-    /* 1 * 256**(2) + 0 * 256**(1) + 1 * 256**(0) */
-    JOIN_SPLIT_PROOF: '65537',
-    MINT_PROOF: '65793',
-    BURN_PROOF: '66049',
+    /* 1 * 256**(2) + 1 * 256**(1) + 1 * 256**(0) */
+    JOIN_SPLIT_PROOF: '65793',
+    MINT_PROOF: '66049',
+    BURN_PROOF: '66305',
 };
