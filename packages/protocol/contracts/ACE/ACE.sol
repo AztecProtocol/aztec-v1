@@ -1,9 +1,9 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "../interfaces/IAZTEC.sol";
+import "../interfaces/IERC20.sol";
 
 import "../libs/IntegerUtils.sol";
 import "../libs/NoteUtils.sol";
@@ -48,11 +48,12 @@ contract ACE is IAZTEC {
         bool canConvert;
     }
     struct NoteRegistry {
-        ERC20 linkedToken;
+        IERC20 linkedToken;
         uint256 scalingFactor;
         uint256 totalSupply;
         bytes32 confidentialTotalMinted;
         bytes32 confidentialTotalBurned;
+        uint256 supplementTotal;
         Flags flags;
         mapping(bytes32 => Note) notes;
         mapping(address => mapping(bytes32 => uint256)) publicApprovals;
@@ -249,6 +250,27 @@ contract ACE is IAZTEC {
     }
 
     /**
+    * @dev Call transferFrom on a linked ERC20 token. Used in cases where the ACE's mint
+    * function is called but the token balance of the note registry in question is
+    * insufficient
+    * @param _value the value to be transferred
+    */
+    function supplementTokens(uint256 _value) external {
+        require(_value > uint(0), "supplement tokens can only be called on a positive value");
+        NoteRegistry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canConvert == true, "note registry does not have conversion rights");
+        
+        // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
+        require(registry.flags.canMintAndBurn == true, "note registry does not have mint and burn rights");
+        
+        require(
+            registry.linkedToken.transferFrom(msg.sender, address(this), _value), 
+            "transfer failed"
+        );
+    }
+
+    /**
     * @dev Burn AZTEC notes
     *      
     * @param _proof the AZTEC proof object
@@ -381,11 +403,12 @@ contract ACE is IAZTEC {
     ) public {
         require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
         NoteRegistry memory registry = NoteRegistry({
-            linkedToken: ERC20(_linkedTokenAddress),
+            linkedToken: IERC20(_linkedTokenAddress),
             scalingFactor: _scalingFactor,
             totalSupply: 0,
             confidentialTotalMinted: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
             confidentialTotalBurned: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
+            supplementTotal: 0,
             // above hashes are for note with k = 0, a = 1. Mint and burn counters start at 0
             flags: Flags({
                 active: true,
@@ -420,38 +443,21 @@ contract ACE is IAZTEC {
         if (publicValue != 0) {
             require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens");
 
-            // if the public value is negative (i.e. value being transferred from an ERC20 into the note registry)
-            if (publicValue < 0) { // if public value is negative - extracting value from the note registry
-                registry.totalSupply = registry.totalSupply.add(uint256(-publicValue)); // subtracting value from registry total supply
+            if (publicValue < 0) {
+                registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
                 require(
-                    // require that tokens of at least this value have previously been approved to be transferred
                     registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
                     "public owner has not validated a transfer of tokens"
                 );
                  
-                // decrement the number of tokens approved for this owner and proofHash
                 registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
                 require(
-                    // transferring public value from the publicOwner, to this note registry
                     registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
                     "transfer failed"
                 );
-            } else { // transferring value out of the system
-                if (registry.totalSupply < uint256(publicValue)) {
-                    require( // the only way this situation should occur is if AZTEC notes have been minted
-                        registry.flags.canMintAndBurn == true,
-                        "this asset should have no requirement to supplement tokens"
-                    );
-
-                    uint256 supplement = uint256(publicValue).sub(registry.totalSupply);
-                    supplementTokens(supplement, publicOwner);
-
-        
-                } else {
-                    registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
-                    // transferring publicValue to the linked public ERC20 token
-                    require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
-                }
+            } else { 
+                registry.totalSupply < uint256(publicValue);
+                require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
             }
         }
     }
@@ -476,13 +482,15 @@ contract ACE is IAZTEC {
      * @dev Returns the registry for a given address.
      */
     function getRegistry(address _owner) public view returns (
-        ERC20 _linkedToken,
+        IERC20 _linkedToken,
         uint256 _scalingFactor,
         uint256 _totalSupply,
         bytes32 _confidentialTotalMinted,
         bytes32 _confidentialTotalBurned,
+        uint256 _supplementTotal,
         bool _canMintAndBurn,
-        bool _canConvert
+        bool _canConvert,
+        address aceAddress
     ) {
         NoteRegistry memory registry = registries[_owner];
         return (
@@ -491,8 +499,10 @@ contract ACE is IAZTEC {
             registry.totalSupply,
             registry.confidentialTotalMinted,
             registry.confidentialTotalBurned,
+            registry.supplementTotal,
             registry.flags.canMintAndBurn,
-            registry.flags.canConvert
+            registry.flags.canConvert,
+            address(this)
         );
     }
 
@@ -522,29 +532,6 @@ contract ACE is IAZTEC {
     */
     function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
-    }
-
-        /**
-    * @dev Call transferFrom on a linked ERC20 token. Used in cases where the ACE's mint
-    * function is called but the token balance of the note registry in question is
-    * insufficient
-    * @param _value the value to be transferred
-    */
-    function supplementTokens(uint256 _value, address publicOwner) internal {
-        // supplementTokens() should only be called when _value > 0
-        require(_value > uint(0), "supplement tokens can only be called on a positive value");
-        NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canConvert == true, "note registry does not have conversion rights");
-        
-        // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
-        require(registry.flags.canMintAndBurn == true, "note registry does not have mint and burn rights");
-
-        require(
-            // transferring public value from the publicOwner, to this note registry
-            registry.linkedToken.transferFrom(msg.sender, publicOwner, _value), 
-            "transfer failed"
-        );
     }
 
     function extractValidatorAddress(uint24 _proof) internal view returns (address) {

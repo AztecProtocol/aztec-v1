@@ -55,11 +55,12 @@ contract ZkAssetMintable is ZkAsset {
         int256 publicValue) = proofOutput.extractProofOutput();
 
         (
-            ERC20Mintable linkedToken,
+            IERC20 linkedToken,
             ,
             uint totalSupply,
             ,
             ,
+            uint256 supplementTotal,
             ,
             ,
             address aceAddress
@@ -72,6 +73,7 @@ contract ZkAssetMintable is ZkAsset {
                 linkedToken.approve(aceAddress, supplementValue);
 
                 ace.supplementTokens(supplementValue);
+                supplementTotal.add(supplementValue);
             }
         }
 
