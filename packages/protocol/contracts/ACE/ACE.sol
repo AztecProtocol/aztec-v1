@@ -309,7 +309,8 @@ contract ACE is IAZTEC, Ownable {
                     registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
                     "public owner has not validated a transfer of tokens"
                 );
-                registry.publicApprovals[publicOwner][proofHash].sub(uint256(-publicValue));
+                registry.publicApprovals[publicOwner][proofHash] =
+                    registry.publicApprovals[publicOwner][proofHash].sub(uint256(-publicValue));
                 registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue));
             } else {
                 registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
