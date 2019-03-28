@@ -75,23 +75,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     function confidentialTransfer(bytes memory _proofData) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid");
-        bytes memory proofOutput = proofOutputs.get(0);
-
-        ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
-        
-        (bytes memory inputNotes,
-        bytes memory outputNotes,
-        address publicOwner,
-        int256 publicValue) = proofOutput.extractProofOutput();
-
-        logInputNotes(inputNotes);
-        logOutputNotes(outputNotes);
-        if (publicValue < 0) {
-            emit ConvertTokens(publicOwner, uint256(-publicValue));
-        }
-        if (publicValue > 0) {
-            emit RedeemTokens(publicOwner, uint256(publicValue));
-        }
+        confidentialTransferInternal(proofOutputs);
     }
 
     function confidentialApprove(
@@ -143,6 +127,26 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         logInputNotes(inputNotes);
         logOutputNotes(outputNotes);
 
+        if (publicValue < 0) {
+            emit ConvertTokens(publicOwner, uint256(-publicValue));
+        }
+        if (publicValue > 0) {
+            emit RedeemTokens(publicOwner, uint256(publicValue));
+        }
+    }
+    
+    function confidentialTransferInternal(bytes memory proofOutputs) internal {
+        bytes memory proofOutput = proofOutputs.get(0);
+
+        ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
+        
+        (bytes memory inputNotes,
+        bytes memory outputNotes,
+        address publicOwner,
+        int256 publicValue) = proofOutput.extractProofOutput();
+
+        logInputNotes(inputNotes);
+        logOutputNotes(outputNotes);
         if (publicValue < 0) {
             emit ConvertTokens(publicOwner, uint256(-publicValue));
         }
