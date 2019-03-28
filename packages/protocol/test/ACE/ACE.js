@@ -207,12 +207,12 @@ contract('ACE', (accounts) => {
             });
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
-            const canMintAndBurn = false;
+            const canAdjustSupply = false;
             const canConvert = true;
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMintAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );

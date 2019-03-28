@@ -42,7 +42,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         address _aceAddress,
         address _linkedTokenAddress,
         uint256 _scalingFactor,
-        bool _canMintAndBurn,
+        bool _canAdjustSupply,
         bool _canConvert
     ) public {
         EIP712_DOMAIN_HASH = keccak256(abi.encodePacked(
@@ -53,7 +53,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         ));
         flags = ACE.Flags({
             active: true,
-            canMintAndBurn: false,
+            canAdjustSupply: false,
             canConvert: true
         });
         ace = ACE(_aceAddress);
@@ -62,14 +62,14 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         ace.createNoteRegistry(
             _linkedTokenAddress,
             _scalingFactor,
-            _canMintAndBurn, // false,
+            _canAdjustSupply, // false,
             _canConvert // true
         );
         emit CreateZkAsset(
             _aceAddress,
             _linkedTokenAddress,
             _scalingFactor,
-            _canMintAndBurn,
+            _canAdjustSupply,
             _canConvert
         );
     }

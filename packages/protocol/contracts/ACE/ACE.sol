@@ -44,7 +44,7 @@ contract ACE is IAZTEC {
     }
     struct Flags {
         bool active;
-        bool canMintAndBurn;
+        bool canAdjustSupply;
         bool canConvert;
     }
     struct NoteRegistry {
@@ -206,7 +206,7 @@ contract ACE is IAZTEC {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canMintAndBurn == true, "this asset is not mintable");
+        require(registry.flags.canAdjustSupply == true, "this asset is not mintable");
         
         // Check that it's a mintable proof
         (, uint8 category, ) = _proof.getProofComponents();
@@ -262,7 +262,7 @@ contract ACE is IAZTEC {
         require(registry.flags.canConvert == true, "note registry does not have conversion rights");
         
         // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
-        require(registry.flags.canMintAndBurn == true, "note registry does not have mint and burn rights");
+        require(registry.flags.canAdjustSupply == true, "note registry does not have mint and burn rights");
         
         require(
             registry.linkedToken.transferFrom(msg.sender, address(this), _value), 
@@ -289,7 +289,7 @@ contract ACE is IAZTEC {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canMintAndBurn == true, "this asset is not burnable");
+        require(registry.flags.canAdjustSupply == true, "this asset is not burnable");
         
         // Check that it's a burnable proof
         (, uint8 category, ) = _proof.getProofComponents();
@@ -398,7 +398,7 @@ contract ACE is IAZTEC {
     function createNoteRegistry(
         address _linkedTokenAddress,
         uint256 _scalingFactor,
-        bool _canMintAndBurn,
+        bool _canAdjustSupply,
         bool _canConvert
     ) public {
         require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
@@ -412,7 +412,7 @@ contract ACE is IAZTEC {
             // above hashes are for note with k = 0, a = 1. Mint and burn counters start at 0
             flags: Flags({
                 active: true,
-                canMintAndBurn: _canMintAndBurn,
+                canAdjustSupply: _canAdjustSupply,
                 canConvert: _canConvert
             })
         });
@@ -488,7 +488,7 @@ contract ACE is IAZTEC {
         bytes32 _confidentialTotalMinted,
         bytes32 _confidentialTotalBurned,
         uint256 _supplementTotal,
-        bool _canMintAndBurn,
+        bool _canAdjustSupply,
         bool _canConvert,
         address aceAddress
     ) {
@@ -500,7 +500,7 @@ contract ACE is IAZTEC {
             registry.confidentialTotalMinted,
             registry.confidentialTotalBurned,
             registry.supplementTotal,
-            registry.flags.canMintAndBurn,
+            registry.flags.canAdjustSupply,
             registry.flags.canConvert,
             address(this)
         );
