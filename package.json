@@ -11,18 +11,18 @@
   },
   "private": true,
   "scripts": {
-    "build": "lerna link && wsrun --exclude-missing --fast-exit --package $PKG --recursive --stages build",
-    "clean": "wsrun --exclude-missing --fast-exit --package $PKG --parallel clean",
+    "build": "lerna link && yarn wsrun --package $PKG --recursive --stages -c build",
+    "clean": "yarn wsrun --package $PKG --parallel -clean",
     "fixpack": "lerna exec --parallel -- yarn fixpack; fixpack",
     "install:all": "yarn install",
     "lerna": "lerna",
-    "lint": "wsrun --exclude-missing --fast-exit --package $PKG --parallel lint",
+    "lint": "yarn wsrun --package $PKG --parallel -c lint",
     "prettier": "prettier --config .prettierrc --write '**/*.{js,jsx,json,md}'",
     "prettier:ci": "prettier --config .prettierrc --list-different '**/*.{js,jsx,json,md}'",
     "rebuild": "run-s clean build",
     "remove_node_modules": "lerna clean --yes; rm -rf node_modules",
-    "test": "wsrun --exclude-missing --fast-exit --package $PKG --serial test",
-    "wsrun": "wsrun"
+    "test": "yarn wsrun --package $PKG --serial -c test",
+    "wsrun": "wsrun --exclude-missing --fast-exit"
   },
   "workspaces": [
     "packages/*"
