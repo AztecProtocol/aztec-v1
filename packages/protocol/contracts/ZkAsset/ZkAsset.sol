@@ -7,6 +7,8 @@ import "../interfaces/IAZTEC.sol";
 import "../interfaces/IZkAsset.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
+import "../interfaces/IERC20.sol";
+
 
 contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
@@ -30,7 +32,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     ));
 
     ACE public ace;
-    ERC20 public linkedToken;
+    IERC20 public linkedToken;
     ACE.Flags public flags;
 
     uint256 public scalingFactor;
@@ -55,7 +57,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             canConvert: true
         });
         ace = ACE(_aceAddress);
-        linkedToken = ERC20(_linkedTokenAddress);
+        linkedToken = IERC20(_linkedTokenAddress);
         scalingFactor = _scalingFactor;
         ace.createNoteRegistry(
             _linkedTokenAddress,
