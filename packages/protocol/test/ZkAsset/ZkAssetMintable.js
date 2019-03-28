@@ -64,7 +64,7 @@ contract('ZkAssetMintable', (accounts) => {
             const oldTotalMinted = zeroNote;
             const adjustedNotes = notes.slice(2, 4);
 
-            const canMintAndBurn = true;
+            const canAdjustSupply = true;
             const canConvert = true;
 
 
@@ -75,7 +75,7 @@ contract('ZkAssetMintable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canMintAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );
@@ -162,14 +162,14 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('validates failure if mint attempted when flag set to false', async () => {
-            const canMintAndBurn = false;
+            const canAdjustSupply = false;
             const canConvert = true;
 
             zkAssetMintable = await ZkAssetMintable.new(
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canMintAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );

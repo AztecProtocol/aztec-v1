@@ -15,13 +15,13 @@ contract ZkAssetOwnable is ZkAsset {
         address _aceAddress,
         address _linkedTokenAddress,
         uint256 _scalingFactor,
-        bool _canMintAndBurn,
+        bool _canAdjustSupply,
         bool _canConvert
     ) public ZkAsset(
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor,
-        _canMintAndBurn,
+        _canAdjustSupply,
         _canConvert
     ) {
         owner = msg.sender;

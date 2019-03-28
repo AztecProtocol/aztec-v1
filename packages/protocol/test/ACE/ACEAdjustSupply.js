@@ -99,7 +99,7 @@ contract('ACE mint and burn functionality', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
-            const canMintAndBurn = true;
+            const canAdjustSupply = true;
             const canConvert = true;
 
             await erc20.mint(
@@ -117,7 +117,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMintAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );
@@ -216,7 +216,7 @@ contract('ACE mint and burn functionality', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
-            const canMintAndBurn = true;
+            const canAdjustSupply = true;
             const canConvert = true;
 
             await erc20.mint(
@@ -234,7 +234,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMintAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );
@@ -269,7 +269,7 @@ contract('ACE mint and burn functionality', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
-            const canMintAndBurn = true;
+            const canAdjustSupply = true;
             const canConvert = false;
 
             await erc20.mint(
@@ -287,7 +287,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMintAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );
@@ -322,7 +322,7 @@ contract('ACE mint and burn functionality', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
-            const canMintAndBurn = true;
+            const canAdjustSupply = true;
             const canConvert = true;
 
             await erc20.mint(
@@ -336,7 +336,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMintAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );
