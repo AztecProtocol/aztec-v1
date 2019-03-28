@@ -11,7 +11,7 @@ import "../libs/ProofUtils.sol";
 
 contract ZkAssetBurnable is ZkAsset {
     event UpdateTotalBurned(bytes32 noteHash, bytes noteData);
-    
+
     address public owner;
 
     constructor(
@@ -41,6 +41,41 @@ contract ZkAssetBurnable is ZkAsset {
 
         logOutputNotes(burnedNotes);
         emit UpdateTotalBurned(noteHash, metadata);
+    }
+
+    function confidentialTransfer(bytes memory _proofData) public {
+        bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
+        require(proofOutputs.length != 0, "proof invalid");
+
+        bytes memory proofOutput = proofOutputs.get(0);
+
+        (,
+        ,
+        ,
+        int256 publicValue) = proofOutput.extractProofOutput();
+
+        (
+            ERC20Mintable linkedToken,
+            ,
+            uint totalSupply,
+            ,
+            ,
+            ,
+            ,
+            address aceAddress
+        ) = ace.getRegistry(address(this));
+        if (publicValue > 0) {
+            if (totalSupply <= uint256(publicValue)) {
+                uint256 supplementValue = uint256(publicValue).sub(totalSupply);
+
+                linkedToken.mint(address(this), supplementValue);
+                linkedToken.approve(aceAddress, supplementValue);
+
+                ace.supplementTokens(supplementValue);
+            }
+        }
+
+        confidentialTransferInternal(proofOutputs);
     }
 }
 
