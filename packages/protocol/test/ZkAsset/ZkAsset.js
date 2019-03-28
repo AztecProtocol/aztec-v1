@@ -19,7 +19,7 @@ const ZkAsset = artifacts.require('./contracts/ZkAsset/ZkAsset');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract.only('ZkAsset', (accounts) => {
+contract('ZkAsset', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
@@ -160,7 +160,7 @@ contract.only('ZkAsset', (accounts) => {
             );
         });
 
-        it.only('should update a note registry with output notes', async () => {
+        it('should update a note registry with output notes', async () => {
             const { receipt } = await zkAsset.confidentialTransfer(proofs[0].proofData);
             expect(receipt.status).to.equal(true);
             console.log('gas used = ', receipt.gasUsed);
