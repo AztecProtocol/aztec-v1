@@ -157,6 +157,7 @@ contract('ZkAsset', (accounts) => {
         it('should update a note registry with output notes', async () => {
             const { receipt } = await zkAsset.confidentialTransfer(proofs[0].proofData);
             expect(receipt.status).to.equal(true);
+            console.log('gas used = ', receipt.gasUsed);
         });
 
         it('should update a note registry by consuming input notes, with kPublic negative', async () => {

@@ -23,26 +23,31 @@ function encodeBilateralSwapTransaction({
         proofData: proofDataRaw,
         challenge,
     } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
-
+    const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
     const proofData = aztec.abiEncoder.inputCoder.bilateralSwap(
         proofDataRaw,
         challenge,
-        inputOwners,
-        outputOwners,
-        outputNotes
+        noteOwners,
+        [outputNotes[0], inputNotes[1]]
     );
 
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-    }]).slice(0x42)}`;
+    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([
+        {
+            inputNotes: [inputNotes[0]],
+            outputNotes: [outputNotes[0]],
+            publicOwner,
+            publicValue,
+        },
+        {
+            inputNotes: [outputNotes[1]],
+            outputNotes: [inputNotes[1]],
+            publicOwner,
+            publicValue,
+        },
+    ]).slice(0x42)}`;
     return { proofData, expectedOutput };
 }
 
@@ -83,23 +88,24 @@ contract('Bilateral Swap', (accounts) => {
                 `0x${padLeft('0', 64)}${result.slice(2)}`
             );
 
-            expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
-            expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
-            expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
-            expect(decoded[0].outputNotes[0].owner).to.equal(outputNotes[0].owner.toLowerCase());
-            expect(decoded[0].outputNotes[1].gamma.eq(outputNotes[1].gamma)).to.equal(true);
-            expect(decoded[0].outputNotes[1].sigma.eq(outputNotes[1].sigma)).to.equal(true);
-            expect(decoded[0].outputNotes[1].noteHash).to.equal(outputNotes[1].noteHash);
-            expect(decoded[0].outputNotes[1].owner).to.equal(outputNotes[1].owner.toLowerCase());
-
             expect(decoded[0].inputNotes[0].gamma.eq(inputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].inputNotes[0].noteHash).to.equal(inputNotes[0].noteHash);
             expect(decoded[0].inputNotes[0].owner).to.equal(inputNotes[0].owner.toLowerCase());
-            expect(decoded[0].inputNotes[1].gamma.eq(inputNotes[1].gamma)).to.equal(true);
-            expect(decoded[0].inputNotes[1].sigma.eq(inputNotes[1].sigma)).to.equal(true);
-            expect(decoded[0].inputNotes[1].noteHash).to.equal(inputNotes[1].noteHash);
-            expect(decoded[0].inputNotes[1].owner).to.equal(inputNotes[1].owner.toLowerCase());
+            expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
+            expect(decoded[0].outputNotes[0].owner).to.equal(outputNotes[0].owner.toLowerCase());
+
+
+            expect(decoded[1].inputNotes[0].gamma.eq(outputNotes[1].gamma)).to.equal(true);
+            expect(decoded[1].inputNotes[0].sigma.eq(outputNotes[1].sigma)).to.equal(true);
+            expect(decoded[1].inputNotes[0].noteHash).to.equal(outputNotes[1].noteHash);
+            expect(decoded[1].inputNotes[0].owner).to.equal(outputNotes[1].owner.toLowerCase());
+            expect(decoded[1].outputNotes[0].gamma.eq(inputNotes[1].gamma)).to.equal(true);
+            expect(decoded[1].outputNotes[0].sigma.eq(inputNotes[1].sigma)).to.equal(true);
+            expect(decoded[1].outputNotes[0].noteHash).to.equal(inputNotes[1].noteHash);
+            expect(decoded[1].outputNotes[0].owner).to.equal(inputNotes[1].owner.toLowerCase());
 
             expect(result).to.equal(expectedOutput);
 

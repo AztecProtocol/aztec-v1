@@ -21,7 +21,8 @@ contract DividendComputation {
      * @notice See DividendComputationInterface for how method calls should be constructed.
      * DividendComputation is written in YUL to enable manual memory management and for other efficiency savings.
      **/
-    function() external payable {
+    // solhint-disable payable-fallback
+    function() external {
         assembly {
 
             // We don't check for function signatures, there's only one function 
@@ -29,6 +30,11 @@ contract DividendComputation {
             // We still assume calldata is offset by 4 bytes so that we can 
             // represent this contract through a compatible ABI
             validateDividendComputation()
+
+            // if we get to here, the proof is valid. We now 'fall through' the assembly block
+            // and into JoinSplitABI.validateJoinSplit()
+            // reset the free memory pointer because we're touching Solidity code again
+            mstore(0x40, 0x60)
 
             /**
              * New calldata map

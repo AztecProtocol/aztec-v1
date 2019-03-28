@@ -2,6 +2,7 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../interfaces/IAZTEC.sol";
 
@@ -16,7 +17,7 @@ import "../libs/SafeMath8.sol";
  * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
  *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
  **/
-contract ACE is IAZTEC {
+contract ACE is IAZTEC, Ownable {
     using IntegerUtils for uint256;
     using NoteUtils for bytes;
     using ProofUtils for uint24;
@@ -63,9 +64,6 @@ contract ACE is IAZTEC {
     // by ACE use the same common reference string.
     bytes32[6] private commonReferenceString;
 
-    // TODO: add a consensus mechanism! This contract is for testing purposes only until then
-    address public owner;
-
     // Every user has their own note registry
     mapping(address => NoteRegistry) internal registries;
 
@@ -85,9 +83,7 @@ contract ACE is IAZTEC {
     * @dev contract constructor. Sets the owner of ACE, the flags, the linked token address and
     *      the scaling factor.
     **/
-    constructor() public {
-        owner = msg.sender;
-    }
+    constructor() public {}
 
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
@@ -112,7 +108,7 @@ contract ACE is IAZTEC {
     ) external returns (bytes memory) {
         // validate that the provided _proof object maps to a corresponding validator and also that
         // the validator is not disabled
-        address validatorAddress = extractValidatorAddress(_proof);
+        address validatorAddress = getValidatorAddress(_proof);
         bytes memory proofOutputs;
         assembly {
             // the first evm word of the 3rd function param is the abi encoded location of proof data
@@ -178,10 +174,11 @@ contract ACE is IAZTEC {
     */
     function clearProofByHashes(uint24 _proof, bytes32[] calldata _proofHashes) external {
         uint256 length = _proofHashes.length;
-        for (uint256 i = 0; i < length; i = i.add(1)) {
+        for (uint256 i = 0; i < length; i++) {
             bytes32 proofHash = _proofHashes[i];
             require(proofHash != bytes32(0x0), "expected no empty proof hash");
             bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+            require(validatedProofs[validatedProofHash] == true, "can only clear previously validated proofs");
             validatedProofs[validatedProofHash] = false;
         }
     }
@@ -192,7 +189,7 @@ contract ACE is IAZTEC {
     * @param _commonReferenceString the new commonReferenceString
     */
     function setCommonReferenceString(bytes32[6] memory _commonReferenceString) public {
-        require(msg.sender == owner, "only the owner can set the common reference string");
+        require(isOwner(), "only the owner can set the common reference string");
         commonReferenceString = _commonReferenceString;
         emit SetCommonReferenceString(_commonReferenceString);
     }
@@ -202,8 +199,9 @@ contract ACE is IAZTEC {
     * @param _proof the AZTEC proof object
     */
     function invalidateProof(uint24 _proof) public {
-        require(msg.sender == owner, "only the owner can invalidate a proof");
+        require(isOwner(), "only the owner can invalidate a proof");
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
+        require(validators[epoch][category][id] != address(0x0), "can only invalidate proofs that exist!");
         disabledValidators[epoch][category][id] = true;
     }
 
@@ -221,6 +219,8 @@ contract ACE is IAZTEC {
         bytes32 _proofHash,
         address _sender
     ) public view returns (bool) {
+        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
+        require(disabledValidators[epoch][category][id] == false, "this proof id has been invalidated!");
         bytes32 validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender));
         return validatedProofs[validatedProofHash];
     }
@@ -235,7 +235,7 @@ contract ACE is IAZTEC {
         uint24 _proof,
         address _validatorAddress
     ) public {
-        require(msg.sender == owner, "only the owner can set a proof");
+        require(isOwner(), "only the owner can set a proof");
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
         require(epoch <= latestEpoch, "the proof epoch cannot be bigger than the latest epoch");
         require(validators[epoch][category][id] == address(0x0), "existing proofs cannot be modified");
@@ -247,7 +247,7 @@ contract ACE is IAZTEC {
      * @dev Increments the `latestEpoch` storage variable.
      */
     function incrementLatestEpoch() public {
-        require(msg.sender == owner, "only the owner can update the latest epoch");
+        require(isOwner(), "only the owner can update the latest epoch");
         latestEpoch = latestEpoch.add(1);
         emit IncrementLatestEpoch(latestEpoch);
     }
@@ -287,7 +287,10 @@ contract ACE is IAZTEC {
             validateProofByHash(_proof, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
         );
-
+        
+        // clear record of valid proof - stops re-entrancy attacks and saves some gas
+        validatedProofs[proofHash] = false;
+        
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -306,14 +309,12 @@ contract ACE is IAZTEC {
                     registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
                     "public owner has not validated a transfer of tokens"
                 );
-                registry.publicApprovals[publicOwner][proofHash] -= uint256(-publicValue);
-                require(
-                    registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue)), 
-                    "transfer failed"
-                );
+                registry.publicApprovals[publicOwner][proofHash] =
+                    registry.publicApprovals[publicOwner][proofHash].sub(uint256(-publicValue));
+                registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue));
             } else {
                 registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
-                require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
+                registry.linkedToken.transfer(publicOwner, uint256(publicValue));
             }
         }
     }
@@ -339,7 +340,7 @@ contract ACE is IAZTEC {
         (, noteHash, ) = inputNotes.get(0).extractNote();
         registry.confidentialTotalSupply = noteHash;
 
-        for (uint i = 1; i < outputNotes.getLength(); i = i.add(1)) {
+        for (uint256 i = 1; i < outputNotes.getLength(); i++) {
             address noteOwner;
             (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry.notes[noteHash];
@@ -348,7 +349,7 @@ contract ACE is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.uintToBytes(5);
+            note.createdOn = now.toBytes5();
             note.owner = noteOwner;
         }
     }
@@ -384,7 +385,7 @@ contract ACE is IAZTEC {
 
         registry.confidentialTotalSupply = noteHash;
 
-        for (uint i = 1; i < inputNotes.getLength(); i = i.add(1)) {
+        for (uint256 i = 1; i < inputNotes.getLength(); i++) {
             address noteOwner;
             (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
             Note storage note = registry.notes[noteHash];
@@ -394,7 +395,7 @@ contract ACE is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.uintToBytes(5);
+            note.destroyedOn = now.toBytes5();
         }
     }
 
@@ -404,14 +405,6 @@ contract ACE is IAZTEC {
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         NoteRegistry storage registry = registries[_registryOwner];
         registry.publicApprovals[msg.sender][_proofHash] = _value;
-    }
-
-    /**
-    * @dev Returns the validator address for a given proof object
-    */
-    function getValidatorAddress(uint24 _proof) public view returns (address) {
-        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-        return validators[epoch][category][id];
     }
 
     /**
@@ -466,7 +459,7 @@ contract ACE is IAZTEC {
         return commonReferenceString;
     }
 
-    function extractValidatorAddress(uint24 _proof) internal view returns (address) {
+    function getValidatorAddress(uint24 _proof) public view returns (address) {
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
         require(validators[epoch][category][id] != address(0x0), "expected the validator address to exist");
         require(disabledValidators[epoch][category][id] == false, "expected the validator address to not be disabled");
@@ -475,7 +468,7 @@ contract ACE is IAZTEC {
 
     function updateInputNotes(bytes memory inputNotes) internal {
         uint256 length = inputNotes.getLength();
-        for (uint i = 0; i < length; i = i.add(1)) {
+        for (uint256 i = 0; i < length; i++) {
             (address _owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];
@@ -485,13 +478,13 @@ contract ACE is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.uintToBytes(5);
+            note.destroyedOn = now.toBytes5();
         }
     }
 
     function updateOutputNotes(bytes memory outputNotes) internal {
         uint256 length = outputNotes.getLength();
-        for (uint i = 0; i < length; i = i.add(1)) {
+        for (uint256 i = 0; i < length; i++) {
             (address _owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
             // `note` will be stored on the blockchain
             Note storage note = registries[msg.sender].notes[noteHash];
@@ -500,7 +493,7 @@ contract ACE is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.uintToBytes(5);
+            note.createdOn = now.toBytes5();
             note.owner = _owner;
         }
     }

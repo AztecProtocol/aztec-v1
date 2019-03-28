@@ -29,8 +29,8 @@ contract JoinSplit is LibEIP712 {
      * AZTEC is written in YUL to enable manual memory management and for other efficiency savings.
      **/
 
-
-    function() external payable {
+    // solhint-disable payable-fallback
+    function() external {
         bytes32 domainHash = EIP712_DOMAIN_HASH;
         assembly {
             // We don't check for function signatures,
@@ -38,6 +38,12 @@ contract JoinSplit is LibEIP712 {
             // We still assume calldata is offset by 4 bytes so that we can represent this contract
             // through a compatible ABI
             validateJoinSplit()
+
+            // if we get to here, the proof is valid. We now 'fall through' the assembly block
+            // and into JoinSplitABI.validateJoinSplit()
+            // reset the free memory pointer because we're touching Solidity code again
+            mstore(0x40, 0x60)
+
             /**
              * New calldata map
              * 0x04:0x24      = calldata location of proofData byte array
@@ -112,7 +118,7 @@ contract JoinSplit is LibEIP712 {
                     // We validate e(\Pi_{i=m+1}^{n}\gamma_i^{-cx_j}, t_2) == e(\Pi_{i=m+1}^{n}\sigma_i^{cx_j}, g_2).
                     // x_j is a pseudorandom variable whose entropy source is the input string, allowing for
                     // a sum of commitment points to be evaluated in one pairing comparison
-                    let k
+                    let k := calldataload(noteIndex)
                     let a := calldataload(add(noteIndex, 0x20))
                     let c := challenge
 
@@ -121,16 +127,17 @@ contract JoinSplit is LibEIP712 {
                     // We can recover \bar{k}_{n-1}.
                     // If m=n then \bar{k}_{n-1} = \sum_{i=0}^{n-1}\bar{k}_i + k_{public}
                     // else \bar{k}_{n-1} = \sum_{i=0}^{m-1}\bar{k}_i - \sum_{i=m}^{n-1}\bar{k}_i - k_{public}
+
                     switch eq(add(i, 0x01), n)
                     case 1 {
                         k := kn
 
                         // if all notes are input notes, invert k
-                        if eq(m, n) {
+                        switch eq(m, n)
+                        case 1 {
                             k := sub(gen_order, k)
                         }
                     }
-                    case 0 { k := calldataload(noteIndex) }
 
                     // Check this commitment is well formed...
                     validateCommitment(noteIndex, k, a)
@@ -142,7 +149,7 @@ contract JoinSplit is LibEIP712 {
 
                         // before we update k, update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
                         kn := addmod(kn, sub(gen_order, k), gen_order)
-                        let x := mod(mload(0x00), gen_order)
+                        let x := mload(0x00)
                         k := mulmod(k, x, gen_order)
                         a := mulmod(a, x, gen_order)
                         c := mulmod(challenge, x, gen_order)
@@ -210,13 +217,24 @@ contract JoinSplit is LibEIP712 {
                     // we then calculate \gamma^{cx} and add into \gamma_{acc}
                     if gt(i, m) {
                         mstore(0x60, c)
-                        result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
+
+                        result := and(
+                            result,
+                            and(
+                                and(
+                                    staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40),
+                                    staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40)
+                                ),
+                                staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40)
+                            )
+                        )
+                        /* result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
 
                         // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
                         result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
 
                         // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
-                        result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40))
+                        result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40)) */
                     }
 
                     // throw transaction if any calls to precompiled contracts failed

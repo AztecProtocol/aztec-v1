@@ -53,12 +53,13 @@ library DividendComputationABIEncoder {
 
             // structure of a `note`
             // 0x00 - 0x20 = size of `note`
-            // 0x20 - 0x40 = `owner`
-            // 0x40 - 0x60 = `noteHash`
-            // 0x60 - 0x80 = size of note `data`
-            // 0x80 - 0xa0 = compressed note coordinate `gamma` (part of `data`)
-            // 0xa0 - 0xc0 = compressed note coordinate `sigma` (part of `data`)
-            // 0xc0 - ???? = remaining note metadata
+            // 0x20 - 0x40 = `noteType`
+            // 0x40 - 0x60 = `owner`
+            // 0x60 - 0x80 = `noteHash`
+            // 0x80 - 0xa0 = size of note `data`
+            // 0xa0 - 0xc0 = compressed note coordinate `gamma` (part of `data`)
+            // 0xc0 - 0xe0 = compressed note coordinate `sigma` (part of `data`)
+            // 0xe0 - ???? = remaining note metadata
 
             // `proofOutputs` must form a monolithic block of memory that we can return.
             // `s` points to the memory location of the start of the current note
@@ -84,47 +85,49 @@ library DividendComputationABIEncoder {
             for { let i := 0 } lt(i, m) { i := add(i, 0x01) } {
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
                 // copy note data to 0x00 - 0x80
-                calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
+                mstore(0x00, 0x01) // store note type at 0x00
+                calldatacopy(0x20, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
-                // construct note hash
-                mstore(0xc0, keccak256(0x00, 0x80))
 
                 // store note length in `s`
-                mstore(s, 0xa0)
+                mstore(s, 0xc0)
+                // store note type (UXTO = 1) in `s+0x20`
+                mstore(add(s, 0x20), 0x01)
                 // store note owner in `s + 0x20`
-                mstore(add(s, 0x20), calldataload(inputOwners))
+                mstore(add(s, 0x40), calldataload(inputOwners))
             
-                // store note hash in `s + 0x40`
-                mstore(add(s, 0x40), mload(0xc0))
-                // store note metadata length in `s + 0x60` (just the coordinates)
-                mstore(add(s, 0x60), 0x40)
+                // store note hash in `s + 0x60`
+                mstore(add(s, 0x60), keccak256(0x00, 0xa0))
+
+                // store note metadata length in `s + 0x80` (just the coordinates)
+                mstore(add(s, 0x80), 0x40)
                 // store compressed note coordinate gamma in `s + 0x80`
                 mstore(
-                add(s, 0x80),
-                or(
-                    calldataload(add(noteIndex, 0x40)),
-                    mul(
-                    and(calldataload(add(noteIndex, 0x60)), 0x01),
-                    0x8000000000000000000000000000000000000000000000000000000000000000
+                    add(s, 0xa0),
+                    or(
+                        calldataload(add(noteIndex, 0x40)),
+                        mul(
+                            and(calldataload(add(noteIndex, 0x60)), 0x01),
+                            0x8000000000000000000000000000000000000000000000000000000000000000
+                        )
                     )
-                )
                 )
                 // store compressed note coordinate sigma in `s + 0xa0`
                 mstore(
-                add(s, 0xa0),
-                or(
-                    calldataload(add(noteIndex, 0x80)),
-                    mul(
-                    and(calldataload(add(noteIndex, 0xa0)), 0x01),
-                    0x8000000000000000000000000000000000000000000000000000000000000000
+                    add(s, 0xc0),
+                    or(
+                        calldataload(add(noteIndex, 0x80)),
+                        mul(
+                            and(calldataload(add(noteIndex, 0xa0)), 0x01),
+                            0x8000000000000000000000000000000000000000000000000000000000000000
+                        )
                     )
-                )
                 )
                 // compute the relative offset to index this note in our returndata
                 mstore(add(add(inputPtr, 0x40), mul(i, 0x20)), sub(s, inputPtr)) // relative offset to note
         
                 // increase s by note length
-                s := add(s, 0xc0)
+                s := add(s, 0xe0)
             }
 
             // transition between input and output notes
@@ -143,41 +146,44 @@ library DividendComputationABIEncoder {
                 // get size of metadata
                 let metadataLength := calldataload(add(sub(metadata, 0x40), metadataIndex))
 
-                // copy note data to 0x00 - 0x80
-                calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
+                mstore(0x00, 0x01) // store note type at 0x00
+                // copy note data to 0x20 - 0xa0
+                calldatacopy(0x20, add(noteIndex, 0x40), 0x80) // get gamma, sigma
 
                 // store note length in `s`
-                mstore(s, add(0xa0, metadataLength))
+                mstore(s, add(0xc0, metadataLength))
+                // store note type (UXTO = 1) in `s+0x20`
+                mstore(add(s, 0x20), 0x01)
                 // store the owner of the note in `s + 0x20`
-                mstore(add(s, 0x20), calldataload(add(outputOwners, mul(sub(i, m), 0x20))))
+                mstore(add(s, 0x40), calldataload(add(outputOwners, mul(sub(i, m), 0x20))))
                 // store note hash
-                mstore(add(s, 0x40), keccak256(0x00, 0x80))
+                mstore(add(s, 0x60), keccak256(0x00, 0xa0))
                 // store note metadata length if `s + 0x60`
-                mstore(add(s, 0x60), add(0x40, metadataLength))
+                mstore(add(s, 0x80), add(0x40, metadataLength))
                 // store compressed note coordinate gamma in `s + 0x80`
                 mstore(
-                    add(s, 0x80),
+                    add(s, 0xa0),
                     or(
-                        mload(0x00),
+                        mload(0x20),
                         mul(
-                            and(mload(0x20), 0x01),
+                            and(mload(0x40), 0x01),
                             0x8000000000000000000000000000000000000000000000000000000000000000
                         )
                     )
                 )
                 // store compressed note coordinate sigma in `s + 0xa0`
                 mstore(
-                add(s, 0xa0),
+                add(s, 0xc0),
                 or(
-                    mload(0x40),
+                    mload(0x60),
                     mul(
-                        and(mload(0x60), 0x01),
+                        and(mload(0x80), 0x01),
                         0x8000000000000000000000000000000000000000000000000000000000000000
                     )
                 )
                 )
                 // copy metadata into `s + 0xc0`
-                calldatacopy(add(s, 0xc0), add(metadataIndex, sub(metadata, 0x20)), metadataLength)
+                calldatacopy(add(s, 0xe0), add(metadataIndex, sub(metadata, 0x20)), metadataLength)
                 // compute the relative offset to index this note in our returndata
                 mstore(add(add(inputPtr, 0x40), mul(sub(i, m), 0x20)), sub(s, inputPtr)) // relative offset to note
 

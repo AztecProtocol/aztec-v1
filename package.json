@@ -8,6 +8,7 @@
     "packages/**"
   ],
   "devDependencies": {
+    "eslint-import-resolver-lerna": "^1.1.0",
     "lerna": "^3.13.1"
   },
   "scripts": {
