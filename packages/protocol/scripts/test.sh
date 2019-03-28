@@ -56,4 +56,14 @@ if [ "$MODE" = "coverage" ]; then
   fi
 fi
 
+if [ "$MODE" = "profile" ]; then
+  ./node_modules/.bin/istanbul report html lcov
+  
+  if [ "$CONTINUOUS_INTEGRATION" = true ]; then
+    cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
+  fi
+fi
+
+
+
 
