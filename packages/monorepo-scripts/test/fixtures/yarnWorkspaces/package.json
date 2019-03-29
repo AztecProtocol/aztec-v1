@@ -1,0 +1,20 @@
+{
+    "name": "msr-test-yarn",
+    "author": "Dave Houlbrooke <dave@shax.com",
+    "version": "0.0.0-semantically-released",
+    "private": true,
+    "license": "0BSD",
+    "engines": {
+        "node": ">=8.3"
+    },
+    "workspaces": [
+        "packages/*"
+    ],
+    "release": {
+        "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/release-notes-generator"
+        ],
+        "noCi": true
+    }
+}

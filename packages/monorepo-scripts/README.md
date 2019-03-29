@@ -1,20 +1,6 @@
-# Contract Artifacts
+## Monorepo Scripts
 
-Smart contract compilation artifacts for the latest version of AZTEC.
-
-## Usage
-
-Install the module:
-
-```bash
-$ yarn add @aztec/contract-artifacts
-```
-
-And import it in your project:
-
-```js
-const aztecContractArtifacts = require('@aztec/contract-artifacts');
-```
+Scripts related to managing the AZTEC monorepo.
 
 ## Contributing
 

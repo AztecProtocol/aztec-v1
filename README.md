@@ -82,7 +82,7 @@ For more information, check out our [documentation](https://aztecprotocol.github
 
 ### Pre Requisites
 
-Make sure you are using Yarn. To install using brew:
+Make sure you are using Yarn ^1.15.2. To install using brew:
 
 ```bash
 brew install yarn

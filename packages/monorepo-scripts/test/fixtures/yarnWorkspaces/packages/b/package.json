@@ -1,0 +1,11 @@
+{
+    "name": "msr-test-b",
+    "version": "0.0.0",
+    "dependencies": {
+        "msr-test-a": "*"
+    },
+    "devDependencies": {
+        "msr-test-c": "*",
+        "left-pad": "latest"
+    }
+}

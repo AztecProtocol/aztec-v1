@@ -1,0 +1,6 @@
+{
+    "version": "0.0.0",
+    "devDependencies": {
+        "multi-semantic-release-test-a": "*"
+    }
+}

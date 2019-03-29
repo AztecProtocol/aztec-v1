@@ -1,0 +1,10 @@
+{
+    "name": "msr-test-yarn-undefined",
+    "author": "Dave Houlbrooke <dave@shax.com",
+    "version": "0.0.0-semantically-released",
+    "private": true,
+    "license": "0BSD",
+    "engines": {
+        "node": ">=8.3"
+    }
+}

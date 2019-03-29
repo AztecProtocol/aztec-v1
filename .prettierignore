@@ -9,4 +9,5 @@ lib/
 node_modules/
 
 # files
+.releaserc
 package.json
