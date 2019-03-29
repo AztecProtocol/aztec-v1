@@ -69,17 +69,17 @@ contract LibEIP712 {
         // ));
 
         assembly {
-            // Load free memory pointer
+            // Load free memory pointer. We're not going to use it - we're going to overwrite it!
+            // We need 0x60 bytes of memory for this hash,
+            // cheaper to overwrite the free memory pointer at 0x40, and then replace it, than allocating free memory
             let memPtr := mload(0x40)
-
-            mstore(memPtr, 0x1901000000000000000000000000000000000000000000000000000000000000)  // EIP191 header
-            mstore(add(memPtr, 0x02), eip712DomainHash)                                         // EIP712 domain hash
-            mstore(add(memPtr, 0x22), _hashStruct)                                              // Hash of struct
-
-            // Compute hash
-            _result := keccak256(memPtr, 0x42)
+            mstore(0x00, 0x1901)               // EIP191 header
+            mstore(0x20, eip712DomainHash)     // EIP712 domain hash
+            mstore(0x40, _hashStruct)          // Hash of struct
+            _result := keccak256(0x1e, 0x42)   // compute hash
+            // replace memory pointer
+            mstore(0x40, memPtr)
         }
-        return _result;
     }
 
     /// @dev Extracts the address of the signer with ECDSA.
@@ -89,31 +89,37 @@ contract LibEIP712 {
     function recoverSignature(
         bytes32 _message,
         bytes memory _signature
-    ) internal view returns (address _signer) {
+    ) internal view returns (address signer) {
         bool result;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
         assembly {
-            v := mload(add(_signature, 0x20))
-            r := mload(add(_signature, 0x40))
-            s := mload(add(_signature, 0x60))
-            let memPtr := mload(0x40)
-            mstore(memPtr, _message)
-            mstore(add(memPtr, 0x20), v)
-            mstore(add(memPtr, 0x40), r)
-            mstore(add(memPtr, 0x60), s)
+            // Here's a little trick we can pull. We expect `_signature` to be a byte array, of length 0x60, with
+            // 'v', 'r' and 's' located linearly in memory. Preceeding this is the length parameter of `_signature`.
+            // If we *replace* this with the signature msg, we get a memory block that equals what the precompile needs
+
+            // load length as a temporary variable
+            let byteLength := mload(_signature)
+
+            // store the signature message
+            mstore(_signature, _message)
+
+            // load 'v' - we need it for a condition check
+            let v := mload(add(_signature, 0x20))
+
             result := and(
                 and(
-                    eq(mload(_signature), 0x60),
-                    or(eq(v, 27), eq(v, 28))
+                    eq(byteLength, 0x60), // validate signature length == 0x60 bytes
+                    or(eq(v, 27), eq(v, 28)) // validate v == 27 or v == 28
                 ),
-                staticcall(gas, 0x01, memPtr, 0x80, memPtr, 0x20)
+                staticcall(gas, 0x01, _signature, 0x80, _signature, 0x20) // validate call to precompile succeeds
             )
-            _signer := mload(memPtr)
+            signer := mload(_signature) // load signing address
+            mstore(_signature, byteLength) // and put the byte length back where it belongs
         }
-        require(result, "signature recovery failed");
-        require(_signer != address(0), "signer address cannot be 0");
+        // wrap failure states in a single if test, so that happy path only has 1 conditional jump
+        if (!(result && (signer == address(0x0)))) {
+            require(signer != address(0), "signer address cannot be 0");
+            require(result, "signature recovery failed");
+        }
     }
 }
 
