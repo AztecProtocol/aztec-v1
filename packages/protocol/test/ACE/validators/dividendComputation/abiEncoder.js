@@ -70,6 +70,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
                 outputNotes,
                 publicOwner,
                 publicValue: 0,
+                challenge,
             }]);
 
             const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(

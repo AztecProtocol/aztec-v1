@@ -55,8 +55,9 @@ library BilateralSwapABIEncoder {
             // 0x240 - 0x260 = relative offset between `t` and `outputNotes`
             // 0x260 - 0x280 = `publicOwner`
             // 0x280 - 0x2a0 = `publicValue`
+            // 0x2a0 - 0x2c0 = `challenge`
 
-            // `inputNotes` starts at 0x2a0
+            // `inputNotes` starts at 0x2c0
             // structure of `inputNotes` and `outputNotes`
             // 0x00 - 0x20 = byte length of notes array
             // 0x20 - 0x40 = number of notes = 1
@@ -127,27 +128,28 @@ library BilateralSwapABIEncoder {
             * 0x40 : 0x60 = relative offset to `bytes outputNotes`
             * 0x60 : 0x80 = publicOwner
             * 0x80 : 0xa0 = publicValue
-            * 0xa0 : 0xa0 + L1 = `bytes inputNotes` (L1 = 0x140 bytes)
-            * 0xa0 + L1 : 0xa0 + L1 + L2 = `bytes inputNotes`
+            * 0xa0 : 0xc0 = challenge
+            * 0xc0 : 0xc0 + L1 = `bytes inputNotes` (L1 = 0x140 bytes)
+            * 0xc0 + L1 : 0xc0 + L1 + L2 = `bytes inputNotes`
             *
             * Start of proofOutput = 0x200
             **/
 
             // length of proofOutput is at 0x200. We don't know that yet, so leave blank
 
-            // relative offset to inputNotes = 0xa0 (5 words)
-            mstore(0x220, 0xa0)                            // location of inputNotes
+            // relative offset to inputNotes = 0xc0 (6 words)
+            mstore(0x220, 0xc0)                            // location of inputNotes
 
             // we know that inputNotes has 1 entry, and input notes don't have metadata.
             // So we actually know the complete size of `bytes inputNotes`
             // (it's 0x140 bytes, we'll get to that in a bit)
-            // => relative offset to outputNotes = 0x140 + 0xa0 = 0x1e0
-            mstore(0x240, 0x1e0)                           // location of outputNotes
+            // => relative offset to outputNotes = 0x140 + 0xc0 = 0x200
+            mstore(0x240, 0x200)                           // location of outputNotes
 
             // bilateral swap proof hardcodes `publicOwner` and `publicValue` to 0 (no public tokens)
             mstore(0x260, 0x00)                             // publicOwner
             mstore(0x280, 0x00)                             // publicValue
-
+            mstore(0x2a0, calldataload(0x124))              // challenge
             /**
             * Encoding of inputNotes
             * 0x00 : 0x20 = byte length of `inputNotes` (0x120)
@@ -163,14 +165,14 @@ library BilateralSwapABIEncoder {
             * of a dynamic bytes array does not include itself in the length calculation
             **/
 
-            // 0x2a0 = length of inputNotes = 0x120
-            mstore(0x2a0, 0x120)
+            // 0x2c0 = length of inputNotes = 0x120
+            mstore(0x2c0, 0x120)
 
-            // 0x2c0 = number of notes (1)
-            mstore(0x2c0, 0x01) // 1 input note
+            // 0x2e0 = number of notes (1)
+            mstore(0x2e0, 0x01) // 1 input note
 
-            // 0x2e0 = relative offset to input note (0x60)
-            mstore(0x2e0, 0x60) // relative offset to note data
+            // 0x300 = relative offset to input note (0x60)
+            mstore(0x300, 0x60) // relative offset to note data
 
             /**
             * Encoding of input note
@@ -182,7 +184,7 @@ library BilateralSwapABIEncoder {
             * 0xa0 : 0xc0 = note coordinate 'gamma' (compressed)
             * 0xc0 : 0xe0 = note coordinate 'sigma' (compressed)
             *
-            * Start of note = 0x300
+            * Start of note = 0x320
             * The size of this note = 0xe0 bytes, so we store 0xc0 in the length parameter
             **/
 
@@ -197,20 +199,20 @@ library BilateralSwapABIEncoder {
             // input note is notes[0] => we need to point to notes + 0x60
             calldatacopy(0x20, add(notes, 0x60), 0x80) // copy gamma, sigma into 0x20 - 0xa0
 
-            // 0x300 = length of note (0xc0)
-            mstore(0x300, 0xc0)
+            // 0x320 = length of note (0xc0)
+            mstore(0x320, 0xc0)
 
-            // 0x320 = note type (UXTO type, 0x01)
-            mstore(0x320, 0x01) // note type
+            // 0x340 = note type (UXTO type, 0x01)
+            mstore(0x340, 0x01) // note type
 
-            // 0x340 = note owners. We want the 1st entry in `noteOwners` (calldataload(noteOwners))
-            mstore(0x340, calldataload(noteOwners)) // note owner
+            // 0x360 = note owners. We want the 1st entry in `noteOwners` (calldataload(noteOwners))
+            mstore(0x360, calldataload(noteOwners)) // note owner
 
-            // 0x360 = note hash, which is the hash of memory from 0x00 - 0xa0
-            mstore(0x360, keccak256(0x00, 0xa0)) // note hash
+            // 0x380 = note hash, which is the hash of memory from 0x00 - 0xa0
+            mstore(0x380, keccak256(0x00, 0xa0)) // note hash
 
-            // 0x380 = noteData length (0x40, no metadata)
-            mstore(0x380, 0x40)
+            // 0x3a0 = noteData length (0x40, no metadata)
+            mstore(0x3a0, 0x40)
 
             // We now need to store compressed note coordinates.
             // We store them in compressed form, as this stuff will be emitted as an event and is not required
@@ -221,9 +223,9 @@ library BilateralSwapABIEncoder {
             // bn128 field elements are only 254 bits long, so we know that we won't override x-coordinate data
             // (we already have the note coords in memory, so we load from memory instead of calldata)
 
-            // 0x3a0 = gamma
+            // 0x3c0 = gamma
             mstore(
-                0x3a0,
+                0x3c0,
                 or(
                     mload(0x20), // load x coordinate
                     mul(         // multiply by (y & 1 ? 2^255 : 0)
@@ -233,9 +235,9 @@ library BilateralSwapABIEncoder {
                 )
             )
             
-            // 0x3c0 = sigma
+            // 0x3e0 = sigma
             mstore(
-                0x3c0,
+                0x3e0,
                 or(
                     mload(0x60),
                     mul(
@@ -255,16 +257,16 @@ library BilateralSwapABIEncoder {
             * 0x40 : 0x60 = relative offset to 1st output note (0x60)
             * 0x60 : 0x60 + L    = 1st output note data
             *
-            * Start of outputNotes = 0x3e0
+            * Start of outputNotes = 0x400
             **/
 
-            // 0x3e0 = byte length of output notes. We don't know what this is so leave blank for now
+            // 0x400 = byte length of output notes. We don't know what this is so leave blank for now
 
-            // 0x400 = number of output notes (0x01)
-            mstore(0x400, 0x01)
+            // 0x420 = number of output notes (0x01)
+            mstore(0x420, 0x01)
 
-            // 0x420 = relative offset to output note data (0x60)
-            mstore(0x420, 0x60)
+            // 0x440 = relative offset to output note data (0x60)
+            mstore(0x440, 0x60)
 
             /**
             * Encoding of output note
@@ -277,7 +279,7 @@ library BilateralSwapABIEncoder {
             * 0xc0 : 0xe0 = note coordinate 'sigma' (compressed)
             * 0xe0 : 0xe0 + L = note metadata
             *
-            * Start of note = 0x440
+            * Start of note = 0x460
             * The size of this note = 0xe0 bytes, so we store 0xc0 in the length parameter
             **/
 
@@ -292,20 +294,20 @@ library BilateralSwapABIEncoder {
             // => calldata pointer = notes + 0x1e0
             calldatacopy(0x20, add(notes, 0x1e0), 0x80) // get gamma, sigma
 
-            // 0x440 = byte length of output note. Leave blank for now
+            // 0x460 = byte length of output note. Leave blank for now
 
-            // 0x460 = note type (0x01)
-            mstore(0x460, 0x01)      // note type
+            // 0x480 = note type (0x01)
+            mstore(0x480, 0x01)      // note type
 
-            // 0x480 = note owner. We are accessing `notes[2]`, therefore
+            // 0x4a0 = note owner. We are accessing `notes[2]`, therefore
             // the note owner = noteOwners[2].
             // i.e. noteOwners + 0x40
-            mstore(0x480, calldataload(add(noteOwners, 0x40))) // note owner
+            mstore(0x4a0, calldataload(add(noteOwners, 0x40))) // note owner
 
-            // 0x4a0 = note hash
-            mstore(0x4a0, keccak256(0x00, 0xa0))
+            // 0x4c0 = note hash
+            mstore(0x4c0, keccak256(0x00, 0xa0))
 
-            // 0x4c0 = noteData length. To get this, we need to identify our metadata length
+            // 0x4e0 = noteData length. To get this, we need to identify our metadata length
             // `metadataPtr` points to the relative offset, in the `metadata` array, to the first metadata entry
             // ABI encoding of the input data should encode 2 metadata entries.
             // => relative offset to this note's metadata = `calldataload(metadataPtr)`
@@ -330,12 +332,12 @@ library BilateralSwapABIEncoder {
             // `calldataload` on our offset
             let metadataLength := calldataload(add(sub(metadataPtr, 0x40), metadataIndex))
 
-            // 0x4c0 = noteData length = 0x40 + metadata length
-            mstore(0x4c0, add(0x40, metadataLength))
+            // 0x4e0 = noteData length = 0x40 + metadata length
+            mstore(0x4e0, add(0x40, metadataLength))
 
-            // 0x4e0 = compressed note coordinate gamma
+            // 0x500 = compressed note coordinate gamma
             mstore(
-                0x4e0,
+                0x500,
                 or(
                     mload(0x20),
                     mul(
@@ -345,9 +347,9 @@ library BilateralSwapABIEncoder {
                 )
             )
 
-            // 0x500 = compressed note coordinate sigma
+            // 0x520 = compressed note coordinate sigma
             mstore(
-                0x500,
+                0x520,
                 or(
                     mload(0x60),
                     mul(
@@ -357,29 +359,29 @@ library BilateralSwapABIEncoder {
                 )
             )
             
-            // To complete `noteData`, we need to copy note metadata into memory (0x520)
+            // To complete `noteData`, we need to copy note metadata into memory (0x540)
             // We know that metadataIndex + metadataPtr - 0x40 points to the start of the metadata entry in calldata.
             // But the first word is the length of the metadata entry, which we don't want.
             // So we need to point to the second word (the byte array data).
             // i.e. we want to start copying at (metadataIndex + metadataPtr - 0x20)
             // and we want to copy `metadataLength` number of bytes.
-            calldatacopy(0x520, add(metadataIndex, sub(metadataPtr, 0x20)), metadataLength)
+            calldatacopy(0x540, add(metadataIndex, sub(metadataPtr, 0x20)), metadataLength)
 
             // We now need to work backwards and fill in the parts of `bytes proofOutput` that we left blank,
             // as we now can identify the size of the array
 
-            // 0x440 points to the size of the output note. The actual size is 0xe0 + metadataLength.
+            // 0x460 points to the size of the output note. The actual size is 0xe0 + metadataLength.
             // So we record 0xc0 + metadataLength
             // (because the 'size' of a byte array does not take into account the word needed to record the size)
-            mstore(0x440, add(0xc0, metadataLength))  // update size of note
+            mstore(0x460, add(0xc0, metadataLength))  // update size of note
 
-            // 0x3e0 = the size of `bytes outputNotes`.
+            // 0x400 = the size of `bytes outputNotes`.
             // Raw size = 0x140 + metadataLength, so record 0x120 + metadataLength
-            mstore(0x3e0, add(0x120, metadataLength)) // update size of outputNotes
+            mstore(0x400, add(0x120, metadataLength)) // update size of outputNotes
 
             // 0x200 = the size of `bytes proofOutput`
-            // Raw size = 0x320 + metadataLength, so record 0x300 + metadataLength
-            mstore(0x200, add(0x300, metadataLength))
+            // Raw size = 0x340 + metadataLength, so record 0x340 + metadataLength
+            mstore(0x200, add(0x320, metadataLength))
 
             // Great! We've now finished writing the 1st proof output.
             // We now need to write the ABI encoding of the 2nd proof output entry.
@@ -387,8 +389,8 @@ library BilateralSwapABIEncoder {
             // 0x1e0 points to the relative offset in `bytes proofOutputs` to the second proof entry.
             // This will be equal to the size of the 1st proof, plus the 0x80 preceeding bytes
             // that are used to record `bytes proofOutputs`
-            // i.e. relative offset = 0x320 + 0x80 + metadataLength = 0x3a0 + metadataLength
-            mstore(0x1e0, add(0x3a0, metadataLength))
+            // i.e. relative offset = 0x340 + 0x80 + metadataLength = 0x3c0 + metadataLength
+            mstore(0x1e0, add(0x3c0, metadataLength))
 
             /** 
             * proofOutput[1]
@@ -397,15 +399,15 @@ library BilateralSwapABIEncoder {
             // When writing data into proofOutputs[1], we cannot use an absolute offset as 
             // metadataLength is not known at compile time.
             // `proofPtr` points to the start of `proofOutputs[1]`
-            let proofPtr := add(0x520, metadataLength)
+            let proofPtr := add(0x540, metadataLength)
 
             // (proofPtr) = size of proofOutput (leave blank for now)
 
-            // (proofPtr + 0x20) = offset to inputNotes
-            mstore(add(proofPtr, 0x20), 0xa0)
+            // (proofPtr + 0x20) = offset to inputNotes (0xc0)
+            mstore(add(proofPtr, 0x20), 0xc0)
 
-            // (proofPtr + 0x40) = offset to outputNotes (0x1e0)
-            mstore(add(proofPtr, 0x40), 0x1e0)
+            // (proofPtr + 0x40) = offset to outputNotes (0x200)
+            mstore(add(proofPtr, 0x40), 0x200)
 
             // (proofPtr + 0x60) = publicOwner (0)
             mstore(add(proofPtr, 0x60), 0x00) // publicOwner
@@ -413,25 +415,30 @@ library BilateralSwapABIEncoder {
             // (proofPtr + 0x80) = publicValue (0)
             mstore(add(proofPtr, 0x80), 0x00) // publicValue
 
+            // (proofPtr + 0xa0) = challenge
+            // we hash the challenge to get the second proof output's challenge - to preserve uniqueness
+            mstore(0xe0, calldataload(0x124))
+            mstore(add(proofPtr, 0xa0), keccak256(0xe0, 0x20)) // challenge
+
             /** 
             * proofOutput[1].inputNotes
             *
-            * starts at (proofPtr + 0xa0)
+            * starts at (proofPtr + 0xc0)
             **/
 
-            // (proofPtr + 0xa0) = byte size of inputNotes (0x120)
-            mstore(add(proofPtr, 0xa0), 0x120)
+            // (proofPtr + 0xc0) = byte size of inputNotes (0x120)
+            mstore(add(proofPtr, 0xc0), 0x120)
 
-            // (proofPtr + 0xc0) = number of input notes (0x01)
-            mstore(add(proofPtr, 0xc0), 0x01)
+            // (proofPtr + 0xe0) = number of input notes (0x01)
+            mstore(add(proofPtr, 0xe0), 0x01)
 
-            // (proofPtr + 0xe0) = relative offset to input note data (0x60)
-            mstore(add(proofPtr, 0xe0), 0x60)
+            // (proofPtr + 0x100) = relative offset to input note data (0x60)
+            mstore(add(proofPtr, 0x100), 0x60)
 
             /** 
             * proofOutput[1].inputNotes[0]
             *
-            * starts at (proofPtr + 0x100)
+            * starts at (proofPtr + 0x120)
             **/
 
             // input note = notes[3]
@@ -439,24 +446,24 @@ library BilateralSwapABIEncoder {
             // copy note data into scratch memory to hash
             calldatacopy(0x20, add(notes, 0x2a0), 0x80)
 
-            // (proofPtr + 0x100) = byte length of input note (0xc0)
-            mstore(add(proofPtr, 0x100), 0xc0) // length of input note
+            // (proofPtr + 0x120) = byte length of input note (0xc0)
+            mstore(add(proofPtr, 0x120), 0xc0) // length of input note
 
-            // (proofPtr + 0x120) = note type (UXTO type, 0x01)
-            mstore(add(proofPtr, 0x120), 0x01) // note type
+            // (proofPtr + 0x140) = note type (UXTO type, 0x01)
+            mstore(add(proofPtr, 0x140), 0x01) // note type
 
-            // (proofPtr + 0x140) = note owner = noteOwners[3]
-            mstore(add(proofPtr, 0x140), calldataload(add(noteOwners, 0x60))) // note owner
+            // (proofPtr + 0x160) = note owner = noteOwners[3]
+            mstore(add(proofPtr, 0x160), calldataload(add(noteOwners, 0x60))) // note owner
 
-            // (proofPtr + 0x160) = note hash
-            mstore(add(proofPtr, 0x160), keccak256(0x00, 0xa0)) // note hash
+            // (proofPtr + 0x180) = note hash
+            mstore(add(proofPtr, 0x180), keccak256(0x00, 0xa0)) // note hash
 
-            // (proofPtr + 0x180) = noteData length (0x40 bytes)
-            mstore(add(proofPtr, 0x180), 0x40)
+            // (proofPtr + 0x1a0) = noteData length (0x40 bytes)
+            mstore(add(proofPtr, 0x1a0), 0x40)
 
-            // (proofPtr + 0x1a0) = compressed coordinate 'gamma'
+            // (proofPtr + 0x1c0) = compressed coordinate 'gamma'
             mstore(
-                add(proofPtr, 0x1a0),
+                add(proofPtr, 0x1c0),
                 or(
                     mload(0x20),
                     mul(
@@ -466,9 +473,9 @@ library BilateralSwapABIEncoder {
                 )
             )
 
-            // (proofPtr + 0x1c0) = compressed coordinate 'sigma'
+            // (proofPtr + 0x1e0) = compressed coordinate 'sigma'
             mstore(
-                add(proofPtr, 0x1c0),
+                add(proofPtr, 0x1e0),
                 or(
                     mload(0x60),
                     mul(
@@ -481,49 +488,49 @@ library BilateralSwapABIEncoder {
             /** 
             * proofOutput[1].outputNotes
             *
-            * starts at (proofPtr + 0x1e0)
+            * starts at (proofPtr + 0x200)
             **/
 
-            // (proofPtr + 0x1e0) = byte length of output notes, leave blank for now
+            // (proofPtr + 0x200) = byte length of output notes, leave blank for now
 
-            // (proofPtr + 0x200) = number of output notes (0x01)
-            mstore(add(proofPtr, 0x200), 0x01)
+            // (proofPtr + 0x220) = number of output notes (0x01)
+            mstore(add(proofPtr, 0x220), 0x01)
 
-            // (proofPtr + 0x220) = offset to output notes (0x60)
-            mstore(add(proofPtr, 0x220), 0x60)
+            // (proofPtr + 0x240) = offset to output notes (0x60)
+            mstore(add(proofPtr, 0x240), 0x60)
 
             /** 
             * proofOutput[1].outputNotes[0]
             *
-            * starts at (proofPtr + 0x240)
+            * starts at (proofPtr + 0x260)
             **/
             // output note = notes[1]
             // => offset = notes + 0x60 + 0xc0 = notes + 0x120
             // copy note data into scratch memory to hash
             calldatacopy(0x20, add(notes, 0x120), 0x80)
 
-            // (proofPtr + 0x240) = length of note, leave blank for now
+            // (proofPtr + 0x260) = length of note, leave blank for now
 
-            // (proofPtr + 0x260) = note type (UXTO type, 0x01)
-            mstore(add(proofPtr, 0x260), 0x01) // note type
+            // (proofPtr + 0x280) = note type (UXTO type, 0x01)
+            mstore(add(proofPtr, 0x280), 0x01) // note type
 
-            // (proofPtr + 0x280) = note owner (noteOwners[1])
-            mstore(add(proofPtr, 0x280), calldataload(add(noteOwners, 0x20)))
+            // (proofPtr + 0x2a0) = note owner (noteOwners[1])
+            mstore(add(proofPtr, 0x2a0), calldataload(add(noteOwners, 0x20)))
 
-            // (proofPtr + 0x2a0) = note hash
-            mstore(add(proofPtr, 0x2a0), keccak256(0x00, 0xa0))
+            // (proofPtr + 0x2c0) = note hash
+            mstore(add(proofPtr, 0x2c0), keccak256(0x00, 0xa0))
 
             // We now need to compute the metadata length. We want to access the 2nd metadata entry,
             // at (metadataPtr + 0x20)
             metadataIndex := calldataload(add(metadataPtr, 0x20))
             metadataLength := calldataload(add(sub(metadataPtr, 0x40), metadataIndex))
 
-            // (proofPtr + 0x2c0) = noteData length (0x40 + metadataLength)
-            mstore(add(proofPtr, 0x2c0), add(0x40, metadataLength))
+            // (proofPtr + 0x2e0) = noteData length (0x40 + metadataLength)
+            mstore(add(proofPtr, 0x2e0), add(0x40, metadataLength))
 
-            // (proofPtr + 0x2e0) = compressed coordinate 'gamma'
+            // (proofPtr + 0x300) = compressed coordinate 'gamma'
             mstore(
-                add(proofPtr, 0x2e0),
+                add(proofPtr, 0x300),
                 or(
                     mload(0x20),
                     mul(
@@ -533,9 +540,9 @@ library BilateralSwapABIEncoder {
                 )
             )
 
-            // (proofPtr + 0x300) = compressed coordinate 'sigma'
+            // (proofPtr + 0x320) = compressed coordinate 'sigma'
             mstore(
-                add(proofPtr, 0x300),
+                add(proofPtr, 0x320),
                 or(
                     mload(0x60),
                     mul(
@@ -545,18 +552,18 @@ library BilateralSwapABIEncoder {
                 )
             )
 
-            // (proofPtr + 0x320) = start of note metadata
-            calldatacopy(add(proofPtr, 0x320), add(metadataIndex, sub(metadataPtr, 0x20)), metadataLength)
+            // (proofPtr + 0x340) = start of note metadata
+            calldatacopy(add(proofPtr, 0x340), add(metadataIndex, sub(metadataPtr, 0x20)), metadataLength)
 
             // Next, work backwards and fill in the remaining gaps
-            // (proofPtr + 0x240) = proofOutputs[1].outputNotes[0].length (0xc0 + metadataLength)
-            mstore(add(proofPtr, 0x240), add(0xc0, metadataLength))
+            // (proofPtr + 0x260) = proofOutputs[1].outputNotes[0].length (0xc0 + metadataLength)
+            mstore(add(proofPtr, 0x260), add(0xc0, metadataLength))
 
-            // (proofPtr + 0x1e0) = proofOutputs[1].outputNotes.length (0x120 + metadataLength)
-            mstore(add(proofPtr, 0x1e0), add(0x120, metadataLength))
+            // (proofPtr + 0x200) = proofOutputs[1].outputNotes.length (0x120 + metadataLength)
+            mstore(add(proofPtr, 0x200), add(0x120, metadataLength))
 
-            // (proofPtr) = proofOutputs[1].length = (0x300 + metadataLength)
-            mstore(proofPtr, add(0x300, metadataLength))
+            // (proofPtr) = proofOutputs[1].length = (0x320 + metadataLength)
+            mstore(proofPtr, add(0x320, metadataLength))
 
             // (0x180) = proofOutputs.length
             // We previously stored proofOutputs[0].length at 0x200
@@ -567,10 +574,10 @@ library BilateralSwapABIEncoder {
             // 4. data to record number of entries (0x20)
             
             // We stored proofOutputs[0].length at 0x200
-            // and we know that proofOutputs[1].length = 0x300 + metadataLength
-            // => length = mload(0x200) + metadataLength + 0x300 + 0x40 + 0x40 + 0x20
-            // => length = mload(0x200) + metadataLength + 0x3a0
-            mstore(0x180, add(add(0x3a0, metadataLength), mload(0x200)))
+            // and we know that proofOutputs[1].length = 0x320 + metadataLength
+            // => length = mload(0x200) + metadataLength + 0x320 + 0x40 + 0x40 + 0x20
+            // => length = mload(0x200) + metadataLength + 0x3c0
+            mstore(0x180, add(add(0x3c0, metadataLength), mload(0x200)))
 
             // Great, we've done it! Now all that is left is to return from this transaction.
             // Our return data starts at 0x160.
