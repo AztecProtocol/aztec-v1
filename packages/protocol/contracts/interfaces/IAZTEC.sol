@@ -8,6 +8,12 @@ contract IAZTEC {
         UTILITY
     }
 
+    enum NoteStatus {
+        DOES_NOT_EXIST,
+        UNSPENT,
+        SPENT
+    }
+
     // 1 * 256**(2) + 0 * 256**(1) ++ 1 * 256**(0)
     uint24 public constant JOIN_SPLIT_PROOF = 65537;
 }
