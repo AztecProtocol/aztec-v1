@@ -325,8 +325,11 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
         proofType !== 'joinSplit'
     && proofType !== 'burn'
     && proofType !== 'mint'
+
     ) {
-        throw new Error('Enter joinsplit, mint or burn in string format as the proofType variable');
+        throw new Error(
+            'Enter joinsplit, mint or burn in string format as the proofType variable'
+        );
     }
 
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
@@ -337,6 +340,14 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
         kPublic = proofUtils.hexToGroupScalar(proofData[proofData.length - 1][0], errors, true);
     } else {
         kPublic = new BN(0).toRed(groupReduction);
+    }
+
+    if (proofType === 'mint' || proofType === 'burn') {
+        const numNotes = proofData.length;
+
+        if (numNotes < 2) {
+            errors.push(errorTypes.INCORRECT_NOTE_NUMBER);
+        }
     }
 
     let runningKBar = zero.redSub(kPublic).redMul(challenge);
@@ -437,7 +448,7 @@ proofUtils.computeChallenge = (...challengeVariables) => {
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
  */
-proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
+proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdentifier = 0) => {
     notes.forEach((note) => {
         if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
             throw customError(
@@ -505,6 +516,19 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
                 numberNotes: notes.length,
             }
         );
+    }
+
+    if (proofIdentifier === 'mint' || proofIdentifier === 'burn') {
+        const numNotes = notes.length;
+        if (numNotes < 2) {
+            throw customError(
+                errorTypes.INCORRECT_NOTE_NUMBER,
+                {
+                    message: 'There is less than 2 notes, this is not possible in a mint proof',
+                    numNotes,
+                }
+            );
+        }
     }
 };
 
