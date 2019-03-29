@@ -21,7 +21,7 @@ describe('sign tests', () => {
         accounts = [secp256k1.generateAccount(), secp256k1.generateAccount()];
     });
 
-    describe('Structure specific EIP712 tests', () => {
+    describe('structure specific EIP712 tests', () => {
         const domainTypes = {
             EIP712Domain: [
                 { name: 'name', type: 'string' },
@@ -52,7 +52,7 @@ describe('sign tests', () => {
         });
     });
 
-    describe('EIP712 implementation tests for JOIN_SPLIT_SIGNATURE', () => {
+    describe('eip712 implementation tests for JOIN_SPLIT_SIGNATURE', () => {
         it('check that the signature outputted is well formed', () => {
             const verifyingContract = proofUtils.randomAddress();
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);

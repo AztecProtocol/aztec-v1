@@ -68,7 +68,7 @@ describe('bn128 tests', () => {
         expect(lhs.fromRed().eq(rhs.fromRed())).to.equal(true);
     });
 
-    it('recoverMessage correctly recovers a note message', async () => {
+    it('correctly recovers a note message', async () => {
         const k = new BN(300);
         const gamma = bn128.curve.g;
         const gammaK = bn128.curve.g.mul(k);
@@ -76,14 +76,14 @@ describe('bn128 tests', () => {
         expect(result).to.equal(300);
     });
 
-    it('recoverMessage returns 1 for point at infinity', async () => {
+    it('returns 1 for point at infinity', async () => {
         const gamma = bn128.curve.g.add(bn128.curve.g.neg());
         const gammaK = gamma;
         const result = await bn128.recoverMessage(gamma, gammaK);
         expect(result).to.equal(1);
     });
 
-    it('recoverMessage throws if cannot find a solution from 0 to K_MAX', async () => {
+    it('throws if cannot find a solution from 0 to K_MAX', async () => {
         const k = new BN(999);
         const gamma = bn128.curve.g;
         const gammaK = bn128.curve.g.mul(k);

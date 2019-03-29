@@ -1,52 +1,46 @@
 {
   "name": "aztec.js",
   "description": "AZTEC cryptography library",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "babel-runtime": "^6.26.0",
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.1",
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
-    "hash.js": "^1.1.7",
     "web3-eth-abi": "1.0.0-beta.50",
-    "web3-utils": "1.0.0-beta.50",
-    "websocket": "^1.0.28"
+    "web3-utils": "1.0.0-beta.50"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.6.0",
+    "@aztec/dev-utils": "^2.0.0",
     "@babel/core": "^7.4.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
     "@babel/preset-env": "^7.4.2",
     "braintree-jsdoc-template": "^3.3.0",
     "chai": "^4.2.0",
-    "cross-env": "^5.2.0",
-    "eslint": "^5.12.1",
-    "eslint-config-airbnb": "^17.1.0",
+    "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
-    "eslint-plugin-react": "^7.12.4",
+    "eslint-plugin-import": "^2.16.0",
     "fixpack": "^2.3.1",
     "jsdoc": "^3.5.5",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.2",
     "nyc": "^13.3.0",
     "push-dir": "^0.4.1",
     "shx": "^0.3.2",
     "sinon": "^7.2.3"
   },
   "engines": {
-    "node": ">=6.12"
+    "node": ">=8.3",
+    "yarn": ">=1.15.2"
   },
   "files": [
     "/lib"
   ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/aztec.js#readme",
   "keywords": [
     "aztec",
     "blockchain",
@@ -66,9 +60,9 @@
     "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
     "build:docs": "jsdoc --configure ./.jsdoc.json",
     "clean": "shx rm -rf ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json ./docs ./lib || true",
-    "coverage": "cross-env NODE_ENV=TEST nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
-    "lint": "eslint --ignore-path ../../.eslintignore ./",
+    "coverage": "nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
+    "lint": "eslint --ignore-path ../../.eslintignore .",
     "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --remote origin --cleanup",
-    "test": "cross-env NODE_ENV=TEST mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
+    "test": "mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
   }
 }

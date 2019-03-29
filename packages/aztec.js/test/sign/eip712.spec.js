@@ -5,7 +5,7 @@ const { padLeft, sha3 } = require('web3-utils');
 
 const eip712 = require('../../src/sign/eip712');
 
-describe('eip712.js tests', () => {
+describe('eip712 tests', () => {
     let simple;
     let complex;
     let alphabetical;
@@ -70,7 +70,7 @@ describe('eip712.js tests', () => {
         };
     });
 
-    it('encodeData correctly encodes a basic struct', () => {
+    it('correctly encodes a basic struct', () => {
         /* eslint-disable max-len */
         const encoded = eip712.encodeMessageData(simple.types, simple.primaryType, simple.message);
         expect(encoded).to.equal(
@@ -78,7 +78,7 @@ describe('eip712.js tests', () => {
         );
     });
 
-    it('encodeData correctly encodes a nested struct', () => {
+    it('correctly encodes a nested struct', () => {
         /* eslint-disable max-len */
         const encoded = eip712.encodeMessageData(complex.types, complex.primaryType, complex.message);
         const expected =
@@ -86,17 +86,17 @@ describe('eip712.js tests', () => {
         expect(encoded).to.equal(expected);
     });
 
-    it('encodeStruct correctly encodes a struct', () => {
+    it('correctly encodes a struct', () => {
         const encoded = eip712.encodeStruct(simple.primaryType, simple.types);
         expect(encoded).to.equal('Foo(bytes32 first,uint256 second,address third)');
     });
 
-    it('encodeStruct correctly orders struct strings alphabetically', () => {
+    it('correctly orders struct strings alphabetically', () => {
         const encodedAlphabetical = eip712.encodeStruct(alphabetical.primaryType, alphabetical.types);
         expect(encodedAlphabetical).to.equal('Top(ZZZ zfoo,AAA aBar)AAA(bytes32 bar)ZZZ(uint foo)');
     });
 
-    it('hashStruct correctly calculates the keccak256 hash of a struct', () => {
+    it('correctly calculates the keccak256 hash of a struct', () => {
         /* eslint-disable max-len */
         const hashed = sha3(`0x${eip712.encodeMessageData(simple.types, simple.primaryType, simple.message)}`);
         const typeData = 'Foo(bytes32 first,uint256 second,address third)';

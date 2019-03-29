@@ -26,7 +26,7 @@ describe('ecdsa tests', () => {
         expect(recovered.eq(publicKey)).to.equal(true);
     });
 
-    it('can construct a valid signature', async () => {
+    it('constructs a valid signature', async () => {
         const { publicKey, privateKey } = secp256k1.accountFromPrivateKey(
             `0x${crypto.randomBytes(32).toString('hex')}`,
         );
@@ -36,7 +36,7 @@ describe('ecdsa tests', () => {
         expect(res).to.equal(true);
     });
 
-    it('can recover signing public key', async () => {
+    it('recovers signing public key', async () => {
         const { publicKey, privateKey } = secp256k1.accountFromPrivateKey(
             `0x${crypto.randomBytes(32).toString('hex')}`,
         );

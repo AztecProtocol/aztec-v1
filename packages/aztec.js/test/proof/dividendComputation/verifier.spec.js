@@ -21,7 +21,7 @@ function randomAddress() {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
-describe('Dividend computation verifier tests', () => {
+describe('dividend computation verifier tests', () => {
     describe('success states', () => {
         it('creates a valid dividend computation proof', () => {
             /*

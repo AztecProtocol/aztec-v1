@@ -42,7 +42,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(isHex('x1234')).to.equal(false);
     });
 
-    it('outputCoder can encode output note', () => {
+    it('can encode output note', () => {
         const encoded = new HexString(outputCoder.encodeOutputNote(notes[0]));
         expect(isHex(encoded)).to.equal(true);
         expect(encoded.hexLength()).to.equal(0xe1);
@@ -56,7 +56,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(secp256k1.decompressHex(encoded.slice(0xc0)).eq(notes[0].ephemeral.getPublic())).to.equal(true);
     });
 
-    it('outputCoder can encode input note', () => {
+    it('can encode input note', () => {
         const encoded = new HexString(outputCoder.encodeInputNote(notes[0]));
         expect(isHex(encoded)).to.equal(true);
         expect(encoded.hexLength()).to.equal(0xc0);
@@ -69,7 +69,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(bn128.decompressHex(encoded.slice(0xa0, 0xc0)).eq(notes[0].sigma)).to.equal(true);
     });
 
-    it('outputCoder can encode notes', () => {
+    it('can encode notes', () => {
         const inputNotes = [notes[0], notes[2], notes[5]];
         const encoded = new HexString(outputCoder.encodeNotes(inputNotes, true));
 
@@ -89,7 +89,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(encoded.hexLength()).to.equal(sum);
     });
 
-    it('outputCoder can encode a proof output', () => {
+    it('can encode a proof output', () => {
         const inputNotes = [notes[0], notes[1]];
         const outputNotes = [notes[2], notes[3], notes[4]];
         const publicOwner = accounts[5].address;
@@ -128,7 +128,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(encoded.hexLength()).to.equal(totalLength);
     });
 
-    it('outputCoder can encode proof outputs', () => {
+    it('can encode proof outputs', () => {
         const proofs = [
             {
                 inputNotes: [notes[0], notes[1]],
@@ -162,7 +162,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(encoded.hexLength()).to.equal(sum);
     });
 
-    it('outputCoder can decode an encoded output note', () => {
+    it('can decode an encoded output note', () => {
         const encoded = outputCoder.encodeOutputNote(notes[0]);
         const result = outputCoder.decodeOutputNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
@@ -172,7 +172,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(result.noteHash).to.equal(notes[0].noteHash);
     });
 
-    it('outputCoder can decode an encoded input note', () => {
+    it('can decode an encoded input note', () => {
         const encoded = outputCoder.encodeInputNote(notes[0]);
         const result = outputCoder.decodeInputNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
@@ -181,7 +181,7 @@ describe('abiEncoder.outputCoder tests', () => {
         expect(result.noteHash).to.equal(notes[0].noteHash);
     });
 
-    it('outputCoder can decode encoded input notes', () => {
+    it('can decode encoded input notes', () => {
         const encoded = outputCoder.encodeNotes([notes[0], notes[1]], true);
         const result = outputCoder.decodeNotes(encoded, true);
         expect(result.length).to.equal(2);
@@ -194,7 +194,7 @@ describe('abiEncoder.outputCoder tests', () => {
         }
     });
 
-    it('outputCoder can decode a proof output', () => {
+    it('can decode a proof output', () => {
         const encoded = outputCoder.encodeProofOutput({
             inputNotes: [notes[0], notes[1]],
             outputNotes: [notes[2], notes[3]],
@@ -222,7 +222,7 @@ describe('abiEncoder.outputCoder tests', () => {
         }
     });
 
-    it('outputCoder can decode proof outputs', () => {
+    it('can decode proof outputs', () => {
         const proofOutputs = [
             {
                 inputNotes: [notes[0], notes[1]],
