@@ -91,7 +91,7 @@ contract LibEIP712 {
         assembly {
             // Here's a little trick we can pull. We expect `_signature` to be a byte array, of length 0x60, with
             // 'v', 'r' and 's' located linearly in memory. Preceeding this is the length parameter of `_signature`.
-            // If we *replace* this with the signature msg, we get a memory block that equals what the precompile needs
+            // We *replace* the length param with the signature msg to get a memory block formatted for the precompile
 
             // load length as a temporary variable
             let byteLength := mload(_signature)
@@ -104,10 +104,13 @@ contract LibEIP712 {
 
             result := and(
                 and(
-                    eq(byteLength, 0x60), // validate signature length == 0x60 bytes
-                    or(eq(v, 27), eq(v, 28)) // validate v == 27 or v == 28
+                    // validate signature length == 0x60 bytes
+                    eq(byteLength, 0x60),
+                    // validate v == 27 or v == 28
+                    or(eq(v, 27), eq(v, 28))
                 ),
-                staticcall(gas, 0x01, _signature, 0x80, _signature, 0x20) // validate call to precompile succeeds
+                // validate call to precompile succeeds
+                staticcall(gas, 0x01, _signature, 0x80, _signature, 0x20)
             )
             signer := mload(_signature) // load signing address
             mstore(_signature, byteLength) // and put the byte length back where it belongs
