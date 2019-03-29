@@ -8,6 +8,12 @@ contract IAZTEC {
         BURN,
         UTILITY
     }
+
+    enum NoteStatus {
+        DOES_NOT_EXIST,
+        UNSPENT,
+        SPENT
+    }
     // proofEpoch = 1 | proofCategory = 1 | proofId = 1
     // 1 * 256**(2) + 1 * 256**(1) ++ 1 * 256**(0)
     uint24 public constant JOIN_SPLIT_PROOF = 65793;
