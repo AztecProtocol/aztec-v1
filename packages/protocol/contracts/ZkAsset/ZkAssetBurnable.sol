@@ -8,8 +8,9 @@ import "./ZkAsset.sol";
 import "../ACE/ACE.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
+import "./ZkAssetOwnable.sol"
 
-contract ZkAssetBurnable is ZkAsset {
+contract ZkAssetBurnable is ZkAsset, ZkAssetOwnable {
     event UpdateTotalBurned(bytes32 noteHash, bytes noteData);
 
     address public owner;
@@ -30,6 +31,7 @@ contract ZkAssetBurnable is ZkAsset {
     }
 
     function confidentialBurn(uint24 _proof, bytes calldata _proofData) external {
+        require(msg.sender == owner, "only the owner can call the confidentialBurn() method");
         require(_proofData.length != 0, "proof invalid");
 
         (bytes memory newTotalBurned, 

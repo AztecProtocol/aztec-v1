@@ -79,16 +79,21 @@ contract AdjustSupply is LibEIP712 {
                 let challenge := mod(calldataload(0x124), gen_order)
 
 
-                // validate m <= n
-                if gt(m, n) { mstore(0x00, 404) revert(0x00, 0x20) }
+                // validate m < n
+                if gt(m, n) { 
+                    mstore(0x00, 404)
+                    revert(0x00, 0x20)
+                }
+
+                if eq(m, n) { 
+                    mstore(0x00, 404)
+                    revert(0x00, 0x20)
+                }
                 
-                let kn := calldataload(sub(add(notes, mul(calldataload(notes), 0xc0)), 0xa0))
+                let kn := 0
 
                 // add sender final hash table
                 mstore(0x2a0, calldataload(0x24))
-
-                kn := mulmod(sub(gen_order, kn), challenge, gen_order) // we actually want c*k_{public}
-
 
                 hashCommitments(notes, n)  // notes = length of proof data array, n = number of notes
                 let b := add(0x2c0, mul(n, 0x80))
@@ -127,11 +132,6 @@ contract AdjustSupply is LibEIP712 {
                 switch eq(add(i, 0x01), n)
                     case 1 {
                         k := kn
-
-                        // if all notes are input notes, invert k
-                        if eq(m, n) {
-                            k := sub(gen_order, k)
-                        }
                     }
                     case 0 { k := calldataload(noteIndex) }
 
@@ -157,7 +157,7 @@ contract AdjustSupply is LibEIP712 {
 
                 case 0 {
 
-                        // nothing to do here except update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
+                    // nothing to do here except update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
                     kn := addmod(kn, k, gen_order)
                 }
 

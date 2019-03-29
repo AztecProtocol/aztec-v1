@@ -8,10 +8,10 @@ import "./ZkAsset.sol";
 import "../ACE/ACE.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
+import "./ZkAssetOwnable.sol"
 
 
-
-contract ZkAssetMintable is ZkAsset {
+contract ZkAssetMintable is ZkAsset, ZkAssetOwnable {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
 
     constructor(
@@ -30,6 +30,7 @@ contract ZkAssetMintable is ZkAsset {
     }
 
     function confidentialMint(uint24 _proof, bytes calldata _proofData) external {
+        require(msg.sender == owner, "only the owner can call the confidentialMint() method");
         require(_proofData.length != 0, "proof invalid");
 
         (bytes memory newTotalMinted, 
@@ -66,7 +67,7 @@ contract ZkAssetMintable is ZkAsset {
             address aceAddress
         ) = ace.getRegistry(address(this));
         if (publicValue > 0) {
-            if (totalSupply <= uint256(publicValue)) {
+            if (totalSupply < uint256(publicValue)) {
                 uint256 supplementValue = uint256(publicValue).sub(totalSupply);
 
                 linkedToken.mint(address(this), supplementValue);
