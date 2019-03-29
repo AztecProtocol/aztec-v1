@@ -1,37 +1,33 @@
 {
   "name": "@aztec/dev-utils",
   "description": "Dev utils to be shared across AZTEC packages",
-  "version": "1.6.0",
+  "version": "2.0.0",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "babel-runtime": "^6.26.0",
     "bn.js": "^4.11.8"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
     "@babel/preset-env": "^7.4.2",
-    "cross-env": "^5.2.0",
-    "eslint": "^5.12.1",
-    "eslint-config-airbnb": "^17.1.0",
+    "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
-    "eslint-plugin-react": "^7.12.4",
+    "eslint-plugin-import": "^2.16.0",
     "fixpack": "^2.3.1",
     "shx": "^0.3.2"
   },
   "engines": {
-    "node": ">=6.12"
+    "node": ">=8.3",
+    "yarn": ">=1.15.2"
   },
   "files": [
     "/lib"
   ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/dev-utils#readme",
   "keywords": [
     "aztec",
     "blockchain",
