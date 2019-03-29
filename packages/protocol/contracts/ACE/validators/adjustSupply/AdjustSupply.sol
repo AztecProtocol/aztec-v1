@@ -65,9 +65,9 @@ contract AdjustSupply is LibEIP712 {
              * 0x104:0x124    = length of proofData byte array
              * 0x124:0x144    = challenge
              * 0x144:0x164    = offset in byte array to notes
-             * 0x1a4:0x1c4    = offset in byte array to inputOwners
-             * 0x1c4:0x1e4    = offset in byte array to outputOwners
-             * 0x1e4:0x204    = offset in byte array to metadata
+             * 0x164:0x184    = offset in byte array to inputOwners
+             * 0x184:0x1a4    = offset in byte array to outputOwners
+             * 0x1a4:0x1c4    = offset in byte array to metadata
              */
             function validateAdjustSupply() {
                 mstore(0x80, calldataload(0x44))
@@ -94,9 +94,11 @@ contract AdjustSupply is LibEIP712 {
 
                 // add sender final hash table
                 mstore(0x2a0, calldataload(0x24))
+                mstore(0x2c0, 0) // add kPublic = 0 to hash table
+                mstore(0x2e0, m) // add m to final hash table
 
                 hashCommitments(notes, n)  // notes = length of proof data array, n = number of notes
-                let b := add(0x2c0, mul(n, 0x80))
+                let b := add(0x300, mul(n, 0x80))
 
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
@@ -371,9 +373,9 @@ contract AdjustSupply is LibEIP712 {
             function hashCommitments(notes, n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
                 let index := add(add(notes, mul(i, 0xc0)), 0x60)
-                calldatacopy(add(0x2c0, mul(i, 0x80)), index, 0x80)
+                calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
-                mstore(0x00, keccak256(0x2c0, mul(n, 0x80)))
+                mstore(0x00, keccak256(0x300, mul(n, 0x80)))
             }
         }
 

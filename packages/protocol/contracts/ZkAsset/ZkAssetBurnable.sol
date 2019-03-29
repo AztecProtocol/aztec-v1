@@ -8,9 +8,9 @@ import "./ZkAsset.sol";
 import "../ACE/ACE.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
-import "./ZkAssetOwnable.sol"
+import "./ZkAssetOwnable.sol";
 
-contract ZkAssetBurnable is ZkAsset, ZkAssetOwnable {
+contract ZkAssetBurnable is ZkAssetOwnable {
     event UpdateTotalBurned(bytes32 noteHash, bytes noteData);
 
     address public owner;
@@ -21,25 +21,29 @@ contract ZkAssetBurnable is ZkAsset, ZkAssetOwnable {
         uint256 _scalingFactor,
         bool _canAdjustSupply,
         bool _canConvert
-    ) public ZkAsset(
+    ) public ZkAssetOwnable(
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor,
         _canAdjustSupply,
         _canConvert
-    ) {
+    ){
+        owner = msg.sender;
     }
 
     function confidentialBurn(uint24 _proof, bytes calldata _proofData) external {
         require(msg.sender == owner, "only the owner can call the confidentialBurn() method");
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory newTotalBurned, 
-        bytes memory burnedNotes) = ace.burn(_proof, _proofData, address(this));
+        (bytes memory _proofOutputs) = ace.burn(_proof, _proofData, address(this));
+
+        (, bytes memory newTotal, ,) = _proofOutputs.get(0).extractProofOutput();
+
+        (, bytes memory burnedNotes, ,) = _proofOutputs.get(1).extractProofOutput();
 
         (,
         bytes32 noteHash,
-        bytes memory metadata) = newTotalBurned.extractNote();
+        bytes memory metadata) = newTotal.extractNote();
 
         logOutputNotes(burnedNotes);
         emit UpdateTotalBurned(noteHash, metadata);

@@ -202,7 +202,7 @@ contract ACE is IAZTEC {
         uint24 _proof,
         bytes calldata _proofData,
         address _proofSender
-    ) external returns (bytes memory, bytes memory) {
+    ) external returns (bytes memory) {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
@@ -220,7 +220,7 @@ contract ACE is IAZTEC {
         (bytes memory oldTotal,  // inputNotesTotal
         bytes memory newTotal, // outputNotesTotal
         ,
-        int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
+        ) = _proofOutputs.get(0).extractProofOutput();
 
     
         // Check the previous confidentialTotalSupply, and then assign the new one
@@ -232,10 +232,9 @@ contract ACE is IAZTEC {
 
 
         // Dealing with minted notes
-        (bytes memory inputNotes, // input notes
+        (,
         bytes memory mintedNotes, // output notes
         ,
-        int256 publicValue
         ) = _proofOutputs.get(1).extractProofOutput();
 
         updateOutputNotes(mintedNotes);
@@ -261,7 +260,7 @@ contract ACE is IAZTEC {
             "transfer failed"
         );
 
-        registry.totalSupply = registry.totalSupply.add(_value)
+        registry.totalSupply = registry.totalSupply.add(_value);
     }
 
     /**
@@ -279,7 +278,7 @@ contract ACE is IAZTEC {
         uint24 _proof,
         bytes calldata _proofData,
         address _proofSender
-    ) external returns (bytes memory, bytes memory) {
+    ) external returns (bytes memory) {
         
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
@@ -296,7 +295,7 @@ contract ACE is IAZTEC {
         (bytes memory oldTotal, // input notes
         bytes memory newTotal, // output notes
         ,
-        int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
+        ) = _proofOutputs.get(0).extractProofOutput();
     
         (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
         require(oldTotalNoteHash == registry.confidentialTotalBurned, "provided total supply note does not match");
@@ -305,15 +304,14 @@ contract ACE is IAZTEC {
 
 
         // Dealing with burned notes
-        (bytes memory inputNotes,
+        (,
         bytes memory burnedNotes,
-        ,
-        int256 publicValue) = _proofOutputs.get(1).extractProofOutput();
+        ,) = _proofOutputs.get(1).extractProofOutput();
 
 
         // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
         updateInputNotes(burnedNotes);
-        return(newTotal, burnedNotes);
+        return(_proofOutputs);
     }
 
     /**
