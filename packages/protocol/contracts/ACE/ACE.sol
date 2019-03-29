@@ -3,6 +3,8 @@ pragma solidity >=0.5.0 <0.6.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
+import "./NoteRegistry.sol";
+
 import "../interfaces/IAZTEC.sol";
 import "../interfaces/IERC20.sol";
 
@@ -17,7 +19,7 @@ import "../libs/SafeMath8.sol";
  * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
  *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
  **/
-contract ACE is IAZTEC, Ownable {
+contract ACE is IAZTEC, Ownable, NoteRegistry {
     using IntegerUtils for uint256;
     using NoteUtils for bytes;
     using ProofUtils for uint24;
@@ -65,15 +67,12 @@ contract ACE is IAZTEC, Ownable {
     // by ACE use the same common reference string.
     bytes32[6] private commonReferenceString;
 
-    // Every user has their own note registry
-    mapping(address => NoteRegistry) internal registries;
-
     // `validators`contains the addresses of the contracts that validate specific proof types
-    mapping(uint8 => mapping(uint8 => mapping(uint8 => address))) public validators;
+    address[0x100][0x100][0x10000] public validators;
 
-    // a list of invalidated proof ids, helpful to blacklist buggy old versions
-    mapping(uint8 => mapping(uint8 => mapping(uint8 => bool))) internal disabledValidators;
-
+    // a list of invalidated proof ids, used to blacklist proofs in the case of a vulnerability being discovered
+    bool[0x100][0x100][0x10000] public disabledValidators;
+    
     // latest proof epoch accepted by this contract
     uint8 public latestEpoch = 1;
 
@@ -81,10 +80,9 @@ contract ACE is IAZTEC, Ownable {
     mapping(bytes32 => bool) public validatedProofs;
     
     /**
-    * @dev contract constructor. Sets the owner of ACE, the flags, the linked token address and
-    *      the scaling factor.
+    * @dev contract constructor. Sets the owner of ACE
     **/
-    constructor() public {}
+    constructor() public Ownable() {}
 
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
@@ -149,10 +147,9 @@ contract ACE is IAZTEC, Ownable {
         }
 
         // if this proof satisfies a balancing relationship, we need to record the proof hash
-        (, uint8 category, ) = _proof.getProofComponents();
-        if (category == uint8(ProofCategory.BALANCED)) {
+        if (((_proof >> 8) & 0xff) == uint8(ProofCategory.BALANCED)) {
             uint256 length = proofOutputs.getLength();
-            for (uint256 i = 0; i < length; i = i.add(1)) {
+            for (uint256 i = 0; i < length; i += 1) {
                 bytes32 proofHash = keccak256(proofOutputs.get(i));
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
                 validatedProofs[validatedProofHash] = true;
@@ -346,11 +343,54 @@ contract ACE is IAZTEC, Ownable {
         uint24 _proof,
         bytes32 _proofHash,
         address _sender
-    ) public view returns (bool) {
-        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-        require(disabledValidators[epoch][category][id] == false, "this proof id has been invalidated!");
-        bytes32 validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender));
-        return validatedProofs[validatedProofHash];
+    ) public view returns (bool isProofValid) {
+        bool isValidatorDisabled;
+        
+        // We need create a unique encoding of _proof, _proofHash and _sender,
+        // and use as a key to access validatedProofs
+        // We do this by computing bytes32 validatedProofHash = keccak256(ABI.encode(_proof, _proofHash, _sender))
+        // We also need to access disabledValidators[_proof.epoch][_proof.category][_proof.id]
+        // This bit is implemented in Yul, as 3-dimensional array access chews through
+        // a lot of gas in Solidity, as does ABI.encode
+        assembly {
+            // inside _proof, we have 3 packed variables : [epoch, category, id]
+            // each is a uint8.
+
+            // To compute the storage key for disabledValidators[epoch][category][id], we do the following:
+            // 1. get the disabledValidators slot 
+            // 2. add (epoch * 0x10000) to the slot
+            // 3. add (category * 0x100) to the slot
+            // 4. add (id) to the slot
+            // i.e. the range of storage pointers allocated to disabledValidators ranges from
+            // disabledValidators_slot to (0xffff * 0x10000 + 0xff * 0x100 + 0xff = disabledValidators_slot 0xffffffff)
+
+            // Conveniently, the multiplications we have to perform on epoch, category and id correspond
+            // to their byte positions in _proof.
+            // i.e. (epoch * 0x10000) = and(_proof, 0xffff0000)
+            // and  (category * 0x100) = and(_proof, 0xff00)
+            // and  (id) = and(_proof, 0xff)
+
+            // Putting this all together. The storage slot offset from '_proof' is...
+            // (_proof & 0xffff0000) + (_proof & 0xff00) + (_proof & 0xff)
+            // i.e. the storage slot offset IS the value of _proof
+            isValidatorDisabled := sload(add(_proof, disabledValidators_slot))
+
+            // next up - compute validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender))
+            let memPtr := mload(0x40)
+            mstore(memPtr, _proofHash)
+            mstore(add(memPtr, 0x20), _proof)
+            mstore(add(memPtr, 0x40), _sender)
+            // Hash ^^ to get validatedProofHash
+            // We store the result in 0x00 because we want to compute mapping key
+            // for validatedProofs[validatedProofHash]
+            mstore(0x00, keccak256(memPtr, 0x60))
+            mstore(0x20, validatedProofs_slot)
+
+            // Compute our mapping key and then load the value of validatedProofs[validatedProofHash] from storage
+            isProofValid := sload(keccak256(0x00, 0x40))
+        }
+        require(isValidatorDisabled == false, "this proof id has been invalidated!");
+
     }
 
     /**
@@ -514,42 +554,24 @@ contract ACE is IAZTEC, Ownable {
         return commonReferenceString;
     }
 
-    function getValidatorAddress(uint24 _proof) public view returns (address) {
-        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-        require(validators[epoch][category][id] != address(0x0), "expected the validator address to exist");
-        require(disabledValidators[epoch][category][id] == false, "expected the validator address to not be disabled");
-        return validators[epoch][category][id];
-    }
 
-    function updateInputNotes(bytes memory inputNotes) internal {
-        uint256 length = inputNotes.getLength();
-        for (uint256 i = 0; i < length; i++) {
-            (address _owner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
-            // `note` will be stored on the blockchain
-            Note storage note = registries[msg.sender].notes[noteHash];
-            require(note.status == 1, "input note does not exist");
-            require(note.owner == _owner, "input note owner does not match");
-            note.status = uint8(2);
-            // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.toBytes5();
+    function getValidatorAddress(uint24 _proof) public view returns (address validatorAddress) {
+        bool isValidatorDisabled;
+        bool queryInvalid;
+        assembly {
+            // we can use _proof directly as an offset when computing the storage pointer for
+            // validators[_proof.epoch][_proof.category][_proof.id] and
+            // disabledValidators[_proof.epoch][_proof.category][_proof.id]
+            // (see `validateProofByHash` for more info on this)
+            isValidatorDisabled := sload(add(_proof, disabledValidators_slot))
+            validatorAddress := sload(add(_proof, validators_slot))
+            queryInvalid := or(iszero(validatorAddress), isValidatorDisabled)
         }
-    }
 
-    function updateOutputNotes(bytes memory outputNotes) internal {
-        uint256 length = outputNotes.getLength();
-        for (uint256 i = 0; i < length; i++) {
-            (address _owner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
-            // `note` will be stored on the blockchain
-            Note storage note = registries[msg.sender].notes[noteHash];
-            require(note.status == 0, "output note exists");
-            note.status = uint8(1);
-            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.toBytes5();
-            note.owner = _owner;
+        // wrap both require checks in a single if test. This means the happy path only has 1 conditional jump
+        if (queryInvalid) {
+            require(validatorAddress != address(0x0), "expected the validator address to exist");
+            require(isValidatorDisabled == false, "expected the validator address to not be disabled");
         }
     }
 }
