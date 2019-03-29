@@ -84,6 +84,7 @@ library NoteUtils {
             // 0x40 - 0x60 : relative offset to outputNotes
             // 0x60 - 0x80 : publicOwner
             // 0x80 - 0xa0 : publicValue
+            // 0xa0 - 0xc0 : challenge
             inputNotes := add(_proofOutput, mload(add(_proofOutput, 0x20)))
             outputNotes := add(_proofOutput, mload(add(_proofOutput, 0x40)))
             publicOwner := and(
@@ -91,6 +92,14 @@ library NoteUtils {
                 0xffffffffffffffffffffffffffffffffffffffff
             )
             publicValue := mload(add(_proofOutput, 0x80))
+        }
+    }
+
+    function extractChallenge(bytes memory _proofOutput) internal pure returns (
+        bytes32 challenge
+    ) {
+        assembly {
+            challenge := mload(add(_proofOutput, 0xa0))
         }
     }
 
