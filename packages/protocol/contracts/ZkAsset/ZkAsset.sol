@@ -16,8 +16,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
     
-    // EIP191 header for EIP712 prefix
-    string constant internal EIP191_HEADER = "\x19\x01";
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
