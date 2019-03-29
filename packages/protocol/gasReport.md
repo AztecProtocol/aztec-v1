@@ -8,11 +8,17 @@ Calldata: 40,464
 TxBase: 21,000 
 Opcodes : 745,577  
 
+745,577
+718,318
+
+ 27,259 saving
+ 20,000 from storage homogenisation
+ 7,259 from gas gibgabs
 
 ### Summary  
 
 Crypto cost: 558,321
-Storage cost: 95,000  
+Storage cost: 95,000  (reduced to 75,000)
 External calls cost: 62,469    
 Event cost: 8,125  
 

@@ -3,6 +3,7 @@ pragma solidity >=0.5.0 <0.6.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "./IZkAsset.sol";
+import "../ACE/NoteRegistry.sol";
 import "../ACE/ACE.sol";
 import "../interfaces/IAZTEC.sol";
 import "../libs/LibEIP712.sol";
@@ -31,7 +32,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
 
     ACE public ace;
     ERC20 public linkedToken;
-    ACE.Flags public flags;
+    NoteRegistry.Flags public flags;
 
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
@@ -47,7 +48,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             keccak256(bytes(EIP712_DOMAIN_VERSION)),
             bytes32(uint256(address(this)))
         ));
-        flags = ACE.Flags({
+        flags = NoteRegistry.Flags({
             active: true,
             canMint: false,
             canBurn: false,
@@ -72,23 +73,24 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     
     function confidentialTransfer(bytes memory _proofData) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
-        require(proofOutputs.length != 0, "proof invalid");
-        bytes memory proofOutput = proofOutputs.get(0);
-
-        ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
         
-        (bytes memory inputNotes,
-        bytes memory outputNotes,
-        address publicOwner,
-        int256 publicValue) = proofOutput.extractProofOutput();
+        for (uint i = 0; i < proofOutputs.getLength(); i++) {
+            bytes memory proofOutput = proofOutputs.get(i);
+            ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
+            
+            (bytes memory inputNotes,
+            bytes memory outputNotes,
+            address publicOwner,
+            int256 publicValue) = proofOutput.extractProofOutput();
 
-        logInputNotes(inputNotes);
-        logOutputNotes(outputNotes);
-        if (publicValue < 0) {
-            emit ConvertTokens(publicOwner, uint256(-publicValue));
-        }
-        if (publicValue > 0) {
-            emit RedeemTokens(publicOwner, uint256(publicValue));
+            logInputNotes(inputNotes);
+            logOutputNotes(outputNotes);
+            if (publicValue < 0) {
+                emit ConvertTokens(publicOwner, uint256(-publicValue));
+            }
+            if (publicValue > 0) {
+                emit RedeemTokens(publicOwner, uint256(publicValue));
+            }
         }
     }
 
