@@ -73,7 +73,7 @@ contract ACE is IAZTEC {
     // `validators`contains the addresses of the contracts that validate specific proof types
     mapping(uint8 => mapping(uint8 => mapping(uint8 => address))) public validators;
 
-    // a list of invalidated proof ids, helpfuI'l to blacklist buggy old versions
+    // a list of invalidated proof ids, helpful to blacklist buggy old versions
     mapping(uint8 => mapping(uint8 => mapping(uint8 => bool))) internal disabledValidators;
 
     // latest proof epoch accepted by this contract
@@ -222,9 +222,6 @@ contract ACE is IAZTEC {
         ,
         int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
 
-        require(publicValueTotal == 0, "mint transactions cannot have a public value");
-        require(newTotal.getLength() == 1, "new total minted must be represented by one note");
-        require(oldTotal.getLength() == 1, "old total minted must be represented by one note");
     
         // Check the previous confidentialTotalSupply, and then assign the new one
         (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
@@ -241,12 +238,8 @@ contract ACE is IAZTEC {
         int256 publicValue
         ) = _proofOutputs.get(1).extractProofOutput();
 
-        require(publicValue == 0, "mint transactions cannot have a public value");
-        require(mintedNotes.getLength() >= 1, "must have at least one minted note");
-        require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
-
         updateOutputNotes(mintedNotes);
-        return(newTotal, mintedNotes);
+        return(_proofOutputs);
     }
 
     /**
@@ -256,7 +249,6 @@ contract ACE is IAZTEC {
     * @param _value the value to be transferred
     */
     function supplementTokens(uint256 _value) external {
-        require(_value > uint(0), "supplement tokens can only be called on a positive value");
         NoteRegistry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
         require(registry.flags.canConvert == true, "note registry does not have conversion rights");
@@ -268,6 +260,8 @@ contract ACE is IAZTEC {
             registry.linkedToken.transferFrom(msg.sender, address(this), _value), 
             "transfer failed"
         );
+
+        registry.totalSupply = registry.totalSupply.add(_value)
     }
 
     /**
@@ -303,10 +297,6 @@ contract ACE is IAZTEC {
         bytes memory newTotal, // output notes
         ,
         int256 publicValueTotal) = _proofOutputs.get(0).extractProofOutput();
-
-        require(publicValueTotal == 0, "burn transactions cannot have a public value");
-        require(newTotal.getLength() == 1, "new total minted must be represented by one note");
-        require(oldTotal.getLength() == 1, "old total minted must be represented by one note");
     
         (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
         require(oldTotalNoteHash == registry.confidentialTotalBurned, "provided total supply note does not match");
@@ -320,9 +310,6 @@ contract ACE is IAZTEC {
         ,
         int256 publicValue) = _proofOutputs.get(1).extractProofOutput();
 
-        require(publicValue == 0, "burn transactions cannot have a public value");
-        require(burnedNotes.getLength() >= 1, "must have at least one note to be burned");
-        require(inputNotes.getLength() == 0, "second proofOutput object can not have input notes");
 
         // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
         updateInputNotes(burnedNotes);
@@ -406,10 +393,13 @@ contract ACE is IAZTEC {
             linkedToken: IERC20(_linkedTokenAddress),
             scalingFactor: _scalingFactor,
             totalSupply: 0,
+            /*
+            confidentialTotalMinted and confidentialTotalBurned below are the hashes of AZTEC notes 
+            with k = 0 and a  =1
+            */
             confidentialTotalMinted: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
             confidentialTotalBurned: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
             supplementTotal: 0,
-            // above hashes are for note with k = 0, a = 1. Mint and burn counters start at 0
             flags: Flags({
                 active: true,
                 canAdjustSupply: _canAdjustSupply,
@@ -456,7 +446,7 @@ contract ACE is IAZTEC {
                     "transfer failed"
                 );
             } else { 
-                registry.totalSupply < uint256(publicValue);
+                registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
                 require(registry.linkedToken.transfer(publicOwner, uint256(publicValue)), "transfer failed");
             }
         }
