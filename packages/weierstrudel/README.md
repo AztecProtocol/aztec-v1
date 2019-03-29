@@ -8,7 +8,7 @@ The current gas schedule for Ethereum's scalar multiplication precompile smart c
 
 ### **"Wait...what?"**
 
-weierstrudel is written entirely in [Huff](https://github.com/AztecProtocol/huff), a low-level domain-specific language that compiles to Ethereum Virtual Machine opcodes. In addition, the following techniques are used to minimize gas costs:
+weierstrudel is written entirely in [Huff](https://github.com/AztecProtocol/AZTEC/tree/master/packages/huff), a low-level domain-specific language that compiles to Ethereum Virtual Machine opcodes. In addition, the following techniques are used to minimize gas costs:
 
 -   Using the GLV technique to exploit a curve endomorphism and reduce the number of 'point doubling' operations in half.
 -   Using Shamir's trick to combine multiple scalar multiplications into a single algorithm, fixing the number of 'point doubling' operations to ~127
