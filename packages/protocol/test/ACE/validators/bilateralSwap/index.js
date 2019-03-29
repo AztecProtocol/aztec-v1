@@ -1,6 +1,6 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const { padLeft } = require('web3-utils');
+const { padLeft, sha3 } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
@@ -40,12 +40,14 @@ function encodeBilateralSwapTransaction({
             outputNotes: [outputNotes[0]],
             publicOwner,
             publicValue,
+            challenge,
         },
         {
             inputNotes: [outputNotes[1]],
             outputNotes: [inputNotes[1]],
             publicOwner,
             publicValue,
+            challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
         },
     ]).slice(0x42)}`;
     return { proofData, expectedOutput };

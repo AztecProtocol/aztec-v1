@@ -73,6 +73,7 @@ library JoinSplitABIEncoder {
             // 0x220 - 0x240 = relative offset between `t` and `outputNotes`
             // 0x240 - 0x260 = `publicOwner`
             // 0x260 - 0x280 = `publicValue`
+            // 0x280 - 0x2a0 = `challenge`
 
             // `inputNotes` starts at 0x280
             // structure of `inputNotes` and `outputNotes`
@@ -108,8 +109,8 @@ library JoinSplitABIEncoder {
             mstore(0x1a0, 0x01)                            // number of proofs
             mstore(0x1c0, 0x60)                            // offset to 1st proof
             // length of proofOutput is at s + 0x60
-            mstore(0x200, 0xa0)                            // location of inputNotes
-            // location of outputNotes is at s + 0xa0
+            mstore(0x200, 0xc0)                            // location of inputNotes
+            // location of outputNotes is at s + 0xc0
             mstore(0x240, calldataload(0x164))             // publicOwner
             // store kPublic. If kPublic is negative, store correct signed representation,
             // relative to 2^256, not to the order of the bn128 group
@@ -121,12 +122,12 @@ library JoinSplitABIEncoder {
             case 0 {
                 mstore(0x260, kPublic)
             }
-            // (0x280 = challenge)
-            // (0x2a0 = proofOutput metadata)
-            let inputPtr := 0x280                                 // point to inputNotes
+
+            mstore(0x280, calldataload(0x144))
+            let inputPtr := 0x2a0                                 // point to inputNotes
             mstore(add(inputPtr, 0x20), m)                        // number of input notes
             // set note pointer, offsetting lookup indices for each input note
-            let s := add(0x2c0, mul(m, 0x20))
+            let s := add(0x2e0, mul(m, 0x20))
 
             for { let i := 0 } lt(i, m) { i := add(i, 0x01) } {
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
@@ -192,8 +193,9 @@ library JoinSplitABIEncoder {
             }
 
             // transition between input and output notes
-            mstore(0x280, sub(sub(s, inputPtr), 0x20)) // store total length of inputNotes at first index of inputNotes 
-            mstore(0x220, add(0xa0, sub(s, inputPtr))) // store relative memory offset to outputNotes
+            // store total length of inputNotes at 1st index of inputNotes 
+            mstore(inputPtr, sub(sub(s, inputPtr), 0x20))
+            mstore(0x220, add(0xc0, sub(s, inputPtr))) // store relative memory offset to outputNotes
             inputPtr := s
             mstore(add(inputPtr, 0x20), sub(n, m)) // store number of output notes
             s := add(s, add(0x40, mul(sub(n, m), 0x20)))
@@ -254,11 +256,11 @@ library JoinSplitABIEncoder {
 
             // cleanup. the length of the outputNotes = s - inputPtr
             mstore(inputPtr, sub(sub(s, inputPtr), 0x20)) // store length of outputNotes at start of outputNotes
-            let notesLength := sub(s, 0x280)
-            mstore(0x1e0, add(0x80, notesLength)) // store length of proofOutput at 0x160
-            mstore(0x180, add(0xe0, notesLength)) // store length of proofOutputs at 0x100
+            let notesLength := sub(s, 0x2a0)
+            mstore(0x1e0, add(0xa0, notesLength)) // store length of proofOutput at 0x160
+            mstore(0x180, add(0x100, notesLength)) // store length of proofOutputs at 0x100
             mstore(0x160, 0x20)
-            return(0x160, add(0x120, notesLength)) // return the final byte array
+            return(0x160, add(0x140, notesLength)) // return the final byte array
         }
     }
 }

@@ -282,6 +282,7 @@ joinSplit.encodeJoinSplitTransaction = ({
         outputNotes,
         publicOwner,
         publicValue: kPublic,
+        challenge,
     }]).slice(0x42)}`;
     return { proofData, expectedOutput };
 };
