@@ -343,15 +343,15 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         uint24 _proof,
         bytes32 _proofHash,
         address _sender
-    ) public view returns (bool isProofValid) {
-        bool isValidatorDisabled;
-        
+    ) public view returns (bool) {        
         // We need create a unique encoding of _proof, _proofHash and _sender,
         // and use as a key to access validatedProofs
         // We do this by computing bytes32 validatedProofHash = keccak256(ABI.encode(_proof, _proofHash, _sender))
         // We also need to access disabledValidators[_proof.epoch][_proof.category][_proof.id]
         // This bit is implemented in Yul, as 3-dimensional array access chews through
         // a lot of gas in Solidity, as does ABI.encode
+        bytes32 validatedProofHash;
+        bool isValidatorDisabled;
         assembly {
             // inside _proof, we have 3 packed variables : [epoch, category, id]
             // each is a uint8.
@@ -375,22 +375,17 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             // i.e. the storage slot offset IS the value of _proof
             isValidatorDisabled := sload(add(_proof, disabledValidators_slot))
 
-            // next up - compute validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender))
+            // Next, compute validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender))
+            // cache free memory pointer - we will overwrite it when computing hash (cheaper than using free memory)
             let memPtr := mload(0x40)
-            mstore(memPtr, _proofHash)
-            mstore(add(memPtr, 0x20), _proof)
-            mstore(add(memPtr, 0x40), _sender)
-            // Hash ^^ to get validatedProofHash
-            // We store the result in 0x00 because we want to compute mapping key
-            // for validatedProofs[validatedProofHash]
-            mstore(0x00, keccak256(memPtr, 0x60))
-            mstore(0x20, validatedProofs_slot)
-
-            // Compute our mapping key and then load the value of validatedProofs[validatedProofHash] from storage
-            isProofValid := sload(keccak256(0x00, 0x40))
+            mstore(0x00, _proofHash)
+            mstore(0x20, _proof)
+            mstore(0x40, _sender)
+            validatedProofHash := keccak256(0x00, 0x60)
+            mstore(0x40, memPtr) // restore the free memory pointer
         }
         require(isValidatorDisabled == false, "this proof id has been invalidated!");
-
+        return validatedProofs[validatedProofHash];
     }
 
     /**
