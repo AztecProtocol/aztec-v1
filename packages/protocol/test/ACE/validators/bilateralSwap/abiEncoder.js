@@ -2,7 +2,7 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
+const { padLeft, sha3 } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
@@ -67,12 +67,14 @@ contract('Bilateral ABI Encoder', (accounts) => {
                     outputNotes: [outputNotes[0]],
                     publicOwner,
                     publicValue,
+                    challenge,
                 },
                 {
                     inputNotes: [outputNotes[1]],
                     outputNotes: [inputNotes[1]],
                     publicOwner,
                     publicValue,
+                    challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
                 },
             ]);
 
@@ -100,6 +102,8 @@ contract('Bilateral ABI Encoder', (accounts) => {
 
             expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
             expect(decoded[0].publicValue).to.equal(0);
+            expect(decoded[0].challenge).to.equal(challenge);
+            expect(decoded[1].challenge).to.equal(`0x${padLeft(sha3(challenge).slice(2), 64)}`);
             expect(decoded[1].publicOwner).to.equal(publicOwner.toLowerCase());
             expect(decoded[1].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));

@@ -80,6 +80,7 @@ outputCoder.decodeProofOutput = (proofOutput) => {
     const outputNotesOffset = parseInt(proofOutput.slice(0x80, 0xc0), 16);
     const publicOwner = `0x${proofOutput.slice(0xd8, 0x100)}`;
     const publicValue = new BN(proofOutput.slice(0x100, 0x140), 16).fromTwos(256).toNumber();
+    const challenge = `0x${proofOutput.slice(0x140, 0x180)}`;
     const inputNotes = outputCoder.decodeNotes(proofOutput.slice(inputNotesOffset * 2));
     const outputNotes = outputCoder.decodeNotes(proofOutput.slice(outputNotesOffset * 2));
 
@@ -88,6 +89,7 @@ outputCoder.decodeProofOutput = (proofOutput) => {
         outputNotes,
         publicOwner,
         publicValue,
+        challenge,
     };
 };
 
@@ -163,6 +165,7 @@ outputCoder.encodeProofOutput = ({
     outputNotes,
     publicOwner,
     publicValue,
+    challenge,
 }) => {
     const encodedInputNotes = outputCoder.encodeNotes(inputNotes, false);
     const encodedOutputNotes = outputCoder.encodeNotes(outputNotes, true);
@@ -172,14 +175,15 @@ outputCoder.encodeProofOutput = ({
     } else {
         formattedValue = padLeft(publicValue.toString(16), 64);
     }
-    const encoded = [...new Array(7)];
-    encoded[0] = padLeft((0x80 + ((encodedInputNotes.length + encodedOutputNotes.length) / 2)).toString(16), 64);
-    encoded[1] = padLeft('a0', 64);
-    encoded[2] = padLeft((0xa0 + (encodedInputNotes.length / 2)).toString(16), 64);
+    const encoded = [...new Array(8)];
+    encoded[0] = padLeft((0xa0 + ((encodedInputNotes.length + encodedOutputNotes.length) / 2)).toString(16), 64);
+    encoded[1] = padLeft('c0', 64);
+    encoded[2] = padLeft((0xc0 + (encodedInputNotes.length / 2)).toString(16), 64);
     encoded[3] = padLeft(publicOwner.slice(2), 64);
     encoded[4] = formattedValue;
-    encoded[5] = encodedInputNotes;
-    encoded[6] = encodedOutputNotes;
+    encoded[5] = padLeft(challenge.slice(2), 64);
+    encoded[6] = encodedInputNotes;
+    encoded[7] = encodedOutputNotes;
     return encoded.join('');
 };
 
