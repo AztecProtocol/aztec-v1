@@ -13,10 +13,6 @@ contract NoteRegistry is IAZTEC {
     using SafeMath for uint256;
     using IntegerUtils for uint256;
 
-    // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
-    // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-    // solhint-disable-next-line not-rely-on-time
-    //
     /**
     * Note struct. This is the data that we store when we log AZTEC notes inside a NoteRegistry
     *
@@ -325,14 +321,13 @@ contract NoteRegistry is IAZTEC {
                         // We then perform logical AND with the bit mask to zero out relevant bits
                         and(
                             note,
-                            // a NOT opcode to reduce contract bytecode size
                             not(0xffffffffff0000000000ff)
                         ),
                         // Now that we have zeroed out storage locations of `status` and `destroyedOn`, update them
                         or(
                             // Create 5-byte timestamp and shift into byte positions 6-11 with a bit shift
                             shl(48, and(timestamp, 0xffffffffff)),
-                            // Combine with the new note status (masked to a uint8) with a logical OR
+                            // Combine with the new note status (masked to a uint8)
                             and(inputNoteStatusNew, 0xff)
                         )
                     )
