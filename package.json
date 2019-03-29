@@ -32,8 +32,9 @@
   "private": true,
   "scripts": {
     "build": "lerna link && yarn wsrun --package $PKG --recursive --stages -c build",
-    "clean": "yarn wsrun --package $PKG --parallel -clean",
+    "clean": "yarn wsrun --package $PKG --parallel -c clean",
     "commit": "git-cz",
+    "coverage": "yarn wsrun --package $PKG --serial -c coverage",
     "fixpack": "lerna exec --parallel -- yarn fixpack; fixpack",
     "install:all": "yarn install",
     "lerna": "lerna",

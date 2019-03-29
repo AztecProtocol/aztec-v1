@@ -1,6 +1,5 @@
 {
-    "branch": "feat-continuous-deployment",
-    "dryRun": true,
+    "branch": "master",
     "plugins": [
         ["@semantic-release/commit-analyzer", {
               "preset": "angular",

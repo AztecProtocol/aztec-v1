@@ -9,16 +9,16 @@ jobs:
             - checkout
             - run:
                 name: "Update NPM"
-                command: sudo npm install -g npm@6.7.0
+                command: sudo npm install -g npm@6.9.0
             - run:
                 name: "Install Yarn"
-                command: sudo npm install -g yarn@1.9.4
+                command: sudo npm install -g yarn@1.15.2
             - run:
-                name: "Bootstrap Monorepo"
+                name: "Install Dependencies"
                 command: yarn install
             - run:
                 name: "Build Packages"
-                command: lerna run build
+                command: yarn build
             - save_cache:
                 key: repo-{{ .Environment.CIRCLE_SHA1 }}
                 paths:
@@ -33,7 +33,9 @@ jobs:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Lint Packages"
-                command: lerna run lint
+                command: |
+                    yarn prettier:ci
+                    yarn lint
     test:
         working_directory: ~/repo
         docker:
@@ -46,7 +48,7 @@ jobs:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Test Packages"
-                command: lerna run test
+                command: yarn test
     coverage:
         working_directory: ~/repo
         docker:
@@ -59,7 +61,18 @@ jobs:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Cover Packages"
-                command: lerna run coverage
+                command: PKG=@aztec/protocol yarn coverage
+    release:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Release Packages"
+                command: yarn script:publish
 workflows:
     version: 2
     main:
@@ -82,8 +95,16 @@ workflows:
                         ignore: gh-pages
             - coverage:
                 requires:
-                    - build
+                    - lint
                     - test
                 filters:
                     branches:
                         ignore: gh-pages
+            - release:
+                requires:
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - master
