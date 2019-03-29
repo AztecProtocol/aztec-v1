@@ -18,9 +18,6 @@ pragma solidity >=0.5.0 <0.6.0;
 
 contract LibEIP712 {
 
-    // EIP191 header for EIP712 prefix
-    string constant internal EIP191_HEADER = "\x19\x01";
-
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "AZTEC_CRYPTOGRAPHY_ENGINE";
 
