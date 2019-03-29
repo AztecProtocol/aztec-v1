@@ -4,54 +4,15 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
+const { proof: { dividendComputation } } = require('aztec.js');
 const { constants: { CRS } } = require('@aztec/dev-utils');
 
-const dividendInputEncode = aztec.abiEncoder.inputCoder.dividendComputation;
 
 // ### Artifacts
 const dividend = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputation');
 const dividendInterface = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputationInterface');
 
 dividend.abi = dividendInterface.abi;
-
-
-function encodeDividendComputationTransaction({
-    inputNotes,
-    outputNotes,
-    za,
-    zb,
-    senderAddress,
-}) {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = aztec.proof.dividendComputation.constructProof([...inputNotes, ...outputNotes], za, zb, senderAddress);
-
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
-    const publicOwner = '0x0000000000000000000000000000000000000000';
-    const publicValue = 0;
-
-    const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
-
-    const proofData = dividendInputEncode(
-        proofDataRawFormatted,
-        challenge,
-        za,
-        zb,
-        inputOwners,
-        outputOwners,
-        outputNotes
-    );
-
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-    }]).slice(0x42)}`;
-    return { proofData, expectedOutput, challenge };
-}
 
 contract('Dividend Computation', (accounts) => {
     let dividendContract;
@@ -80,7 +41,7 @@ contract('Dividend Computation', (accounts) => {
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
 
-            const { proofData, expectedOutput } = encodeDividendComputationTransaction({
+            const { proofData, expectedOutput } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 za,

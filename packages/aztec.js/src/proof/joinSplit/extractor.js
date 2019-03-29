@@ -25,12 +25,12 @@ extractor.extractWitness = (transcripts, m, challenges) => {
         notes: firstNotes,
         challenge: firstChallenge,
         rollingHash,
-    } = proofUtils.convertTranscript(transcripts[0], m, challenges[0], []);
+    } = proofUtils.convertTranscript(transcripts[0], m, challenges[0], [], 'joinSplit');
 
     const {
         notes: secondNotes,
         challenge: secondChallenge,
-    } = proofUtils.convertTranscript(transcripts[1], m, challenges[1], []);
+    } = proofUtils.convertTranscript(transcripts[1], m, challenges[1], [], 'joinSplit');
     rollingHash.keccak();
     const challengeFactor = firstChallenge.redSub(secondChallenge).redInvm();
     const witnesses = firstNotes.map((firstNote, i) => {
