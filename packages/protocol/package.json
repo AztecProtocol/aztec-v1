@@ -1,7 +1,7 @@
 {
   "name": "@aztec/protocol",
   "description": "AZTEC smart contract repository",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
@@ -45,7 +45,7 @@
   "files": [
     "/contracts"
   ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/dev-utils#readme",
+  "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/protocol#readme",
   "keywords": [
     "aztec",
     "blockchain",
