@@ -110,7 +110,7 @@ module.exports = {
             version: compilerConfig.solcVersion,
             settings: {
                 optimizer: {
-                    enabled: false,
+                    enabled: true,
                     runs: 200,
                 },
                 evmVersion: 'petersburg',
