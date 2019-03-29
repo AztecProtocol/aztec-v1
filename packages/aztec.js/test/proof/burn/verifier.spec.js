@@ -102,7 +102,7 @@ describe('Burn proof verification tests', () => {
             const proofData = [
                 [`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0'],
                 [`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0'],
-                [`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']
+                [`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0'],
             ];
 
             const { valid, errors } = verifier.verifyProof(proofData, challenge, sender);

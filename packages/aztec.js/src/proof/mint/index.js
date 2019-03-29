@@ -7,7 +7,6 @@ const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 const joinSplit = require('../joinSplit');
 
-
 const {
     inputCoder,
     outputCoder,
@@ -34,8 +33,6 @@ mint.encodeMintTransaction = ({
     const outputOwners = outputNotes.map(n => n.owner);
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
-
-    // const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
 
     const proofData = inputCoder.mint(
         proofDataRaw,
@@ -64,6 +61,7 @@ mint.encodeMintTransaction = ({
         publicValue,
     },
     ]).slice(0x42)}`;
+
     return { proofData, expectedOutput, challenge };
 };
 
@@ -79,9 +77,8 @@ mint.constructProof = (notes, sender) => {
     }
 
     proofUtils.parseInputs(notesArray, sender);
-
-
     const { proofData, challenge } = joinSplit.constructProof(notesArray, m, sender, kPublic);
+
     return { proofData, challenge };
 };
 
