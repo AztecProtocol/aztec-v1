@@ -196,7 +196,7 @@ contract('JoinSplit', (accounts) => {
             console.log('gas used = ', gasUsed);
         });
 
-        it('validate that zero quantity of input notes works', async () => {
+        it('validates that zero quantity of input notes works', async () => {
             const outputNotes = notes.slice(0, 10);
             const kPublic = -450;
             const publicOwner = aztecAccounts[0].address;
@@ -227,7 +227,7 @@ contract('JoinSplit', (accounts) => {
             console.log('gas used = ', gasUsed);
         });
 
-        it('validate that zero quantity of output notes works', async () => {
+        it('validates that zero quantity of output notes works', async () => {
             const inputNotes = notes.slice(0, 10);
             const kPublic = 450;
             const publicOwner = aztecAccounts[0].address;
@@ -258,7 +258,7 @@ contract('JoinSplit', (accounts) => {
             console.log('gas used = ', gasUsed);
         });
 
-        it('validate that input notes of zero value work', async () => {
+        it('validates that input notes of zero value work', async () => {
             const inputNotes = [
                 aztec.note.create(aztecAccounts[0].publicKey, 0),
                 aztec.note.create(aztecAccounts[1].publicKey, 0),
@@ -293,7 +293,7 @@ contract('JoinSplit', (accounts) => {
             console.log('gas used = ', gasUsed);
         });
 
-        it('validate that output notes of zero value work', async () => {
+        it('validates that output notes of zero value work', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = [
                 aztec.note.create(aztecAccounts[0].publicKey, 0),
