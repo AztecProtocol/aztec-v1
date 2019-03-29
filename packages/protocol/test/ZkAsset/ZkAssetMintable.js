@@ -105,7 +105,7 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should complete a mint operation', async () => {
-            const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData); // works fine
+            const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData);
             expect(receipt.status).to.equal(true);
         });
 
