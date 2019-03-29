@@ -1,7 +1,7 @@
 {
   "name": "@aztec/dev-utils",
   "description": "Dev utils to be shared across AZTEC packages",
-  "version": "2.0.0",
+  "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
