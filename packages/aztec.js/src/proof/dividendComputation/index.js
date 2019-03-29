@@ -13,6 +13,11 @@ const bn128 = require('../../bn128');
 const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 
+const {
+    inputCoder,
+    outputCoder,
+} = require('../../abiEncoder');
+
 const { groupReduction } = bn128;
 const { customError } = utils.errors;
 const { errorTypes } = utils.constants;
@@ -151,6 +156,44 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         proofData, // this has 18 elements
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
+};
+
+dividendComputation.encodeDividendComputationTransaction = ({
+    inputNotes,
+    outputNotes,
+    za,
+    zb,
+    senderAddress,
+}) => {
+    const {
+        proofData: proofDataRaw,
+        challenge,
+    } = dividendComputation.constructProof([...inputNotes, ...outputNotes], za, zb, senderAddress);
+
+    const inputOwners = inputNotes.map(m => m.owner);
+    const outputOwners = outputNotes.map(n => n.owner);
+    const publicOwner = '0x0000000000000000000000000000000000000000';
+    const publicValue = 0;
+
+    const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
+
+    const proofData = inputCoder.dividendComputation(
+        proofDataRawFormatted,
+        challenge,
+        za,
+        zb,
+        inputOwners,
+        outputOwners,
+        outputNotes
+    );
+
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
+        inputNotes,
+        outputNotes,
+        publicOwner,
+        publicValue,
+    }]).slice(0x42)}`;
+    return { proofData, expectedOutput, challenge };
 };
 
 module.exports = dividendComputation;

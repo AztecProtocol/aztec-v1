@@ -19,6 +19,11 @@ bilateralSwap.verifier = verifier;
 const { customError } = utils.errors;
 const { errorTypes } = utils.constants;
 
+const {
+    inputCoder,
+    outputCoder,
+} = require('../../abiEncoder');
+
 /**
  * Construct AZTEC bilateral swap proof transcript
  *
@@ -108,6 +113,38 @@ bilateralSwap.constructProof = (notes, sender) => {
         proofData,
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
+};
+
+bilateralSwap.encodeBilateralSwapTransaction = ({
+    inputNotes,
+    outputNotes,
+    senderAddress,
+}) => {
+    const {
+        proofData: proofDataRaw,
+        challenge,
+    } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+    const inputOwners = inputNotes.map(m => m.owner);
+    const outputOwners = outputNotes.map(n => n.owner);
+
+    const proofData = inputCoder.bilateralSwap(
+        proofDataRaw,
+        challenge,
+        inputOwners,
+        outputOwners,
+        outputNotes
+    );
+
+    const publicOwner = '0x0000000000000000000000000000000000000000';
+    const publicValue = 0;
+
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
+        inputNotes,
+        outputNotes,
+        publicOwner,
+        publicValue,
+    }]).slice(0x42)}`;
+    return { proofData, expectedOutput };
 };
 
 module.exports = bilateralSwap;

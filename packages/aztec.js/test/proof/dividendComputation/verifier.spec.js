@@ -16,10 +16,6 @@ const { errorTypes } = utils.constants;
 
 const { expect } = chai;
 
-function randomAddress() {
-    return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
-}
-
 describe('Dividend computation verifier tests', () => {
     describe('success states', () => {
         it('dividendComputation.constructProof creates a valid dividend computation proof', () => {
@@ -37,7 +33,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
             const { valid } = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
             expect(valid).to.equal(true);
@@ -62,7 +58,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
 
             const wrongRelationship = proofUtils.makeTestNotes([90], [4, 49]);
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(wrongRelationship, za, zb, sender);
@@ -97,7 +93,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
@@ -137,7 +133,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
 
             const { challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
@@ -176,7 +172,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
 
             const zaLarge = K_MAX + za;
@@ -213,7 +209,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
 
             const zbLarge = K_MAX + zb;
@@ -250,7 +246,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
@@ -288,7 +284,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
@@ -331,7 +327,7 @@ describe('Dividend computation verifier tests', () => {
             const za = 100;
             const zb = 5;
 
-            const sender = randomAddress();
+            const sender = proofUtils.randomAddress();
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);

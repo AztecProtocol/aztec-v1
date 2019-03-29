@@ -184,7 +184,7 @@
                     "type": "address"
                 }
             ],
-            "name": "mint",
+            "name": "adjustSupply",
             "outputs": [
                 {
                     "name": "",

@@ -13,39 +13,6 @@ const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilat
 
 BilateralSwap.abi = BilateralSwapInterface.abi;
 
-
-function encodeBilateralSwapTransaction({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-}) {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
-
-    const proofData = aztec.abiEncoder.inputCoder.bilateralSwap(
-        proofDataRaw,
-        challenge,
-        inputOwners,
-        outputOwners,
-        outputNotes
-    );
-
-    const publicOwner = '0x0000000000000000000000000000000000000000';
-    const publicValue = 0;
-
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-    }]).slice(0x42)}`;
-    return { proofData, expectedOutput };
-}
-
 contract('Bilateral Swap', (accounts) => {
     let bilateralSwapContract;
     describe('success states', () => {
@@ -68,7 +35,7 @@ contract('Bilateral Swap', (accounts) => {
         it('successfully validate output encoding for bilateral proof in zero-knowledge', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
-            const { proofData, expectedOutput } = encodeBilateralSwapTransaction({
+            const { proofData, expectedOutput } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],

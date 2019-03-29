@@ -1,12 +1,12 @@
 {
   "name": "aztec.js",
-  "version": "0.6.0",
+  "version": "0.6.0-beta.3",
   "author": "AZTEC",
   "description": "AZTEC cryptography library",
   "license": "LGPL-3.0",
-  "main": "./lib",
+  "main": "./src",
   "files": [
-    "/lib"
+    "/src"
   ],
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
   "keywords": [
@@ -40,7 +40,7 @@
     "websocket": "^1.0.28"
   },
   "devDependencies": {
-    "@aztec/dev-utils": "^1.6.0",
+    "@aztec/dev-utils": "^1.6.0-beta.2",
     "babel-cli": "^6.26.0",
     "babel-plugin-add-module-exports": "^1.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
