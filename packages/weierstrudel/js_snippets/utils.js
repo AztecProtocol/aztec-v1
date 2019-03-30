@@ -73,5 +73,4 @@ utils.generatePointData = (numPoints) => {
     );
 };
 
-
 module.exports = utils;

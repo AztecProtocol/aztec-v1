@@ -6,7 +6,7 @@
   "license": "LGPL-3.0",
   "main": "./src",
   "files": [
-      "/lib"
+    "/lib"
   ],
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
   "keywords": [

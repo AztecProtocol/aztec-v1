@@ -1,0 +1,306 @@
+/**
+* @title Monty
+* @author Zachary Williamson
+*
+* @dev MONTY__MAIN uses a Montgomery batch inverse to convert
+*      a set of bn128 group elements from jacobian to affine form
+*      Coordinates are expected to be placed linearly in calldata,
+*      starting at 0x00 (i.e. 0x00: X_1, 0x20: Y_1, 0x40: Z_1, 0x60: X_2, ...)
+*      Affine coordinates are placed linearly in returndata, in 0x40 byte blocks
+**/
+
+#include "./modInv.huff"
+
+#define macro MONTY__INITIAL_OFFSET = takes(0) returns(1) {
+    0x00
+}
+
+template <calldata_location>
+#define macro MONTY__LOAD_SLICE = takes(0) returns(0) {
+    jumpdest
+    // starting stack state: p x_{n-1} p y_{n-1} p a_{n-1} z_{n-1} p
+    // start by copying p, then loading z_{n}
+    dup1 <push2(calldata_location)> calldataload
+    // z_{n} p p x_{n-1} p y_{n-1} p a_{n-1} z_{n-1} p
+    // compute a_{n} = a_{n-1} z_{n-1}
+    dup2 dup10 dup10 mulmod
+    // a_{n} z_{n} p p x_{n-1} p y_{n-1} p a_{n-1} z_{n-1} p
+    dup3 <push2(calldata_location-0x20)> calldataload
+    // y_{n} p a_{n} z_{n} p p x_{n-1} p y_{n-1} p a_{n-1} z_{n-1} p
+    dup2 <push2(calldata_location-0x40)> calldataload
+    // x_{n} p y_{n} p a_{n} z_{n} p p x_{n-1} p y_{n-1} p a_{n-1} z_{n-1} p
+    dup2
+    // p x_{n} p y_{n} p a_{n} z_{n} p p x_{n-1} p y_{n-1} p a_{n-1} z_{n-1} p
+}
+
+
+template <max, delta>
+#define macro MONTY__LOAD_100 = takes(0) returns(0) {
+    MONTY__LOAD_SLICE<max>()
+    MONTY__LOAD_SLICE<max-delta>()
+    MONTY__LOAD_SLICE<max-delta*2>()
+    MONTY__LOAD_SLICE<max-delta*3>()
+    MONTY__LOAD_SLICE<max-delta*4>()
+    MONTY__LOAD_SLICE<max-delta*5>()
+    MONTY__LOAD_SLICE<max-delta*6>()
+    MONTY__LOAD_SLICE<max-delta*7>()
+    MONTY__LOAD_SLICE<max-delta*8>()
+    MONTY__LOAD_SLICE<max-delta*9>()
+    MONTY__LOAD_SLICE<max-delta*10>()
+    MONTY__LOAD_SLICE<max-delta*11>()
+    MONTY__LOAD_SLICE<max-delta*12>()
+    MONTY__LOAD_SLICE<max-delta*13>()
+    MONTY__LOAD_SLICE<max-delta*14>()
+    MONTY__LOAD_SLICE<max-delta*15>()
+    MONTY__LOAD_SLICE<max-delta*16>()
+    MONTY__LOAD_SLICE<max-delta*17>()
+    MONTY__LOAD_SLICE<max-delta*18>()
+    MONTY__LOAD_SLICE<max-delta*19>()
+    MONTY__LOAD_SLICE<max-delta*20>()
+    MONTY__LOAD_SLICE<max-delta*21>()
+    MONTY__LOAD_SLICE<max-delta*22>()
+    MONTY__LOAD_SLICE<max-delta*23>()
+    MONTY__LOAD_SLICE<max-delta*24>()
+    MONTY__LOAD_SLICE<max-delta*25>()
+    MONTY__LOAD_SLICE<max-delta*26>()
+    MONTY__LOAD_SLICE<max-delta*27>()
+    MONTY__LOAD_SLICE<max-delta*28>()
+    MONTY__LOAD_SLICE<max-delta*29>()
+    MONTY__LOAD_SLICE<max-delta*30>()
+    MONTY__LOAD_SLICE<max-delta*31>()
+    MONTY__LOAD_SLICE<max-delta*32>()
+    MONTY__LOAD_SLICE<max-delta*33>()
+    MONTY__LOAD_SLICE<max-delta*34>()
+    MONTY__LOAD_SLICE<max-delta*35>()
+    MONTY__LOAD_SLICE<max-delta*36>()
+    MONTY__LOAD_SLICE<max-delta*37>()
+    MONTY__LOAD_SLICE<max-delta*38>()
+    MONTY__LOAD_SLICE<max-delta*39>()
+    MONTY__LOAD_SLICE<max-delta*40>()
+    MONTY__LOAD_SLICE<max-delta*41>()
+    MONTY__LOAD_SLICE<max-delta*42>()
+    MONTY__LOAD_SLICE<max-delta*43>()
+    MONTY__LOAD_SLICE<max-delta*44>()
+    MONTY__LOAD_SLICE<max-delta*45>()
+    MONTY__LOAD_SLICE<max-delta*46>()
+    MONTY__LOAD_SLICE<max-delta*47>()
+    MONTY__LOAD_SLICE<max-delta*48>()
+    MONTY__LOAD_SLICE<max-delta*49>()
+    MONTY__LOAD_SLICE<max-delta*50>()
+    MONTY__LOAD_SLICE<max-delta*51>()
+    MONTY__LOAD_SLICE<max-delta*52>()
+    MONTY__LOAD_SLICE<max-delta*53>()
+    MONTY__LOAD_SLICE<max-delta*54>()
+    MONTY__LOAD_SLICE<max-delta*55>()
+    MONTY__LOAD_SLICE<max-delta*56>()
+    MONTY__LOAD_SLICE<max-delta*57>()
+    MONTY__LOAD_SLICE<max-delta*58>()
+    MONTY__LOAD_SLICE<max-delta*59>()
+    MONTY__LOAD_SLICE<max-delta*60>()
+    MONTY__LOAD_SLICE<max-delta*61>()
+    MONTY__LOAD_SLICE<max-delta*62>()
+    MONTY__LOAD_SLICE<max-delta*63>()
+    MONTY__LOAD_SLICE<max-delta*64>()
+    MONTY__LOAD_SLICE<max-delta*65>()
+    MONTY__LOAD_SLICE<max-delta*66>()
+    MONTY__LOAD_SLICE<max-delta*67>()
+    MONTY__LOAD_SLICE<max-delta*68>()
+    MONTY__LOAD_SLICE<max-delta*69>()
+    MONTY__LOAD_SLICE<max-delta*70>()
+    MONTY__LOAD_SLICE<max-delta*71>()
+    MONTY__LOAD_SLICE<max-delta*72>()
+    MONTY__LOAD_SLICE<max-delta*73>()
+    MONTY__LOAD_SLICE<max-delta*74>()
+    MONTY__LOAD_SLICE<max-delta*75>()
+    MONTY__LOAD_SLICE<max-delta*76>()
+    MONTY__LOAD_SLICE<max-delta*77>()
+    MONTY__LOAD_SLICE<max-delta*78>()
+    MONTY__LOAD_SLICE<max-delta*79>()
+    MONTY__LOAD_SLICE<max-delta*80>()
+    MONTY__LOAD_SLICE<max-delta*81>()
+    MONTY__LOAD_SLICE<max-delta*82>()
+    MONTY__LOAD_SLICE<max-delta*83>()
+    MONTY__LOAD_SLICE<max-delta*84>()
+    MONTY__LOAD_SLICE<max-delta*85>()
+    MONTY__LOAD_SLICE<max-delta*86>()
+    MONTY__LOAD_SLICE<max-delta*87>()
+    MONTY__LOAD_SLICE<max-delta*88>()
+    MONTY__LOAD_SLICE<max-delta*89>()
+    MONTY__LOAD_SLICE<max-delta*90>()
+    MONTY__LOAD_SLICE<max-delta*91>()
+    MONTY__LOAD_SLICE<max-delta*92>()
+    MONTY__LOAD_SLICE<max-delta*93>()
+    MONTY__LOAD_SLICE<max-delta*94>()
+    MONTY__LOAD_SLICE<max-delta*95>()
+    MONTY__LOAD_SLICE<max-delta*96>()
+    MONTY__LOAD_SLICE<max-delta*97>()
+    MONTY__LOAD_SLICE<max-delta*98>()
+    MONTY__LOAD_SLICE<max-delta*99>()
+}
+
+
+#define macro MONTY__LOAD = takes(0) returns(0) {
+    0x5f calldatasize gt monty__load__have_data jumpi
+    0x00 0x00 return
+    monty__load__have_data:
+
+    // load  p x_{n} p y_{n} p a_{n} z_{n} p
+    P() 0x20 calldatasize sub calldataload  // z_{n} p
+    0x01 // 1st accumulator value is 1      // a_{n} z_{n} p
+    dup3 0x40 calldatasize sub calldataload // y_{n} p a_{n} z_{n} p
+    dup2 0x60 calldatasize sub calldataload // x_{n} p y_{n} p a_{n} z_{n} p
+    dup2                                    // p x_{n} p y_{n} p a_{n} z_{n} p
+    0x01
+    // how many points do we have?
+    0x60 calldatasize div     // n
+    // we've already loaded 1 point, so subtract by 1
+    sub
+    // multiply this by code size
+    __codesize(MONTY__LOAD_SLICE<0xffff>) mul
+    // and subtract from monty_test__end
+    monty_test_2__end sub
+    // and now jump to the jump label
+    jump
+    MONTY__LOAD_100<0x60*99+0x40+MONTY__INITIAL_OFFSET, 0x60>() // 0x28DB = 0x60*99 + 0x40
+    monty_test_2__end:
+}
+
+#define macro MONTY__NORMALIZE_SLICE = takes(0) returns(0) {
+    jumpdest
+    // stack state: i p x_{i} p y_{i} p a_{i} z_{i} p
+    swap6
+    // a_{i} p x_{i} p y_{i} p i z_{i} p
+    dup7 mulmod
+    // z^{-1}_{i} x_{i} p y_{i} p i z_{i} p
+    dup3 dup1 dup3 dup1 mulmod
+    // zz'_{i} p z'_{i} x_{i} p y_{i} p i z_{i} p
+    swap3 dup4 mulmod
+    // x'_{i} z'_{i} zz'_{i} p y_{i} p i z_{i} p
+    msize mstore // hon hon hon
+    mulmod mulmod // y'_{i} i z_{i} p
+    msize mstore  // i z_{i} p
+    mulmod        // i p x_{1} p y_{1} p a_{i} z_{1} p
+}
+
+#define macro MONTY__NORMALIZE = takes(0) returns(0) {
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+    MONTY__NORMALIZE_SLICE()
+}
+
+#define macro MONTY__MAIN = takes(0) returns(0) {
+    MONTY__LOAD()
+    // stack = p x_{0} p y_{0} p a_{0} z_{0} p
+    // we need to compute the accumulator, then get the inverse
+    dup3 dup8 dup8 mulmod
+    // t p x_{0} p y_{0} p a_{0} z_{0} p
+    // t = product of every z-coordinate
+    MODINV()
+
+    0x60 calldatasize div
+    __codesize(MONTY__NORMALIZE_SLICE) mul
+    monty__main__end sub jump
+
+    MONTY__NORMALIZE()
+
+    monty__main__end:
+    pop
+    msize 0x00 return
+}

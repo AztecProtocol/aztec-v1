@@ -36,7 +36,6 @@ regex.isolateTemplate = (val) => {
 };
 
 regex.containsOperators = (input) => {
-    console.log('checking containsOperators on ', input);
     return operators.test(input);
 };
 
@@ -55,6 +54,13 @@ regex.isLiteral = (input) => {
 
 regex.removeSpacesAndLines = (input) => {
     return input.replace(/(\r\n\t|\n|\r\t|\s)/gm, '');
+};
+
+regex.isPush = (input) => {
+    if (input.slice(0, 4) === 'push') {
+        return true;
+    }
+    return false;
 };
 
 module.exports = regex;

@@ -3,6 +3,7 @@ const BN = require('bn.js');
 const crypto = require('crypto');
 const path = require('path');
 
+const toBytes32 = require('../js_snippets/toBytes32');
 const { Runtime } = require('../../huff/src');
 const {
     p,
@@ -13,20 +14,10 @@ const { expect } = chai;
 const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
 
 
-function sliceMemory(memArray) {
-    const numWords = Math.ceil(memArray.length / 32);
-    const result = [];
-    for (let i = 0; i < numWords * 32; i += 32) {
-        result.push(new BN(memArray.slice(i, i + 32), 16));
-    }
-    return result;
-}
-
-
-describe.only('modular inverse', () => {
+describe('modular inverse', () => {
     let modInv;
     before(() => {
-        modInv = new Runtime('modInv.huff', pathToTestData, true);
+        modInv = new Runtime('modInv.huff', pathToTestData);
     });
 
     it('what I think is an inverse, actually IS an inverse!', () => {
@@ -37,7 +28,7 @@ describe.only('modular inverse', () => {
         expect(z.mul(zInv).umod(p).eq(new BN(1))).to.equal(true);
     });
 
-    it('macro CREATE_LOOKUP_ADDITION_CHAIN functions as expected', async () => {
+    it('macro CREATE_LOOKUP_ADDITION_CHAIN computes hardcoded lookup table', async () => {
         const z = new BN(crypto.randomBytes(32), 16).umod(p);
         const { stack } = await modInv('CREATE_LOOKUP_ADDITION_CHAIN', [z]);
 
@@ -70,49 +61,20 @@ describe.only('modular inverse', () => {
         const { stack } = await modInv('MODINV', [z]);
         expect(stack.length).to.equal(1);
         expect(stack[0].mul(z).umod(p).eq(new BN(1))).to.equal(true);
+        expect(stack[0].eq(zInv)).to.equal(true);
     });
 
-    it.only('macro MONTY_LOAD correctly computes z-factors', async () => {
-        const numPoints = 6;
-        const points = [...new Array(numPoints)].map(() => new BN(crypto.randomBytes(32), 16).umod(p));
-        const calldata = points.reduce((acc, z, i) => {
-            return ([
-                ...acc,
-                { index: (i * 96) + 32, value: new BN(0) },
-                { index: (i * 96) + 64, value: new BN(0) },
-                { index: (i * 96) + 96, value: z },
-            ]);
-        }, [{ index: 0, value: new BN(numPoints) }]);
-        const { stack, returnValue } = await modInv('MONTY_LOAD', [], [], calldata);
-        const returnWords = sliceMemory(returnValue);
-        console.log('return words = ', returnWords);
-        console.log(stack);
-
-        let accumulator = new BN(1);
-        console.log('points = ', points);
-        console.log('hmm = ', points[5].mul(points[4]).umod(p));
-        for (let i = 0; i < stack.length - 1; i += 6) {
-            const index = 1 + i;
-            const pointIndex = Math.round(i / 6);
-            console.log('point index = ', pointIndex);
-            console.log('points length = ', points.length - pointIndex - 1);
-            accumulator = accumulator.mul(points[points.length - (pointIndex + 1)]).umod(p);
-            console.log(accumulator);
-            const expected = points[points.length - (pointIndex + 3)];
-            console.log(i);
-            expect(stack[index].eq(accumulator)).to.equal(true);
-            expect(stack[index + 1].eq(p)).to.equal(true);
-            expect(stack[index + 2].eq(p)).to.equal(true);
-            expect(stack[index + 3].eq(p)).to.equal(true);
-            expect(stack[index + 4].eq(p)).to.equal(true);
-            expect(stack[index + 5].eq(expected)).to.equal(true);
-        }
-        // const accumulator = [points[0]];
-        // const expectedPoints = [];
-        // for (let i = 2; i < points.length; i += 1) {
-        //     accumulator.push(accumulator[i].mul(points[i - 1]));
-        //     expectedPoints.push(points[i]);
-        // }
-        // expect(stack.length).to.equal((numPoints - 2) * 6);
+    it('macro MODINV__MAIN correctly computes a modular inverse from calldata', async () => {
+        const z = new BN(crypto.randomBytes(32), 16).umod(p);
+        const zRed = z.toRed(pRed);
+        const zInv = zRed.redInvm().fromRed();
+        expect(z.mul(zInv).umod(p).eq(new BN(1))).to.equal(true);
+        const calldata = Buffer.from(toBytes32(z.toString(16)), 'hex');
+        const { stack, returnValue } = await modInv('MODINV__MAIN', [], [], calldata);
+        expect(stack.length).to.equal(0);
+        expect(returnValue.length).to.equal(32);
+        const result = new BN(returnValue, 16);
+        expect(result.mul(z).umod(p).eq(new BN(1))).to.equal(true);
+        expect(result.eq(zInv)).to.equal(true);
     });
 });

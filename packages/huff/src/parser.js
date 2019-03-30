@@ -109,6 +109,29 @@ parser.processTemplateLiteral = (literal, macros) => {
 
 parser.parseTemplate = (templateName, macros = {}, index = 0) => {
     const macroId = parser.getId();
+    if (regex.isPush(templateName)) {
+        const invokedName = templateName.slice(6, -1);
+        const numBytes = parseInt(templateName.slice(4, 5), 10);
+        const unpaddedHex = formatEvenBytes(parser.processTemplateLiteral(invokedName, macros).toString(16));
+        const hex = padNBytes(unpaddedHex, numBytes);
+        const opcode = toHex(95 + (hex.length / 2));
+        return {
+            templateName: `inline-${templateName}-${macroId}`,
+            macros: {
+                ...macros,
+                [`inline-${templateName}-${macroId}`]: {
+                    name: `inline-${templateName}-${macroId}`,
+                    ops: [{
+                        type: TYPES.PUSH,
+                        value: opcode,
+                        args: [hex],
+                        index,
+                    }],
+                    templateParams: [],
+                },
+            },
+        };
+    }
     if (regex.isLiteral(templateName)) {
         const hex = formatEvenBytes(parser.processTemplateLiteral(templateName, macros).toString(16));
         const opcode = toHex(95 + (hex.length / 2));
@@ -251,7 +274,6 @@ parser.processMacroInternal = (
         templateParams,
     } = macro;
     const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommas(t)], []);
-
     check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs!`);
     const templateRegExps = templateParams.map((label, i) => {
         const pattern = new RegExp(`\\b(${label})\\b`, 'g');
@@ -279,8 +301,6 @@ parser.processMacroInternal = (
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
-                console.log('I think a template? opvalue = ', op.value);
-                console.log('template arguments = ', templateArguments);
                 const parsedName = parser.substituteTemplateArguments([op.value], templateRegExps);
                 if (parsedName.length !== 1) {
                     throw new Error('cannot parse template invokation ', parsedName);
