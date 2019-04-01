@@ -14,46 +14,6 @@ const dividendInterface = artifacts.require('./contracts/ACE/validators/dividend
 
 dividend.abi = dividendInterface.abi;
 
-
-function encodeDividendComputationTransaction({
-    inputNotes,
-    outputNotes,
-    za,
-    zb,
-    senderAddress,
-}) {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = aztec.proof.dividendComputation.constructProof([...inputNotes, ...outputNotes], za, zb, senderAddress);
-
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
-    const publicOwner = '0x0000000000000000000000000000000000000000';
-    const publicValue = 0;
-
-    const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
-
-    const proofData = dividendInputEncode(
-        proofDataRawFormatted,
-        challenge,
-        za,
-        zb,
-        inputOwners,
-        outputOwners,
-        outputNotes
-    );
-
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-        challenge,
-    }]).slice(0x42)}`;
-    return { proofData, expectedOutput, challenge };
-}
-
 contract('Dividend Computation', (accounts) => {
     let dividendContract;
     describe('success states', () => {

@@ -2,14 +2,12 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "./IZkAsset.sol";
 import "../ACE/NoteRegistry.sol";
 import "../ACE/ACE.sol";
 import "../interfaces/IAZTEC.sol";
 import "../interfaces/IZkAsset.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
-import "../interfaces/IERC20.sol";
 
 
 contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
@@ -115,7 +113,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         int256 publicValue) = _proofOutput.extractProofOutput();
         
         uint256 length = inputNotes.getLength();
-        for (uint i = 0; i < length; i = i.add(1)) {
+        for (uint i = 0; i < length; i += 1) {
             (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
             require(
                 confidentialApproved[noteHash][msg.sender] == true,
@@ -137,7 +135,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     }
     
     function confidentialTransferInternal(bytes memory proofOutputs) internal {
-        for (uint i = 0; i < proofOutputs.getLength(); i++) {
+        for (uint i = 0; i < proofOutputs.getLength(); i += 1) {
             bytes memory proofOutput = proofOutputs.get(i);
             ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
             
@@ -158,14 +156,14 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     }
 
     function logInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
+        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
             emit DestroyNote(noteOwner, noteHash, metadata);
         }
     }
 
     function logOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i = i.add(1)) {
+        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
             emit CreateNote(noteOwner, noteHash, metadata);
         }

@@ -6,7 +6,6 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./NoteRegistry.sol";
 
 import "../interfaces/IAZTEC.sol";
-import "../interfaces/IERC20.sol";
 
 import "../libs/IntegerUtils.sol";
 import "../libs/NoteUtils.sol";
@@ -39,29 +38,6 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     );
     event IncrementLatestEpoch(uint8 newLatestEpoch);
 
-    struct Note {
-        uint8 status;
-        bytes5 createdOn;
-        bytes5 destroyedOn;
-        address owner;
-    }
-    struct Flags {
-        bool active;
-        bool canAdjustSupply;
-        bool canConvert;
-    }
-    struct NoteRegistry {
-        IERC20 linkedToken;
-        uint256 scalingFactor;
-        uint256 totalSupply;
-        bytes32 confidentialTotalMinted;
-        bytes32 confidentialTotalBurned;
-        uint256 supplementTotal;
-        Flags flags;
-        mapping(bytes32 => Note) notes;
-        mapping(address => mapping(bytes32 => uint256)) publicApprovals;
-    }
-
     // The commonReferenceString contains one G1 group element and one G2 group element,
     // that are created via the AZTEC protocol's trusted setup. All zero-knowledge proofs supported
     // by ACE use the same common reference string.
@@ -83,6 +59,112 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     * @dev contract constructor. Sets the owner of ACE
     **/
     constructor() public Ownable() {}
+
+    /**
+    * @dev Mint AZTEC notes
+    *      
+    * @param _proof the AZTEC proof object
+    * @param _proofData the mint proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function mint(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory) {
+        
+        Registry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canAdjustSupply == true, "this asset is not mintable");
+        
+        // Check that it's a mintable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        require(category == uint8(ProofCategory.MINT), "this is not a mint proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        require(_proofOutputs.getLength() > 0, "call to validateProof failed");
+
+        // Dealing with notes representing totals
+        (bytes memory oldTotal,  // inputNotesTotal
+        bytes memory newTotal, // outputNotesTotal
+        ,
+        ) = _proofOutputs.get(0).extractProofOutput();
+
+    
+        // Check the previous confidentialTotalSupply, and then assign the new one
+        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
+
+        require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total minted note does not match");
+        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
+        registry.confidentialTotalMinted = newTotalNoteHash;
+
+
+        // Dealing with minted notes
+        (,
+        bytes memory mintedNotes, // output notes
+        ,
+        ) = _proofOutputs.get(1).extractProofOutput();
+
+        updateOutputNotes(mintedNotes);
+        return(_proofOutputs);
+    }
+
+    /**
+    * @dev Burn AZTEC notes
+    *      
+    * @param _proof the AZTEC proof object
+    * @param _proofData the burn proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function burn(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory) {
+        
+        Registry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canAdjustSupply == true, "this asset is not burnable");
+        
+        // Check that it's a burnable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        require(category == uint8(ProofCategory.BURN), "this is not a burn proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        
+        // Dealing with notes representing totals
+        (bytes memory oldTotal, // input notes
+        bytes memory newTotal, // output notes
+        ,
+        ) = _proofOutputs.get(0).extractProofOutput();
+    
+        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
+        require(oldTotalNoteHash == registry.confidentialTotalBurned, "provided total burned note does not match");
+        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
+        registry.confidentialTotalBurned = newTotalNoteHash;
+
+
+        // Dealing with burned notes
+        (,
+        bytes memory burnedNotes,
+        ,) = _proofOutputs.get(1).extractProofOutput();
+
+
+        // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
+        updateInputNotes(burnedNotes);
+        return(_proofOutputs);
+    }
+    event Debug(bytes32 _proofHash, bytes32 _validatedProofHash, uint24 _proof);
 
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
@@ -152,6 +234,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             for (uint256 i = 0; i < length; i += 1) {
                 bytes32 proofHash = keccak256(proofOutputs.get(i));
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+                emit Debug(proofHash, validatedProofHash, _proof);
                 validatedProofs[validatedProofHash] = true;
             }
         } 
@@ -172,140 +255,13 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     */
     function clearProofByHashes(uint24 _proof, bytes32[] calldata _proofHashes) external {
         uint256 length = _proofHashes.length;
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; i += 1) {
             bytes32 proofHash = _proofHashes[i];
             require(proofHash != bytes32(0x0), "expected no empty proof hash");
             bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
             require(validatedProofs[validatedProofHash] == true, "can only clear previously validated proofs");
             validatedProofs[validatedProofHash] = false;
         }
-    }
-
-    /**
-    * @dev Mint AZTEC notes
-    *      
-    * @param _proof the AZTEC proof object
-    * @param _proofData the mint proof construction data
-    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
-    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
-    * Unnamed param is the AZTEC zero-knowledge proof data
-    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
-    * notes that were created. Returned so that a zkAsset can emit the appropriate events
-    */
-    function mint(
-        uint24 _proof,
-        bytes calldata _proofData,
-        address _proofSender
-    ) external returns (bytes memory) {
-        
-        NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canAdjustSupply == true, "this asset is not mintable");
-        
-        // Check that it's a mintable proof
-        (, uint8 category, ) = _proof.getProofComponents();
-
-        require(category == uint8(ProofCategory.MINT), "this is not a mint proof");
-
-        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
-        require(_proofOutputs.getLength() > 0, "call to validateProof failed");
-
-        // Dealing with notes representing totals
-        (bytes memory oldTotal,  // inputNotesTotal
-        bytes memory newTotal, // outputNotesTotal
-        ,
-        ) = _proofOutputs.get(0).extractProofOutput();
-
-    
-        // Check the previous confidentialTotalSupply, and then assign the new one
-        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
-
-        require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total supply note does not match");
-        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
-        registry.confidentialTotalMinted = newTotalNoteHash;
-
-
-        // Dealing with minted notes
-        (,
-        bytes memory mintedNotes, // output notes
-        ,
-        ) = _proofOutputs.get(1).extractProofOutput();
-
-        updateOutputNotes(mintedNotes);
-        return(_proofOutputs);
-    }
-
-    /**
-    * @dev Call transferFrom on a linked ERC20 token. Used in cases where the ACE's mint
-    * function is called but the token balance of the note registry in question is
-    * insufficient
-    * @param _value the value to be transferred
-    */
-    function supplementTokens(uint256 _value) external {
-        NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canConvert == true, "note registry does not have conversion rights");
-        
-        // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
-        require(registry.flags.canAdjustSupply == true, "note registry does not have mint and burn rights");
-        
-        require(
-            registry.linkedToken.transferFrom(msg.sender, address(this), _value), 
-            "transfer failed"
-        );
-
-        registry.totalSupply = registry.totalSupply.add(_value);
-    }
-
-    /**
-    * @dev Burn AZTEC notes
-    *      
-    * @param _proof the AZTEC proof object
-    * @param _proofData the burn proof construction data
-    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
-    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
-    * Unnamed param is the AZTEC zero-knowledge proof data
-    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
-    * notes that were created. Returned so that a zkAsset can emit the appropriate events
-    */
-    function burn(
-        uint24 _proof,
-        bytes calldata _proofData,
-        address _proofSender
-    ) external returns (bytes memory) {
-        
-        NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canAdjustSupply == true, "this asset is not burnable");
-        
-        // Check that it's a burnable proof
-        (, uint8 category, ) = _proof.getProofComponents();
-
-        require(category == uint8(ProofCategory.BURN), "this is not a burn proof");
-
-        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
-        
-        // Dealing with notes representing totals
-        (bytes memory oldTotal, // input notes
-        bytes memory newTotal, // output notes
-        ,
-        ) = _proofOutputs.get(0).extractProofOutput();
-    
-        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
-        require(oldTotalNoteHash == registry.confidentialTotalBurned, "provided total supply note does not match");
-        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
-        registry.confidentialTotalBurned = newTotalNoteHash;
-
-
-        // Dealing with burned notes
-        (,
-        bytes memory burnedNotes,
-        ,) = _proofOutputs.get(1).extractProofOutput();
-
-
-        // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
-        updateInputNotes(burnedNotes);
-        return(_proofOutputs);
     }
 
     /**
@@ -415,131 +371,6 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         emit IncrementLatestEpoch(latestEpoch);
     }
 
-    function createNoteRegistry(
-        address _linkedTokenAddress,
-        uint256 _scalingFactor,
-        bool _canAdjustSupply,
-        bool _canConvert
-    ) public {
-        require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
-        NoteRegistry memory registry = NoteRegistry({
-            linkedToken: IERC20(_linkedTokenAddress),
-            scalingFactor: _scalingFactor,
-            totalSupply: 0,
-            /*
-            confidentialTotalMinted and confidentialTotalBurned below are the hashes of AZTEC notes 
-            with k = 0 and a  =1
-            */
-            confidentialTotalMinted: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
-            confidentialTotalBurned: 0xdba4b8aad5b7a3f3e8e921ae22073db70b6d6590aface862af0d4eff2b920c9d,
-            supplementTotal: 0,
-            flags: Flags({
-                active: true,
-                canAdjustSupply: _canAdjustSupply,
-                canConvert: _canConvert
-            })
-        });
-        registries[msg.sender] = registry;
-    }
-
-    function updateNoteRegistry(
-        uint24 _proof,
-        address _proofSender,
-        bytes memory _proofOutput
-    ) public {
-        NoteRegistry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        bytes32 proofHash = keccak256(_proofOutput);
-        require(
-            validateProofByHash(_proof, proofHash, _proofSender) == true,
-            "ACE has not validated a matching proof"
-        );
-        
-        // clear record of valid proof - stops re-entrancy attacks and saves some gas
-        validatedProofs[proofHash] = false;
-        
-        (bytes memory inputNotes,
-        bytes memory outputNotes,
-        address publicOwner,
-        int256 publicValue) = _proofOutput.extractProofOutput();
-
-        updateInputNotes(inputNotes);
-        updateOutputNotes(outputNotes);
-
-        if (publicValue != 0) {
-            require(registry.flags.canConvert == true, "this asset cannot be converted into public tokens");
-
-            if (publicValue < 0) {
-                registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
-                require(
-                    registry.publicApprovals[publicOwner][proofHash] >= uint256(-publicValue),
-                    "public owner has not validated a transfer of tokens"
-                );
-                registry.publicApprovals[publicOwner][proofHash] =
-                    registry.publicApprovals[publicOwner][proofHash].sub(uint256(-publicValue));
-                registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue));
-            } else {
-                registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
-                registry.linkedToken.transfer(publicOwner, uint256(publicValue));
-            }
-        }
-    }
-
-    /** 
-    * @dev This should be called from an asset contract.
-    */
-    function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
-        NoteRegistry storage registry = registries[_registryOwner];
-        registry.publicApprovals[msg.sender][_proofHash] = _value;
-    }
-
-    /**
-     * @dev Returns the registry for a given address.
-     */
-    function getRegistry(address _owner) public view returns (
-        IERC20 _linkedToken,
-        uint256 _scalingFactor,
-        uint256 _totalSupply,
-        bytes32 _confidentialTotalMinted,
-        bytes32 _confidentialTotalBurned,
-        uint256 _supplementTotal,
-        bool _canAdjustSupply,
-        bool _canConvert,
-        address aceAddress
-    ) {
-        NoteRegistry memory registry = registries[_owner];
-        return (
-            registry.linkedToken,
-            registry.scalingFactor,
-            registry.totalSupply,
-            registry.confidentialTotalMinted,
-            registry.confidentialTotalBurned,
-            registry.supplementTotal,
-            registry.flags.canAdjustSupply,
-            registry.flags.canConvert,
-            address(this)
-        );
-    }
-
-    /**
-     * @dev Returns the note for a given address and note hash.
-     */
-    function getNote(address _registryOwner, bytes32 _noteHash) public view returns (
-        uint8 _status,
-        bytes5 _createdOn,
-        bytes5 _destroyedOn,
-        address _noteOwner
-    ) {
-        NoteRegistry storage registry = registries[_registryOwner];
-        Note storage note = registry.notes[_noteHash];
-        return (
-            note.status,
-            note.createdOn,
-            note.destroyedOn,
-            note.owner
-        );
-    }
-    
     /**
     * @dev Returns the common reference string.
     * We use a custom getter for `commonReferenceString` - the default getter created by making the storage

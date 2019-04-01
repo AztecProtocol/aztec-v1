@@ -84,15 +84,6 @@ library JoinSplitABIEncoder {
 
             // structure of a `note`
             // 0x00 - 0x20 = size of `note`
-            // 0x20 - 0x40 = `owner`
-            // 0x40 - 0x60 = `noteHash`
-            // 0x60 - 0x80 = size of note `data`
-            // 0x80 - 0xa0 = compressed note coordinate `gamma` (part of `data`)
-            // 0xa0 - 0xc0 = compressed note coordinate `sigma` (part of `data`)
-            // 0xc0 - ???? = remaining note metadata
-
-            // structure of a `note` (new)
-            // 0x00 - 0x20 = size of `note`
             // 0x20 - 0x40 = type
             // 0x40 - 0x60 = `owner`
             // 0x60 - 0x80 = `noteHash`
@@ -123,7 +114,7 @@ library JoinSplitABIEncoder {
                 mstore(0x260, kPublic)
             }
 
-            mstore(0x280, calldataload(0x144))
+            mstore(0x280, calldataload(0x144))                    // store challenge
             let inputPtr := 0x2a0                                 // point to inputNotes
             mstore(add(inputPtr, 0x20), m)                        // number of input notes
             // set note pointer, offsetting lookup indices for each input note
@@ -152,7 +143,7 @@ library JoinSplitABIEncoder {
                 mstore(add(s, 0x20), 0x01)
                 // store note owner in `s + 0x20`. If ECDSA recovery fails, or signing address is `0`, throw an error
                 mstore(0x80, typeHash)
-                mstore(0xa0, 0x10001)
+                mstore(0xa0, 0x10101)   // proof id 0x010101
                 if or(
                     iszero(mload(add(s, 0x40))),
                     iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x40), 0x20))
