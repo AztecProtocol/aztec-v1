@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
+    "braintree-jsdoc-template": "^3.3.0",
     "require-dir": "^1.2.0"
   },
   "devDependencies": {
