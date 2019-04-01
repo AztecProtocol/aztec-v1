@@ -8,6 +8,15 @@ import "../interfaces/IAZTEC.sol";
 import "../libs/IntegerUtils.sol";
 import "../libs/NoteUtils.sol";
 
+/**
+ * @title NoteRegistry contract which contains the storage variables that define the set of valid
+ * AZTEC notes for a particular address
+ * @author AZTEC
+ * @dev The NoteRegistry defines the state of valid AZTEC notes. It enacts instructions to update the 
+ * state, given to it by the ACE and only the note registry owner can enact a state update.  
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
+
 contract NoteRegistry is IAZTEC {
     using NoteUtils for bytes;
     using SafeMath for uint256;
@@ -63,8 +72,31 @@ contract NoteRegistry is IAZTEC {
 
     mapping(bytes32 => bool) public validatedProofs;
 
+
+    /**
+    * @dev Query the ACE for a previously validated proof
+    *
+    * @param _proof - unique identifier for the proof in question and being validated
+    * @param _proofHash - keccak256 hash of a bytes proofOutput argument. Used to identify the proof in question,
+    * validated 
+    * @param _sender - address of the entity that originally validated the proof
+    * @return boolean - true if the proof has previously been validated, false if not
+    */
     function validateProofByHash(uint24 _proof, bytes32 _proofHash, address _sender) public view returns (bool);
 
+
+    /**
+    * @dev Creates a note registry with a linked ERC20 token. Ownership of the registry is assigned to
+    * msg.sender. The note registry defines the state of valid AZTEC notes for the owner.
+    *
+    * @param _linkedTokenAddress - public ERC20 token that is linked to the NoteRegistry. This is used to
+    * transfer public value into and out of the system
+    * @param _scalingFactor - defines how many ERC20 tokens are represented by one AZTEC note
+    * @param _canMint - flag set by the owner to decide whether the registry has minting priviledges 
+    * @param _canBurn - flag set by the owner to decide whether the registry has burning priviledges 
+    * @param _canConvert - flag set by the owner to decide whether the registry has public to private, and 
+    * vice versa, conversion priviledges
+    */
     function createNoteRegistry(
         address _linkedTokenAddress,
         uint256 _scalingFactor,
@@ -88,6 +120,15 @@ contract NoteRegistry is IAZTEC {
         registries[msg.sender] = registry;
     }
 
+
+    /**
+    * @dev Update the state of the note registry according to transfer instructions issued by a 
+    * zero-knowledge proof
+    *
+    * @param _proof - unique identifier for a proof
+    * @param _proofSender - address of the entity sending the proof
+    * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
+    */
     function updateNoteRegistry(
         uint24 _proof,
         address _proofSender,
@@ -138,6 +179,16 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
+    /**
+    * @dev Mint AZTEC notes, update the note registry state to include the minted notes and 
+    * update the total minted value
+    * 
+    * May lead to a scenario where there are insufficient public ERC20 tokens to convert these
+    * minted notes into ERC20 tokens. In this case, the supplementTokens() function in ACE is called.
+    *
+    * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
+    * @param _proofSender - address of the entity sending the proof
+    */
     function mint(bytes memory _proofOutput, address _proofSender) public returns (bool) {
         Registry storage registry = registries[msg.sender];
         require(registry.flags.active == false, "note registry does not exist for the given address");
@@ -173,6 +224,16 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
+    /**
+    * @dev Burn AZTEC notes, update the state of the note registry destroy the burned notes and 
+    * update the total burned value. 
+    *
+    * May lead to a scenario where there are insufficient public ERC20 tokens to convert these
+    * minted notes into ERC20 tokens. In this case, the supplementTokens() function in ACE is called.
+    *
+    * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
+    * @param _proofSender - address of the entity sending the proof
+    */
     function burn(bytes memory _proofOutput, address _proofSender) public returns (bool) {
         Registry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
@@ -220,6 +281,9 @@ contract NoteRegistry is IAZTEC {
 
     /** 
     * @dev This should be called from an asset contract.
+    * @param _registryOwner - address of the registry owner
+    * @param _proofHash - keccak256 hash of bytes proofOutput
+    * @param _value - value up to which approval is granted
     */
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         Registry storage registry = registries[_registryOwner];
@@ -229,6 +293,18 @@ contract NoteRegistry is IAZTEC {
 
     /**
      * @dev Returns the registry for a given address.
+     *
+     * @param _owner - address of the registry owner in question
+     * @return _linkedTokenAddress - public ERC20 token that is linked to the NoteRegistry. This is used to
+     * transfer public value into and out of the system     
+     * @return _scalingFactor - defines how many ERC20 tokens are represented by one AZTEC note
+     * @return _totalSupply - TODO
+     * @return _confidentialTotalSupply - keccak256 hash of the note representing the total supply 
+     * of the note registry
+     * @return _canMint - flag set by the owner to decide whether the registry has minting priviledges 
+     * @return _canBurn - flag set by the owner to decide whether the registry has burning priviledges 
+     * @return _canConvert - flag set by the owner to decide whether the registry has public to private, and 
+     * vice versa, conversion priviledges
      */
     function getRegistry(address _owner) public view returns (
         ERC20 _linkedToken,
@@ -253,6 +329,13 @@ contract NoteRegistry is IAZTEC {
 
     /**
      * @dev Returns the note for a given address and note hash.
+     * @param _registryOwner - address of the registry owner
+     * @param _noteHash - keccak256 hash of the note coordiantes (gamma and sigma)
+     * @return status - status of the note, details whether the note is in a note registry
+     * or has been destroyed
+     * @return createdOn - time the note was created
+     * @return destroyedOn - time the note was destroyed
+     * @return noteOwner - address of the note owner
      */
     function getNote(address _registryOwner, bytes32 _noteHash) public view returns (
         uint8 status,
@@ -272,6 +355,11 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
+    /**
+     * @dev Removes input notes from the note registry
+     * @param inputNotes - an array of input notes from a zero-knowledge proof, that are to be
+     * removed and destroyed from a note registry
+     */
     function updateInputNotes(bytes memory inputNotes) internal {
         // set up some temporary variables we'll need
         // N.B. the status flags are NoteStatus enums, but written as uint8's.
@@ -340,6 +428,11 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
+    /**
+     * @dev Adds output notes to the note registry
+     * @param outputNotes - an array of output notes from a zero-knowledge proof, that are to be
+     * added to the note registry
+     */
     function updateOutputNotes(bytes memory outputNotes) internal {
 
         // set up some temporary variables we'll need

@@ -4,6 +4,14 @@ import "./ZkAsset.sol";
 import "../libs/ProofUtils.sol";
 import "../libs/SafeMath8.sol";
 
+/**
+ * @title ZkAssetOwnable
+ * @author AZTEC
+ * @dev A contract which inherits from ZkAsset and includes the definition
+ * of the contract owner
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
+
 contract ZkAssetOwnable is ZkAsset {
     using ProofUtils for uint24;
     using SafeMath8 for uint8;
