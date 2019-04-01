@@ -45,12 +45,13 @@ let mainnetProvider = {};
 let ropstenProvider = {};
 
 const projectRoot = '';
+const isVerbose = true;
 const coverageSubproviderConfig = {
-    isVerbose: true,
+    isVerbose,
     ignoreFilesGlobs: ['**/node_modules/**', '**/interfaces/**', '**/test/**'],
 };
-const defaultFromAddress = getFirstAddress();
 const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);
+const defaultFromAddress = getFirstAddress();
 const provider = new ProviderEngine();
 
 switch (process.env.MODE) {
@@ -58,11 +59,9 @@ switch (process.env.MODE) {
         global.profilerSubprovider = new ProfilerSubprovider(
             artifactAdapter,
             defaultFromAddress,
-            true
+            isVerbose
         );
-        // global.profilerSubprovider.stop();
         provider.addProvider(global.profilerSubprovider);
-        // provider.addProvider(new RpcProvider({ rpcUrl: 'http://localhost:8545' }));
         break;
     case 'coverage':
         global.coverageSubprovider = new CoverageSubprovider(
@@ -76,7 +75,7 @@ switch (process.env.MODE) {
         provider.addProvider(new RevertTraceSubprovider(
             artifactAdapter,
             defaultFromAddress,
-            coverageSubproviderConfig
+            isVerbose
         ));
         break;
     default:
