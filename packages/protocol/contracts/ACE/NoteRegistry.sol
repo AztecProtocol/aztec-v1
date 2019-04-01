@@ -80,10 +80,7 @@ contract NoteRegistry is IAZTEC {
         // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
         require(registry.flags.canAdjustSupply == true, "note registry does not have mint and burn rights");
         
-        require(
-            registry.linkedToken.transferFrom(msg.sender, address(this), _value), 
-            "transfer failed"
-        );
+        registry.linkedToken.transferFrom(msg.sender, address(this), _value);
 
         registry.totalSupply = registry.totalSupply.add(_value);
     }
