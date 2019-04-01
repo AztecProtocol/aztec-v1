@@ -1,9 +1,3 @@
-/**
- * Verification algorithm for AZTEC join-split zero-knowledge proofs
- *
- * @namespace verifier
- * @memberof module:proof.joinSplit
- */
 const BN = require('bn.js');
 const utils = require('@aztec/dev-utils');
 
@@ -21,7 +15,7 @@ const verifier = {};
  * Verify an AZTEC zero-knowledge proof
  *
  * @method verifyProof
- * @memberof module:proof.joinSplit.verifier
+ * @memberof module:joinSplit
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
  * @param {number} m number of input notes
  * @param {string} challengeHex hex-string formatted proof challenge

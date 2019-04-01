@@ -1,10 +1,22 @@
+/**
+ * Note ABI encoding helper functions
+ * @module noteCoder
+ */
 const { padLeft } = require('web3-utils');
-
 const bn128 = require('../bn128');
 const secp256k1 = require('../secp256k1');
 
 const noteCoder = {};
 
+
+/**
+ * Encode a note public key
+ *
+ * @method encodeNotePublicKey
+ * @param {Object[]} gamma_sigma_ephemeral - object containing three elements: gamma, sigma and the ephemeral
+ * key of a note
+ * @returns {string} data - hexadecimal concatenated string of gamma, sigma and the ephemeral key
+ */
 noteCoder.encodeNotePublicKey = ({ gamma, sigma, ephemeral }) => {
     const gammaEnc = gamma.encode('hex', true);
     const sigmaEnc = sigma.encode('hex', true);
@@ -12,6 +24,13 @@ noteCoder.encodeNotePublicKey = ({ gamma, sigma, ephemeral }) => {
     return `0x${padLeft(gammaEnc, 66)}${padLeft(sigmaEnc, 66)}${padLeft(ephemeralEnc, 66)}`;
 };
 
+/**
+ * Decode a note from it's event log
+ *
+ * @method decodeNoteFromEventLog
+ * @param {string} parameter - event log parameter
+ * @returns {Object[]} data - hexadecimal concatenated string of gamma, sigma and the ephemeral key
+ */
 noteCoder.decodeNoteFromEventLog = (parameter) => {
     if (parameter.length !== 196) {
         throw new Error('event parameter has incorrect length!');

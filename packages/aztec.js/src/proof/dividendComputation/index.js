@@ -1,7 +1,7 @@
 /**
  * Constructs AZTEC dividend computations
  *
- * @module proof.dividendComputation
+ * @module dividendComputation
 */
 
 const BN = require('bn.js');
@@ -29,7 +29,8 @@ dividendComputation.verifier = verifier;
  * @param {integer} za - integer required to represent ratio in a compatible form with finite-field arithmetic
  * @param {integer} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
  * @param {sender} sender - Ethereum address
- * @returns {{proofData:string[], challenge: string}} - proof data and challenge
+ * @returns {string[]} proofData - constructed cryptographic proof data
+ * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
 dividendComputation.constructProof = (notes, za, zb, sender) => {
     const numNotes = 3;
