@@ -1,7 +1,5 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../../libs/LibEIP712.sol";
-
 library AdjustSupplyABIEncoder {
     /**
      * Calldata map
@@ -27,7 +25,6 @@ library AdjustSupplyABIEncoder {
             // set up initial variables
             let notes := add(0x104, calldataload(0x144))
             let n := calldataload(notes)
-            let m := 1
             let inputOwners := add(0x124, calldataload(0x164)) // one word after input owners = 1st
             let outputOwners := add(0x124, calldataload(0x184)) // one word after outputOwners = 1st
             let metadata := add(0x144, calldataload(0x1a4)) // two words after metadata = 1st
@@ -47,8 +44,9 @@ library AdjustSupplyABIEncoder {
             // 0x220 - 0x240 = relative offset between `t` and `outputNotes`
             // 0x240 - 0x260 = `publicOwner`
             // 0x260 - 0x280 = `publicValue`
+            // 0x280 - 0x2a0 = `challenge`
 
-            // `inputNotes A` starts at 0x280
+            // `inputNotes A` starts at 0x2a0
             // structure of `inputNotes` and `outputNotes`
             // 0x00 - 0x20 = byte length of notes array
             // 0x20 - 0x40 = number of notes `i`
@@ -61,6 +59,7 @@ library AdjustSupplyABIEncoder {
             // 0x40 - 0x60 = relative offset between `r` and `outputNotes`
             // 0x60 - 0x80 = `publicOwner`
             // 0x80 - 0xa0 = `publicValue`
+            // 0xa0 - 0xc0 = `challenge`
 
             // 'inputNotes B'
             // structure of `inputNotes` and `outputNotes`
@@ -71,12 +70,13 @@ library AdjustSupplyABIEncoder {
 
             // structure of a `note`
             // 0x00 - 0x20 = size of `note`
-            // 0x20 - 0x40 = `owner`
-            // 0x40 - 0x60 = `noteHash`
-            // 0x60 - 0x80 = size of note `data`
-            // 0x80 - 0xa0 = compressed note coordinate `gamma` (part of `data`)
-            // 0xa0 - 0xc0 = compressed note coordinate `sigma` (part of `data`)
-            // 0xc0 - ???? = remaining note metadata
+            // 0x20 - 0x40 = `noteType`
+            // 0x40 - 0x60 = `owner`
+            // 0x60 - 0x80 = `noteHash`
+            // 0x80 - 0xa0 = size of note `data`
+            // 0xa0 - 0xc0 = compressed note coordinate `gamma` (part of `data`)
+            // 0xc0 - 0xe0 = compressed note coordinate `sigma` (part of `data`)
+            // 0xe0 - ???? = remaining note metadata
 
             // `proofOutputs` must form a monolithic block of memory that we can return.
             // `s` points to the memory location of the start of the current note
@@ -87,220 +87,202 @@ library AdjustSupplyABIEncoder {
             mstore(0x1c0, 0x80)                            // offset to 1st proof
             // 0x1e0 = offset to 2nd proof
             // length of proofOutput is at s + 0x60
-            mstore(0x220, 0xa0)                            // location of inputNotes
+            mstore(0x220, 0xc0)                            // location of inputNotes
             mstore(0x260, 0x00)                            // publicOwner is 0
+            mstore(0x280, 0x00)                            // publicValue is 0
 
-            let kPublic := 0
-            mstore(0x280, kPublic)
+            mstore(0x2a0, calldataload(0x124))
 
-            let inputPtr := 0x2a0                                 // point to inputNotes
-            mstore(add(inputPtr, 0x20), m)                        // number of input notes
             // set note pointer, offsetting lookup indices for each input note
-            let s := add(0x2e0, mul(m, 0x20))
 
             /////////////////// PROOF OUTPUT A: START OF INPUT NOTES //////////////////
-            let i := 0x01
-            // get note index
-            let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
+            // 0x2c0 = number of bytes in `inputNotes` (leave blank for now)
+            // 0x2e0 = number of input notes
+            mstore(0x2e0, 0x01)
+
+            // 0x300 = relative offset to 1st input note (0x60)
+            mstore(0x300, 0x60)
+
+            // Start of inputNote[0]
             // get pointer to metadata
-            let metadataIndex := calldataload(add(metadata, mul(sub(i, m), 0x20)))
+            let metadataIndex := calldataload(metadata)
             // get size of metadata
-            let metadataLength := calldataload(add(sub(metadata, 0x40), metadataIndex))
+            let metadataLength := calldataload(add(metadataIndex, sub(metadata, 0x40)))
 
-            // copy note data to 0x00 - 0x80
-            calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
+            // copy note data to 0x20 - 0xa0
+            mstore(0x00, 0x01)
+            calldatacopy(0x20, add(notes, 0x120), 0x80) // get gamma, sigma
 
-            // store note length in `s`
-            mstore(s, add(0xa0, metadataLength))
-            // store the owner of the note in `s + 0x20`
-            mstore(add(s, 0x20), calldataload(add(outputOwners, mul(sub(i, m), 0x20))))
+            // store note length in `s` = 0x320
+            mstore(0x320, add(0xc0, metadataLength))
+            // store note type (UXTO type, 0x01) in `s + 0x20`
+            mstore(0x340, 0x01)
+            // store the owner of the note in `s + 0x40`
+            mstore(0x360, calldataload(outputOwners))
             // store note hash
-            mstore(add(s, 0x40), keccak256(0x00, 0x80))
-            // store note metadata length if `s + 0x60`
-            mstore(add(s, 0x60), add(0x40, metadataLength))
-            // store compressed note coordinate gamma in `s + 0x80`
+            mstore(0x380, keccak256(0x00, 0xa0))
+            // store note metadata length if `s + 0x80`
+            mstore(0x3a0, add(0x40, metadataLength))
+            // store compressed note coordinate gamma in `s + 0xa0`
             mstore(
-                add(s, 0x80),
+                0x3c0,
                 or(
-                    mload(0x00),
-                    mul(
-                        and(mload(0x20), 0x01),
-                        0x8000000000000000000000000000000000000000000000000000000000000000
-                    )
+                    mload(0x20),
+                    shl(255, and(mload(0x40), 0x01))
                 )
             )
-            // store compressed note coordinate sigma in `s + 0xa0`
+            // store compressed note coordinate sigma in `s + 0xc0`
             mstore(
-            add(s, 0xa0),
-            or(
-                mload(0x40),
-                mul(
-                    and(mload(0x60), 0x01),
-                    0x8000000000000000000000000000000000000000000000000000000000000000
+                0x3e0,
+                or(
+                    mload(0x60),
+                    shl(255, and(mload(0x80), 0x01))
                 )
             )
-            )
-            // copy metadata into `s + 0xc0`
-            calldatacopy(add(s, 0xc0), add(metadataIndex, sub(metadata, 0x20)), metadataLength)
+            // copy metadata into `s + 0xe0`
+            calldatacopy(0x400, add(metadataIndex, sub(metadata, 0x20)), metadataLength)
             // compute the relative offset to index this note in our returndata
-            mstore(add(add(inputPtr, 0x40), mul(sub(i, m), 0x20)), sub(s, inputPtr)) // relative offset to note
 
             // increase s by note length
-            s := add(s, add(mload(s), 0x20))
 
+            // store relative memory offset to outputNotes
+            mstore(0x240, add(0x200, metadataLength))
+            // store the length of inputNotes at 0x2c0
+            mstore(0x2c0, add(0x120, metadataLength))
             ///////////////// PROOF OUTPUT A: START OF OUTPUT NOTES (1) ///////////////////
 
             // transition between input and output notes
-            // 0x2a0 = inputPtr = the pointer to the start of inputNotes
-            // s = pointer to the 'next' input note
-            // s - inputPtr = byte length between start and end of inputNotes
-            // 0xa0 + (s - inputPtr) = byte length between start of 'proofOutput' and end of input notes
-            // start of outputNotes = end of inputNotes
-            mstore(0x2a0, sub(sub(s, inputPtr), 0x20)) // store total length of inputNotes at first index of inputNotes 
-            mstore(0x240, add(0xa0, sub(s, inputPtr))) // store relative memory offset to outputNotes
-            inputPtr := s
-            mstore(add(inputPtr, 0x20), 0x01) // store number of output notes
-            // we want s to point to the first data entry in outputNotes
-            // add 0x40 to skip over 'number of bytes in array' and 'number of entries in array'
-            // add (x * 0x20) to skip over the relative offsets to each data bloack
-            s := add(s, add(0x40, mul(0x01, 0x20)))
             
-            i := 0
-            noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
-
-            // copy note data to 0x00 - 0x80
-            calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
-
+            // 0x400 + metadataLength = byte length of output notes (0x120)
+            // 0x420 + metadataLength = # of output notes (1)
+            // 0x440 + metadataLength = offset to outputNotes[0] (0x60)
+            mstore(add(0x400, metadataLength), 0x120) // store length of output notes
+            mstore(add(0x420, metadataLength), 0x01) // store number of output notes
+            mstore(add(0x440, metadataLength), 0x60) // store offset to outputNotes[0]
+        
             // construct note hash
-            mstore(0xc0, keccak256(0x00, 0x80))
+            // copy 1st note note to 0x20 - 0xa0
+            calldatacopy(0x20, add(notes, 0x60), 0x80) // get gamma, sigma
 
             // store note length in `s`
-            mstore(s, 0xa0)
-
-            // store note owner in `s + 0x20`
-            mstore(add(s, 0x20), calldataload(inputOwners))
-            // store note hash in `s + 0x40`
-            mstore(add(s, 0x40), mload(0xc0))
-            // store note metadata length in `s + 0x60` (just the coordinates)
-            mstore(add(s, 0x60), 0x40)
-            // store compressed note coordinate gamma in `s + 0x80`
+            mstore(add(0x460, metadataLength), 0xc0)
+            // store note type (UXTO type, 0x01) in `s + 0x20`
+            mstore(add(0x480, metadataLength), 0x01)
+            // store note owner in `s + 0x40`
+            mstore(add(0x4a0, metadataLength), calldataload(inputOwners))
+            // store note hash in `s + 0x60`
+            mstore(add(0x4c0, metadataLength), keccak256(0x00, 0xa0))
+            // store note metadata length in `s + 0x80` (just the coordinates)
+            mstore(add(0x4e0, metadataLength), 0x40)
+            // store compressed note coordinate gamma in `s + 0xa0`
             mstore(
-            add(s, 0x80),
-            or(
-                calldataload(add(noteIndex, 0x40)),
-                mul(
-                and(calldataload(add(noteIndex, 0x60)), 0x01),
-                0x8000000000000000000000000000000000000000000000000000000000000000
+                add(0x500, metadataLength),
+                or(
+                    mload(0x20),
+                    shl(255, and(mload(0x40), 0x01))
                 )
             )
-            )
-            // store compressed note coordinate sigma in `s + 0xa0`
+            // store compressed note coordinate sigma in `s + 0xc0`
             mstore(
-            add(s, 0xa0),
-            or(
-                calldataload(add(noteIndex, 0x80)),
-                mul(
-                and(calldataload(add(noteIndex, 0xa0)), 0x01),
-                0x8000000000000000000000000000000000000000000000000000000000000000
+                add(0x520, metadataLength),
+                or(
+                    mload(0x60),
+                    shl(255, and(mload(0x80), 0x01))
                 )
-            )
             )
             // compute the relative offset to index this note in our returndata
-            mstore(add(add(inputPtr, 0x40), mul(i, 0x20)), sub(s, inputPtr)) // relative offset to note
+            mstore(add(0x440, metadataLength), 0x60) // relative offset to note
     
-            // increase s by note length
-            s := add(s, 0xc0)
-
             // now we need to transition between first and second proofOutput
             // s is going to point to the end of the outputNotes array
             // so, s is our absolute pointer to the start of the 2nd proofOutputs entry
             // we know that 'proofOutputs' starts at 0x180
             // so (s - 0x180) = relative offset to second proofOutputs entry
-            let startOfProofOutput := s
-            mstore(0x200, sub(s, 0x220)) // length of proofOutput
-            mstore(0x1e0, sub(s, 0x180)) // offset to get to second proofOutput
-            mstore(inputPtr, sub(s, add(inputPtr, 0x20)))
-            mstore(add(s, 0x20), 0xa0)
-            mstore(add(s, 0x40), 0xe0)
-            mstore(add(s, 0x60), 0x00)
-            mstore(add(s, 0x80), 0x00)
+            let startOfProofOutput := add(0x540, metadataLength)
+
+            // proofOutput[0].length = start of proofOutput[1] - start of proofOutput[0] - 0x20
+            // proofOutput[0].length = (0x540 + metadataLength) - 0x200 - 0x20 = 0x320 + metadataLength
+            mstore(0x200, add(0x320, metadataLength)) // length of proofOutput
+            mstore(0x1e0, add(0x3c0, metadataLength)) // offset to get to second proofOutput
+
+            // s points to the start of proofOutputs[0]
+            let s := startOfProofOutput
+            mstore(add(s, 0x20), 0xc0)   // location of inputNotes
+            mstore(add(s, 0x40), 0x100)  // location of outputNotes
+            mstore(add(s, 0x60), 0x00)   // publicOwner
+            mstore(add(s, 0x80), 0x00)   // publicValue
+
+            // compute challenge = kecck256(challenge)
+            mstore(0x20, calldataload(0x124))
+            mstore(add(s, 0xa0), keccak256(0x20, 0x20)) // challenge
             // 0x00 length of proofOutput
             // 0x20 location of inputNotes
             // 0x40 location of outputNotes
             // 0x60 publicOwner
             // 0x80 publicValue
             // 0xa0 = inputNoteData
-            mstore(add(s, 0xa0), 0x20) // length of input notes array (1 word)
-            mstore(add(s, 0xc0), 0x00) // number of entries (0 words)
-            
-            // 0xe0 = start of output notes
-            // inside inputNote
-            // 0x00 = byte length
-            // 0x20 = number of notes
-            // 0x40 = 
-            s := add(s, 0xe0)
-            // now s = start of output notes
-            // we don't know the length
-            // but we do know that the number of notes = n - 2
-            mstore(add(s, 0x20), sub(n, 2))
-            inputPtr := s
-            // we want to point s to first outputNote data
-            // want to add 0x40 + (0x20 * number of output notes)
-            s := add(s, add(0x40, mul(0x20, sub(n, 2))))
-            // now s points to output note data!
-            m := add(m, 0x01)
-            // the number of output n
+            mstore(add(s, 0xc0), 0x20) // length of input notes array (1 word)
+            mstore(add(s, 0xe0), 0x00) // number of entries (0 words)
+
+            // set notesPtr = proofOutputs[1].outputNotes
+            let notesPtr := add(s, 0x100)
+
+            // s + 0x20 = number of notes = n - 2
+            mstore(add(notesPtr, 0x20), sub(n, 2))
+
+            // set s to point to proofOutputs[1].outputNotes[0]
+            s := add(add(s, 0x140), mul(0x20, sub(n, 2)))
+
             // Output notes:
             // first output note needs to go into the first proofOutput object
             // second output note onwards, needs to go into the second proofOutput object
-            for { i := m } lt(i, n) { i := add(i, 0x01) } {
+            for { let i := 0x02 } lt(i, n) { i := add(i, 0x01) } {
 
             /////////////////// START OF PROOF OUTPUT B  ////////////////////
 
-                // get note index
-                noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
                 // get pointer to metadata
-                metadataIndex := calldataload(add(metadata, mul(sub(i, sub(m, 0x01)), 0x20)))
+                metadataIndex := calldataload(add(metadata, mul(sub(i, 0x01), 0x20)))
                 // get size of metadata
                 metadataLength := calldataload(add(sub(metadata, 0x40), metadataIndex))
 
-                // copy note data to 0x00 - 0x80
-                calldatacopy(0x00, add(noteIndex, 0x40), 0x80) // get gamma, sigma
+                mstore(0x00, 0x01)
+                // copy note data to 0x20 - 0xa0
+                calldatacopy(
+                    0x20,
+                    add(add(notes, 0x60), mul(i, 0xc0)),
+                    0x80
+                ) // get gamma, sigma
 
                 // store note length in `s`
-                mstore(s, add(0xa0, metadataLength))
-                // store the owner of the note in `s + 0x20`
-                mstore(add(s, 0x20), calldataload(add(outputOwners, mul(sub(i, sub(m, 0x01)), 0x20))))
+                mstore(s, add(0xc0, metadataLength))
+                // store note type (UXTO type, 0x01) in `s + 0x20`
+                mstore(add(s, 0x20), 0x01)
+                // store the owner of the note in `s + 0x40`
+                mstore(add(s, 0x40), calldataload(add(outputOwners, mul(sub(i, 0x01), 0x20))))
                 // store note hash
-                mstore(add(s, 0x40), keccak256(0x00, 0x80))
-                // store note metadata length if `s + 0x60`
-                mstore(add(s, 0x60), add(0x40, metadataLength))
-                // store compressed note coordinate gamma in `s + 0x80`
+                mstore(add(s, 0x60), keccak256(0x00, 0xa0))
+                // store note metadata length if `s + 0x80`
+                mstore(add(s, 0x80), add(0x40, metadataLength))
+                // store compressed note coordinate gamma in `s + 0xa0`
                 mstore(
-                    add(s, 0x80),
+                    add(s, 0xa0),
                     or(
-                        mload(0x00),
-                        mul(
-                            and(mload(0x20), 0x01),
-                            0x8000000000000000000000000000000000000000000000000000000000000000
-                        )
+                        mload(0x20),
+                        shl(255, and(mload(0x40), 0x01))
                     )
                 )
-                // store compressed note coordinate sigma in `s + 0xa0`
+                // store compressed note coordinate sigma in `s + 0xc0`
                 mstore(
-                add(s, 0xa0),
-                or(
-                    mload(0x40),
-                    mul(
-                        and(mload(0x60), 0x01),
-                        0x8000000000000000000000000000000000000000000000000000000000000000
+                    add(s, 0xc0),
+                    or(
+                        mload(0x60),
+                        shl(255, and(mload(0x80), 0x01))
                     )
                 )
-                )
-                // copy metadata into `s + 0xc0`
-                calldatacopy(add(s, 0xc0), add(metadataIndex, sub(metadata, 0x20)), metadataLength)
+                // copy metadata into `s + 0xe0`
+                calldatacopy(add(s, 0xe0), add(metadataIndex, sub(metadata, 0x20)), metadataLength)
                 // compute the relative offset to index this note in our returndata
-                mstore(add(add(inputPtr, 0x40), mul(sub(i, m), 0x20)), sub(s, inputPtr)) // relative offset to note
+                mstore(add(notesPtr, mul(i, 0x20)), sub(s, notesPtr)) // relative offset to note
 
                 // increase s by note length
                 s := add(s, add(mload(s), 0x20))
@@ -311,30 +293,13 @@ library AdjustSupplyABIEncoder {
             // 1. length of proofOutput
             // 2. length of outputNotes
             // length of outputNotes = s - inputPtr, stored at inputPtr
-            mstore(inputPtr, sub(sub(s, inputPtr), 0x20)) // store length of outputNotes at start of outputNotes
+            mstore(notesPtr, sub(sub(s, notesPtr), 0x20)) // store length of outputNotes at start of outputNotes
             // length of proofOutput
             let proofOutputLength := sub(s, startOfProofOutput)
             mstore(startOfProofOutput, sub(proofOutputLength, 0x20))
-            let notesLength := sub(s, 0x280)
             mstore(0x180, sub(s, 0x1a0)) // store length of proofOutputs at 0x100
-            // mstore(0x00 , notesLength) return(0x00, 0x20)
             mstore(0x160, 0x20)
             return(0x160, sub(s, 0x160)) // return the final byte array
         }
-    }
-}
-
-contract AdjustSupplyABIEncoderTest is LibEIP712 {
-
-    function validateAdjustSupply(
-        bytes calldata, 
-        address, 
-        uint[6] calldata
-    ) 
-        external 
-        view 
-        returns (bytes memory) 
-    {
-        AdjustSupplyABIEncoder.encodeAndExit();
     }
 }

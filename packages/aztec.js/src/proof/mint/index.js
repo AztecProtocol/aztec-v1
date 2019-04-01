@@ -3,6 +3,8 @@
  *
  * @module proof.mint
  */
+const { padLeft, sha3 } = require('web3-utils');
+
 const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 const joinSplit = require('../joinSplit');
@@ -53,12 +55,14 @@ mint.encodeMintTransaction = ({
         }],
         publicOwner,
         publicValue,
+        challenge,
     },
     {
         inputNotes: [],
         outputNotes: outputNotes.slice(1),
         publicOwner,
         publicValue,
+        challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
     },
     ]).slice(0x42)}`;
 

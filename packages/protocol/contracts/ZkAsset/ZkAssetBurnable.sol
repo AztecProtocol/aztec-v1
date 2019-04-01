@@ -13,8 +13,6 @@ import "./ZkAssetOwnable.sol";
 contract ZkAssetBurnable is ZkAssetOwnable {
     event UpdateTotalBurned(bytes32 noteHash, bytes noteData);
 
-    address public owner;
-
     constructor(
         address _aceAddress,
         address _linkedTokenAddress,
@@ -43,7 +41,7 @@ contract ZkAssetBurnable is ZkAssetOwnable {
 
         (,
         bytes32 noteHash,
-        bytes memory metadata) = newTotal.extractNote();
+        bytes memory metadata) = newTotal.get(0).extractNote();
 
         logOutputNotes(burnedNotes);
         emit UpdateTotalBurned(noteHash, metadata);

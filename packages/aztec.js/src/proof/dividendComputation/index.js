@@ -192,6 +192,7 @@ dividendComputation.encodeDividendComputationTransaction = ({
         outputNotes,
         publicOwner,
         publicValue,
+        challenge,
     }]).slice(0x42)}`;
     return { proofData, expectedOutput, challenge };
 };
