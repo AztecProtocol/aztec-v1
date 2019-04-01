@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
+    "braintree-jsdoc-template": "^3.3.0",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
@@ -47,6 +48,7 @@
   "scripts": {
     "clean": "./node_modules/.bin/rimraf ./lib",
     "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
+    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
+    "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
   }
 }
