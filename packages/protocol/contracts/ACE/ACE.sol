@@ -192,7 +192,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         uint24 _proof,
         bytes32 _proofHash,
         address _sender
-    ) public view returns (bool) {        
+    ) public view returns (bool) {
         // We need create a unique encoding of _proof, _proofHash and _sender,
         // and use as a key to access validatedProofs
         // We do this by computing bytes32 validatedProofHash = keccak256(ABI.encode(_proof, _proofHash, _sender))

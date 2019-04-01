@@ -31,11 +31,11 @@ contract NoteRegistry is IAZTEC {
         // can manipulate a timestamp has little effect, but should be considered when utilizing this parameter.
         // We store `createdOn` in 5 bytes of data - just in case this contract is still around in 2038 :)
         // This kicks the 'year 2038' problem down the road by about 400 years
-        bytes5 createdOn;
+        uint40 createdOn;
 
         // `destroyedOn` logs the timestamp of the block that destroys this note in a transaction.
         // Default value is 0x0000000000 for notes that have not been spent.
-        bytes5 destroyedOn;
+        uint40 destroyedOn;
 
         // The owner of the note
         address owner;
@@ -168,7 +168,7 @@ contract NoteRegistry is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.toBytes5();
+            note.createdOn = uint40(now);
             note.owner = noteOwner;
         }
     }
@@ -214,7 +214,7 @@ contract NoteRegistry is IAZTEC {
             // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
             // The 900-ish seconds a miner can manipulate a timestamp should have little effect
             // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.toBytes5();
+            note.destroyedOn = uint40(now);
         }
     }
 
@@ -231,17 +231,17 @@ contract NoteRegistry is IAZTEC {
      * @dev Returns the registry for a given address.
      */
     function getRegistry(address _owner) public view returns (
-        ERC20 _linkedToken,
-        uint256 _scalingFactor,
-        uint256 _totalSupply,
-        bytes32 _confidentialTotalSupply,
-        bool _canMint,
-        bool _canBurn,
-        bool _canConvert
+        address linkedToken,
+        uint256 scalingFactor,
+        uint256 totalSupply,
+        bytes32 confidentialTotalSupply,
+        bool canMint,
+        bool canBurn,
+        bool canConvert
     ) {
         Registry memory registry = registries[_owner];
         return (
-            registry.linkedToken,
+            address(registry.linkedToken),
             registry.scalingFactor,
             registry.totalSupply,
             registry.confidentialTotalSupply,
@@ -256,8 +256,8 @@ contract NoteRegistry is IAZTEC {
      */
     function getNote(address _registryOwner, bytes32 _noteHash) public view returns (
         uint8 status,
-        bytes5 createdOn,
-        bytes5 destroyedOn,
+        uint40 createdOn,
+        uint40 destroyedOn,
         address noteOwner
     ) {
         // Load out a note for a given registry owner. Struct unpacking is done in Yul to improve efficiency
@@ -272,7 +272,7 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
-    function updateInputNotes(bytes memory inputNotes) internal {
+    function updateInputNotes(bytes memory _inputNotes) internal {
         // set up some temporary variables we'll need
         // N.B. the status flags are NoteStatus enums, but written as uint8's.
         // We represent them as uint256 vars because it is the enum values that enforce type safety.
@@ -290,9 +290,9 @@ contract NoteRegistry is IAZTEC {
         // We also must check the following:
         // 1. the note has an existing status of UNSPENT
         // 2. the note owner matches the provided input
-        uint256 length = inputNotes.getLength();
+        uint256 length = _inputNotes.getLength();
         for (uint256 i = 0; i < length; i++) {
-            (address noteOwner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
+            (address noteOwner, bytes32 noteHash,) = _inputNotes.get(i).extractNote();
 
             // Get the storage location of the input note
             // solhint-disable-next-line no-unused-vars
@@ -340,15 +340,15 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
-    function updateOutputNotes(bytes memory outputNotes) internal {
+    function updateOutputNotes(bytes memory _outputNotes) internal {
 
         // set up some temporary variables we'll need
         uint256 outputNoteStatusNew = uint256(NoteStatus.UNSPENT);
         uint256 outputNoteStatusOld;
-        uint256 length = outputNotes.getLength();
+        uint256 length = _outputNotes.getLength();
 
         for (uint256 i = 0; i < length; i++) {
-            (address noteOwner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
+            (address noteOwner, bytes32 noteHash,) = _outputNotes.get(i).extractNote();
             require(noteOwner != address(0x0), "output note owner cannot be address(0x0)!");
 
             // Create a record in the note registry for this output note
@@ -369,7 +369,7 @@ contract NoteRegistry is IAZTEC {
                             // `status` occupies byte position 0
                             and(outputNoteStatusNew, 0xff), // mask to 1 byte (uint8)
                             // `createdOn` occupies byte positions 1-5 => shift by 8 bits
-                            shl(8, and(timestamp, 0xffffffffff)) // mask timestamp to 5 bytes (bytes5)
+                            shl(8, and(timestamp, 0xffffffffff)) // mask timestamp to 40 bits
                         ),
                         // `owner` occupies byte positions 11-31 => shift by 88 bits
                         shl(88, noteOwner) // noteOwner already of address type, no need to mask
