@@ -26,7 +26,6 @@ const bn128 = {};
 
 /**
  * The elliptic.js curve object
- * @memberof module:bn128
  */
 bn128.curve = new EC.curve.short({
     a: '0',
@@ -39,14 +38,12 @@ bn128.curve = new EC.curve.short({
 
 /**
  * BN.js reduction context for bn128 curve group's prime modulus
- * @memberof module:bn128
  */
 bn128.groupReduction = BN.red(bn128.curve.n);
 
 /**
  * Get a random BN in the bn128 curve group's reduction context
  * @method randomGroupScalar
- * @memberof module:bn128
  * @returns {BN} BN.js instance
  */
 bn128.randomGroupScalar = () => {
@@ -56,7 +53,6 @@ bn128.randomGroupScalar = () => {
 /**
  * Get a random point on the curve
  * @method randomPoint
- * @memberof module:bn128
  * @returns {Point} a random point
  */
 bn128.randomPoint = function randomPoint() {
@@ -74,7 +70,6 @@ bn128.randomPoint = function randomPoint() {
 
 /**
  * elliptic.js Point representation of AZTEC generator point
- * @memberof module:bn128
  */
 bn128.h = bn128.curve.point(H_X, H_Y);
 
@@ -85,7 +80,6 @@ bn128.K_MAX = K_MAX;
  * Brute-force recover an AZTEC note value from a decrypted point pair.  
  *   Requires the value 'k' is less than ~ 1 million
  * @method recoverMessage
- * @memberof module:bn128
  * @param {Point} gamma the AZTEC note coordinate \gamma
  * @param {Point} gammaK the AZTEC decrypted coordinate \gamma^{k}. Computed from \sigma.h^{-a}
  * @returns {number} the value of the note

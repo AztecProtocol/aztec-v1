@@ -1,8 +1,7 @@
 /**
  * Note utility functions
  *
- * @namespace noteUtils
- * @memberof module:note
+ * @module module:noteUtils
  */
 const { padLeft, sha3 } = require('web3-utils');
 
@@ -13,7 +12,6 @@ const utils = {};
  *
  * @method getSharedSecret
  * @private
- * @memberof module:note.noteUtils
  * @param {Object} ephemeralPoint secp256k1 point
  * @param {Object} privateKey hex-string formatted private key
  * @returns {string} hex-string formatted shared secret
@@ -29,7 +27,6 @@ utils.getSharedSecret = (ephemeralPoint, privateKey) => {
  *
  * @method getNoteHash
  * @private
- * @memberof module:note.noteUtils
  * @param {Object} gamma AZTEC commitment base point
  * @param {Object} sigma AZTEC commitment signed point
  * @returns {string} sha3 hash in hex-string format
