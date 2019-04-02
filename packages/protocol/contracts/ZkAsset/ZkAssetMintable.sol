@@ -68,7 +68,6 @@ contract ZkAssetMintable is ZkAssetOwnable {
             ,
             ,
             ,
-            ,
         ) = ace.getRegistry(address(this));
         if (publicValue > 0) {
             if (totalSupply < uint256(publicValue)) {
