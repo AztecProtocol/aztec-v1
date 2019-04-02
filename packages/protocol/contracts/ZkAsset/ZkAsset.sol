@@ -9,7 +9,13 @@ import "../interfaces/IZkAsset.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
 
-
+/**
+ * @title ZkAsset
+ * @author AZTEC
+ * @dev A contract defining the standard interface and behaviours of a confidential asset. 
+ * The ownership values and transfer values are encrypted. 
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
 contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
@@ -72,11 +78,33 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         );
     }
     
+    /**
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes 
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine. 
+    *
+    * Upon successfull verification, it will update note registry state - creating output notes and 
+    * destroying input notes.
+    * 
+    * @param _proofData - bytes variable outputted from a proof verification contract, representing 
+    * transfer instructions for the ACE
+    */
     function confidentialTransfer(bytes memory _proofData) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
         confidentialTransferInternal(proofOutputs);
     }
 
+    /**
+    * @dev Note owner approving a third party, another address, to spend the note on 
+    * owner's behalf. This is necessary to allow the confidentialTransferFrom() method
+    * to be called
+    * 
+    * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
+    * @param _spender - address being approved to spend the note
+    * @param _status - defines whether the _spender address is being approved to spend the 
+    * note, or if permission is being revoked
+    * @param _signature - ECDSA signature from the note owner that validates the
+    * confidentialApprove() instruction   
+    */
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
@@ -106,6 +134,17 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         confidentialApproved[_noteHash][_spender] = _status;
     }
 
+    /**
+    * @dev Executes a value transfer mediated by smart contracts. The method is supplied with
+    * transfer instructions represented by a bytes _proofOutput argument that was outputted
+    * from a proof verification contract.
+    * 
+    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables: 
+    * 1) epoch number 2) category number 3) ID number for the proof
+    * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
+    * transfer instructions for the ACE
+    */
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
         (bytes memory inputNotes,
         bytes memory outputNotes,
@@ -155,6 +194,12 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         }
     }
 
+    /**
+    * @dev Emit events for all input notes, which represent notes being destroyed
+    * and removed from the note registry
+    * 
+    * @param inputNotes - input notes being destroyed and removed from note registry state
+    */
     function logInputNotes(bytes memory inputNotes) internal {
         for (uint i = 0; i < inputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
@@ -162,6 +207,12 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         }
     }
 
+    /**
+    * @dev Emit events for all output notes, which represent notes being created and added
+    * to the note registry
+    * 
+    * @param outputNotes - outputNotes being created and added to note registry state
+    */
     function logOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();

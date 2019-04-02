@@ -1,5 +1,11 @@
 pragma solidity >= 0.5.0 <0.6.0;
 
+
+/**
+ * @title Library of proof utility functions
+ * @author AZTEC
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
 library ProofUtils {
 
     /**
