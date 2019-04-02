@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "version": "0.4.2",
+  "version": "0.4.3-beta.2",
   "author": "AZTEC",
   "description": "AZTEC smart contract repository",
   "license": "LGPL-3.0",
@@ -24,8 +24,9 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "openzeppelin-solidity": "2.1.2",
-    "@aztec/dev-utils": "file:../dev-utils"
+    "@aztec/dev-utils": "file:../dev-utils",
+    "braintree-jsdoc-template": "^3.3.0",
+    "openzeppelin-solidity": "2.1.2"
   },
   "devDependencies": {
     "@0x/sol-compiler": "^3.1.3",
@@ -68,8 +69,10 @@
     "lint": "npm run lint:js && npm run lint:sol",
     "test:sol": "scripts/test.sh",
     "test": "scripts/test.sh",
+    "trace": "scripts/trace.sh",
     "coverage": "scripts/coverage.sh",
     "profile": "scripts/profile.sh",
+    "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",
     "compile": "./node_modules/.bin/truffle compile --all",
     "build:artifacts": "node scripts/artifacts.js"
   }

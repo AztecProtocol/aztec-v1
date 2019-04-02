@@ -17,6 +17,7 @@ import "../libs/SafeMath8.sol";
  * @author AZTEC
  * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
  *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ACE is IAZTEC, Ownable, NoteRegistry {
     using IntegerUtils for uint256;
@@ -59,6 +60,112 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     * @dev contract constructor. Sets the owner of ACE
     **/
     constructor() public Ownable() {}
+
+    /**
+    * @dev Mint AZTEC notes
+    *      
+    * @param _proof the AZTEC proof object
+    * @param _proofData the mint proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function mint(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory) {
+        
+        Registry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canAdjustSupply == true, "this asset is not mintable");
+        
+        // Check that it's a mintable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        require(category == uint8(ProofCategory.MINT), "this is not a mint proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        require(_proofOutputs.getLength() > 0, "call to validateProof failed");
+
+        // Dealing with notes representing totals
+        (bytes memory oldTotal,  // inputNotesTotal
+        bytes memory newTotal, // outputNotesTotal
+        ,
+        ) = _proofOutputs.get(0).extractProofOutput();
+
+    
+        // Check the previous confidentialTotalSupply, and then assign the new one
+        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
+
+        require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total minted note does not match");
+        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
+        registry.confidentialTotalMinted = newTotalNoteHash;
+
+
+        // Dealing with minted notes
+        (,
+        bytes memory mintedNotes, // output notes
+        ,
+        ) = _proofOutputs.get(1).extractProofOutput();
+
+        updateOutputNotes(mintedNotes);
+        return(_proofOutputs);
+    }
+
+    /**
+    * @dev Burn AZTEC notes
+    *      
+    * @param _proof the AZTEC proof object
+    * @param _proofData the burn proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function burn(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory) {
+        
+        Registry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canAdjustSupply == true, "this asset is not burnable");
+        
+        // Check that it's a burnable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        require(category == uint8(ProofCategory.BURN), "this is not a burn proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        
+        // Dealing with notes representing totals
+        (bytes memory oldTotal, // input notes
+        bytes memory newTotal, // output notes
+        ,
+        ) = _proofOutputs.get(0).extractProofOutput();
+    
+        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
+        require(oldTotalNoteHash == registry.confidentialTotalBurned, "provided total burned note does not match");
+        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
+        registry.confidentialTotalBurned = newTotalNoteHash;
+
+
+        // Dealing with burned notes
+        (,
+        bytes memory burnedNotes,
+        ,) = _proofOutputs.get(1).extractProofOutput();
+
+
+        // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
+        updateInputNotes(burnedNotes);
+        return(_proofOutputs);
+    }
+    event Debug(bytes32 _proofHash, bytes32 _validatedProofHash, uint24 _proof);
 
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
@@ -124,9 +231,10 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             for (uint256 i = 0; i < length; i += 1) {
                 bytes32 proofHash = keccak256(proofOutputs.get(i));
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+                emit Debug(proofHash, validatedProofHash, _proof);
                 validatedProofs[validatedProofHash] = true;
             }
-        }
+        } 
         return proofOutputs;
     }
 
@@ -144,7 +252,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     */
     function clearProofByHashes(uint24 _proof, bytes32[] calldata _proofHashes) external {
         uint256 length = _proofHashes.length;
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; i += 1) {
             bytes32 proofHash = _proofHashes[i];
             require(proofHash != bytes32(0x0), "expected no empty proof hash");
             bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
@@ -201,24 +309,39 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             // inside _proof, we have 3 packed variables : [epoch, category, id]
             // each is a uint8.
 
-            // To compute the storage key for disabledValidators[epoch][category][id], we do the following:
-            // 1. get the disabledValidators slot 
-            // 2. add (epoch * 0x10000) to the slot
-            // 3. add (category * 0x100) to the slot
-            // 4. add (id) to the slot
-            // i.e. the range of storage pointers allocated to disabledValidators ranges from
-            // disabledValidators_slot to (0xffff * 0x10000 + 0xff * 0x100 + 0xff = disabledValidators_slot 0xffffffff)
+            // We need to compute the storage key for `disabledValidators[epoch][category][id]`
+            // Type of array is bool[0x100][0x100][0x100]
+            // Solidity will only squish 32 boolean variables into a single storage slot, not 256
+            // => result of disabledValidators[epoch][category] is stored in 0x08 storage slots
+            // => result of disabledValidators[epoch] is stored in 0x08 * 0x100 = 0x800 storage slots
 
-            // Conveniently, the multiplications we have to perform on epoch, category and id correspond
-            // to their byte positions in _proof.
-            // i.e. (epoch * 0x10000) = and(_proof, 0xffff0000)
-            // and  (category * 0x100) = and(_proof, 0xff00)
-            // and  (id) = and(_proof, 0xff)
+            // To compute the storage slot  disabledValidators[epoch][category][id], we do the following:
+            // 1. get the disabledValidators slot 
+            // 2. add (epoch * 0x800) to the slot (or epoch << 11)
+            // 3. add (category * 0x08) to the slot (or category << 3)
+            // 4. add (id / 0x20) to the slot (or id >> 5)
+
+            // Once the storage slot has been loaded, we need to isolate the byte that contains our boolean
+            // This will be equal to id % 0x20, which is also id & 0x1f
 
             // Putting this all together. The storage slot offset from '_proof' is...
-            // (_proof & 0xffff0000) + (_proof & 0xff00) + (_proof & 0xff)
-            // i.e. the storage slot offset IS the value of _proof
-            isValidatorDisabled := sload(add(_proof, disabledValidators_slot))
+            // epoch: ((_proof & 0xff0000) >> 16) << 11 = ((_proof & 0xff0000) >> 5)
+            // category: ((_proof & 0xff00) >> 8) << 3 = ((_proof & 0xff00) >> 5)
+            // id: (_proof & 0xff) >> 5
+            // i.e. the storage slot offset = _proof >> 5
+
+            // the byte index of the storage word that we require, is equal to (_proof & 0x1f)
+            // to convert to a bit index, we multiply by 8
+            // i.e. bit index = shl(3, and(_proof & 0x1f))
+            // => result = shr(shl(3, and_proof & 0x1f), value)
+            isValidatorDisabled := 
+                shr(
+                    shl(
+                        0x03,
+                        and(_proof, 0x1f)
+                    ),
+                    sload(add(shr(5, _proof), disabledValidators_slot))
+                )
 
             // Next, compute validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender))
             // cache free memory pointer - we will overwrite it when computing hash (cheaper than using free memory)
@@ -274,11 +397,23 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         bool isValidatorDisabled;
         bool queryInvalid;
         assembly {
-            // we can use _proof directly as an offset when computing the storage pointer for
-            // validators[_proof.epoch][_proof.category][_proof.id] and
-            // disabledValidators[_proof.epoch][_proof.category][_proof.id]
-            // (see `validateProofByHash` for more info on this)
-            isValidatorDisabled := sload(add(_proof, disabledValidators_slot))
+            // To compute the storage key for validatorAddress[epoch][category][id], we do the following:
+            // 1. get the validatorAddress slot 
+            // 2. add (epoch * 0x10000) to the slot
+            // 3. add (category * 0x100) to the slot
+            // 4. add (id) to the slot
+            // i.e. the range of storage pointers allocated to validatorAddress ranges from
+            // validatorAddress_slot to (0xffff * 0x10000 + 0xff * 0x100 + 0xff = validatorAddress_slot 0xffffffff)
+
+            // Conveniently, the multiplications we have to perform on epoch, category and id correspond
+            // to their byte positions in _proof.
+            // i.e. (epoch * 0x10000) = and(_proof, 0xffff0000)
+            // and  (category * 0x100) = and(_proof, 0xff00)
+            // and  (id) = and(_proof, 0xff)
+
+            // Putting this all together. The storage slot offset from '_proof' is...
+            // (_proof & 0xffff0000) + (_proof & 0xff00) + (_proof & 0xff)
+            // i.e. the storage slot offset IS the value of _proof
             validatorAddress := sload(add(_proof, validators_slot))
             queryInvalid := or(iszero(validatorAddress), isValidatorDisabled)
         }

@@ -1,3 +1,8 @@
+
+/**
+ * Output ABI encoding function
+ * @module outputCoder
+ */
 const { padLeft, sha3 } = require('web3-utils');
 const BN = require('bn.js');
 
@@ -6,33 +11,36 @@ const secp256k1 = require('../secp256k1');
 
 const outputCoder = {};
 
+/**
+ * Decode a note
+ *
+ * @method decodeNote
+ * @param {note} note - AZTEC note
+ * @returns {Object[]} note variables - extracted variables: noteType, owner, 
+ * noteHash, gamma, sigma, ephemeral
+ */
 outputCoder.decodeNote = (note) => {
     const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length === 0xe1) {
-        return outputCoder.decodeOutputNote(note);
-    }
-    if (length === 0xc0) {
-        return outputCoder.decodeInputNote(note);
-    }
-    throw new Error(`unknown note length ${length}`);
-};
-
-outputCoder.decodeOutputNote = (note) => {
-    const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length !== 0xe1) {
-        throw new Error(`invalid length of ${length.toString(16)}`);
-    }
+    let expectedLength;
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
     const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
-    if (metadataLength !== 0x61) {
-        throw new Error(`invalid metadata length of ${metadataLength}`);
+    let ephemeral = null;
+    if (metadataLength === 0x61) {
+        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
+        expectedLength = 0xe1;
+    } else {
+        expectedLength = 0xc0;
     }
+
+    if (length !== expectedLength) {
+        throw new Error(`unexpected note length of ${length}`);
+    }
+
     const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
     const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
 
-    const ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     return {
         noteType,
         owner,
@@ -43,30 +51,15 @@ outputCoder.decodeOutputNote = (note) => {
     };
 };
 
-outputCoder.decodeInputNote = (note) => {
-    const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length !== 0xc0) {
-        throw new Error(`invalid input note length of ${length.toString(16)}`);
-    }
-    const noteType = parseInt(note.slice(0x40, 0x80), 16);
-    const owner = `0x${note.slice(0x98, 0xc0)}`;
-    const noteHash = `0x${note.slice(0xc0, 0x100)}`;
-    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
-    if (metadataLength !== 0x40) {
-        throw new Error(`invalid metadata length of ${metadataLength}`);
-    }
-    const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
-    const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
-    return {
-        noteType,
-        owner,
-        noteHash,
-        gamma,
-        sigma,
-    };
-};
 
-
+/**
+ * Decode an array of notes
+ *
+ * @method decodeNotes
+ * @param {note} notes - array of AZTEC notes
+ * @returns {Object[]} array of note variables - array of decoded and extracted note variables
+ * where each element corresponds to the note variables for an individual note
+ */
 outputCoder.decodeNotes = (notes) => {
     const n = parseInt(notes.slice(0x40, 0x80), 16);
     return [...new Array(n)].map((x, i) => {
@@ -75,6 +68,14 @@ outputCoder.decodeNotes = (notes) => {
     });
 };
 
+/**
+ * Decode a bytes proofOutput string into it's constitutent objects
+ *
+ * @method decodeProofOutput
+ * @param {proofOutput} proofOutput - bytes proofOutput string, outputted from a zero-knowledge proof
+ * @returns {Object[]} decoded constituent proofOutput objects - including inputNotes, outputNotes,
+ * publicOwner, publicValue and the challenge
+ */
 outputCoder.decodeProofOutput = (proofOutput) => {
     const inputNotesOffset = parseInt(proofOutput.slice(0x40, 0x80), 16);
     const outputNotesOffset = parseInt(proofOutput.slice(0x80, 0xc0), 16);
@@ -93,16 +94,37 @@ outputCoder.decodeProofOutput = (proofOutput) => {
     };
 };
 
+/**
+ * Decode a bytes proofOutputs object into the constituent variables of each
+ * individual bytes proofOutput object
+ *
+ * @method decodeProofOutputs
+ * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
+ * proofOutput objects
+ * @returns {Object[]} array of decoded proofOutput objects - each element contains the 
+ * publicValue and the challenge
+ */
 outputCoder.decodeProofOutputs = (proofOutputsHex) => {
     const proofOutputs = proofOutputsHex.slice(2);
-
     const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
-    return [...new Array(numOutputs)].map((x, i) => {
+    const result = [...new Array(numOutputs)].map((x, i) => {
         const outputOffset = parseInt(proofOutputs.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
         return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
     });
+
+    return result;
 };
 
+/**
+ * Decode a bytes proofOutputs object into the constituent variables of each
+ * individual bytes proofOutput object
+ *
+ * @method getProofOutput
+ * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
+ * proofOutput objects
+ * @param {Number} i - index to the particular proofOutput the user wishes to select
+ * @returns {string} selected proofOutput object extracted from proofOutputsHec
+ */
 outputCoder.getProofOutput = (proofOutputsHex, i) => {
     const proofOutputs = proofOutputsHex.slice(2);
     const offset = parseInt(proofOutputs.slice(0x40 + (0x40 * i), 0x80 + (0x40 * i)), 16);
@@ -110,10 +132,27 @@ outputCoder.getProofOutput = (proofOutputsHex, i) => {
     return proofOutputs.slice((offset * 2) - 0x40, (offset * 2) + (length * 2));
 };
 
+
+/**
+ * Decode a bytes proofOutputs object into the constituent variables of each
+ * individual bytes proofOutput object
+ *
+ * @method hashProofOutput
+ * @param {proofOutput} proofOutput - proofOutput object, contains transfer instructions
+ * @returns {string} sha3 hash of the proofOutput 
+ */
 outputCoder.hashProofOutput = (proofOutput) => {
     return sha3(`0x${proofOutput.slice(0x40)}`);
 };
 
+/**
+ * Encode an output note, according to the ABI encoding specification
+ *
+ * @method encodeOutputNote
+ * @param {note} note - AZTEC note
+ * @returns {string} the various components of an AZTEC output note, encoded appropriately and concatenated 
+ * together
+ */
 outputCoder.encodeOutputNote = (note) => {
     const encoded = [...new Array(7)];
     encoded[0] = padLeft('e1', 64);
@@ -127,6 +166,13 @@ outputCoder.encodeOutputNote = (note) => {
     return encoded.join('');
 };
 
+/**
+ * Encode an input note, according to the ABI encoding specification
+ *
+ * @method encodeInputNote
+ * @param {note} note - AZTEC note
+ * @returns {string} ABI encoded representation of the notes array
+ */
 outputCoder.encodeInputNote = (note) => {
     const encoded = [...new Array(6)];
     encoded[0] = padLeft('c0', 64);
@@ -139,12 +185,31 @@ outputCoder.encodeInputNote = (note) => {
     return encoded.join('');
 };
 
+/**
+ * Encode an array of notes according to the ABI specification. Able to encode both input and output 
+ * notes
+ *
+ * @method encodeNotes
+ * @param {note[]} notes - array of AZTEC notes
+ * @param {boolean} isOutput - boolean describing whether the array of AZTEC notes are input or output notes
+ * @returns {string} ABI encoded representation of the notes array
+ */
 outputCoder.encodeNotes = (notes, isOutput) => {
     let encodedNotes;
     if (isOutput) {
-        encodedNotes = notes.map(note => outputCoder.encodeOutputNote(note, isOutput));
+        encodedNotes = notes.map((note) => {
+            if (note.forceNoMetadata) {
+                return outputCoder.encodeInputNote(note, isOutput);
+            }
+            return outputCoder.encodeOutputNote(note, isOutput);
+        });
     } else {
-        encodedNotes = notes.map(note => outputCoder.encodeInputNote(note, isOutput));
+        encodedNotes = notes.map((note) => {
+            if (note.forceMetadata) {
+                return outputCoder.encodeOutputNote(note, isOutput);
+            }
+            return outputCoder.encodeInputNote(note, isOutput);
+        });
     }
     const offsetToData = 0x40 + (0x20 * encodedNotes.length);
     const noteLengths = encodedNotes.reduce((acc, p) => {
@@ -160,6 +225,17 @@ outputCoder.encodeNotes = (notes, isOutput) => {
     return encoded.join('');
 };
 
+/**
+ * Encode a proofOutput object according to the ABI specification
+ *
+ * @method encodeProofOutput
+ * @param {note[]} inputNotes - array of notes to be input to a zero-knowledge proof
+ * @param {note[]} outputNotes - array of notes to be output from a zero-knowledge proof
+ * @param {address} publicOwner - Ethereum address of the account 
+ * @param {Number} publicValue - quantity of public ERC20 tokens input to the zero-knowledge proof
+ * @param {string} challenge - cryptographic challenge variable, part of the sigma protocol
+ * @returns {string} ABI encoded representation of the proofOutput object
+ */
 outputCoder.encodeProofOutput = ({
     inputNotes,
     outputNotes,
@@ -187,6 +263,14 @@ outputCoder.encodeProofOutput = ({
     return encoded.join('');
 };
 
+
+/**
+ * Encode a proofOutputs object according to the ABI specification
+ *
+ * @method encodeProofOutputs
+ * @param {proofOutputs} proofOutputs - array of notes to be input to a zero-knowledge proof
+ * @returns {string} ABI encoded representation of the proofOutputs object
+ */
 outputCoder.encodeProofOutputs = (proofOutputs) => {
     const encodedProofOutputs = proofOutputs.map(proofOutput => outputCoder.encodeProofOutput(proofOutput));
     const offsetToData = 0x40 + (0x20 * proofOutputs.length);

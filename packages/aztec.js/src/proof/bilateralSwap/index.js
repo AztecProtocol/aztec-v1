@@ -1,10 +1,10 @@
 /**
  * Constructs AZTEC bilateral swap zero-knowledge proofs
  *
- * @module proof.bilateralSwap
+ * @module bilateralSwap
  */
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
+const { padLeft, sha3 } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
 const crypto = require('crypto');
 
@@ -19,12 +19,19 @@ bilateralSwap.verifier = verifier;
 const { customError } = utils.errors;
 const { errorTypes } = utils.constants;
 
+const {
+    inputCoder,
+    outputCoder,
+} = require('../../abiEncoder');
+
 /**
  * Construct AZTEC bilateral swap proof transcript
  *
  * @method constructProof
- * @param {Object[], sender} notes array of AZTEC notes, sender address
- * @returns {{ proofData: string[], challenge: string }} - proof data and challenge
+ * @param {Object[]} notes AZTEC notes
+ * @param {string} sender the address calling the constructProof() function
+ * @returns {string[]} proofData - constructed cryptographic proof data
+ * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
 bilateralSwap.constructProof = (notes, sender) => {
     const bkArray = [];
@@ -108,6 +115,47 @@ bilateralSwap.constructProof = (notes, sender) => {
         proofData,
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
+};
+
+bilateralSwap.encodeBilateralSwapTransaction = ({
+    inputNotes,
+    outputNotes,
+    senderAddress,
+}) => {
+    const {
+        proofData: proofDataRaw,
+        challenge,
+    } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+
+    const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+
+    const proofData = inputCoder.bilateralSwap(
+        proofDataRaw,
+        challenge,
+        noteOwners,
+        [outputNotes[0], inputNotes[1]]
+    );
+
+    const publicOwner = '0x0000000000000000000000000000000000000000';
+    const publicValue = 0;
+
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([
+        {
+            inputNotes: [inputNotes[0]],
+            outputNotes: [outputNotes[0]],
+            publicOwner,
+            publicValue,
+            challenge,
+        },
+        {
+            inputNotes: [outputNotes[1]],
+            outputNotes: [inputNotes[1]],
+            publicOwner,
+            publicValue,
+            challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
+        },
+    ]).slice(0x42)}`;
+    return { proofData, expectedOutput };
 };
 
 module.exports = bilateralSwap;

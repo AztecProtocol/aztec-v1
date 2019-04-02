@@ -18,12 +18,15 @@ const ACETest = artifacts.require('./contracts/ACE/ACETest');
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
-
+const AdjustSupply = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupplyInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
+AdjustSupply.abi = AdjustSupplyInterface.abi;
 
-contract.only('ACE', (accounts) => {
-    describe('initialization', () => {
+
+contract('ACE', (accounts) => {
+    describe('initialization tests', () => {
         let ace;
 
         beforeEach(async () => {
@@ -340,17 +343,14 @@ contract('note registry', (accounts) => {
                 kPublic: 0, // perfectly balanced...
                 validatorAddress: aztecJoinSplit.address,
             });
-
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
-            const canMint = false;
-            const canBurn = false;
+            const canAdjustSupply = false;
             const canConvert = true;
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMint,
-                canBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );
@@ -361,8 +361,8 @@ contract('note registry', (accounts) => {
                 { from: accounts[0], gas: 4700000 }
             )));
             await Promise.all(accounts.map(account => erc20.approve(
-                ace.address,
-                scalingFactor.mul(tokensTransferred),
+                ace.address, // address approving to spend
+                scalingFactor.mul(tokensTransferred), // value to transfer
                 { from: account, gas: 4700000 }
             ))); // approving tokens
             proofOutputs = proofs.map(({ expectedOutput }) => outputCoder.getProofOutput(expectedOutput, 0));
