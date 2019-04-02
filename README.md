@@ -3,14 +3,17 @@
 <p align="center"> AZTEC is an efficient zero-knowledge privacy protocol. The protocol powers real world financial applications on Ethereum mainnet today. A complete explanation of AZTEC can be found in our <a href="https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf">white paper</a>.</p>
 
 <p align="center">
- <a href="https://circleci.com/gh/AztecProtocol/AZTEC">
+  <a href="https://circleci.com/gh/AztecProtocol/AZTEC">
     <img src="https://circleci.com/gh/AztecProtocol/AZTEC.svg?style=svg&circle-token=bb8aa4415af9d373eab3ee130a284e0c4874f65c" alt="CircleCI"/>
+  </a>
+  <a href="https://coveralls.io/github/AztecProtocol/AZTEC?branch=master">
+    <img src="https://coveralls.io/repos/github/AztecProtocol/AZTEC/badge.svg?branch=master" alt="Coverage Status"/>
   </a>
   <a href="https://lernajs.io/">
     <img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg" alt="Lerna"/>
   </a>
-  <a href="https://telegram.com">
-    <img src="https://img.shields.io/badge/chat-telegram-0088cc.svg?style=flat" alt="Telegram"/>
+  <a href="https://t.me/aztecprotocol">
+    <img src="https://img.shields.io/badge/chat-telegram-0088CC.svg?style=flat" alt="Twitter"/>
   </a>
   <a href="https://www.gnu.org/licenses/lgpl-3.0">
     <img src="https://img.shields.io/badge/License-LGPL%20v3-008033.svg" alt="License: LGPL v3">

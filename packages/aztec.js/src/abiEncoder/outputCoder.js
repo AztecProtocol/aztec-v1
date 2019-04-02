@@ -21,39 +21,26 @@ const outputCoder = {};
  */
 outputCoder.decodeNote = (note) => {
     const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length === 0xe1) {
-        return outputCoder.decodeOutputNote(note);
-    }
-    if (length === 0xc0) {
-        return outputCoder.decodeInputNote(note);
-    }
-    throw new Error(`unknown note length ${length}`);
-};
-
-/**
- * Decode an output note
- *
- * @method decodeOutputNote
- * @param {note} note - AZTEC note
- * @returns {Object[]} note variables - extracted variables: noteType, owner, 
- * noteHash, gamma, sigma, ephemeral
- */
-outputCoder.decodeOutputNote = (note) => {
-    const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length !== 0xe1) {
-        throw new Error(`invalid length of ${length.toString(16)}`);
-    }
+    let expectedLength;
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
     const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
-    if (metadataLength !== 0x61) {
-        throw new Error(`invalid metadata length of ${metadataLength}`);
+    let ephemeral = null;
+    if (metadataLength === 0x61) {
+        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
+        expectedLength = 0xe1;
+    } else {
+        expectedLength = 0xc0;
     }
+
+    if (length !== expectedLength) {
+        throw new Error(`unexpected note length of ${length}`);
+    }
+
     const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
     const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
 
-    const ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     return {
         noteType,
         owner,
@@ -64,36 +51,6 @@ outputCoder.decodeOutputNote = (note) => {
     };
 };
 
-/**
- * Decode an input note
- *
- * @method decodeInputNote
- * @param {note} note - AZTEC note
- * @returns {Object[]} note variables - extracted variables: noteType, owner, 
- * noteHash, gamma, sigma
- */
-outputCoder.decodeInputNote = (note) => {
-    const length = parseInt(note.slice(0x00, 0x40), 16);
-    if (length !== 0xc0) {
-        throw new Error(`invalid input note length of ${length.toString(16)}`);
-    }
-    const noteType = parseInt(note.slice(0x40, 0x80), 16);
-    const owner = `0x${note.slice(0x98, 0xc0)}`;
-    const noteHash = `0x${note.slice(0xc0, 0x100)}`;
-    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
-    if (metadataLength !== 0x40) {
-        throw new Error(`invalid metadata length of ${metadataLength}`);
-    }
-    const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
-    const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
-    return {
-        noteType,
-        owner,
-        noteHash,
-        gamma,
-        sigma,
-    };
-};
 
 /**
  * Decode an array of notes
@@ -149,12 +106,13 @@ outputCoder.decodeProofOutput = (proofOutput) => {
  */
 outputCoder.decodeProofOutputs = (proofOutputsHex) => {
     const proofOutputs = proofOutputsHex.slice(2);
-
     const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
-    return [...new Array(numOutputs)].map((x, i) => {
+    const result = [...new Array(numOutputs)].map((x, i) => {
         const outputOffset = parseInt(proofOutputs.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
         return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
     });
+
+    return result;
 };
 
 /**
@@ -239,9 +197,19 @@ outputCoder.encodeInputNote = (note) => {
 outputCoder.encodeNotes = (notes, isOutput) => {
     let encodedNotes;
     if (isOutput) {
-        encodedNotes = notes.map(note => outputCoder.encodeOutputNote(note, isOutput));
+        encodedNotes = notes.map((note) => {
+            if (note.forceNoMetadata) {
+                return outputCoder.encodeInputNote(note, isOutput);
+            }
+            return outputCoder.encodeOutputNote(note, isOutput);
+        });
     } else {
-        encodedNotes = notes.map(note => outputCoder.encodeInputNote(note, isOutput));
+        encodedNotes = notes.map((note) => {
+            if (note.forceMetadata) {
+                return outputCoder.encodeOutputNote(note, isOutput);
+            }
+            return outputCoder.encodeInputNote(note, isOutput);
+        });
     }
     const offsetToData = 0x40 + (0x20 * encodedNotes.length);
     const noteLengths = encodedNotes.reduce((acc, p) => {

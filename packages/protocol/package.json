@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "version": "0.4.2",
+  "version": "0.4.3-beta.2",
   "author": "AZTEC",
   "description": "AZTEC smart contract repository",
   "license": "LGPL-3.0",
@@ -69,6 +69,7 @@
     "lint": "npm run lint:js && npm run lint:sol",
     "test:sol": "scripts/test.sh",
     "test": "scripts/test.sh",
+    "trace": "scripts/trace.sh",
     "coverage": "scripts/coverage.sh",
     "profile": "scripts/profile.sh",
     "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",

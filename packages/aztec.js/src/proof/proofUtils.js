@@ -34,6 +34,10 @@ proofUtils.makeTestNotes = (makerNoteValues, takerNoteValues) => {
     return noteValues.map(value => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
 };
 
+proofUtils.randomAddress = () => {
+    return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
+};
+
 /**
  * Generate a random note value that is less than K_MAX
  * @method generateNoteValue
@@ -117,6 +121,38 @@ proofUtils.convertToBNAndAppendPoints = (proofData, errors) => {
     });
 
     return proofDataBn;
+};
+
+/**
+ * Generate random blinding scalars, conditional on the AZTEC join-split proof statement
+ *   Separated out into a distinct method so that we can stub this for extractor tests
+ *
+ * @method generateBlindingScalars
+ * @memberof proof.joinSplit
+ * @param {number} n number of notes
+ * @param {number} m number of input notes
+ */
+proofUtils.generateBlindingScalars = (n, m) => {
+    let runningBk = new BN(0).toRed(groupReduction);
+    const scalars = [...Array(n)].map((v, i) => {
+        let bk = bn128.randomGroupScalar();
+        const ba = bn128.randomGroupScalar();
+        if (i === (n - 1)) {
+            if (n === m) {
+                bk = new BN(0).toRed(groupReduction).redSub(runningBk);
+            } else {
+                bk = runningBk;
+            }
+        }
+
+        if ((i + 1) > m) {
+            runningBk = runningBk.redSub(bk);
+        } else {
+            runningBk = runningBk.redAdd(bk);
+        }
+        return { bk, ba };
+    });
+    return scalars;
 };
 
 /**
@@ -279,10 +315,36 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
  * @returns {string} challenge - cryptographic challenge in 
  * @returns {BN} kPublic - pubic value being converted in the transaction
  */
-proofUtils.convertTranscript = (proofData, m, challengeHex, errors) => {
+proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) => {
+    if (
+        proofType !== 'joinSplit'
+    && proofType !== 'burn'
+    && proofType !== 'mint'
+
+    ) {
+        throw new Error(
+            'Enter joinsplit, mint or burn in string format as the proofType variable'
+        );
+    }
+
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
     const n = proofData.length;
-    const kPublic = proofUtils.hexToGroupScalar(proofData[proofData.length - 1][0], errors, true);
+    let kPublic;
+
+    if (proofType === 'joinSplit') {
+        kPublic = proofUtils.hexToGroupScalar(proofData[proofData.length - 1][0], errors, true);
+    } else {
+        kPublic = new BN(0).toRed(groupReduction);
+    }
+
+    if (proofType === 'mint' || proofType === 'burn') {
+        const numNotes = proofData.length;
+
+        if (numNotes < 2) {
+            errors.push(errorTypes.INCORRECT_NOTE_NUMBER);
+        }
+    }
+
     let runningKBar = zero.redSub(kPublic).redMul(challenge);
     const rollingHash = new Keccak();
 
@@ -379,7 +441,7 @@ proofUtils.computeChallenge = (...challengeVariables) => {
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
  */
-proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
+proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdentifier = 0) => {
     notes.forEach((note) => {
         if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
             throw customError(
@@ -447,6 +509,19 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0)) => {
                 numberNotes: notes.length,
             }
         );
+    }
+
+    if (proofIdentifier === 'mint' || proofIdentifier === 'burn') {
+        const numNotes = notes.length;
+        if (numNotes < 2) {
+            throw customError(
+                errorTypes.INCORRECT_NOTE_NUMBER,
+                {
+                    message: 'There is less than 2 notes, this is not possible in a mint proof',
+                    numNotes,
+                }
+            );
+        }
     }
 };
 
