@@ -313,24 +313,39 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             // inside _proof, we have 3 packed variables : [epoch, category, id]
             // each is a uint8.
 
-            // To compute the storage key for disabledValidators[epoch][category][id], we do the following:
-            // 1. get the disabledValidators slot 
-            // 2. add (epoch * 0x10000) to the slot
-            // 3. add (category * 0x100) to the slot
-            // 4. add (id) to the slot
-            // i.e. the range of storage pointers allocated to disabledValidators ranges from
-            // disabledValidators_slot to (0xffff * 0x10000 + 0xff * 0x100 + 0xff = disabledValidators_slot 0xffffffff)
+            // We need to compute the storage key for `disabledValidators[epoch][category][id]`
+            // Type of array is bool[0x100][0x100][0x100]
+            // Solidity will only squish 32 boolean variables into a single storage slot, not 256
+            // => result of disabledValidators[epoch][category] is stored in 0x08 storage slots
+            // => result of disabledValidators[epoch] is stored in 0x08 * 0x100 = 0x800 storage slots
 
-            // Conveniently, the multiplications we have to perform on epoch, category and id correspond
-            // to their byte positions in _proof.
-            // i.e. (epoch * 0x10000) = and(_proof, 0xffff0000)
-            // and  (category * 0x100) = and(_proof, 0xff00)
-            // and  (id) = and(_proof, 0xff)
+            // To compute the storage slot  disabledValidators[epoch][category][id], we do the following:
+            // 1. get the disabledValidators slot 
+            // 2. add (epoch * 0x800) to the slot (or epoch << 11)
+            // 3. add (category * 0x08) to the slot (or category << 3)
+            // 4. add (id / 0x20) to the slot (or id >> 5)
+
+            // Once the storage slot has been loaded, we need to isolate the byte that contains our boolean
+            // This will be equal to id % 0x20, which is also id & 0x1f
 
             // Putting this all together. The storage slot offset from '_proof' is...
-            // (_proof & 0xffff0000) + (_proof & 0xff00) + (_proof & 0xff)
-            // i.e. the storage slot offset IS the value of _proof
-            isValidatorDisabled := sload(add(_proof, disabledValidators_slot))
+            // epoch: ((_proof & 0xff0000) >> 16) << 11 = ((_proof & 0xff0000) >> 5)
+            // category: ((_proof & 0xff00) >> 8) << 3 = ((_proof & 0xff00) >> 5)
+            // id: (_proof & 0xff) >> 5
+            // i.e. the storage slot offset = _proof >> 5
+
+            // the byte index of the storage word that we require, is equal to (_proof & 0x1f)
+            // to convert to a bit index, we multiply by 8
+            // i.e. bit index = shl(3, and(_proof & 0x1f))
+            // => result = shr(shl(3, and_proof & 0x1f), value)
+            isValidatorDisabled := 
+                shr(
+                    shl(
+                        0x03,
+                        and(_proof, 0x1f)
+                    ),
+                    sload(add(shr(5, _proof), disabledValidators_slot))
+                )
 
             // Next, compute validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender))
             // cache free memory pointer - we will overwrite it when computing hash (cheaper than using free memory)
@@ -386,11 +401,23 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         bool isValidatorDisabled;
         bool queryInvalid;
         assembly {
-            // we can use _proof directly as an offset when computing the storage pointer for
-            // validators[_proof.epoch][_proof.category][_proof.id] and
-            // disabledValidators[_proof.epoch][_proof.category][_proof.id]
-            // (see `validateProofByHash` for more info on this)
-            isValidatorDisabled := sload(add(_proof, disabledValidators_slot))
+            // To compute the storage key for validatorAddress[epoch][category][id], we do the following:
+            // 1. get the validatorAddress slot 
+            // 2. add (epoch * 0x10000) to the slot
+            // 3. add (category * 0x100) to the slot
+            // 4. add (id) to the slot
+            // i.e. the range of storage pointers allocated to validatorAddress ranges from
+            // validatorAddress_slot to (0xffff * 0x10000 + 0xff * 0x100 + 0xff = validatorAddress_slot 0xffffffff)
+
+            // Conveniently, the multiplications we have to perform on epoch, category and id correspond
+            // to their byte positions in _proof.
+            // i.e. (epoch * 0x10000) = and(_proof, 0xffff0000)
+            // and  (category * 0x100) = and(_proof, 0xff00)
+            // and  (id) = and(_proof, 0xff)
+
+            // Putting this all together. The storage slot offset from '_proof' is...
+            // (_proof & 0xffff0000) + (_proof & 0xff00) + (_proof & 0xff)
+            // i.e. the storage slot offset IS the value of _proof
             validatorAddress := sload(add(_proof, validators_slot))
             queryInvalid := or(iszero(validatorAddress), isValidatorDisabled)
         }

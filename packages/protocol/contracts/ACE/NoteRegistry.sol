@@ -216,12 +216,12 @@ contract NoteRegistry is IAZTEC {
      * vice versa, conversion priviledges
      */
     function getRegistry(address _owner) public view returns (
-        ERC20 _linkedToken,
+        IERC20 _linkedToken,
         uint256 _scalingFactor,
         uint256 _totalSupply,
-        bytes32 _confidentialTotalSupply,
-        bool _canMint,
-        bool _canBurn,
+        bytes32 _confidentialTotalMinted,
+        bytes32 _confidentialTotalBurned,
+        bool _canAdjustSupply,
         bool _canConvert
     ) {
         Registry memory registry = registries[_owner];
@@ -229,9 +229,9 @@ contract NoteRegistry is IAZTEC {
             registry.linkedToken,
             registry.scalingFactor,
             registry.totalSupply,
-            registry.confidentialTotalSupply,
-            registry.flags.canMint,
-            registry.flags.canBurn,
+            registry.confidentialTotalMinted,
+            registry.confidentialTotalBurned,
+            registry.flags.canAdjustSupply,
             registry.flags.canConvert
         );
     }
