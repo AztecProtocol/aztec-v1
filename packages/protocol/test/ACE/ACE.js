@@ -411,8 +411,7 @@ contract('note registry', (accounts) => {
             expect(registry.linkedToken).to.equal(erc20.address);
             expect(registry.scalingFactor.toString()).to.equal(scalingFactor.toString());
             expect(registry.confidentialTotalSupply).to.equal(padLeft('0x00', 64));
-            expect(registry.canMint).to.equal(false);
-            expect(registry.canBurn).to.equal(false);
+            expect(registry.canAdjustSupply).to.equal(false);
             expect(registry.canConvert).to.equal(true);
         });
 
