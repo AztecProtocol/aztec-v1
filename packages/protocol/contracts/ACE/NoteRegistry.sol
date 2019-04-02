@@ -240,6 +240,7 @@ contract NoteRegistry is IAZTEC {
         bool canConvert
     ) {
         Registry memory registry = registries[_owner];
+        require(registry.flags.active == true, "registry not created");
         return (
             address(registry.linkedToken),
             registry.scalingFactor,
