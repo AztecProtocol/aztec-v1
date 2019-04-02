@@ -394,14 +394,12 @@ contract('note registry', (accounts) => {
         });
 
         it('should create a new note registry', async () => {
-            const canMint = false;
-            const canBurn = false;
+            const canAdjustSupply = false;
             const canConvert = true;
             const { receipt } = await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canMint,
-                canBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[1] }
             );

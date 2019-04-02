@@ -7,8 +7,8 @@
  */
 module.exports = {
     BOGUS_PROOF: '65538',
-    BURN_PROOF: '66049',
-    JOIN_SPLIT_PROOF: '65537',
-    MINT_PROOF: '65793',
-    UTILITY_PROOF: '66305',
+    BURN_PROOF: '66305',
+    JOIN_SPLIT_PROOF: '65793',
+    MINT_PROOF: '66049',
+    UTILITY_PROOF: '66561',
 };
