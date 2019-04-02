@@ -1,9 +1,3 @@
-/**
- * Verifies AZTEC dividend computations
- *
- * @module proof.dividendComputation
-*/
-
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const utils = require('@aztec/dev-utils');
@@ -23,13 +17,14 @@ const verifier = {};
  * Verify AZTEC dividend computation proof transcript
  *
  * @method verifyProof
+ * @memberof module:dividendComputation
  * @param {Object[]} proofData - proofData array of AZTEC notes
  * @param {string} challenge - challenge variable used in zero-knowledge protocol
  * @param {string} sender - Ethereum address
  * @param {integer} za - integer required to represent ratio in a compatible form with finite-field arithmetic
  * @param {integer} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
- * @returns {boolean, string[]} valid, errors - valid describes whether the proof verification is valid, 
- * errors is an array of all errors that were caught
+ * @returns {boolean} valid - boolean that describes whether the proof verification is valid
+ * @returns {option} errors - an array of all errors that were caught
  */
 verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const errors = [];

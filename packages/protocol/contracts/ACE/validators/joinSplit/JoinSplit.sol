@@ -12,7 +12,7 @@ import "../../../interfaces/JoinSplitInterface.sol";
  * The intended use case is to call this externally via `staticcall`.
  * External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no
  * storage and makes no external calls (other than to precompiles)
- * Copyright Spilsbury Holdings Ltd 2018. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  * We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum.
  * Our full vision of the protocol includes confidential cross-asset interactions via our
  * family of AZTEC zero-knowledge proofs
@@ -83,7 +83,6 @@ contract JoinSplit is LibEIP712 {
                 mstore(0x2c0, kn)
                 mstore(0x2e0, m)
                 mstore(0x300, calldataload(0x164))
-
                 kn := mulmod(sub(gen_order, kn), challenge, gen_order) // we actually want c*k_{public}
                 hashCommitments(notes, n)
                 let b := add(0x320, mul(n, 0x80))

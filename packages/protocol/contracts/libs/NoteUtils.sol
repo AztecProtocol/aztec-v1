@@ -95,6 +95,11 @@ library NoteUtils {
         }
     }
 
+    /**
+    * @dev Extract the challenge from a bytes proofOutput variable
+    * @param _proofOutput bytes proofOutput, outputted from a proof validation smart contract
+    * @return bytes32 challenge - cryptographic variable that is part of the sigma protocol
+    */
     function extractChallenge(bytes memory _proofOutput) internal pure returns (
         bytes32 challenge
     ) {
@@ -130,7 +135,12 @@ library NoteUtils {
             metadata := add(_note, 0x80)
         }
     }
-
+    
+    /**
+    * @dev Get the note type
+    * @param _note an AZTEC note
+    * @return noteType
+    */
     function getNoteType(bytes memory _note) internal pure returns (
         uint256 noteType
     ) {

@@ -1,5 +1,16 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+/**
+ * @title Library to ABI encode the output of a join split proof verification operation
+ * @author AZTEC
+ * @dev Don't include this as an internal library. This contract uses a static memory table to cache
+ * elliptic curve primitives and hashes.
+ * Calling this internally from another function will lead to memory mutation and undefined behaviour.
+ * The intended use case is to call this externally via `staticcall`.
+ * External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no
+ * storage and makes no external calls (other than to precompiles)
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
+ **/
 library JoinSplitABIEncoder {
 
     // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
@@ -43,13 +54,13 @@ library JoinSplitABIEncoder {
             // 0x00 - 0x160  = scratch data for EIP712 signature computation and note hash computation
             // JOIN_SPLIT_SIGNATURE struct hash variables
             // 0x80 = type hash
-            // 0xa0 = proof object (65537)
+            // 0xa0 = proof object (65793)
             // 0xc0 = noteHash
             // 0xe0 = challenge
             // 0x100 = sender
             // type hash of 'JOIN_SPLIT_SIGNATURE'
             mstore(0x80, typeHash)
-            mstore(0xa0, 0x10001)
+            mstore(0xa0, 0x10101)
             mstore(0xe0, calldataload(0x144)) // challenge
             mstore(0x100, calldataload(0x24))
 
@@ -84,12 +95,13 @@ library JoinSplitABIEncoder {
 
             // structure of a `note`
             // 0x00 - 0x20 = size of `note`
-            // 0x20 - 0x40 = `owner`
-            // 0x40 - 0x60 = `noteHash`
-            // 0x60 - 0x80 = size of note `data`
-            // 0x80 - 0xa0 = compressed note coordinate `gamma` (part of `data`)
-            // 0xa0 - 0xc0 = compressed note coordinate `sigma` (part of `data`)
-            // 0xc0 - ???? = remaining note metadata
+            // 0x20 - 0x40 = type
+            // 0x40 - 0x60 = `owner`
+            // 0x60 - 0x80 = `noteHash`
+            // 0x80 - 0xa0 = size of note `data`
+            // 0xa0 - 0xc0 = compressed note coordinate `gamma` (part of `data`)
+            // 0xc0 - 0xe0 = compressed note coordinate `sigma` (part of `data`)
+            // 0xe0 - ???? = remaining note metadata
 
             // structure of a `note` (new)
             // 0x00 - 0x20 = size of `note`
@@ -123,7 +135,7 @@ library JoinSplitABIEncoder {
                 mstore(0x260, kPublic)
             }
 
-            mstore(0x280, calldataload(0x144))
+            mstore(0x280, calldataload(0x144))                    // store challenge
             let inputPtr := 0x2a0                                 // point to inputNotes
             mstore(add(inputPtr, 0x20), m)                        // number of input notes
             // set note pointer, offsetting lookup indices for each input note
@@ -152,7 +164,7 @@ library JoinSplitABIEncoder {
                 mstore(add(s, 0x20), 0x01)
                 // store note owner in `s + 0x20`. If ECDSA recovery fails, or signing address is `0`, throw an error
                 mstore(0x80, typeHash)
-                mstore(0xa0, 0x10001)
+                mstore(0xa0, 0x10101)   // proof id 0x010101
                 if or(
                     iszero(mload(add(s, 0x40))),
                     iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x40), 0x20))

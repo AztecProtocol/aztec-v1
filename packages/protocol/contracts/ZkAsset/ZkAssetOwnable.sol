@@ -4,6 +4,14 @@ import "./ZkAsset.sol";
 import "../libs/ProofUtils.sol";
 import "../libs/SafeMath8.sol";
 
+/**
+ * @title ZkAssetOwnable
+ * @author AZTEC
+ * @dev A contract which inherits from ZkAsset and includes the definition
+ * of the contract owner
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
+
 contract ZkAssetOwnable is ZkAsset {
     using ProofUtils for uint24;
     using SafeMath8 for uint8;
@@ -14,11 +22,15 @@ contract ZkAssetOwnable is ZkAsset {
     constructor(
         address _aceAddress,
         address _linkedTokenAddress,
-        uint256 _scalingFactor
+        uint256 _scalingFactor,
+        bool _canAdjustSupply,
+        bool _canConvert
     ) public ZkAsset(
         _aceAddress,
         _linkedTokenAddress,
-        _scalingFactor
+        _scalingFactor,
+        _canAdjustSupply,
+        _canConvert
     ) {
         owner = msg.sender;
     }
