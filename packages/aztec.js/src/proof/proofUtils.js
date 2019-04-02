@@ -18,7 +18,6 @@ const notesConstruct = require('../note');
 const { groupReduction } = bn128;
 
 const proofUtils = {};
-// const { customError } = errors;
 const { errorTypes } = constants;
 
 const zero = new BN(0).toRed(groupReduction);
@@ -26,10 +25,9 @@ const zero = new BN(0).toRed(groupReduction);
 /**
  * Make test notes
  * @method makeTestNotes
- * @memberof module:proofUtils
  * @param {string[]} makerNoteValues - array of maker note values 
  * @param {string[]} makerNoteValues - array of taker note values
- * @returns {[Notes{}]} - array of AZTEC notes
+ * @returns {Object[]} Array of AZTEC notes
  */
 proofUtils.makeTestNotes = (makerNoteValues, takerNoteValues) => {
     const noteValues = [...makerNoteValues, ...takerNoteValues];
@@ -43,7 +41,6 @@ proofUtils.randomAddress = () => {
 /**
  * Generate a random note value that is less than K_MAX
  * @method generateNoteValue
- * @memberof module:proofUtils
  * @returns {BN} - big number instance of an AZTEC note value
  */
 proofUtils.generateNoteValue = () => {
@@ -55,7 +52,6 @@ proofUtils.generateNoteValue = () => {
  * will either 1) immediately throw if incorrect number, or 2) push the error to 
  * a supplied array of errors
  * @method checkNumNotes
- * @memberof module:proofUtils
  * @param {Object[]} notes - array of AZTEC notes
  * @param {integer} numNotes - desired number of notes
  * @param {boolean} shouldThrow - choose whether the tx should be thrown or the error simply recorded
@@ -93,7 +89,6 @@ proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
  * Converts proof data to bn.js format, calculates gamma and sigma 
  * then appends these to the end
  * @method convertToBNAndAppendPoints
- * @memberof module:proofUtils
  * @param {string[]} proofData - array of proof data from proof construction
  * @param {string[]} errors - record of all errors that are thrown
  * @returns {BN[]} proofData - array of proof data in bn.js format
@@ -164,10 +159,10 @@ proofUtils.generateBlindingScalars = (n, m) => {
  * Computes the blinding factors and challenge from note array and final hash
  * Used for testing purposes
  * @method getBlindingFactorsAndChallenge
- * @memberof module:proofUtils
  * @param {string[]} noteArray - array of proof data from proof construction
  * @param {Hash} finalHash - hash object used to recover the challenge
- * @returns { blindingFactors: BN[] , challenge: string} proofData - array of proof data in bn.js format
+ * @returns {BN[]} blinding factors - array of blinding factors
+ * @returns {string} challenge - cryptographic variable used in the sigma protocol
  */
 proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
     const bkArray = [];
@@ -212,11 +207,11 @@ proofUtils.randomAddress = () => {
  * Recovers the blinding factors and challenge
  * Used for testing purposes
  * @method getBlindingFactorsAndChallenge
- * @memberof module:proofUtils
  * @param {string[]} proofDataBn - array of proof data from proof construction
  * @param {string} formattedChallenge - challenge variable
  * @param {Hash} finalHash - hash object used to recover the challenge
- * @returns { blindingFactors: BN[] , challenge: string} proofData - array of proof data in bn.js format
+ * @returns {BN[]} blinding factors - array of blinding factors
+ * @returns {string} challenge - cryptographic variable used in the sigma protocol
  */
 proofUtils.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge, finalHash) => {
     const kBarArray = [];
@@ -264,7 +259,6 @@ proofUtils.recoverBlindingFactorsAndChallenge = (proofDataBn, formattedChallenge
 /**
  * Converts a hexadecimal input into a scalar bn.js
  * @method hexToGroupScalar
- * @memberof module:proofUtils
  * @param {string} hex - hex input
  * @param {string[]} errors - collection of all errors that occurred
  * @param {boolean} canbeZero - control to determine hex input can be zero
@@ -284,7 +278,6 @@ proofUtils.hexToGroupScalar = (hex, errors, canBeZero = false) => {
 /**
  * Converts a hexadecimal input to a group element
  * @method hexToGroupScalar
- * @memberof module:proofUtils
  * @param {string} xHex - hexadecimal representation of x coordinate
  * @param {string} yHex - hexadecimal representation of y coordinate
  * @param {string[]} errors - collection of all errors that occurred
@@ -313,12 +306,14 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
  * Convert ABI encoded proof transcript back into BN.js form (for scalars) and elliptic.js form (for points)
  *
  * @method convertTranscript
- * @memberof module:proofUtils
  * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
  * @param {number} m number of input notes
  * @param {string} challengeHex hex-string formatted proof challenge
  * @param {string[]} errors container for discovered errors
- * @returns { notes: Object[], rollingHash: Hash, challenge: string, kPublic: BN} necessary proof variables in required format
+ * @returns {Object[]} notes - array of AZTEC notes
+ * @returns {Hash} rolling hash - hash used to generate x in pairing optimisation
+ * @returns {string} challenge - cryptographic challenge in 
+ * @returns {BN} kPublic - pubic value being converted in the transaction
  */
 proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) => {
     if (
@@ -396,7 +391,6 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
  *   Separated out into a distinct method so that we can stub this for extractor tests
  *
  * @method computeChallenge
- * @memberof proofUtils
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
  * @param {number} m number of input notes
@@ -442,7 +436,6 @@ proofUtils.computeChallenge = (...challengeVariables) => {
  * Validate proof inputs are well formed
  *
  * @method parseInputs
- * @memberof proof.joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
@@ -536,7 +529,6 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
  * Validate proof inputs are well formed
  *
  * @method isOnCurve
- * @memberof proofUtils
  * @param {BN[]} point - bn.js format of a point on the curve
  * @returns boolean - true if point is on curve, false if not
  */

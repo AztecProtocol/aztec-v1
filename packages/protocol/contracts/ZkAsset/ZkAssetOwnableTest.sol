@@ -2,6 +2,12 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./ZkAssetOwnable.sol";
 
+/**
+ * @title ZkAssetOwnableTest
+ * @author AZTEC 
+ * @dev Used for testing purposes
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
 contract ZkAssetOwnableTest {
 
     ZkAssetOwnable public zkAssetOwnable;

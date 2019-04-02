@@ -1,5 +1,16 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+/**
+ * @title Library to ABI encode the output of a join split proof verification operation
+ * @author AZTEC
+ * @dev Don't include this as an internal library. This contract uses a static memory table to cache
+ * elliptic curve primitives and hashes.
+ * Calling this internally from another function will lead to memory mutation and undefined behaviour.
+ * The intended use case is to call this externally via `staticcall`.
+ * External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no
+ * storage and makes no external calls (other than to precompiles)
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
+ **/
 library JoinSplitABIEncoder {
 
     // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
@@ -83,6 +94,16 @@ library JoinSplitABIEncoder {
             // start of notes array and the location of the `note`
 
             // structure of a `note`
+            // 0x00 - 0x20 = size of `note`
+            // 0x20 - 0x40 = type
+            // 0x40 - 0x60 = `owner`
+            // 0x60 - 0x80 = `noteHash`
+            // 0x80 - 0xa0 = size of note `data`
+            // 0xa0 - 0xc0 = compressed note coordinate `gamma` (part of `data`)
+            // 0xc0 - 0xe0 = compressed note coordinate `sigma` (part of `data`)
+            // 0xe0 - ???? = remaining note metadata
+
+            // structure of a `note` (new)
             // 0x00 - 0x20 = size of `note`
             // 0x20 - 0x40 = type
             // 0x40 - 0x60 = `owner`

@@ -2,7 +2,7 @@
  * Module to construct ECDSA messages for structured data,  
  * following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
- * @module sign.eip712
+ * @module sign
  */
 
 const { padLeft, sha3 } = require('web3-utils');

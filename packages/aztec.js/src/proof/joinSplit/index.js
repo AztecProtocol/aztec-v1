@@ -1,7 +1,5 @@
 /**
- * Constructs AZTEC join-split zero-knowledge proofs
- *
- * @module proof.joinSplit
+ * @module joinSplit
  */
 
 const BN = require('bn.js');
@@ -32,7 +30,7 @@ joinSplit.verifier = verifier;
  *   Separated out into a distinct method so that we can stub this for extractor tests
  *
  * @method generateBlindingScalars
- * @memberof proof.joinSplit
+ * @memberof module:joinSplit
  * @param {number} n number of notes
  * @param {number} m number of input notes
  */
@@ -64,7 +62,7 @@ joinSplit.generateBlindingScalars = (n, m) => {
  * Construct AZTEC join-split proof transcript
  *
  * @method constructProof
- * @memberof proof.joinSplit
+ * @memberof module:joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
@@ -146,7 +144,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
  * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
  *
  * @method constructProof
- * @memberof proof.joinSplit
+ * @memberof module:joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
@@ -227,7 +225,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
  * Encode a join split transaction
  * 
  * @method encodeJoinSplitTransaction
- * @memberof module:proof.joinSplit.helpers
+ * @memberof module:joinSplit
  * @param {Object} values
  * @param {Note[]} inputNotes input AZTEC notes
  * @param {Note[]} outputNotes output AZTEC notes
