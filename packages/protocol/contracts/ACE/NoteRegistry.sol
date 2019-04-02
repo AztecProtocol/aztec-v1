@@ -267,7 +267,7 @@ contract NoteRegistry is IAZTEC {
 
     /**
      * @dev Removes input notes from the note registry
-     * @param inputNotes - an array of input notes from a zero-knowledge proof, that are to be
+     * @param _inputNotes - an array of input notes from a zero-knowledge proof, that are to be
      * removed and destroyed from a note registry
      */
     function updateInputNotes(bytes memory _inputNotes) internal {
@@ -340,7 +340,7 @@ contract NoteRegistry is IAZTEC {
 
     /**
      * @dev Adds output notes to the note registry
-     * @param outputNotes - an array of output notes from a zero-knowledge proof, that are to be
+     * @param _outputNotes - an array of output notes from a zero-knowledge proof, that are to be
      * added to the note registry
      */
     function updateOutputNotes(bytes memory _outputNotes) internal {
