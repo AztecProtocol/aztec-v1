@@ -1,3 +1,4 @@
+
 const BN = require('bn.js');
 const web3Utils = require('web3-utils');
 const crypto = require('crypto');
@@ -16,7 +17,7 @@ const { padLeft } = web3Utils;
  *
  * @method createSharedSecret
  * @private
- * @memberof module:note
+ * @memberof module:noteUtils
  * @param {Object} pubicKeyHex elliptic.js hex-formatted public key
  * @return {{type: string, name: ephemeralKey}} elliptic.js hex-formatted ephemeral key
  * @return {{type: string, name: encoded}} hex-string formatted shared secret

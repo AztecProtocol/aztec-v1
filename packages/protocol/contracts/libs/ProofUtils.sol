@@ -1,5 +1,11 @@
 pragma solidity >= 0.5.0 <0.6.0;
 
+
+/**
+ * @title Library of proof utility functions
+ * @author AZTEC
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
 library ProofUtils {
 
     /**
@@ -7,6 +13,7 @@ library ProofUtils {
      * Reverts if the category is not one of [0, 1, 2, 3].
      * @param proof The compressed uint24 number.
      * @return A tuple (uint8, uint8, uint8) representing the epoch, category and proofId.
+     * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
      */
     function getProofComponents(uint24 proof) internal pure returns (uint8 epoch, uint8 category, uint8 id) {
         assembly {
