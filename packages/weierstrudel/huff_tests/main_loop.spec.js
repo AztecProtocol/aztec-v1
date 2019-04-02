@@ -23,9 +23,9 @@ describe('bn128 main loop', function describe() {
         main = new Runtime('main_loop.huff', pathToTestData, true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of ONE point', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of ONE point', async () => {
         const { calldata, expected } = generatePointData(1);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -38,9 +38,9 @@ describe('bn128 main loop', function describe() {
     });
 
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of TWO points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of TWO points', async () => {
         const { calldata, expected } = generatePointData(2);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -52,9 +52,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of THREE points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of THREE points', async () => {
         const { calldata, expected } = generatePointData(3);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -66,9 +66,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of FOUR points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of FOUR points', async () => {
         const { calldata, expected } = generatePointData(4);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -80,9 +80,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of FIVE points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of FIVE points', async () => {
         const { calldata, expected } = generatePointData(5);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -94,9 +94,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of SIX points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of SIX points', async () => {
         const { calldata, expected } = generatePointData(6);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -108,9 +108,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of SEVEN points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of SEVEN points', async () => {
         const { calldata, expected } = generatePointData(7);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -122,9 +122,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of EIGHT points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of EIGHT points', async () => {
         const { calldata, expected } = generatePointData(8);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -136,9 +136,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of NINE points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of NINE points', async () => {
         const { calldata, expected } = generatePointData(9);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -150,9 +150,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of TEN points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of TEN points', async () => {
         const { calldata, expected } = generatePointData(10);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -164,9 +164,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of ELEVEN points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of ELEVEN points', async () => {
         const { calldata, expected } = generatePointData(11);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -179,9 +179,9 @@ describe('bn128 main loop', function describe() {
     });
 
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of TWLEVE points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of TWLEVE points', async () => {
         const { calldata, expected } = generatePointData(12);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -193,9 +193,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of THIRTEEN points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of THIRTEEN points', async () => {
         const { calldata, expected } = generatePointData(13);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -207,9 +207,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of FOURTEEN points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of FOURTEEN points', async () => {
         const { calldata, expected } = generatePointData(14);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -221,9 +221,9 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of FIFTEEN points', async () => {
+    it('macro WEIERSTRUDEL__MAIN calculates scalar multiplication of FIFTEEN points', async () => {
         const { calldata, expected } = generatePointData(15);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata);
+        const { stack, returnValue } = await main('WEIERSTRUDEL__MAIN', [], [], calldata);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);

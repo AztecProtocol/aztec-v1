@@ -169,12 +169,12 @@
 // start here
 //          |
 //          v
-#define macro MAIN__WEIERSTRUDEL = takes(0) returns(0) {
+#define macro WEIERSTRUDEL__MAIN = takes(0) returns(0) {
     // Step 1, validate integrity of inputs.
     // `callvalue` must be 0
     // calldatasize must be a clean multiple of 0x60
     callvalue
-    0x60 0x04 calldatasize sub mod // todo check this works
+    0x60 FUNCTION_SIGNATURE_OFFSET() calldatasize sub mod // todo check this works
     or iszero sensible_inputs jumpi
     400 0x00 mstore
     0x20 0x00 revert
@@ -413,18 +413,4 @@ sensible_inputs:
         0x60 returndatasize return
 }
 
-#define macro MAIN__CONSTRUCTOR_SHALLOW = takes(0) returns(0) {
-    __codesize(MAIN__WEIERSTRUDEL)
-    __tablesize(MAIN__JUMP_TABLE)
-    __tablesize(WNAF_GREEDY__JUMP_TABLE)
-    add add dup1 0x01 0x00 codecopy 0x00 return
-}
-
-#define macro MAIN__CONSTRUCTOR = takes(0) returns(0) {
-    __codesize(MAIN__WEIERSTRUDEL)
-    __tablesize(MAIN__JUMP_TABLE)
-    __tablesize(WNAF_GREEDY__JUMP_TABLE)
-    add add dup1 __codesize(MAIN__CONSTRUCTOR_SHALLOW) 0x00 codecopy 0x00 return
-}
-
-#define macro TEST_CONSTRUCTOR = takes(0) returns(0) {}
+#define macro WEIERSTRUDEL__CONSTRUCTOR = takes(0) returns(0) {}

@@ -50,13 +50,14 @@ utils.generateScalars = (numPoints) => {
 utils.generateCalldata = (points, scalars) => {
     const numPoints = points.length;
     if (numPoints !== scalars.length) { throw new Error('num points !== num scalars!'); }
-    const calldata = Buffer.from(contractInterface
+    const calldataRaw = Buffer.from(contractInterface
         .functions[`ecBatchMul(uint256[2][${numPoints}],uint256[${numPoints}])`]
         .encode([
             points.map(({ x, y }) => [x.toString(10), y.toString(10)]),
             scalars.map(s => s.toString(10)),
         ])
         .slice(2), 'hex');
+    const calldata = calldataRaw.slice(4); // function signature offset
     const expected = points.reduce((acc, { x, y }, i) => {
         if (!acc) {
             return referenceCurve.point(x, y).mul(scalars[i]);

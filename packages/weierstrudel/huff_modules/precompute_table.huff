@@ -147,7 +147,7 @@ template <m,p1,p2>
     // Saves about 100 gas because we can cut out a few mulmod ops
 
     // get location in calldata of last point
-    0x3c 0x03 0x04 calldatasize sub div dup1 add sub
+    FUNCTION_SIGNATURE_OFFSET() 0x40 sub 0x03 FUNCTION_SIGNATURE_OFFSET() calldatasize sub div dup1 add sub
     // we want to keep track of the number of points we're iterating over.
     // can't store on stack because our stack size is a function of the number of loop iterations
     // store at memory location PRECOMPUTE_ITERATOR()
@@ -186,7 +186,7 @@ precompute_table_start:
 
     // we have calculated the table required for one point, with the arguments left on the stack.
     // we need to determine if there are any more points to calculate
-    0x04 PRECOMPUTE_ITERATOR() mload sub precompute_table_repeat jumpi
+    FUNCTION_SIGNATURE_OFFSET() PRECOMPUTE_ITERATOR() mload sub precompute_table_repeat jumpi
 
     // if we've fallen through to this point, our loop has finished.
     // now for the next part - we have our points lying around on the stack so that we can efficiently PRECOMPUTE_TABLE__RESCALE them
@@ -208,7 +208,7 @@ precompute_table_start:
     // same byte length or this won't work, as eacy PRECOMPUTE_TABLE__RESCALE_SLICE macro won't be constant-length.
     // (this is because some macros will have a 'PUSH1' opcode and some will have a 'PUSH2' opcode.
     //    i.e. POINT_TABLE_START_LOCATION must be at least 0x100)
-    0x60 0x04 calldatasize sub div 15 sub __codesize(PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION,dup4,dup6>) mul
+    0x60 FUNCTION_SIGNATURE_OFFSET() calldatasize sub div 15 sub __codesize(PRECOMPUTE_TABLE__RESCALE_SLICE<POINT_TABLE_START_LOCATION,dup4,dup6>) mul
     PRECOMPUTE_TABLE__RESCALE_start add jump
 
 PRECOMPUTE_TABLE__RESCALE_start:

@@ -10,7 +10,7 @@ const { inputMap, macros, jumptables } = parser.parseFile('main_loop.huff', path
 
 const {
     data: { bytecode: macroCode },
-} = parser.processMacro('MAIN__WEIERSTRUDEL', 0, [], macros, inputMap, jumptables);
+} = parser.processMacro('WEIERSTRUDEL__MAIN', 0, [], macros, inputMap, jumptables);
 
 const {
     data: { bytecode: compilerCode },

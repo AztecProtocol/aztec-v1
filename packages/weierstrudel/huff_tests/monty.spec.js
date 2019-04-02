@@ -33,7 +33,7 @@ function generatePointDataJacobian(numPoints) {
         ].join('');
     }).join('');
     return {
-        calldata: Buffer.from(calldata, 'hex'),
+        calldata: Buffer.from(`ffffffff${calldata}`, 'hex'),
         expected,
     };
 }

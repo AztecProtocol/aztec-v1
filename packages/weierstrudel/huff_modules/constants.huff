@@ -20,8 +20,12 @@ template <t>
 <t>
 }
 
+#define macro FUNCTION_SIGNATURE_OFFSET = takes(0) returns(1) {
+    0x00
+}
+
 #define macro GET_NUMBER_OF_POINTS = takes(0) returns(1) {
-    0x60 0x04 calldatasize sub div
+    0x60 FUNCTION_SIGNATURE_OFFSET() calldatasize sub div
 }
 
 #define macro WNAF_START_LOCATION = takes(0) returns(1) {

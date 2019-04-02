@@ -12,7 +12,7 @@
 #include "./modInv.huff"
 
 #define macro MONTY__INITIAL_OFFSET = takes(0) returns(1) {
-    0x00
+    0x04
 }
 
 template <calldata_location>
@@ -304,3 +304,5 @@ template <max, delta>
     pop
     msize 0x00 return
 }
+
+#define macro MONTY__CONSTRUCTOR = takes(0) returns(0) {}

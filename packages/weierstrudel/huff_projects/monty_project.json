@@ -1,0 +1,7 @@
+{
+    "name": "Monty",
+    "file": "monty.huff",
+    "constructor": "MONTY__CONSTRUCTOR",
+    "entryMacro": "MONTY__MAIN",
+    "abi": []
+}

@@ -32,7 +32,7 @@
     "eslint-plugin-import": "^2.14.0",
     "ethers": "^4.0.27",
     "mocha": "^5.2.0",
-    "truffle": "^5.0.6"
+    "truffle": "^5.0.10"
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
