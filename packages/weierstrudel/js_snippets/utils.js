@@ -1,20 +1,12 @@
-const ethers = require('ethers');
 const BN = require('bn.js');
 const EC = require('elliptic');
-const path = require('path');
-const fs = require('fs');
 
 const bn128Reference = require('./bn128_reference');
-
-ethers.errors.setLogLevel('error');
 
 const { p, n } = bn128Reference;
 
 const utils = {};
 
-const pathToProjectData = path.posix.resolve(__dirname, '../huff_projects');
-const projectParams = JSON.parse(fs.readFileSync(path.join(pathToProjectData, 'weierstrudel_project.json')));
-const contractInterface = new ethers.utils.Interface(projectParams.abi);
 
 // eslint-disable-next-line new-cap
 const referenceCurve = new EC.curve.short({
@@ -50,14 +42,9 @@ utils.generateScalars = (numPoints) => {
 utils.generateCalldata = (points, scalars) => {
     const numPoints = points.length;
     if (numPoints !== scalars.length) { throw new Error('num points !== num scalars!'); }
-    const calldataRaw = Buffer.from(contractInterface
-        .functions[`ecBatchMul(uint256[2][${numPoints}],uint256[${numPoints}])`]
-        .encode([
-            points.map(({ x, y }) => [x.toString(10), y.toString(10)]),
-            scalars.map(s => s.toString(10)),
-        ])
-        .slice(2), 'hex');
-    const calldata = calldataRaw.slice(4); // function signature offset
+    const pointBuffer = Buffer.concat(points.map(({ x, y }) => Buffer.concat([x.toBuffer('be', 32), y.toBuffer('be', 32)])));
+    const scalarBuffer = Buffer.concat(scalars.map(s => s.toBuffer('be', 32)));
+    const calldata = Buffer.concat([pointBuffer, scalarBuffer]);
     const expected = points.reduce((acc, { x, y }, i) => {
         if (!acc) {
             return referenceCurve.point(x, y).mul(scalars[i]);
