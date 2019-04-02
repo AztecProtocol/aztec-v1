@@ -10,6 +10,7 @@ const { generatePointData } = require('../js_snippets/utils');
 
 const Weierstrudel = artifacts.require('Weierstrudel');
 const Monty = artifacts.require('Monty');
+const WeierstrudelCaller = artifacts.require('WeierstrudelCaller');
 
 function decodeJacobianResult(output) {
     const result = web3.eth.abi.decodeParameter('uint[3]', output);
@@ -33,9 +34,13 @@ contract('Weierstrudel contract tests', (accounts) => {
 
     let weierstrudel;
     let monty;
+    let weierstrudelCaller;
     before(async () => {
         weierstrudel = await Weierstrudel.new();
         monty = await Monty.new();
+        WeierstrudelCaller.link('WeierstrudelStub', weierstrudel.address);
+        WeierstrudelCaller.link('MontyStub', monty.address);
+        weierstrudelCaller = await WeierstrudelCaller.new();
     });
 
 
@@ -95,4 +100,9 @@ contract('Weierstrudel contract tests', (accounts) => {
             expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
         });
     }).timeout(100000);
+
+    it('Weierstrudel caller succeeds in comparing Weierstrudel with precompile', async () => {
+        const result = await weierstrudelCaller.ecTest();
+        expect(result).to.equal(true);
+    });
 });

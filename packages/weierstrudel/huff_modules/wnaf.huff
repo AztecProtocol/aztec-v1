@@ -337,7 +337,9 @@ template<number_of_points>
 
         // Next up, we load the scalar from calldata and split it into two half-length scalars using a bn128 curve endomorphism.
         // (see ENDOMORPHISM for details, this endomorphism is present for any short Weierstrass curve where a = 0)
-        dup2 calldataload ENDOMORPHISM()
+        // (also, perform modular reduction on scalar...)
+        0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 dup3 calldataload mod
+        ENDOMORPHISM()
 
         // stack state: k1 k2 v s m
 
