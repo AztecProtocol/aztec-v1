@@ -31,7 +31,6 @@ secp256k1.curve = secp256k1.ec.curve;
 /**
  * Derive an ethereum account from a private key
  * @method accountFromPrivateKey
- * @memberof module:secp256k1
  * @param privateKey hex-formatted private key
  * @return {module:secp256k1~Account} an ethereum account
  */
@@ -50,7 +49,6 @@ secp256k1.accountFromPrivateKey = function accountFromPrivateKey(privateKey) {
 /**
  * Generate a random ethereum account
  * @method generateAccount
- * @memberof module:secp256k1
  * @return {module:secp256k1~Account} an ethereum account
  */
 secp256k1.generateAccount = function generateAccount() {
@@ -60,7 +58,6 @@ secp256k1.generateAccount = function generateAccount() {
 /**
  * Get a random point on the curve
  * @method randomPoint
- * @memberof module:secp256k1
  * @returns {Point} a random point
  */
 secp256k1.randomPoint = function randomPoint() {
@@ -132,7 +129,7 @@ secp256k1.decompressHex = (compressed) => {
 /**
  * Compress a secp256k1 point into 33 bytes.
  *
-* @method compress
+ * @method compress
  * @param {Point} point secp256k1 group element
  * @returns {string} hex-formatted compressed point
  */
@@ -150,7 +147,6 @@ secp256k1.ecdsa = {};
  * Convert an Ethereum public key into an address
  *
  * @method accountFromPublicKey
- * @memberof module:secp256k1.ecdsa
  * @param {string} publicKey hex-string formatted public key (uncompressed)
  * @returns {string} address
  */
@@ -172,7 +168,6 @@ secp256k1.ecdsa.accountFromPublicKey = (publicKey) => {
  * Sign a message hash with a given private key
  *
  * @method signMessage
- * @memberof module:secp256k1.ecdsa
  * @param {string} hash hex-string formatted message hash
  * @param {string} privateKey hex-string formatted private key
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
@@ -193,7 +188,6 @@ secp256k1.ecdsa.signMessage = (hash, privateKey) => {
  * Verify an ECDSA signature against a publickey
  *
  * @method verifyMessage
- * @memberof module:secp256k1.ecdsa
  * @param {string} hash hex-string formatted message hash
  * @param {string} r hex-string formatted ECDSA parameter r
  * @param {string} s hex-string formatted ECDSA parameter s
@@ -210,7 +204,6 @@ secp256k1.ecdsa.verifyMessage = (hash, r, s, publicKey) => {
  * Recover the signing key of an ECDSA signature
  *
  * @method recoverPublicKey
- * @memberof module:secp256k1.ecdsa
  * @param {string} hash hex-string formatted message hash
  * @param {string} r hex-string formatted ECDSA parameter r
  * @param {string} s hex-string formatted ECDSA parameter s
@@ -234,7 +227,6 @@ secp256k1.ecdsa.recoverPublicKey = (hash, r, s, v) => {
  * (we don't use web3 because we want a different preamble for eip712 signatures)
  *
  * @method web3Comparison
- * @memberof module:secp256k1.ecdsa
  * @returns {Object} ecdsa module signature and web3 signature
  */
 secp256k1.ecdsa.web3Comparison = () => {

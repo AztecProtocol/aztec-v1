@@ -6,6 +6,7 @@ pragma solidity >=0.5.0 <0.6.0;
  * @dev NoteUtils is a utility library that extracts user-readable information from AZTEC proof outputs.
  *      Specifically, `bytes proofOutput` objects can be extracted from `bytes proofOutputs`,
  *      `bytes proofOutput` and `bytes note` can be extracted into their constituent components,
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 library NoteUtils {
 
@@ -95,6 +96,11 @@ library NoteUtils {
         }
     }
 
+    /**
+    * @dev Extract the challenge from a bytes proofOutput variable
+    * @param _proofOutput bytes proofOutput, outputted from a proof validation smart contract
+    * @return bytes32 challenge - cryptographic variable that is part of the sigma protocol
+    */
     function extractChallenge(bytes memory _proofOutput) internal pure returns (
         bytes32 challenge
     ) {
@@ -130,7 +136,12 @@ library NoteUtils {
             metadata := add(_note, 0x80)
         }
     }
-
+    
+    /**
+    * @dev Get the note type
+    * @param _note an AZTEC note
+    * @return noteType
+    */
     function getNoteType(bytes memory _note) internal pure returns (
         uint256 noteType
     ) {
