@@ -76,11 +76,8 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     * Unnamed param is the AZTEC zero-knowledge proof data
     * @return a `bytes proofOutputs` variable formatted according to the Cryptography Engine standard
     */
-    function validateProof(
-        uint24 _proof,
-        address _sender,
-        bytes calldata
-    ) external returns (bytes memory) {
+    function validateProof(uint24 _proof, address _sender, bytes calldata) external returns (bytes memory) {
+        require(_proof != 0, "proof object invalid");
         // validate that the provided _proof object maps to a corresponding validator and also that
         // the validator is not disabled
         address validatorAddress = getValidatorAddress(_proof);
@@ -108,14 +105,13 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             calldatacopy(destination, proofDataLocation, proofDataSize)
             // call our validator smart contract, and validate the call succeeded
             let callSize := add(proofDataSize, 0x104)
-            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00) 
+            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00)
             case 0 {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed because proof is invalid
             }
 
             // copy returndata to memory
             returndatacopy(memPtr, 0x00, returndatasize)
-
             // store the proof outputs in memory
             mstore(0x40, add(memPtr, returndatasize))
             // the first evm word in the memory pointer is the abi encoded location of the actual returned data
@@ -233,7 +229,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             validatedProofHash := keccak256(0x00, 0x60)
             mstore(0x40, memPtr) // restore the free memory pointer
         }
-        require(isValidatorDisabled == false, "this proof id has been invalidated!");
+        require(isValidatorDisabled == false, "proof invalid");
         return validatedProofs[validatedProofHash];
     }
 
@@ -248,6 +244,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         address _validatorAddress
     ) public {
         require(isOwner(), "only the owner can set a proof");
+        require(_validatorAddress != address(0x0), "expected the validator address to exist");
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
         require(epoch <= latestEpoch, "the proof epoch cannot be bigger than the latest epoch");
         require(validators[epoch][category][id] == address(0x0), "existing proofs cannot be modified");
@@ -272,7 +269,6 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
     }
-
 
     function getValidatorAddress(uint24 _proof) public view returns (address validatorAddress) {
         bool isValidatorDisabled;

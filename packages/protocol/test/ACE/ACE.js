@@ -23,7 +23,7 @@ const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSpl
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract.only('ACE', (accounts) => {
-    describe('initialization states', () => {
+    describe('initialization', () => {
         let ace;
 
         beforeEach(async () => {
@@ -51,7 +51,7 @@ contract.only('ACE', (accounts) => {
         });
     });
 
-    describe('success states', () => {
+    describe('runtime', () => {
         let aztecAccounts = [];
         let notes = [];
         let ace;
@@ -98,131 +98,172 @@ contract.only('ACE', (accounts) => {
             validatedProofHash = keccak256(`0x${hashData}`);
         });
 
-        it('should read the validator address', async () => {
-            const validatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
-            expect(validatorAddress).to.equal(aztecJoinSplit.address);
-        });
-
-        it('should increment the latest epoch', async () => {
-            const latestEpoch = new BN(await ace.latestEpoch()).add(new BN(1));
-            await ace.incrementLatestEpoch();
-            const newLatestEpoch = await ace.latestEpoch();
-            expect(newLatestEpoch.toString()).to.equal(latestEpoch.toString());
-        });
-
-        it('should validate a join-split proof', async () => {
-            const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-            expect(receipt.status).to.equal(true);
-
-            const result = await ace.validatedProofs(validatedProofHash);
-            expect(result).to.equal(true);
-        });
-
-        // TODO: fix this
-        // it.only('should invalidate a previously validated join-split proof', async () => {
-        //     await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-        //     const { receipt } = await ace.invalidateProof(JOIN_SPLIT_PROOF);
-        //     expect(receipt.status).to.equal(true);
-
-        //     await truffleAssert(
-        //         ace.validateProofByHash(JOIN_SPLIT_PROOF, validatedProofHash, accounts[0]),
-        //         'this proof id has been invalidated!'
-        //     );
-        // });
-
-        it('should have a wrapper contract validate a join-split transaction', async () => {
-            const aceTest = await ACETest.new();
-            await aceTest.setACEAddress(ace.address);
-            const { receipt } = await aceTest.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-            expect(proofOutput).to.equal(receipt.logs[0].args.proofOutputs.slice(0x82));
-        });
-
-        it('should validate-by-hash previously set proofs', async () => {
-            await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-            const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
-            expect(result).to.equal(true);
-        });
-
-        it('should not validate-by-hash not previously set proofs', async () => {
-            const result = await ace.validateProofByHash(BOGUS_PROOF, proofHash, accounts[0]);
-            expect(result).to.equal(false);
-        });
-
-        it('should clear previously set proofs', async () => {
-            await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-            const firstResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
-            expect(firstResult).to.equal(true);
-            await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]);
-            const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
-            expect(secondResult).to.equal(false);
-        });
-    });
-
-    describe('failure states', async () => {
-        let aztecAccounts = [];
-        let notes = [];
-        let ace;
-        // eslint-disable-next-line no-unused-vars
-        let proofData;
-        // eslint-disable-next-line no-unused-vars
-        let proofHash;
-        let proofOutput;
-        let expectedOutput;
-
-        beforeEach(async () => {
-            ace = await ACE.new({
-                from: accounts[0],
+        describe('success states', () => {
+            it('should read the validator address', async () => {
+                const validatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
+                expect(validatorAddress).to.equal(aztecJoinSplit.address);
             });
-            aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-            notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-            ];
-            await ace.setCommonReferenceString(constants.CRS);
-            const aztecJoinSplit = await JoinSplit.new();
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-            const inputNotes = notes.slice(2, 4);
-            const outputNotes = notes.slice(0, 2);
-            const publicOwner = aztecAccounts[0].address;
-            const kPublic = 40;
-            ({ proofData, expectedOutput } = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes,
-                outputNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(2, 4),
-                publicOwner,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            }));
-            proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
-            proofHash = outputCoder.hashProofOutput(proofOutput);
+
+            it('should increment the latest epoch', async () => {
+                const latestEpoch = new BN(await ace.latestEpoch()).add(new BN(1));
+                await ace.incrementLatestEpoch();
+                const newLatestEpoch = await ace.latestEpoch();
+                expect(newLatestEpoch.toString()).to.equal(latestEpoch.toString());
+            });
+
+            it('should validate a join-split proof', async () => {
+                const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+                expect(receipt.status).to.equal(true);
+
+                const result = await ace.validatedProofs(validatedProofHash);
+                expect(result).to.equal(true);
+            });
+
+            it('should have a wrapper contract validate a join-split transaction', async () => {
+                const aceTest = await ACETest.new();
+                await aceTest.setACEAddress(ace.address);
+                const { receipt } = await aceTest.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+                expect(proofOutput).to.equal(receipt.logs[0].args.proofOutputs.slice(0x82));
+            });
+
+            it('should validate-by-hash previously set proofs', async () => {
+                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+                const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
+                expect(result).to.equal(true);
+            });
+
+            it('should not validate-by-hash not previously set proofs', async () => {
+                const result = await ace.validateProofByHash(BOGUS_PROOF, proofHash, accounts[0]);
+                expect(result).to.equal(false);
+            });
+
+            it('should clear previously set proofs', async () => {
+                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+                const firstResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
+                expect(firstResult).to.equal(true);
+                await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]);
+                const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
+                expect(secondResult).to.equal(false);
+            });
         });
 
-        it('should not set a proof if not owner', async () => {
-            await truffleAssert.reverts(ace.setProof(JOIN_SPLIT_PROOF, accounts[1], {
-                from: accounts[1],
-            }));
+        describe('failure states', async () => { /* eslint-disable no-unused-vars */
+            it('should throw when the proof maps to no validator address', async () => {
+                await truffleAssert.reverts(
+                    ace.getValidatorAddress(BOGUS_PROOF),
+                    'expected the validator address to exist'
+                );
+            });
+
+            it('should not increment the latest epoch if not owner', async () => {
+                const opts = { from: accounts[1] };
+                await truffleAssert.reverts(
+                    ace.incrementLatestEpoch(opts),
+                    'only the owner can update the latest epoch'
+                );
+            });
+
+            it('should not set a proof if not owner', async () => {
+                const opts = { from: accounts[1] };
+                await truffleAssert.reverts(
+                    ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address, opts),
+                    'only the owner can set a proof'
+                );
+            });
+
+            it('should not set a proof if the proof\'s epoch is higher than the contract latest epoch', async () => {
+                const JOIN_SPLIT_PROOF_V2 = `${parseInt(JOIN_SPLIT_PROOF, 10) + 65536}`; // epoch is 2 instead of 1
+                await truffleAssert.reverts(
+                    ace.setProof(JOIN_SPLIT_PROOF_V2, aztecJoinSplit.address),
+                    'the proof epoch cannot be bigger than the latest epoch'
+                );
+            });
+
+            it('should not set a proof if it had been set already', async () => {
+                await truffleAssert.reverts(
+                    ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address),
+                    'existing proofs cannot be modified'
+                );
+            });
+
+            it('should not set a proof if validator address does not exist', async () => {
+                await truffleAssert.reverts(
+                    ace.setProof(JOIN_SPLIT_PROOF, constants.addresses.ZERO_ADDRESS),
+                    'expected the validator address to exist'
+                );
+            });
+
+            it('should not set the common reference string if not owner', async () => {
+                const opts = { from: accounts[1] };
+                await truffleAssert.reverts(
+                    ace.setCommonReferenceString(constants.CRS, opts),
+                    'only the owner can set the common reference string'
+                );
+            });
+
+            it('should not validate malformed proof data', async () => {
+                const malformedProofData = '0x0123' + proofData.slice(6);
+                await truffleAssert.reverts(ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], malformedProofData));
+            });
+
+            it('should not validate a malformed uint24 proof', async () => {
+                const MALFORMED_PROOF = '0';
+                await truffleAssert.reverts(
+                    ace.validateProof(MALFORMED_PROOF, accounts[0], proofData),
+                    'proof object invalid'
+                );
+            });
+
+            // TODO: fix this
+            // it('should not validate an invalid proof hash', async () => {
+            //     const bogusProofHash = '0x0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff';
+            //     await truffleAssert.reverts(
+            //         ace.validateProofByHash(JOIN_SPLIT_PROOF, bogusProofHash, accounts[0]),
+            //         'proof invalid'
+            //     );
+            // });
+
+            // TODO: fix this
+            // it('should invalidate a previously validated join-split proof', async () => {
+            //     await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+            //     const { receipt } = await ace.invalidateProof(JOIN_SPLIT_PROOF);
+            //     expect(receipt.status).to.equal(true);
+
+            //     await truffleAssert(
+            //         ace.validateProofByHash(JOIN_SPLIT_PROOF, validatedProofHash, accounts[0]),
+            //         'this proof id has been invalidated!'
+            //     );
+            // });
+
+            it('should not invalidate proof if not owner', async () => {
+                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+
+                const opts = { from: accounts[1] };
+                await truffleAssert.reverts(
+                    ace.invalidateProof(JOIN_SPLIT_PROOF, opts),
+                    'only the owner can invalidate a proof'
+                );
+            });
+
+            it('should not clear empty proof hashes', async () => {
+                await truffleAssert.reverts(
+                    ace.clearProofByHashes(JOIN_SPLIT_PROOF, [padLeft('0x0', 64)]),
+                    'expected no empty proof hash'
+                );
+            });
+
+            it('should not clear not previously validated proof hashes', async () => {
+                await truffleAssert.reverts(
+                    ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]),
+                    'can only clear previously validated proofs'
+                );
+            });
         });
-
-        it('should not set the common reference string if not owner', async () => {
-            await truffleAssert.reverts(ace.setCommonReferenceString(constants.CRS, {
-                from: accounts[1],
-            }));
-        });
-
-        // it.only('should throw a previously validated join-split proof', async () => {
-        //     await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-        //     const { receipt } = await ace.invalidateProof(JOIN_SPLIT_PROOF);
-        //     expect(receipt.status).to.equal(true);
-
-        //     await truffleAssert(
-        //         ace.validateProofByHash(validatedProofHash),
-        //         'this proof id has been invalidated!'
-        //     );
-        // });
     });
+});
 
-    describe('note registry', async () => {
+contract('note registry', (accounts) => {
+    describe('success states', async () => {
         let aztecAccounts = [];
         let notes = [];
         let ace;
@@ -403,7 +444,6 @@ contract.only('ACE', (accounts) => {
             expect(tokenBalance.toString()).to.equal(newBalance.toString());
         });
 
-
         it('should deposit into the public erc20 contract ', async () => {
             const publicOwner = accounts[2];
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData);
@@ -499,6 +539,17 @@ contract.only('ACE', (accounts) => {
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
+        });
+    });
+
+    describe('failure states', async () => {
+        let ace;
+
+        it('should throw when trying to read a non-existent registry', async () => {
+            await truffleAssert.reverts(
+                ace.getRegistry(accounts[1]),
+                'registry not created'
+            );
         });
     });
 });
