@@ -7,6 +7,7 @@ import "../interfaces/IAZTEC.sol";
 
 import "../libs/IntegerUtils.sol";
 import "../libs/NoteUtils.sol";
+import "../libs/ProofUtils.sol";
 
 /**
  * @title NoteRegistry contract which contains the storage variables that define the set of valid
@@ -21,6 +22,7 @@ contract NoteRegistry is IAZTEC {
     using NoteUtils for bytes;
     using SafeMath for uint256;
     using IntegerUtils for uint256;
+    using ProofUtils for uint24;
 
     /**
     * Note struct. This is the data that we store when we log AZTEC notes inside a NoteRegistry
@@ -52,18 +54,19 @@ contract NoteRegistry is IAZTEC {
 
     struct Flags {
         bool active;
-        bool canMint;
-        bool canBurn;
+        bool canAdjustSupply;
         bool canConvert;
     }
 
     struct Registry {
-        Flags flags;
-        ERC20 linkedToken;
-        mapping(bytes32 => Note) notes;
+        IERC20 linkedToken;
         uint256 scalingFactor;
         uint256 totalSupply;
-        bytes32 confidentialTotalSupply;
+        bytes32 confidentialTotalMinted;
+        bytes32 confidentialTotalBurned;
+        uint256 supplementTotal;
+        Flags flags;
+        mapping(bytes32 => Note) notes;
         mapping(address => mapping(bytes32 => uint256)) publicApprovals;
     }
 
@@ -72,9 +75,29 @@ contract NoteRegistry is IAZTEC {
 
     mapping(bytes32 => bool) public validatedProofs;
 
+    /**
+    * @dev Call transferFrom on a linked ERC20 token. Used in cases where the ACE's mint
+    * function is called but the token balance of the note registry in question is
+    * insufficient
+    * @param _value the value to be transferred
+    */
+    function supplementTokens(uint256 _value) external {
+        Registry storage registry = registries[msg.sender];
+        require(registry.flags.active == true, "note registry does not exist for the given address");
+        require(registry.flags.canConvert == true, "note registry does not have conversion rights");
+        
+        // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
+        require(registry.flags.canAdjustSupply == true, "note registry does not have mint and burn rights");
+        
+        registry.linkedToken.transferFrom(msg.sender, address(this), _value);
+
+        registry.totalSupply = registry.totalSupply.add(_value);
+    }
 
     /**
     * @dev Query the ACE for a previously validated proof
+    *
+    * @notice This is a virtual function, that must be overwritten by the contract that inherits from NoteRegistr
     *
     * @param _proof - unique identifier for the proof in question and being validated
     * @param _proofHash - keccak256 hash of a bytes proofOutput argument. Used to identify the proof in question,
@@ -84,36 +107,27 @@ contract NoteRegistry is IAZTEC {
     */
     function validateProofByHash(uint24 _proof, bytes32 _proofHash, address _sender) public view returns (bool);
 
-
-    /**
-    * @dev Creates a note registry with a linked ERC20 token. Ownership of the registry is assigned to
-    * msg.sender. The note registry defines the state of valid AZTEC notes for the owner.
-    *
-    * @param _linkedTokenAddress - public ERC20 token that is linked to the NoteRegistry. This is used to
-    * transfer public value into and out of the system
-    * @param _scalingFactor - defines how many ERC20 tokens are represented by one AZTEC note
-    * @param _canMint - flag set by the owner to decide whether the registry has minting priviledges 
-    * @param _canBurn - flag set by the owner to decide whether the registry has burning priviledges 
-    * @param _canConvert - flag set by the owner to decide whether the registry has public to private, and 
-    * vice versa, conversion priviledges
-    */
     function createNoteRegistry(
         address _linkedTokenAddress,
         uint256 _scalingFactor,
-        bool _canMint,
-        bool _canBurn,
+        bool _canAdjustSupply,
         bool _canConvert
     ) public {
         require(registries[msg.sender].flags.active == false, "address already has a linked note registry");
         Registry memory registry = Registry({
-            linkedToken: ERC20(_linkedTokenAddress),
+            linkedToken: IERC20(_linkedTokenAddress),
             scalingFactor: _scalingFactor,
             totalSupply: 0,
-            confidentialTotalSupply: bytes32(0x0),
+            /*
+            confidentialTotalMinted and confidentialTotalBurned below are the hashes of AZTEC notes 
+            with k = 0 and a  =1
+            */
+            confidentialTotalMinted: 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c,
+            confidentialTotalBurned: 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c,
+            supplementTotal: 0,
             flags: Flags({
                 active: true,
-                canMint: _canMint,
-                canBurn: _canBurn,
+                canAdjustSupply: _canAdjustSupply,
                 canConvert: _canConvert
             })
         });
@@ -158,8 +172,6 @@ contract NoteRegistry is IAZTEC {
         // (publicValue < 0) => transfer from publicOwner to ACE
         // (publicValue > 0) => transfer from ACE to publicOwner
         if (publicValue != 0) {
-            require(flags.canMint == false, "mintable assets cannot be converted into public tokens");
-            require(flags.canBurn == false, "burnable assets cannot be converted into public tokens");
             require(flags.canConvert == true, "this asset cannot be converted into public tokens");
 
             if (publicValue < 0) {
@@ -179,111 +191,8 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
-    /**
-    * @dev Mint AZTEC notes, update the note registry state to include the minted notes and 
-    * update the total minted value
-    * 
-    * May lead to a scenario where there are insufficient public ERC20 tokens to convert these
-    * minted notes into ERC20 tokens. In this case, the supplementTokens() function in ACE is called.
-    *
-    * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
-    * @param _proofSender - address of the entity sending the proof
-    */
-    function mint(bytes memory _proofOutput, address _proofSender) public returns (bool) {
-        Registry storage registry = registries[msg.sender];
-        require(registry.flags.active == false, "note registry does not exist for the given address");
-        require(registry.flags.canMint == true, "this asset is not mintable");
-        bytes32 proofHash = keccak256(_proofOutput);
-        require(
-            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true, 
-            "ACE has not validated a matching proof"
-        ); 
-        
-        (bytes memory inputNotes, bytes memory outputNotes, , int256 publicValue) = _proofOutput.extractProofOutput();
-        require(publicValue == 0, "mint transactions cannot have a public value");
-        require(outputNotes.getLength() > 0, "mint transactions require at least one output note");
-        require(inputNotes.getLength() == JOIN_SPLIT_PROOF, "mint transactions can only have one input note");
-        
-        (, bytes32 noteHash, ) = outputNotes.get(0).extractNote();
-        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
-       
-        (, noteHash, ) = inputNotes.get(0).extractNote();
-        registry.confidentialTotalSupply = noteHash;
-
-        for (uint256 i = 1; i < outputNotes.getLength(); i++) {
-            address noteOwner;
-            (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
-            Note storage note = registry.notes[noteHash];
-            require(note.status == 0, "output note exists");
-            note.status = uint8(1);
-            // AZTEC uses timestamps to measure the age of a note on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.createdOn = now.toBytes5();
-            note.owner = noteOwner;
-        }
-    }
-
-    /**
-    * @dev Burn AZTEC notes, update the state of the note registry destroy the burned notes and 
-    * update the total burned value. 
-    *
-    * May lead to a scenario where there are insufficient public ERC20 tokens to convert these
-    * minted notes into ERC20 tokens. In this case, the supplementTokens() function in ACE is called.
-    *
-    * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
-    * @param _proofSender - address of the entity sending the proof
-    */
-    function burn(bytes memory _proofOutput, address _proofSender) public returns (bool) {
-        Registry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canBurn == true, "asset not burnable");
-        bytes32 proofHash = keccak256(_proofOutput);
-        require(
-            validateProofByHash(JOIN_SPLIT_PROOF, proofHash, _proofSender) == true,
-            "ACE has not validated a matching proof"
-        );
-        (
-            bytes memory inputNotes,
-            bytes memory outputNotes,
-            ,
-            int256 publicValue
-        ) = _proofOutput.extractProofOutput();
-        require(publicValue == 0, "mint transactions cannot have a public value");
-
-        require(inputNotes.getLength() > 0, "burn transactions require at least one input note");
-        require(outputNotes.getLength() == 1, "burn transactions can only have one output note");
-        (
-            ,
-            bytes32 noteHash,
-        ) = inputNotes.get(0).extractNote();
-        require(noteHash == registry.confidentialTotalSupply, "provided total supply note does not match");
-        (
-            ,
-            noteHash,
-        ) = outputNotes.get(0).extractNote();
-
-        registry.confidentialTotalSupply = noteHash;
-
-        for (uint256 i = 1; i < inputNotes.getLength(); i++) {
-            address noteOwner;
-            (noteOwner, noteHash, ) = outputNotes.get(i).extractNote();
-            Note storage note = registry.notes[noteHash];
-            require(note.status == 1, "input note does not exist");
-            require(note.owner == noteOwner, "input note owner does not match");
-            note.status = uint8(2);
-            // AZTEC uses timestamps to measure the age of a note, on timescales of days/months
-            // The 900-ish seconds a miner can manipulate a timestamp should have little effect
-            // solhint-disable-next-line not-rely-on-time
-            note.destroyedOn = now.toBytes5();
-        }
-    }
-
     /** 
     * @dev This should be called from an asset contract.
-    * @param _registryOwner - address of the registry owner
-    * @param _proofHash - keccak256 hash of bytes proofOutput
-    * @param _value - value up to which approval is granted
     */
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         Registry storage registry = registries[_registryOwner];
@@ -301,18 +210,18 @@ contract NoteRegistry is IAZTEC {
      * @return _totalSupply - TODO
      * @return _confidentialTotalSupply - keccak256 hash of the note representing the total supply 
      * of the note registry
-     * @return _canMint - flag set by the owner to decide whether the registry has minting priviledges 
+     * @return _canAdjustSupply - determines whether the registry has minting and burning priviledges 
      * @return _canBurn - flag set by the owner to decide whether the registry has burning priviledges 
      * @return _canConvert - flag set by the owner to decide whether the registry has public to private, and 
      * vice versa, conversion priviledges
      */
     function getRegistry(address _owner) public view returns (
-        ERC20 _linkedToken,
+        IERC20 _linkedToken,
         uint256 _scalingFactor,
         uint256 _totalSupply,
-        bytes32 _confidentialTotalSupply,
-        bool _canMint,
-        bool _canBurn,
+        bytes32 _confidentialTotalMinted,
+        bytes32 _confidentialTotalBurned,
+        bool _canAdjustSupply,
         bool _canConvert
     ) {
         Registry memory registry = registries[_owner];
@@ -320,9 +229,9 @@ contract NoteRegistry is IAZTEC {
             registry.linkedToken,
             registry.scalingFactor,
             registry.totalSupply,
-            registry.confidentialTotalSupply,
-            registry.flags.canMint,
-            registry.flags.canBurn,
+            registry.confidentialTotalMinted,
+            registry.confidentialTotalBurned,
+            registry.flags.canAdjustSupply,
             registry.flags.canConvert
         );
     }
@@ -379,7 +288,7 @@ contract NoteRegistry is IAZTEC {
         // 1. the note has an existing status of UNSPENT
         // 2. the note owner matches the provided input
         uint256 length = inputNotes.getLength();
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; i += 1) {
             (address noteOwner, bytes32 noteHash,) = inputNotes.get(i).extractNote();
 
             // Get the storage location of the input note
@@ -440,7 +349,7 @@ contract NoteRegistry is IAZTEC {
         uint256 outputNoteStatusOld;
         uint256 length = outputNotes.getLength();
 
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; i += 1) {
             (address noteOwner, bytes32 noteHash,) = outputNotes.get(i).extractNote();
             require(noteOwner != address(0x0), "output note owner cannot be address(0x0)!");
 

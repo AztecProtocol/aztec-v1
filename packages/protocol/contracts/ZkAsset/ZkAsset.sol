@@ -2,10 +2,10 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "./IZkAsset.sol";
 import "../ACE/NoteRegistry.sol";
 import "../ACE/ACE.sol";
 import "../interfaces/IAZTEC.sol";
+import "../interfaces/IZkAsset.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
 
@@ -36,7 +36,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     ));
 
     ACE public ace;
-    ERC20 public linkedToken;
+    IERC20 public linkedToken;
     NoteRegistry.Flags public flags;
 
     uint256 public scalingFactor;
@@ -45,7 +45,9 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     constructor(
         address _aceAddress,
         address _linkedTokenAddress,
-        uint256 _scalingFactor
+        uint256 _scalingFactor,
+        bool _canAdjustSupply,
+        bool _canConvert
     ) public {
         EIP712_DOMAIN_HASH = keccak256(abi.encodePacked(
             EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
@@ -55,24 +57,24 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         ));
         flags = NoteRegistry.Flags({
             active: true,
-            canMint: false,
-            canBurn: false,
+            canAdjustSupply: false,
             canConvert: true
         });
         ace = ACE(_aceAddress);
-        linkedToken = ERC20(_linkedTokenAddress);
+        linkedToken = IERC20(_linkedTokenAddress);
         scalingFactor = _scalingFactor;
         ace.createNoteRegistry(
             _linkedTokenAddress,
             _scalingFactor,
-            false,
-            false,
-            true
+            _canAdjustSupply, // false,
+            _canConvert // true
         );
         emit CreateZkAsset(
             _aceAddress,
             _linkedTokenAddress,
-            _scalingFactor
+            _scalingFactor,
+            _canAdjustSupply,
+            _canConvert
         );
     }
     
@@ -88,25 +90,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     */
     function confidentialTransfer(bytes memory _proofData) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
-        
-        for (uint i = 0; i < proofOutputs.getLength(); i++) {
-            bytes memory proofOutput = proofOutputs.get(i);
-            ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
-            
-            (bytes memory inputNotes,
-            bytes memory outputNotes,
-            address publicOwner,
-            int256 publicValue) = proofOutput.extractProofOutput();
-
-            logInputNotes(inputNotes);
-            logOutputNotes(outputNotes);
-            if (publicValue < 0) {
-                emit ConvertTokens(publicOwner, uint256(-publicValue));
-            }
-            if (publicValue > 0) {
-                emit RedeemTokens(publicOwner, uint256(publicValue));
-            }
-        }
+        confidentialTransferInternal(proofOutputs);
     }
 
     /**
@@ -168,7 +152,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         int256 publicValue) = _proofOutput.extractProofOutput();
         
         uint256 length = inputNotes.getLength();
-        for (uint i = 0; i < length; i = i.add(1)) {
+        for (uint i = 0; i < length; i += 1) {
             (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
             require(
                 confidentialApproved[noteHash][msg.sender] == true,
@@ -188,6 +172,27 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             emit RedeemTokens(publicOwner, uint256(publicValue));
         }
     }
+    
+    function confidentialTransferInternal(bytes memory proofOutputs) internal {
+        for (uint i = 0; i < proofOutputs.getLength(); i += 1) {
+            bytes memory proofOutput = proofOutputs.get(i);
+            ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
+            
+            (bytes memory inputNotes,
+            bytes memory outputNotes,
+            address publicOwner,
+            int256 publicValue) = proofOutput.extractProofOutput();
+
+            logInputNotes(inputNotes);
+            logOutputNotes(outputNotes);
+            if (publicValue < 0) {
+                emit ConvertTokens(publicOwner, uint256(-publicValue));
+            }
+            if (publicValue > 0) {
+                emit RedeemTokens(publicOwner, uint256(publicValue));
+            }
+        }
+    }
 
     /**
     * @dev Emit events for all input notes, which represent notes being destroyed
@@ -196,7 +201,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     * @param inputNotes - input notes being destroyed and removed from note registry state
     */
     function logInputNotes(bytes memory inputNotes) internal {
-        for (uint i = 0; i < inputNotes.getLength(); i = i.add(1)) {
+        for (uint i = 0; i < inputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
             emit DestroyNote(noteOwner, noteHash, metadata);
         }
@@ -209,7 +214,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     * @param outputNotes - outputNotes being created and added to note registry state
     */
     function logOutputNotes(bytes memory outputNotes) internal {
-        for (uint i = 0; i < outputNotes.getLength(); i = i.add(1)) {
+        for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
             emit CreateNote(noteOwner, noteHash, metadata);
         }

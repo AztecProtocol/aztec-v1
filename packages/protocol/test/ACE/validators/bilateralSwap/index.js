@@ -1,6 +1,6 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const { padLeft, sha3 } = require('web3-utils');
+const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
@@ -12,46 +12,6 @@ const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/
 const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwapInterface');
 
 BilateralSwap.abi = BilateralSwapInterface.abi;
-
-
-function encodeBilateralSwapTransaction({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-}) {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-    const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-    const proofData = aztec.abiEncoder.inputCoder.bilateralSwap(
-        proofDataRaw,
-        challenge,
-        noteOwners,
-        [outputNotes[0], inputNotes[1]]
-    );
-
-    const publicOwner = '0x0000000000000000000000000000000000000000';
-    const publicValue = 0;
-
-    const expectedOutput = `0x${aztec.abiEncoder.outputCoder.encodeProofOutputs([
-        {
-            inputNotes: [inputNotes[0]],
-            outputNotes: [outputNotes[0]],
-            publicOwner,
-            publicValue,
-            challenge,
-        },
-        {
-            inputNotes: [outputNotes[1]],
-            outputNotes: [inputNotes[1]],
-            publicOwner,
-            publicValue,
-            challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
-        },
-    ]).slice(0x42)}`;
-    return { proofData, expectedOutput };
-}
 
 contract('Bilateral Swap', (accounts) => {
     let bilateralSwapContract;
@@ -75,7 +35,7 @@ contract('Bilateral Swap', (accounts) => {
         it('successfully validate output encoding for bilateral proof in zero-knowledge', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
-            const { proofData, expectedOutput } = encodeBilateralSwapTransaction({
+            const { proofData, expectedOutput } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
