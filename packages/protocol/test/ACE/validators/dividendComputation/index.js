@@ -99,7 +99,7 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const { proofData, expectedOutput } = encodeDividendComputationTransaction({
+            const { proofData, expectedOutput } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress,
@@ -134,7 +134,7 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const { proofData } = encodeDividendComputationTransaction({
+            const { proofData } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 za,
@@ -163,7 +163,7 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const { proofData } = encodeDividendComputationTransaction({
+            const { proofData } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 za,
@@ -238,7 +238,7 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const { proofData } = encodeDividendComputationTransaction({
+            const { proofData } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 za,
@@ -267,7 +267,7 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const { proofData } = encodeDividendComputationTransaction({
+            const { proofData } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 za,
@@ -296,7 +296,7 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const { proofData } = encodeDividendComputationTransaction({
+            const { proofData } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 za,
@@ -335,7 +335,7 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const { proofData } = encodeDividendComputationTransaction({
+            const { proofData } = dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
                 zaHigh,
