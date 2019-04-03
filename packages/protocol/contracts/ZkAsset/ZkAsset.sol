@@ -160,7 +160,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             );
         }
 
-        ace.updateNoteRegistry(_proof, msg.sender, _proofOutput);
+        ace.updateNoteRegistry(_proof, _proofOutput, msg.sender);
 
         logInputNotes(inputNotes);
         logOutputNotes(outputNotes);
@@ -176,7 +176,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     function confidentialTransferInternal(bytes memory proofOutputs) internal {
         for (uint i = 0; i < proofOutputs.getLength(); i += 1) {
             bytes memory proofOutput = proofOutputs.get(i);
-            ace.updateNoteRegistry(JOIN_SPLIT_PROOF, address(this), proofOutput);
+            ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proofOutput, address(this));
             
             (bytes memory inputNotes,
             bytes memory outputNotes,

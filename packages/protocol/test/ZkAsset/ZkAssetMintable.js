@@ -52,7 +52,6 @@ contract('ZkAssetMintable', (accounts) => {
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
-
             // Creating a fixed note
             const a = padLeft('1', 64);
             const k = padLeft('0', 8);
@@ -66,7 +65,6 @@ contract('ZkAssetMintable', (accounts) => {
 
             const canAdjustSupply = true;
             const canConvert = true;
-
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(1);
@@ -148,7 +146,6 @@ contract('ZkAssetMintable', (accounts) => {
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-
 
             // Creating a fixed note
             const a = padLeft('1', 64);

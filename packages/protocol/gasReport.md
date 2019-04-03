@@ -84,7 +84,7 @@ Similarly, registry.publicApprovals is being loaded 3 times - can refactor like 
 Sload ops: 400  
 Remaining: 742  
 
-Again, we're paying a heavy price for these nested mappings. Also, `keccak256(abi.encode(_proofHash, _proof, _sender))` costs 200 gas, but the raw opcode cost should be closer to 50.  
+Again, we're paying a heavy price for these nested mappings. Also, `keccak256(abi.encode(_proofHash, _proof, _proofSender))` costs 200 gas, but the raw opcode cost should be closer to 50.  
 
 ### ACE.validateProof  
 

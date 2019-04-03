@@ -54,7 +54,6 @@ contract('ZkAssetBurnable', (accounts) => {
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
-
             // Creating a fixed note
             const a = padLeft('1', 64);
             const k = padLeft('0', 8);
@@ -68,7 +67,6 @@ contract('ZkAssetBurnable', (accounts) => {
 
             const canBurnAndBurn = true;
             const canConvert = true;
-
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(1);
