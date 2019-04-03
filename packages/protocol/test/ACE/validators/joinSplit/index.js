@@ -281,6 +281,37 @@ contract('JoinSplit', (accounts) => {
             const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
             console.log('gas used = ', gasUsed);
         });
+
+        it('validate the minimum number of notes possible (one input, one output) works', async () => {
+            const inputNotes = notes.slice(0, 1);
+
+            const outputNotes = [
+                aztec.note.create(aztecAccounts[0].publicKey, 0),
+            ];
+
+            const kPublic = 0;
+            const publicOwner = aztecAccounts[0].address;
+            const senderAddress = accounts[0];
+            const { proofData, expectedOutput } = encodeJoinSplitTransaction({
+                inputNotes,
+                outputNotes,
+                senderAddress,
+                inputNoteOwners: aztecAccounts.slice(0, 10),
+                publicOwner,
+                kPublic,
+                validatorAddress: joinSplitContract.address,
+            });
+
+            const opts = {
+                from: senderAddress,
+                gas: 4000000,
+            };
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
+            expect(result).to.equal(expectedOutput);
+
+            const gasUsed = await joinSplitContract.validateJoinSplit.estimateGas(proofData, senderAddress, constants.CRS, opts);
+            console.log('gas used = ', gasUsed);
+        });
     });
 
     describe('failure states', () => {
