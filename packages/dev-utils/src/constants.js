@@ -85,6 +85,13 @@ const constants = {
      *  @default 1024
      */
     SIGNATURES_PER_FILE: 1024,
+    /**
+     * Hash of a dummy AZTEC note with k = 0 and a = 1
+     * @constant ZERO_VALUE_NOTE_HASH
+     * @type {string}
+     * @default 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c
+     */
+    ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
 };
 
 /**
@@ -99,7 +106,7 @@ constants.addresses = {
      */
     DAI_ADDRESS: '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359',
     /**
-     * Generic burning Etheruem address
+     * Generic burning Ethereum address
      */
     ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
 };
@@ -192,6 +199,6 @@ constants.statuses = {
     NOTE_DOES_NOT_EXIST: 0,
     NOTE_UNSPENT: 1,
     NOTE_SPENT: 2,
-}
+};
 
 module.exports = constants;

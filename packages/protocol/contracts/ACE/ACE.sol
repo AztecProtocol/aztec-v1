@@ -96,14 +96,12 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         ,
         ) = _proofOutputs.get(0).extractProofOutput();
 
-    
         // Check the previous confidentialTotalSupply, and then assign the new one
         (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
 
         require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total minted note does not match");
         (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
         registry.confidentialTotalMinted = newTotalNoteHash;
-
 
         // Dealing with minted notes
         (,
@@ -154,18 +152,15 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
         registry.confidentialTotalBurned = newTotalNoteHash;
 
-
         // Dealing with burned notes
         (,
         bytes memory burnedNotes,
         ,) = _proofOutputs.get(1).extractProofOutput();
 
-
         // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
         updateInputNotes(burnedNotes);
         return(_proofOutputs);
     }
-    event Debug(bytes32 _proofHash, bytes32 _validatedProofHash, uint24 _proof);
 
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
@@ -184,7 +179,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     * @return a `bytes proofOutputs` variable formatted according to the Cryptography Engine standard
     */
     function validateProof(uint24 _proof, address _sender, bytes calldata) external returns (bytes memory) {
-        require(_proof != 0, "proof object invalid");
+        require(_proof != 0, "expected the proof to be valid");
         // validate that the provided _proof object maps to a corresponding validator and also that
         // the validator is not disabled
         address validatorAddress = getValidatorAddress(_proof);
@@ -231,10 +226,9 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             for (uint256 i = 0; i < length; i += 1) {
                 bytes32 proofHash = keccak256(proofOutputs.get(i));
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
-                emit Debug(proofHash, validatedProofHash, _proof);
                 validatedProofs[validatedProofHash] = true;
             }
-        } 
+        }
         return proofOutputs;
     }
 
@@ -279,7 +273,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     function invalidateProof(uint24 _proof) public {
         require(isOwner(), "only the owner can invalidate a proof");
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-        require(validators[epoch][category][id] != address(0x0), "can only invalidate proofs that exist!");
+        require(validators[epoch][category][id] != address(0x0), "can only invalidate proofs that exist");
         disabledValidators[epoch][category][id] = true;
     }
 
@@ -352,7 +346,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             validatedProofHash := keccak256(0x00, 0x60)
             mstore(0x40, memPtr) // restore the free memory pointer
         }
-        require(isValidatorDisabled == false, "proof invalid");
+        require(isValidatorDisabled == false, "proof id has been invalidated");
         return validatedProofs[validatedProofHash];
     }
 
