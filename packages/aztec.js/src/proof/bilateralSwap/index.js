@@ -156,6 +156,8 @@ bilateralSwap.encodeBilateralSwapTransaction = ({
         },
     ]).slice(0x42)}`;
     return { proofData, expectedOutput };
+};
+
 /**
  * Strictly for testing purposes only. 
  * 

@@ -97,7 +97,7 @@ contract('Bilateral Swap', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const { proofData, expectedOutput } = encodeBilateralSwapTransaction({
+            const { proofData, expectedOutput } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress,
@@ -132,7 +132,7 @@ contract('Bilateral Swap', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
-            const { proofData } = encodeBilateralSwapTransaction({
+            const { proofData } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
@@ -314,7 +314,7 @@ contract('Bilateral Swap', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
-            const { proofData } = encodeBilateralSwapTransaction({
+            const { proofData } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
@@ -354,7 +354,7 @@ contract('Bilateral Swap', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
-            const { proofData } = encodeBilateralSwapTransaction({
+            const { proofData } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
@@ -387,7 +387,7 @@ contract('Bilateral Swap', (accounts) => {
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = bilateralSwap.constructProofTesting([...inputNotes, ...outputNotes], senderAddress, testVariable);
+            } = bilateralSwap.constructProofTest([...inputNotes, ...outputNotes], senderAddress, testVariable);
 
             const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
@@ -454,7 +454,7 @@ contract('Bilateral Swap', (accounts) => {
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = bilateralSwap.constructProofTesting([...inputNotes, ...outputNotes], senderAddress, testVariable);
+            } = bilateralSwap.constructProofTest([...inputNotes, ...outputNotes], senderAddress, testVariable);
 
             const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
@@ -486,7 +486,7 @@ contract('Bilateral Swap', (accounts) => {
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = bilateralSwap.constructProofTesting([...inputNotes, ...outputNotes], senderAddress, testVariable);
+            } = bilateralSwap.constructProofTest([...inputNotes, ...outputNotes], senderAddress, testVariable);
 
             const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
@@ -584,7 +584,7 @@ contract('Bilateral Swap', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
-            const { proofData } = encodeBilateralSwapTransaction({
+            const { proofData } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
@@ -606,7 +606,7 @@ contract('Bilateral Swap', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
-            const { proofData } = encodeBilateralSwapTransaction({
+            const { proofData } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
@@ -627,7 +627,7 @@ contract('Bilateral Swap', (accounts) => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
-            const { proofData } = encodeBilateralSwapTransaction({
+            const { proofData } = bilateralSwap.encodeBilateralSwapTransaction({
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
