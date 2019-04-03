@@ -165,21 +165,23 @@ describe('abiEncoder.outputCoder tests', () => {
 
     it('outputCoder can decode an encoded output note', () => {
         const encoded = outputCoder.encodeOutputNote(notes[0]);
-        const result = outputCoder.decodeOutputNote(encoded);
+        const result = outputCoder.decodeNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
         expect(result.sigma.eq(notes[0].sigma)).to.equal(true);
         expect(result.ephemeral.eq(notes[0].ephemeral.getPublic())).to.equal(true);
         expect(result.owner).to.equal(notes[0].owner);
         expect(result.noteHash).to.equal(notes[0].noteHash);
+        // TODO: expect(result.noteType).to.equal(notes[0].noteType);
     });
 
     it('outputCoder can decode an encoded input note', () => {
         const encoded = outputCoder.encodeInputNote(notes[0]);
-        const result = outputCoder.decodeInputNote(encoded);
+        const result = outputCoder.decodeNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
         expect(result.sigma.eq(notes[0].sigma)).to.equal(true);
         expect(result.owner).to.equal(notes[0].owner);
         expect(result.noteHash).to.equal(notes[0].noteHash);
+        // TODO: expect(result.noteType).to.equal(notes[0].noteType);
     });
 
     it('outputCoder can decode encoded input notes', () => {
