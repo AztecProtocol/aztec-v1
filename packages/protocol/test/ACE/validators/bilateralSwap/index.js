@@ -12,6 +12,7 @@ const {
     abiEncoder: { inputCoder, outputCoder, encoderFactory },
     note,
     secp256k1,
+    bn128,
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 
@@ -201,7 +202,40 @@ contract('Bilateral Swap', (accounts) => {
             }));
         });
 
-        // TODO: Does the contract throw when scalars are not mod r?
+        it.only('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
+            const noteValues = [10, 20, 10, 20];
+
+            const notes = [
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+            const senderAddress = accounts[0];
+
+            const proofConstruct = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+
+            const outputOwners = [...outputNotes.map(n => n.owner)];
+
+            // Generate scalars that NOT mod r
+            const kBarBN = new BN(proofConstruct.proofData[0][0], 16);
+            const notModRKBar = `0x${(kBarBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+
+            proofConstruct.proofData[0][0] = notModRKBar;
+
+            const proofData = inputCoder.bilateralSwap(
+                proofConstruct.proofData,
+                proofConstruct.challenge,
+                outputOwners,
+                [outputNotes[0], inputNotes[1]]
+            );
+
+
+            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
 
         it('validate failure when scalars are zero', async () => {
             const noteValues = [10, 20, 10, 20];
@@ -369,7 +403,42 @@ contract('Bilateral Swap', (accounts) => {
             }));
         });
 
-        // TODO: Does the contract throw if any group element resolves to the point at infinity?
+
+        it.only('Validate failure if a group element resolves to a point at infinity', async () => {
+            const noteValues = [10, 20, 10, 20];
+
+            const notes = [
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+            const senderAddress = accounts[0];
+
+
+            const proofConstruct = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+
+            /*
+            Need to set kBar to be the point at infinity and check failure. Point at infinity 
+            defined in projective coordinates as (0, 1, 0)
+
+            const kBarInfinity = `0x${().toString(16)}`;
+            proofConstruct.proofData[0][0] = kBarInfinity;
+            */
+
+            const proofData = inputCoder.bilateralSwap(
+                proofConstruct.proofData,
+                proofConstruct.challenge,
+                outputOwners,
+                [outputNotes[0], inputNotes[1]]
+            );
+
+            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
 
         it('Validate failure when sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
@@ -403,8 +472,7 @@ contract('Bilateral Swap', (accounts) => {
             }));
         });
 
-        it('Validate failure if challenge is not mod(GROUP_MODULUS)', async () => {
-            // TODO: check this is correct
+        it.only('Validate failure if challenge is not mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [
