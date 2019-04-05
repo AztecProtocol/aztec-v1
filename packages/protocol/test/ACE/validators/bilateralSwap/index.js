@@ -12,7 +12,6 @@ const {
     abiEncoder: { inputCoder, outputCoder, encoderFactory },
     note,
     secp256k1,
-    bn128,
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 
@@ -110,6 +109,61 @@ contract('Bilateral Swap', (accounts) => {
             });
             expect(result).to.equal(expectedOutput);
         });
+
+        it('Validate success if challenge has GROUP_MODULUS added to it', async () => {
+            const noteValues = [10, 20, 10, 20];
+
+            const notes = [
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+            const senderAddress = accounts[0];
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+
+            const challengeBN = new BN(challenge.slice(2), 16);
+            const notModRChallenge = `0x${(challengeBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const proofData = inputCoder.bilateralSwap(
+                proofDataRaw,
+                notModRChallenge,
+                noteOwners,
+                [outputNotes[0], inputNotes[1]]
+            );
+
+            const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            });
+
+            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicValue = 0;
+
+            const expectedOutput = `0x${outputCoder.encodeProofOutputs([
+                {
+                    inputNotes: [inputNotes[0]],
+                    outputNotes: [outputNotes[0]],
+                    publicOwner,
+                    publicValue,
+                    challenge: notModRChallenge,
+                },
+                {
+                    inputNotes: [outputNotes[1]],
+                    outputNotes: [inputNotes[1]],
+                    publicOwner,
+                    publicValue,
+                    challenge: `0x${padLeft(sha3(notModRChallenge).slice(2), 64)}`,
+                },
+            ]).slice(0x42)}`;
+
+            expect(result).to.equal(expectedOutput);
+        });
     });
 
     describe('failure states', () => {
@@ -202,7 +256,7 @@ contract('Bilateral Swap', (accounts) => {
             }));
         });
 
-        it.only('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
+        it('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [
@@ -218,7 +272,7 @@ contract('Bilateral Swap', (accounts) => {
             const outputOwners = [...outputNotes.map(n => n.owner)];
 
             // Generate scalars that NOT mod r
-            const kBarBN = new BN(proofConstruct.proofData[0][0], 16);
+            const kBarBN = new BN(proofConstruct.proofData[0][0].slice(2), 16);
             const notModRKBar = `0x${(kBarBN.add(constants.GROUP_MODULUS)).toString(16)}`;
 
             proofConstruct.proofData[0][0] = notModRKBar;
@@ -404,7 +458,7 @@ contract('Bilateral Swap', (accounts) => {
         });
 
 
-        it.only('Validate failure if a group element resolves to a point at infinity', async () => {
+        it('Validate failure if a group element resolves to a point at infinity', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [
@@ -462,40 +516,6 @@ contract('Bilateral Swap', (accounts) => {
             const proofData = inputCoder.bilateralSwap(
                 proofDataRaw,
                 challenge,
-                outputOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
-
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
-        });
-
-        it.only('Validate failure if challenge is not mod(GROUP_MODULUS)', async () => {
-            const noteValues = [10, 20, 10, 20];
-
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
-
-            const inputNotes = notes.slice(0, 2);
-            const outputNotes = notes.slice(2, 4);
-            const senderAddress = accounts[0];
-
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-
-
-            const challengeBN = new BN(challenge, 16);
-            const notModRChallenge = `0x${(challengeBN.add(constants.GROUP_MODULUS)).toString(16)}`;
-
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                notModRChallenge,
                 outputOwners,
                 [outputNotes[0], inputNotes[1]]
             );
