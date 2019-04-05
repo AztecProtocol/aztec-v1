@@ -151,6 +151,158 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     });
 
     // Manipulating proofData into the array format required by the smart contract verifier
+    const proofData = [];
+
+    proofDataUnformatted.forEach((proofElement) => {
+        proofData.push(...proofElement);
+    });
+
+    return {
+        proofDataUnformatted,
+        proofData,
+        challenge: `0x${padLeft(challenge.toString(16), 64)}`,
+    };
+};
+
+/**
+ * Strictly for testing purposes only. 
+ * 
+ * Construct AZTEC bilateral swap proof transcript, with additional testVariable input. 
+ * Used for testing purposes - allows the chosen variable to not be inputted into the hash
+ * used to construct the challenge
+ *
+ * @method constructProofTest
+ * @param {note[]} notes array of AZTEC notes
+ * @param {address} sender address from which the transaction is sent
+ * @param {string} testVariable variable which will not be added into the hash for the challenge,
+ * strictly for testing purposes
+ * @returns {string[]} - proof data
+ * @returns {string} - challenge
+ */
+dividendComputation.constructProofTest = (notes, za, zb, sender, testVariable) => {
+    const numNotes = 3;
+    let challenge;
+
+    // Used to check the number of input notes. Boolean argument specifies whether the 
+    // check should throw if not satisfied, or if we seek to collect all errors 
+    // and only throw at the end. Here, set to true - immediately throw if error
+    proofUtils.checkNumNotes(notes, numNotes, true);
+
+    proofUtils.parseInputs(notes, sender);
+    // Array to store bk values later
+    const bkArray = [];
+    // convert z_a and z_b into BN instances if they aren't already
+    let zaBN;
+    let zbBN;
+
+    const rollingHash = new Keccak();
+
+    if (BN.isBN(za)) {
+        zaBN = za;
+    } else {
+        zaBN = new BN(za);
+    }
+
+    if (BN.isBN(zb)) {
+        zbBN = zb;
+    } else {
+        zbBN = new BN(zb);
+    }
+    // Check that proof data lies on the bn128 curve
+    notes.forEach((note) => {
+        const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
+        const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
+
+        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
+            throw customError(
+                errorTypes.NOT_ON_CURVE,
+                {
+                    message: 'A group element is not on the bn128 curve',
+                    gammaOnCurve,
+                    sigmaOnCurve,
+                    note,
+                }
+            );
+        }
+    });
+
+    notes.forEach((note) => {
+        rollingHash.append(note.gamma);
+        rollingHash.append(note.sigma);
+    });
+
+    let x = new BN(0).toRed(groupReduction);
+    x = rollingHash.keccak(groupReduction);
+
+    const blindingFactors = notes.map((note, i) => {
+        let bk = bn128.randomGroupScalar();
+        const ba = bn128.randomGroupScalar();
+        let B;
+
+        // Calculating the blinding factors
+        if (i === 0) { // input note
+            const xbk = bk.redMul(x); // xbk = bk*x
+            const xba = ba.redMul(x); // xba = ba*x
+            x = rollingHash.keccak(groupReduction);
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            bkArray.push(bk);
+        }
+
+        if (i === 1) { // output note
+            const xbk = bk.redMul(x); // xbk = bk*x
+            const xba = ba.redMul(x); // xba = ba*x
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            x = rollingHash.keccak(groupReduction);
+            bkArray.push(bk);
+        }
+
+        if (i === 2) { // residual note
+            const zbRed = zbBN.toRed(groupReduction);
+            const zaRed = zaBN.toRed(groupReduction);
+
+            // bk_3 = (z_b)(bk_1) - (z_a)(bk_2)
+            bk = (zbRed.redMul(bkArray[0])).redSub(zaRed.redMul(bkArray[1]));
+
+            const xbk = bk.redMul(x); // xbk = bk*x
+            const xba = ba.redMul(x); // xba = ba*x
+
+            x = rollingHash.keccak(groupReduction);
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            bkArray.push(bk);
+        }
+
+        return {
+            bk,
+            ba,
+            B,
+        };
+    });
+
+    if (testVariable === 'notes') {
+        challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, blindingFactors);
+    } else if (testVariable === 'sender') {
+        challenge = proofUtils.computeChallenge(zaBN, zbBN, notes, blindingFactors);
+    } else if (testVariable === 'blindingFactors') {
+        challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes);
+    } else {
+        challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
+    }
+
+    const proofDataUnformatted = blindingFactors.map((blindingFactor, i) => {
+        const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
+        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+
+        return [
+            `0x${padLeft(kBar.toString(16), 64)}`,
+            `0x${padLeft(aBar.toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.y.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.y.fromRed().toString(16), 64)}`,
+        ];
+    });
+
+    // Manipulating proofData into the array format required by the smart contract verifier
     const proofData = [...proofDataUnformatted[0], ...proofDataUnformatted[1], ...proofDataUnformatted[2]];
     return {
         proofDataUnformatted, // this has 6 elements
@@ -158,6 +310,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
 };
+
 
 dividendComputation.encodeDividendComputationTransaction = ({
     inputNotes,
