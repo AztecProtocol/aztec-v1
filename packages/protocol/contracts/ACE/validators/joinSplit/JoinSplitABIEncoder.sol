@@ -16,7 +16,6 @@ library JoinSplitABIEncoder {
     // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
     bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
         0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
-        // 0x904692743a9f431a791d777dd8d42e18e79888579fa6807b5f17b14020210e30;
 
     /**
      * Calldata map

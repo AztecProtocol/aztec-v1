@@ -145,7 +145,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
             await Promise.all([0, 1].map((i) => {
                 // eslint-disable-next-line no-unused-vars
-                const { signature } = signNote(
+                const { signature, encodedTypedData } = signNote(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,

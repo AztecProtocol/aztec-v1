@@ -62,7 +62,7 @@ contract LibEIP712 {
         // keccak256(abi.encodePacked(
         //     EIP191_HEADER,
         //     EIP712_DOMAIN_HASH,
-        //     hashStruct    
+        //     hashStruct
         // ));
 
         assembly {
@@ -79,6 +79,40 @@ contract LibEIP712 {
         }
     }
 
+    // /// @dev Extracts the address of the signer with ECDSA.
+    // /// @param _message The EIP712 message.
+    // /// @param _signature The ECDSA values, v, r and s.
+    // /// @return The address of the message signer.
+    // function recoverSignature(
+    //     bytes32 _message,
+    //     bytes memory _signature
+    // ) internal view returns (address _signer) {
+    //     bool result;
+    //     uint8 v;
+    //     bytes32 r;
+    //     bytes32 s;
+    //     assembly {
+    //         v := mload(add(_signature, 0x20))
+    //         r := mload(add(_signature, 0x40))
+    //         s := mload(add(_signature, 0x60))
+    //         let memPtr := mload(0x40)
+    //         mstore(memPtr, _message)
+    //         mstore(add(memPtr, 0x20), v)
+    //         mstore(add(memPtr, 0x40), r)
+    //         mstore(add(memPtr, 0x60), s)
+    //         result := and(
+    //             and(
+    //                 eq(mload(_signature), 0x60),
+    //                 or(eq(v, 27), eq(v, 28))
+    //             ),
+    //             staticcall(gas, 0x01, memPtr, 0x80, memPtr, 0x20)
+    //         )
+    //         _signer := mload(memPtr)
+    //     }
+    //     require(result, "signature recovery failed");
+    //     require(_signer != address(0), "signer address cannot be 0");
+    // }
+
     /// @dev Extracts the address of the signer with ECDSA.
     /// @param _message The EIP712 message.
     /// @param _signature The ECDSA values, v, r and s.
@@ -86,7 +120,7 @@ contract LibEIP712 {
     function recoverSignature(
         bytes32 _message,
         bytes memory _signature
-    ) internal view returns (address signer) {
+    ) internal  returns (address _signer) {
         bool result;
         assembly {
             // Here's a little trick we can pull. We expect `_signature` to be a byte array, of length 0x60, with
@@ -112,14 +146,17 @@ contract LibEIP712 {
                 // validate call to precompile succeeds
                 staticcall(gas, 0x01, _signature, 0x80, _signature, 0x20)
             )
-            signer := mload(_signature) // load signing address
+            _signer := mload(_signature) // load signing address
             mstore(_signature, byteLength) // and put the byte length back where it belongs
         }
         // wrap failure states in a single if test, so that happy path only has 1 conditional jump
-        if (!(result && (signer == address(0x0)))) {
-            require(signer != address(0), "signer address cannot be 0");
+        if (!(result && (_signer == address(0x0)))) {
+            emit DebugSigner(_signer);
+            require(_signer != address(0x0), "signer address cannot be 0");
             require(result, "signature recovery failed");
         }
     }
+
+    event DebugSigner(address signer);
 }
 

@@ -1,5 +1,4 @@
-/* global: describe, after: true */
-
+/* global after: true */
 
 after('generate coverage report', async () => {
     if (process.env.MODE === 'coverage') {
