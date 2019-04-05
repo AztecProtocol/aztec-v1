@@ -80,10 +80,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
     } else {
         kPublicBn = new BN(kPublic);
     }
-    // proofUtils.parseInputs(notes, sender, m, kPublicBn);
-
-    console.log('notes length: ', notes.length);
-    console.log('notes: ', notes[1]);
+    proofUtils.parseInputs(notes, sender, m, kPublicBn);
 
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
