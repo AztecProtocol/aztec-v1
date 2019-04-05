@@ -200,7 +200,7 @@ contract('ZkAssetOwnable', (accounts) => {
                     true,
                     concatenatedSignature
                 ),
-                'only unspent notes can be approved'
+                'expected note to exist'
             );
         });
 

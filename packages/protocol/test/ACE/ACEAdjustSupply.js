@@ -16,9 +16,9 @@ const { outputCoder } = abiEncoder;
 const ACE = artifacts.require('./contracts/ACE/ACE');
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
+const JoinSplitInterface = artifacts.require('./contracts/interfaces/JoinSplitInterface');
 const AdjustSupply = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupplyInterface');
+const AdjustSupplyInterface = artifacts.require('./contracts/interfaces/AdjustSupplyInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 AdjustSupply.abi = AdjustSupplyInterface.abi;
@@ -160,7 +160,6 @@ contract('ACE mint and burn functionality', (accounts) => {
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
-
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
             notes = aztecAccounts.map(({ publicKey }, i) => {
@@ -196,7 +195,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             });
         });
 
-        it('validate failure when attempting to transfer greater minted balance than linked token balance', async () => {
+        it('should validate failure when attempting to transfer greater minted balance than linked token balance', async () => {
             const kPublic = 50; // kPublic is one greater than linked token balance
             const tokensTransferred = new BN(49);
             const publicOwner = accounts[1];
@@ -246,10 +245,10 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(aceReceipt.status).to.equal(true);
 
             const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput));
+            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
         });
 
-        it('validate failure if trying to convert value when the asset is NOT convertible', async () => {
+        it('should validate failure if trying to convert value when the asset is NOT convertible', async () => {
             const kPublic = 50; // kPublic is one greater than linked token balance
             const tokensTransferred = new BN(50);
             const publicOwner = accounts[1];
@@ -299,10 +298,10 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(aceReceipt.status).to.equal(true);
 
             const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput));
+            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
         });
 
-        it('validate failure if user has not approved ACE to extract tokens', async () => {
+        it('should validate failure if user has not approved ACE to extract tokens', async () => {
             const kPublic = 50;
             const tokensTransferred = new BN(50);
             const publicOwner = accounts[1];
@@ -348,7 +347,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(aceReceipt.status).to.equal(true);
 
             const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, accounts[0], formattedProofOutput));
+            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
         });
     });
 });

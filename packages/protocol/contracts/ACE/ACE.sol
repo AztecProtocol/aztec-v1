@@ -96,14 +96,12 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         ,
         ) = _proofOutputs.get(0).extractProofOutput();
 
-    
         // Check the previous confidentialTotalSupply, and then assign the new one
         (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
 
         require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total minted note does not match");
         (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
         registry.confidentialTotalMinted = newTotalNoteHash;
-
 
         // Dealing with minted notes
         (,
@@ -154,18 +152,15 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
         registry.confidentialTotalBurned = newTotalNoteHash;
 
-
         // Dealing with burned notes
         (,
         bytes memory burnedNotes,
         ,) = _proofOutputs.get(1).extractProofOutput();
 
-
         // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
         updateInputNotes(burnedNotes);
         return(_proofOutputs);
     }
-    event Debug(bytes32 _proofHash, bytes32 _validatedProofHash, uint24 _proof);
 
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
@@ -183,11 +178,8 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     * Unnamed param is the AZTEC zero-knowledge proof data
     * @return a `bytes proofOutputs` variable formatted according to the Cryptography Engine standard
     */
-    function validateProof(
-        uint24 _proof,
-        address _sender,
-        bytes calldata
-    ) external returns (bytes memory) {
+    function validateProof(uint24 _proof, address _sender, bytes calldata) external returns (bytes memory) {
+        require(_proof != 0, "expected the proof to be valid");
         // validate that the provided _proof object maps to a corresponding validator and also that
         // the validator is not disabled
         address validatorAddress = getValidatorAddress(_proof);
@@ -215,14 +207,13 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             calldatacopy(destination, proofDataLocation, proofDataSize)
             // call our validator smart contract, and validate the call succeeded
             let callSize := add(proofDataSize, 0x104)
-            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00) 
+            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00)
             case 0 {
                 mstore(0x00, 400) revert(0x00, 0x20) // call failed because proof is invalid
             }
 
             // copy returndata to memory
             returndatacopy(memPtr, 0x00, returndatasize)
-
             // store the proof outputs in memory
             mstore(0x40, add(memPtr, returndatasize))
             // the first evm word in the memory pointer is the abi encoded location of the actual returned data
@@ -235,10 +226,9 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             for (uint256 i = 0; i < length; i += 1) {
                 bytes32 proofHash = keccak256(proofOutputs.get(i));
                 bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
-                emit Debug(proofHash, validatedProofHash, _proof);
                 validatedProofs[validatedProofHash] = true;
             }
-        } 
+        }
         return proofOutputs;
     }
 
@@ -283,7 +273,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     function invalidateProof(uint24 _proof) public {
         require(isOwner(), "only the owner can invalidate a proof");
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-        require(validators[epoch][category][id] != address(0x0), "can only invalidate proofs that exist!");
+        require(validators[epoch][category][id] != address(0x0), "can only invalidate proofs that exist");
         disabledValidators[epoch][category][id] = true;
     }
 
@@ -300,7 +290,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         uint24 _proof,
         bytes32 _proofHash,
         address _sender
-    ) public view returns (bool) {        
+    ) public view returns (bool) {
         // We need create a unique encoding of _proof, _proofHash and _sender,
         // and use as a key to access validatedProofs
         // We do this by computing bytes32 validatedProofHash = keccak256(ABI.encode(_proof, _proofHash, _sender))
@@ -356,7 +346,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             validatedProofHash := keccak256(0x00, 0x60)
             mstore(0x40, memPtr) // restore the free memory pointer
         }
-        require(isValidatorDisabled == false, "this proof id has been invalidated!");
+        require(isValidatorDisabled == false, "proof id has been invalidated");
         return validatedProofs[validatedProofHash];
     }
 
@@ -371,6 +361,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         address _validatorAddress
     ) public {
         require(isOwner(), "only the owner can set a proof");
+        require(_validatorAddress != address(0x0), "expected the validator address to exist");
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
         require(epoch <= latestEpoch, "the proof epoch cannot be bigger than the latest epoch");
         require(validators[epoch][category][id] == address(0x0), "existing proofs cannot be modified");
@@ -395,7 +386,6 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     function getCommonReferenceString() public view returns (bytes32[6] memory) {
         return commonReferenceString;
     }
-
 
     function getValidatorAddress(uint24 _proof) public view returns (address validatorAddress) {
         bool isValidatorDisabled;
