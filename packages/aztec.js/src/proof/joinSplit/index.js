@@ -18,7 +18,6 @@ const sign = require('../../sign');
 
 const { outputCoder, inputCoder } = abiEncoder;
 const { groupReduction } = bn128;
-const joinSplitEncode = inputCoder.joinSplit;
 
 const joinSplit = {};
 joinSplit.extractor = extractor;
@@ -81,7 +80,10 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
     } else {
         kPublicBn = new BN(kPublic);
     }
-    proofUtils.parseInputs(notes, sender, m, kPublicBn);
+    // proofUtils.parseInputs(notes, sender, m, kPublicBn);
+
+    console.log('notes length: ', notes.length);
+    console.log('notes: ', notes[1]);
 
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
@@ -222,6 +224,191 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
 };
 
 /**
+ * For testing purposes - used to test putting different combinations of variables
+ * into the computeChallenge() method
+ *
+ * @method constructJoinSplitModifiedTest
+ * @memberof module:joinSplit
+ * @param {Object[]} notes array of AZTEC notes
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ * @returns {Object} proof data and challenge
+ */
+joinSplit.constructJoinSplitModifiedTest = (notes, m, sender, kPublic, publicOwner, testVariable) => {
+    // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
+    const rollingHash = new Keccak();
+
+    let kPublicBn;
+    if (BN.isBN(kPublic)) {
+        kPublicBn = kPublic;
+    } else if (kPublic < 0) {
+        kPublicBn = bn128.curve.n.sub(new BN(-kPublic));
+    } else {
+        kPublicBn = new BN(kPublic);
+    }
+    proofUtils.parseInputs(notes, sender, m, kPublicBn);
+
+    notes.forEach((note) => {
+        rollingHash.append(note.gamma);
+        rollingHash.append(note.sigma);
+    });
+
+    // define 'running' blinding factor for the k-parameter in final note
+    let runningBk = new BN(0).toRed(groupReduction);
+
+    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
+
+    const blindingFactors = notes.map((note, i) => {
+        let B;
+        let x = new BN(0).toRed(groupReduction);
+        const { bk, ba } = blindingScalars[i];
+        if ((i + 1) > m) {
+            // get next iteration of our rolling hash
+            x = rollingHash.keccak(groupReduction);
+            const xbk = bk.redMul(x);
+            const xba = ba.redMul(x);
+            runningBk = runningBk.redSub(bk);
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+        } else {
+            runningBk = runningBk.redAdd(bk);
+            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+        }
+        return {
+            bk,
+            ba,
+            B,
+            x,
+        };
+    });
+
+    let challenge;
+
+    if (testVariable === 'sender') {
+        challenge = proofUtils.computeChallenge(kPublicBn, m, publicOwner, notes, blindingFactors);
+    } else if (testVariable === 'notes') {
+        challenge = proofUtils.computeChallenge(sender, kPublicBn, m, publicOwner, blindingFactors);
+    } else if (testVariable === 'blindingFactors') {
+        challenge = proofUtils.computeChallenge(sender, kPublicBn, m, publicOwner, notes);
+    } else {
+        challenge = proofUtils.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
+    }
+
+    const proofData = blindingFactors.map((blindingFactor, i) => {
+        let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
+        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+        if (i === (notes.length - 1)) {
+            kBar = kPublicBn;
+        }
+        return [
+            `0x${padLeft(kBar.toString(16), 64)}`,
+            `0x${padLeft(aBar.toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.y.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.y.fromRed().toString(16), 64)}`,
+        ];
+    });
+    return {
+        proofData,
+        challenge: `0x${padLeft(challenge.toString(16), 64)}`,
+    };
+};
+
+/**
+ * Construct AZTEC join-split proof transcript
+ *
+ * @method constructProofTest
+ * @memberof module:joinSplit
+ * @param {Object[]} notes array of AZTEC notes
+ * @param {number} m number of input notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @param {string} kPublic public commitment being added to proof
+ * @param {string} testVariable public commitment being added to proof
+
+ * @returns {Object} proof data and challenge
+ */
+joinSplit.constructProofTest = (notes, m, sender, kPublic, testVariable) => {
+    // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
+    const rollingHash = new Keccak();
+    // convert kPublic into a BN instance if it is not one
+    let kPublicBn;
+    if (BN.isBN(kPublic)) {
+        kPublicBn = kPublic;
+    } else if (kPublic < 0) {
+        kPublicBn = bn128.curve.n.sub(new BN(-kPublic));
+    } else {
+        kPublicBn = new BN(kPublic);
+    }
+    proofUtils.parseInputs(notes, sender, m, kPublicBn);
+
+    notes.forEach((note) => {
+        rollingHash.append(note.gamma);
+        rollingHash.append(note.sigma);
+    });
+
+    // define 'running' blinding factor for the k-parameter in final note
+    let runningBk = new BN(0).toRed(groupReduction);
+
+    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
+
+    const blindingFactors = notes.map((note, i) => {
+        let B;
+        let x = new BN(0).toRed(groupReduction);
+        const { bk, ba } = blindingScalars[i];
+        if ((i + 1) > m) {
+            // get next iteration of our rolling hash
+            x = rollingHash.keccak(groupReduction);
+            const xbk = bk.redMul(x);
+            const xba = ba.redMul(x);
+            runningBk = runningBk.redSub(bk);
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+        } else {
+            runningBk = runningBk.redAdd(bk);
+            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+        }
+        return {
+            bk,
+            ba,
+            B,
+            x,
+        };
+    });
+
+    let challenge;
+
+    if (testVariable === 'sender') {
+        challenge = proofUtils.computeChallenge(kPublicBn, m, notes, blindingFactors);
+    } else if (testVariable === 'notes') {
+        challenge = proofUtils.computeChallenge(sender, kPublicBn, m, blindingFactors);
+    } else if (testVariable === 'blindingFactors') {
+        challenge = proofUtils.computeChallenge(sender, kPublicBn, m, notes);
+    } else {
+        challenge = proofUtils.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
+    }
+
+    const proofData = blindingFactors.map((blindingFactor, i) => {
+        let kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
+        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+        if (i === (notes.length - 1)) {
+            kBar = kPublicBn;
+        }
+        return [
+            `0x${padLeft(kBar.toString(16), 64)}`,
+            `0x${padLeft(aBar.toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].gamma.y.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.x.fromRed().toString(16), 64)}`,
+            `0x${padLeft(notes[i].sigma.y.fromRed().toString(16), 64)}`,
+        ];
+    });
+    return {
+        proofData,
+        challenge: `0x${padLeft(challenge.toString(16), 64)}`,
+    };
+};
+
+/**
  * Encode a join split transaction
  * 
  * @method encodeJoinSplitTransaction
@@ -266,7 +453,7 @@ joinSplit.encodeJoinSplitTransaction = ({
     });
 
     const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = joinSplitEncode(
+    const proofData = inputCoder.joinSplit(
         proofDataRaw,
         m,
         challenge,
