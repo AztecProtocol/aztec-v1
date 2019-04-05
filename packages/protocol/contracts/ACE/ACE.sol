@@ -26,9 +26,9 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
     using SafeMath for uint256;
     using SafeMath8 for uint8;
 
-    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32[4] note,uint256 challenge,address sender)"
+    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
     bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
-        0x904692743a9f431a791d777dd8d42e18e79888579fa6807b5f17b14020210e30;
+        0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
 
     event SetCommonReferenceString(bytes32[6] _commonReferenceString);
     event SetProof(
