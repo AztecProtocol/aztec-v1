@@ -21,15 +21,17 @@ JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAsset', (accounts) => {
     describe('success states', () => {
-        let aztecAccounts = [];
-        let notes = [];
         let ace;
-        let erc20;
-        let zkAsset;
-        let scalingFactor;
+        let aztecAccounts = [];
         let aztecJoinSplit;
+        const canAdjustSupply = false;
+        const canConvert = true;
+        let erc20;
+        let notes = [];
         const proofs = [];
+        let scalingFactor;
         const tokensTransferred = new BN(100000);
+        let zkAsset;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -97,19 +99,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: aztecJoinSplit.address,
             });
 
-            const proofOutputs = proofs.map(({ expectedOutput }) => {
-                return outputCoder.getProofOutput(expectedOutput, 0);
-            });
-            const proofHashes = proofOutputs.map((proofOutput) => {
-                return outputCoder.hashProofOutput(proofOutput);
-            });
-
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
-
-            const canAdjustSupply = false;
-            const canConvert = true;
-
             zkAsset = await ZkAsset.new(
                 ace.address,
                 erc20.address,
@@ -134,6 +125,14 @@ contract('ZkAsset', (accounts) => {
                     opts
                 );
             }));
+
+            const proofOutputs = proofs.map(({ expectedOutput }) => {
+                return outputCoder.getProofOutput(expectedOutput, 0);
+            });
+            const proofHashes = proofOutputs.map((proofOutput) => {
+                return outputCoder.hashProofOutput(proofOutput);
+            });
+
             await ace.publicApprove(
                 zkAsset.address,
                 proofHashes[0],

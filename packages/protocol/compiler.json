@@ -1,5 +1,5 @@
 {
   "artifactsDir": "./artifacts",
   "contractsDir": "./contracts",
-  "solcVersion": "0.5.6"
+  "solcVersion": "0.5.7"
 }
