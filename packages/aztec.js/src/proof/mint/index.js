@@ -86,4 +86,21 @@ mint.constructProof = (notes, sender) => {
     return { proofData, challenge };
 };
 
+mint.constructProofTest = (notes, sender, testVariable) => {
+    const m = 1;
+    const kPublic = 0;
+    let notesArray;
+
+    if (!Array.isArray(notes)) {
+        notesArray = [notes];
+    } else {
+        notesArray = notes;
+    }
+
+    proofUtils.parseInputs(notesArray, sender);
+    const { proofData, challenge } = joinSplit.constructProofTest(notesArray, m, sender, kPublic, testVariable);
+
+    return { proofData, challenge };
+};
+
 module.exports = mint;

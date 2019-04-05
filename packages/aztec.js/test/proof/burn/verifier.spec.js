@@ -20,7 +20,7 @@ const { expect } = chai;
 
 describe('Burn proof verification tests', () => {
     describe('success states', () => {
-        it('proof.constructProof creates a valid join-split proof', () => {
+        it('proof.constructProof creates a valid burn proof', () => {
             const newTotalBurned = 50;
             const oldTotalBurned = 30;
             const burnOne = 10;

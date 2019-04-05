@@ -6,7 +6,7 @@ import "../../../libs/LibEIP712.sol";
 
 /**
  * @title Library to validate AZTEC zero-knowledge proofs
- * @author Zachary Williamson, AZTEC
+ * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
@@ -14,10 +14,6 @@ import "../../../libs/LibEIP712.sol";
  * External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no
  * storage and makes no external calls (other than to precompiles)
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
- * We will be releasing AZTEC as an open-source protocol that provides efficient transaction privacy for Ethereum.
- * Our full vision of the protocol includes confidential cross-asset interactions via our
- * family of AZTEC zero-knowledge proofs
- * and the AZTEC token standard, stay tuned for updates!
  **/
 contract AdjustSupply is LibEIP712 {
     /**
