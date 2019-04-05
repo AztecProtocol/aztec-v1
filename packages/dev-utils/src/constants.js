@@ -114,26 +114,22 @@ constants.addresses = {
 /**
  * Domains, schemas and signature related to EIP712
  */
+const EIP712_DOMAIN = [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'verifyingContract', type: 'address' },
+];
+
+// keccak256 hash of "EIP712Domain(string name,string version,address verifyingContract)"
+const EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = '0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766';
+
+// keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
+const JOIN_SPLIT_SIGNATURE_TYPE_HASH = '0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462';
+
 constants.eip712 = {
     ACE_DOMAIN_PARAMS: {
         name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
         version: '1',
-    },
-    JOIN_SPLIT_SIGNATURE: {
-        types: {
-            JoinSplitSignature: [
-                { name: 'proof', type: 'uint24' },
-                { name: 'noteHash', type: 'bytes32' },
-                { name: 'challenge', type: 'uint256' },
-                { name: 'sender', type: 'address' },
-            ],
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
-        },
-        primaryType: 'JoinSplitSignature',
     },
     AZTEC_RINKEBY_DOMAIN_PARAMS: {
         name: 'AZTEC_RINKEBY_DOMAIN',
@@ -145,6 +141,21 @@ constants.eip712 = {
         version: '1',
         salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
     },
+    EIP712_DOMAIN,
+    EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
+    JOIN_SPLIT_SIGNATURE: {
+        types: {
+            JoinSplitSignature: [
+                { name: 'proof', type: 'uint24' },
+                { name: 'noteHash', type: 'bytes32' },
+                { name: 'challenge', type: 'uint256' },
+                { name: 'sender', type: 'address' },
+            ],
+            EIP712Domain: EIP712_DOMAIN,
+        },
+        primaryType: 'JoinSplitSignature',
+    },
+    JOIN_SPLIT_SIGNATURE_TYPE_HASH,
     NOTE_SIGNATURE: {
         types: {
             NoteSignature: [
@@ -152,11 +163,7 @@ constants.eip712 = {
                 { name: 'spender', type: 'address' },
                 { name: 'status', type: 'bool' },
             ],
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
+            EIP712Domain: EIP712_DOMAIN,
         },
         primaryType: 'NoteSignature',
     },
