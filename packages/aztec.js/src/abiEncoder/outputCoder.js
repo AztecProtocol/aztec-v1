@@ -51,7 +51,6 @@ outputCoder.decodeNote = (note) => {
     };
 };
 
-
 /**
  * Decode an array of notes
  *
@@ -123,7 +122,7 @@ outputCoder.decodeProofOutputs = (proofOutputsHex) => {
  * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
  * proofOutput objects
  * @param {Number} i - index to the particular proofOutput the user wishes to select
- * @returns {string} selected proofOutput object extracted from proofOutputsHec
+ * @returns {string} selected proofOutput object extracted from proofOutputsHex
  */
 outputCoder.getProofOutput = (proofOutputsHex, i) => {
     const proofOutputs = proofOutputsHex.slice(2);
@@ -132,6 +131,54 @@ outputCoder.getProofOutput = (proofOutputsHex, i) => {
     return proofOutputs.slice((offset * 2) - 0x40, (offset * 2) + (length * 2));
 };
 
+/**
+ * Extract the note from a bytes notes string
+ * 
+ * @method getNote
+ * @param {string} notes - bytes notes string
+ * @param {Number} i - index to the particular note the user wishes to select
+ * @returns {string} bytes selected note string
+ */
+outputCoder.getNote = (notes, i) => {
+    const noteOffset = 2 * parseInt(notes.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
+    const length = 2 * parseInt(notes.slice(noteOffset, noteOffset + 0x40), 16);
+    // Add 0x40 because the length itself has to be included
+    return notes.slice(noteOffset, noteOffset + 0x40 + length);
+};
+
+/**
+ * Extract the the input notes from a proof output
+ * 
+ * @method getInputNotes
+ * @param {string} proofOutput - the particular proofOutput the user wishes to select
+ * @returns (string) input notes extracted from proofOutput
+ */
+outputCoder.getInputNotes = (proofOutput) => {
+    const inputNotesOffset = 2 * parseInt(proofOutput.slice(0x40, 0x80), 16);
+    const length = 2 * parseInt(proofOutput.slice(inputNotesOffset, inputNotesOffset + 0x40), 16);
+    if (length > 0x0) {
+        const inputNotes = proofOutput.slice(inputNotesOffset, inputNotesOffset + 0x40 + length);
+        return inputNotes;
+    }
+    return padLeft('0x0', 64);
+};
+
+/**
+ * Extract the the input notes from a proof output
+ * 
+ * @method getOutputNotes
+ * @param {string} proofOutput - the particular proofOutput the user wishes to select
+ * @returns (string) output notes extracted from proofOutput
+ */
+outputCoder.getOutputNotes = (proofOutput) => {
+    const outputNotesOffset = 2 * parseInt(proofOutput.slice(0x80, 0xc0), 16);
+    const length = 2 * parseInt(proofOutput.slice(outputNotesOffset, outputNotesOffset + 0x40), 16);
+    if (length > 0x0) {
+        const inputNotes = proofOutput.slice(outputNotesOffset, outputNotesOffset + 0x40 + length);
+        return inputNotes;
+    }
+    return padLeft('0x0', 64);
+};
 
 /**
  * Decode a bytes proofOutputs object into the constituent variables of each
