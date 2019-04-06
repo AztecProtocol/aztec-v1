@@ -7,7 +7,6 @@ import "./NoteRegistry.sol";
 
 import "../interfaces/IAZTEC.sol";
 
-import "../libs/IntegerUtils.sol";
 import "../libs/NoteUtils.sol";
 import "../libs/ProofUtils.sol";
 import "../libs/SafeMath8.sol";
@@ -20,7 +19,6 @@ import "../libs/SafeMath8.sol";
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ACE is IAZTEC, Ownable, NoteRegistry {
-    using IntegerUtils for uint256;
     using NoteUtils for bytes;
     using ProofUtils for uint24;
     using SafeMath for uint256;

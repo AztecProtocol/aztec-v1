@@ -4,7 +4,6 @@ import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "../interfaces/IAZTEC.sol";
-import "../libs/IntegerUtils.sol";
 import "../libs/NoteUtils.sol";
 import "../libs/ProofUtils.sol";
 
@@ -19,7 +18,6 @@ import "../libs/ProofUtils.sol";
 contract NoteRegistry is IAZTEC {
     using NoteUtils for bytes;
     using SafeMath for uint256;
-    using IntegerUtils for uint256;
     using ProofUtils for uint24;
 
     /**

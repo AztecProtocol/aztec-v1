@@ -2,6 +2,11 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "./LibEIP712.sol";
 
+/**
+ * @title Library of EIP712 utility constants and functions
+ * @author AZTEC
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
 contract LibEIP712Test is LibEIP712 {
 
     /// @dev Calculates EIP712 encoding for a hash struct in this EIP712 Domain.

@@ -110,10 +110,6 @@ NoteUtils.extractNote = 344
 
 These are all fairly optimized, perhaps we can make finer-grained methods that return specific variables (instead of 'extractNote', 'extractProofOutput') that might help a bit.  
 
-### IntegerUtils.toBytes5  
-
-Total: 140
-
 ### SafeMath  
 
 SafeMath.sub: 225  
