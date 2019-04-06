@@ -10,13 +10,15 @@ const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
 
 const {
     bn128,
-    proof: { joinSplit },
+    proof: { joinSplit, proofUtils },
     sign,
     abiEncoder: { outputCoder, inputCoder, encoderFactory },
     note,
     secp256k1,
+    keccak,
 } = require('aztec.js');
 
+const Keccak = keccak;
 // ### Artifacts
 const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
@@ -699,14 +701,35 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const testVariable = 'kPublic';
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const kPublicBN = new BN(kPublic);
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, m, publicOwner, notes, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = joinSplit.constructJoinSplitModifiedTest(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner, testVariable
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
             );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -823,14 +846,34 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const testVariable = 'publicOwner';
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const kPublicBN = new BN(kPublic);
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, m, notes, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = joinSplit.constructJoinSplitModifiedTest(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner, testVariable
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
             );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -882,14 +925,35 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const testVariable = 'm';
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const kPublicBN = new BN(kPublic);
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, publicOwner, notes, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = joinSplit.constructJoinSplitModifiedTest(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner, testVariable
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
             );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -1205,14 +1269,35 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const testVariable = 'sender';
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const kPublicBN = new BN(kPublic);
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(kPublicBN, m, publicOwner, notes, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = joinSplit.constructJoinSplitModifiedTest(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner, testVariable
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
             );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -1264,14 +1349,35 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const testVariable = 'notes';
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const kPublicBN = new BN(kPublic);
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, m, publicOwner, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = joinSplit.constructJoinSplitModifiedTest(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner, testVariable
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
             );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -1323,15 +1429,35 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const testVariable = 'blindingFactors';
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const kPublicBN = new BN(kPublic);
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, m, publicOwner, notes);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = joinSplit.constructJoinSplitModifiedTest(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner, testVariable
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
             );
 
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;

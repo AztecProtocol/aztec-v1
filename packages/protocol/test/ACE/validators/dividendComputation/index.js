@@ -13,8 +13,11 @@ const {
     note,
     secp256k1,
     bn128,
+    keccak,
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+
+const Keccak = keccak;
 
 
 // ### Artifacts
@@ -64,6 +67,7 @@ contract('Dividend Computation', (accounts) => {
             const decoded = outputCoder.decodeProofOutputs(
                 `0x${padLeft('0', 64)}${result.slice(2)}`
             );
+
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
@@ -587,16 +591,32 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const testVariable = 'sender';
+            const zaBN = new BN(za);
+            const zbBN = new BN(zb);
+
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const localConstructBlindingFactors = dividendComputation.constructBlindingFactors;
+            const blindingFactors = dividendComputation.constructBlindingFactors(notes, zaBN, zbBN, rollingHash);
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(zaBN, zbBN, notes, blindingFactors);
+            dividendComputation.constructBlindingFactors = () => blindingFactors;
+
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = dividendComputation.constructProofTest([...inputNotes, ...outputNotes],
+            } = dividendComputation.constructProof([...inputNotes, ...outputNotes],
                 za,
                 zb,
-                senderAddress,
-                testVariable);
+                senderAddress);
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            dividendComputation.constructBlindingFactors = localConstructBlindingFactors;
 
             const outputOwners = outputNotes.map(n => n.owner);
             const inputOwners = inputNotes.map(n => n.owner);
@@ -620,7 +640,7 @@ contract('Dividend Computation', (accounts) => {
             }));
         });
 
-        it('Validate failure when za address NOT integrated into challenge variable', async () => {
+        it('Validate failure when za NOT integrated into challenge variable', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -635,16 +655,31 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const testVariable = 'za';
+            const zaBN = new BN(za);
+            const zbBN = new BN(zb);
+
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const localConstructBlindingFactors = dividendComputation.constructBlindingFactors;
+            const blindingFactors = dividendComputation.constructBlindingFactors(notes, zaBN, zbBN, rollingHash);
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, zbBN, notes, blindingFactors);
+            dividendComputation.constructBlindingFactors = () => blindingFactors;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = dividendComputation.constructProofTest([...inputNotes, ...outputNotes],
+            } = dividendComputation.constructProof([...inputNotes, ...outputNotes],
                 za,
                 zb,
-                senderAddress,
-                testVariable);
+                senderAddress);
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            dividendComputation.constructBlindingFactors = localConstructBlindingFactors;
 
             const outputOwners = outputNotes.map(n => n.owner);
             const inputOwners = inputNotes.map(n => n.owner);
@@ -668,7 +703,7 @@ contract('Dividend Computation', (accounts) => {
             }));
         });
 
-        it('Validate failure when zb address NOT integrated into challenge variable', async () => {
+        it('Validate failure when zb NOT integrated into challenge variable', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -683,16 +718,30 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const testVariable = 'zb';
+            const zaBN = new BN(za);
+            const zbBN = new BN(zb);
+
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+            const localConstructBlindingFactors = dividendComputation.constructBlindingFactors;
+            const blindingFactors = dividendComputation.constructBlindingFactors(notes, zaBN, zbBN, rollingHash);
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, zaBN, notes, blindingFactors);
+            dividendComputation.constructBlindingFactors = () => blindingFactors;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = dividendComputation.constructProofTest([...inputNotes, ...outputNotes],
+            } = dividendComputation.constructProof([...inputNotes, ...outputNotes],
                 za,
                 zb,
-                senderAddress,
-                testVariable);
+                senderAddress);
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            dividendComputation.constructBlindingFactors = localConstructBlindingFactors;
 
             const outputOwners = outputNotes.map(n => n.owner);
             const inputOwners = inputNotes.map(n => n.owner);
@@ -730,18 +779,31 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const testVariable = 'notes';
+            const zaBN = new BN(za);
+            const zbBN = new BN(zb);
+
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const localConstructBlindingFactors = dividendComputation.constructBlindingFactors;
+            const blindingFactors = dividendComputation.constructBlindingFactors(notes, zaBN, zbBN, rollingHash);
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, zaBN, zbBN, blindingFactors);
+            dividendComputation.constructBlindingFactors = () => blindingFactors;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = dividendComputation.constructProofTest(
-                [...inputNotes, ...outputNotes],
+            } = dividendComputation.constructProof([...inputNotes, ...outputNotes],
                 za,
                 zb,
-                senderAddress,
-                testVariable
-            );
+                senderAddress);
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            dividendComputation.constructBlindingFactors = localConstructBlindingFactors;
 
             const outputOwners = outputNotes.map(n => n.owner);
             const inputOwners = inputNotes.map(n => n.owner);
@@ -779,18 +841,31 @@ contract('Dividend Computation', (accounts) => {
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
 
-            const testVariable = 'blindingFactors';
+            const zaBN = new BN(za);
+            const zbBN = new BN(zb);
+
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const localConstructBlindingFactors = dividendComputation.constructBlindingFactors;
+            const blindingFactors = dividendComputation.constructBlindingFactors(notes, zaBN, zbBN, rollingHash);
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, zaBN, zbBN, notes);
+            dividendComputation.constructBlindingFactors = () => blindingFactors;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = dividendComputation.constructProofTest(
-                [...inputNotes, ...outputNotes],
+            } = dividendComputation.constructProof([...inputNotes, ...outputNotes],
                 za,
                 zb,
-                senderAddress,
-                testVariable
-            );
+                senderAddress);
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            dividendComputation.constructBlindingFactors = localConstructBlindingFactors;
 
             const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12),
                 proofDataRaw.slice(12, 18)]);

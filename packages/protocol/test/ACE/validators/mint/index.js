@@ -1,19 +1,23 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
+const sinon = require('sinon');
 const BN = require('bn.js');
 const { sha3, padLeft } = require('web3-utils');
 
 const {
     secp256k1,
     note,
-    proof: { mint },
+    proof: { mint, proofUtils, joinSplit },
     abiEncoder: { outputCoder, inputCoder, encoderFactory },
     bn128,
+    keccak,
 } = require('aztec.js');
 
 const { constants } = require('@aztec/dev-utils');
 const crypto = require('crypto');
 const truffleAssert = require('truffle-assertions');
+
+const Keccak = keccak;
 
 
 // ### Artifacts
@@ -370,6 +374,38 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
             ));
         });
 
+        it('Validate failure for no notes', async () => {
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+            const senderAddress = aztecAccounts[0].address;
+
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = mint.constructProof([], senderAddress);
+
+            const outputNotes = [];
+
+            const inputOwners = [];
+            const outputOwners = [];
+
+            const proofData = inputCoder.mint(
+                proofDataRaw,
+                challenge,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+
+            parseInputs.restore();
+        });
+
         it('validate failure when points not on curve', async () => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = `${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}`;
@@ -686,18 +722,39 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
             const inputNotes = [newTotalMinted];
             const outputNotes = [oldTotalMinted, ...adjustedNotes];
 
-            const testVariable = 'sender';
+            const m = 1;
+            const kPublic = 0;
+            const kPublicBN = new BN(kPublic);
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(kPublicBN, m, notes, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = mint.constructProofTest(
-                [newTotalMinted, oldTotalMinted, ...adjustedNotes],
-                senderAddress,
-                testVariable
+            } = mint.constructProof(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
             );
 
-            const inputOwners = inputNotes.map(m => m.owner);
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
+
+            const inputOwners = inputNotes.map(n => n.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
             const proofData = inputCoder.mint(
@@ -737,18 +794,39 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
             const inputNotes = [newTotalMinted];
             const outputNotes = [oldTotalMinted, ...adjustedNotes];
 
-            const testVariable = 'kPublic';
+            const m = 1;
+            const kPublic = 0;
+            const kPublicBN = new BN(kPublic);
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, m, notes, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = mint.constructProofTest(
-                [newTotalMinted, oldTotalMinted, ...adjustedNotes],
-                senderAddress,
-                testVariable
+            } = mint.constructProof(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
             );
 
-            const inputOwners = inputNotes.map(m => m.owner);
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
+
+            const inputOwners = inputNotes.map(n => n.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
             const proofData = inputCoder.mint(
@@ -788,18 +866,39 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
             const inputNotes = [newTotalMinted];
             const outputNotes = [oldTotalMinted, ...adjustedNotes];
 
-            const testVariable = 'notes';
+            const m = 1;
+            const kPublic = 0;
+            const kPublicBN = new BN(kPublic);
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, m, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = mint.constructProofTest(
-                [newTotalMinted, oldTotalMinted, ...adjustedNotes],
-                senderAddress,
-                testVariable
+            } = mint.constructProof(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
             );
 
-            const inputOwners = inputNotes.map(m => m.owner);
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
+
+            const inputOwners = inputNotes.map(n => n.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
             const proofData = inputCoder.mint(
@@ -822,6 +921,79 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
             ));
         });
 
+        it('Validate failure when m NOT integrated into challenge variable', async () => {
+            const noteValues = [50, 30, 10, 10];
+            const numNotes = noteValues.length;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+            const notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = notes[1];
+            const adjustedNotes = notes.slice(2, 4);
+            const senderAddress = accounts[0];
+
+            const inputNotes = [newTotalMinted];
+            const outputNotes = [oldTotalMinted, ...adjustedNotes];
+
+            const m = 1;
+            const kPublic = 0;
+            const kPublicBN = new BN(kPublic);
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, notes, blindingFactors);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = mint.constructProof(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
+            );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
+
+            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map(n => n.owner);
+
+            const proofData = inputCoder.mint(
+                proofDataRaw,
+                challenge,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+            const opts = {
+                from: senderAddress,
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
+                proofData,
+                senderAddress,
+                constants.CRS,
+                opts
+            ));
+        });
+
+
         it('Validate failure when blindingFactors NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
@@ -839,18 +1011,39 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
             const inputNotes = [newTotalMinted];
             const outputNotes = [oldTotalMinted, ...adjustedNotes];
 
-            const testVariable = 'blindingFactors';
+            const m = 1;
+            const kPublic = 0;
+            const kPublicBN = new BN(kPublic);
+            const rollingHash = new Keccak();
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+
+            const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
+            const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
+
+            const blindingScalars = joinSplit.generateBlindingScalars(numNotes, m);
+            const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, m, notes);
+            joinSplit.constructBlindingFactors = () => blindingFactors;
+            joinSplit.generateBlindingScalars = () => blindingScalars;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = mint.constructProofTest(
-                [newTotalMinted, oldTotalMinted, ...adjustedNotes],
-                senderAddress,
-                testVariable
+            } = mint.constructProof(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
             );
 
-            const inputOwners = inputNotes.map(m => m.owner);
+            proofUtils.computeChallenge = localComputeChallenge;
+            joinSplit.constructBlindingFactors = localConstructBlindingFactors;
+            joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
+
+            const inputOwners = inputNotes.map(n => n.owner);
             const outputOwners = outputNotes.map(n => n.owner);
 
             const proofData = inputCoder.mint(

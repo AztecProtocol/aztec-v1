@@ -1,10 +1,10 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
+const sinon = require('sinon');
 const BN = require('bn.js');
 const { padLeft, sha3 } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 const crypto = require('crypto');
-
 
 // ### Internal Dependencies
 const {
@@ -13,8 +13,12 @@ const {
     note,
     secp256k1,
     bn128,
+    keccak,
 } = require('aztec.js');
-const { constants } = require('@aztec/dev-utils');
+const { constants, errors: { customError } } = require('@aztec/dev-utils');
+
+const { errorTypes } = constants;
+const Keccak = keccak;
 
 // ### Artifacts
 const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
@@ -216,7 +220,7 @@ contract('Bilateral Swap', (accounts) => {
                 challenge,
             } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
 
             const fakeProofData = [...Array(4)]
                 .map(() => [...Array(6)]
@@ -225,7 +229,7 @@ contract('Bilateral Swap', (accounts) => {
             const proofData = inputCoder.bilateralSwap(
                 fakeProofData,
                 challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
@@ -270,7 +274,7 @@ contract('Bilateral Swap', (accounts) => {
 
             const proofConstruct = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
 
             // Generate scalars that NOT mod r
             const kBarBN = new BN(proofConstruct.proofData[0][0].slice(2), 16);
@@ -281,7 +285,7 @@ contract('Bilateral Swap', (accounts) => {
             const proofData = inputCoder.bilateralSwap(
                 proofConstruct.proofData,
                 proofConstruct.challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
@@ -308,7 +312,7 @@ contract('Bilateral Swap', (accounts) => {
                 challenge,
             } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const scalarZeroProofData = proofDataRaw.map((proofElement) => {
                 return [
                     padLeft(0, 64),
@@ -323,7 +327,7 @@ contract('Bilateral Swap', (accounts) => {
             const proofData = inputCoder.bilateralSwap(
                 scalarZeroProofData,
                 challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
@@ -360,7 +364,7 @@ contract('Bilateral Swap', (accounts) => {
                 challenge,
             } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const metadata = outputNotes;
 
             const { length } = proofDataRaw;
@@ -375,7 +379,7 @@ contract('Bilateral Swap', (accounts) => {
             const configs = {
                 CHALLENGE: challenge.slice(2),
                 PROOF_DATA: { data, length: actualLength },
-                OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(outputOwners),
+                OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(noteOwners),
                 METADATA: encoderFactory.encodeMetadata(metadata),
             };
 
@@ -458,7 +462,6 @@ contract('Bilateral Swap', (accounts) => {
             }));
         });
 
-
         it('Validate failure when sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
@@ -470,18 +473,26 @@ contract('Bilateral Swap', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const testVariable = 'sender';
+            const blindingFactors = bilateralSwap.constructBlindingFactors(notes);
+            const localConstructBlindingFactors = bilateralSwap.constructBlindingFactors;
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge([...inputNotes, ...outputNotes], blindingFactors);
+            bilateralSwap.constructBlindingFactors = () => blindingFactors;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = bilateralSwap.constructProofTest([...inputNotes, ...outputNotes], senderAddress, testVariable);
+            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            bilateralSwap.constructBlindingFactors = localConstructBlindingFactors;
+
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
                 proofDataRaw,
                 challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
@@ -512,11 +523,11 @@ contract('Bilateral Swap', (accounts) => {
             proofConstruct.proofData[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
             proofConstruct.challenge = `0x${padLeft('0a', 64)}`;
 
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
                 proofConstruct.proofData,
                 proofConstruct.challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
@@ -537,18 +548,25 @@ contract('Bilateral Swap', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const testVariable = 'notes';
+            const blindingFactors = bilateralSwap.constructBlindingFactors(notes);
+            const localConstructBlindingFactors = bilateralSwap.constructBlindingFactors;
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, blindingFactors);
+            bilateralSwap.constructBlindingFactors = () => blindingFactors;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = bilateralSwap.constructProofTest([...inputNotes, ...outputNotes], senderAddress, testVariable);
+            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            proofUtils.computeChallenge = localComputeChallenge;
+            bilateralSwap.constructBlindingFactors = localConstructBlindingFactors;
+
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
                 proofDataRaw,
                 challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
@@ -569,18 +587,25 @@ contract('Bilateral Swap', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const testVariable = 'blindingFactors';
+            const blindingFactors = bilateralSwap.constructBlindingFactors(notes);
+            const localConstructBlindingFactors = bilateralSwap.constructBlindingFactors;
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, [...inputNotes, ...outputNotes]);
+            bilateralSwap.constructBlindingFactors = () => blindingFactors;
 
             const {
                 proofData: proofDataRaw,
                 challenge,
-            } = bilateralSwap.constructProofTest([...inputNotes, ...outputNotes], senderAddress, testVariable);
+            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            proofUtils.computeChallenge = localComputeChallenge;
+            bilateralSwap.constructBlindingFactors = localConstructBlindingFactors;
+
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
                 proofDataRaw,
                 challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
@@ -609,11 +634,11 @@ contract('Bilateral Swap', (accounts) => {
                 challenge,
             } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
                 proofDataRaw,
                 challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0]]
             );
 
@@ -642,11 +667,11 @@ contract('Bilateral Swap', (accounts) => {
                 challenge,
             } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
             const proofData = inputCoder.bilateralSwap(
                 proofDataRaw,
                 challenge,
-                outputOwners,
+                noteOwners,
                 [outputNotes[0], inputNotes[1]]
             );
 
