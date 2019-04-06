@@ -796,7 +796,6 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
 
             const m = 1;
             const kPublic = 0;
-            const kPublicBN = new BN(kPublic);
             const rollingHash = new Keccak();
             notes.forEach((individualNote) => {
                 rollingHash.append(individualNote.gamma);
