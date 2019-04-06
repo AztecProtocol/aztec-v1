@@ -382,18 +382,10 @@ contract('JoinSplit', (accounts) => {
         });
 
         it('validate successful recovery of note owner', async () => {
-            const noteValues = [10, 20, 10, 20];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-
-
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
-
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
-            const kPublic = 0;
+            const kPublic = -40;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
             const m = inputNotes.length;
@@ -707,8 +699,6 @@ contract('JoinSplit', (accounts) => {
                 rollingHash.append(individualNote.sigma);
             });
 
-            const kPublicBN = new BN(kPublic);
-
             const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
             const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
 
@@ -940,7 +930,9 @@ contract('JoinSplit', (accounts) => {
             const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
 
             const localComputeChallenge = proofUtils.computeChallenge;
-            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, kPublicBN, publicOwner, notes, blindingFactors);
+            proofUtils.computeChallenge = () => localComputeChallenge(
+                senderAddress, kPublicBN, publicOwner, notes, blindingFactors
+            );
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 

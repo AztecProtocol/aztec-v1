@@ -1,6 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const sinon = require('sinon');
 const BN = require('bn.js');
 const { padLeft, sha3 } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
@@ -13,12 +12,9 @@ const {
     note,
     secp256k1,
     bn128,
-    keccak,
 } = require('aztec.js');
-const { constants, errors: { customError } } = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
-const { errorTypes } = constants;
-const Keccak = keccak;
 
 // ### Artifacts
 const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
@@ -391,10 +387,12 @@ contract('Bilateral Swap', (accounts) => {
 
             const incorrectEncoding = encoderFactory.encode(configs, abiParams, 'bilateralSwap');
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(incorrectEncoding, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(incorrectEncoding, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                })
+            );
         });
 
         it('validate failure when incorrect H_X, H_Y in CRS is supplied)', async () => {

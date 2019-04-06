@@ -492,10 +492,12 @@ contract('Dividend Computation', (accounts) => {
 
             const incorrectEncoding = encoderFactory.encode(configs, abiParams, 'dividendComputation');
 
-            await truffleAssert.reverts(dividendContract.validateDividendComputation(incorrectEncoding, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                dividendContract.validateDividendComputation(incorrectEncoding, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                })
+            );
         });
 
         it('validate failure when incorrect H_X, H_Y in CRS is supplied)', async () => {
