@@ -4,14 +4,6 @@ import "./LibEIP712.sol";
 
 contract LibEIP712Test is LibEIP712 {
 
-    event Bar(uint256 timestamp);
-
-    /// @dev Used only for debugging purposes: getting the r,s,v params
-    /// needed in `recoverSignature`.
-    function foo() public {
-        emit Bar(now);
-    }
-
     /// @dev Calculates EIP712 encoding for a hash struct in this EIP712 Domain.
     /// @param _hashStruct The EIP712 hash struct.
     /// @return EIP712 hash applied to this EIP712 Domain.
@@ -30,7 +22,7 @@ contract LibEIP712Test is LibEIP712 {
     function _recoverSignature(
         bytes32 _message,
         bytes memory _signature
-    ) public returns (address _signer) {
+    ) public view returns (address _signer) {
         _signer = super.recoverSignature(_message, _signature);
     }
 }
