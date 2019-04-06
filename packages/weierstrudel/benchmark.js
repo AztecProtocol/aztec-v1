@@ -1,7 +1,8 @@
 const path = require('path');
 
 const { Runtime } = require('../huff/src');
-const bn128Reference = require('./js_snippets/bn128_reference');
+
+const { generatePointData } = require('./js_snippets/utils');
 
 const pathToTestData = path.posix.resolve(__dirname, './huff_modules');
 
@@ -10,19 +11,7 @@ const main = new Runtime('main_loop.huff', pathToTestData);
 
 async function runMainLoop(numPoints, numIterations) {
     const iterations = [...new Array(numIterations)].map(() => {
-        const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
-        console.log('points = ', points);
-        const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
-        console.log('scalars = ', scalars);
-
-        const calldata = [...new Array(numPoints)].reduce((acc, x, i) => {
-            return ([
-                ...acc,
-                { index: (i * 2) * 32, value: points[i].x },
-                { index: ((i * 2) + 1) * 32, value: points[i].y },
-                { index: (numPoints * 64) + (i * 32), value: scalars[i] },
-            ]);
-        }, []);
+        const { calldata } = generatePointData(numPoints);
         return main('WEIERSTRUDEL__MAIN', [], [], calldata);
     });
     const results = await Promise.all(iterations);

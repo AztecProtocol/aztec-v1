@@ -1,0 +1,37 @@
+
+#define macro FP4_SQUARE = takes(5) returns(0) {
+    // assume stack state of: a0 a1 a2 a3 p
+    // (a1+a3)
+    dup4 dup3 add
+    // -a3
+    dup5 dup7 sub   // -a3 (a1+a3) a0 a1 a2 a3 p
+    // (a1-a3)
+    dup4 dup2 add   // (a1-a3) -a3 (a1+a3) a0 a1 a2 a3 p
+    // (a0+a2)
+    dup6 dup5 add
+    // (a0-a2) p
+    dup9 dup6 dup9 dup3 sub add // (a0-a2) p (a0+a2) (a1-a3) -a3 (a1+a3) a0 a1 a2 a3 p
+    // p p
+    dup2 dup1                   // p p (a0-a2) p (a0+a2) (a1-a3) -a3 (a1+a3) a0 a1 a2 a3 p
+    // t1 = (a1-a3)(a0+a2)
+    dup1 dup7 dup7 mulmod       // t1 p p (a0-a2) p (a0+a2) (a1-a3) -a3 (a1+a3) a0 a1 a2 a3 p
+    // swap(t1, (a1+a3))
+    swap8                       // (a1+a3) p p (a0-a2) p (a0+a2) (a1-a3) -a3 t1 a0 a1 a2 a3 p
+    // t2 = (a1+a3)(a0-a2)
+    dup2 dup2 dup6 mulmod       // t2 (a1+a3) p p (a0-a2) p (a0+a2) (a1-a3) -a3 t1 a0 a1 a2 a3 p
+    // r3 = t2 - t1
+    dup1 dup11 dup5 sub add     // r3 t2 (a1+a3) p p (a0-a2) p (a0+a2) (a1-a3) -a3 t1 a0 a1 a2 a3 p
+    // swap(r3, t1)
+    swap10
+    // r1 = t1+t2
+    add
+    // swap(r2, (a1-a3))
+    swap7                       // (a1-a3) (a1+a3) p p (a0-a2) p (a0+a2) r1 -a3 r3 a0 a1 a2 a3 p
+    // r2 = (a1-a3)(a1+a3) + 2a0a2
+    mulmod dup2 dup12 dup11 dup1 add mulmod add // r2 p (a0-a2) p (a0+a2) r1 -a3 r3 a0 a1 a2 a3 p
+    // swap(r2, -a3)            // -a3 p (a0-a2) p (a0+a2) r1 r2 r3 a0 a1 a2 a3 p
+    // r0 = (-2a1a3 + (a0-a2)(a0+a2))
+    dup1 add dup10 mulmod       // -2a1a3 (a0-a2) p (a0+a2) r1 r2 r3 a0 a1 a2 a3 p
+    swap3 mulmod add            // r0 r1 r2 r3 a0 a1 a2 a3 p
+    // (46 * 3) + (6 * 8) = 138 + 48 = 186 gas
+}

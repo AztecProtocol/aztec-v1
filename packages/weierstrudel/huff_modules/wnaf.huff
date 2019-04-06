@@ -186,6 +186,75 @@ template<num_shifted_bits, wnaf_pointer_total_increase, wnaf_pointer_base_increa
     dup1 WNAF_TABLE_MASK() and mload jump
 }
 
+
+/**
+ * @title Extremely greedy slice for 1st scalar
+ * @dev For the first scalar, we know that the number of existing entries = 0,
+ *      so we can directly set the number of entries instead of reading + updating the value
+ **/
+template<num_shifted_bits, num_shifted_bits_2, wnaf_pointer_total_increase, wnaf_pointer_base_increase>
+#define macro WNAF_GREEDY__EXTREMELY_GREEDY_SLICE = takes(0) returns(0) {
+    // w o k v s m
+    // <num_shifted_bits_2> represents the number of bits we must shift `w` down by in order to
+    // position the WNAF entry at the 5th-10th least-significant bits of `w`
+    dup1 <num_shifted_bits_2> shr
+
+    // We now mask off all but those 5 bits
+    0x3e0 and
+
+    // The resulting value directly maps to the internal offset required to index the WNAF point in our precomputed lookup table,
+    // plus 32 bytes.
+    // For example, if w = 3, We want the memory location of 3P.
+    // 3P is directly adjacent to P, so if P is at 0x00 - 0x40, then 3P will be at 0x40 - 0x60.
+    // 3 << 5 is equal to 0x80. Tadaa.
+    // We must now convert this relative offset into an absolute offset, but adding in `m`.
+    // `m` points to the start of the point table in memory, minus 32 bytes. Add them together and we have our memory offset.
+    dup7 add
+    
+    // stack state: w' w o k v s m
+    // Next up, we want to identify how many non-zero WNAF entries are currently at this bit index, and increase this counter by 0x02.
+    // Step 1: get our offset to the previous WNAF bit sequence
+    dup3
+
+    // Now add in <wnaf_pointer_total_increase> to get to the current WNAF bit sequence.
+    <wnaf_pointer_total_increase> add               // o' w' w o
+
+    // swap positions with o' and o. We'll consume `o` in a bit.
+    swap3                                           // o w' w o'
+
+    // next, store our updated `n` at position `o'`
+    0x02 dup1 dup6 mstore                                // n o w' w o' k v s m 0_b 0_t 1_b 1_t
+
+    // now that we have `n`, we can subtract `n` from <wnaf_pointer_base_increase> to compute
+    // the relative difference between the pointer to the previous WNAF bit sequence (`o`) and
+    // the location of our current WNAF point pointer
+    <wnaf_pointer_base_increase>
+    sub add            // o" w' w o'
+
+    // now that we know where the WNAF pointer should be stored, and what to store there,
+    // we call `mstore` - we've already positioned our variables on the stack correctly
+    mstore                                          // w o'
+
+    // we're now left with our scalar `w` and the memory location of the current WNAF bit sequence.
+    // all that's left to do is reduce `w` down by 5 bits + the number of bits we reduced `w` down by to get `w'`.
+    // We can get away with this because we know that, for any non-zero WNAF entry, the adjacent `w` bits MUST be zero.
+    <num_shifted_bits> shr
+
+    // Finally, we must account for the situation where our WNAF entry is negative.
+    // If `w'` corresponds to a wnaf entry that is >16, it's a negative WNAF entry.
+    // We still indexed the correct point, because we store negative points after positive points in our lookup table.
+    // However we're about to mask off the current WNAF entry's bits from `w` (i.e. subtracting the entry).
+    // If the WNAF entry is negative, we need to increase `w` by 32. This is the same as adding the WNAF entry into `w`, because
+    // any bits that are less significant than the 6th bit are irrelevant because of `w`'s Hamming weight.
+    // We achieve this by adding 16 into `w`. If the WNAF entry is > 16, then the 5th bit is high, so adding 16 will trigger
+    // and overflow and add 1 to the 6th bit. If the WNAF entry is < 16, then there is no overflow, and we don't mind mutating the WNAF's
+    // least-significant 5 bits because we're about to mask them off.
+    0x10 add                 // w" o
+    // Finally, now that we've reduced down our WNAF, let's convert `w` into a jump index and jump away to the next WNAF_GREEDY__SLICE
+    dup1 WNAF_TABLE_MASK() and mload
+    jump
+}
+
 /**
  * @title This is our jump table. We store this directly inside the contract bytecode to save on gas
  *          (we can use `codecopy` to initialize our table instead of a bunch of `mstore8` opcodes)

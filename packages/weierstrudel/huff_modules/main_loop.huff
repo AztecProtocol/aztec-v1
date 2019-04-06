@@ -166,6 +166,315 @@
     main__add_f_24 main__add_f_25 main__add_f_26 main__add_f_27 main__add_f_28 main__add_f_29 main__add_f_30
 }
 
+
+
+#define macro WEIERSTRUDEL__MAIN_EXCEPTION_TEST = takes(0) returns(0) {
+    // Step 1, validate integrity of inputs.
+    // `callvalue` must be 0
+    // calldatasize must be a clean multiple of 0x60
+    callvalue
+    0x60 FUNCTION_SIGNATURE_OFFSET() calldatasize sub mod // todo check this works
+    or iszero sensible_inputs jumpi
+    400 0x00 mstore
+    0x20 0x00 revert
+sensible_inputs:
+
+    // start by computing every point's endomorphism-split windowed-non-adjacent-form representation.
+    // Get this out of the way first so we can free up the memory this thing needs for its jump table
+    WNAF_GREEDY__SIZE_OF_ENTRY()
+    WNAF_GREEDY__COMPUTE()
+    // Set up our stack state. We need the order of the group that the bn128 curve's point coordinates are members of.
+    // (this is p)
+    // We also need 2p and 3p, because we avoid performing a modular reduction in intermediate sums when the result
+    // still fits into an evm word. When we compute inversions of these 'overloaded' points we need to scale p by
+    // an equivalent amount.
+    // start by negating the size of our wnaf entry, it's more useful in this form
+    // because we'll be subtracting it from our pointer to the next wnaf entry.
+    // (the `add` opcode doesn't care about variable ordering on the stack, `sub` does.
+    //    so whenever possible it's usually more efficient to add negative values than
+    //    subtract positive ones)
+    0 sub
+    3P()
+    2P()
+    P()
+    // Stack state: p 2p 3p d
+
+    // Set up our memory state. The precomputed lookup table requires 'beta', the cube root of unity mod p.
+ 
+    // Because we need this value when the state of our stack is somewhat undefined (hon hon), we keep it in memory.
+    // We do the same with 2p, 3p for the same reasons
+    BETA() BETA_LOCATION() mstore // p 2p 3p d
+    dup3 3P_LOCATION() mstore
+    dup2 2P_LOCATION() mstore
+
+    // Next, let's compute our point lookup table.
+    PRECOMPUTE_TABLE__COMPUTE()
+
+    // Nice. now, put the global-z coordinate on the stack, we want to re-use that memory
+    GLOBAL_Z_LOCATION() mload // z p 2p 3p d
+
+    // we also want the pointer to the most significant non-zero wnaf entry on the stack
+    WNAF_GREEDY__FIND_FIRST_ENTRY<dup5,dup6>()
+    
+    // The next step is to fiddle with the *least* significant wnaf entry. 
+    // We want this entry to point to a location in the jump table that will terminate
+    // the algorithm. We can do this by adding 62 (max number of points *2 + 2) to the entry
+    WNAF_START_LOCATION() mload 0x3e add WNAF_START_LOCATION() mstore
+
+    // Next, we set up our jump table.
+    __tablesize(MAIN__JUMP_TABLE) __tablestart(MAIN__JUMP_TABLE) 0x1e codecopy
+    // The stack state is now: i Z p 2p 3p
+    // We now want to get the first point in our wnaf entry and set that as our
+    // initial point
+    dup1 mload                  // n i z p 2p 3p
+    dup2 sub                    // o i z p 2p 3p d
+    // the wnaf entries are located 30 + (size of wnaf) bytes behind the location of 'n'
+    0x1e dup8 sub add           // o' i z p 2p 3p d
+    mload
+    // entry should now be in least significant 2 bytes
+    0x02ffe0 and                // o_x
+    dup1 mload                  // -x o_x i z p 2p 3p
+    dup5 sub                    // x o_x i z p 2p 3p
+    swap1 0x20 add mload        // -y x i z p 2p 3p
+    dup5 sub                    // y x i z p 2p 3p
+    0x01                        // z y x i p 2p 3p
+
+    // next, we want to use the number of entries at this wnaf index as
+    // an index to our lookup table, but offset by 1 (0x02) because we have already
+    // fished a point out of the wnaf entry.
+    // z y x i z p 2p 3p
+    0x02
+    dup5                        // i 32 z y x i z p 2p 3p d
+    dup11 add
+    swap5
+    mload
+    sub
+    // and finally we can load up this jump entry and jump into our main loop
+    mload 0xffff and jump
+
+    // jump destinations for our main loop. Each destination 'falls through' to the next
+    // destination, so we 'only' need 30 copies of the addition algorithm
+    main__add_30:
+        ADD__MAIN<GET_P_30, dup6, dup7>()
+    main__add_29:
+        ADD__MAIN<GET_P_29, dup6, dup7>()
+    main__add_28:
+        ADD__MAIN<GET_P_28, dup6, dup7>()
+    main__add_27:
+        ADD__MAIN<GET_P_27, dup6, dup7>()
+    main__add_26:
+        ADD__MAIN<GET_P_26, dup6, dup7>()
+    main__add_25:
+        ADD__MAIN<GET_P_25, dup6, dup7>()
+    main__add_24:
+        ADD__MAIN<GET_P_24, dup6, dup7>()
+    main__add_23:
+        ADD__MAIN<GET_P_23, dup6, dup7>()
+    main__add_22:
+        ADD__MAIN<GET_P_22, dup6, dup7>()
+    main__add_21:
+        ADD__MAIN<GET_P_21, dup6, dup7>()
+    main__add_20:
+        ADD__MAIN<GET_P_20, dup6, dup7>()
+    main__add_19:
+        ADD__MAIN<GET_P_19, dup6, dup7>()
+    main__add_18:
+        ADD__MAIN<GET_P_18, dup6, dup7>()
+    main__add_17:
+        ADD__MAIN<GET_P_17, dup6, dup7>()
+    main__add_16:
+        ADD__MAIN<GET_P_16, dup6, dup7>()
+    main__add_15:
+        ADD__MAIN<GET_P_15, dup6, dup7>()
+    main__add_14:
+        ADD__MAIN<GET_P_14, dup6, dup7>()
+    main__add_13:
+        ADD__MAIN<GET_P_13, dup6, dup7>()
+    main__add_12:
+        ADD__MAIN<GET_P_12, dup6, dup7>()
+    main__add_11:
+        ADD__MAIN<GET_P_11, dup6, dup7>()
+    main__add_10:
+        ADD__MAIN<GET_P_10, dup6, dup7>()
+    main__add_09:
+        ADD__MAIN<GET_P_9, dup6, dup7>()
+    main__add_08:
+        ADD__MAIN<GET_P_8, dup6, dup7>()
+    main__add_07:
+        ADD__MAIN<GET_P_7, dup6, dup7>()
+    main__add_06:
+        ADD__MAIN<GET_P_6, dup6, dup7>()
+    main__add_05:
+        ADD__MAIN<GET_P_5, dup6, dup7>()
+    main__add_04:
+        ADD__MAIN<GET_P_4, dup6, dup7>()
+    main__add_03:
+        ADD__MAIN<GET_P_3, dup6, dup7>()
+    main__add_02:
+        ADD__MAIN<GET_P_2, dup6, dup7>()
+    main__add_01:
+        ADD__MAIN<GET_P_1, dup6, dup7>()
+    main__add_00:
+        // double the accumulator once there's nothing left to add
+        DOUBLE__MAIN<dup6, dup7>()
+        // stack state: z y x i Z p 2p 3p d
+        // Next up, we want to decrease i by the size of a wnaf entry in memory.
+        // We then want to load up the next wnaf index and jump.
+        // (the pointer i points to the next wnaf entry, so we're pointing to
+        //    the *next* wnaf pointer, not the current one. This saves a swap op)
+        dup9 dup5 add swap4
+        mload
+        // Once we have the wnaf entry, we need to convert to a jump index.
+        mload 0xffff and
+        jump // *jazz hands*
+
+    // We have a separate instantiation of the 'loop' for the final entry in our wnaf. This is because
+    // we don't want to double the accumulator at the end of this section.
+    main__add_f_30:
+        ADD__MAIN<GET_P_30, dup6, dup7>()
+    main__add_f_29:
+        ADD__MAIN<GET_P_29, dup6, dup7>()
+    main__add_f_28:
+        ADD__MAIN<GET_P_28, dup6, dup7>()
+    main__add_f_27:
+        ADD__MAIN<GET_P_27, dup6, dup7>()
+    main__add_f_26:
+        ADD__MAIN<GET_P_26, dup6, dup7>()
+    main__add_f_25:
+        ADD__MAIN<GET_P_25, dup6, dup7>()
+    main__add_f_24:
+        ADD__MAIN<GET_P_24, dup6, dup7>()
+    main__add_f_23:
+        ADD__MAIN<GET_P_23, dup6, dup7>()
+    main__add_f_22:
+        ADD__MAIN<GET_P_22, dup6, dup7>()
+    main__add_f_21:
+        ADD__MAIN<GET_P_21, dup6, dup7>()
+    main__add_f_20:
+        ADD__MAIN<GET_P_20, dup6, dup7>()
+    main__add_f_19:
+        ADD__MAIN<GET_P_19, dup6, dup7>()
+    main__add_f_18:
+        ADD__MAIN<GET_P_18, dup6, dup7>()
+    main__add_f_17:
+        ADD__MAIN<GET_P_17, dup6, dup7>()
+    main__add_f_16:
+        ADD__MAIN<GET_P_16, dup6, dup7>()
+    main__add_f_15:
+        ADD__MAIN<GET_P_15, dup6, dup7>()
+    main__add_f_14:
+        ADD__MAIN<GET_P_14, dup6, dup7>()
+    main__add_f_13:
+        ADD__MAIN<GET_P_13, dup6, dup7>()
+    main__add_f_12:
+        ADD__MAIN<GET_P_12, dup6, dup7>()
+    main__add_f_11:
+        ADD__MAIN<GET_P_11, dup6, dup7>()
+    main__add_f_10:
+        ADD__MAIN<GET_P_10, dup6, dup7>()
+    main__add_f_09:
+        ADD__MAIN<GET_P_9, dup6, dup7>()
+    main__add_f_08:
+        ADD__MAIN<GET_P_8, dup6, dup7>()
+    main__add_f_07:
+        ADD__MAIN<GET_P_7, dup6, dup7>()
+    main__add_f_06:
+        ADD__MAIN<GET_P_6, dup6, dup7>()
+    main__add_f_05:
+        ADD__MAIN<GET_P_5, dup6, dup7>()
+    main__add_f_04:
+        ADD__MAIN<GET_P_4, dup6, dup7>()
+    main__add_f_03:
+        ADD__MAIN<GET_P_3, dup6, dup7>()
+    main__add_f_02:
+        ADD__MAIN<GET_P_2, dup6, dup7>()
+    main__add_f_01:
+        ADD__MAIN<GET_P_1, dup6, dup7>()
+    main__add_f_00:
+
+    // test if z is zero
+    dup1 main__z_not_zero jumpi
+    // hey! What do you think you're trying to pull?
+        0x00 0x00 revert
+main__z_not_zero:
+    // We're almost done now. We have our result, but we need to scale the final
+    // point's Z-coordinate by the globalZ coordinate, as we performed the
+    // entire scalar multiplication algorithm on an isomorphism of the bn128 curve
+    // where globalZ is considered affine.
+    // Our accumulator also represents the y-coordinate in its inverse form,
+    // so we need to negate it.
+    // Finally, both x and y are probably overloaded so we perform a modular reduction
+        dup5                    // z zf yf xf i Z p 2p 3p 
+        dup7 swap2 mulmod       // z'' yf xf i Z p 2p 3p
+        0x40 mstore             // yf xf i Z p 2p 3p
+        dup5 swap1 mod          // yf xf i Z p 2p 3p
+        dup5 sub                // y xf i Z p 2p 3p
+        0x20 mstore             // xf i Z p 2p 3p
+        dup4 swap1 mod          // x i Z p 2p 3p
+        returndatasize mstore   // i Z p 2p 3p
+    // Might as well clean up the stack, it's only 12 gas.
+        pop pop pop pop pop pop
+    // and we're done! Let's get out of here...
+        0x60 returndatasize return
+}
+
+#define macro WEIERSTRUDEL__CONSTRUCTOR = takes(0) returns(0) {}
+
+
+#define macro GET_P_EXCEPTION = takes(0) returns(0) {
+    // stack state: ? ? ? z y x i Z p 2p 3p d
+    dup7 mload  // n ? ? ? z y x i Z p 2p 3p d
+    // we want to update n - shrink by 0x02
+    0x02 dup2 sub dup9 mstore // n ? ? ? z y x i Z p 2p 3p d
+    // wnaf value = i - n + (d - 0x1e)
+    dup8 sub 0x1e dup14 sub add mload
+    0x02ffe0 and
+    dup1 0x20 add
+    // o_y o_x ? ? ? z y x i
+}
+
+#define macro WEIERSTRUDEL__MAIN_LOOP_WITH_EXCEPTION_HANDLING = takes(0) returns(0) {
+    0x3e WNAF_START_LOCATION() mload sub WNAF_START_LOCATION() mstore
+
+    dup1 mload                  // n i z p 2p 3p
+    dup2 sub                    // o i z p 2p 3p d
+    // the wnaf entries are located 30 + (size of wnaf) bytes behind the location of 'n'
+    0x1e dup8 sub add           // o' i z p 2p 3p d
+
+    // i - n + (d - 0x1e) == wnaf value
+    mload
+    // entry should now be in least significant 2 bytes
+    0x02ffe0 and                // o_x
+    dup1 mload                  // -x o_x i z p 2p 3p
+    dup5 sub                    // x o_x i z p 2p 3p
+    swap1 0x20 add mload        // -y x i z p 2p 3p
+    dup5 sub                    // y x i z p 2p 3p
+    0x01                        // z y x i Z p 2p 3p
+
+    // item 1: update n to be 0x02 smaller
+    0x02 dup5 mload sub dup5 mstore
+
+    // ok...now we have a wnaf entry. We're going to use an actual *loop* here,
+    // because we want to save on code size and we don't care about the exception case being efficient.
+    // z y x i Z p 2p 3p
+    dup4 mload main__exception_keep_going jumpi
+    main__exception_finished_one_addition_cycle jump
+    main__exception_keep_going: // z y x i Z p 2p 3p
+        ADD__MAIN_WITH_EXCEPTION<GET_P_EXCEPTION, dup6, dup7, main__exception_add_return_dest>()
+        main__exception_add_return_dest:
+    // z y x i Z p 2p 3p -1
+    dup4 mload main__exception_keep_going jumpi
+    main__exception_finished_one_addition_cycle:
+        dup4 WNAF_START_LOCATION() eq main__exception_end jumpi
+        DOUBLE__MAIN<dup6, dup7>()
+    // ok. we've hit the end of this entry, update i
+    // z y x i Z p 2p 3p d
+    swap3 dup9 add swap3
+    dup4 mload iszero main__exception_finished_one_addition_cycle jumpi
+    main__exception_keep_going jump
+    main__exception_end:
+}
+
 // start here
 //          |
 //          v
@@ -392,6 +701,29 @@ sensible_inputs:
     main__add_f_01:
         ADD__MAIN<GET_P_1, dup6, dup7>()
     main__add_f_00:
+
+    // test if z is zero
+    dup1 main__z_not_zero jumpi
+        // hey! What do you think you're trying to pull?
+        // You didn't end up here by accident, did you?
+        // Now we have to run the whole main loop again with exception handling,
+        // and you're going to pay for it!
+
+        // stack state: zf yf xf i Z p 2p 3p
+        pop pop pop pop
+        WNAF_GREEDY__FIND_FIRST_ENTRY<dup5,dup6>()
+        WEIERSTRUDEL__MAIN_LOOP_WITH_EXCEPTION_HANDLING()
+        dup1 main__z_not_zero jumpi
+        // ok, fine. z is still 0 so we must have a point at infinity
+        // zf yf xf
+        dup1 iszero dup3 0x01 eq dup5 iszero and and main__point_at_infinity jumpi
+            // What? How did you get here?! Scram!
+            0x00 0x00 revert 
+        main__point_at_infinity: // zf yf xf i Z p 2p 3p
+            0x40 mstore 0x20 mstore 0x00 mstore pop pop pop pop pop pop
+            0x60 returndatasize return
+
+main__z_not_zero:
     // We're almost done now. We have our result, but we need to scale the final
     // point's Z-coordinate by the globalZ coordinate, as we performed the
     // entire scalar multiplication algorithm on an isomorphism of the bn128 curve
@@ -412,5 +744,3 @@ sensible_inputs:
     // and we're done! Let's get out of here...
         0x60 returndatasize return
 }
-
-#define macro WEIERSTRUDEL__CONSTRUCTOR = takes(0) returns(0) {}

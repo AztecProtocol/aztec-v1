@@ -1,4 +1,5 @@
 #include "constants.huff"
+#include "double.huff"
 
 /// @dev mixed point addition
 /// @notice expects (z1 -y1 x1) to be on stack
@@ -33,8 +34,96 @@ template <getP2Location,p,2p>
     dup2 dup1 dup1          // p p p t1 p t2 p z1 -y1 x1
     dup4 dup1               // t1 t1 p p p t1 p t2 p z1 -y1 x1
     mulmod                  // t3 p p t1 p t2 p z1 -y1 x1
+    dup2 dup5 dup3          // t3 t1 p t3 p p t1 p t2 p z1 -y1 x1
+    mulmod                  // t4 t3 p p t1 p t2 p z1 -y1 x1
+    swap10                  // x1 t3 p p t1 p t2 p z1 -y1 t4
+    mulmod                  // t3 p t1 p t2 p z1 -y1 t4
+    dup2 sub                // t3 p t1 p t2 p z1 -y1 t4
+    swap7                   // -y1 p t1 p t2 p z1 t3 t4
+    dup2 dup10              // t4 p -y1 p t1 p t2 p z1 t3 t4
+    dup2 dup8 dup1          // t2 t2 p t4 p -y1 p t1 p t2 p z1 t3 t4
+    mulmod                  // x3 t4 p -y1 p t1 p t2 p z1 t3 t4
+    dup11 dup1 add
+    add
+    addmod                  // x3 -y1 p t1 p t2 p z1 t3 t4
+    swap9                   // t4 -y1 p t1 p t2 p z1 t3 x3
+    mulmod                  // t4 t1 p t2 p z1 t3 x3
+    swap5                   // z1 t1 p t2 p t4 t3 x3
+    mulmod                  // z3 t2 p t4 t3 x3
+    swap4                   // t3 t2 p t4 z3 x3
+    dup6                    // x3 t3 t2 p t4 z3 x3
+    add                     // t3 t2 p t4 z3 x3
+    mulmod                  // t3 t4 z3 x3
+    add                     // y3 z3 x3
+    <2p> sub                // -y3 z3 x3
+    swap1                   // z3 -y3 x3
+}
+
+/// @dev mixed point addition
+/// @notice expects (z1 -y1 x1) to be on stack
+/// <getP2Location> should push o_y o_x onto stack
+/// where o_y = mem offset of y2, o_x = mem offset of -x2
+template <getP2Location,p,2p,exception_return_destination>
+#define macro ADD__MAIN_WITH_EXCEPTION = takes(3) returns(3) {
+    <p>             // p z1 -y1 x1
+    dup1            // p p z1 -y1 x1
+    dup3            // z1 p p z1 -y1 x1
+    dup1            // z1 z1 p p z1 -y1 x1
+    mulmod          // t1 p z1 -y1 x1
+    dup2            // p t1 p z1 -y1 x1
+    <getP2Location> // o_y o_x p t1 p z1 -y1 x1
+    mload           // y2 o_x p t1 p z1 -y1 x1
+    dup3            // p y2 o_x p t1 p z1 -y1 x1
+    dup7                // z1 p y2 o_x p t1 p z1 -y1 x1
+    dup6                // t1 z1 p y2 o_x p t1 p z1 -y1 x1
+    mulmod              // t2 y2 o_x p t1 p z1 -y1 x1
+    dup4 swap2          // y2 t2 p o_x p t1 p z1 -y1 x1
+    mulmod              // t2 o_x p t1 p z1 -y1 x1
+    dup7                // -y1 t2 o_x p t1 p z1 -y1 x1
+    // NOTE: -y1 is 2x/3x overloaded
+    add                 // t2 o_x p t1 p z1 -y1 x1
+    // t2 is 3x/4x overloaded
+    swap3               // t1 o_x p t2
+    dup3 swap2 mload    // -x2 t1 p p t2
+    mulmod              // t1 p t2 p z1 -y1 x1
+    dup7                // x1 t1 p t2 p z1 -y1 x1
+    // NOTE: x1 is 1x/3x overloaded
+    add                     // t1 p t2 p z1 -y1 x1
+    dup2 dup1 dup1          // p p p t1 p t2 p z1 -y1 x1
+    dup4 dup1               // t1 t1 p p p t1 p t2 p z1 -y1 x1
+    mulmod                  // t3 p p t1 p t2 p z1 -y1 x1
     dup1 skip_reject jumpi
-        0x00 0x00 revert
+
+    // EXCEPTION HANDLING
+    // t3 = t1*t1
+    // t1 = x1 - z1z1x2
+    // question: if our affine point is the point at infinity, can we handle this gracefully?
+    // if x2 = 0, y2 = 0
+    // x1 - z1z1x2 = x1
+    // if z1 = 0 then result = x2
+    dup8 z_not_zero jumpi
+        pop pop pop pop    // p t2 p z1 -y1 x1
+        <getP2Location>    // o_y o_x p t1 p z1 -y1 x1
+        mload              // y3 o_x p t1 p z1 -y1 x1
+        dup3 sub           // -y3 o_x p t1 p z1 -y1 x1
+        swap6 pop          // o_x p t1 p z1 -y3 x1
+        mload swap1 sub    // x3 t1 p z1 -y3 x1
+        swap5              // x1 t1 p z1 -y3 x3
+        pop pop pop pop 0x01 // z3 -y3 x3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+        <exception_return_destination> jump
+    z_not_zero:             // t3 p p t1 p t2 p z1 -y1 x1
+    // ok, so z1 isn't zero. Is y1 == y2?
+    dup2 dup7 dup1 mulmod   // (y2z1z1z1 - y1)^2
+    // if this is zero, y1 == y2
+    // if this is not zero, y1 == -y2
+    set_result_to_infinity jumpi
+        pop pop pop pop pop pop pop       // z1 -y1 x1 i Z p 2p 3p
+        DOUBLE__MAIN<dup6, dup7>()
+        <exception_return_destination> jump
+    set_result_to_infinity: // t3 p p t1 p t2 p z1 -y1 x1
+        pop pop pop pop pop pop pop pop pop pop
+        0x00 0x01 0x00
+        <exception_return_destination> jump
     skip_reject:
     dup2 dup5 dup3          // t3 t1 p t3 p p t1 p t2 p z1 -y1 x1
     mulmod                  // t4 t3 p p t1 p t2 p z1 -y1 x1
@@ -75,9 +164,10 @@ template <mx2,my2,p,2p>
     // t1 t2 p y x
     dup3 dup1 dup3 dup1 mulmod
     // t3 p t1 t2 p y x
-    dup1 ADD__AFFINE_skip jumpi
-        0x00 0x00 revert
-    ADD__AFFINE_skip:
+    // this macro is used to precompute a point lookup table
+    // we have already validated that P is on the curve.
+    // P, 3P, 5P, 7P, 9P, 11P, 13P, 15P cannot satisfy the edge cases for
+    // standard incomplete addition formulae
     dup2 dup2 dup5 mulmod
     // t4 t3 p t1 t2 p y x
     swap4
@@ -133,16 +223,6 @@ template <2p,p1,p2,p3,mx2,my2>
     add
     // t1 t2 z y x
     <p3> dup1 dup3 dup1 mulmod
-    // We want to figure out if X2Z1Z1 - X1 = 0
-    // i.e. does t1 = 0?
-    // We cannot test t1 directly as doubling overloads x by 2x, and addition overloads x by 3x.
-    // So t1 can be either 0, p or 2p. Instead we check if t3 = t1*t1 is zero.
-    // As t3 is the output of a mulmod opcode it is not overloaded.
-    // We also save some gas by testing if t3 is anything but 0 - our jump condition is just t3
-    // t3 p t1 t2 z y x
-    dup1 skip_reject jumpi
-        0x00 0x00 revert
-    skip_reject:
     dup2 dup2 dup5 mulmod
     // t4 t3 p t1 t2 z y x
     swap4
@@ -201,9 +281,6 @@ template <2p,p1,p2,p3,mx2,my2,mz2>
     add
     // t1 t2 z y x
     <p3> dup1 dup3 dup1 mulmod
-    dup1 skip_reject jumpi
-        0x00 0x00 revert
-    skip_reject:
     // t3 p t1 t2 z y x
     dup2 dup2 dup5 mulmod
     // t4 t3 p t1 t2 z y x

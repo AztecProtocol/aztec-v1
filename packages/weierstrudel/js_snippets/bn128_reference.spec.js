@@ -33,7 +33,6 @@ function getComparisonTable(x, y, z) {
     return table;
 }
 
-
 describe('arithmetic tests', () => {
     it('double works', () => {
         const pBase = bn128.randomPointInternal();

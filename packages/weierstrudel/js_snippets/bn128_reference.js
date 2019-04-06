@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const n = new BN('30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001', 16);
 const p = new BN('21888242871839275222246405745257275088696311157297823662689037894645226208583', 10);
 const pRed = BN.red(p);
+const nRed = BN.red(n);
 
 // bn128 weierstrass formula = y^2 = x^3 + 3
 const b = new BN('3', 10).toRed(pRed);
@@ -26,6 +27,7 @@ const bn128 = {};
 bn128.p = p;
 bn128.pRed = pRed;
 bn128.n = n;
+bn128.nRed = nRed;
 bn128.lambda = lambda;
 bn128.beta = beta;
 bn128.basis = [

@@ -9,7 +9,7 @@ const utils = {};
 
 
 // eslint-disable-next-line new-cap
-const referenceCurve = new EC.curve.short({
+utils.referenceCurve = new EC.curve.short({
     a: '0',
     b: '3',
     p: p.toString(16),
@@ -47,9 +47,9 @@ utils.generateCalldata = (points, scalars) => {
     const calldata = Buffer.concat([pointBuffer, scalarBuffer]);
     const expected = points.reduce((acc, { x, y }, i) => {
         if (!acc) {
-            return referenceCurve.point(x, y).mul(scalars[i]);
+            return utils.referenceCurve.point(x, y).mul(scalars[i]);
         }
-        return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
+        return acc.add(utils.referenceCurve.point(x, y).mul(scalars[i]));
     }, null);
     return { calldata, expected };
 };
