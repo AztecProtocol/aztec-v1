@@ -41,7 +41,7 @@ const signNote = (verifyingContract, spender, privateKey) => {
     return sign.signStructuredData(domain, schema, message, privateKey);
 };
 
-contract.only('LibEIP712', (accounts) => {
+contract('LibEIP712', (accounts) => {
     let libEIP712;
 
     beforeEach(async () => {
@@ -76,7 +76,7 @@ contract.only('LibEIP712', (accounts) => {
     });
 
     describe('failure states', async () => {
-        it.skip('should fail when signer is 0x0', async () => {
+        it('should fail when signer is 0x0', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const { signature, encodedTypedData } = signNote(
                 libEIP712.address,
@@ -84,8 +84,8 @@ contract.only('LibEIP712', (accounts) => {
                 aztecAccount.privateKey
             );
 
-            // Setting any number other than 27 or 28 makes ecrecover deterministically return 0x0
-            const v = '0x00000000000000000000000000000000000000000000000000000000000000010';
+            // see https://ethereum.stackexchange.com/questions/69328/how-to-get-0x0-from-ecrecover/69329#69329
+            const v = padLeft('0x10', 64);
             const concatenatedSignature = v + signature[1].slice(2) + signature[2].slice(2);
             await truffleAssert.reverts(
                 libEIP712._recoverSignature(encodedTypedData, concatenatedSignature),
