@@ -284,6 +284,10 @@ dividendComputation.constructProofTest = (notes, za, zb, sender, testVariable) =
         challenge = proofUtils.computeChallenge(zaBN, zbBN, notes, blindingFactors);
     } else if (testVariable === 'blindingFactors') {
         challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes);
+    } else if (testVariable === 'za') {
+        challenge = proofUtils.computeChallenge(sender, zbBN, notes, blindingFactors);
+    } else if (testVariable === 'zb') {
+        challenge = proofUtils.computeChallenge(sender, zaBN, notes, blindingFactors);
     } else {
         challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
     }
