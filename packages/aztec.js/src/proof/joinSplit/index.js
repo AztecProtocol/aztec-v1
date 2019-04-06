@@ -450,15 +450,19 @@ joinSplit.encodeJoinSplitTransaction = ({
     });
 
     const outputOwners = outputNotes.map(n => n.owner);
+    const inputOwners = inputNotes.map(n => n.owner);
+
     const proofData = inputCoder.joinSplit(
         proofDataRaw,
         m,
         challenge,
         publicOwner,
         inputSignatures,
+        inputOwners,
         outputOwners,
         outputNotes
     );
+
     const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
