@@ -119,7 +119,7 @@ library NoteUtils {
             address owner,
             bytes32 noteHash,
             bytes memory metadata
-        ) {
+    ) {
         assembly {
             // memory map of a note:
             // 0x00 - 0x20 : byte length of note

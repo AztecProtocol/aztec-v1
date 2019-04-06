@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-/* global artifacts, contract, expect: true */
+/* global artifacts, contract: true */
 const truffleAssert = require('truffle-assertions');
 
 const SafeMath8 = artifacts.require('./SafeMath8Test');
