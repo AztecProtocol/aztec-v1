@@ -22,7 +22,7 @@ const ZkAssetMintable = artifacts.require('./contracts/ZkAsset/ZkAssetMintable')
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('ZkAssetMintable', (accounts) => {
+contract.only('ZkAssetMintable', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let ace;
@@ -140,7 +140,6 @@ contract('ZkAssetMintable', (accounts) => {
     });
 
     describe('failure states', () => {
-        let aztecAccounts = [];
         let ace;
         let erc20;
         let zkAssetMintable;
@@ -153,17 +152,95 @@ contract('ZkAssetMintable', (accounts) => {
             aztecAdjustSupply = await AdjustSupply.new();
             aztecJoinSplit = await JoinSplit.new();
 
-            aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(1);
+        });
 
+        it('validate failure if msg.sender is not owner', async () => {
+            const canAdjustSupply = true;
+            const canConvert = true;
+
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
+            const notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            zkAssetMintable = await ZkAssetMintable.new(
+                ace.address,
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                { from: accounts[0] }
+            );
+
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = zeroNote;
+            const adjustedNotes = notes.slice(2, 4);
+
+            const senderAddress = proof.proofUtils.randomAddress();
+
+            // Minting two AZTEC notes, worth 30 and 20
+            proofs[0] = proof.mint.encodeMintTransaction({
+                newTotalMinted,
+                oldTotalMinted,
+                adjustedNotes,
+                senderAddress,
+            });
+
+            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData));
+        });
+
+        it('validate failure if ace.mint throws', async () => {
+            // ace.mint will throw if total inputs != total outputs in the mint proof
+            const canAdjustSupply = true;
+            const canConvert = true;
+
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+
+            // total inputs != total outputs - ace.mint will throw
+            const noteValues = [50, 0, 30, 30];
+            const notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            zkAssetMintable = await ZkAssetMintable.new(
+                ace.address,
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                { from: accounts[0] }
+            );
+
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = zeroNote;
+            const adjustedNotes = notes.slice(2, 4);
+
+
+            // Minting two AZTEC notes, worth 30 and 30
+            proofs[0] = proof.mint.encodeMintTransaction({
+                newTotalMinted,
+                oldTotalMinted,
+                adjustedNotes,
+                senderAddress: zkAssetMintable.address,
+            });
+            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData));
+        });
+
+        it('validates failure if mint attempted when flag set to false', async () => {
             const canAdjustSupply = false;
             const canConvert = true;
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
+            const notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
 
             zkAssetMintable = await ZkAssetMintable.new(
                 ace.address,
