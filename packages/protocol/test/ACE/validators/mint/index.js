@@ -1,6 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const sinon = require('sinon');
 const BN = require('bn.js');
 const { sha3, padLeft } = require('web3-utils');
 
@@ -9,7 +8,7 @@ const {
     note,
     proof: { mint },
     abiEncoder: { outputCoder, inputCoder, encoderFactory },
-    proofUtils,
+    bn128,
 } = require('aztec.js');
 
 const { constants } = require('@aztec/dev-utils');
@@ -23,7 +22,7 @@ const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adju
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 
-contract.only('AdjustSupply tests for mint proof', (accounts) => {
+contract('AdjustSupply tests for mint proof', (accounts) => {
     let adjustSupplyContract;
     describe('success states', () => {
         beforeEach(async () => {
@@ -371,6 +370,32 @@ contract.only('AdjustSupply tests for mint proof', (accounts) => {
             ));
         });
 
+        it('validate failure when points not on curve', async () => {
+            const zeroes = `${padLeft('0', 64)}`;
+            const noteString = `${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}`;
+            const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
+            const challenge = sha3(challengeString, 'hex');
+            const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
+            const senderAddress = accounts[0];
+
+            const outputOwners = [];
+            const inputOwners = [];
+
+            const proofData = inputCoder.mint(
+                proofDataRaw,
+                challenge,
+                inputOwners,
+                outputOwners,
+                []
+            );
+
+            const opts = {
+                from: senderAddress,
+                gas: 4000000,
+            };
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
+        });
+
         it('Validate failure if scalars are not mod GROUP_MODULUS', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
@@ -594,6 +619,56 @@ contract.only('AdjustSupply tests for mint proof', (accounts) => {
             }));
         });
 
+        it('validate failure when group element (blinding factor) resolves to infinity', async () => {
+            const noteValues = [50, 30, 10, 10];
+            const numNotes = noteValues.length;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+            const notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = notes[1];
+            const adjustedNotes = notes.slice(2, 4);
+            const senderAddress = accounts[0];
+
+            const inputNotes = [newTotalMinted];
+            const outputNotes = [oldTotalMinted, ...adjustedNotes];
+
+            const proofConstruct = mint.constructProof([newTotalMinted, oldTotalMinted, ...adjustedNotes], senderAddress);
+
+            proofConstruct.proofData[0][0] = `0x${padLeft('05', 64)}`;
+            proofConstruct.proofData[0][1] = `0x${padLeft('05', 64)}`;
+            proofConstruct.proofData[0][2] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
+            proofConstruct.proofData[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            proofConstruct.proofData[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
+            proofConstruct.proofData[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            proofConstruct.challenge = `0x${padLeft('0a', 64)}`;
+
+            const inputOwners = inputNotes.map(m => m.owner);
+            const outputOwners = outputNotes.map(n => n.owner);
+
+            const proofData = inputCoder.mint(
+                proofConstruct.proofData,
+                proofConstruct.challenge,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+            const opts = {
+                from: senderAddress,
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
+                proofData,
+                senderAddress,
+                constants.CRS,
+                opts
+            ));
+        });
+
         it('Validate failure when sender address NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
@@ -612,6 +687,57 @@ contract.only('AdjustSupply tests for mint proof', (accounts) => {
             const outputNotes = [oldTotalMinted, ...adjustedNotes];
 
             const testVariable = 'sender';
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = mint.constructProofTest(
+                [newTotalMinted, oldTotalMinted, ...adjustedNotes],
+                senderAddress,
+                testVariable
+            );
+
+            const inputOwners = inputNotes.map(m => m.owner);
+            const outputOwners = outputNotes.map(n => n.owner);
+
+            const proofData = inputCoder.mint(
+                proofDataRaw,
+                challenge,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+            const opts = {
+                from: senderAddress,
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
+                proofData,
+                senderAddress,
+                constants.CRS,
+                opts
+            ));
+        });
+
+        it('Validate failure when kPublic (set internally in proof to 0) NOT integrated into challenge variable', async () => {
+            const noteValues = [50, 30, 10, 10];
+            const numNotes = noteValues.length;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+            const notes = aztecAccounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = notes[1];
+            const adjustedNotes = notes.slice(2, 4);
+            const senderAddress = accounts[0];
+
+            const inputNotes = [newTotalMinted];
+            const outputNotes = [oldTotalMinted, ...adjustedNotes];
+
+            const testVariable = 'kPublic';
 
             const {
                 proofData: proofDataRaw,

@@ -12,6 +12,7 @@ const {
     abiEncoder: { inputCoder, outputCoder, encoderFactory },
     note,
     secp256k1,
+    bn128,
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 
@@ -317,6 +318,57 @@ contract('Dividend Computation', (accounts) => {
             }));
         });
 
+        it('validate failure when group element (blinding factor) resolves to infinity', async () => {
+            const za = 100;
+            const zb = 5;
+            const noteValues = [90, 4, 50];
+
+            const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const notes = [
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 1);
+            const outputNotes = notes.slice(1, 3);
+            const senderAddress = accounts[0];
+
+            const proofConstruct = dividendComputation.constructProof([...inputNotes, ...outputNotes],
+                za,
+                zb,
+                senderAddress);
+
+            const proofDataRawFormatted = [proofConstruct.proofData.slice(0, 6)].concat(
+                [proofConstruct.proofData.slice(6, 12),
+                    proofConstruct.proofData.slice(12, 18)]
+            );
+
+            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map(n => n.owner);
+
+            proofDataRawFormatted[0][0] = `0x${padLeft('05', 64)}`;
+            proofDataRawFormatted[0][1] = `0x${padLeft('05', 64)}`;
+            proofDataRawFormatted[0][2] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
+            proofDataRawFormatted[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            proofDataRawFormatted[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
+            proofDataRawFormatted[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            proofConstruct.challenge = `0x${padLeft('0a', 64)}`;
+
+            const proofData = inputCoder.dividendComputation(
+                proofDataRawFormatted,
+                proofConstruct.challenge,
+                za,
+                zb,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+
+            await truffleAssert.reverts(dividendContract.validateDividendComputation(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
+
         it('validate failure when scalars are zero', async () => {
             const za = 100;
             const zb = 5;
@@ -536,6 +588,102 @@ contract('Dividend Computation', (accounts) => {
             const senderAddress = accounts[0];
 
             const testVariable = 'sender';
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = dividendComputation.constructProofTest([...inputNotes, ...outputNotes],
+                za,
+                zb,
+                senderAddress,
+                testVariable);
+
+            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map(n => n.owner);
+
+            const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12),
+                proofDataRaw.slice(12, 18)]);
+
+            const proofData = inputCoder.dividendComputation(
+                proofDataRawFormatted,
+                challenge,
+                za,
+                zb,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+
+            await truffleAssert.reverts(dividendContract.validateDividendComputation(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
+
+        it('Validate failure when za address NOT integrated into challenge variable', async () => {
+            const za = 100;
+            const zb = 5;
+            const noteValues = [90, 4, 50];
+
+            const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+
+            const notes = [
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 1);
+            const outputNotes = notes.slice(1, 3);
+            const senderAddress = accounts[0];
+
+            const testVariable = 'za';
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = dividendComputation.constructProofTest([...inputNotes, ...outputNotes],
+                za,
+                zb,
+                senderAddress,
+                testVariable);
+
+            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map(n => n.owner);
+
+            const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12),
+                proofDataRaw.slice(12, 18)]);
+
+            const proofData = inputCoder.dividendComputation(
+                proofDataRawFormatted,
+                challenge,
+                za,
+                zb,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+
+            await truffleAssert.reverts(dividendContract.validateDividendComputation(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
+
+        it('Validate failure when zb address NOT integrated into challenge variable', async () => {
+            const za = 100;
+            const zb = 5;
+            const noteValues = [90, 4, 50];
+
+            const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+
+            const notes = [
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 1);
+            const outputNotes = notes.slice(1, 3);
+            const senderAddress = accounts[0];
+
+            const testVariable = 'zb';
 
             const {
                 proofData: proofDataRaw,

@@ -12,6 +12,7 @@ const {
     abiEncoder: { inputCoder, outputCoder, encoderFactory },
     note,
     secp256k1,
+    bn128,
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 
@@ -458,42 +459,6 @@ contract('Bilateral Swap', (accounts) => {
         });
 
 
-        it('Validate failure if a group element resolves to a point at infinity', async () => {
-            const noteValues = [10, 20, 10, 20];
-
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
-
-            const inputNotes = notes.slice(0, 2);
-            const outputNotes = notes.slice(2, 4);
-            const senderAddress = accounts[0];
-
-
-            const proofConstruct = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-
-            /*
-            Need to set kBar to be the point at infinity and check failure. Point at infinity 
-            defined in projective coordinates as (0, 1, 0)
-
-            const kBarInfinity = `0x${().toString(16)}`;
-            proofConstruct.proofData[0][0] = kBarInfinity;
-            */
-
-            const proofData = inputCoder.bilateralSwap(
-                proofConstruct.proofData,
-                proofConstruct.challenge,
-                outputOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
-
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
-        });
-
         it('Validate failure when sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
@@ -516,6 +481,41 @@ contract('Bilateral Swap', (accounts) => {
             const proofData = inputCoder.bilateralSwap(
                 proofDataRaw,
                 challenge,
+                outputOwners,
+                [outputNotes[0], inputNotes[1]]
+            );
+
+            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                from: accounts[0],
+                gas: 4000000,
+            }));
+        });
+
+        it('Validate failure if a group element (blinding factor) resolves to the point at infinity', async () => {
+            const noteValues = [10, 20, 10, 20];
+
+            const notes = [
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+            const senderAddress = accounts[0];
+
+            const proofConstruct = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+
+            proofConstruct.proofData[0][0] = `0x${padLeft('05', 64)}`;
+            proofConstruct.proofData[0][1] = `0x${padLeft('05', 64)}`;
+            proofConstruct.proofData[0][2] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
+            proofConstruct.proofData[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            proofConstruct.proofData[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
+            proofConstruct.proofData[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            proofConstruct.challenge = `0x${padLeft('0a', 64)}`;
+
+            const outputOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const proofData = inputCoder.bilateralSwap(
+                proofConstruct.proofData,
+                proofConstruct.challenge,
                 outputOwners,
                 [outputNotes[0], inputNotes[1]]
             );
