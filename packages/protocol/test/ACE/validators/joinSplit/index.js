@@ -476,6 +476,149 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
+        it.only('validates failure for fake signature', async () => {
+            const noteValues = [10, 20, 10, 20];
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+
+            const notes = [
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+
+            const kPublic = 0;
+            const publicOwner = aztecAccounts[0].address;
+            const senderAddress = accounts[0];
+            const m = inputNotes.length;
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            );
+
+            // Note, the below are fake signatures. The v parameter has been fixed to 
+            // 27, but the r and s parameters are fake data
+            const inputSignatures = [
+                ['0x000000000000000000000000000000000000000000000000000000000000001b',
+                    '0xcbc2f0a07ef0684bd5af6338e0df66e7048dbbfc75e50a89ce631103ac975fb3',
+                    '0x38e71e1b7919f9fef61aeab31c57a23c0ec3ae8f414c1e1c2886a569398235e9'],
+                ['0x000000000000000000000000000000000000000000000000000000000000001b',
+                    '0xb5bc488fe84f6b5bbb81e5f7313b4ac73f53ad64b28a9d3408accaf1b52bc25c',
+                    '0x141acee147d2fb8b3c8f1c796c564b3c014d4e99bf77f517ee7774925deb878e']];
+
+            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map(n => n.owner);
+
+            const proofData = inputCoder.joinSplit(
+                proofDataRaw,
+                m,
+                challenge,
+                publicOwner,
+                inputSignatures,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
+        });
+
+
+        it.only('validate successful recovery of note owner', async () => {
+            const noteValues = [10, 20, 10, 20];
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+
+
+            const notes = [
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ];
+
+            const inputNotes = notes.slice(0, 2);
+            const outputNotes = notes.slice(2, 4);
+
+            const kPublic = 0;
+            const publicOwner = aztecAccounts[0].address;
+            const senderAddress = accounts[0];
+            const m = inputNotes.length;
+
+            const {
+                proofData: proofDataRaw,
+                challenge,
+            } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            );
+
+
+            const inputSignatures = inputNotes.map((inputNote, index) => {
+                const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
+                const message = {
+                    proof: JOIN_SPLIT_PROOF,
+                    noteHash: inputNote.noteHash,
+                    challenge,
+                    sender: senderAddress,
+                };
+                const { privateKey } = aztecAccounts[index];
+                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+
+                return signature;
+            });
+            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map(n => n.owner);
+
+            const proofData = inputCoder.joinSplit(
+                proofDataRaw,
+                m,
+                challenge,
+                publicOwner,
+                inputSignatures,
+                inputOwners,
+                outputOwners,
+                outputNotes
+            );
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
+
+            const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+
+
+            expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
+            expect(decoded[0].outputNotes[0].owner).to.equal(outputNotes[0].owner.toLowerCase());
+            expect(decoded[0].outputNotes[1].gamma.eq(outputNotes[1].gamma)).to.equal(true);
+            expect(decoded[0].outputNotes[1].sigma.eq(outputNotes[1].sigma)).to.equal(true);
+            expect(decoded[0].outputNotes[1].noteHash).to.equal(outputNotes[1].noteHash);
+            expect(decoded[0].outputNotes[1].owner).to.equal(outputNotes[1].owner.toLowerCase());
+
+            expect(decoded[0].inputNotes[0].gamma.eq(inputNotes[0].gamma)).to.equal(true);
+            expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);
+            expect(decoded[0].inputNotes[0].noteHash).to.equal(inputNotes[0].noteHash);
+            expect(decoded[0].inputNotes[0].owner).to.equal(inputNotes[0].owner.toLowerCase());
+
+            expect(decoded[0].inputNotes[1].gamma.eq(inputNotes[1].gamma)).to.equal(true);
+            expect(decoded[0].inputNotes[1].sigma.eq(inputNotes[1].sigma)).to.equal(true);
+            expect(decoded[0].inputNotes[1].noteHash).to.equal(inputNotes[1].noteHash);
+            expect(decoded[0].inputNotes[1].owner).to.equal(inputNotes[1].owner.toLowerCase());
+
+            expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
+            expect(decoded[0].publicValue).to.equal(kPublic);
+        });
+
 
         it('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 20, 10, 20];
