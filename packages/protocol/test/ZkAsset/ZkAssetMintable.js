@@ -22,7 +22,7 @@ const ZkAssetMintable = artifacts.require('./contracts/ZkAsset/ZkAssetMintable')
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract.only('ZkAssetMintable', (accounts) => {
+contract('ZkAssetMintable', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let ace;
@@ -161,6 +161,7 @@ contract.only('ZkAssetMintable', (accounts) => {
         });
 
         it('validate failure if msg.sender is not owner', async () => {
+            const proofs = [];
             const canAdjustSupply = true;
             const canConvert = true;
 
@@ -180,24 +181,24 @@ contract.only('ZkAssetMintable', (accounts) => {
             );
 
             const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
+            const oldTotalMinted = note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
-
-            const senderAddress = proof.proofUtils.randomAddress();
 
             // Minting two AZTEC notes, worth 30 and 20
             proofs[0] = proof.mint.encodeMintTransaction({
                 newTotalMinted,
                 oldTotalMinted,
                 adjustedNotes,
-                senderAddress,
+                senderAddress: accounts[0],
             });
 
-            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData));
+            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData, { from: accounts[1] }),
+                'only the owner can call the confidentialMint() method');
         });
 
         it('validate failure if ace.mint throws', async () => {
             // ace.mint will throw if total inputs != total outputs in the mint proof
+            const proofs = [];
             const canAdjustSupply = true;
             const canConvert = true;
 
@@ -219,7 +220,7 @@ contract.only('ZkAssetMintable', (accounts) => {
             );
 
             const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
+            const oldTotalMinted = note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
 
@@ -234,8 +235,10 @@ contract.only('ZkAssetMintable', (accounts) => {
         });
 
         it('validates failure if mint attempted when flag set to false', async () => {
+            const proofs = [];
             const canAdjustSupply = false;
             const canConvert = true;
+
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
             const notes = aztecAccounts.map(({ publicKey }, i) => {
@@ -250,30 +253,33 @@ contract.only('ZkAssetMintable', (accounts) => {
                 canConvert,
                 { from: accounts[0] }
             );
-        });
 
-        it('validates failure if mint attempted when flag set to false', async () => {
-            const [owner, recipient1, recipient2] = aztecAccounts;
+            const newTotalMinted = notes[0];
+            const oldTotalMinted = note.createZeroValueNote();
+            const adjustedNotes = notes.slice(2, 4);
 
-            const newTotalMinted = note
-                .create(owner.publicKey, 50);
-            const oldTotalMinted = note
-                .createZeroValueNote();
+            // Minting two AZTEC notes, worth 30 and 20
+            proofs[0] = proof.mint.encodeMintTransaction({
+                newTotalMinted,
+                oldTotalMinted,
+                adjustedNotes,
+                senderAddress: zkAssetMintable.address,
+            });
 
-            const mintedNotes = [
-                note.create(recipient1.publicKey, 20),
-                note.create(recipient2.publicKey, 30),
-            ];
+            const publicOwner = accounts[0];
+            const inputNoteOwners = aztecAccounts.slice(2, 4);
 
-            const mintProof = proof.mint
-                .encodeMintTransaction({
-                    newTotalMinted, // 50
-                    oldTotalMinted, // 0
-                    adjustedNotes: mintedNotes, // 30 + 20
-                    senderAddress: zkAssetMintable.address,
-                });
+            proofs[1] = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: adjustedNotes,
+                outputNotes: [],
+                senderAddress: accounts[0],
+                inputNoteOwners, // need the owners of the adjustedNotes
+                publicOwner,
+                kPublic: 50,
+                validatorAddress: aztecJoinSplit.address,
+            });
 
-            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, mintProof.proofData));
+            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData));
         });
     });
 });

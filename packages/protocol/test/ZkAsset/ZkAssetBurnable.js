@@ -26,7 +26,7 @@ const ZkAssetBurnable = artifacts.require('./contracts/ZkAsset/ZkAssetBurnable')
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract.only('ZkAssetBurnable', (accounts) => {
+contract('ZkAssetBurnable', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let notes = [];
@@ -180,7 +180,7 @@ contract.only('ZkAssetBurnable', (accounts) => {
         });
 
         it('validates failure if burn attempted when flag set to false', async () => {
-            const canBurnAndBurn = false;
+            const canAdjustSupply = false;
             const canConvert = true;
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
@@ -197,7 +197,7 @@ contract.only('ZkAssetBurnable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canBurnAndBurn,
+                canAdjustSupply,
                 canConvert,
                 { from: accounts[0] }
             );
@@ -248,7 +248,8 @@ contract.only('ZkAssetBurnable', (accounts) => {
 
             const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData);
             expect(joinSplitReceipt.status).to.equal(true);
-            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData));
+            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData),
+                'this asset is not burnable');
         });
 
         it('validate failure if msg.sender is not owner', async () => {
@@ -323,7 +324,8 @@ contract.only('ZkAssetBurnable', (accounts) => {
 
             const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData);
             expect(joinSplitReceipt.status).to.equal(true);
-            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData));
+            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData, { from: accounts[1] }),
+                'only the owner can call the confidentialBurn() method');
         });
 
         it('validate failure if ace.burn throws', async () => {
