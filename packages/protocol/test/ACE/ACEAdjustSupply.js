@@ -751,7 +751,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(utilityReceipt.status).to.equal(true);
         });
 
-        it.only('confirm updateNoteRegistry() fails when two note registries are linked to the same ERC20 token', async () => {
+        it('confirm updateNoteRegistry() fails when two note registries are linked to the same ERC20 token', async () => {
             const proofs = [];
             const proofHashes = [];
             // User A creates a non-mintable note registry (X) linked to an ERC20 
