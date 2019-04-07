@@ -27,71 +27,19 @@ dividendComputation.verifier = verifier;
 
 
 /**
- * Construct AZTEC dividend computation proof transcript
+ * Construct blinding factors 
  *
- * @method constructProof
- * @param {Object[]} notes - array of AZTEC notes
- * @param {integer} za - integer required to represent ratio in a compatible form with finite-field arithmetic
- * @param {integer} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
- * @param {sender} sender - Ethereum address
- * @returns {string[]} proofData - constructed cryptographic proof data
- * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
+ * @method constructBlindingFactors
+ * @param {Object[]} notes AZTEC notes
+ * @returns {Object[]} blinding factors
  */
-dividendComputation.constructProof = (notes, za, zb, sender) => {
-    const numNotes = 3;
-
-    // Used to check the number of input notes. Boolean argument specifies whether the 
-    // check should throw if not satisfied, or if we seek to collect all errors 
-    // and only throw at the end. Here, set to true - immediately throw if error
-    proofUtils.checkNumNotes(notes, numNotes, true);
-
-    proofUtils.parseInputs(notes, sender);
-    // Array to store bk values later
+dividendComputation.constructBlindingFactors = (notes, zaBN, zbBN, rollingHash) => {
     const bkArray = [];
-    // convert z_a and z_b into BN instances if they aren't already
-    let zaBN;
-    let zbBN;
-
-    const rollingHash = new Keccak();
-
-    if (BN.isBN(za)) {
-        zaBN = za;
-    } else {
-        zaBN = new BN(za);
-    }
-
-    if (BN.isBN(zb)) {
-        zbBN = zb;
-    } else {
-        zbBN = new BN(zb);
-    }
-    // Check that proof data lies on the bn128 curve
-    notes.forEach((note) => {
-        const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
-        const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
-
-        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
-            throw customError(
-                errorTypes.NOT_ON_CURVE,
-                {
-                    message: 'A group element is not on the bn128 curve',
-                    gammaOnCurve,
-                    sigmaOnCurve,
-                    note,
-                }
-            );
-        }
-    });
-
-    notes.forEach((note) => {
-        rollingHash.append(note.gamma);
-        rollingHash.append(note.sigma);
-    });
-
     let x = new BN(0).toRed(groupReduction);
     x = rollingHash.keccak(groupReduction);
 
-    const blindingFactors = notes.map((note, i) => {
+
+    return notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
         let B;
@@ -134,6 +82,70 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
             B,
         };
     });
+};
+
+/**
+ * Construct AZTEC dividend computation proof transcript
+ *
+ * @method constructProof
+ * @param {Object[]} notes - array of AZTEC notes
+ * @param {Number} za - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {Number} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {sender} sender - Ethereum address
+ * @returns {string[]} proofData - constructed cryptographic proof data
+ * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
+ */
+dividendComputation.constructProof = (notes, za, zb, sender) => {
+    const numNotes = 3;
+
+    // Used to check the number of input notes. Boolean argument specifies whether the 
+    // check should throw if not satisfied, or if we seek to collect all errors 
+    // and only throw at the end. Here, set to true - immediately throw if error
+    proofUtils.checkNumNotes(notes, numNotes, true);
+
+    proofUtils.parseInputs(notes, sender);
+    // convert z_a and z_b into BN instances if they aren't already
+    let zaBN;
+    let zbBN;
+
+    const rollingHash = new Keccak();
+
+    if (BN.isBN(za)) {
+        zaBN = za;
+    } else {
+        zaBN = new BN(za);
+    }
+
+    if (BN.isBN(zb)) {
+        zbBN = zb;
+    } else {
+        zbBN = new BN(zb);
+    }
+    // Check that proof data lies on the bn128 curve
+    notes.forEach((note) => {
+        const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
+        const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
+
+        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
+            throw customError(
+                errorTypes.NOT_ON_CURVE,
+                {
+                    message: 'A group element is not on the bn128 curve',
+                    gammaOnCurve,
+                    sigmaOnCurve,
+                    note,
+                }
+            );
+        }
+    });
+
+    notes.forEach((note) => {
+        rollingHash.append(note.gamma);
+        rollingHash.append(note.sigma);
+    });
+
+    const blindingFactors = dividendComputation.constructBlindingFactors(notes, zaBN, zbBN, rollingHash);
+
 
     const challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
     const proofDataUnformatted = blindingFactors.map((blindingFactor, i) => {
@@ -151,14 +163,31 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
     });
 
     // Manipulating proofData into the array format required by the smart contract verifier
-    const proofData = [...proofDataUnformatted[0], ...proofDataUnformatted[1], ...proofDataUnformatted[2]];
+    const proofData = [];
+
+    proofDataUnformatted.forEach((proofElement) => {
+        proofData.push(...proofElement);
+    });
+
     return {
-        proofDataUnformatted, // this has 6 elements
-        proofData, // this has 18 elements
+        proofDataUnformatted,
+        proofData,
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
     };
 };
 
+/**
+ * Encode a dividend computation transaction
+ * 
+ * @method encodeDividendComputationTransaction
+ * @memberof module:dividendComputation
+ * @param {Note[]} inputNotes input AZTEC notes
+ * @param {Note[]} outputNotes output AZTEC notes
+ * @param {Number} za - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {Number} zb - integer required to represent ratio in a compatible form with finite-field arithmetic
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
+ * @returns {Object} AZTEC proof data and expected output
+ */
 dividendComputation.encodeDividendComputationTransaction = ({
     inputNotes,
     outputNotes,
