@@ -22,7 +22,7 @@ const ZkAssetMintable = artifacts.require('./contracts/ZkAsset/ZkAssetMintable')
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('ZkAssetMintable', (accounts) => {
+contract.only('ZkAssetMintable', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let ace;
@@ -279,7 +279,8 @@ contract('ZkAssetMintable', (accounts) => {
                 validatorAddress: aztecJoinSplit.address,
             });
 
-            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData));
+            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData),
+                'this asset is not mintable');
         });
     });
 });
