@@ -1,7 +1,7 @@
 /**
  * Constructs AZTEC join-split zero-knowledge proofs
  *
- * @module proof.burn
+ * @module burn
  */
 const { padLeft, sha3 } = require('web3-utils');
 
@@ -17,6 +17,17 @@ const {
 const burn = {};
 burn.verifier = verifier;
 
+/**
+ * Encode a burn transaction
+ * 
+ * @method encodeBurnTransaction
+ * @memberof module:burn
+ * @param {Note[]} newTotalBurned AZTEC note representing the new total burned number
+ * @param {Note[]} oldTotalBurned AZTEC note representing the old total burned number
+ * @param {Note[]} adjustedNotes notes being burned
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
+ * @returns {Object} AZTEC proof data and expected output
+ */
 burn.encodeBurnTransaction = ({
     newTotalBurned,
     oldTotalBurned,
@@ -35,8 +46,6 @@ burn.encodeBurnTransaction = ({
     const outputOwners = outputNotes.map(n => n.owner);
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
-
-    // const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);
 
     const proofData = inputCoder.burn(
         proofDataRaw,
@@ -75,11 +84,11 @@ burn.encodeBurnTransaction = ({
  * Construct AZTEC burn proof transcript
  *
  * @method constructProof
- * @memberof proof.burn
- * @param {Object[]} notes array of AZTEC notes
- * @param {number} m number of input notes
+ * @memberof burn
+ * @param {Note[]} notes array of AZTEC notes
  * @param {string} sender Ethereum address of transaction sender
- * @returns {Object} proof data and challenge
+ * @returns {string[]} proofData - constructed cryptographic proof data
+ * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
 burn.constructProof = (notes, sender) => {
     const m = 1;
