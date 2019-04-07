@@ -26,7 +26,7 @@ const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adju
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 
-contract.only('AdjustSupply tests for burn proof', (accounts) => {
+contract('AdjustSupply tests for burn proof', (accounts) => {
     let adjustSupplyContract;
     describe('success states', () => {
         beforeEach(async () => {
