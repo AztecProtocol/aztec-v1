@@ -288,6 +288,15 @@ note.encodeMetadata = (noteArray) => {
 };
 
 /**
+ * Create a zero value note with from a constant a to make the hash of the initial totalMinted note in
+ * mintable assets a constant
+ *
+ * @method createZeroValueNote
+ * @returns {Note} created note instance
+ */
+note.createZeroValueNote = () => note.fromViewKey(utils.constants.ZERO_VALUE_NOTE_VIEWING_KEY);
+
+/**
  * Export the Note class as part of the note module. We shouldn't really use this directly, but useful for testing purposes
  *
  * @memberof module:note
