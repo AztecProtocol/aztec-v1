@@ -121,7 +121,7 @@ contract('ZkAsset', (accounts) => {
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
 
-            const tokenWithdrawlProof = proof.joinSplit.encodeJoinSplitTransaction({
+            const tokenWithdrawalProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
                 outputNotes: notes.slice(2, 4),
                 senderAddress: accounts[0],
@@ -131,8 +131,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: aztecJoinSplit.address,
             });
 
-            const tokenWithdrawlProofOutput = outputCoder.getProofOutput(tokenWithdrawlProof.expectedOutput, 0);
-            const tokenWithdrawlProofHash = outputCoder.hashProofOutput(tokenWithdrawlProofOutput);
+            const tokenWithdrawalProofOutput = outputCoder.getProofOutput(tokenWithdrawalProof.expectedOutput, 0);
+            const tokenWithdrawalProofHash = outputCoder.hashProofOutput(tokenWithdrawalProofOutput);
 
             await ace.publicApprove(
                 zkAsset.address,
@@ -143,13 +143,13 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(
                 zkAsset.address,
-                tokenWithdrawlProofHash,
+                tokenWithdrawalProofHash,
                 40,
                 { from: accounts[1] }
             );
 
             await zkAsset.confidentialTransfer(depositProof.proofData);
-            const { receipt } = await zkAsset.confidentialTransfer(tokenWithdrawlProof.proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(tokenWithdrawalProof.proofData);
             expect(receipt.status).to.equal(true);
         });
 
@@ -167,21 +167,21 @@ contract('ZkAsset', (accounts) => {
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
 
-            const withdrawlAmount = 40;
-            const withdrawlAmountBN = new BN(withdrawlAmount);
+            const withdrawalAmount = 40;
+            const withdrawalAmountBN = new BN(withdrawalAmount);
 
-            const withdrawlAndTransferProof = proof.joinSplit.encodeJoinSplitTransaction({
+            const withdrawalAndTransferProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(6, 8),
                 outputNotes: notes.slice(4, 6),
                 senderAddress: accounts[0],
                 inputNoteOwners: aztecAccounts.slice(6, 8),
                 publicOwner: accounts[2],
-                kPublic: withdrawlAmount,
+                kPublic: withdrawalAmount,
                 validatorAddress: aztecJoinSplit.address,
             });
 
-            const withdrawlAndTransferProofOutput = outputCoder.getProofOutput(withdrawlAndTransferProof.expectedOutput, 0);
-            const withdrawlAndTransferProofHash = outputCoder.hashProofOutput(withdrawlAndTransferProofOutput);
+            const withdrawalAndTransferProofOutput = outputCoder.getProofOutput(withdrawalAndTransferProof.expectedOutput, 0);
+            const withdrawalAndTransferProofHash = outputCoder.hashProofOutput(withdrawalAndTransferProofOutput);
 
             await ace.publicApprove(
                 zkAsset.address,
@@ -192,18 +192,18 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(
                 zkAsset.address,
-                withdrawlAndTransferProofHash,
+                withdrawalAndTransferProofHash,
                 40,
                 { from: accounts[2] }
             );
 
             await zkAsset.confidentialTransfer(depositProof.proofData);
 
-            const balancePreWithdrawl = await erc20.balanceOf(accounts[2]);
-            const expectedBalancePostWithdrawl = balancePreWithdrawl.add(withdrawlAmountBN.mul(scalingFactor));
-            const { receipt } = await zkAsset.confidentialTransfer(withdrawlAndTransferProof.proofData);
-            const balancePostWithdrawl = await erc20.balanceOf(accounts[2]);
-            expect(balancePostWithdrawl.toString()).to.equal(expectedBalancePostWithdrawl.toString());
+            const balancePreWithdrawal = await erc20.balanceOf(accounts[2]);
+            const expectedBalancePostWithdrawal = balancePreWithdrawal.add(withdrawalAmountBN.mul(scalingFactor));
+            const { receipt } = await zkAsset.confidentialTransfer(withdrawalAndTransferProof.proofData);
+            const balancePostWithdrawal = await erc20.balanceOf(accounts[2]);
+            expect(balancePostWithdrawal.toString()).to.equal(expectedBalancePostWithdrawal.toString());
 
             expect(receipt.status).to.equal(true);
         });

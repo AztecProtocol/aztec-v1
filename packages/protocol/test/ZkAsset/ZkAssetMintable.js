@@ -116,7 +116,7 @@ contract('ZkAssetMintable', (accounts) => {
             const erc20TotalSupplyAfterMint = (await erc20.totalSupply()).toNumber();
             expect(erc20TotalSupplyAfterMint).to.equal(0);
 
-            const withdrawlProof = proof.joinSplit
+            const withdrawalProof = proof.joinSplit
                 .encodeJoinSplitTransaction({
                     inputNotes: mintedNotes, // 20 + 30
                     outputNotes: [],
@@ -128,10 +128,10 @@ contract('ZkAssetMintable', (accounts) => {
                 });
 
             const { receipt: transferReceipt } = await zkAssetMintable
-                .confidentialTransfer(withdrawlProof.proofData);
+                .confidentialTransfer(withdrawalProof.proofData);
             
-            const erc20TotalSupplyAfterWithdrawl = (await erc20.totalSupply()).toNumber();
-            expect(erc20TotalSupplyAfterWithdrawl).to.equal(kPublic * scalingFactor);
+            const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
+            expect(erc20TotalSupplyAfterWithdrawal).to.equal(kPublic * scalingFactor);
             const finalBalance = (await erc20.balanceOf(recipient1.address)).toNumber();
             expect(transferReceipt.status).to.equal(true);
             expect(initialBalance).to.equal(0);
