@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * Note utility functions
  *

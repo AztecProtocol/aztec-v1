@@ -22,7 +22,7 @@ const ZkAssetMintable = artifacts.require('./contracts/ZkAsset/ZkAssetMintable')
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract.only('ZkAssetMintable', (accounts) => {
+contract('ZkAssetMintable', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let ace;
