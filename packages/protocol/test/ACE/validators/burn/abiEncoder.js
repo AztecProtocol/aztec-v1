@@ -6,7 +6,9 @@ const {
     note,
     proof: { burn },
 } = require('aztec.js');
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const {
+    constants: { CRS },
+} = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 // ### Artifacts
@@ -81,13 +83,6 @@ contract('AdjustSupply ABI Encoder on a burn proof', (accounts) => {
             expect(decoded[1].publicOwner).to.equal(publicOwner.toLowerCase());
             expect(decoded[1].publicValue).to.equal(publicValue);
             expect(result).to.equal(expectedOutput);
-
-            const gasUsed = await adjustSupplyAbiEncoder.validateAdjustSupply.estimateGas(proofData, senderAddress, CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-
-            console.log('gas used = ', gasUsed);
         });
     });
 });

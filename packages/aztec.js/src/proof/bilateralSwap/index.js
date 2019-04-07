@@ -25,6 +25,47 @@ const {
 } = require('../../abiEncoder');
 
 /**
+ * Construct blinding factors 
+ *
+ * @method constructBlindingFactors
+ * @param {Object[]} notes AZTEC notes
+ * @returns {Object[]} blinding factors
+ */
+bilateralSwap.constructBlindingFactors = (notes) => {
+    const bkArray = [];
+
+    return notes.map((note, i) => {
+        let bk = bn128.randomGroupScalar();
+        const ba = bn128.randomGroupScalar();
+        let B;
+
+        /*
+        Explanation of the below if/else
+        - The purpose is to set bk1 = bk3 and bk2 = bk4
+        - i is used as an indexing variable, to keep track of whether we are at a maker note or taker note
+        - All bks are stored in a bkArray. When we arrive at the taker notes, we set bk equal to the bk of the corresponding
+        maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the bkArray, and setting the current
+        bk equal to the element at the resulting position.
+        */
+
+        // Maker notes
+        if (i <= 1) {
+            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+        } else { // taker notes
+            bk = bkArray[i - 2];
+            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+        }
+        bkArray.push(bk);
+
+        return {
+            bk,
+            ba,
+            B,
+        };
+    });
+};
+
+/**
  * Construct AZTEC bilateral swap proof transcript
  *
  * @method constructProof
@@ -34,8 +75,6 @@ const {
  * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
 bilateralSwap.constructProof = (notes, sender) => {
-    const bkArray = [];
-
     // Check that proof data lies on the bn128 curve
     notes.forEach((note) => {
         const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
@@ -56,39 +95,9 @@ bilateralSwap.constructProof = (notes, sender) => {
 
     proofUtils.parseInputs(notes, sender);
 
-    const blindingFactors = notes.map((note, i) => {
-        let bk = bn128.randomGroupScalar();
-        const ba = bn128.randomGroupScalar();
-        let B;
-
-
-        /*
-        Explanation of the below if/else
-        - The purpose is to set bk1 = bk3 and bk2 = bk4
-        - i is used as an indexing variable, to keep track of whether we are at a maker note or taker note
-        - All bks are stored in a bkArray. When we arrive at the taker notes, we set bk equal to the bk of the corresponding
-          maker note. This is achieved by 'jumping back' 2 index positions (i - 2) in the bkArray, and setting the current
-          bk equal to the element at the resulting position.
-        */
-
-        // Maker notes
-        if (i <= 1) {
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-        } else { // taker notes
-            bk = bkArray[i - 2];
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-        }
-        bkArray.push(bk);
-
-        return {
-            bk,
-            ba,
-            B,
-        };
-    });
+    const blindingFactors = bilateralSwap.constructBlindingFactors(notes);
 
     const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
-
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar;
 
@@ -117,6 +126,16 @@ bilateralSwap.constructProof = (notes, sender) => {
     };
 };
 
+/**
+ * Encode a bilateral swap transaction
+ * 
+ * @method encodeBilateralSwapTransaction
+ * @memberof module:bilateralSwap
+ * @param {Note[]} inputNotes input AZTEC notes
+ * @param {Note[]} outputNotes output AZTEC notes
+ * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
+ * @returns {Object} AZTEC proof data and expected output
+ */
 bilateralSwap.encodeBilateralSwapTransaction = ({
     inputNotes,
     outputNotes,

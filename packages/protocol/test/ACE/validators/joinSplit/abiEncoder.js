@@ -62,13 +62,17 @@ contract('Join Split ABI Encoder', (accounts) => {
                 return signature;
             });
             const publicOwner = aztecAccounts[0].address;
+
             const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map(n => n.owner);
+
             const data = joinSplitEncode(
                 proofData,
                 m,
                 challenge,
                 publicOwner,
                 inputSignatures,
+                inputOwners,
                 outputOwners,
                 outputNotes
             );
@@ -109,12 +113,6 @@ contract('Join Split ABI Encoder', (accounts) => {
             expect(decoded[0].challenge).to.equal(challenge);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await joinSplitAbiEncoder.validateJoinSplit.estimateGas(data, senderAddress, CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-
-            console.log('gas used = ', gasUsed);
         });
     });
 });
