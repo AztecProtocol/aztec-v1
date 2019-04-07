@@ -1,7 +1,6 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const { padLeft, keccak256 } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
@@ -13,7 +12,6 @@ const {
         JOIN_SPLIT_PROOF, MINT_PROOF, BURN_PROOF, UTILITY_PROOF,
     },
 } = require('@aztec/dev-utils');
-const crypto = require('crypto');
 
 const { outputCoder } = abiEncoder;
 
@@ -58,11 +56,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await ace.setProof(UTILITY_PROOF, aztecBilateralSwap.address);
 
             // Creating a fixed note
-            const a = padLeft('1', 64);
-            const k = padLeft('0', 8);
-            const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
-            const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            zeroNote = note.fromViewKey(viewingKey);
+            zeroNote = note.createZeroValueNote();
 
             erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
@@ -290,13 +284,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             await ace.setProof(UTILITY_PROOF, aztecBilateralSwap.address);
 
-
-            // Creating a fixed note
-            const a = padLeft('1', 64);
-            const k = padLeft('0', 8);
-            const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
-            const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            zeroNote = note.fromViewKey(viewingKey);
+            zeroNote = note.createZeroValueNote();
         });
 
         it('should validate failure when attempting to transfer greater minted balance than linked token balance', async () => {
@@ -752,168 +740,136 @@ contract('ACE mint and burn functionality', (accounts) => {
         });
 
         it('confirm updateNoteRegistry() fails when two note registries are linked to the same ERC20 token', async () => {
-            const proofs = [];
-            const proofHashes = [];
-            // User A creates a non-mintable note registry (X) linked to an ERC20 
-
-            // // User B then creates a mintable note registry (Y) linked to the same ERC20
-            // const userAddressB = accounts[1];
-            // erc20 = await ERC20Mintable.new();
-            // const canAdjustSupplyB = true;
-            // const canConvertB = true;
-
-            // await ace.createNoteRegistry(
-            //     erc20.address,
-            //     scalingFactor,
-            //     canAdjustSupplyB,
-            //     canConvertB,
-            //     { from: userAddressB }
-            // );
-
-            // User A converts tokens Q (50) into an AZTEC note in note registry X
-            // await erc20.mint(
-            //     userAddressA,
-            //     scalingFactor.mul(tokensTransferred)
-            // );
-
-            // const balance = await erc20.balanceOf(userAddressA);
-            // console.log('balance: ', balance);
-
-            // await erc20.approve(
-            //     ace.address,
-            //     scalingFactor.mul(tokensTransferred),
-            //     { from: accounts[0], gas: 4700000 }
-            // );
-
-            // User A creates a note registry linked to an ERC20 token and converts tokens into it
-
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 1, 1];
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
-
-            proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 1),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -50,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            const canAdjustSupply = true;
-            const canConvert = true;
             const scalingFactor = new BN(10);
-            const tokensTransferred = new BN(100000);
+            const tokensTransferred = new BN(50);
+
+            // User A creates a note registry linked to a particular ERC20 token, and 
+            // transfers 50 tokens to it
+
+            const [ownerA, attacker] = accounts;
+            const [recipient1, recipient2] = [...new Array(2)].map(() => secp256k1.generateAccount());
 
             erc20 = await ERC20Mintable.new();
+
+            await erc20.mint(
+                ownerA,
+                scalingFactor.mul(tokensTransferred),
+                { from: ownerA, gas: 4700000 }
+            );
+
+            // Set the first note registry
+            const canAdjustSupply = false;
+            const canConvert = true;
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
                 canAdjustSupply,
                 canConvert,
-                { from: accounts[0] }
-            );
-
-            const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-            proofHashes[0] = outputCoder.hashProofOutput(proofOutput);
-            const hex = parseInt(JOIN_SPLIT_PROOF, 10).toString(16);
-            const hashData = [
-                padLeft(proofHashes[0].slice(2), 64),
-                padLeft(hex, 64),
-                padLeft(accounts[0].slice(2), 64),
-            ].join('');
-            const validatedProofHash = keccak256(`0x${hashData}`);
-
-            const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-
-            await erc20.mint(
-                accounts[0],
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
+                { from: ownerA, gas: 4700000 }
             );
 
             await erc20.approve(
                 ace.address, // address approving to spend
                 scalingFactor.mul(tokensTransferred), // value to transfer
-                { from: accounts[0], gas: 4700000 }
+                { from: ownerA, gas: 4700000 }
             );
+
+            const outputNotes = [note.create(recipient1.publicKey, 50)];
+
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes,
+                senderAddress: ownerA,
+                inputNoteOwners: [],
+                publicOwner: ownerA,
+                kPublic: -50,
+                validatorAddress: aztecJoinSplit.address,
+            });
+
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
 
             await ace.publicApprove(
-                accounts[0],
-                proofHashes[0],
-                100,
-                { from: accounts[0] }
+                ownerA,
+                depositProofHash,
+                50,
+                { from: ownerA }
             );
-            console.log('created first join split');
 
-            const { receipt: joinSplitReceipt } = await ace.validateProof(
+            await ace.validateProof(
                 JOIN_SPLIT_PROOF,
-                accounts[0],
-                proofs[0].proofData,
-                { from: accounts[0] }
+                ownerA,
+                depositProof.proofData,
+                { from: ownerA }
             );
-            console.log('validated first join split');
 
-            const result = await ace.validatedProofs(validatedProofHash);
-            expect(result).to.equal(true);
-            expect(joinSplitReceipt.status).to.equal(true);
+            const formattedProofOutput = `0x${depositProofOutput.slice(0x40)}`;
 
-
-            const { receipt: updateRegistryReceipt } = await ace.updateNoteRegistry(
-                JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0], { from: accounts[0] }
+            await ace.updateNoteRegistry(
+                JOIN_SPLIT_PROOF, formattedProofOutput, ownerA, { from: ownerA }
             );
-            console.log('updated the first note registry');
 
-            expect(updateRegistryReceipt.status).to.equal(true);
+            // Attacker creates a note registry, linked to same public ERC20 contract 
+            const canAdjustSupplyAttacker = true;
+            const canConvertAttacker = true;
 
-            // User B creates another note registry, linked to the same token
-            // and mints into it
-            const newTotalMinted = notes.slice(1, 2);
-            const oldTotalMinted = [zeroNote];
-            const adjustedNotes = notes.slice(2, 3);
-
-            console.log('new totla minted length', newTotalMinted.length);
-            console.log('old total minted length', oldTotalMinted.length);
-            console.log('adjusted notes', adjustedNotes.length);
-
-            proofs[1] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[1],
-            });
-            console.log('created mint proof data');
-
-            // acounts[1] = user B
             await ace.createNoteRegistry(
                 erc20.address,
                 scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[1] }
+                canAdjustSupplyAttacker,
+                canConvertAttacker,
+                { from: attacker }
             );
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[1].proofData, accounts[1]);
-            console.log('performed the first mint');
-            expect(mintReceipt.status).to.equal(true);
-            process.exit(1);
 
-            // User B attempts to convert their minted note into tokens via updateNoteRegisty()
-            proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: userAddressB,
-                inputNoteOwners: adjustedNotes.owner,
-                publicOwner: userAddressB,
-                kPublic: 1,
+            const newTotalMinted = note.create(recipient2.publicKey, 1);
+            const oldTotalMinted = note.createZeroValueNote();
+            const adjustedNotes = [note.create(recipient2.publicKey, 1)];
+
+            const mintProof = proof.mint.encodeMintTransaction({
+                newTotalMinted,
+                oldTotalMinted,
+                adjustedNotes,
+                senderAddress: attacker,
             });
 
-            console.log('created final set of proof data');
+            await ace.mint(MINT_PROOF, mintProof.proofData, attacker, { from: attacker });
 
+            // User B attempts to convert their minted note into tokens via updateNoteRegisty()
+            const attackerJoinSplitProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: adjustedNotes,
+                outputNotes: [],
+                senderAddress: attacker,
+                inputNoteOwners: [recipient2],
+                publicOwner: attacker,
+                kPublic: 1,
+                validatorAddress: aztecJoinSplit.address,
+            });
 
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proofs[2].proofData, userAddressB));
+            await ace.validateProof(
+                JOIN_SPLIT_PROOF,
+                attacker,
+                attackerJoinSplitProof.proofData,
+                { from: attacker }
+            );
+
+            const attackerJoinSplitProofOutput = outputCoder.getProofOutput(attackerJoinSplitProof.expectedOutput, 0);
+            const attackerJoinSplitProofHash = outputCoder.hashProofOutput(attackerJoinSplitProofOutput);
+
+            const formattedProofOutputAttacker = `0x${attackerJoinSplitProofOutput.slice(0x40)}`;
+
+            await ace.publicApprove(
+                attacker,
+                attackerJoinSplitProofHash,
+                1,
+                { from: attacker }
+            );
+
+            await truffleAssert.reverts(ace.updateNoteRegistry(
+                JOIN_SPLIT_PROOF,
+                formattedProofOutputAttacker,
+                attacker,
+                { from: attacker }
+            ));
         });
     });
 });
