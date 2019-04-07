@@ -126,6 +126,9 @@ const EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = '0x91ab3d17e3a50a9d89e63fd30b92be7f5
 // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
 const JOIN_SPLIT_SIGNATURE_TYPE_HASH = '0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462';
 
+// keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool status)"
+const NOTE_SIGNATURE_TYPE_HASH = '0x9fe730639297761b7154c4543e5b6d06ca424c8b46480a40d3181296d5c35815';
+
 constants.eip712 = {
     ACE_DOMAIN_PARAMS: {
         name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
@@ -166,6 +169,11 @@ constants.eip712 = {
             EIP712Domain: EIP712_DOMAIN,
         },
         primaryType: 'NoteSignature',
+    },
+    NOTE_SIGNATURE_TYPE_HASH,
+    ZK_ASSET_DOMAIN_PARAMS: {
+        name: 'ZK_ASSET',
+        version: '1',
     },
 };
 

@@ -9,28 +9,37 @@ const { constants, proofs } = require('@aztec/dev-utils');
 const eip712 = require('./eip712');
 const secp256k1 = require('../secp256k1');
 
-// For backwards compatibility. TODO: remove
-const defaultDomain = {
-    name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
-    version: '1',
-};
-
 const sign = {};
 sign.eip712 = eip712;
 
 /**
- * Generate EIP712 domain parameters for AZTECERC20Bridge.sol
+ * Generate EIP712 domain parameters for ACE.sol
  * @method generateAZTECDomainParams
  * @param {string} verifyingContract address of target contract
  * @returns {Object} EIP712 Domain type object
  */
 sign.generateAZTECDomainParams = function generateAZTECDomainParams(
     verifyingContract,
-    domain = defaultDomain
+    domain = constants.eip712.ACE_DOMAIN_PARAMS
 ) {
     return {
         name: domain.name,
         version: domain.version,
+        verifyingContract,
+    };
+};
+
+/**
+ * Generate EIP712 domain parameters for ZkAsset.sol
+ * @method generateZKAssetDomainParams
+ * @param {string} verifyingContract address of target contract
+ * @returns {Object} EIP712 Domain type object
+ */
+sign.generateZKAssetDomainParams = function generateZKAssetDomainParams(
+    verifyingContract
+) {
+    return {
+        ...constants.eip712.ZK_ASSET_DOMAIN_PARAMS,
         verifyingContract,
     };
 };

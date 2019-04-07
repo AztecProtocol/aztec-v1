@@ -14,8 +14,8 @@ const { outputCoder } = abiEncoder;
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
 const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const ERC20BrokenTest = artifacts.require('./contracts/ERC20/ERC20BrokenTest');
 const ERC20BrokenTransferTest = artifacts.require('./contracts/ERC20/ERC20BrokenTransferTest');
+const ERC20BrokenTransferFromTest = artifacts.require('./contracts/ERC20/ERC20BrokenTransferFromTest');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
 
 contract('Note Registry', (accounts) => {
@@ -426,11 +426,11 @@ contract('Note Registry', (accounts) => {
 
         it('should fail to update a note registry if the erc20 transferFrom fails', async () => {
             const opts = { from: accounts[1] };
-            const erc20BrokenTest = await ERC20BrokenTest.new();
-            await erc20BrokenTest.mint(accounts[0], scalingFactor.mul(tokensTransferred));
-            await erc20BrokenTest.approve(ace.address, scalingFactor.mul(tokensTransferred));
+            const erc20BrokenTransferFromTest = await ERC20BrokenTransferFromTest.new();
+            await erc20BrokenTransferFromTest.mint(accounts[0], scalingFactor.mul(tokensTransferred));
+            await erc20BrokenTransferFromTest.approve(ace.address, scalingFactor.mul(tokensTransferred));
             await ace.createNoteRegistry(
-                erc20BrokenTest.address,
+                erc20BrokenTransferFromTest.address,
                 scalingFactor,
                 canAdjustSupply,
                 canConvert,

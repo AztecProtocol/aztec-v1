@@ -123,7 +123,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
                 status
             ));
             bytes32 msgHash = hashEIP712Message(hashStruct);
-            emit DebugMsgHash(msgHash);
             signer = recoverSignature(
                 msgHash,
                 _signature
@@ -134,8 +133,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         require(signer == noteOwner, "the note owner did not sign this message");
         confidentialApproved[_noteHash][_spender] = _status;
     }
-
-    event DebugMsgHash(bytes32 msgHash);
 
     /**
     * @dev Executes a value transfer mediated by smart contracts. The method is supplied with
