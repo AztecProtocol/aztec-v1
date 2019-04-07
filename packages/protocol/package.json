@@ -26,7 +26,8 @@
   "dependencies": {
     "@aztec/dev-utils": "file:../dev-utils",
     "braintree-jsdoc-template": "^3.3.0",
-    "openzeppelin-solidity": "2.1.2"
+    "openzeppelin-solidity": "2.1.2",
+    "sinon": "^7.3.1"
   },
   "devDependencies": {
     "@0x/sol-compiler": "^3.1.3",

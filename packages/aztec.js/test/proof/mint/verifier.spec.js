@@ -20,7 +20,7 @@ const { expect } = chai;
 
 describe('Mint proof verification tests', () => {
     describe('success states', () => {
-        it('proof.constructProof creates a valid join-split proof', () => {
+        it('proof.constructProof creates a valid mint proof', () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 30;
             const mintOne = 10;

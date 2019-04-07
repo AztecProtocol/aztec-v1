@@ -18,7 +18,6 @@ const sign = require('../../sign');
 
 const { outputCoder, inputCoder } = abiEncoder;
 const { groupReduction } = bn128;
-const joinSplitEncode = inputCoder.joinSplit;
 
 const joinSplit = {};
 joinSplit.extractor = extractor;
@@ -57,6 +56,40 @@ joinSplit.generateBlindingScalars = (n, m) => {
     return scalars;
 };
 
+/**
+ * Construct blinding factors 
+ *
+ * @method constructBlindingFactors
+ * @param {Object[]} notes AZTEC notes
+ * @returns {Object[]} blinding factors
+ */
+joinSplit.constructBlindingFactors = (notes, m, rollingHash, blindingScalars) => {
+    let B;
+    let x = new BN(0).toRed(groupReduction);
+    let runningBk = new BN(0).toRed(groupReduction);
+
+    return notes.map((note, i) => {
+        const { bk, ba } = blindingScalars[i];
+        if ((i + 1) > m) {
+            // get next iteration of our rolling hash
+            x = rollingHash.keccak(groupReduction);
+            const xbk = bk.redMul(x);
+            const xba = ba.redMul(x);
+            runningBk = runningBk.redSub(bk);
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+        } else {
+            runningBk = runningBk.redAdd(bk);
+            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+        }
+        return {
+            bk,
+            ba,
+            B,
+            x,
+        };
+    });
+};
+
 
 /**
  * Construct AZTEC join-split proof transcript
@@ -89,32 +122,10 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
     });
 
     // define 'running' blinding factor for the k-parameter in final note
-    let runningBk = new BN(0).toRed(groupReduction);
 
     const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
 
-    const blindingFactors = notes.map((note, i) => {
-        let B;
-        let x = new BN(0).toRed(groupReduction);
-        const { bk, ba } = blindingScalars[i];
-        if ((i + 1) > m) {
-            // get next iteration of our rolling hash
-            x = rollingHash.keccak(groupReduction);
-            const xbk = bk.redMul(x);
-            const xba = ba.redMul(x);
-            runningBk = runningBk.redSub(bk);
-            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
-        } else {
-            runningBk = runningBk.redAdd(bk);
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-        }
-        return {
-            bk,
-            ba,
-            B,
-            x,
-        };
-    });
+    const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
 
     const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, notes, blindingFactors);
 
@@ -170,34 +181,10 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
         rollingHash.append(note.sigma);
     });
 
-    // define 'running' blinding factor for the k-parameter in final note
-    let runningBk = new BN(0).toRed(groupReduction);
 
     const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
 
-    const blindingFactors = notes.map((note, i) => {
-        let B;
-        let x = new BN(0).toRed(groupReduction);
-        const { bk, ba } = blindingScalars[i];
-        if ((i + 1) > m) {
-            // get next iteration of our rolling hash
-            x = rollingHash.keccak(groupReduction);
-            const xbk = bk.redMul(x);
-            const xba = ba.redMul(x);
-            runningBk = runningBk.redSub(bk);
-            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
-        } else {
-            runningBk = runningBk.redAdd(bk);
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-        }
-        return {
-            bk,
-            ba,
-            B,
-            x,
-        };
-    });
-
+    const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
     const challenge = proofUtils.computeChallenge(sender, kPublicBn, m, publicOwner, notes, blindingFactors);
 
     const proofData = blindingFactors.map((blindingFactor, i) => {
@@ -266,15 +253,19 @@ joinSplit.encodeJoinSplitTransaction = ({
     });
 
     const outputOwners = outputNotes.map(n => n.owner);
-    const proofData = joinSplitEncode(
+    const inputOwners = inputNotes.map(n => n.owner);
+
+    const proofData = inputCoder.joinSplit(
         proofDataRaw,
         m,
         challenge,
         publicOwner,
         inputSignatures,
+        inputOwners,
         outputOwners,
         outputNotes
     );
+
     const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
         inputNotes,
         outputNotes,
