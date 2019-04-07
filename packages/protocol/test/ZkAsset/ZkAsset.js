@@ -4,8 +4,10 @@ const BN = require('bn.js');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
+const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
 const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const truffleAssert = require('truffle-assertions');
+const { keccak256 } = require('web3-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -19,6 +21,12 @@ const ZkAsset = artifacts.require('./contracts/ZkAsset/ZkAsset');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
+const computeDomainHash = (validatorAddress) => {
+    const types = { EIP712Domain: constants.eip712.EIP712_DOMAIN };
+    const domain = sign.generateZKAssetDomainParams(validatorAddress);
+    return keccak256(`0x${sign.eip712.encodeMessageData(types, 'EIP712Domain', domain)}`);
+};
+
 contract('ZkAsset', (accounts) => {
     describe('success states', () => {
         let ace;
@@ -29,7 +37,7 @@ contract('ZkAsset', (accounts) => {
         let erc20;
         let notes = [];
         const proofs = [];
-        let scalingFactor;
+        const scalingFactor = new BN(10);
         const tokensTransferred = new BN(100000);
         let zkAsset;
 
@@ -99,8 +107,14 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: aztecJoinSplit.address,
             });
 
+            const proofOutputs = proofs.map(({ expectedOutput }) => {
+                return outputCoder.getProofOutput(expectedOutput, 0);
+            });
+            const proofHashes = proofOutputs.map((proofOutput) => {
+                return outputCoder.hashProofOutput(proofOutput);
+            });
+
             erc20 = await ERC20Mintable.new();
-            scalingFactor = new BN(10);
             zkAsset = await ZkAsset.new(
                 ace.address,
                 erc20.address,
@@ -125,13 +139,6 @@ contract('ZkAsset', (accounts) => {
                     opts
                 );
             }));
-
-            const proofOutputs = proofs.map(({ expectedOutput }) => {
-                return outputCoder.getProofOutput(expectedOutput, 0);
-            });
-            const proofHashes = proofOutputs.map((proofOutput) => {
-                return outputCoder.hashProofOutput(proofOutput);
-            });
 
             await ace.publicApprove(
                 zkAsset.address,
@@ -159,28 +166,64 @@ contract('ZkAsset', (accounts) => {
             );
         });
 
-        it('should update a note registry with output notes', async () => {
-            const { receipt } = await zkAsset.confidentialTransfer(proofs[0].proofData);
-            expect(receipt.status).to.equal(true);
-            console.log('gas used = ', receipt.gasUsed);
+
+        describe('success states', async () => {
+            it('should correctly compute the domain hash', async () => {
+                const domainHash = computeDomainHash(zkAsset.address);
+                const result = await zkAsset.EIP712_DOMAIN_HASH();
+                expect(result).to.equal(domainHash);
+            });
+
+            it('should correctly set the flags', async () => {
+                const result = await zkAsset.flags();
+                expect(result.active).to.equal(true);
+                expect(result.canAdjustSupply).to.equal(false);
+                expect(result.canConvert).to.equal(true);
+            });
+
+            it('should correctly set the linked token', async () => {
+                const result = await zkAsset.linkedToken();
+                expect(result).to.equal(erc20.address);
+            });
+
+            it('should correctly set the scaling factor', async () => {
+                const result = await zkAsset.scalingFactor();
+                expect(result.toNumber()).to.equal(scalingFactor.toNumber());
+            });
+
+            it('should update a note registry with output notes', async () => {
+                const { receipt } = await zkAsset.confidentialTransfer(proofs[0].proofData);
+                expect(receipt.status).to.equal(true);
+                console.log('gas used = ', receipt.gasUsed);
+            });
+
+            it('should update a note registry by consuming input notes, with kPublic negative', async () => {
+                await zkAsset.confidentialTransfer(proofs[0].proofData);
+                const { receipt } = await zkAsset.confidentialTransfer(proofs[1].proofData);
+                expect(receipt.status).to.equal(true);
+            });
+
+            it('should update a note registry by consuming input notes, with kPublic positive', async () => {
+                await zkAsset.confidentialTransfer(proofs[2].proofData);
+                const { receipt } = await zkAsset.confidentialTransfer(proofs[3].proofData);
+                expect(receipt.status).to.equal(true);
+                const result = await ace.getNote(zkAsset.address, notes[6].noteHash);
+                expect(result.status.toNumber()).to.equal(constants.statuses.NOTE_SPENT);
+            });
+
+            it('should update a note registry with kPublic = 0', async () => {
+                await zkAsset.confidentialTransfer(proofs[4].proofData);
+                const { receipt } = await zkAsset.confidentialTransfer(proofs[5].proofData);
+                expect(receipt.status).to.equal(true);
+            });
         });
 
-        it('should update a note registry by consuming input notes, with kPublic negative', async () => {
-            await zkAsset.confidentialTransfer(proofs[0].proofData);
-            const { receipt } = await zkAsset.confidentialTransfer(proofs[1].proofData);
-            expect(receipt.status).to.equal(true);
-        });
-
-        it('should update a note registry by consuming input notes, with kPublic positive', async () => {
-            await zkAsset.confidentialTransfer(proofs[2].proofData);
-            const { receipt } = await zkAsset.confidentialTransfer(proofs[3].proofData);
-            expect(receipt.status).to.equal(true);
-        });
-
-        it('should update a note registry with kPublic = 0', async () => {
-            await zkAsset.confidentialTransfer(proofs[4].proofData);
-            const { receipt } = await zkAsset.confidentialTransfer(proofs[5].proofData);
-            expect(receipt.status).to.equal(true);
+        describe('failure states', async () => {
+            it('should fail if the ace fails to validate the proof', async () => {
+                const malformedProofData = `0x0123${proofs[0].proofData.slice(6)}`;
+                // no error message because it throws in assembly
+                await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData));
+            });
         });
     });
 });

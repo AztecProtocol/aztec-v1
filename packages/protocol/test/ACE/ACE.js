@@ -208,7 +208,8 @@ contract('ACE', (accounts) => {
             });
 
             it('should not validate malformed proof data', async () => {
-                const malformedProofData = '0x0123' + proofData.slice(6);
+                const malformedProofData = `0x0123${proofData.slice(6)}`;
+                // no error message because it throws in assembly
                 await truffleAssert.reverts(ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], malformedProofData));
             });
 
