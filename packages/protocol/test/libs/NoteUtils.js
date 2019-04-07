@@ -2,6 +2,7 @@
 /* global artifacts, contract, describe, expect, it: true */
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+const truffleAssert = require('truffle-assertions');
 const { padLeft } = require('web3-utils');
 
 const NoteUtils = artifacts.require('./NoteUtilsTest');
@@ -55,16 +56,17 @@ contract('NoteUtils', async (accounts) => {
         it('should return the correct length of the abi encoded notes array', async () => {
             const formattedOutputNotes = `0x${outputNotes.slice(0x40)}`;
             const result = await noteUtils.getLength(formattedOutputNotes);
+            // there's always only one proof output in the arary in the case of join splits
             expect(result.toNumber()).to.equal(1);
         });
 
-        it('should return a correct bytes proof output from a proof outputs array...', async () => {
+        it('should return a correct bytes proof output from a proof outputs array', async () => {
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
             const result = await noteUtils.get(proofs[0].expectedOutput, 0);
             expect(result).to.equal(formattedProofOutput);
         });
 
-        it('should return a correct bytes note from a notes array...', async () => {
+        it('should return a correct bytes note from a notes array', async () => {
             const testNote = outputCoder.getNote(outputNotes, 0);
             const formattedTestNote = `0x${testNote.slice(0x40)}`;
             const formattedOutputNotes = `0x${outputNotes.slice(0x40)}`;
@@ -87,17 +89,14 @@ contract('NoteUtils', async (accounts) => {
         it('should extract the note components', async () => {
             const testNote = outputCoder.getNote(outputNotes, 0);
             // eslint-disable-next-line no-unused-vars
-            const { owner, noteHash, gamma, sigma, ephemeral } = outputCoder.decodeNote(testNote);
+            const { owner, noteHash } = outputCoder.decodeNote(testNote);
+            const metadata = outputCoder.getMetadata(testNote);
+            const formattedMetadata = `0x${metadata}`;
             const formattedTestNote = `0x${testNote.slice(0x40)}`;
             const result = await noteUtils.extractNote(formattedTestNote);
             expect(result.owner.toLowerCase()).to.equal(owner);
             expect(result.noteHash).to.equal(noteHash);
-
-            // TODO: check the metadata
-            // console.log('result.metadata', result.metadata);
-            // console.log('gamma.x', gamma.x);
-            // console.log('sigma.x', sigma.x);
-            // console.log('ephemeral.x', ephemeral.x);
+            expect(result.metadata).to.equal(formattedMetadata);
         });
 
         it('should extract the correct note type', async () => {
@@ -117,6 +116,11 @@ contract('NoteUtils', async (accounts) => {
     });
 
     describe('failure states', async () => {
-
+        it('should fail when index is out of bounds', async () => {
+            await truffleAssert.reverts(
+                noteUtils.get(proofs[0].expectedOutput, 100),
+                'AZTEC array index is out of bounds'
+            );
+        });
     });
 });

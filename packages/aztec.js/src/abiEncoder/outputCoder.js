@@ -164,6 +164,39 @@ outputCoder.getInputNotes = (proofOutput) => {
 };
 
 /**
+ * Extract the metadata from a notee
+ * 
+ * @method getMetadata
+ * @param {string} notes - bytes note string
+ * @returns {strings} extracted bytes metadata
+ */
+outputCoder.getMetadata = (note) => {
+    let metadata = '';
+    const gamma = note.slice(0x140, 0x180);
+    metadata += gamma;
+    const sigma = note.slice(0x180, 0x1c0);
+    metadata += sigma;
+
+    const length = parseInt(note.slice(0x00, 0x40), 16);
+    let expectedLength;
+    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
+    let ephemeral = null;
+    if (metadataLength === 0x61) {
+        ephemeral = note.slice(0x1c0, 0x202);
+        metadata += ephemeral;
+        expectedLength = 0xe1;
+    } else {
+        expectedLength = 0xc0;
+    }
+
+    if (length !== expectedLength) {
+        throw new Error(`unexpected note length of ${length}`);
+    }
+
+    return metadata;
+};
+
+/**
  * Extract the the input notes from a proof output
  * 
  * @method getOutputNotes

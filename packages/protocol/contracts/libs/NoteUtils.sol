@@ -58,7 +58,7 @@ library NoteUtils {
                 _proofOutputsOrNotes
             )
         }
-        require(valid, "AZTEC array index is out of bounds!");
+        require(valid, "AZTEC array index is out of bounds");
     }
 
     /**
