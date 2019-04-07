@@ -62,13 +62,17 @@ contract('Join Split ABI Encoder', (accounts) => {
                 return signature;
             });
             const publicOwner = aztecAccounts[0].address;
+
             const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map(n => n.owner);
+
             const data = joinSplitEncode(
                 proofData,
                 m,
                 challenge,
                 publicOwner,
                 inputSignatures,
+                inputOwners,
                 outputOwners,
                 outputNotes
             );
