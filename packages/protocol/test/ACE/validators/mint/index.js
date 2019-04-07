@@ -1065,7 +1065,7 @@ contract('AdjustSupply tests for mint proof', (accounts) => {
             ));
         });
 
-        it('Validate failure if number of notes supplied is less than the minimum (2)', async () => {
+        it('Validate failure if number of notes supplied is less than the minimum (2) i.e. no output notes', async () => {
             const noteValues = [50];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
