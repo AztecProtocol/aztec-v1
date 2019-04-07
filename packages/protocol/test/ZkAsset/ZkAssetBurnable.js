@@ -1,8 +1,6 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const crypto = require('crypto');
-const { padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
@@ -54,15 +52,8 @@ contract('ZkAssetBurnable', (accounts) => {
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
-            // Creating a fixed note
-            const a = padLeft('1', 64);
-            const k = padLeft('0', 8);
-            const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
-            const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            const zeroNote = note.fromViewKey(viewingKey);
-
             const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
+            const oldTotalBurned = note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             const canBurnAndBurn = true;
@@ -156,7 +147,6 @@ contract('ZkAssetBurnable', (accounts) => {
         let scalingFactor;
         let aztecAdjustSupply;
         let aztecJoinSplit;
-        let zeroNote;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -166,14 +156,6 @@ contract('ZkAssetBurnable', (accounts) => {
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-
-
-            // Creating a fixed note
-            const a = padLeft('1', 64);
-            const k = padLeft('0', 8);
-            const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
-            const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-            zeroNote = note.fromViewKey(viewingKey);
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(1);
@@ -190,7 +172,7 @@ contract('ZkAssetBurnable', (accounts) => {
             });
 
             const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
+            const oldTotalBurned = note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             zkAssetBurnable = await ZkAssetBurnable.new(
@@ -273,7 +255,7 @@ contract('ZkAssetBurnable', (accounts) => {
             );
 
             const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
+            const oldTotalBurned = note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             const publicOwner = accounts[0];
@@ -386,7 +368,7 @@ contract('ZkAssetBurnable', (accounts) => {
             const senderAddress = proof.proofUtils.randomAddress();
 
             const newTotalBurned = burnNotes[0];
-            const oldTotalBurned = zeroNote;
+            const oldTotalBurned = note.createZeroValueNote();
             const adjustedNotes = burnNotes.slice(2, 4);
 
             proofs[1] = proof.burn.encodeBurnTransaction({
