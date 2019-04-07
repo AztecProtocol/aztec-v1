@@ -109,7 +109,7 @@ module.exports = {
             version: compilerConfig.solcVersion,
             settings: {
                 optimizer: {
-                    enabled: false,
+                    enabled: true,
                     runs: 200,
                 },
                 evmVersion: 'petersburg',
@@ -123,7 +123,7 @@ module.exports = {
     networks: {
         development: {
             provider,
-            gas: 6000000,
+            gas: 6500000,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,

@@ -60,8 +60,9 @@ contract JoinSplit is LibEIP712 {
              * 0x164:0x184    = publicOwner
              * 0x184:0x1a4    = offset in byte array to notes
              * 0x1a4:0x1c4    = offset in byte array to inputSignatures
-             * 0x1c4:0x1e4    = offset in byte array to outputOwners
-             * 0x1e4:0x204    = offset in byte array to metadata
+             * 0x1c4:0x1e4    = offset in byte array to inputOwners
+             * 0x1e4:0x204    = offset in byte array to outputOwners
+             * 0x204:0x224    = offset in byte array to metadata
              */
             function validateJoinSplit() {
                 mstore(0x80, calldataload(0x44))

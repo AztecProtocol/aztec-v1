@@ -201,7 +201,7 @@ contract('Note Registry', (accounts) => {
 
             const tokenBalance = await erc20.balanceOf(publicOwner);
             const withdrawnAmount = new BN(10); // kPublic is -10
-            const newBalance = previousTokenBalance.sub(withdrawnAmount);
+            const newBalance = previousTokenBalance.sub(withdrawnAmount.mul(scalingFactor));
             expect(tokenBalance.toString()).to.equal(newBalance.toString());
         });
 
@@ -219,7 +219,7 @@ contract('Note Registry', (accounts) => {
 
             const tokenBalance = await erc20.balanceOf(publicOwner);
             const withdrawnAmount = new BN(40); // kPublic is 40
-            const newBalance = previousTokenBalance.add(withdrawnAmount);
+            const newBalance = previousTokenBalance.add(withdrawnAmount.mul(scalingFactor));
             expect(tokenBalance.toString()).to.equal(newBalance.toString());
         });
 

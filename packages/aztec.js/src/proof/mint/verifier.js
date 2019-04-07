@@ -1,9 +1,3 @@
-/**
- * Verification algorithm for AZTEC mint zero-knowledge proofs
- *
- * @namespace verifier
- * @memberof module:proof.mint
- */
 const utils = require('@aztec/dev-utils');
 
 const joinSplit = require('../joinSplit');
@@ -17,7 +11,7 @@ const verifier = {};
 * Verify an AZTEC mint zero-knowledge proof
 *
 * @method verifyProof
-* @memberof module:proof.burn.verifier
+* @memberof module:mint
 * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
 * @param {number} m number of input notes
 * @param {string} challengeHex hex-string formatted proof challenge

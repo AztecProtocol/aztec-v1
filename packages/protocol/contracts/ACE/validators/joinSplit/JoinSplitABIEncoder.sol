@@ -17,25 +17,26 @@ library JoinSplitABIEncoder {
     bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
         0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
 
-    /**
-     * Calldata map
-     * 0x04:0x24      = calldata location of proofData byte array
-     * 0x24:0x44      = message sender
-     * 0x44:0x64      = h_x
-     * 0x64:0x84      = h_y
-     * 0x84:0xa4      = t2_x0
-     * 0xa4:0xc4      = t2_x1
-     * 0xc4:0xe4      = t2_y0
-     * 0xe4:0x104     = t2_y1
-     * 0x104:0x124    = length of proofData byte array
-     * 0x124:0x144    = m
-     * 0x144:0x164    = challenge
-     * 0x164:0x184    = publicOwner
-     * 0x184:0x1a4    = offset in byte array to notes
-     * 0x1a4:0x1c4    = offset in byte array to inputSignatures
-     * 0x1c4:0x2e4    = offset in byte array to outputOwners
-     * 0x1e4:0x204    = offset in byte array to metadata
-     */
+        /**
+        * Calldata map
+        * 0x04:0x24      = calldata location of proofData byte array
+        * 0x24:0x44      = message sender
+        * 0x44:0x64      = h_x
+        * 0x64:0x84      = h_y
+        * 0x84:0xa4      = t2_x0
+        * 0xa4:0xc4      = t2_x1
+        * 0xc4:0xe4      = t2_y0
+        * 0xe4:0x104     = t2_y1
+        * 0x104:0x124    = length of proofData byte array
+        * 0x124:0x144    = m
+        * 0x144:0x164    = challenge
+        * 0x164:0x184    = publicOwner
+        * 0x184:0x1a4    = offset in byte array to notes
+        * 0x1a4:0x1c4    = offset in byte array to inputSignatures
+        * 0x1c4:0x1e4    = offset in byte array to inputOwners
+        * 0x1e4:0x204    = offset in byte array to outputOwners
+        * 0x204:0x224    = offset in byte array to metadata
+        */
 
     function encodeAndExit(bytes32 domainHash) internal view {
         bytes32 typeHash = JOIN_SPLIT_SIGNATURE_TYPE_HASH;
@@ -44,9 +45,10 @@ library JoinSplitABIEncoder {
             let notes := add(0x104, calldataload(0x184))
             let n := calldataload(notes)
             let m := calldataload(0x124)
-            let outputOwners := add(0x124, calldataload(0x1c4)) // one word after outputOwners = 1st
+            let inputOwners := add(0x124, calldataload(0x1c4)) // one word after inputOwners = 1st
+            let outputOwners := add(0x124, calldataload(0x1e4)) // one word after outputOwners = 1st
             let signatures := add(0x124, calldataload(0x1a4)) // one word after signatures = 1st
-            let metadata := add(0x144, calldataload(0x1e4)) // two words after metadata = 1st
+            let metadata := add(0x144, calldataload(0x204)) // two words after metadata = 1st
 
             // memory map of `proofOutputs`
 
@@ -93,16 +95,6 @@ library JoinSplitABIEncoder {
             // start of notes array and the location of the `note`
 
             // structure of a `note`
-            // 0x00 - 0x20 = size of `note`
-            // 0x20 - 0x40 = type
-            // 0x40 - 0x60 = `owner`
-            // 0x60 - 0x80 = `noteHash`
-            // 0x80 - 0xa0 = size of note `data`
-            // 0xa0 - 0xc0 = compressed note coordinate `gamma` (part of `data`)
-            // 0xc0 - 0xe0 = compressed note coordinate `sigma` (part of `data`)
-            // 0xe0 - ???? = remaining note metadata
-
-            // structure of a `note` (new)
             // 0x00 - 0x20 = size of `note`
             // 0x20 - 0x40 = type
             // 0x40 - 0x60 = `owner`
@@ -161,15 +153,26 @@ library JoinSplitABIEncoder {
                 mstore(s, 0xc0)
                 // store note type (1)
                 mstore(add(s, 0x20), 0x01)
-                // store note owner in `s + 0x20`. If ECDSA recovery fails, or signing address is `0`, throw an error
                 mstore(0x80, typeHash)
                 mstore(0xa0, 0x10101)   // proof id 0x010101
-                if or(
-                    iszero(mload(add(s, 0x40))),
-                    iszero(staticcall(gas, 0x01, 0x00, 0x80, add(s, 0x40), 0x20))
-                ) {
-                    mstore(0x00, 400) revert(0x00, 0x20)
-                }
+                
+                // store note owner in `s + 0x40`
+                mstore(add(s, 0x40), calldataload(add(inputOwners, mul(i, 0x20))))
+
+                let t := staticcall(gas, 0x01, 0x00, 0x80, 0x00, 0x20)
+                let owner := mload(add(s, 0x40))
+                let recoveredAddress := mload(0x00)
+
+                // Check recovered address matches now owner, throw if not
+                if iszero(eq(recoveredAddress, owner)) {
+                    mstore(0x00, 400)
+                    revert(0x00, 0x20)
+                } 
+
+                if iszero(owner) {
+                    mstore(0x00, 400)
+                    revert(0x00, 0x20)
+                } 
                 // store note hash in `s + 0x60`
                 mstore(add(s, 0x60), mload(0xc0))
                 // store note metadata length in `s + 0x60` (just the coordinates)

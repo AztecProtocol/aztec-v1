@@ -95,14 +95,6 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
             expect(decoded[0].publicValue).to.equal(0);
             expect(result.slice(2)).to.equal(expected.slice(0x42));
             expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-            const gasUsed = await DividendComputationAbiEncoder.validateDividendComputation.estimateGas(
-                data, senderAddress, CRS,
-                {
-                    from: accounts[0],
-                    gas: 4000000,
-                }
-            );
-            console.log('gas used = ', gasUsed);
         });
     });
 });
