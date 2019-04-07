@@ -86,7 +86,7 @@ contract NoteRegistry is IAZTEC {
         // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
         require(registry.flags.canAdjustSupply == true, "note registry does not have mint and burn rights");
         
-        registry.linkedToken.transferFrom(msg.sender, address(this), _value);
+        registry.linkedToken.transferFrom(msg.sender, address(this), _value.mul(registry.scalingFactor));
 
         registry.totalSupply = registry.totalSupply.add(_value);
     }
@@ -176,10 +176,10 @@ contract NoteRegistry is IAZTEC {
                 );
                 // TODO: redundant step
                 registry.publicApprovals[publicOwner][proofHash] = publicApprovals.sub(uint256(-publicValue));
-                registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue));
+                registry.linkedToken.transferFrom(publicOwner, address(this), uint256(-publicValue).mul(registry.scalingFactor));
             } else {
                 registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
-                registry.linkedToken.transfer(publicOwner, uint256(publicValue));
+                registry.linkedToken.transfer(publicOwner, uint256(publicValue).mul(registry.scalingFactor));
             }
         }
     }

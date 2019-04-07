@@ -40,4 +40,8 @@ utils.getNoteHash = (gamma, sigma) => {
     return sha3(`0x${noteType}${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
 };
 
+utils.constants = {
+    ZERO_VALUE_NOTE_VIEWING_KEY: '0x00000000000000000000000000000000000000000000000000000000000000010000000002eff9beac9595f45cf86e1d9864f1d3d9460b77a74cb6fbcbd796fd877ef34b34',
+};
+
 module.exports = utils;

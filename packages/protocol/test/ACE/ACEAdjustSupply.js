@@ -217,7 +217,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             const scalingFactor = new BN(1);
             const canAdjustSupply = true;
             const canConvert = true;
-
+            // Mint 49
             await erc20.mint(
                 accounts[0],
                 scalingFactor.mul(tokensTransferred),
@@ -237,13 +237,15 @@ contract('ACE mint and burn functionality', (accounts) => {
                 canConvert,
                 { from: accounts[0] }
             );
-
+            // ZK mint 50
             const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
             expect(mintReceipt.status).to.equal(true);
 
+            // Validate proof to transfer 50
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData);
             expect(aceReceipt.status).to.equal(true);
 
+            // Fail when you try to enact the transfer of 50
             const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
             await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
         });

@@ -63,7 +63,7 @@ contract ZkAssetMintable is ZkAssetOwnable {
 
         (
             ,
-            ,
+            uint256 scalingFactor,
             uint256 totalSupply,
             ,
             ,
@@ -72,8 +72,8 @@ contract ZkAssetMintable is ZkAssetOwnable {
         if (publicValue > 0) {
             if (totalSupply < uint256(publicValue)) {
                 uint256 supplementValue = uint256(publicValue).sub(totalSupply);
-                ERC20Mintable(address(linkedToken)).mint(address(this), supplementValue);
-                ERC20Mintable(address(linkedToken)).approve(address(ace), supplementValue);
+                ERC20Mintable(address(linkedToken)).mint(address(this), supplementValue.mul(scalingFactor));
+                ERC20Mintable(address(linkedToken)).approve(address(ace), supplementValue.mul(scalingFactor));
 
                 ace.supplementTokens(supplementValue);
             }

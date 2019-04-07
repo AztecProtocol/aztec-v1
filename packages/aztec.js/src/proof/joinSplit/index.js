@@ -143,7 +143,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
 /**
  * Construct AZTEC join-split proof transcript. This one rolls `publicOwner` into the hash
  *
- * @method constructProof
+ * @method constructJoinSplitModified
  * @memberof module:joinSplit
  * @param {Object[]} notes array of AZTEC notes
  * @param {number} m number of input notes
