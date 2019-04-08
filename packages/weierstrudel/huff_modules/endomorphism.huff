@@ -3,35 +3,81 @@
 #define macro ENDOMORPHISM = takes(1) returns(2) {
     // One way of extracting short scalars k1, k2 is through lattice reduction
     // Calculate short basis scalars b1, b2 via the extended Euclidean algorithm
-    // where b1 = a1.n + x and b2 = a2.n + y
-    // and floor(b2/n) - floor(b1/n) = (a2 - a1) = n
-    // One can then calculate floor(k.b2/n) = c1 and floor(-k.b1/n) = c2
+
+    // a1 + b1.\lambda = 0 mod n
+    // a2 + b2.\lambda = 0 mod n
+    // a1.b2 - a2.b1 = n
+    // Calculate floor(k.b2/n) = c1 and floor(-k.b1/n) = c2
     // c1, c2 calculated through Babai rounding and are half-length scalars
-    // q1 = c1.b1 = k.b1.a1 and q2 = c2.b2 = -k.b2.a2
+    // q1 = c1.b1 = k.b1.a1 and q2 = c2.b2 = -k.b2.a2 (ish)
     // -(q1+q2) = -(k.b1.a1-k.b2.a2) = k2
     // k1 - k2\lambda = k
+
     // push group modulus n onto stack
-    0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 dup1 dup1
-    // we need to calculate k*b1. We require a full-width 512 bit multiplication,
+    0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
+
+    // perform a modular reduction on k
+    swap1 mod
+    0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 dup1 dup1 // n n n k
+    // stack state: n n n n k
+
+    // to compute q2, we want to multiply k by short basis vector b1
+    // and then round by dividing by the group modulus n.
+    // b1.k produces a 512-bit result, so (b1.k / n) would require
+    // a full-width division, which is slow and annoying.
+    // We can, instead, precompute scalar g1 = (2^256)*b1 / n.
+    // b1 <= 127 bits and n = 254 bits, so the resulting
+    // value of g1 will be <= 130 bits.
+    // If we compute (g1.k) and then shift down by (2^256),
+    // we get the desired result: round(k*b1 / n).
+
+    // Instead of requiring a 512-bit division, we only need to compute the most
+    // significant 256 bits of a 512-bit multplication.
+    // We can do this efficiently via the chinese remainder theorem
     // see https://medium.com/wicketh/mathemagic-full-multiply-27650fec525d
-    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff // -1 n n k
-    0x24ccef014a773d2cf7a7bd9d4391eb18d dup6 mulmod // mm n n n k
-    0x24ccef014a773d2cf7a7bd9d4391eb18d dup6 mul    // bottom mm n n n k
-    dup1 dup3 lt // x bottom mm n n n k
+
+    // n.b. we multiply by -g1 because we desire the negation of the above
+    // compute q2 = mulmod(-g1.k|hi, b2, n)
+    // q2 = round(-k.g1 / n).b2
+
+    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff // -1 n n n k
+    // compute x1 = mulmod(k, -g1, -1) = -k.g1 % (2^256 - 1)
+    0x24ccef014a773d2cf7a7bd9d4391eb18d dup6 mulmod // x1 n n n k
+    // compute x0 = mul(k, -g1) = -k.g1 % (2^256)
+    0x24ccef014a773d2cf7a7bd9d4391eb18d dup6 mul    // x0 x1 n n n k
+    // compute f = lt(x1, x0)
+    dup1 dup3 lt // f x0 x1 n n n k
+    // compute c2 = sub(sub(x1, x0), f) = x1 - x0 - f
+    // c2 = -g1.k|hi = high 256 bits of a 512-bit multiplication of (-g1 * k1)
     swap2 sub sub // c2 n n n
+    // compute q2 = mulmod(-g1.k|hi, b2, n)
+    // q2 = round(-k.g1 / n).b2
     0x89d3256894d213e3 mulmod // q2 n n k
 
+    // Next up, we need to compute q1 = c1.b1 = (g2.k >> 256)*b1
     0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 // n q2 n n k
     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff // -1 n q2 n n k
-    0x2d91d232ec7e0b3d7 dup7 mulmod // mm n q2 n n k
-    0x2d91d232ec7e0b3d7 dup7 mul    // bottom mm n q2 n n k
-    dup1 dup3 lt // x bottom mm
-    swap2 sub sub // c1 n q2 n n k
+    // compute x1 = mulmod(k, g2, p)
+    0x2d91d232ec7e0b3d7 dup7 mulmod // x1 n q2 n n k
+    // compute x0 = mul(k, g2)
+    0x2d91d232ec7e0b3d7 dup7 mul    // x0 x1 n q2 n n k
+    // compute f = lt(x1, x0)
+    dup1 dup3 lt // f x0 x1 n q2 n n k
+    // compute q1 = mulmod(g2.k, b1, n)
+    swap2 sub sub // q1 n q2 n n k
+    // multiply by b1
     0x30644e72e131a029b85045b68181585cb8e665ff8b011694c1d039a872b0eed9 mulmod // q1 q2 n n k
-    add sub                     // k2 n k
+
+    // k2 = q1 + q2 % n
+    addmod                     // k2 n k
+
+    // n.b. technically we're computing -k2. We invert all endormophism-scaled points in our 
+    // lookup table to account for this
+
+    // k1 = k + k2\lambda mod n
     swap2                   // k n k2
-    0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 // n k n k2
+    dup2 // n k n k2
     dup4 0xb3c4d79d41a917585bfc41088d8daaa78b17ea66b99c90dd mulmod // k2\lambda k n k2
-    addmod // (could replace with add sub?)
-    // k1 k2 
+    addmod
+    // tadaa, we have our short scalars: k1 k2 
 }

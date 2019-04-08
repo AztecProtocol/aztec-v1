@@ -169,20 +169,14 @@ bn128.mixedAdd = (x2, y2, x1, y1, z1) => {
 };
 
 bn128.randomPointInternal = () => {
-    let x;
-    let y;
-    function recurse() {
-        x = new BN(crypto.randomBytes(32), 16);
-        x = x.toRed(pRed);
-        const xxx = x.redSqr().redMul(x);
-        const y2 = xxx.redAdd(b);
-        y = y2.redSqrt();
-        if (y.redSqr().fromRed().eq(xxx.redAdd(b).fromRed())) {
-            return { x, y };
-        }
-        return recurse();
+    const x = new BN(crypto.randomBytes(32), 16).toRed(pRed);
+    const xxx = x.redSqr().redMul(x);
+    const y2 = xxx.redAdd(b);
+    const y = y2.redSqrt();
+    if (y.redSqr().fromRed().eq(xxx.redAdd(b).fromRed())) {
+        return { x, y };
     }
-    return recurse();
+    return bn128.randomPointInternal();
 };
 
 bn128.randomPoint = () => {

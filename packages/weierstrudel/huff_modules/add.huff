@@ -164,6 +164,9 @@ template <mx2,my2,p,2p>
     // t1 t2 p y x
     dup3 dup1 dup3 dup1 mulmod
     // t3 p t1 t2 p y x
+    dup1 skip_reject_b jumpi
+    0x00 0x00 revert
+    skip_reject_b:
     // this macro is used to precompute a point lookup table
     // we have already validated that P is on the curve.
     // P, 3P, 5P, 7P, 9P, 11P, 13P, 15P cannot satisfy the edge cases for
@@ -223,6 +226,9 @@ template <2p,p1,p2,p3,mx2,my2>
     add
     // t1 t2 z y x
     <p3> dup1 dup3 dup1 mulmod
+    dup1 skip_reject_c jumpi
+    0x00 0x00 revert
+    skip_reject_c:
     dup2 dup2 dup5 mulmod
     // t4 t3 p t1 t2 z y x
     swap4
@@ -281,6 +287,9 @@ template <2p,p1,p2,p3,mx2,my2,mz2>
     add
     // t1 t2 z y x
     <p3> dup1 dup3 dup1 mulmod
+    dup1 skip_reject_d jumpi
+    0x00 0x00 revert
+    skip_reject_d:
     // t3 p t1 t2 z y x
     dup2 dup2 dup5 mulmod
     // t4 t3 p t1 t2 z y x

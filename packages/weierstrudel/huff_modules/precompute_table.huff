@@ -89,7 +89,9 @@ template <p1>
     mulmod                                              // zzz p zz z -y_old x_old
     dup2                                                // p zzz p zz z -y_old x_old
     PRECOMPUTE_ITERATOR() mload calldataload            // x p zzz p zz z -y_old x_old
+    dup2 swap1 mod
     PRECOMPUTE_ITERATOR() mload 0x20 add calldataload   // y x p zzz p zz z -y_old x_old
+    dup3 swap1 mod
     PRECOMPUTE_TABLE__VALIDATE_POINT_ON_CURVE()                           // y x p zzz p zz z -y_old x_old
     swap5                                               // zz x p zzz p y z -y_old x_old
     mulmod                                              // x' zzz p y z -y_old x_old

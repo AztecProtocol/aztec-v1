@@ -10,7 +10,7 @@ endo.lambda = new BN('b3c4d79d41a917585bfc41088d8daaa78b17ea66b99c90dd', 16);
 endo.basis = [
     {
         a: new BN('89d3256894d213e3', 16),
-        b: new BN('-6f4d8248eeb859fc8211bbeb7d4f1128', 16), // 30644e72e131a029b85045b68181585e06ceecda572a2489be32480255cc0e6f need this?
+        b: new BN('6f4d8248eeb859fc8211bbeb7d4f1128', 16), // n.b. this should be a negative, but we don't tolerate that kind of attitude around here...
     },
     {
         a: new BN('6f4d8248eeb859fd0be4e1541221250b', 16),
@@ -18,8 +18,12 @@ endo.basis = [
     },
 ];
 
-endo.g1 = new BN('-24ccef014a773d2cf7a7bd9d4391eb18d', 16);
-endo.g2 = new BN('2d91d232ec7e0b3d7', 16);
+
+// endo.g1 = new BN('-24ccef014a773d2cf7a7bd9d4391eb18d', 16);
+// endo.g2 = new BN('2d91d232ec7e0b3d7', 16);
+
+endo.g1 = endo.basis[0].b.ushln(256).div(endo.n);
+endo.g2 = endo.basis[1].b.ushln(256).div(endo.n);
 
 // endomorphism extension. The Babai rounding step requires 508-bit division, which is a pain.
 // So instead of calculating (b1.k)/n and (b2.k)/n when splitting scalar k, precompute
@@ -55,7 +59,7 @@ endo.endoSplit = (k) => {
     const q2 = c2.mul(v2.b);
 
     // Calculate answer
-    const k2 = q2.sub(q1);
+    const k2 = q1.sub(q2);
     const k2Lambda = k2.mul(endo.lambda).umod(endo.n);
     const k1 = k.sub(k2Lambda);
     return { k1, k2: k2.neg() };

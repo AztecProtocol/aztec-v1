@@ -4,6 +4,7 @@ const path = require('path');
 
 const { Runtime } = require('../../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
+const golangVectors = require('./test_vectors');
 
 const { p } = bn128Reference;
 const { expect } = chai;
@@ -40,6 +41,10 @@ describe('bn128 double', () => {
     let double;
     before(() => {
         double = new Runtime(testHelper, pathToTestData);
+    });
+
+    it('DOUBLE__PRECOMPUTE_TABLE works with golang test vectors', async () => {
+
     });
 
     it('macro DOUBLE__PRECOMPUTE_TABLE correctly calculates point doubling', async () => {
