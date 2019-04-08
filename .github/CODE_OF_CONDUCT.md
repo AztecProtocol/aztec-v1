@@ -8,21 +8,21 @@ We are committed to making participation in this projects a harassment-free expe
 
 Examples of behaviour that contributes to creating a positive environment include:
 
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards other community members
+-   Using welcoming and inclusive language
+-   Being respectful of differing viewpoints and experiences
+-   Gracefully accepting constructive criticism
+-   Focusing on what is best for the community
+-   Showing empathy towards other community members
 
 Examples of unacceptable behaviour by participants include:
 
-- Personal attacks or hate speech
-- The use of sexualised language or imagery
-- Trolling or insulting/derogatory comments
-- Public or private harassment
-- Publishing other's private information, such as physical or electronic addresses, without explicit permission
-- Other unethical or unprofessional conduct
-- Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviours that they deem inappropriate, threatening, offensive, or harmful.
+-   Personal attacks or hate speech
+-   The use of sexualised language or imagery
+-   Trolling or insulting/derogatory comments
+-   Public or private harassment
+-   Publishing other's private information, such as physical or electronic addresses, without explicit permission
+-   Other unethical or unprofessional conduct
+-   Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviours that they deem inappropriate, threatening, offensive, or harmful.
 
 ## Covenant
 

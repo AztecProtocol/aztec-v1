@@ -87,14 +87,13 @@ describe('Mint proof verification tests', () => {
         });
     });
 
-
     describe('failure states', () => {
         it('will REJECT if points not on curve', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
             // we can construct 'proof' where all points and scalars are zero.
             // The challenge response will be correctly reconstructed, but the proof should still be invalid
             const zeroes = `${padLeft('0', 64)}`;
-            const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
+            const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const sender = proofUtils.randomAddress();
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
 
@@ -126,7 +125,7 @@ describe('Mint proof verification tests', () => {
         });
 
         it('will REJECT if malformed challenge', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
             const oldTotalMinted = 30;
@@ -146,7 +145,7 @@ describe('Mint proof verification tests', () => {
         });
 
         it('will REJECT if notes do not balance', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const oldTotalMinted = 30;
             const mintOne = 10;
@@ -167,11 +166,11 @@ describe('Mint proof verification tests', () => {
         });
 
         it('will REJECT for random proof data', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const proofData = [...Array(4)]
-                .map(() => [...Array(6)]
-                    .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
+            const proofData = [...Array(4)].map(() =>
+                [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
+            );
             const sender = proofUtils.randomAddress();
 
             const result = verifier.verifyProof(proofData, `0x${crypto.randomBytes(32).toString('hex')}`, sender);
@@ -181,7 +180,7 @@ describe('Mint proof verification tests', () => {
         });
 
         it('will REJECT if note value response is 0', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
             const oldTotalMinted = 30;
@@ -203,7 +202,7 @@ describe('Mint proof verification tests', () => {
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
             const oldTotalMinted = 30;
@@ -231,7 +230,7 @@ describe('Mint proof verification tests', () => {
         });
 
         it('will REJECT if blinding factor computed from invalid point', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
             const oldTotalMinted = 30;
@@ -264,7 +263,7 @@ describe('Mint proof verification tests', () => {
         });
 
         it('will throw if number of notes supplied is less than 2', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const noteValue = 50;
             const testNote = notes.create(secp256k1.generateAccount().publicKey, noteValue);

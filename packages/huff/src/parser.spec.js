@@ -50,8 +50,9 @@ describe('parser tests', () => {
                     ops: [{ type: 'PUSH', value: '62', args: ['12345'] }],
                 },
             };
-            const result = utils
-                .normalize(new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))));
+            const result = utils.normalize(
+                new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))),
+            );
             expect(parser.processTemplateLiteral(source, macros).toString(16)).to.equal(result.toString(16));
         });
 
@@ -61,12 +62,14 @@ describe('parser tests', () => {
             expect(keys.length).to.equal(1);
             expect(result.macros[keys[0]]).to.deep.equal({
                 name: 'dup4',
-                ops: [{
-                    type: 'OPCODE',
-                    value: '83',
-                    args: [],
-                    index: 0,
-                }],
+                ops: [
+                    {
+                        type: 'OPCODE',
+                        value: '83',
+                        args: [],
+                        index: 0,
+                    },
+                ],
                 templateParams: [],
             });
             const source = 'FOO+0x1234-222*BAR';
@@ -78,17 +81,20 @@ describe('parser tests', () => {
                     ops: [{ type: 'PUSH', value: '62', args: ['12345'] }],
                 },
             };
-            const numericResult = utils
-                .normalize(new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))));
+            const numericResult = utils.normalize(
+                new BN('1e2a2', 16).add(new BN('1234', 16).sub(new BN(222, 10).mul(new BN('12345', 16)))),
+            );
             result = parser.parseTemplate(source, macros, 0);
             expect(result.macros['inline-FOO+0x1234-222*BAR-stub']).to.deep.equal({
                 name: 'inline-FOO+0x1234-222*BAR-stub',
-                ops: [{
-                    type: 'PUSH',
-                    value: '7f',
-                    args: [numericResult.toString(16)],
-                    index: 0,
-                }],
+                ops: [
+                    {
+                        type: 'PUSH',
+                        value: '7f',
+                        args: [numericResult.toString(16)],
+                        index: 0,
+                    },
+                ],
                 templateParams: [],
             });
         });
@@ -108,9 +114,7 @@ describe('parser tests', () => {
                     templateParams: [],
                 },
             };
-            const files = [
-                { filename: 'FOO', data: foo },
-            ];
+            const files = [{ filename: 'FOO', data: foo }];
             const map = inputMap.createInputMap(files);
             const output = parser.processMacro('FOO', 0, [], macros, map);
             const expected = [
@@ -142,7 +146,7 @@ describe('parser tests', () => {
             `;
             const fullOps = parser.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
             const ops = fullOps.map((o) => {
-                expect(typeof (o.index)).to.equal('number');
+                expect(typeof o.index).to.equal('number');
                 return { args: o.args, type: o.type, value: o.value };
             });
             expect(ops.length).to.equal(12);
@@ -234,9 +238,12 @@ describe('parser tests', () => {
             }
         `;
 
-            const map = inputMap.createInputMap([{
-                filename: 'test', data: source,
-            }]);
+            const map = inputMap.createInputMap([
+                {
+                    filename: 'test',
+                    data: source,
+                },
+            ]);
             const { macros } = parser.parseTopLevel(source, 0, map);
             const keys = Object.keys(macros);
             expect(keys.length).to.equal(2);
@@ -277,7 +284,6 @@ describe('parser tests', () => {
             const expected = fs.readFileSync(path.posix.resolve(pathToTestData, 'compiled.txt'), 'utf8');
             expect(result.bytecode).to.equal(expected);
         });
-
 
         it('can process codesize macro', () => {
             const source = `

@@ -8,7 +8,10 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants, proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -90,11 +93,7 @@ contract('ACE', (accounts) => {
             proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
             proofHash = outputCoder.hashProofOutput(proofOutput);
             const hex = parseInt(JOIN_SPLIT_PROOF, 10).toString(16);
-            const hashData = [
-                padLeft(proofHash.slice(2), 64),
-                padLeft(hex, 64),
-                padLeft(accounts[0].slice(2), 64),
-            ].join('');
+            const hashData = [padLeft(proofHash.slice(2), 64), padLeft(hex, 64), padLeft(accounts[0].slice(2), 64)].join('');
             validatedProofHash = keccak256(`0x${hashData}`);
         });
 
@@ -153,49 +152,44 @@ contract('ACE', (accounts) => {
             });
         });
 
-        describe('failure states', async () => { /* eslint-disable no-unused-vars */
+        describe('failure states', async () => {
+            /* eslint-disable no-unused-vars */
             it('should fail to read a validator address', async () => {
-                await truffleAssert.reverts(
-                    ace.getValidatorAddress(BOGUS_PROOF),
-                    'expected the validator address to exist'
-                );
+                await truffleAssert.reverts(ace.getValidatorAddress(BOGUS_PROOF), 'expected the validator address to exist');
             });
 
             it('should not increment the latest epoch if not owner', async () => {
                 const opts = { from: accounts[1] };
-                await truffleAssert.reverts(
-                    ace.incrementLatestEpoch(opts),
-                    'only the owner can update the latest epoch'
-                );
+                await truffleAssert.reverts(ace.incrementLatestEpoch(opts), 'only the owner can update the latest epoch');
             });
 
             it('should not set a proof if not owner', async () => {
                 const opts = { from: accounts[1] };
                 await truffleAssert.reverts(
                     ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address, opts),
-                    'only the owner can set a proof'
+                    'only the owner can set a proof',
                 );
             });
 
-            it('should not set a proof if the proof\'s epoch is higher than the contract latest epoch', async () => {
+            it("should not set a proof if the proof's epoch is higher than the contract latest epoch", async () => {
                 const JOIN_SPLIT_PROOF_V2 = `${parseInt(JOIN_SPLIT_PROOF, 10) + 65536}`; // epoch is 2 instead of 1
                 await truffleAssert.reverts(
                     ace.setProof(JOIN_SPLIT_PROOF_V2, aztecJoinSplit.address),
-                    'the proof epoch cannot be bigger than the latest epoch'
+                    'the proof epoch cannot be bigger than the latest epoch',
                 );
             });
 
             it('should not set a proof if it had been set already', async () => {
                 await truffleAssert.reverts(
                     ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address),
-                    'existing proofs cannot be modified'
+                    'existing proofs cannot be modified',
                 );
             });
 
             it('should not set a proof if validator address does not exist', async () => {
                 await truffleAssert.reverts(
                     ace.setProof(JOIN_SPLIT_PROOF, constants.addresses.ZERO_ADDRESS),
-                    'expected the validator address to exist'
+                    'expected the validator address to exist',
                 );
             });
 
@@ -203,7 +197,7 @@ contract('ACE', (accounts) => {
                 const opts = { from: accounts[1] };
                 await truffleAssert.reverts(
                     ace.setCommonReferenceString(constants.CRS, opts),
-                    'only the owner can set the common reference string'
+                    'only the owner can set the common reference string',
                 );
             });
 
@@ -217,7 +211,7 @@ contract('ACE', (accounts) => {
                 const MALFORMED_PROOF = '0';
                 await truffleAssert.reverts(
                     ace.validateProof(MALFORMED_PROOF, accounts[0], proofData),
-                    'expected the proof to be valid'
+                    'expected the proof to be valid',
                 );
             });
 
@@ -227,7 +221,7 @@ contract('ACE', (accounts) => {
 
                 await truffleAssert.reverts(
                     ace.validateProofByHash(JOIN_SPLIT_PROOF, validatedProofHash, accounts[0]),
-                    'proof id has been invalidated'
+                    'proof id has been invalidated',
                 );
             });
 
@@ -235,23 +229,20 @@ contract('ACE', (accounts) => {
                 await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
 
                 const opts = { from: accounts[1] };
-                await truffleAssert.reverts(
-                    ace.invalidateProof(JOIN_SPLIT_PROOF, opts),
-                    'only the owner can invalidate a proof'
-                );
+                await truffleAssert.reverts(ace.invalidateProof(JOIN_SPLIT_PROOF, opts), 'only the owner can invalidate a proof');
             });
 
             it('should not clear empty proof hashes', async () => {
                 await truffleAssert.reverts(
                     ace.clearProofByHashes(JOIN_SPLIT_PROOF, [padLeft('0x0', 64)]),
-                    'expected no empty proof hash'
+                    'expected no empty proof hash',
                 );
             });
 
             it('should not clear not previously validated proof hashes', async () => {
                 await truffleAssert.reverts(
                     ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]),
-                    'can only clear previously validated proofs'
+                    'can only clear previously validated proofs',
                 );
             });
         });

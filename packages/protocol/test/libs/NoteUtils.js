@@ -117,10 +117,7 @@ contract('NoteUtils', async (accounts) => {
 
     describe('failure states', async () => {
         it('should fail when index is out of bounds', async () => {
-            await truffleAssert.reverts(
-                noteUtils.get(proofs[0].expectedOutput, 100),
-                'AZTEC array index is out of bounds'
-            );
+            await truffleAssert.reverts(noteUtils.get(proofs[0].expectedOutput, 100), 'AZTEC array index is out of bounds');
         });
     });
 });

@@ -16,7 +16,7 @@ const inputCoder = {};
  * @param {string} challenge - cryptographic challenge variable, part of the sigma protocol
  * @param {string[]} owners - owners of the output notes from a zero-knowledge proof
  * @param {string[]} metadata - metadata attached to an AZTEC note
- * @returns {string} data - hexadecimal concatenated string of parameters encoded according 
+ * @returns {string} data - hexadecimal concatenated string of parameters encoded according
  * to the ABI spec of that particular proof
  */
 inputCoder.bilateralSwap = (proofData, challenge, owners, metadata) => {
@@ -27,15 +27,10 @@ inputCoder.bilateralSwap = (proofData, challenge, owners, metadata) => {
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'bilateralSwap');
 };
-
 
 /**
  * Input encoding for joinSplit proof data
@@ -45,11 +40,11 @@ inputCoder.bilateralSwap = (proofData, challenge, owners, metadata) => {
  * @param {Number} m - number of input notes
  * @param {string} challenge - cryptographic challenge variable, part of the sigma protocol
  * @param {string} publicOwner - owner of the public ERC20 tokens transferred in the proof
- * @param {string[]} inputSignatures - ECDSA signatures provided by note owners for their 
- * notes to be used in a zero-knowledge proof 
+ * @param {string[]} inputSignatures - ECDSA signatures provided by note owners for their
+ * notes to be used in a zero-knowledge proof
  * @param {string[]} outputOwners - owners of the output notes from a zero-knowledge proof
  * @param {string[]} metadata - metadata attached to an AZTEC note
- * @returns {string} data - hexadecimal concatenated string of parameters encoded according 
+ * @returns {string} data - hexadecimal concatenated string of parameters encoded according
  * to the ABI spec of that particular proof
  */
 inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, inputOwners, outputOwners, metadata) => {
@@ -64,13 +59,7 @@ inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, i
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'INPUT_SIGNATURES',
-        'INPUT_OWNERS',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'INPUT_SIGNATURES', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'joinSplit');
 };
@@ -86,7 +75,7 @@ inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, i
  * @param {string} inputOwners - owners of the input notes for a zero-knowledge proof
  * @param {string[]} outputOwners - owners of the output notes from a zero-knowledge proof
  * @param {string[]} metadata - metadata attached to an AZTEC note
- * @returns {string} data - hexadecimal concatenated string of parameters encoded according 
+ * @returns {string} data - hexadecimal concatenated string of parameters encoded according
  * to the ABI spec of that particular proof
  */
 inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, outputOwners, metadata) => {
@@ -100,12 +89,7 @@ inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, out
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'INPUT_OWNERS',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'dividendComputation');
 };
@@ -119,12 +103,7 @@ inputCoder.mint = (proofData, challenge, inputOwners, outputOwners, metadata) =>
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'INPUT_OWNERS',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'mint');
 };
@@ -138,12 +117,7 @@ inputCoder.burn = (proofData, challenge, inputOwners, outputOwners, metadata) =>
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = [
-        'PROOF_DATA',
-        'INPUT_OWNERS',
-        'OUTPUT_OWNERS',
-        'METADATA',
-    ];
+    const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'burn');
 };

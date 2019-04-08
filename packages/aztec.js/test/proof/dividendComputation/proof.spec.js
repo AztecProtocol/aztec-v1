@@ -7,7 +7,6 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
-
 describe('Dividend computation proof construction tests', () => {
     it('dividendComputation.constructProof outputs proof data with correct number of proof variables and is well formed', () => {
         /*

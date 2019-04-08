@@ -57,10 +57,17 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
 
         // Maker notes
         if (i <= 1) {
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
-        } else { // taker notes
+            B = gamma
+                .mul(kBar)
+                .add(bn128.h.mul(aBar))
+                .add(sigma.mul(challenge).neg());
+        } else {
+            // taker notes
             kBar = kBarArray[i - 2];
-            B = gamma.mul(kBar).add(bn128.h.mul(aBar)).add(sigma.mul(challenge).neg());
+            B = gamma
+                .mul(kBar)
+                .add(bn128.h.mul(aBar))
+                .add(sigma.mul(challenge).neg());
         }
 
         if (B.isInfinity()) {

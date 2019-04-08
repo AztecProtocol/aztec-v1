@@ -19,7 +19,6 @@ const truffleAssert = require('truffle-assertions');
 
 const Keccak = keccak;
 
-
 // ### Artifacts
 const AdjustSupply = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply');
 const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply/AdjustSupplyInterface');
@@ -94,7 +93,6 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-
         it('validates that large numbers of input/output notes work', async () => {
             const noteValues = [80, 30, 10, 10, 10, 10, 10];
             const numNotes = noteValues.length;
@@ -150,12 +148,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            );
+            const result = await adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts);
 
             expect(result).to.equal(expectedOutput);
         });
@@ -185,12 +178,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            );
+            const result = await adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts);
 
             expect(result).to.equal(expectedOutput);
         });
@@ -212,59 +200,55 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const inputNotes = [newTotalBurned];
             const outputNotes = [oldTotalBurned, ...adjustedNotes];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof([newTotalBurned, oldTotalBurned, ...adjustedNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [newTotalBurned, oldTotalBurned, ...adjustedNotes],
+                senderAddress,
+            );
 
             const challengeBN = new BN(challenge.slice(2), 16);
-            const notModRChallenge = `0x${(challengeBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+            const notModRChallenge = `0x${challengeBN.add(constants.GROUP_MODULUS).toString(16)}`;
 
-            const inputOwners = inputNotes.map(m => m.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
             const publicOwner = '0x0000000000000000000000000000000000000000';
             const publicValue = 0;
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                notModRChallenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, notModRChallenge, inputOwners, outputOwners, outputNotes);
 
-            const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-                inputNotes: [{
-                    ...outputNotes[0],
-                    forceMetadata: true,
-                }],
-                outputNotes: [{
-                    ...inputNotes[0],
-                    forceNoMetadata: true,
-                }],
-                publicOwner,
-                publicValue,
-                challenge: notModRChallenge,
-            },
-            {
-                inputNotes: [],
-                outputNotes: outputNotes.slice(1),
-                publicOwner,
-                publicValue,
-                challenge: `0x${padLeft(sha3(notModRChallenge).slice(2), 64)}`,
-            },
-            ]).slice(0x42)}`;
+            const expectedOutput = `0x${outputCoder
+                .encodeProofOutputs([
+                    {
+                        inputNotes: [
+                            {
+                                ...outputNotes[0],
+                                forceMetadata: true,
+                            },
+                        ],
+                        outputNotes: [
+                            {
+                                ...inputNotes[0],
+                                forceNoMetadata: true,
+                            },
+                        ],
+                        publicOwner,
+                        publicValue,
+                        challenge: notModRChallenge,
+                    },
+                    {
+                        inputNotes: [],
+                        outputNotes: outputNotes.slice(1),
+                        publicOwner,
+                        publicValue,
+                        challenge: `0x${padLeft(sha3(notModRChallenge).slice(2), 64)}`,
+                    },
+                ])
+                .slice(0x42)}`;
 
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
-            const result = await adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            );
+            const result = await adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts);
 
             expect(result).to.equal(expectedOutput);
         });
@@ -332,42 +316,32 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                fakeProofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(
+                adjustSupplyContract.validateAdjustSupply(fakeProofData, senderAddress, constants.CRS, opts),
+            );
         });
 
         it('Validate failure for no notes', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const senderAddress = aztecAccounts[0].address;
 
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof([], senderAddress);
+            const { proofData: proofDataRaw, challenge } = burn.constructProof([], senderAddress);
 
             const outputNotes = [];
 
             const inputOwners = [];
             const outputOwners = [];
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                adjustSupplyContract.validateAdjustSupply(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
 
             parseInputs.restore();
         });
@@ -383,13 +357,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const outputOwners = [];
             const inputOwners = [];
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                []
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, []);
 
             const opts = {
                 from: senderAddress,
@@ -418,31 +386,26 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const proofConstruct = burn.constructProof([newTotalBurned, oldTotalBurned, ...adjustedNotes], senderAddress);
 
             const kBarBN = new BN(proofConstruct.proofData[0][0].slice(2), 16);
-            const notModRKBar = `0x${(kBarBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+            const notModRKBar = `0x${kBarBN.add(constants.GROUP_MODULUS).toString(16)}`;
 
             proofConstruct.proofData[0][0] = notModRKBar;
 
-            const inputOwners = inputNotes.map(m => m.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.burn(
                 proofConstruct.proofData,
                 proofConstruct.challenge,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('Validate failure if scalars are zero', async () => {
@@ -462,20 +425,13 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const inputNotes = [newTotalBurned];
             const outputNotes = [oldTotalBurned, ...adjustedNotes];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof([newTotalBurned, oldTotalBurned, ...adjustedNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [newTotalBurned, oldTotalBurned, ...adjustedNotes],
+                senderAddress,
+            );
 
             const scalarZeroProofData = proofDataRaw.map((proofElement) => {
-                return [
-                    padLeft(0, 64),
-                    padLeft(0, 64),
-                    proofElement[2],
-                    proofElement[3],
-                    proofElement[4],
-                    proofElement[5],
-                ];
+                return [padLeft(0, 64), padLeft(0, 64), proofElement[2], proofElement[3], proofElement[4], proofElement[5]];
             });
 
             const zeroScalar = padLeft(0, 64);
@@ -488,28 +444,17 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             expect(scalarZeroProofData[3][0]).to.equal(zeroScalar);
             expect(scalarZeroProofData[3][1]).to.equal(zeroScalar);
 
-            const inputOwners = inputNotes.map(m => m.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
-            const proofData = inputCoder.burn(
-                scalarZeroProofData,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(scalarZeroProofData, challenge, inputOwners, outputOwners, outputNotes);
 
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('Validate failure when proof data not correctly encoded', async () => {
@@ -529,18 +474,18 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const inputNotes = [newTotalBurned];
             const outputNotes = [oldTotalBurned, ...adjustedNotes];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof([newTotalBurned, oldTotalBurned, ...adjustedNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [newTotalBurned, oldTotalBurned, ...adjustedNotes],
+                senderAddress,
+            );
 
-            const inputOwners = inputNotes.map(m => m.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
             const { length } = proofDataRaw;
-            const noteString = proofDataRaw.map(individualNotes => encoderFactory.encodeNote(individualNotes));
+            const noteString = proofDataRaw.map((individualNotes) => encoderFactory.encodeNote(individualNotes));
 
             // Incorrect encoding of proof data happens here: first two characters incorrectly sliced off
-            // noteString, and padLeft() increases from 64 to 66 to still recognise it as a valid bytes 
+            // noteString, and padLeft() increases from 64 to 66 to still recognise it as a valid bytes
             // object. However. this is incorrect ABI encoding so will throw
             const data = [padLeft(Number(length).toString(16), 66), ...noteString.slice(2)].join('');
             const actualLength = Number(data.length / 2);
@@ -554,12 +499,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 METADATA: encoderFactory.encodeMetadata(metadata),
             };
 
-            const abiParams = [
-                'PROOF_DATA',
-                'INPUT_OWNERS',
-                'OUTPUT_OWNERS',
-                'METADATA',
-            ];
+            const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
             const incorrectEncoding = encoderFactory.encode(configs, abiParams, 'burn');
 
@@ -568,12 +508,9 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                incorrectEncoding,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(
+                adjustSupplyContract.validateAdjustSupply(incorrectEncoding, senderAddress, constants.CRS, opts),
+            );
         });
 
         it('validate failure when incorrect H_X, H_Y in CRS is supplied', async () => {
@@ -609,16 +546,14 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const fakeHx = H_X.add(new BN(1, 10));
             const fakeHy = H_Y.add(new BN(1, 10));
 
-            const fakeCRS = [
-                `0x${padLeft(fakeHx.toString(16), 64)}`,
-                `0x${padLeft(fakeHy.toString(16), 64)}`,
-                ...t2,
-            ];
+            const fakeCRS = [`0x${padLeft(fakeHx.toString(16), 64)}`, `0x${padLeft(fakeHy.toString(16), 64)}`, ...t2];
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, accounts[0], fakeCRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                adjustSupplyContract.validateAdjustSupply(proofData, accounts[0], fakeCRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('validate failure when group element (blinding factor) resolves to infinity', async () => {
@@ -648,27 +583,22 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             proofConstruct.proofData[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
             proofConstruct.challenge = `0x${padLeft('0a', 64)}`;
 
-            const inputOwners = inputNotes.map(m => m.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.burn(
                 proofConstruct.proofData,
                 proofConstruct.challenge,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('Validate failure when sender address NOT integrated into challenge variable', async () => {
@@ -697,7 +627,6 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 rollingHash.append(individualNote.sigma);
             });
 
-
             const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
             const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
 
@@ -709,38 +638,27 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
             joinSplit.constructBlindingFactors = localConstructBlindingFactors;
             joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
-            const inputOwners = inputNotes.map(n => n.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('Validate failure when kPublic (set internally in proof to 0) NOT integrated into challenge variable', async () => {
@@ -768,7 +686,6 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 rollingHash.append(individualNote.sigma);
             });
 
-
             const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
             const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
 
@@ -780,38 +697,27 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
             joinSplit.constructBlindingFactors = localConstructBlindingFactors;
             joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
-            const inputOwners = inputNotes.map(n => n.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('Validate failure when commitments NOT integrated into challenge variable', async () => {
@@ -840,7 +746,6 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 rollingHash.append(individualNote.sigma);
             });
 
-
             const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
             const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
 
@@ -852,38 +757,27 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
             joinSplit.constructBlindingFactors = localConstructBlindingFactors;
             joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
-            const inputOwners = inputNotes.map(n => n.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('Validate failure when m NOT integrated into challenge variable', async () => {
@@ -912,7 +806,6 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 rollingHash.append(individualNote.sigma);
             });
 
-
             const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
             const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
 
@@ -924,40 +817,28 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
             joinSplit.constructBlindingFactors = localConstructBlindingFactors;
             joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
-            const inputOwners = inputNotes.map(n => n.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
-
 
         it('Validate failure when blindingFactors NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
@@ -985,7 +866,6 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 rollingHash.append(individualNote.sigma);
             });
 
-
             const localConstructBlindingFactors = joinSplit.constructBlindingFactors;
             const localGenerateBlindingScalars = joinSplit.generateBlindingScalars;
 
@@ -997,38 +877,27 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic
+            const { proofData: proofDataRaw, challenge } = burn.constructProof(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
             joinSplit.constructBlindingFactors = localConstructBlindingFactors;
             joinSplit.generateBlindingScalars = localGenerateBlindingScalars;
 
-            const inputOwners = inputNotes.map(n => n.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('Validate failure if number of notes supplied is less than the minimum (2) i.e. no output notes', async () => {
@@ -1043,37 +912,22 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const newTotalBurned = notes[0];
             const senderAddress = accounts[0];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = burn.constructProof([newTotalBurned], senderAddress);
+            const { proofData: proofDataRaw, challenge } = burn.constructProof([newTotalBurned], senderAddress);
 
             const inputNotes = [newTotalBurned];
             const outputNotes = [];
 
-            const inputOwners = inputNotes.map(m => m.owner);
-            const outputOwners = outputNotes.map(n => n.owner);
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
 
-
-            const proofData = inputCoder.burn(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwners,
-                outputNotes
-            );
+            const proofData = inputCoder.burn(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
 
             const opts = {
                 from: senderAddress,
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(
-                proofData,
-                senderAddress,
-                constants.CRS,
-                opts
-            ));
+            await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
     });
 });

@@ -1,0 +1,11 @@
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+
+.circleci                       @PaulRBerg
+packages/aztec.js               @zac-williamson @PaulRBerg @thomas-waite
+packages/contract-addresses     @PaulRBerg
+packages/contract-artifacts     @PaulRBerg
+packages/dev-utils              @PaulRBerg
+packages/protocol               @zac-williamson @PaulRBerg @thomas-waite
+packages/huff                   @zac-williamson
+packages/weierstrudel           @zac-williamson

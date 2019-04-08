@@ -1,4 +1,6 @@
-const { constants: { H_X, H_Y } } = require('@aztec/dev-utils');
+const {
+    constants: { H_X, H_Y },
+} = require('@aztec/dev-utils');
 const chai = require('chai');
 const crypto = require('crypto');
 
@@ -24,7 +26,13 @@ describe('bn128 tests', () => {
         const scalarInverse = scalar.redInvm();
         const result = testPoint.mul(scalar).mul(scalarInverse);
         expect(result.eq(testPoint));
-        expect(testPoint.x.redSqr().redMul(testPoint.x).redAdd(bn128.curve.b).eq(testPoint.y.redSqr())).to.equal(true);
+        expect(
+            testPoint.x
+                .redSqr()
+                .redMul(testPoint.x)
+                .redAdd(bn128.curve.b)
+                .eq(testPoint.y.redSqr()),
+        ).to.equal(true);
     });
 
     it('random group scalar creates well-formed BN instance', () => {
@@ -39,7 +47,10 @@ describe('bn128 tests', () => {
         for (let i = 0; i < 10; i += 1) {
             const point = bn128.randomPoint();
             const lhs = point.y.redSqr();
-            const rhs = point.x.redSqr().redMul(point.x).redAdd(bn128.curve.b);
+            const rhs = point.x
+                .redSqr()
+                .redMul(point.x)
+                .redAdd(bn128.curve.b);
             expect(lhs.fromRed().eq(rhs.fromRed())).to.equal(true);
         }
     });
@@ -47,7 +58,10 @@ describe('bn128 tests', () => {
     it('AZTEC generator point h is correctly represented', () => {
         const { h } = bn128;
         const lhs = h.y.redSqr();
-        const rhs = h.x.redSqr().redMul(h.x).redAdd(bn128.curve.b);
+        const rhs = h.x
+            .redSqr()
+            .redMul(h.x)
+            .redAdd(bn128.curve.b);
 
         expect(h.x.fromRed().eq(H_X)).to.equal(true);
         expect(h.y.fromRed().eq(H_Y)).to.equal(true);

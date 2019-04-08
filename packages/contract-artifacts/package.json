@@ -1,10 +1,31 @@
 {
   "name": "@aztec/contract-artifacts",
+  "description": "Smart contract compilation artifacts for the latest version of AZTEC.",
   "version": "1.4.0",
   "author": "AZTEC",
-  "description": "Smart contract compilation artifacts for the latest version of AZTEC.",
-  "license": "LGPL-3.0",
-  "main": "./lib",
+  "bugs": {
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.26.0",
+    "require-dir": "^1.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "cross-env": "^5.2.0",
+    "eslint": "^5.15.3",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "fixpack": "^2.3.1",
+    "shx": "^0.3.2"
+  },
+  "engines": {
+    "node": ">=8.3",
+    "yarn": "1.15.2"
+  },
   "files": [
     "/artifacts",
     "/lib"
@@ -12,43 +33,22 @@
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
   "keywords": [
     "aztec",
+    "blockchain",
+    "confidentiality",
     "cryptography",
-    "privacy",
-    "protocol",
     "ethereum",
-    "blockchain"
+    "privacy",
+    "protocol"
   ],
+  "license": "LGPL-3.0",
+  "main": "./lib",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
-  "bugs": {
-    "url": "https://github.com/AztecProtocol/AZTEC/issues"
-  },
-  "dependencies": {
-    "babel-runtime": "^6.26.0",
-    "braintree-jsdoc-template": "^3.3.0",
-    "require-dir": "^1.2.0"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-add-module-exports": "^1.0.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-minify": "^0.5.0",
-    "cross-env": "^5.2.0",
-    "eslint": "^5.8.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.2.0",
-    "eslint-plugin-react": "^7.12.4",
-    "rimraf": "^2.6.3"
-  },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf ./lib",
-    "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib"
+    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "clean": "shx rm -rf ./lib",
+    "lint": "eslint --ignore-path ../../.eslintignore ."
   }
 }

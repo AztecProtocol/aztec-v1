@@ -2,7 +2,7 @@
  * Constructs AZTEC dividend computations
  *
  * @module dividendComputation
-*/
+ */
 
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
@@ -13,10 +13,7 @@ const bn128 = require('../../bn128');
 const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 
-const {
-    inputCoder,
-    outputCoder,
-} = require('../../abiEncoder');
+const { inputCoder, outputCoder } = require('../../abiEncoder');
 
 const { groupReduction } = bn128;
 const { customError } = utils.errors;
@@ -25,9 +22,8 @@ const { errorTypes } = utils.constants;
 const dividendComputation = {};
 dividendComputation.verifier = verifier;
 
-
 /**
- * Construct blinding factors 
+ * Construct blinding factors
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
@@ -38,14 +34,14 @@ dividendComputation.constructBlindingFactors = (notes, zaBN, zbBN, rollingHash) 
     let x = new BN(0).toRed(groupReduction);
     x = rollingHash.keccak(groupReduction);
 
-
     return notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
         let B;
 
         // Calculating the blinding factors
-        if (i === 0) { // input note
+        if (i === 0) {
+            // input note
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
             x = rollingHash.keccak(groupReduction);
@@ -53,7 +49,8 @@ dividendComputation.constructBlindingFactors = (notes, zaBN, zbBN, rollingHash) 
             bkArray.push(bk);
         }
 
-        if (i === 1) { // output note
+        if (i === 1) {
+            // output note
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
@@ -61,12 +58,13 @@ dividendComputation.constructBlindingFactors = (notes, zaBN, zbBN, rollingHash) 
             bkArray.push(bk);
         }
 
-        if (i === 2) { // residual note
+        if (i === 2) {
+            // residual note
             const zbRed = zbBN.toRed(groupReduction);
             const zaRed = zaBN.toRed(groupReduction);
 
             // bk_3 = (z_b)(bk_1) - (z_a)(bk_2)
-            bk = (zbRed.redMul(bkArray[0])).redSub(zaRed.redMul(bkArray[1]));
+            bk = zbRed.redMul(bkArray[0]).redSub(zaRed.redMul(bkArray[1]));
 
             const xbk = bk.redMul(x); // xbk = bk*x
             const xba = ba.redMul(x); // xba = ba*x
@@ -98,8 +96,8 @@ dividendComputation.constructBlindingFactors = (notes, zaBN, zbBN, rollingHash) 
 dividendComputation.constructProof = (notes, za, zb, sender) => {
     const numNotes = 3;
 
-    // Used to check the number of input notes. Boolean argument specifies whether the 
-    // check should throw if not satisfied, or if we seek to collect all errors 
+    // Used to check the number of input notes. Boolean argument specifies whether the
+    // check should throw if not satisfied, or if we seek to collect all errors
     // and only throw at the end. Here, set to true - immediately throw if error
     proofUtils.checkNumNotes(notes, numNotes, true);
 
@@ -126,16 +124,13 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
         const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
         const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
 
-        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
-            throw customError(
-                errorTypes.NOT_ON_CURVE,
-                {
-                    message: 'A group element is not on the bn128 curve',
-                    gammaOnCurve,
-                    sigmaOnCurve,
-                    note,
-                }
-            );
+        if (gammaOnCurve === false || sigmaOnCurve === false) {
+            throw customError(errorTypes.NOT_ON_CURVE, {
+                message: 'A group element is not on the bn128 curve',
+                gammaOnCurve,
+                sigmaOnCurve,
+                note,
+            });
         }
     });
 
@@ -146,11 +141,16 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
 
     const blindingFactors = dividendComputation.constructBlindingFactors(notes, zaBN, zbBN, rollingHash);
 
-
     const challenge = proofUtils.computeChallenge(sender, zaBN, zbBN, notes, blindingFactors);
     const proofDataUnformatted = blindingFactors.map((blindingFactor, i) => {
-        const kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
-        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+        const kBar = notes[i].k
+            .redMul(challenge)
+            .redAdd(blindingFactor.bk)
+            .fromRed();
+        const aBar = notes[i].a
+            .redMul(challenge)
+            .redAdd(blindingFactor.ba)
+            .fromRed();
 
         return [
             `0x${padLeft(kBar.toString(16), 64)}`,
@@ -178,7 +178,7 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
 
 /**
  * Encode a dividend computation transaction
- * 
+ *
  * @method encodeDividendComputationTransaction
  * @memberof module:dividendComputation
  * @param {Note[]} inputNotes input AZTEC notes
@@ -188,20 +188,16 @@ dividendComputation.constructProof = (notes, za, zb, sender) => {
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
-dividendComputation.encodeDividendComputationTransaction = ({
-    inputNotes,
-    outputNotes,
-    za,
-    zb,
-    senderAddress,
-}) => {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = dividendComputation.constructProof([...inputNotes, ...outputNotes], za, zb, senderAddress);
+dividendComputation.encodeDividendComputationTransaction = ({ inputNotes, outputNotes, za, zb, senderAddress }) => {
+    const { proofData: proofDataRaw, challenge } = dividendComputation.constructProof(
+        [...inputNotes, ...outputNotes],
+        za,
+        zb,
+        senderAddress,
+    );
 
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
+    const inputOwners = inputNotes.map((m) => m.owner);
+    const outputOwners = outputNotes.map((n) => n.owner);
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
@@ -214,16 +210,20 @@ dividendComputation.encodeDividendComputationTransaction = ({
         zb,
         inputOwners,
         outputOwners,
-        outputNotes
+        outputNotes,
     );
 
-    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-        inputNotes,
-        outputNotes,
-        publicOwner,
-        publicValue,
-        challenge,
-    }]).slice(0x42)}`;
+    const expectedOutput = `0x${outputCoder
+        .encodeProofOutputs([
+            {
+                inputNotes,
+                outputNotes,
+                publicOwner,
+                publicValue,
+                challenge,
+            },
+        ])
+        .slice(0x42)}`;
     return { proofData, expectedOutput, challenge };
 };
 

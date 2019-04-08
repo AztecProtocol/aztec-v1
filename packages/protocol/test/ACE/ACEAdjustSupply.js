@@ -8,9 +8,7 @@ const truffleAssert = require('truffle-assertions');
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
 const {
     constants,
-    proofs: {
-        JOIN_SPLIT_PROOF, MINT_PROOF, BURN_PROOF, UTILITY_PROOF,
-    },
+    proofs: { JOIN_SPLIT_PROOF, MINT_PROOF, BURN_PROOF, UTILITY_PROOF },
 } = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
@@ -63,25 +61,13 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = true;
             const canConvert = true;
 
-            await erc20.mint(
-                accounts[0],
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            );
+            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            await erc20.approve(
-                ace.address,
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            );
+            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
         });
 
         it('successful call to the mint function', async () => {
@@ -338,25 +324,13 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = true;
             const canConvert = true;
             // Mint 49
-            await erc20.mint(
-                accounts[0],
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            );
+            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            await erc20.approve(
-                ace.address,
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            );
+            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
             // ZK mint 50
             const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
             expect(mintReceipt.status).to.equal(true);
@@ -394,16 +368,11 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = false;
             const canConvert = true;
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
 
-            await truffleAssert.reverts(ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]),
-                'this asset is not mintable');
+            await truffleAssert.reverts(ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]), 'this asset is not mintable');
         });
 
         it('should validate failure if trying to convert value when the asset is NOT convertible', async () => {
@@ -457,25 +426,13 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = true;
             const canConvert = false;
 
-            await erc20.mint(
-                accounts[0],
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            );
+            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            await erc20.approve(
-                ace.address,
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            );
+            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
 
             const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
             expect(mintReceipt.status).to.equal(true);
@@ -484,8 +441,10 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(aceReceipt.status).to.equal(true);
 
             const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]),
-                'asset cannot be converted into public tokens');
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]),
+                'asset cannot be converted into public tokens',
+            );
         });
 
         it('should validate failure if user has not approved ACE to extract tokens', async () => {
@@ -539,21 +498,13 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = true;
             const canConvert = true;
 
-            await erc20.mint(
-                accounts[0],
-                scalingFactor.mul(tokensTransferred),
-                { from: accounts[0], gas: 4700000 }
-            );
+            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
             // No approval
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
 
             const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
             expect(mintReceipt.status).to.equal(true);
@@ -592,13 +543,9 @@ contract('ACE mint and burn functionality', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
 
             const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
 
@@ -606,8 +553,10 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(aceReceipt.status).to.equal(true);
 
             const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(ace.updateNoteRegistry(MINT_PROOF, formattedProofOutput, accounts[0]),
-                'ACE has not validated a matching proof');
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(MINT_PROOF, formattedProofOutput, accounts[0]),
+                'ACE has not validated a matching proof',
+            );
         });
 
         it('confirm validateProof() does not store proofHash in validatedProofs for MINT_PROOF', async () => {
@@ -634,17 +583,15 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = true;
             const canConvert = true;
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
 
             const { receipt: aceReceipt } = await ace.validateProof(MINT_PROOF, accounts[0], proofs[0].proofData);
-            await truffleAssert.reverts(ace.updateNoteRegistry(MINT_PROOF, proofs[0].proofData, accounts[0]),
-                'ACE has not validated a matching proof');
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(MINT_PROOF, proofs[0].proofData, accounts[0]),
+                'ACE has not validated a matching proof',
+            );
 
             expect(aceReceipt.status).to.equal(true);
         });
@@ -683,19 +630,17 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = true;
             const canConvert = true;
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
 
             const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
             const { receipt: burnReceipt } = await ace.validateProof(BURN_PROOF, accounts[0], proofs[1].proofData);
 
-            await truffleAssert.reverts(ace.updateNoteRegistry(BURN_PROOF, proofs[1].proofData, accounts[0]),
-                'ACE has not validated a matching proof');
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(BURN_PROOF, proofs[1].proofData, accounts[0]),
+                'ACE has not validated a matching proof',
+            );
             expect(mintReceipt.status).to.equal(true);
             expect(burnReceipt.status).to.equal(true);
         });
@@ -724,17 +669,15 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canAdjustSupply = true;
             const canConvert = true;
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
 
             const { receipt: utilityReceipt } = await ace.validateProof(UTILITY_PROOF, accounts[0], proofs[0].proofData);
-            await truffleAssert.reverts(ace.updateNoteRegistry(UTILITY_PROOF, proofs[0].proofData, accounts[0]),
-                'ACE has not validated a matching proof');
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(UTILITY_PROOF, proofs[0].proofData, accounts[0]),
+                'ACE has not validated a matching proof',
+            );
 
             expect(utilityReceipt.status).to.equal(true);
         });
@@ -743,7 +686,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             const scalingFactor = new BN(10);
             const tokensTransferred = new BN(50);
 
-            // User A creates a note registry linked to a particular ERC20 token, and 
+            // User A creates a note registry linked to a particular ERC20 token, and
             // transfers 50 tokens to it
 
             const [ownerA, attacker] = accounts;
@@ -751,27 +694,20 @@ contract('ACE mint and burn functionality', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
 
-            await erc20.mint(
-                ownerA,
-                scalingFactor.mul(tokensTransferred),
-                { from: ownerA, gas: 4700000 }
-            );
+            await erc20.mint(ownerA, scalingFactor.mul(tokensTransferred), { from: ownerA, gas: 4700000 });
 
             // Set the first note registry
             const canAdjustSupply = false;
             const canConvert = true;
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: ownerA, gas: 4700000 }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: ownerA,
+                gas: 4700000,
+            });
 
             await erc20.approve(
                 ace.address, // address approving to spend
                 scalingFactor.mul(tokensTransferred), // value to transfer
-                { from: ownerA, gas: 4700000 }
+                { from: ownerA, gas: 4700000 },
             );
 
             const outputNotes = [note.create(recipient1.publicKey, 50)];
@@ -789,37 +725,21 @@ contract('ACE mint and burn functionality', (accounts) => {
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
 
-            await ace.publicApprove(
-                ownerA,
-                depositProofHash,
-                50,
-                { from: ownerA }
-            );
+            await ace.publicApprove(ownerA, depositProofHash, 50, { from: ownerA });
 
-            await ace.validateProof(
-                JOIN_SPLIT_PROOF,
-                ownerA,
-                depositProof.proofData,
-                { from: ownerA }
-            );
+            await ace.validateProof(JOIN_SPLIT_PROOF, ownerA, depositProof.proofData, { from: ownerA });
 
             const formattedProofOutput = `0x${depositProofOutput.slice(0x40)}`;
 
-            await ace.updateNoteRegistry(
-                JOIN_SPLIT_PROOF, formattedProofOutput, ownerA, { from: ownerA }
-            );
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, ownerA, { from: ownerA });
 
-            // Attacker creates a note registry, linked to same public ERC20 contract 
+            // Attacker creates a note registry, linked to same public ERC20 contract
             const canAdjustSupplyAttacker = true;
             const canConvertAttacker = true;
 
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupplyAttacker,
-                canConvertAttacker,
-                { from: attacker }
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupplyAttacker, canConvertAttacker, {
+                from: attacker,
+            });
 
             const newTotalMinted = note.create(recipient2.publicKey, 1);
             const oldTotalMinted = note.createZeroValueNote();
@@ -845,31 +765,18 @@ contract('ACE mint and burn functionality', (accounts) => {
                 validatorAddress: aztecJoinSplit.address,
             });
 
-            await ace.validateProof(
-                JOIN_SPLIT_PROOF,
-                attacker,
-                attackerJoinSplitProof.proofData,
-                { from: attacker }
-            );
+            await ace.validateProof(JOIN_SPLIT_PROOF, attacker, attackerJoinSplitProof.proofData, { from: attacker });
 
             const attackerJoinSplitProofOutput = outputCoder.getProofOutput(attackerJoinSplitProof.expectedOutput, 0);
             const attackerJoinSplitProofHash = outputCoder.hashProofOutput(attackerJoinSplitProofOutput);
 
             const formattedProofOutputAttacker = `0x${attackerJoinSplitProofOutput.slice(0x40)}`;
 
-            await ace.publicApprove(
-                attacker,
-                attackerJoinSplitProofHash,
-                1,
-                { from: attacker }
-            );
+            await ace.publicApprove(attacker, attackerJoinSplitProofHash, 1, { from: attacker });
 
-            await truffleAssert.reverts(ace.updateNoteRegistry(
-                JOIN_SPLIT_PROOF,
-                formattedProofOutputAttacker,
-                attacker,
-                { from: attacker }
-            ));
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutputAttacker, attacker, { from: attacker }),
+            );
         });
     });
 });

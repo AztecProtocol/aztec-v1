@@ -9,9 +9,7 @@ const proofUtils = require('../proofUtils');
 const { groupReduction } = bn128;
 const { errorTypes, K_MAX } = utils.constants;
 
-
 const verifier = {};
-
 
 /**
  * Verify AZTEC dividend computation proof transcript
@@ -35,15 +33,15 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
     const kBarArray = [];
     const numNotes = 3;
 
-    // Used to check the number of notes. Boolean argument specifies whether the 
-    // check should throw if not satisfied, or if we seek to collect all errors 
+    // Used to check the number of notes. Boolean argument specifies whether the
+    // check should throw if not satisfied, or if we seek to collect all errors
     // and only throw at the end. Here, set to false - only throw at end
     proofUtils.checkNumNotes(proofData, numNotes, false, errors);
 
     // convertToBNAndAppendPoints appends gamma and sigma to the end of proofdata as well
     const proofDataBn = proofUtils.convertToBNAndAppendPoints(proofData, errors);
 
-    const formattedChallenge = (new BN(challenge.slice(2), 16)).toRed(groupReduction);
+    const formattedChallenge = new BN(challenge.slice(2), 16).toRed(groupReduction);
 
     // convert to bn.js instances if not already
     if (BN.isBN(za)) {
@@ -92,37 +90,49 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
         const sigma = proofElement[7];
         let B;
 
-        if (i === 0) { // input note
+        if (i === 0) {
+            // input note
             const kBarX = kBar.redMul(x); // xbk = bk*x
             const aBarX = aBar.redMul(x); // xba = ba*x
             const challengeX = formattedChallenge.mul(x);
             x = rollingHash.keccak(groupReduction);
-            B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul(challengeX).neg());
+            B = gamma
+                .mul(kBarX)
+                .add(bn128.h.mul(aBarX))
+                .add(sigma.mul(challengeX).neg());
             kBarArray.push(kBar);
         }
 
-        if (i === 1) { // output note
+        if (i === 1) {
+            // output note
             const aBarX = aBar.redMul(x);
             const kBarX = kBar.redMul(x);
             const challengeX = formattedChallenge.mul(x);
             x = rollingHash.keccak(groupReduction);
-            B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul(challengeX).neg());
+            B = gamma
+                .mul(kBarX)
+                .add(bn128.h.mul(aBarX))
+                .add(sigma.mul(challengeX).neg());
             kBarArray.push(kBar);
         }
 
-        if (i === 2) { // residual note
+        if (i === 2) {
+            // residual note
             const zbRed = zbBN.toRed(groupReduction);
             const zaRed = zaBN.toRed(groupReduction);
 
             // kBar_3 = (z_b)(kBar_1) - (z_a)(kBar_2)
-            kBar = (zbRed.redMul(kBarArray[0])).redSub(zaRed.redMul(kBarArray[1]));
+            kBar = zbRed.redMul(kBarArray[0]).redSub(zaRed.redMul(kBarArray[1]));
 
             const aBarX = aBar.redMul(x);
             const kBarX = kBar.redMul(x);
             const challengeX = formattedChallenge.redMul(x);
             x = rollingHash.keccak(groupReduction);
 
-            B = gamma.mul(kBarX).add(bn128.h.mul(aBarX)).add(sigma.mul((challengeX).neg()));
+            B = gamma
+                .mul(kBarX)
+                .add(bn128.h.mul(aBarX))
+                .add(sigma.mul(challengeX.neg()));
             kBarArray.push(kBar);
         }
 

@@ -9,17 +9,14 @@ const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
 const joinSplit = require('../joinSplit');
 
-const {
-    inputCoder,
-    outputCoder,
-} = require('../../abiEncoder');
+const { inputCoder, outputCoder } = require('../../abiEncoder');
 
 const mint = {};
 mint.verifier = verifier;
 
 /**
  * Encode a mint transaction
- * 
+ *
  * @method encodeMintTransaction
  * @memberof module:mint
  * @param {Note[]} newTotalMinted AZTEC note representing the new total minted number
@@ -28,54 +25,50 @@ mint.verifier = verifier;
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
-mint.encodeMintTransaction = ({
-    newTotalMinted,
-    oldTotalMinted,
-    adjustedNotes,
-    senderAddress,
-}) => {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = mint.constructProof([newTotalMinted, oldTotalMinted, ...adjustedNotes], senderAddress);
+mint.encodeMintTransaction = ({ newTotalMinted, oldTotalMinted, adjustedNotes, senderAddress }) => {
+    const { proofData: proofDataRaw, challenge } = mint.constructProof(
+        [newTotalMinted, oldTotalMinted, ...adjustedNotes],
+        senderAddress,
+    );
 
     const inputNotes = [newTotalMinted];
     const outputNotes = [oldTotalMinted, ...adjustedNotes];
 
-    const inputOwners = inputNotes.map(m => m.owner);
-    const outputOwners = outputNotes.map(n => n.owner);
+    const inputOwners = inputNotes.map((m) => m.owner);
+    const outputOwners = outputNotes.map((n) => n.owner);
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
-    const proofData = inputCoder.mint(
-        proofDataRaw,
-        challenge,
-        inputOwners,
-        outputOwners,
-        outputNotes
-    );
+    const proofData = inputCoder.mint(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
 
-    const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-        inputNotes: [{
-            ...outputNotes[0],
-            forceMetadata: true,
-        }],
-        outputNotes: [{
-            ...inputNotes[0],
-            forceNoMetadata: true,
-        }],
-        publicOwner,
-        publicValue,
-        challenge,
-    },
-    {
-        inputNotes: [],
-        outputNotes: outputNotes.slice(1),
-        publicOwner,
-        publicValue,
-        challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
-    },
-    ]).slice(0x42)}`;
+    const expectedOutput = `0x${outputCoder
+        .encodeProofOutputs([
+            {
+                inputNotes: [
+                    {
+                        ...outputNotes[0],
+                        forceMetadata: true,
+                    },
+                ],
+                outputNotes: [
+                    {
+                        ...inputNotes[0],
+                        forceNoMetadata: true,
+                    },
+                ],
+                publicOwner,
+                publicValue,
+                challenge,
+            },
+            {
+                inputNotes: [],
+                outputNotes: outputNotes.slice(1),
+                publicOwner,
+                publicValue,
+                challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
+            },
+        ])
+        .slice(0x42)}`;
 
     return { proofData, expectedOutput, challenge };
 };

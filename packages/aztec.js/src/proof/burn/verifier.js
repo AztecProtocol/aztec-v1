@@ -10,7 +10,6 @@ const joinSplit = require('../joinSplit');
 
 const { errorTypes } = utils.constants;
 
-
 const verifier = {};
 
 /**
@@ -26,7 +25,6 @@ const verifier = {};
 verifier.verifyProof = (proofData, challengeHex, sender) => {
     const m = 1;
     let proofDataArray;
-
 
     if (!Array.isArray(proofData)) {
         proofDataArray = [proofData];

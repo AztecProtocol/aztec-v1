@@ -10,13 +10,7 @@ const EC = require('elliptic');
 const crypto = require('crypto');
 
 const {
-    constants: {
-        FIELD_MODULUS,
-        GROUP_MODULUS,
-        H_X,
-        H_Y,
-        K_MAX,
-    },
+    constants: { FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y, K_MAX },
 } = require('@aztec/dev-utils');
 const decodePoint = require('./decodePoint');
 
@@ -58,9 +52,17 @@ bn128.randomGroupScalar = () => {
 bn128.randomPoint = function randomPoint() {
     function recurse() {
         const x = new BN(crypto.randomBytes(32), 16).toRed(bn128.curve.red);
-        const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
+        const y2 = x
+            .redSqr()
+            .redMul(x)
+            .redIAdd(bn128.curve.b);
         const y = y2.redSqrt();
-        if (y.redSqr(y).redSub(y2).cmp(bn128.curve.a)) {
+        if (
+            y
+                .redSqr(y)
+                .redSub(y2)
+                .cmp(bn128.curve.a)
+        ) {
             return recurse();
         }
         return bn128.curve.point(x, y);
@@ -77,7 +79,7 @@ bn128.K_MAX = K_MAX;
 
 // TODO: replace with optimized C++ implementation, this is way too slow
 /**
- * Brute-force recover an AZTEC note value from a decrypted point pair.  
+ * Brute-force recover an AZTEC note value from a decrypted point pair.
  *   Requires the value 'k' is less than ~ 1 million
  * @method recoverMessage
  * @param {Point} gamma the AZTEC note coordinate \gamma
@@ -105,9 +107,18 @@ bn128.recoverMessage = function recoverMessage(gamma, gammaK) {
 bn128.decompress = (compressed) => {
     const yBit = compressed.testn(255);
     const x = compressed.maskn(255).toRed(bn128.curve.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(bn128.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
@@ -130,9 +141,18 @@ bn128.decompressHex = (compressedHex) => {
     const compressed = new BN(compressedHex, 16);
     const yBit = compressed.testn(255);
     const x = compressed.maskn(255).toRed(bn128.curve.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(bn128.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();

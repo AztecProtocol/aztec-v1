@@ -1,7 +1,6 @@
 const BN = require('bn.js');
 const utils = require('@aztec/dev-utils');
 
-
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
@@ -23,12 +22,13 @@ const verifier = {};
  */
 verifier.verifyProof = (proofData, m, challengeHex, sender) => {
     const errors = [];
-    const {
-        rollingHash,
-        kPublic,
-        notes,
-        challenge,
-    } = proofUtils.convertTranscript(proofData, m, challengeHex, errors, 'joinSplit');
+    const { rollingHash, kPublic, notes, challenge } = proofUtils.convertTranscript(
+        proofData,
+        m,
+        challengeHex,
+        errors,
+        'joinSplit',
+    );
 
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));
@@ -50,7 +50,8 @@ verifier.verifyProof = (proofData, m, challengeHex, sender) => {
             c = challenge.redMul(x);
         }
         const sigma = note.sigma.mul(c).neg();
-        const B = note.gamma.mul(kBar)
+        const B = note.gamma
+            .mul(kBar)
             .add(bn128.h.mul(aBar))
             .add(sigma);
         if (i === m) {

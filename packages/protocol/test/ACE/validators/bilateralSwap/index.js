@@ -15,7 +15,6 @@ const {
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 
-
 // ### Artifacts
 const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
 const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwapInterface');
@@ -38,9 +37,7 @@ contract('Bilateral Swap', (accounts) => {
         it('successfully validate output encoding for bilateral proof in zero-knowledge', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -55,9 +52,7 @@ contract('Bilateral Swap', (accounts) => {
                 gas: 4000000,
             });
 
-            const decoded = outputCoder.decodeProofOutputs(
-                `0x${padLeft('0', 64)}${result.slice(2)}`
-            );
+            const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
 
             expect(decoded[0].inputNotes[0].gamma.eq(inputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);
@@ -67,7 +62,6 @@ contract('Bilateral Swap', (accounts) => {
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
             expect(decoded[0].outputNotes[0].owner).to.equal(outputNotes[0].owner.toLowerCase());
-
 
             expect(decoded[1].inputNotes[0].gamma.eq(outputNotes[1].gamma)).to.equal(true);
             expect(decoded[1].inputNotes[0].sigma.eq(outputNotes[1].sigma)).to.equal(true);
@@ -84,9 +78,7 @@ contract('Bilateral Swap', (accounts) => {
         it('validate a proof that uses notes worth 0', async () => {
             const noteValues = [0, 20, 0, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -108,29 +100,25 @@ contract('Bilateral Swap', (accounts) => {
         it('Validate success if challenge has GROUP_MODULUS added to it', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
 
             const challengeBN = new BN(challenge.slice(2), 16);
-            const notModRChallenge = `0x${(challengeBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+            const notModRChallenge = `0x${challengeBN.add(constants.GROUP_MODULUS).toString(16)}`;
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                notModRChallenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const proofData = inputCoder.bilateralSwap(proofDataRaw, notModRChallenge, noteOwners, [
+                outputNotes[0],
+                inputNotes[1],
+            ]);
 
             const result = await bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
                 from: accounts[0],
@@ -140,22 +128,24 @@ contract('Bilateral Swap', (accounts) => {
             const publicOwner = '0x0000000000000000000000000000000000000000';
             const publicValue = 0;
 
-            const expectedOutput = `0x${outputCoder.encodeProofOutputs([
-                {
-                    inputNotes: [inputNotes[0]],
-                    outputNotes: [outputNotes[0]],
-                    publicOwner,
-                    publicValue,
-                    challenge: notModRChallenge,
-                },
-                {
-                    inputNotes: [outputNotes[1]],
-                    outputNotes: [inputNotes[1]],
-                    publicOwner,
-                    publicValue,
-                    challenge: `0x${padLeft(sha3(notModRChallenge).slice(2), 64)}`,
-                },
-            ]).slice(0x42)}`;
+            const expectedOutput = `0x${outputCoder
+                .encodeProofOutputs([
+                    {
+                        inputNotes: [inputNotes[0]],
+                        outputNotes: [outputNotes[0]],
+                        publicOwner,
+                        publicValue,
+                        challenge: notModRChallenge,
+                    },
+                    {
+                        inputNotes: [outputNotes[1]],
+                        outputNotes: [inputNotes[1]],
+                        publicOwner,
+                        publicValue,
+                        challenge: `0x${padLeft(sha3(notModRChallenge).slice(2), 64)}`,
+                    },
+                ])
+                .slice(0x42)}`;
 
             expect(result).to.equal(expectedOutput);
         });
@@ -175,9 +165,7 @@ contract('Bilateral Swap', (accounts) => {
         it('Validate failure for incorrect input note values (k1 != k3, k2 != k4)', async () => {
             const noteValues = [10, 50, 20, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -188,75 +176,64 @@ contract('Bilateral Swap', (accounts) => {
                 senderAddress: accounts[0],
             });
 
-
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure for using random proof data', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const {
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+            const { challenge } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
 
-            const fakeProofData = [...Array(4)]
-                .map(() => [...Array(6)]
-                    .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
-
-            const proofData = inputCoder.bilateralSwap(
-                fakeProofData,
-                challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
+            const fakeProofData = [...Array(4)].map(() =>
+                [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
             );
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            const proofData = inputCoder.bilateralSwap(fakeProofData, challenge, noteOwners, [outputNotes[0], inputNotes[1]]);
+
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure when points not on curve', async () => {
             const zeroes = `${padLeft('0', 64)}`;
-            const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
+            const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const challenge = sha3(challengeString, 'hex');
 
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
             const outputOwners = [proofUtils.randomAddress()];
 
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                challenge,
-                outputOwners,
-                []
-            );
+            const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, outputOwners, []);
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -264,62 +241,50 @@ contract('Bilateral Swap', (accounts) => {
 
             const proofConstruct = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
 
             // Generate scalars that NOT mod r
             const kBarBN = new BN(proofConstruct.proofData[0][0].slice(2), 16);
-            const notModRKBar = `0x${(kBarBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+            const notModRKBar = `0x${kBarBN.add(constants.GROUP_MODULUS).toString(16)}`;
 
             proofConstruct.proofData[0][0] = notModRKBar;
 
-            const proofData = inputCoder.bilateralSwap(
-                proofConstruct.proofData,
-                proofConstruct.challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
+            const proofData = inputCoder.bilateralSwap(proofConstruct.proofData, proofConstruct.challenge, noteOwners, [
+                outputNotes[0],
+                inputNotes[1],
+            ]);
+
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
             );
-
-
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
         });
 
         it('validate failure when scalars are zero', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
             const scalarZeroProofData = proofDataRaw.map((proofElement) => {
-                return [
-                    padLeft(0, 64),
-                    padLeft(0, 64),
-                    proofElement[2],
-                    proofElement[3],
-                    proofElement[4],
-                    proofElement[5],
-                ];
+                return [padLeft(0, 64), padLeft(0, 64), proofElement[2], proofElement[3], proofElement[4], proofElement[5]];
             });
 
-            const proofData = inputCoder.bilateralSwap(
-                scalarZeroProofData,
-                challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
+            const proofData = inputCoder.bilateralSwap(scalarZeroProofData, challenge, noteOwners, [
+                outputNotes[0],
+                inputNotes[1],
+            ]);
 
             const zeroScalar = padLeft(0, 64);
             expect(scalarZeroProofData[0][0]).to.equal(zeroScalar);
@@ -331,37 +296,37 @@ contract('Bilateral Swap', (accounts) => {
             expect(scalarZeroProofData[3][0]).to.equal(zeroScalar);
             expect(scalarZeroProofData[3][1]).to.equal(zeroScalar);
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('validate failure when proof data not correctly encoded', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
             // Performing ABI encoding
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
             const metadata = outputNotes;
 
             const { length } = proofDataRaw;
-            const noteString = proofDataRaw.map(individualNotes => encoderFactory.encodeNote(individualNotes));
+            const noteString = proofDataRaw.map((individualNotes) => encoderFactory.encodeNote(individualNotes));
 
             // Incorrect encoding of proof data happens here: first two characters incorrectly sliced off
-            // noteString, and padLeft() increases from 64 to 66 to still recognise it as a valid bytes 
+            // noteString, and padLeft() increases from 64 to 66 to still recognise it as a valid bytes
             // object. However. this is incorrect ABI encoding so will throw
             const data = [padLeft(Number(length).toString(16), 66), ...noteString.slice(2)].join('');
             const actualLength = Number(data.length / 2);
@@ -373,11 +338,7 @@ contract('Bilateral Swap', (accounts) => {
                 METADATA: encoderFactory.encodeMetadata(metadata),
             };
 
-            const abiParams = [
-                'PROOF_DATA',
-                'OUTPUT_OWNERS',
-                'METADATA',
-            ];
+            const abiParams = ['PROOF_DATA', 'OUTPUT_OWNERS', 'METADATA'];
 
             const incorrectEncoding = encoderFactory.encode(configs, abiParams, 'bilateralSwap');
 
@@ -385,16 +346,14 @@ contract('Bilateral Swap', (accounts) => {
                 bilateralSwapContract.validateBilateralSwap(incorrectEncoding, accounts[0], constants.CRS, {
                     from: accounts[0],
                     gas: 4000000,
-                })
+                }),
             );
         });
 
         it('validate failure when incorrect H_X, H_Y in CRS is supplied)', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -417,24 +376,20 @@ contract('Bilateral Swap', (accounts) => {
             const fakeHx = H_X.add(new BN(1, 10));
             const fakeHy = H_Y.add(new BN(1, 10));
 
-            const fakeCRS = [
-                `0x${padLeft(fakeHx.toString(16), 64)}`,
-                `0x${padLeft(fakeHy.toString(16), 64)}`,
-                ...t2,
-            ];
+            const fakeCRS = [`0x${padLeft(fakeHx.toString(16), 64)}`, `0x${padLeft(fakeHy.toString(16), 64)}`, ...t2];
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], fakeCRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], fakeCRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure for using a fake challenge', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -448,18 +403,18 @@ contract('Bilateral Swap', (accounts) => {
             const fakeChallenge = padLeft(crypto.randomBytes(32).toString('hex'), 64);
             const fakeProofData = `0x${proofData.slice(0x02, 0x42)}${fakeChallenge}${proofData.slice(0x82)}`;
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(fakeProofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(fakeProofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure when sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -471,35 +426,29 @@ contract('Bilateral Swap', (accounts) => {
             proofUtils.computeChallenge = () => localComputeChallenge([...inputNotes, ...outputNotes], blindingFactors);
             bilateralSwap.constructBlindingFactors = () => blindingFactors;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
 
             proofUtils.computeChallenge = localComputeChallenge;
             bilateralSwap.constructBlindingFactors = localConstructBlindingFactors;
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, noteOwners, [outputNotes[0], inputNotes[1]]);
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure if a group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -515,26 +464,24 @@ contract('Bilateral Swap', (accounts) => {
             proofConstruct.proofData[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
             proofConstruct.challenge = `0x${padLeft('0a', 64)}`;
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofConstruct.proofData,
-                proofConstruct.challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const proofData = inputCoder.bilateralSwap(proofConstruct.proofData, proofConstruct.challenge, noteOwners, [
+                outputNotes[0],
+                inputNotes[1],
+            ]);
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure when initial commitments NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -546,34 +493,29 @@ contract('Bilateral Swap', (accounts) => {
             proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, blindingFactors);
             bilateralSwap.constructBlindingFactors = () => blindingFactors;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
 
             proofUtils.computeChallenge = localComputeChallenge;
             bilateralSwap.constructBlindingFactors = localConstructBlindingFactors;
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, noteOwners, [outputNotes[0], inputNotes[1]]);
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure when blinding factors NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -585,26 +527,23 @@ contract('Bilateral Swap', (accounts) => {
             proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, [...inputNotes, ...outputNotes]);
             bilateralSwap.constructBlindingFactors = () => blindingFactors;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
 
             proofUtils.computeChallenge = localComputeChallenge;
             bilateralSwap.constructBlindingFactors = localConstructBlindingFactors;
 
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
-            );
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, noteOwners, [outputNotes[0], inputNotes[1]]);
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure for number of notes less than minimum number required - using 2 instead of 4', async () => {
@@ -613,31 +552,26 @@ contract('Bilateral Swap', (accounts) => {
 
             bilateralSwapAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
             const senderAddress = accounts[0];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                challenge,
-                noteOwners,
-                [outputNotes[0]]
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
             );
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, noteOwners, [outputNotes[0]]);
+
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure for number of notes less than minimum number required - using 3 instead of 4', async () => {
@@ -646,33 +580,27 @@ contract('Bilateral Swap', (accounts) => {
 
             bilateralSwapAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 3);
             const senderAddress = accounts[0];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
-
-            const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
-            const proofData = inputCoder.bilateralSwap(
-                proofDataRaw,
-                challenge,
-                noteOwners,
-                [outputNotes[0], inputNotes[1]]
+            const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
             );
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
-        });
+            const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, noteOwners, [outputNotes[0], inputNotes[1]]);
 
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
+        });
 
         it('validate failure for random note values between [0,...,K_MAX]', async () => {
             const noteValues = [
@@ -682,9 +610,7 @@ contract('Bilateral Swap', (accounts) => {
                 proofUtils.generateNoteValue(),
             ];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -695,18 +621,18 @@ contract('Bilateral Swap', (accounts) => {
                 senderAddress: accounts[0],
             });
 
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure for incorrect number of input notes', async () => {
             const noteValues = [10, 20, 30, 10, 20, 30];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -716,18 +642,18 @@ contract('Bilateral Swap', (accounts) => {
                 outputNotes,
                 senderAddress: accounts[0],
             });
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure for a bid note of zero value that does not satisfy proof relationship', async () => {
             const noteValues = [0, 20, 10, 20];
 
-            const notes = [
-                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -737,10 +663,12 @@ contract('Bilateral Swap', (accounts) => {
                 outputNotes,
                 senderAddress: accounts[0],
             });
-            await truffleAssert.reverts(bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                bilateralSwapContract.validateBilateralSwap(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
     });
 });

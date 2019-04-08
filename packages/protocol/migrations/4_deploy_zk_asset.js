@@ -1,5 +1,7 @@
 /* global artifacts */
-const { constants: { addresses, ERC20_SCALING_FACTOR } } = require('@aztec/dev-utils');
+const {
+    constants: { addresses, ERC20_SCALING_FACTOR },
+} = require('@aztec/dev-utils');
 const { isUndefined } = require('lodash');
 
 const ACE = artifacts.require('./ACE.sol');
@@ -22,14 +24,7 @@ module.exports = (deployer, network) => {
             const canAdjustSupply = false;
             const canConvert = true;
 
-            return deployer.deploy(
-                ZkAsset,
-                aceAddress,
-                erc20Address,
-                ERC20_SCALING_FACTOR,
-                canAdjustSupply,
-                canConvert
-            );
+            return deployer.deploy(ZkAsset, aceAddress, erc20Address, ERC20_SCALING_FACTOR, canAdjustSupply, canConvert);
         });
     });
 };

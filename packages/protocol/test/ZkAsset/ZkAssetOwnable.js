@@ -6,7 +6,10 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -17,7 +20,6 @@ const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 const ZkAssetOwnable = artifacts.require('./contracts/ZkAsset/ZkAssetOwnable');
 const ZkAssetOwnableTest = artifacts.require('./contracts/ZkAsset/ZkAssetOwnableTest');
-
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
@@ -51,24 +53,25 @@ contract('ZkAssetOwnable', (accounts) => {
     const tokensTransferred = new BN(100000);
 
     const confidentialApprove = async (indexes) => {
-        await Promise.all(indexes.map((i) => {
-            const { signature } = signNote(
-                zkAssetOwnable.address,
-                notes[i].noteHash,
-                zkAssetOwnableTest.address,
-                aztecAccounts[i].privateKey
-            );
-            const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
-            // eslint-disable-next-line no-await-in-loop
-            return zkAssetOwnable.confidentialApprove(
-                notes[i].noteHash,
-                zkAssetOwnableTest.address,
-                true,
-                concatenatedSignature
-            );
-        }));
+        await Promise.all(
+            indexes.map((i) => {
+                const { signature } = signNote(
+                    zkAssetOwnable.address,
+                    notes[i].noteHash,
+                    zkAssetOwnableTest.address,
+                    aztecAccounts[i].privateKey,
+                );
+                const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
+                // eslint-disable-next-line no-await-in-loop
+                return zkAssetOwnable.confidentialApprove(
+                    notes[i].noteHash,
+                    zkAssetOwnableTest.address,
+                    true,
+                    concatenatedSignature,
+                );
+            }),
+        );
     };
-
 
     beforeEach(async () => {
         ace = await ACE.new({ from: accounts[0] });
@@ -146,58 +149,28 @@ contract('ZkAssetOwnable', (accounts) => {
         erc20 = await ERC20Mintable.new();
         const canAdjustSupply = false;
         const canConvert = true;
-        zkAssetOwnable = await ZkAssetOwnable.new(
-            ace.address,
-            erc20.address,
-            scalingFactor,
-            canAdjustSupply,
-            canConvert
-        );
+        zkAssetOwnable = await ZkAssetOwnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
         await zkAssetOwnable.setProofs(epoch, filter);
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
         await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
 
-        await Promise.all(accounts.map((account) => {
-            const opts = { from: accounts[0], gas: 4700000 };
-            return erc20.mint(
-                account,
-                scalingFactor.mul(tokensTransferred),
-                opts
-            );
-        }));
-        await Promise.all(accounts.map((account) => {
-            const opts = { from: account, gas: 4700000 };
-            return erc20.approve(
-                ace.address,
-                scalingFactor.mul(tokensTransferred),
-                opts
-            );
-        }));
+        await Promise.all(
+            accounts.map((account) => {
+                const opts = { from: accounts[0], gas: 4700000 };
+                return erc20.mint(account, scalingFactor.mul(tokensTransferred), opts);
+            }),
+        );
+        await Promise.all(
+            accounts.map((account) => {
+                const opts = { from: account, gas: 4700000 };
+                return erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
+            }),
+        );
 
-        await ace.publicApprove(
-            zkAssetOwnable.address,
-            proofHashes[0],
-            10,
-            { from: accounts[0] }
-        );
-        await ace.publicApprove(
-            zkAssetOwnable.address,
-            proofHashes[1],
-            40,
-            { from: accounts[1] }
-        );
-        await ace.publicApprove(
-            zkAssetOwnable.address,
-            proofHashes[2],
-            130,
-            { from: accounts[2] }
-        );
-        await ace.publicApprove(
-            zkAssetOwnable.address,
-            proofHashes[4],
-            30,
-            { from: accounts[3] }
-        );
+        await ace.publicApprove(zkAssetOwnable.address, proofHashes[0], 10, { from: accounts[0] });
+        await ace.publicApprove(zkAssetOwnable.address, proofHashes[1], 40, { from: accounts[1] });
+        await ace.publicApprove(zkAssetOwnable.address, proofHashes[2], 130, { from: accounts[2] });
+        await ace.publicApprove(zkAssetOwnable.address, proofHashes[4], 30, { from: accounts[3] });
     });
 
     describe('success states', () => {
@@ -249,20 +222,17 @@ contract('ZkAssetOwnable', (accounts) => {
     describe('failure states', async () => {
         it('should fail to set a new proof bit filter if not owner', async () => {
             const opts = { from: accounts[1] };
-            await truffleAssert.reverts(
-                zkAssetOwnable.setProofs(epoch, filter, opts),
-                'only the owner can set the epoch proofs'
-            );
+            await truffleAssert.reverts(zkAssetOwnable.setProofs(epoch, filter, opts), 'only the owner can set the epoch proofs');
         });
 
-        it('should fail to approve a contract to update a note registry if note doesn\'t exist', async () => {
+        it("should fail to approve a contract to update a note registry if note doesn't exist", async () => {
             await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
 
             const { signature } = signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
-                aztecAccounts[0].privateKey
+                aztecAccounts[0].privateKey,
             );
             const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
             await truffleAssert.reverts(
@@ -270,9 +240,9 @@ contract('ZkAssetOwnable', (accounts) => {
                     notes[2].noteHash, // wrong note hash
                     zkAssetOwnableTest.address,
                     true,
-                    concatenatedSignature
+                    concatenatedSignature,
                 ),
-                'expected note to exist'
+                'expected note to exist',
             );
         });
 
@@ -284,17 +254,12 @@ contract('ZkAssetOwnable', (accounts) => {
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
-                aztecAccounts[0].privateKey
+                aztecAccounts[0].privateKey,
             );
             const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
             await truffleAssert.reverts(
-                zkAssetOwnable.confidentialApprove(
-                    notes[0].noteHash,
-                    zkAssetOwnableTest.address,
-                    true,
-                    concatenatedSignature
-                ),
-                'only unspent notes can be approved'
+                zkAssetOwnable.confidentialApprove(notes[0].noteHash, zkAssetOwnableTest.address, true, concatenatedSignature),
+                'only unspent notes can be approved',
             );
         });
 
@@ -304,13 +269,8 @@ contract('ZkAssetOwnable', (accounts) => {
 
             const emptySignature = '0x';
             await truffleAssert.reverts(
-                zkAssetOwnable.confidentialApprove(
-                    notes[0].noteHash,
-                    zkAssetOwnableTest.address,
-                    true,
-                    emptySignature
-                ),
-                'the note owner did not sign this message'
+                zkAssetOwnable.confidentialApprove(notes[0].noteHash, zkAssetOwnableTest.address, true, emptySignature),
+                'the note owner did not sign this message',
             );
         });
 
@@ -324,11 +284,8 @@ contract('ZkAssetOwnable', (accounts) => {
             const bogusProof = `${parseInt(JOIN_SPLIT_PROOF, 10) + 1}`; // adding 1 changes the proof id from the proof object
             const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
             await truffleAssert.reverts(
-                zkAssetOwnableTest.callConfidentialTransferFrom(
-                    bogusProof,
-                    formattedProofOutput
-                ),
-                'expected proof to be supported'
+                zkAssetOwnableTest.callConfidentialTransferFrom(bogusProof, formattedProofOutput),
+                'expected proof to be supported',
             );
         });
 
@@ -345,7 +302,7 @@ contract('ZkAssetOwnable', (accounts) => {
             const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput),
-                'public owner has not validated a transfer of tokens'
+                'public owner has not validated a transfer of tokens',
             );
         });
     });

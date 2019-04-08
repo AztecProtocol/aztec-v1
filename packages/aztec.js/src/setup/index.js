@@ -9,7 +9,9 @@
  * @module setup
  */
 
-const { constants: { SIGNATURES_PER_FILE } } = require('@aztec/dev-utils');
+const {
+    constants: { SIGNATURES_PER_FILE },
+} = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const fs = require('fs');
 const path = require('path');
@@ -32,9 +34,18 @@ const compressionMask = new BN('800000000000000000000000000000000000000000000000
 setup.decompress = (compressed) => {
     const yBit = compressed.testn(255);
     const x = compressed.maskn(255).toRed(bn128.curve.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(bn128.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(bn128.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
@@ -72,14 +83,14 @@ setup.readSignature = (inputValue) => {
     return new Promise((resolve, reject) => {
         const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
 
-        const fileName = path.posix.resolve(partialPath, `data${(((fileNum) * SIGNATURES_PER_FILE) - 1)}.dat`);
+        const fileName = path.posix.resolve(partialPath, `data${fileNum * SIGNATURES_PER_FILE - 1}.dat`);
         fs.readFile(fileName, (err, data) => {
             if (err) {
                 return reject(err);
             }
             // each file starts at 0 (0, 1024, 2048 etc)
-            const min = ((fileNum - 1) * SIGNATURES_PER_FILE);
-            const bytePosition = ((value - min) * 32);
+            const min = (fileNum - 1) * SIGNATURES_PER_FILE;
+            const bytePosition = (value - min) * 32;
             // eslint-disable-next-line new-cap
             const signatureBuf = new Buffer.alloc(32);
             data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
@@ -101,12 +112,12 @@ setup.readSignatureSync = (inputValue) => {
     const value = Number(inputValue);
     const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
 
-    const fileName = path.posix.resolve(partialPath, `data${(((fileNum) * SIGNATURES_PER_FILE) - 1)}.dat`);
+    const fileName = path.posix.resolve(partialPath, `data${fileNum * SIGNATURES_PER_FILE - 1}.dat`);
     const data = fs.readFileSync(fileName);
 
     // each file starts at 0 (0, 1024, 2048 etc)
-    const min = ((fileNum - 1) * SIGNATURES_PER_FILE);
-    const bytePosition = ((value - min) * 32);
+    const min = (fileNum - 1) * SIGNATURES_PER_FILE;
+    const bytePosition = (value - min) * 32;
     // eslint-disable-next-line new-cap
     const signatureBuf = new Buffer.alloc(32);
     data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);

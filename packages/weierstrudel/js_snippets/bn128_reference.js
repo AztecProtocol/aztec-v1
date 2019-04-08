@@ -15,9 +15,15 @@ const lambda = new BN('b3c4d79d41a917585bfc41088d8daaa78b17ea66b99c90dd', 16);
 
 function setRed(point) {
     let { x, y, z } = point;
-    if (!x.red) { x = x.toRed(pRed); }
-    if (!y.red) { y = y.toRed(pRed); }
-    if (z && !z.red) { z = z.toRed(pRed); }
+    if (!x.red) {
+        x = x.toRed(pRed);
+    }
+    if (!y.red) {
+        y = y.toRed(pRed);
+    }
+    if (z && !z.red) {
+        z = z.toRed(pRed);
+    }
     return { x, y, z };
 }
 
@@ -44,16 +50,30 @@ bn128._double = function _double({ x, y, z }) {
     const yy = y.redSqr();
     const yyyy = yy.redSqr();
     const zz = z.redSqr();
-    let s = x.redAdd(yy).redSqr().redSub(xx).redSub(yyyy);
+    let s = x
+        .redAdd(yy)
+        .redSqr()
+        .redSub(xx)
+        .redSub(yyyy);
     s = s.redAdd(s);
     const m = xx.redAdd(xx).redAdd(xx);
-    const t = m.redSqr().redSub(s).redSub(s);
+    const t = m
+        .redSqr()
+        .redSub(s)
+        .redSub(s);
     const x3 = t;
     let yyyy8 = yyyy.redAdd(yyyy);
     yyyy8 = yyyy8.redAdd(yyyy8);
     yyyy8 = yyyy8.redAdd(yyyy8);
-    const y3 = s.redSub(t).redMul(m).redSub(yyyy8);
-    const z3 = y.add(z).redSqr().redSub(yy).redSub(zz);
+    const y3 = s
+        .redSub(t)
+        .redMul(m)
+        .redSub(yyyy8);
+    const z3 = y
+        .add(z)
+        .redSqr()
+        .redSub(yy)
+        .redSub(zz);
     return {
         x: x3,
         y: y3,
@@ -94,7 +114,7 @@ bn128._add = function _add(x2, y2, z2, x1, y1, z1) {
     const zzz2 = z2.redMul(z2);
     t1 = t1.redMul(x2);
     t2 = t2.redMul(y2);
-    t1 = (x1.redMul(zz2)).redSub(t1);
+    t1 = x1.redMul(zz2).redSub(t1);
     t2 = t2.redSub(y1.redMul(zzz2));
     const z3 = z1.redMul(t1);
     let t4 = t1.redSqr();
@@ -134,8 +154,26 @@ bn128.isEqual = function isEqual(x1, y1, z1, x2, y2, z2) {
     const zzz2 = zz2.redMul(z2Red);
 
     return (
-        x1.toRed(pRed).redMul(zz2).fromRed().eq(x2.toRed(pRed).redMul(zz1).fromRed())
-        && y1.toRed(pRed).redMul(zzz2).fromRed().eq(y2.toRed(pRed).redMul(zzz1).fromRed())
+        x1
+            .toRed(pRed)
+            .redMul(zz2)
+            .fromRed()
+            .eq(
+                x2
+                    .toRed(pRed)
+                    .redMul(zz1)
+                    .fromRed(),
+            ) &&
+        y1
+            .toRed(pRed)
+            .redMul(zzz2)
+            .fromRed()
+            .eq(
+                y2
+                    .toRed(pRed)
+                    .redMul(zzz1)
+                    .fromRed(),
+            )
     );
 };
 
@@ -175,7 +213,12 @@ bn128.randomPointInternal = () => {
         const xxx = x.redSqr().redMul(x);
         const y2 = xxx.redAdd(b);
         y = y2.redSqrt();
-        if (y.redSqr().fromRed().eq(xxx.redAdd(b).fromRed())) {
+        if (
+            y
+                .redSqr()
+                .fromRed()
+                .eq(xxx.redAdd(b).fromRed())
+        ) {
             return { x, y };
         }
         return recurse();
@@ -209,7 +252,6 @@ bn128.randomPointJacobian = () => {
         z: z.fromRed(),
     };
 };
-
 
 bn128.scalarMul = (point, scalar) => {
     const x = point.x.toRed(pRed);
@@ -253,14 +295,13 @@ bn128.scalarMul = (point, scalar) => {
                         x1: accumulator.x,
                         y1: accumulator.y,
                         z1: accumulator.z,
-                    }
+                    },
                 );
             }
         }
     }
     return accumulator;
 };
-
 
 bn128.generateSingleTable = (x, y, z) => {
     const point = setRed({ x, y, z });
@@ -302,7 +343,7 @@ bn128.PRECOMPUTE_TABLE__RESCALE = (point, zIn) => {
 };
 
 bn128.generateTable = (inputPoints) => {
-    const points = inputPoints.map(i => setRed(i));
+    const points = inputPoints.map((i) => setRed(i));
     let globalZ = new BN(1).toRed(pRed);
     const tables = points.map((point) => {
         const scaled = bn128.PRECOMPUTE_TABLE__RESCALE(point, globalZ);
@@ -310,7 +351,7 @@ bn128.generateTable = (inputPoints) => {
         globalZ = table.tableZ;
         return table;
     });
-    globalZ = (tables[tables.length - 1].tableZ);
+    globalZ = tables[tables.length - 1].tableZ;
     return { tables, globalZ };
 };
 
@@ -343,6 +384,5 @@ bn128.toAffine = (input) => {
     const y = point.y.redMul(zzz.redInvm());
     return { x, y };
 };
-
 
 module.exports = bn128;

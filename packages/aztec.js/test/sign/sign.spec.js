@@ -1,4 +1,3 @@
-
 const { constants, proofs } = require('@aztec/dev-utils');
 
 const BN = require('bn.js');
@@ -19,10 +18,7 @@ describe('sign tests', () => {
     let accounts;
 
     beforeEach(() => {
-        accounts = [
-            secp256k1.generateAccount(),
-            secp256k1.generateAccount(),
-        ];
+        accounts = [secp256k1.generateAccount(), secp256k1.generateAccount()];
     });
 
     describe('Structure specific EIP712 tests', () => {
@@ -51,7 +47,7 @@ describe('sign tests', () => {
                 sha3('1').slice(2),
                 padLeft('cccccccccccccccccccccccccccccccccccccccc', 64),
             ];
-            const expected = (messageData.join(''));
+            const expected = messageData.join('');
             expect(result).to.equal(expected);
         });
     });
@@ -68,7 +64,7 @@ describe('sign tests', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
+                note: noteString,
                 challenge,
                 sender: senderAddress,
             };
@@ -95,7 +91,7 @@ describe('sign tests', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
+                note: noteString,
                 challenge,
                 sender: senderAddress,
             };
@@ -107,7 +103,7 @@ describe('sign tests', () => {
             const r = Buffer.from(signature[1].slice(2), 'hex');
             const s = Buffer.from(signature[2].slice(2), 'hex');
 
-            const publicKeyRecover = (ethUtil.ecrecover(messageHash, v, r, s)).toString('hex');
+            const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
     });

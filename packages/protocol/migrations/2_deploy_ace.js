@@ -1,5 +1,7 @@
 /* global artifacts */
-const { constants: { CRS } } = require('@aztec/dev-utils');
+const {
+    constants: { CRS },
+} = require('@aztec/dev-utils');
 
 const ACE = artifacts.require('./ACE.sol');
 

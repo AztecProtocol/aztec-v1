@@ -5,7 +5,10 @@ const BN = require('bn.js');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 const truffleAssert = require('truffle-assertions');
 const { keccak256 } = require('web3-utils');
 
@@ -17,7 +20,6 @@ const ACE = artifacts.require('./contracts/ACE/ACE');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 const ZkAsset = artifacts.require('./contracts/ZkAsset/ZkAsset');
-
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
@@ -52,30 +54,20 @@ contract('ZkAsset', (accounts) => {
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             erc20 = await ERC20Mintable.new();
-            zkAsset = await ZkAsset.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert
-            );
+            zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
 
-            await Promise.all(accounts.map((account) => {
-                const opts = { from: accounts[0], gas: 4700000 };
-                return erc20.mint(
-                    account,
-                    scalingFactor.mul(tokensTransferred),
-                    opts
-                );
-            }));
-            await Promise.all(accounts.map((account) => {
-                const opts = { from: account, gas: 4700000 };
-                return erc20.approve(
-                    ace.address,
-                    scalingFactor.mul(tokensTransferred),
-                    opts
-                );
-            }));
+            await Promise.all(
+                accounts.map((account) => {
+                    const opts = { from: accounts[0], gas: 4700000 };
+                    return erc20.mint(account, scalingFactor.mul(tokensTransferred), opts);
+                }),
+            );
+            await Promise.all(
+                accounts.map((account) => {
+                    const opts = { from: account, gas: 4700000 };
+                    return erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
+                }),
+            );
         });
 
         describe('success states', async () => {
@@ -122,12 +114,7 @@ contract('ZkAsset', (accounts) => {
                 const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
                 const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
 
-                await ace.publicApprove(
-                    zkAsset.address,
-                    depositProofHash,
-                    transferAmount,
-                    { from: accounts[0] }
-                );
+                await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
 
                 const { receipt } = await zkAsset.confidentialTransfer(depositProof.proofData);
                 expect(receipt.status).to.equal(true);
@@ -163,19 +150,9 @@ contract('ZkAsset', (accounts) => {
                 const tokenWithdrawalProofOutput = outputCoder.getProofOutput(tokenWithdrawalProof.expectedOutput, 0);
                 const tokenWithdrawalProofHash = outputCoder.hashProofOutput(tokenWithdrawalProofOutput);
 
-                await ace.publicApprove(
-                    zkAsset.address,
-                    depositProofHash,
-                    10,
-                    { from: accounts[0] }
-                );
+                await ace.publicApprove(zkAsset.address, depositProofHash, 10, { from: accounts[0] });
 
-                await ace.publicApprove(
-                    zkAsset.address,
-                    tokenWithdrawalProofHash,
-                    40,
-                    { from: accounts[1] }
-                );
+                await ace.publicApprove(zkAsset.address, tokenWithdrawalProofHash, 40, { from: accounts[1] });
 
                 await zkAsset.confidentialTransfer(depositProof.proofData);
                 const { receipt } = await zkAsset.confidentialTransfer(tokenWithdrawalProof.proofData);
@@ -212,19 +189,9 @@ contract('ZkAsset', (accounts) => {
                 const withdrawalAndTransferProofOutput = outputCoder.getProofOutput(withdrawalAndTransferProof.expectedOutput, 0);
                 const withdrawalAndTransferProofHash = outputCoder.hashProofOutput(withdrawalAndTransferProofOutput);
 
-                await ace.publicApprove(
-                    zkAsset.address,
-                    depositProofHash,
-                    130,
-                    { from: accounts[2] }
-                );
+                await ace.publicApprove(zkAsset.address, depositProofHash, 130, { from: accounts[2] });
 
-                await ace.publicApprove(
-                    zkAsset.address,
-                    withdrawalAndTransferProofHash,
-                    40,
-                    { from: accounts[2] }
-                );
+                await ace.publicApprove(zkAsset.address, withdrawalAndTransferProofHash, 40, { from: accounts[2] });
 
                 await zkAsset.confidentialTransfer(depositProof.proofData);
 
@@ -261,12 +228,7 @@ contract('ZkAsset', (accounts) => {
                     validatorAddress: aztecJoinSplit.address,
                 });
 
-                await ace.publicApprove(
-                    zkAsset.address,
-                    depositProofHash,
-                    30,
-                    { from: accounts[3] }
-                );
+                await ace.publicApprove(zkAsset.address, depositProofHash, 30, { from: accounts[3] });
 
                 await zkAsset.confidentialTransfer(depositProof.proofData);
                 const { receipt } = await zkAsset.confidentialTransfer(transferProof.proofData);
@@ -291,12 +253,7 @@ contract('ZkAsset', (accounts) => {
                 const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
                 const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
 
-                await ace.publicApprove(
-                    zkAsset.address,
-                    depositProofHash,
-                    transferAmount,
-                    { from: accounts[0] }
-                );
+                await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
                 const malformedProofData = `0x0123${depositProof.proofData.slice(6)}`;
                 // no error message because it throws in assembly
                 await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData));
