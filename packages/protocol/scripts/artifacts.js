@@ -8,9 +8,23 @@ const ARTIFACTS_DIR = '../contract-artifacts/artifacts/';
 const ARTIFACTS_DIR_AUX = '../contract-artifacts/artifacts-aux/';
 
 const excludedContracts = [
+    'ACETest.json',
+    'AdjustSupplyABIEncoderTest.json',
+    'BilateralSwapABIEncoderTest.json',
+    'DividendComputationABIEncoderTest.json',
+    'ERC20.json',
+    'ERC20BrokenTransferTest.json',
+    'ERC20BrokenTransferFromTest.json',
+    'IERC20.json',
     'JoinSplitABIEncoderTest.json',
+    'LibEIP712Test.json',
     'Migrations.json',
+    'NoteUtilsTest.json',
+    'Ownable.json',
+    'ProofUtilsTest.json',
     'SafeMath.json',
+    'SafeMath8Test.json',
+    'ZkAssetOwnableTest.json',
 ];
 
 if (!fs.existsSync(CONTRACTS_DIR)) {
@@ -24,10 +38,23 @@ if (!fs.existsSync(ARTIFACTS_DIR)) {
 
 const cherrypickContractJson = async (filename) => {
     const content = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, filename), 'utf-8'));
-    if (filename === 'JoinSplit') {
-        const joinSplitInterface = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, 'JoinSplitInterface.sol')));
-        content.abi = joinSplitInterface.abi;
+    if (filename === 'AdjustSupply') {
+        const contractInterface = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, 'AdjustSupplyInterface.sol')));
+        content.abi = contractInterface.abi;
     }
+    if (filename === 'BilateralSwap') {
+        const contractInterface = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, 'BilateralSwapInterface.sol')));
+        content.abi = contractInterface.abi;
+    }
+    if (filename === 'DividendComputation') {
+        const contractInterface = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, 'DividendComputationInterface.sol')));
+        content.abi = contractInterface.abi;
+    }
+    if (filename === 'JoinSplit') {
+        const contractInterface = JSON.parse(await fs.readFile(path.join(CONTRACTS_DIR, 'JoinSplitInterface.sol')));
+        content.abi = contractInterface.abi;
+    }
+
     return {
         abi: content.abi,
         bytecode: content.bytecode,
