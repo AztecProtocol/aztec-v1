@@ -41,13 +41,16 @@ describe('bn128 add', () => {
         const { x: x1, y: y1, z: z1 } = bn128Reference.randomPointJacobian();
         const { zz, zzz } = bn128Reference.zFactors({ x2, y2 }, { x1, y1, z1 });
 
-        const initialMemory = [{
-            index: 0,
-            value: bn128Reference.p.sub(x2),
-        }, {
-            index: 32,
-            value: y2,
-        }];
+        const initialMemory = [
+            {
+                index: 0,
+                value: bn128Reference.p.sub(x2),
+            },
+            {
+                index: 32,
+                value: y2,
+            },
+        ];
         const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
         const { stack } = await add('ADD__PRECOMPUTE_TABLE_IMPL', [x1, bn128Reference.p.sub(y1), z1], initialMemory, [], 1);
         expect(stack.length).to.equal(11);
@@ -71,13 +74,16 @@ describe('bn128 add', () => {
         const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
         const y1Neg = bn128Reference.p.sub(y1);
         const x2Neg = bn128Reference.p.sub(x2);
-        const initialMemory = [{
-            index: 0,
-            value: x2Neg,
-        }, {
-            index: 32,
-            value: y2,
-        }];
+        const initialMemory = [
+            {
+                index: 0,
+                value: x2Neg,
+            },
+            {
+                index: 32,
+                value: y2,
+            },
+        ];
         const { stack } = await add('ADD__MAIN_IMPL', [x1, y1Neg, z1], initialMemory, [], 1);
 
         expect(stack.length).to.equal(3);
@@ -95,13 +101,16 @@ describe('bn128 add', () => {
 
         const x2Neg = bn128Reference.p.sub(x2);
         const { zz, zzz } = bn128Reference.zFactors({ x2, y2 }, { x1, y1, z1: new BN(1) });
-        const initialMemory = [{
-            index: 0,
-            value: x2Neg,
-        }, {
-            index: 32,
-            value: y2,
-        }];
+        const initialMemory = [
+            {
+                index: 0,
+                value: x2Neg,
+            },
+            {
+                index: 32,
+                value: y2,
+            },
+        ];
         const { stack } = await add('ADD__AFFINE_IMPL', [x1, p.sub(y1)], initialMemory, [], 1);
         const [x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
 

@@ -23,7 +23,7 @@ describe('wnaf tests', () => {
             result += count;
         }
         result /= 10000;
-        const rounded = Math.round((result * 10) - 427) / 10;
+        const rounded = Math.round(result * 10 - 427) / 10;
         expect(rounded < 0.5).to.equal(true);
         expect(rounded > -0.5).to.equal(true);
     });
@@ -38,7 +38,7 @@ describe('wnaf tests', () => {
             frequencies[count] += 1;
             max = Math.max(max, count);
         }
-        const probabilities = frequencies.map(f => f / 10000);
+        const probabilities = frequencies.map((f) => f / 10000);
 
         const conditionalCost = 23;
         const wnafSliceCost = 69;
@@ -79,7 +79,7 @@ describe('wnaf tests', () => {
             frequencies[count] += 1;
             max = Math.max(max, count);
         });
-        const probabilities = frequencies.map(f => f / 10000);
+        const probabilities = frequencies.map((f) => f / 10000);
 
         const conditionalCost = 23;
         const wnafSliceCost = 69;

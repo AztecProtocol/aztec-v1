@@ -1,4 +1,6 @@
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
+const {
+    constants: { K_MAX },
+} = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
@@ -18,10 +20,7 @@ function generateNoteValue() {
 }
 
 function getKPublic(kIn, kOut) {
-    return kOut.reduce(
-        (acc, v) => acc - v,
-        kIn.reduce((acc, v) => acc + v, 0)
-    );
+    return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
 }
 
 function randomAddress() {
@@ -83,31 +82,21 @@ describe('AZTEC extractor tests', () => {
         const sender = randomAddress();
 
         // construct first proof
-        const {
-            proofData: firstTranscript,
-            challenge: firstChallenge,
-        } = proof.constructProof(commitments, m, sender, kPublic);
+        const { proofData: firstTranscript, challenge: firstChallenge } = proof.constructProof(commitments, m, sender, kPublic);
 
         // and now let's get a second proof over the same input string
-        const {
-            proofData: secondTranscript,
-            challenge: secondChallenge,
-        } = proof.constructProof(commitments, m, sender, kPublic);
+        const { proofData: secondTranscript, challenge: secondChallenge } = proof.constructProof(commitments, m, sender, kPublic);
 
-        const witnesses = extractor.extractWitness(
-            [firstTranscript, secondTranscript],
-            m,
-            [firstChallenge, secondChallenge]
-        );
+        const witnesses = extractor.extractWitness([firstTranscript, secondTranscript], m, [firstChallenge, secondChallenge]);
 
         // validate that the extractor has extracted the correct witnesses
-        witnesses.forEach(({
-            gamma,
-            sigma,
-            k,
-            a,
-        }) => {
-            expect(gamma.mul(k).add(bn128.h.mul(a)).eq(sigma)).to.equal(true);
+        witnesses.forEach(({ gamma, sigma, k, a }) => {
+            expect(
+                gamma
+                    .mul(k)
+                    .add(bn128.h.mul(a))
+                    .eq(sigma),
+            ).to.equal(true);
         });
     });
 });

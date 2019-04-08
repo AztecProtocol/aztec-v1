@@ -1,56 +1,51 @@
 {
   "name": "@aztec/dev-utils",
-  "version": "1.7.0",
-  "author": "AZTEC",
   "description": "Dev utils to be shared across AZTEC packages",
-  "license": "LGPL-3.0",
-  "main": "./lib",
-  "files": [
-    "/lib"
-  ],
-  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
-  "keywords": [
-    "aztec",
-    "cryptography",
-    "privacy",
-    "protocol",
-    "ethereum",
-    "blockchain"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
-  },
+  "version": "0.0.0-semantically-released",
+  "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "babel-runtime": "^6.26.0",
-    "bn.js": "^4.11.8",
-    "braintree-jsdoc-template": "^3.3.0",
-    "chai": "^4.2.0",
-    "web3-utils": "1.0.0-beta.37"
+    "bn.js": "^4.11.8"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-add-module-exports": "^1.0.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-minify": "^0.5.0",
-    "cross-env": "^5.2.0",
-    "eslint": "^5.8.0",
-    "eslint-config-airbnb": "^17.1.0",
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.2.0",
-    "eslint-plugin-react": "^7.12.4",
-    "rimraf": "^2.6.3"
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "fixpack": "^2.3.1",
+    "shx": "^0.3.2"
+  },
+  "engines": {
+    "node": ">=8.3",
+    "yarn": "1.15.2"
+  },
+  "files": [
+    "/lib"
+  ],
+  "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/dev-utils#readme",
+  "keywords": [
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol"
+  ],
+  "license": "LGPL-3.0",
+  "main": "./lib",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
-    "clean": "./node_modules/.bin/rimraf ./lib",
-    "lint": "./node_modules/.bin/eslint --ignore-path ../../.eslintignore .",
-    "build": "npm run clean && ./node_modules/.bin/cross-env BABEL_ENV=production ./node_modules/.bin/babel ./src --copy-files --out-dir ./lib",
-    "build:docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
+    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "clean": "shx rm -rf ./lib",
+    "lint": "eslint --ignore-path ../../.eslintignore ."
   }
 }

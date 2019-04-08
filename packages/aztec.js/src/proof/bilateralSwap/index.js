@@ -19,13 +19,10 @@ bilateralSwap.verifier = verifier;
 const { customError } = utils.errors;
 const { errorTypes } = utils.constants;
 
-const {
-    inputCoder,
-    outputCoder,
-} = require('../../abiEncoder');
+const { inputCoder, outputCoder } = require('../../abiEncoder');
 
 /**
- * Construct blinding factors 
+ * Construct blinding factors
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
@@ -51,7 +48,8 @@ bilateralSwap.constructBlindingFactors = (notes) => {
         // Maker notes
         if (i <= 1) {
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-        } else { // taker notes
+        } else {
+            // taker notes
             bk = bkArray[i - 2];
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
         }
@@ -80,16 +78,13 @@ bilateralSwap.constructProof = (notes, sender) => {
         const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
         const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
 
-        if ((gammaOnCurve === false) || (sigmaOnCurve === false)) {
-            throw customError(
-                errorTypes.NOT_ON_CURVE,
-                {
-                    message: 'A group element is not on the bn128 curve',
-                    gammaOnCurve,
-                    sigmaOnCurve,
-                    note,
-                }
-            );
+        if (gammaOnCurve === false || sigmaOnCurve === false) {
+            throw customError(errorTypes.NOT_ON_CURVE, {
+                message: 'A group element is not on the bn128 curve',
+                gammaOnCurve,
+                sigmaOnCurve,
+                note,
+            });
         }
     });
 
@@ -104,12 +99,18 @@ bilateralSwap.constructProof = (notes, sender) => {
         // Only set the first 2 values of kBar - the third and fourth are later inferred
         // from a cryptographic relation. Set the third and fourth to random values
         if (i <= 1) {
-            kBar = ((notes[i].k.redMul(challenge)).redAdd(blindingFactor.bk)).fromRed();
+            kBar = notes[i].k
+                .redMul(challenge)
+                .redAdd(blindingFactor.bk)
+                .fromRed();
         } else {
             kBar = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
         }
 
-        const aBar = ((notes[i].a.redMul(challenge)).redAdd(blindingFactor.ba)).fromRed();
+        const aBar = notes[i].a
+            .redMul(challenge)
+            .redAdd(blindingFactor.ba)
+            .fromRed();
 
         return [
             `0x${padLeft(kBar.toString(16), 64)}`,
@@ -128,7 +129,7 @@ bilateralSwap.constructProof = (notes, sender) => {
 
 /**
  * Encode a bilateral swap transaction
- * 
+ *
  * @method encodeBilateralSwapTransaction
  * @memberof module:bilateralSwap
  * @param {Note[]} inputNotes input AZTEC notes
@@ -136,44 +137,34 @@ bilateralSwap.constructProof = (notes, sender) => {
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
-bilateralSwap.encodeBilateralSwapTransaction = ({
-    inputNotes,
-    outputNotes,
-    senderAddress,
-}) => {
-    const {
-        proofData: proofDataRaw,
-        challenge,
-    } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
+bilateralSwap.encodeBilateralSwapTransaction = ({ inputNotes, outputNotes, senderAddress }) => {
+    const { proofData: proofDataRaw, challenge } = bilateralSwap.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-    const noteOwners = [...inputNotes.map(m => m.owner), ...outputNotes.map(n => n.owner)];
+    const noteOwners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
 
-    const proofData = inputCoder.bilateralSwap(
-        proofDataRaw,
-        challenge,
-        noteOwners,
-        [outputNotes[0], inputNotes[1]]
-    );
+    const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, noteOwners, [outputNotes[0], inputNotes[1]]);
 
     const publicOwner = '0x0000000000000000000000000000000000000000';
     const publicValue = 0;
 
-    const expectedOutput = `0x${outputCoder.encodeProofOutputs([
-        {
-            inputNotes: [inputNotes[0]],
-            outputNotes: [outputNotes[0]],
-            publicOwner,
-            publicValue,
-            challenge,
-        },
-        {
-            inputNotes: [outputNotes[1]],
-            outputNotes: [inputNotes[1]],
-            publicOwner,
-            publicValue,
-            challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
-        },
-    ]).slice(0x42)}`;
+    const expectedOutput = `0x${outputCoder
+        .encodeProofOutputs([
+            {
+                inputNotes: [inputNotes[0]],
+                outputNotes: [outputNotes[0]],
+                publicOwner,
+                publicValue,
+                challenge,
+            },
+            {
+                inputNotes: [outputNotes[1]],
+                outputNotes: [inputNotes[1]],
+                publicOwner,
+                publicValue,
+                challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
+            },
+        ])
+        .slice(0x42)}`;
     return { proofData, expectedOutput };
 };
 

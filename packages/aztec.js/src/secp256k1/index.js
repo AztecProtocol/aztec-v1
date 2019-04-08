@@ -7,10 +7,7 @@
 const BN = require('bn.js');
 const crypto = require('crypto');
 const elliptic = require('elliptic');
-const Web3EthAccounts = require('web3-eth-accounts');
 const web3Utils = require('web3-utils');
-
-const web3EthAccounts = new Web3EthAccounts();
 
 /**
  * @typedef {Object} Account
@@ -25,12 +22,13 @@ const secp256k1 = {};
  * The elliptic.js ec object
  * @memberof module:secp256k1
  */
-secp256k1.ec = new elliptic.ec("secp256k1"); // eslint-disable-line
+secp256k1.ec = new elliptic.ec('secp256k1'); // eslint-disable-line new-cap
 
 secp256k1.curve = secp256k1.ec.curve;
 /**
  * Derive an ethereum account from a private key
  * @method accountFromPrivateKey
+ * @memberof module:secp256k1
  * @param privateKey hex-formatted private key
  * @return {module:secp256k1~Account} an ethereum account
  */
@@ -49,6 +47,7 @@ secp256k1.accountFromPrivateKey = function accountFromPrivateKey(privateKey) {
 /**
  * Generate a random ethereum account
  * @method generateAccount
+ * @memberof module:secp256k1
  * @return {module:secp256k1~Account} an ethereum account
  */
 secp256k1.generateAccount = function generateAccount() {
@@ -58,21 +57,29 @@ secp256k1.generateAccount = function generateAccount() {
 /**
  * Get a random point on the curve
  * @method randomPoint
+ * @memberof module:secp256k1
  * @returns {Point} a random point
  */
 secp256k1.randomPoint = function randomPoint() {
     function recurse() {
         const x = new BN(crypto.randomBytes(32), 16).toRed(secp256k1.ec.curve.red);
-        const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.ec.curve.b);
+        const y2 = x
+            .redSqr()
+            .redMul(x)
+            .redIAdd(secp256k1.ec.curve.b);
         const y = y2.redSqrt();
-        if (y.redSqr(y).redSub(y2).cmp(secp256k1.ec.curve.a)) {
+        if (
+            y
+                .redSqr(y)
+                .redSub(y2)
+                .cmp(secp256k1.ec.curve.a)
+        ) {
             return recurse();
         }
         return secp256k1.ec.curve.point(x, y);
     }
     return recurse();
 };
-
 
 /**
  * Decompress a 256-bit representation of a secp256k1 G1 element.
@@ -85,9 +92,18 @@ secp256k1.randomPoint = function randomPoint() {
  */
 secp256k1.decompress = (compressed, yBit) => {
     const x = compressed.maskn(255).toRed(secp256k1.curve.red);
-    const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(secp256k1.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
@@ -96,7 +112,6 @@ secp256k1.decompress = (compressed, yBit) => {
     }
     return { x: x.fromRed(), y };
 };
-
 
 /**
  * Decompress a 256-bit representation of a secp256k1 G1 element.
@@ -113,9 +128,18 @@ secp256k1.decompressHex = (compressed) => {
     }
     const x = new BN(compressed.slice(0, 64), 16).toRed(secp256k1.curve.red);
     const yBit = new BN(compressed.slice(64, 66), 16);
-    const y2 = x.redSqr().redMul(x).redIAdd(secp256k1.curve.b);
+    const y2 = x
+        .redSqr()
+        .redMul(x)
+        .redIAdd(secp256k1.curve.b);
     const yRoot = y2.redSqrt();
-    if (yRoot.redSqr().redSub(y2).fromRed().cmpn(0) !== 0) {
+    if (
+        yRoot
+            .redSqr()
+            .redSub(y2)
+            .fromRed()
+            .cmpn(0) !== 0
+    ) {
         throw new Error('x^3 + 3 not a square, malformed input');
     }
     let y = yRoot.fromRed();
@@ -124,7 +148,6 @@ secp256k1.decompressHex = (compressed) => {
     }
     return secp256k1.curve.point(x.fromRed(), y);
 };
-
 
 /**
  * Compress a secp256k1 point into 33 bytes.
@@ -147,12 +170,13 @@ secp256k1.ecdsa = {};
  * Convert an Ethereum public key into an address
  *
  * @method accountFromPublicKey
+ * @memberof module:secp256k1.ecdsa
  * @param {string} publicKey hex-string formatted public key (uncompressed)
  * @returns {string} address
  */
 secp256k1.ecdsa.accountFromPublicKey = (publicKey) => {
     let publicHash;
-    if (typeof (publicKey) === 'string') {
+    if (typeof publicKey === 'string') {
         publicHash = web3Utils.sha3(`0x${publicKey.slice(4)}`);
     } else {
         const ecKey = secp256k1.ec.keyFromPublic(publicKey);
@@ -163,18 +187,18 @@ secp256k1.ecdsa.accountFromPublicKey = (publicKey) => {
     return address;
 };
 
-
 /**
  * Sign a message hash with a given private key
  *
  * @method signMessage
+ * @memberof module:secp256k1.ecdsa
  * @param {string} hash hex-string formatted message hash
  * @param {string} privateKey hex-string formatted private key
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
 secp256k1.ecdsa.signMessage = (hash, privateKey) => {
-    const signature = secp256k1
-        .ec.keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
+    const signature = secp256k1.ec
+        .keyFromPrivate(Buffer.from(privateKey.slice(2), 'hex'))
         .sign(Buffer.from(hash.slice(2), 'hex'), { canonical: true });
     return [
         `0x${web3Utils.padLeft(Number(27 + Number(signature.recoveryParam)).toString(16), 64)}`,
@@ -183,11 +207,11 @@ secp256k1.ecdsa.signMessage = (hash, privateKey) => {
     ];
 };
 
-
 /**
  * Verify an ECDSA signature against a publickey
  *
  * @method verifyMessage
+ * @memberof module:secp256k1.ecdsa
  * @param {string} hash hex-string formatted message hash
  * @param {string} r hex-string formatted ECDSA parameter r
  * @param {string} s hex-string formatted ECDSA parameter s
@@ -204,6 +228,7 @@ secp256k1.ecdsa.verifyMessage = (hash, r, s, publicKey) => {
  * Recover the signing key of an ECDSA signature
  *
  * @method recoverPublicKey
+ * @memberof module:secp256k1.ecdsa
  * @param {string} hash hex-string formatted message hash
  * @param {string} r hex-string formatted ECDSA parameter r
  * @param {string} s hex-string formatted ECDSA parameter s
@@ -217,31 +242,9 @@ secp256k1.ecdsa.recoverPublicKey = (hash, r, s, v) => {
     const ecPublicKey = secp256k1.ec.recoverPubKey(
         Buffer.from(web3Utils.padLeft(hash.slice(2), 64), 'hex'),
         { r: rBn, s: sBn },
-        vn < 2 ? vn : 1 - (vn % 2)
+        vn < 2 ? vn : 1 - (vn % 2),
     );
     return ecPublicKey;
-};
-
-/**
- * Compares signatures from this module with those signed by web3. For debug and test purposes  
- * (we don't use web3 because we want a different preamble for eip712 signatures)
- *
- * @method web3Comparison
- * @returns {Object} ecdsa module signature and web3 signature
- */
-secp256k1.ecdsa.web3Comparison = () => {
-    const account = web3EthAccounts.create();
-    const { privateKey } = account;
-    const initialMessage = account.address;
-    const web3Sig = account.sign(account.address, '');
-    const initialBuffer = Buffer.from(web3Utils.hexToBytes(initialMessage, 'hex'));
-    const preamble = Buffer.from(`\x19Ethereum Signed Message:\n${initialBuffer.length}`);
-    const messageBuffer = Buffer.concat([preamble, initialBuffer]);
-    const hashedMessage = web3Utils.sha3(messageBuffer);
-
-    const result = secp256k1.ecdsa.signMessage(hashedMessage, privateKey);
-
-    return ({ result, web3Sig });
 };
 
 module.exports = secp256k1;

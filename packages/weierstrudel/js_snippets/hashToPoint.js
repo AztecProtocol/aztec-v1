@@ -19,7 +19,12 @@ hashToPoint.getPoint = (hash) => {
     const xxx = xx.redMul(xRed);
     const yy = xxx.redAdd(b);
     const y = yy.redSqrt();
-    if (y.redSqr().redSub(yy).cmp(zero) !== 0) {
+    if (
+        y
+            .redSqr()
+            .redSub(yy)
+            .cmp(zero) !== 0
+    ) {
         throw new Error('Cannot find root, pick another hash');
     }
 };

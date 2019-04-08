@@ -10,7 +10,6 @@ const { expect } = chai;
 
 const { p, pRed, n } = bn128;
 
-
 // eslint-disable-next-line new-cap
 const referenceCurve = new EC.curve.short({
     a: '0',
@@ -21,18 +20,16 @@ const referenceCurve = new EC.curve.short({
     g: ['1', '2'],
 });
 
-
 function getComparisonTable(x, y, z) {
     const normalized = bn128.toAffine({ x, y, z });
     const point = referenceCurve.point(normalized.x.fromRed(), normalized.y.fromRed());
     const table = [point];
     for (let i = 1; i < 8; i += 1) {
-        table[i] = point.mul(new BN((i * 2) + 1));
+        table[i] = point.mul(new BN(i * 2 + 1));
     }
 
     return table;
 }
-
 
 describe('arithmetic tests', () => {
     it('double works', () => {
@@ -44,7 +41,6 @@ describe('arithmetic tests', () => {
         const zzz = zz.redMul(result.z);
         const dx = result.x.redMul(zz.redInvm());
         const dy = result.y.redMul(zzz.redInvm());
-
 
         const expected = ecPoint.mul(new BN(2));
         expect(expected.x.fromRed().eq(dx.fromRed())).to.equal(true);
@@ -76,14 +72,16 @@ describe('arithmetic tests', () => {
             referenceCurve.point(p1.x.fromRed(), p1.y.fromRed()),
             referenceCurve.point(p2.x.fromRed(), p2.y.fromRed()),
         ];
-        const result = bn128.toAffine(bn128._mixedAdd(
-            { x2: p2.x, y2: p2.y },
-            {
-                x1: jacobianPoint.x.toRed(pRed),
-                y1: jacobianPoint.y.toRed(pRed),
-                z1: jacobianPoint.z.toRed(pRed),
-            }
-        ));
+        const result = bn128.toAffine(
+            bn128._mixedAdd(
+                { x2: p2.x, y2: p2.y },
+                {
+                    x1: jacobianPoint.x.toRed(pRed),
+                    y1: jacobianPoint.y.toRed(pRed),
+                    z1: jacobianPoint.z.toRed(pRed),
+                },
+            ),
+        );
         const expected = ecPoints[0].add(ecPoints[1]);
         expect(expected.x.fromRed().eq(result.x.fromRed())).to.equal(true);
         expect(expected.y.fromRed().eq(result.y.fromRed())).to.equal(true);
@@ -114,7 +112,7 @@ describe('bn128 table test', () => {
         while (j >= 0) {
             const zz = runningZ.redSqr();
             const zzz = zz.redMul(runningZ);
-            normalizedTable[j] = ({ x: table[j].x.redMul(zz), y: table[j].y.redMul(zzz), z: globalZ });
+            normalizedTable[j] = { x: table[j].x.redMul(zz), y: table[j].y.redMul(zzz), z: globalZ };
             if (j !== 0) {
                 runningZ = runningZ.redMul(zFactors[j - 1]);
             }
@@ -131,13 +129,9 @@ describe('bn128 table test', () => {
     });
 
     it('generateMultiTable performs correct point additions', () => {
-        const points = [
-            bn128.randomPointInternal(),
-            bn128.randomPointInternal(),
-            bn128.randomPointInternal(),
-        ];
+        const points = [bn128.randomPointInternal(), bn128.randomPointInternal(), bn128.randomPointInternal()];
         const { tables } = bn128.generateTable(points);
-        const comparisonTables = points.map(point => getComparisonTable(point.x, point.y, new BN(1).toRed(pRed)));
+        const comparisonTables = points.map((point) => getComparisonTable(point.x, point.y, new BN(1).toRed(pRed)));
 
         for (let i = 0; i < tables.length; i += 1) {
             const { table, doubleZ } = tables[i];
@@ -161,7 +155,7 @@ describe('bn128 table test', () => {
             bn128.randomPointInternal(),
         ];
         const { tables, globalZ } = bn128.generateTable(points);
-        const comparisonTables = points.map(point => getComparisonTable(point.x, point.y, new BN(1).toRed(pRed)));
+        const comparisonTables = points.map((point) => getComparisonTable(point.x, point.y, new BN(1).toRed(pRed)));
         const scaledTables = bn128.PRECOMPUTE_TABLE__RESCALEMultiTable(tables, globalZ);
         for (let i = scaledTables.length - 1; i >= 0; i -= 1) {
             const table = scaledTables[i];

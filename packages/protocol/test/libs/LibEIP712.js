@@ -18,12 +18,7 @@ const computeMsgHash = (domainHash, sender) => {
     const noteHash = crypto.randomBytes(32).toString('hex');
     const encodedSender = padLeft(sender.slice(2), 64);
     const status = padLeft(1, 64);
-    const hashStruct = keccak256([
-        constants.JOIN_SPLIT_SIGNATURE_TYPE_HASH,
-        noteHash,
-        encodedSender,
-        status,
-    ].join(''));
+    const hashStruct = keccak256([constants.JOIN_SPLIT_SIGNATURE_TYPE_HASH, noteHash, encodedSender, status].join(''));
     const msg = ['0x1901', domainHash.slice(2), hashStruct.slice(2)].join('');
     const msgHash = keccak256(msg);
     return { hashStruct, msgHash };
@@ -64,11 +59,7 @@ contract('LibEIP712', (accounts) => {
 
         it('should recover the sender address', async () => {
             const aztecAccount = secp256k1.generateAccount();
-            const { signature, encodedTypedData } = signNote(
-                libEIP712.address,
-                aztecAccount.address,
-                aztecAccount.privateKey
-            );
+            const { signature, encodedTypedData } = signNote(libEIP712.address, aztecAccount.address, aztecAccount.privateKey);
             const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
             const result = await libEIP712._recoverSignature(encodedTypedData, concatenatedSignature);
             expect(result).to.equal(aztecAccount.address);
@@ -78,18 +69,14 @@ contract('LibEIP712', (accounts) => {
     describe('failure states', async () => {
         it('should fail when signer is 0x0', async () => {
             const aztecAccount = secp256k1.generateAccount();
-            const { signature, encodedTypedData } = signNote(
-                libEIP712.address,
-                aztecAccount.address,
-                aztecAccount.privateKey
-            );
+            const { signature, encodedTypedData } = signNote(libEIP712.address, aztecAccount.address, aztecAccount.privateKey);
 
             // see https://ethereum.stackexchange.com/questions/69328/how-to-get-0x0-from-ecrecover/69329#69329
             const v = padLeft('0x10', 64);
             const concatenatedSignature = v + signature[1].slice(2) + signature[2].slice(2);
             await truffleAssert.reverts(
                 libEIP712._recoverSignature(encodedTypedData, concatenatedSignature),
-                'signer address cannot be 0'
+                'signer address cannot be 0',
             );
         });
     });

@@ -1,12 +1,12 @@
 {
-  "lerna": "3.10.6",
-  "packages": ["packages/*"],
-  "version": "independent",
-  "command": {
-      "publish": {
-          "ignoreChanges": ["test/**/*", "*.md", "scripts", "lib"]
-      }
-  },
-  "npmClient": "npm",
-  "useWorkspaces": true
+    "lerna": "3.13.1",
+    "packages": ["packages/*"],
+    "version": "independent",
+    "command": {
+        "publish": {
+            "ignoreChanges": ["*.md", "lib", "scripts", "test/**/*"]
+        }
+    },
+    "npmClient": "yarn",
+    "useWorkspaces": true
 }

@@ -8,7 +8,6 @@ const secp256k1 = require('../secp256k1');
 
 const noteCoder = {};
 
-
 /**
  * Encode a note public key
  *

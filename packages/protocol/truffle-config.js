@@ -34,7 +34,7 @@ function createProvider(network) {
     return () => {
         return new HDWalletProvider(
             process.env.PRIVATE_KEY || process.env.MNEMONIC,
-            `https://${network}.infura.io/v3/` + process.env.INFURA_API_KEY
+            `https://${network}.infura.io/v3/` + process.env.INFURA_API_KEY,
         );
     };
 }
@@ -56,27 +56,15 @@ const provider = new ProviderEngine();
 
 switch (process.env.MODE) {
     case 'profile':
-        global.profilerSubprovider = new ProfilerSubprovider(
-            artifactAdapter,
-            defaultFromAddress,
-            isVerbose
-        );
+        global.profilerSubprovider = new ProfilerSubprovider(artifactAdapter, defaultFromAddress, isVerbose);
         provider.addProvider(global.profilerSubprovider);
         break;
     case 'coverage':
-        global.coverageSubprovider = new CoverageSubprovider(
-            artifactAdapter,
-            defaultFromAddress,
-            coverageSubproviderConfig
-        );
+        global.coverageSubprovider = new CoverageSubprovider(artifactAdapter, defaultFromAddress, coverageSubproviderConfig);
         provider.addProvider(global.coverageSubprovider);
         break;
     case 'trace':
-        provider.addProvider(new RevertTraceSubprovider(
-            artifactAdapter,
-            defaultFromAddress,
-            isVerbose
-        ));
+        provider.addProvider(new RevertTraceSubprovider(artifactAdapter, defaultFromAddress, isVerbose));
         break;
     default:
         kovanProvider = createProvider('kovan');

@@ -6,16 +6,13 @@ const { padLeft, randomHex, sha3 } = require('web3-utils');
 const sinon = require('sinon');
 const utils = require('@aztec/dev-utils');
 
-
 const bn128 = require('../../../src/bn128');
 const bilateralProof = require('../../../src/proof/bilateralSwap');
 const Keccak = require('../../../src/keccak');
 const proofUtils = require('../../../src/proof/proofUtils');
 
-
 const { expect } = chai;
 const { errorTypes } = utils.constants;
-
 
 describe('AZTEC bilateral swap verifier tests', () => {
     describe('success states', () => {
@@ -45,14 +42,16 @@ describe('AZTEC bilateral swap verifier tests', () => {
                 finalHash.append(proofElement[7]);
             });
 
-            const { recoveredBlindingFactors } = proofUtils.recoverBlindingFactorsAndChallenge(proofDataBn,
+            const { recoveredBlindingFactors } = proofUtils.recoverBlindingFactorsAndChallenge(
+                proofDataBn,
                 formattedChallenge,
-                finalHash);
+                finalHash,
+            );
 
-            const testkBar1 = (recoveredBlindingFactors[0].kBar).toString(16);
-            const testkBar2 = (recoveredBlindingFactors[1].kBar).toString(16);
-            const testkBar3 = (recoveredBlindingFactors[2].kBar).toString(16);
-            const testkBar4 = (recoveredBlindingFactors[3].kBar).toString(16);
+            const testkBar1 = recoveredBlindingFactors[0].kBar.toString(16);
+            const testkBar2 = recoveredBlindingFactors[1].kBar.toString(16);
+            const testkBar3 = recoveredBlindingFactors[2].kBar.toString(16);
+            const testkBar4 = recoveredBlindingFactors[3].kBar.toString(16);
 
             expect(testkBar1).to.equal(testkBar3);
             expect(testkBar2).to.equal(testkBar4);
@@ -63,7 +62,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
         it('will REJECT if malformed challenge', () => {
             // to test failure states we need to pass in bad data to verifier
             // so we need to turn off proof.parseInputs
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
@@ -80,13 +79,11 @@ describe('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT for random note values', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const randomNotes = proofUtils.makeTestNotes(
-                [proofUtils.generateNoteValue(),
-                    proofUtils.generateNoteValue()],
-                [proofUtils.generateNoteValue(),
-                    proofUtils.generateNoteValue()]
+                [proofUtils.generateNoteValue(), proofUtils.generateNoteValue()],
+                [proofUtils.generateNoteValue(), proofUtils.generateNoteValue()],
             );
 
             const sender = randomHex(20);
@@ -102,7 +99,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT if bilateral swap note balancing relationship not satisfied', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const unbalancedNotes = proofUtils.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
             const sender = randomHex(20);
@@ -118,11 +115,11 @@ describe('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT for random proof data', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const proofData = [...Array(4)]
-                .map(() => [...Array(6)]
-                    .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
+            const proofData = [...Array(4)].map(() =>
+                [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
+            );
 
             const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
@@ -137,7 +134,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT if blinding factor is at infinity', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
@@ -160,7 +157,7 @@ describe('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
@@ -179,16 +176,16 @@ describe('AZTEC bilateral swap verifier tests', () => {
         });
 
         it('will REJECT if blinding factor computed from points not on the curve', () => {
-            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
             const sender = randomHex(20);
 
             const zeroes = `${padLeft('0', 64)}`;
-            const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
+            const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const proofData = [...new Array(4)].map(
-                () => [...new Array(6)].map(() => '0x0000000000000000000000000000000000000000000000000000000000000000')
+            const proofData = [...new Array(4)].map(() =>
+                [...new Array(6)].map(() => '0x0000000000000000000000000000000000000000000000000000000000000000'),
             );
 
             // Making the kBars satisfy the proof relation, to ensure it's not an incorrect

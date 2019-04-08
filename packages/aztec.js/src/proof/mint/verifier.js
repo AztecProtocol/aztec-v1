@@ -4,19 +4,18 @@ const joinSplit = require('../joinSplit');
 
 const { errorTypes } = utils.constants;
 
-
 const verifier = {};
 
 /**
-* Verify an AZTEC mint zero-knowledge proof
-*
-* @method verifyProof
-* @memberof module:mint
-* @param {string[]} proofData AZTEC join-split zero-knowledge proof data
-* @param {number} m number of input notes
-* @param {string} challengeHex hex-string formatted proof challenge
-* @param {string} sender Ethereum address of transaction sender
-*/
+ * Verify an AZTEC mint zero-knowledge proof
+ *
+ * @method verifyProof
+ * @memberof module:mint
+ * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
+ * @param {number} m number of input notes
+ * @param {string} challengeHex hex-string formatted proof challenge
+ * @param {string} sender Ethereum address of transaction sender
+ */
 
 verifier.verifyProof = (proofData, challengeHex, sender) => {
     const m = 1;

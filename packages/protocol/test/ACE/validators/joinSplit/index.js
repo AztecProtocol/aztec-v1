@@ -6,7 +6,10 @@ const truffleAssert = require('truffle-assertions');
 const { padLeft, sha3 } = require('web3-utils');
 
 // ### Internal Dependencies
-const { constants, proofs: { JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const {
     bn128,
@@ -24,7 +27,6 @@ const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSp
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
-
 
 contract('JoinSplit', (accounts) => {
     let joinSplitContract;
@@ -207,10 +209,7 @@ contract('JoinSplit', (accounts) => {
         });
 
         it('validate that input notes of zero value work', async () => {
-            const inputNotes = [
-                note.create(aztecAccounts[0].publicKey, 0),
-                note.create(aztecAccounts[1].publicKey, 0),
-            ];
+            const inputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
             const outputNotes = notes.slice(0, 2);
             const kPublic = -10;
             const publicOwner = aztecAccounts[0].address;
@@ -235,10 +234,7 @@ contract('JoinSplit', (accounts) => {
 
         it('validate that output notes of zero value work', async () => {
             const inputNotes = notes.slice(0, 2);
-            const outputNotes = [
-                note.create(aztecAccounts[0].publicKey, 0),
-                note.create(aztecAccounts[1].publicKey, 0),
-            ];
+            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
@@ -263,9 +259,7 @@ contract('JoinSplit', (accounts) => {
         it('validate the minimum number of notes possible (one input, one output) works', async () => {
             const inputNotes = notes.slice(0, 1);
 
-            const outputNotes = [
-                note.create(aztecAccounts[0].publicKey, 0),
-            ];
+            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0)];
 
             const kPublic = 0;
             const publicOwner = aztecAccounts[0].address;
@@ -297,13 +291,16 @@ contract('JoinSplit', (accounts) => {
             const publicOwner = aztecAccounts[0].address;
             const m = inputNotes.length;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified([...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner);
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
+            );
 
             const challengeBN = new BN(challenge.slice(2), 16);
-            const notModRChallenge = `0x${(challengeBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+            const notModRChallenge = `0x${challengeBN.add(constants.GROUP_MODULUS).toString(16)}`;
             const validatorAddress = joinSplitContract.address;
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
@@ -320,8 +317,8 @@ contract('JoinSplit', (accounts) => {
                 return signature;
             });
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -331,16 +328,20 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
-            const expectedOutput = `0x${outputCoder.encodeProofOutputs([{
-                inputNotes,
-                outputNotes,
-                publicOwner,
-                publicValue: kPublic,
-                challenge: notModRChallenge,
-            }]).slice(0x42)}`;
+            const expectedOutput = `0x${outputCoder
+                .encodeProofOutputs([
+                    {
+                        inputNotes,
+                        outputNotes,
+                        publicOwner,
+                        publicValue: kPublic,
+                        challenge: notModRChallenge,
+                    },
+                ])
+                .slice(0x42)}`;
 
             const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, {
                 from: accounts[0],
@@ -359,13 +360,13 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
-
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -381,8 +382,8 @@ contract('JoinSplit', (accounts) => {
 
                 return signature;
             });
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -392,7 +393,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -403,7 +404,6 @@ contract('JoinSplit', (accounts) => {
             const result = await joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts);
 
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
@@ -445,10 +445,7 @@ contract('JoinSplit', (accounts) => {
             ];
 
             const inputNotes = notes.slice(0, 2);
-            const outputNotes = [
-                note.create(aztecAccounts[0].publicKey, 0),
-                note.create(aztecAccounts[1].publicKey, 0),
-            ];
+            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
@@ -480,18 +477,17 @@ contract('JoinSplit', (accounts) => {
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ];
             const inputNotes = notes.slice(0, 2);
-            const outputNotes = [
-                note.create(aztecAccounts[0].publicKey, 0),
-                note.create(aztecAccounts[1].publicKey, 0),
-            ];
+            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
             const m = inputNotes.length;
-            const {
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
@@ -507,12 +503,12 @@ contract('JoinSplit', (accounts) => {
                 const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
-            const fakeProofData = [...Array(4)]
-                .map(() => [...Array(6)]
-                    .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
+            const fakeProofData = [...Array(4)].map(() =>
+                [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
+            );
             const proofData = inputCoder.joinSplit(
                 fakeProofData,
                 m,
@@ -521,7 +517,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -535,9 +531,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -547,25 +541,31 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
-            // Note, the below are fake signatures. The v parameter has been fixed to 
+            // Note, the below are fake signatures. The v parameter has been fixed to
             // 27, but the r and s parameters are fake data
             const inputSignatures = [
-                ['0x000000000000000000000000000000000000000000000000000000000000001b',
+                [
+                    '0x000000000000000000000000000000000000000000000000000000000000001b',
                     '0xcbc2f0a07ef0684bd5af6338e0df66e7048dbbfc75e50a89ce631103ac975fb3',
-                    '0x38e71e1b7919f9fef61aeab31c57a23c0ec3ae8f414c1e1c2886a569398235e9'],
-                ['0x000000000000000000000000000000000000000000000000000000000000001b',
+                    '0x38e71e1b7919f9fef61aeab31c57a23c0ec3ae8f414c1e1c2886a569398235e9',
+                ],
+                [
+                    '0x000000000000000000000000000000000000000000000000000000000000001b',
                     '0xb5bc488fe84f6b5bbb81e5f7313b4ac73f53ad64b28a9d3408accaf1b52bc25c',
-                    '0x141acee147d2fb8b3c8f1c796c564b3c014d4e99bf77f517ee7774925deb878e']];
+                    '0x141acee147d2fb8b3c8f1c796c564b3c014d4e99bf77f517ee7774925deb878e',
+                ],
+            ];
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -575,9 +575,8 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
-
 
             const opts = {
                 from: accounts[0],
@@ -591,22 +590,24 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
             const kPublic = 0;
             const publicOwner = aztecAccounts[0].address;
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const m = inputNotes.length;
 
             const proofConstruct = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
@@ -625,7 +626,7 @@ contract('JoinSplit', (accounts) => {
 
             // Generate scalars that NOT mod r
             const kBarBN = new BN(proofConstruct.proofData[0][0].slice(2), 16);
-            const notModRKBar = `0x${(kBarBN.add(constants.GROUP_MODULUS)).toString(16)}`;
+            const notModRKBar = `0x${kBarBN.add(constants.GROUP_MODULUS).toString(16)}`;
 
             proofConstruct.proofData[0][0] = notModRKBar;
 
@@ -637,14 +638,15 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
-
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure when kPublic NOT integrated into challenge variable', async () => {
@@ -652,9 +654,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -679,11 +679,12 @@ contract('JoinSplit', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
@@ -704,8 +705,8 @@ contract('JoinSplit', (accounts) => {
                 return signature;
             });
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -715,7 +716,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -729,10 +730,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -742,13 +740,13 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
-
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
                 const fakeDomain = {
@@ -769,8 +767,8 @@ contract('JoinSplit', (accounts) => {
 
                 return signature;
             });
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -780,7 +778,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -795,9 +793,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -823,11 +819,12 @@ contract('JoinSplit', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
@@ -848,8 +845,8 @@ contract('JoinSplit', (accounts) => {
                 return signature;
             });
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -859,7 +856,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -874,9 +871,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -899,17 +894,17 @@ contract('JoinSplit', (accounts) => {
             const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
 
             const localComputeChallenge = proofUtils.computeChallenge;
-            proofUtils.computeChallenge = () => localComputeChallenge(
-                senderAddress, kPublicBN, publicOwner, notes, blindingFactors
-            );
+            proofUtils.computeChallenge = () =>
+                localComputeChallenge(senderAddress, kPublicBN, publicOwner, notes, blindingFactors);
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
@@ -929,8 +924,8 @@ contract('JoinSplit', (accounts) => {
                 const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -940,7 +935,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -953,9 +948,7 @@ contract('JoinSplit', (accounts) => {
         it('validate failure for group element (blinding factor) resolving to infinity', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
@@ -964,9 +957,12 @@ contract('JoinSplit', (accounts) => {
             const senderAddress = accounts[0];
             const m = inputNotes.length;
 
-
             const proofConstruct = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             proofConstruct.proofData[0][0] = `0x${padLeft('05', 64)}`;
@@ -991,8 +987,8 @@ contract('JoinSplit', (accounts) => {
                 return signature;
             });
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofConstruct.proofData,
@@ -1002,7 +998,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -1012,14 +1008,11 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-
         it('validate failure when scalars are zero', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1028,11 +1021,12 @@ contract('JoinSplit', (accounts) => {
             const publicOwner = aztecAccounts[0].address;
             const m = inputNotes.length;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
@@ -1050,14 +1044,7 @@ contract('JoinSplit', (accounts) => {
             });
 
             const scalarZeroProofData = proofDataRaw.map((proofElement) => {
-                return [
-                    padLeft(0, 64),
-                    padLeft(0, 64),
-                    proofElement[2],
-                    proofElement[3],
-                    proofElement[4],
-                    proofElement[5],
-                ];
+                return [padLeft(0, 64), padLeft(0, 64), proofElement[2], proofElement[3], proofElement[4], proofElement[5]];
             });
 
             const zeroScalar = padLeft(0, 64);
@@ -1070,8 +1057,8 @@ contract('JoinSplit', (accounts) => {
             expect(scalarZeroProofData[3][0]).to.equal(zeroScalar);
             expect(scalarZeroProofData[3][1]).to.equal(zeroScalar);
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 scalarZeroProofData,
@@ -1081,22 +1068,22 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('validate failure when proof data not correctly encoded', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1105,11 +1092,12 @@ contract('JoinSplit', (accounts) => {
             const publicOwner = aztecAccounts[0].address;
             const m = inputNotes.length;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
@@ -1126,16 +1114,16 @@ contract('JoinSplit', (accounts) => {
                 return signature;
             });
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const metadata = outputNotes;
 
             const { length } = proofDataRaw;
-            const noteString = proofDataRaw.map(individualNotes => encoderFactory.encodeNote(individualNotes));
+            const noteString = proofDataRaw.map((individualNotes) => encoderFactory.encodeNote(individualNotes));
 
             // Incorrect encoding of proof data happens here: first two characters incorrectly sliced off
-            // noteString, and padLeft() increases from 64 to 66 to still recognise it as a valid bytes 
+            // noteString, and padLeft() increases from 64 to 66 to still recognise it as a valid bytes
             // object. However. this is incorrect ABI encoding so will throw
             const data = [padLeft(Number(length).toString(16), 66), ...noteString.slice(2)].join('');
             const actualLength = Number(data.length / 2);
@@ -1151,30 +1139,23 @@ contract('JoinSplit', (accounts) => {
                 METADATA: encoderFactory.encodeMetadata(metadata),
             };
 
-            const abiParams = [
-                'PROOF_DATA',
-                'INPUT_SIGNATURES',
-                'INPUT_OWNERS',
-                'OUTPUT_OWNERS',
-                'METADATA',
-            ];
+            const abiParams = ['PROOF_DATA', 'INPUT_SIGNATURES', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
             const incorrectEncoding = encoderFactory.encode(configs, abiParams, 'joinSplit');
 
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(incorrectEncoding, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                joinSplitContract.validateJoinSplit(incorrectEncoding, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('validate failure when incorrect H_X, H_Y in CRS is supplied', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1203,16 +1184,14 @@ contract('JoinSplit', (accounts) => {
             const fakeHx = H_X.add(new BN(1, 10));
             const fakeHy = H_Y.add(new BN(1, 10));
 
-            const fakeCRS = [
-                `0x${padLeft(fakeHx.toString(16), 64)}`,
-                `0x${padLeft(fakeHy.toString(16), 64)}`,
-                ...t2,
-            ];
+            const fakeCRS = [`0x${padLeft(fakeHx.toString(16), 64)}`, `0x${padLeft(fakeHy.toString(16), 64)}`, ...t2];
 
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, accounts[0], fakeCRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                joinSplitContract.validateJoinSplit(proofData, accounts[0], fakeCRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
 
         it('Validate failure when sender address NOT integrated into challenge variable', async () => {
@@ -1220,9 +1199,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -1249,11 +1226,12 @@ contract('JoinSplit', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
@@ -1274,8 +1252,8 @@ contract('JoinSplit', (accounts) => {
                 return signature;
             });
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -1285,7 +1263,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -1300,9 +1278,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -1329,11 +1305,12 @@ contract('JoinSplit', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
@@ -1353,8 +1330,8 @@ contract('JoinSplit', (accounts) => {
                 const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -1364,7 +1341,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -1374,15 +1351,12 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-
         it('Validate failure when blinding factors NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -1409,11 +1383,12 @@ contract('JoinSplit', (accounts) => {
             joinSplit.constructBlindingFactors = () => blindingFactors;
             joinSplit.generateBlindingScalars = () => blindingScalars;
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             proofUtils.computeChallenge = localComputeChallenge;
@@ -1433,8 +1408,8 @@ contract('JoinSplit', (accounts) => {
                 return signature;
             });
 
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -1444,7 +1419,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -1471,19 +1446,18 @@ contract('JoinSplit', (accounts) => {
                 validatorAddress: joinSplitContract.address,
             });
 
-            await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            }));
+            await truffleAssert.reverts(
+                joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                }),
+            );
         });
-
 
         it('validate failure for zero input note value', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [0, 0, 5, 5];
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1491,11 +1465,12 @@ contract('JoinSplit', (accounts) => {
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
             const m = inputNotes.length;
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
@@ -1511,8 +1486,8 @@ contract('JoinSplit', (accounts) => {
                 const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -1522,7 +1497,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -1535,9 +1510,7 @@ contract('JoinSplit', (accounts) => {
         it('validate failure for zero output note value', async () => {
             const noteValues = [10, 10, 0, 0];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
@@ -1545,11 +1518,12 @@ contract('JoinSplit', (accounts) => {
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
             const m = inputNotes.length;
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(
-                [...inputNotes, ...outputNotes], m, senderAddress, kPublic, publicOwner
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                [...inputNotes, ...outputNotes],
+                m,
+                senderAddress,
+                kPublic,
+                publicOwner,
             );
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
@@ -1565,8 +1539,8 @@ contract('JoinSplit', (accounts) => {
                 const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
-            const outputOwners = outputNotes.map(n => n.owner);
-            const inputOwners = inputNotes.map(n => n.owner);
+            const outputOwners = outputNotes.map((n) => n.owner);
+            const inputOwners = inputNotes.map((n) => n.owner);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -1576,7 +1550,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                outputNotes
+                outputNotes,
             );
 
             const opts = {
@@ -1596,10 +1570,13 @@ contract('JoinSplit', (accounts) => {
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
 
-            const {
-                proofData: proofDataRaw,
-                challenge,
-            } = joinSplit.constructJoinSplitModified(commitments, m, accounts[0], 0, publicOwner);
+            const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+                commitments,
+                m,
+                accounts[0],
+                0,
+                publicOwner,
+            );
 
             const inputSignatures = commitments.slice(0, 2).map((inputNote, index) => {
                 const domain = sign.generateAZTECDomainParams(joinSplitContract.address, constants.eip712.ACE_DOMAIN_PARAMS);
@@ -1614,8 +1591,8 @@ contract('JoinSplit', (accounts) => {
                 const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
                 return signature;
             });
-            const outputOwners = aztecAccounts.slice(2, 4).map(a => a.address);
-            const inputOwners = aztecAccounts.slice(0, 2).map(a => a.address);
+            const outputOwners = aztecAccounts.slice(2, 4).map((a) => a.address);
+            const inputOwners = aztecAccounts.slice(0, 2).map((a) => a.address);
 
             const proofData = inputCoder.joinSplit(
                 proofDataRaw,
@@ -1625,7 +1602,7 @@ contract('JoinSplit', (accounts) => {
                 inputSignatures,
                 inputOwners,
                 outputOwners,
-                commitments.slice(2, 4)
+                commitments.slice(2, 4),
             );
 
             const opts = {
@@ -1668,7 +1645,7 @@ contract('JoinSplit', (accounts) => {
                 signature,
                 inputOwners,
                 outputOwners,
-                []
+                [],
             );
 
             const opts = {

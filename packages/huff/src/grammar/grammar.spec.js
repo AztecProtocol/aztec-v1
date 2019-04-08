@@ -34,14 +34,7 @@ describe('grammar tests', () => {
             const template = source.match(grammar.topLevel.TEMPLATE);
             source = source.slice(template.index + template[0].length);
             const result = source.match(grammar.topLevel.MACRO);
-            expect(result).to.deep.equal([
-                macro,
-                'macro',
-                'TEST',
-                '3',
-                '2',
-                macroBody,
-            ]);
+            expect(result).to.deep.equal([macro, 'macro', 'TEST', '3', '2', macroBody]);
         });
 
         it('can strip a line', () => {

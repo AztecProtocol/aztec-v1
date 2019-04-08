@@ -8,7 +8,7 @@
  * information alongside
  * @method customError
  * @param {string} errorType - the type of error thrown
- * @param {Object} data - additional debugging information to be thrown alongside the 
+ * @param {Object} data - additional debugging information to be thrown alongside the
  * error
  */
 

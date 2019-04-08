@@ -7,7 +7,10 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const { constants, proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF } } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -100,25 +103,22 @@ contract('Note Registry', (accounts) => {
         });
 
         erc20 = await ERC20Mintable.new();
-        await ace.createNoteRegistry(
-            erc20.address,
-            scalingFactor,
-            canAdjustSupply,
-            canConvert,
-            { from: accounts[0] }
+        await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, { from: accounts[0] });
+
+        await Promise.all(
+            accounts.map((account) =>
+                erc20.mint(account, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 }),
+            ),
         );
-
-        await Promise.all(accounts.map(account => erc20.mint(
-            account,
-            scalingFactor.mul(tokensTransferred),
-            { from: accounts[0], gas: 4700000 }
-        )));
-        await Promise.all(accounts.map(account => erc20.approve(
-            ace.address, // address approving to spend
-            scalingFactor.mul(tokensTransferred), // value to transfer
-            { from: account, gas: 4700000 }
-        )));
-
+        await Promise.all(
+            accounts.map((account) =>
+                erc20.approve(
+                    ace.address, // address approving to spend
+                    scalingFactor.mul(tokensTransferred), // value to transfer
+                    { from: account, gas: 4700000 },
+                ),
+            ),
+        );
 
         proofOutputs = proofs.map(({ expectedOutput }) => {
             return outputCoder.getProofOutput(expectedOutput, 0);
@@ -130,41 +130,15 @@ contract('Note Registry', (accounts) => {
 
     describe('success states', async () => {
         beforeEach(async () => {
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[0],
-                10,
-                { from: accounts[0] }
-            );
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[1],
-                40,
-                { from: accounts[1] }
-            );
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[2],
-                130,
-                { from: accounts[2] }
-            );
-            await ace.publicApprove(
-                accounts[0],
-                proofHashes[4],
-                30,
-                { from: accounts[3] }
-            );
+            await ace.publicApprove(accounts[0], proofHashes[0], 10, { from: accounts[0] });
+            await ace.publicApprove(accounts[0], proofHashes[1], 40, { from: accounts[1] });
+            await ace.publicApprove(accounts[0], proofHashes[2], 130, { from: accounts[2] });
+            await ace.publicApprove(accounts[0], proofHashes[4], 30, { from: accounts[3] });
         });
 
         it('should be able to create a new note registry', async () => {
             const opts = { from: accounts[1] };
-            const { receipt } = await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                opts
-            );
+            const { receipt } = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
             expect(receipt.status).to.equal(true);
         });
 
@@ -305,54 +279,33 @@ contract('Note Registry', (accounts) => {
 
     describe('failure states', async () => {
         it('should fail to read a non-existent note', async () => {
-            await truffleAssert.reverts(
-                ace.getNote(accounts[1], notes[0].noteHash),
-                'expected note to exist'
-            );
+            await truffleAssert.reverts(ace.getNote(accounts[1], notes[0].noteHash), 'expected note to exist');
         });
 
         it('should fail to read a non-existent registry', async () => {
-            await truffleAssert.reverts(
-                ace.getRegistry(accounts[1]),
-                'expected registry to be created'
-            );
+            await truffleAssert.reverts(ace.getRegistry(accounts[1]), 'expected registry to be created');
         });
 
         it('should fail to create a note registry if sender already owns one', async () => {
             await truffleAssert.reverts(
-                ace.createNoteRegistry(
-                    erc20.address,
-                    scalingFactor,
-                    canAdjustSupply,
-                    canConvert
-                ),
-                'address already has a linked note registry'
+                ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert),
+                'address already has a linked note registry',
             );
         });
 
         it('should fail to create a note registry if linked token address is 0x0', async () => {
             const opts = { from: accounts[1] };
             await truffleAssert.reverts(
-                ace.createNoteRegistry(
-                    constants.addresses.ZERO_ADDRESS,
-                    scalingFactor,
-                    canAdjustSupply,
-                    canConvert,
-                    opts
-                ),
-                'expected the linked token address to exist'
+                ace.createNoteRegistry(constants.addresses.ZERO_ADDRESS, scalingFactor, canAdjustSupply, canConvert, opts),
+                'expected the linked token address to exist',
             );
         });
 
         it('should fail to public approve tokens if no registry exists for the given address', async () => {
             const publicValue = 10;
             await truffleAssert.reverts(
-                ace.publicApprove(
-                    accounts[1],
-                    proofHashes[0],
-                    publicValue
-                ),
-                'note registry does not exist'
+                ace.publicApprove(accounts[1], proofHashes[0], publicValue),
+                'note registry does not exist',
             );
         });
 
@@ -361,7 +314,7 @@ contract('Note Registry', (accounts) => {
             const opts = { from: accounts[1] };
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0], opts),
-                'note registry does not exist for the given address'
+                'note registry does not exist for the given address',
             );
         });
 
@@ -370,7 +323,7 @@ contract('Note Registry', (accounts) => {
             const malformedProofOutput = `0x${proofOutputs[0].slice(0x05)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, malformedProofOutput, accounts[0]),
-                'ACE has not validated a matching proof'
+                'ACE has not validated a matching proof',
             );
         });
 
@@ -379,7 +332,7 @@ contract('Note Registry', (accounts) => {
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(BOGUS_PROOF, formattedProofOutput, accounts[0]),
-                'ACE has not validated a matching proof'
+                'ACE has not validated a matching proof',
             );
         });
 
@@ -388,25 +341,19 @@ contract('Note Registry', (accounts) => {
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[1]),
-                'ACE has not validated a matching proof'
+                'ACE has not validated a matching proof',
             );
         });
 
         it('should fail to update a note registry is public value is non-zero and conversion is deactivated', async () => {
             const canConvertFlag = false;
             const opts = { from: accounts[1] };
-            await ace.createNoteRegistry(
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvertFlag,
-                opts
-            );
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvertFlag, opts);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[0].proofData);
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0], opts),
-                'asset cannot be converted into public tokens'
+                'asset cannot be converted into public tokens',
             );
         });
 
@@ -415,12 +362,12 @@ contract('Note Registry', (accounts) => {
             await ace.publicApprove(
                 accounts[0],
                 proofHashes[0],
-                5 // kPublic is -10
+                5, // kPublic is -10
             );
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]),
-                'public owner has not validated a transfer of tokens'
+                'public owner has not validated a transfer of tokens',
             );
         });
 
@@ -429,20 +376,14 @@ contract('Note Registry', (accounts) => {
             const erc20BrokenTransferFromTest = await ERC20BrokenTransferFromTest.new();
             await erc20BrokenTransferFromTest.mint(accounts[0], scalingFactor.mul(tokensTransferred));
             await erc20BrokenTransferFromTest.approve(ace.address, scalingFactor.mul(tokensTransferred));
-            await ace.createNoteRegistry(
-                erc20BrokenTransferFromTest.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                opts
-            );
+            await ace.createNoteRegistry(erc20BrokenTransferFromTest.address, scalingFactor, canAdjustSupply, canConvert, opts);
 
             await ace.publicApprove(accounts[1], proofHashes[0], 10);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[0].proofData, opts);
             const formattedProofOutput = `0x${proofOutputs[0].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[1], opts),
-                'you shall not pass'
+                'you shall not pass',
             );
         });
 
@@ -454,13 +395,7 @@ contract('Note Registry', (accounts) => {
             await erc20BrokenTransferTest.approve(ace.address, scalingFactor.mul(tokensTransferred));
             await erc20BrokenTransferTest.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
 
-            await ace.createNoteRegistry(
-                erc20BrokenTransferTest.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                opts
-            );
+            await ace.createNoteRegistry(erc20BrokenTransferTest.address, scalingFactor, canAdjustSupply, canConvert, opts);
             await ace.publicApprove(accounts[2], proofHashes[2], 130, opts);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData, opts);
             let formattedProofOutput = `0x${proofOutputs[2].slice(0x40)}`;
@@ -469,7 +404,7 @@ contract('Note Registry', (accounts) => {
             formattedProofOutput = `0x${proofOutputs[3].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[2], opts),
-                'you shall not pass'
+                'you shall not pass',
             );
         });
 
@@ -479,7 +414,7 @@ contract('Note Registry', (accounts) => {
             const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]),
-                'input note status is not UNSPENT'
+                'input note status is not UNSPENT',
             );
         });
 
@@ -506,7 +441,7 @@ contract('Note Registry', (accounts) => {
             formattedProofOutput = `0x${proofOutputs[6].slice(0x40)}`;
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]),
-                'output note exists'
+                'output note exists',
             );
         });
     });

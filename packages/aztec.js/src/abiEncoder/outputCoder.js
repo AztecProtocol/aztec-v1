@@ -1,4 +1,3 @@
-
 /**
  * Output ABI encoding function
  * @module outputCoder
@@ -16,7 +15,7 @@ const outputCoder = {};
  *
  * @method decodeNote
  * @param {note} note - AZTEC note
- * @returns {Object[]} note variables - extracted variables: noteType, owner, 
+ * @returns {Object[]} note variables - extracted variables: noteType, owner,
  * noteHash, gamma, sigma, ephemeral
  */
 outputCoder.decodeNote = (note) => {
@@ -62,7 +61,7 @@ outputCoder.decodeNote = (note) => {
 outputCoder.decodeNotes = (notes) => {
     const n = parseInt(notes.slice(0x40, 0x80), 16);
     return [...new Array(n)].map((x, i) => {
-        const noteOffset = parseInt(notes.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
+        const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
         return outputCoder.decodeNote(notes.slice(noteOffset * 2));
     });
 };
@@ -100,14 +99,14 @@ outputCoder.decodeProofOutput = (proofOutput) => {
  * @method decodeProofOutputs
  * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
  * proofOutput objects
- * @returns {Object[]} array of decoded proofOutput objects - each element contains the 
+ * @returns {Object[]} array of decoded proofOutput objects - each element contains the
  * publicValue and the challenge
  */
 outputCoder.decodeProofOutputs = (proofOutputsHex) => {
     const proofOutputs = proofOutputsHex.slice(2);
     const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
     const result = [...new Array(numOutputs)].map((x, i) => {
-        const outputOffset = parseInt(proofOutputs.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
+        const outputOffset = parseInt(proofOutputs.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
         return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
     });
 
@@ -126,21 +125,21 @@ outputCoder.decodeProofOutputs = (proofOutputsHex) => {
  */
 outputCoder.getProofOutput = (proofOutputsHex, i) => {
     const proofOutputs = proofOutputsHex.slice(2);
-    const offset = parseInt(proofOutputs.slice(0x40 + (0x40 * i), 0x80 + (0x40 * i)), 16);
-    const length = parseInt(proofOutputs.slice((offset * 2) - 0x40, (offset * 2)), 16);
-    return proofOutputs.slice((offset * 2) - 0x40, (offset * 2) + (length * 2));
+    const offset = parseInt(proofOutputs.slice(0x40 + 0x40 * i, 0x80 + 0x40 * i), 16);
+    const length = parseInt(proofOutputs.slice(offset * 2 - 0x40, offset * 2), 16);
+    return proofOutputs.slice(offset * 2 - 0x40, offset * 2 + length * 2);
 };
 
 /**
  * Extract the note from a bytes notes string
- * 
+ *
  * @method getNote
  * @param {string} notes - bytes notes string
  * @param {Number} i - index to the particular note the user wishes to select
  * @returns {string} bytes selected note string
  */
 outputCoder.getNote = (notes, i) => {
-    const noteOffset = 2 * parseInt(notes.slice(0x80 + (i * 0x40), 0xc0 + (i * 0x40)), 16);
+    const noteOffset = 2 * parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
     const length = 2 * parseInt(notes.slice(noteOffset, noteOffset + 0x40), 16);
     // Add 0x40 because the length itself has to be included
     return notes.slice(noteOffset, noteOffset + 0x40 + length);
@@ -148,7 +147,7 @@ outputCoder.getNote = (notes, i) => {
 
 /**
  * Extract the the input notes from a proof output
- * 
+ *
  * @method getInputNotes
  * @param {string} proofOutput - the particular proofOutput the user wishes to select
  * @returns (string) input notes extracted from proofOutput
@@ -165,7 +164,7 @@ outputCoder.getInputNotes = (proofOutput) => {
 
 /**
  * Extract the metadata from a notee
- * 
+ *
  * @method getMetadata
  * @param {string} notes - bytes note string
  * @returns {strings} extracted bytes metadata
@@ -198,7 +197,7 @@ outputCoder.getMetadata = (note) => {
 
 /**
  * Extract the the input notes from a proof output
- * 
+ *
  * @method getOutputNotes
  * @param {string} proofOutput - the particular proofOutput the user wishes to select
  * @returns (string) output notes extracted from proofOutput
@@ -219,7 +218,7 @@ outputCoder.getOutputNotes = (proofOutput) => {
  *
  * @method hashProofOutput
  * @param {proofOutput} proofOutput - proofOutput object, contains transfer instructions
- * @returns {string} sha3 hash of the proofOutput 
+ * @returns {string} sha3 hash of the proofOutput
  */
 outputCoder.hashProofOutput = (proofOutput) => {
     return sha3(`0x${proofOutput.slice(0x40)}`);
@@ -230,7 +229,7 @@ outputCoder.hashProofOutput = (proofOutput) => {
  *
  * @method encodeOutputNote
  * @param {note} note - AZTEC note
- * @returns {string} the various components of an AZTEC output note, encoded appropriately and concatenated 
+ * @returns {string} the various components of an AZTEC output note, encoded appropriately and concatenated
  * together
  */
 outputCoder.encodeOutputNote = (note) => {
@@ -266,7 +265,7 @@ outputCoder.encodeInputNote = (note) => {
 };
 
 /**
- * Encode an array of notes according to the ABI specification. Able to encode both input and output 
+ * Encode an array of notes according to the ABI specification. Able to encode both input and output
  * notes
  *
  * @method encodeNotes
@@ -291,15 +290,18 @@ outputCoder.encodeNotes = (notes, isOutput) => {
             return outputCoder.encodeInputNote(note, isOutput);
         });
     }
-    const offsetToData = 0x40 + (0x20 * encodedNotes.length);
-    const noteLengths = encodedNotes.reduce((acc, p) => {
-        return [...acc, acc[acc.length - 1] + (p.length / 2)];
-    }, [offsetToData]);
+    const offsetToData = 0x40 + 0x20 * encodedNotes.length;
+    const noteLengths = encodedNotes.reduce(
+        (acc, p) => {
+            return [...acc, acc[acc.length - 1] + p.length / 2];
+        },
+        [offsetToData],
+    );
 
     const encoded = [
         padLeft((noteLengths.slice(-1)[0] - 0x20).toString(16), 64),
         padLeft(notes.length.toString(16), 64),
-        ...noteLengths.slice(0, -1).map(n => padLeft(n.toString(16), 64)),
+        ...noteLengths.slice(0, -1).map((n) => padLeft(n.toString(16), 64)),
         ...encodedNotes,
     ];
     return encoded.join('');
@@ -311,18 +313,12 @@ outputCoder.encodeNotes = (notes, isOutput) => {
  * @method encodeProofOutput
  * @param {note[]} inputNotes - array of notes to be input to a zero-knowledge proof
  * @param {note[]} outputNotes - array of notes to be output from a zero-knowledge proof
- * @param {address} publicOwner - Ethereum address of the account 
+ * @param {address} publicOwner - Ethereum address of the account
  * @param {Number} publicValue - quantity of public ERC20 tokens input to the zero-knowledge proof
  * @param {string} challenge - cryptographic challenge variable, part of the sigma protocol
  * @returns {string} ABI encoded representation of the proofOutput object
  */
-outputCoder.encodeProofOutput = ({
-    inputNotes,
-    outputNotes,
-    publicOwner,
-    publicValue,
-    challenge,
-}) => {
+outputCoder.encodeProofOutput = ({ inputNotes, outputNotes, publicOwner, publicValue, challenge }) => {
     const encodedInputNotes = outputCoder.encodeNotes(inputNotes, false);
     const encodedOutputNotes = outputCoder.encodeNotes(outputNotes, true);
     let formattedValue;
@@ -332,9 +328,9 @@ outputCoder.encodeProofOutput = ({
         formattedValue = padLeft(publicValue.toString(16), 64);
     }
     const encoded = [...new Array(8)];
-    encoded[0] = padLeft((0xa0 + ((encodedInputNotes.length + encodedOutputNotes.length) / 2)).toString(16), 64);
+    encoded[0] = padLeft((0xa0 + (encodedInputNotes.length + encodedOutputNotes.length) / 2).toString(16), 64);
     encoded[1] = padLeft('c0', 64);
-    encoded[2] = padLeft((0xc0 + (encodedInputNotes.length / 2)).toString(16), 64);
+    encoded[2] = padLeft((0xc0 + encodedInputNotes.length / 2).toString(16), 64);
     encoded[3] = padLeft(publicOwner.slice(2), 64);
     encoded[4] = formattedValue;
     encoded[5] = padLeft(challenge.slice(2), 64);
@@ -342,7 +338,6 @@ outputCoder.encodeProofOutput = ({
     encoded[7] = encodedOutputNotes;
     return encoded.join('');
 };
-
 
 /**
  * Encode a proofOutputs object according to the ABI specification
@@ -352,16 +347,19 @@ outputCoder.encodeProofOutput = ({
  * @returns {string} ABI encoded representation of the proofOutputs object
  */
 outputCoder.encodeProofOutputs = (proofOutputs) => {
-    const encodedProofOutputs = proofOutputs.map(proofOutput => outputCoder.encodeProofOutput(proofOutput));
-    const offsetToData = 0x40 + (0x20 * proofOutputs.length);
-    const proofLengths = encodedProofOutputs.reduce((acc, p) => {
-        return [...acc, acc[acc.length - 1] + (p.length / 2)];
-    }, [offsetToData]);
+    const encodedProofOutputs = proofOutputs.map((proofOutput) => outputCoder.encodeProofOutput(proofOutput));
+    const offsetToData = 0x40 + 0x20 * proofOutputs.length;
+    const proofLengths = encodedProofOutputs.reduce(
+        (acc, p) => {
+            return [...acc, acc[acc.length - 1] + p.length / 2];
+        },
+        [offsetToData],
+    );
 
     const encoded = [
         padLeft((proofLengths.slice(-1)[0] - 0x20).toString(16), 64),
         padLeft(proofOutputs.length.toString(16), 64),
-        ...proofLengths.slice(0, -1).map(n => padLeft(n.toString(16), 64)),
+        ...proofLengths.slice(0, -1).map((n) => padLeft(n.toString(16), 64)),
         ...encodedProofOutputs,
     ];
     return `0x${encoded.join('')}`.toLowerCase();

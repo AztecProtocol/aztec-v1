@@ -3,7 +3,7 @@ const proofUtils = require('../proofUtils');
 const extractor = {};
 
 /**
- * Extract the witnesses for two proof transcripts over the same input string but with different challenges.  
+ * Extract the witnesses for two proof transcripts over the same input string but with different challenges.
  * We use this to validate the soundness of our implementation in the random oracle model.
  *
  * @method extractWitness
@@ -14,16 +14,21 @@ const extractor = {};
  * @returns {Object[]} the AZTEC notes used in the proof, with their extracted witnesses (the note value and note viewing key)
  */
 extractor.extractWitness = (transcripts, m, challenges) => {
-    const {
-        notes: firstNotes,
-        challenge: firstChallenge,
-        rollingHash,
-    } = proofUtils.convertTranscript(transcripts[0], m, challenges[0], [], 'joinSplit');
+    const { notes: firstNotes, challenge: firstChallenge, rollingHash } = proofUtils.convertTranscript(
+        transcripts[0],
+        m,
+        challenges[0],
+        [],
+        'joinSplit',
+    );
 
-    const {
-        notes: secondNotes,
-        challenge: secondChallenge,
-    } = proofUtils.convertTranscript(transcripts[1], m, challenges[1], [], 'joinSplit');
+    const { notes: secondNotes, challenge: secondChallenge } = proofUtils.convertTranscript(
+        transcripts[1],
+        m,
+        challenges[1],
+        [],
+        'joinSplit',
+    );
     rollingHash.keccak();
     const challengeFactor = firstChallenge.redSub(secondChallenge).redInvm();
     const witnesses = firstNotes.map((firstNote, i) => {

@@ -1,12 +1,13 @@
 /* eslint-disable prefer-arrow-callback */
-const { constants: { K_MAX } } = require('@aztec/dev-utils');
+const {
+    constants: { K_MAX },
+} = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
 const utils = require('@aztec/dev-utils');
-
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
@@ -23,10 +24,7 @@ function generateNoteValue() {
 }
 
 function getKPublic(kIn, kOut) {
-    return kOut.reduce(
-        (acc, v) => acc - v,
-        kIn.reduce((acc, v) => acc + v, 0)
-    );
+    return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
 }
 
 function generateBalancedNotes(nIn, nOut) {
@@ -88,7 +86,6 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-
         it('validates join-split proof with 0 output notes', () => {
             const kIn = [...Array(5)].map(() => generateNoteValue());
             const kOut = [];
@@ -140,14 +137,13 @@ describe('AZTEC verifier tests', function describeVerifier() {
         });
     });
 
-
     describe('failure states', function failure() {
         this.timeout(10000);
         let parseInputs;
         beforeEach(() => {
             // to test failure states we need to pass in bad data to verifier
             // so we need to turn off proof.parseInputs
-            parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => { });
+            parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
         });
 
         afterEach(() => {
@@ -158,7 +154,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             // we can construct 'proof' where all points and scalars are zero.
             // The challenge response will be correctly reconstructed, but the proof should still be invalid
             const zeroes = `${padLeft('0', 64)}`;
-            const noteString = [...Array(6)].reduce(acc => `${acc}${zeroes}`, '');
+            const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const sender = randomAddress();
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
@@ -178,7 +174,8 @@ describe('AZTEC verifier tests', function describeVerifier() {
             const kOut = [...Array(5)].map(() => generateNoteValue());
 
             const { commitments, m } = proofHelpers.generateCommitmentSet({
-                kIn, kOut,
+                kIn,
+                kOut,
             });
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
@@ -205,9 +202,9 @@ describe('AZTEC verifier tests', function describeVerifier() {
         });
 
         it('will REJECT for random proof data', () => {
-            const proofData = [...Array(4)]
-                .map(() => [...Array(6)]
-                    .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`));
+            const proofData = [...Array(4)].map(() =>
+                [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
+            );
             const sender = randomAddress();
             const result = verifier.verifyProof(proofData, 1, `0x${crypto.randomBytes(31).toString('hex')}`, sender);
             expect(result.valid).to.equal(false);

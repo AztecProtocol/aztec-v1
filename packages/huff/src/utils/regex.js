@@ -7,7 +7,7 @@ const operators = new RegExp('[\\+\\-\\*]');
 // const angleBrackets = new RegExp('^[^<>]*');
 
 regex.sliceCommas = (input) => {
-    return (input.match(commas) || []).filter(r => r !== '');
+    return (input.match(commas) || []).filter((r) => r !== '');
 };
 
 regex.endOfData = (input) => {
@@ -25,10 +25,7 @@ regex.countEmptyChars = (input) => {
 regex.isolateTemplate = (val) => {
     const index = val.indexOf('<');
     if (index !== -1) {
-        return [
-            val.slice(0, index),
-            regex.isolateTemplate(val.slice(index + 1, val.lastIndexOf('>'))),
-        ];
+        return [val.slice(0, index), regex.isolateTemplate(val.slice(index + 1, val.lastIndexOf('>')))];
     }
     return [val];
     // const match = input.match(angleBrackets) || [''];
