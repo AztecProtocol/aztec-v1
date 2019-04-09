@@ -6,25 +6,23 @@ const {
     note,
     proof: { burn },
 } = require('aztec.js');
-const {
-    constants: { CRS },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupplyABIEncoderTest');
+const ABIEncoder = artifacts.require('./AdjustSupplyABIEncoderTest');
 
-contract('AdjustSupply ABI Encoder on a burn proof', (accounts) => {
+contract('AdjustSupply ABI Encoder on a Burn Proof', (accounts) => {
     let adjustSupplyAbiEncoder;
 
-    describe('success states', () => {
+    describe('Success States', () => {
         beforeEach(async () => {
             adjustSupplyAbiEncoder = await ABIEncoder.new({
                 from: accounts[0],
             });
         });
 
-        it('successfully encodes output of a burn proof', async () => {
+        it('should encode output of a burn proof', async () => {
             const numNotes = 4;
             const noteValues = [50, 30, 10, 10];
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -36,7 +34,7 @@ contract('AdjustSupply ABI Encoder on a burn proof', (accounts) => {
             const oldTotalBurned = notes[1];
             const adjustedNotes = notes.slice(2, 4);
 
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = 0;
 
             const senderAddress = accounts[0];
@@ -48,7 +46,7 @@ contract('AdjustSupply ABI Encoder on a burn proof', (accounts) => {
                 senderAddress: accounts[0],
             });
 
-            const result = await adjustSupplyAbiEncoder.validateAdjustSupply(proofData, senderAddress, CRS, {
+            const result = await adjustSupplyAbiEncoder.validateAdjustSupply(proofData, senderAddress, constants.CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });

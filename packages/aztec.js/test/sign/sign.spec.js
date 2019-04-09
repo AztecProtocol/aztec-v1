@@ -14,46 +14,43 @@ const secp256k1 = require('../../src/secp256k1');
 
 const { expect } = chai;
 
-describe('sign tests', () => {
+describe('Sign', () => {
     let accounts;
+    const domainTypes = {
+        EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'verifyingContract', type: 'address' },
+        ],
+    };
 
     beforeEach(() => {
         accounts = [secp256k1.generateAccount(), secp256k1.generateAccount()];
     });
 
-    describe('Structure specific EIP712 tests', () => {
-        const domainTypes = {
-            EIP712Domain: [
-                { name: 'name', type: 'string' },
-                { name: 'version', type: 'string' },
-                { name: 'verifyingContract', type: 'address' },
-            ],
-        };
-
-        it('will generate correct AZTEC domain params', () => {
-            expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
-                name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
-                version: '1',
-                verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-            });
-        });
-
-        it('AZTEC domain params resolves to expected message', () => {
-            const messageInput = sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
-            const result = eip712.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
-            const messageData = [
-                sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
-                sha3('AZTEC_CRYPTOGRAPHY_ENGINE').slice(2),
-                sha3('1').slice(2),
-                padLeft('cccccccccccccccccccccccccccccccccccccccc', 64),
-            ];
-            const expected = messageData.join('');
-            expect(result).to.equal(expected);
+    it('should generate correct AZTEC domain params', () => {
+        expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
+            name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
+            version: '1',
+            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         });
     });
 
-    describe('EIP712 implementation tests for JOIN_SPLIT_SIGNATURE', () => {
-        it('check that the signature outputted is well formed', () => {
+    it('should have the domain params resolve to expected message', () => {
+        const messageInput = sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
+        const result = eip712.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
+        const messageData = [
+            sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
+            sha3('AZTEC_CRYPTOGRAPHY_ENGINE').slice(2),
+            sha3('1').slice(2),
+            padLeft('cccccccccccccccccccccccccccccccccccccccc', 64),
+        ];
+        const expected = messageData.join('');
+        expect(result).to.equal(expected);
+    });
+
+    describe('Join Split Signature', () => {
+        it('should output a well formed signature', () => {
             const verifyingContract = proofUtils.randomAddress();
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
             const senderAddress = proofUtils.randomAddress();
@@ -64,7 +61,7 @@ describe('sign tests', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                note: noteString,
+                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
                 challenge,
                 sender: senderAddress,
             };
@@ -80,7 +77,7 @@ describe('sign tests', () => {
             expect(signature[2].length - 2).to.equal(expectedNumCharacters);
         });
 
-        it('check public key is correctly recovered from signature params', () => {
+        it('should recover public key from signature params', () => {
             const verifyingContract = proofUtils.randomAddress();
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
             const senderAddress = proofUtils.randomAddress();
@@ -91,7 +88,7 @@ describe('sign tests', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                note: noteString,
+                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
                 challenge,
                 sender: senderAddress,
             };

@@ -12,20 +12,20 @@ const {
 } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const ACE = artifacts.require('./contracts/ACE/ACE');
-const AdjustSupply = artifacts.require('./contracts/ACE/validators/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/AdjustSupplyInterface');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const ACE = artifacts.require('./ACE');
+const AdjustSupply = artifacts.require('./AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplit');
 
-const ZkAssetMintable = artifacts.require('./contracts/ZkAsset/ZkAssetMintable');
+const ZkAssetMintable = artifacts.require('./ZkAssetMintable');
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAssetMintable', (accounts) => {
-    describe('success states', () => {
+    describe('Success States', () => {
         let aztecAccounts = [];
         let ace;
         let erc20;
@@ -120,7 +120,7 @@ contract('ZkAssetMintable', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         let ace;
         let erc20;
         let zkAssetMintable;
@@ -141,7 +141,7 @@ contract('ZkAssetMintable', (accounts) => {
             scalingFactor = new BN(1);
         });
 
-        it('validate failure if msg.sender is not owner', async () => {
+        it('should fail if msg.sender is not owner', async () => {
             const proofs = [];
             const canAdjustSupply = true;
             const canConvert = true;
@@ -174,15 +174,15 @@ contract('ZkAssetMintable', (accounts) => {
             );
         });
 
-        it('validate failure if ace.mint throws', async () => {
-            // ace.mint will throw if total inputs != total outputs in the mint proof
+        it('should fail if ace.mint fails', async () => {
+            // ace.mint throws if total inputs != total outputs in the mint proof
             const proofs = [];
             const canAdjustSupply = true;
             const canConvert = true;
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            // total inputs != total outputs - ace.mint will throw
+            // total inputs != total outputs - ace.mint throws
             const noteValues = [50, 0, 30, 30];
             const notes = aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
@@ -206,7 +206,7 @@ contract('ZkAssetMintable', (accounts) => {
             await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData));
         });
 
-        it('validates failure if mint attempted when flag set to false', async () => {
+        it('should fail if flag set to FALSE', async () => {
             const proofs = [];
             const canAdjustSupply = false;
             const canConvert = true;

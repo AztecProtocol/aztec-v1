@@ -227,13 +227,6 @@
     ethers "~4.0.4"
     lodash "^4.17.11"
 
-"@aztec/dev-utils@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@aztec/dev-utils/-/dev-utils-2.0.0.tgz#702e5f0c23eed345d8b2acb705e2d25f46ce3350"
-  integrity sha512-ZEaz33KfkR7QrB4G8xEzOls91EYQoozih67AmfH5g44cn45JlCRfHgpuZvUxY8XWMQ+5HtsEU7JHqr95zUlfdw==
-  dependencies:
-    bn.js "^4.11.8"
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.0.0-beta.35":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.0.0.tgz#06e2ab19bdb535385559aabb5ba59729482800f8"

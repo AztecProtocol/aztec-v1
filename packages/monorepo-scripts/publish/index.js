@@ -2,7 +2,7 @@ const multirelease = require('multi-semantic-release');
 
 // prettier-ignore
 multirelease([
-    `${__dirname}/packages/aztec.js/package.json`,
-    `${__dirname}/packages/dev-utils/package.json`,
-    `${__dirname}/packages/protocol/package.json`,
-])
+    `../../aztec.js/package.json`,
+    `../../dev-utils/package.json`,
+    `../../packages/protocol/package.json`,
+]);

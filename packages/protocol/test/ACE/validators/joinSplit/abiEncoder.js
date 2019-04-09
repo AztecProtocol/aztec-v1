@@ -18,19 +18,19 @@ const { outputCoder, inputCoder } = aztec.abiEncoder;
 const joinSplitEncode = inputCoder.joinSplit;
 
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitABIEncoderTest');
+const ABIEncoder = artifacts.require('./JoinSplitABIEncoderTest');
 
 function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
 
-contract('Join Split ABI Encoder', (accounts) => {
+contract('Join-Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
     let aztecAccounts = [];
     let notes = [];
 
     // Creating a collection of tests that should pass
-    describe('success states', () => {
+    describe('Success States', () => {
         beforeEach(async () => {
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
 
@@ -43,7 +43,7 @@ contract('Join Split ABI Encoder', (accounts) => {
             });
         });
 
-        it('successfully encodes output of a join split proof', async () => {
+        it('should encode output of a join-split proof', async () => {
             const m = 2;
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);

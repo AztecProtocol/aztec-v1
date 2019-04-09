@@ -36,8 +36,8 @@ function validateGroupElement(xHex, yHex) {
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
-describe('Burn proof construction tests', () => {
-    it('proof.constructProof creates a proof with well-formed outputs', () => {
+describe('Burn Proof', () => {
+    it('should construct a proof with well-formed outputs', () => {
         const newTotalBurned = 50;
         const oldTotalBurned = 30;
         const burnOne = 10;
@@ -62,7 +62,7 @@ describe('Burn proof construction tests', () => {
         });
     });
 
-    it('proof.constructProof will throw if point not on curve', () => {
+    it('should fail to construct a proof if point NOT on curve', () => {
         const newTotalBurned = 50;
         const oldTotalBurned = 30;
         const burnOne = 10;
@@ -81,7 +81,7 @@ describe('Burn proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if point at infinity', () => {
+    it('should fail to construct a proof if point at infinity', () => {
         const newTotalBurned = 50;
         const oldTotalBurned = 30;
         const burnOne = 10;
@@ -102,7 +102,7 @@ describe('Burn proof construction tests', () => {
         expect(message).to.contain('POINT_AT_INFINITY');
     });
 
-    it('proof.constructProof will throw if viewing key response is 0', () => {
+    it('should fail to construct a proof if viewing key response is 0', () => {
         const newTotalBurned = 50;
         const oldTotalBurned = 30;
         const burnOne = 10;
@@ -121,7 +121,7 @@ describe('Burn proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if value > K_MAX', () => {
+    it('should fail to construct a proof if value > K_MAX', () => {
         const newTotalBurned = 50;
         const oldTotalBurned = 30;
         const burnOne = 10;
@@ -140,7 +140,7 @@ describe('Burn proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if n < 2', () => {
+    it('should fail to construct a proof if n < 2', () => {
         const noteValue = 50;
         const testNote = notes.create(secp256k1.generateAccount().publicKey, noteValue);
         const sender = proofUtils.randomAddress();

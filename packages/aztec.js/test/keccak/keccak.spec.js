@@ -7,8 +7,8 @@ const { expect } = chai;
 const Keccak = require('../../src/keccak');
 const bn128 = require('../../src/bn128');
 
-describe('keccak tests', () => {
-    it('keccak will correctly hash a set of points', () => {
+describe('Keccak', () => {
+    it('should hash a set of points', () => {
         const points = [
             [
                 '763de812dec810215bc17987e5d2a0ba8dfb00d9b7df29ab857ee446d98e4cf',
@@ -36,7 +36,7 @@ describe('keccak tests', () => {
         ).to.equal(new BN(sha3(`0x${expected}`).slice(2), 16).umod(bn128.curve.n).toString(16));
     });
 
-    it('keccak will correctly hash a set of BN big numbers', () => {
+    it('should hash a set of bn.js numbers', () => {
         const numbers = [
             '87e5d2a0ba8dfb00d9b7df29ab857ee446d98e4cf',
             '2201082870c343ebcabce44eea82167c55d321a3f816c7e4e56b729f9dd6a6a9',

@@ -1,26 +1,25 @@
 /* eslint-disable prefer-arrow-callback */
 
-const utils = require('@aztec/dev-utils');
+const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
-const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
-const proofUtils = require('../../../src/proof/proofUtils');
+const { padLeft, sha3 } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const secp256k1 = require('../../../src/secp256k1');
 const notes = require('../../../src/note');
 const proof = require('../../../src/proof/mint');
+const proofUtils = require('../../../src/proof/proofUtils');
 const verifier = require('../../../src/proof/mint/verifier');
 
-const { errorTypes } = utils.constants;
-
+const { errorTypes } = devUtils.constants;
 const { expect } = chai;
 
-describe('Mint proof verification tests', () => {
-    describe('success states', () => {
-        it('proof.constructProof creates a valid mint proof', () => {
+describe('Mint Proof Verifier', () => {
+    describe('Success States', () => {
+        it('should construct a valid mint proof', () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 30;
             const mintOne = 10;
@@ -37,7 +36,7 @@ describe('Mint proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates mint proof with 0 notes minted i.e. no notes are actually minted', () => {
+        it('should accept mint proof with 0 notes minted i.e. no notes are actually minted', () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 50;
 
@@ -53,7 +52,7 @@ describe('Mint proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates mint proof with large number of minted notes', () => {
+        it('should accept mint proof with large number of minted notes', () => {
             const newTotalMinted = 100;
             const oldTotalMinted = 10;
 
@@ -69,7 +68,7 @@ describe('Mint proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates minting without any previous minted number of tokens', () => {
+        it('should mint without any previous minted number of tokens', () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 0;
             const mintOne = 25;
@@ -87,8 +86,8 @@ describe('Mint proof verification tests', () => {
         });
     });
 
-    describe('failure states', () => {
-        it('will REJECT if points not on curve', () => {
+    describe('Failure States', () => {
+        it('should REJECT if points NOT on curve', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
             // we can construct 'proof' where all points and scalars are zero.
             // The challenge response will be correctly reconstructed, but the proof should still be invalid
@@ -124,7 +123,7 @@ describe('Mint proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if malformed challenge', () => {
+        it('should REJECT if malformed challenge', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -144,7 +143,7 @@ describe('Mint proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if notes do not balance', () => {
+        it('should REJECT if notes do NOT balance', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const oldTotalMinted = 30;
@@ -165,7 +164,7 @@ describe('Mint proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for random proof data', () => {
+        it('should REJECT for random proof data', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const proofData = [...Array(4)].map(() =>
@@ -179,7 +178,7 @@ describe('Mint proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if note value response is 0', () => {
+        it('should REJECT if note value response is 0', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -201,7 +200,7 @@ describe('Mint proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor is at infinity', () => {
+        it('should REJECT if blinding factor is at infinity', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -229,7 +228,7 @@ describe('Mint proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -262,7 +261,7 @@ describe('Mint proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will throw if number of notes supplied is less than 2', () => {
+        it('should fail if number of notes supplied is less than 2', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const noteValue = 50;

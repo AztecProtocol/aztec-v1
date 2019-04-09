@@ -7,8 +7,8 @@ const secp256k1 = require('../../src/secp256k1');
 const { padLeft } = web3Utils;
 const { expect } = chai;
 
-describe('ecdsa tests', () => {
-    it('signature parameters can be used to recover signer public key', async () => {
+describe('ECDSA', () => {
+    it('should reuse signature parameters to recover signer public key', async () => {
         const message = web3Utils.sha3('this is a test message');
 
         const keypair = secp256k1.ec.genKeyPair();
@@ -23,7 +23,7 @@ describe('ecdsa tests', () => {
         expect(recovered.eq(publicKey)).to.equal(true);
     });
 
-    it('can construct a valid signature', async () => {
+    it('should construct a valid signature', async () => {
         const { publicKey, privateKey } = secp256k1.accountFromPrivateKey(`0x${crypto.randomBytes(32).toString('hex')}`);
         const hash = `0x${crypto.randomBytes(32).toString('hex')}`;
         const [, r, s] = secp256k1.ecdsa.signMessage(hash, privateKey);
@@ -31,7 +31,7 @@ describe('ecdsa tests', () => {
         expect(res).to.equal(true);
     });
 
-    it('can recover signing public key', async () => {
+    it('should recover signing public key', async () => {
         const { publicKey, privateKey } = secp256k1.accountFromPrivateKey(`0x${crypto.randomBytes(32).toString('hex')}`);
         const hash = `0x${crypto.randomBytes(32).toString('hex')}`;
         const [v, r, s] = secp256k1.ecdsa.signMessage(hash, privateKey);

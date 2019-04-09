@@ -43,7 +43,7 @@ contract('LibEIP712', (accounts) => {
         libEIP712 = await LibEIP712.new();
     });
 
-    describe('success states', async () => {
+    describe('Success States', async () => {
         it('should correctly compute the domain hash', async () => {
             const domainHash = computeDomainHash(libEIP712.address);
             const result = await libEIP712.EIP712_DOMAIN_HASH();
@@ -66,7 +66,7 @@ contract('LibEIP712', (accounts) => {
         });
     });
 
-    describe('failure states', async () => {
+    describe('Failure States', async () => {
         it('should fail when signer is 0x0', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const { signature, encodedTypedData } = signNote(libEIP712.address, aztecAccount.address, aztecAccount.privateKey);

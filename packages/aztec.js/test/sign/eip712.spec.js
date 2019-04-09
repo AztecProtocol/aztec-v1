@@ -5,7 +5,7 @@ const { padLeft, sha3 } = require('web3-utils');
 
 const eip712 = require('../../src/sign/eip712');
 
-describe('eip712 tests', () => {
+describe('EIP712', () => {
     let simple;
     let complex;
     let alphabetical;
@@ -70,7 +70,7 @@ describe('eip712 tests', () => {
         };
     });
 
-    it('correctly encodes a basic struct', () => {
+    it('should encode a basic struct', () => {
         /* eslint-disable max-len */
         const encoded = eip712.encodeMessageData(simple.types, simple.primaryType, simple.message);
         expect(encoded).to.equal(
@@ -78,7 +78,7 @@ describe('eip712 tests', () => {
         );
     });
 
-    it('correctly encodes a nested struct', () => {
+    it('should encode a nested struct', () => {
         /* eslint-disable max-len */
         const encoded = eip712.encodeMessageData(complex.types, complex.primaryType, complex.message);
         const expected =
@@ -86,17 +86,17 @@ describe('eip712 tests', () => {
         expect(encoded).to.equal(expected);
     });
 
-    it('correctly encodes a struct', () => {
+    it('should encode a struct', () => {
         const encoded = eip712.encodeStruct(simple.primaryType, simple.types);
         expect(encoded).to.equal('Foo(bytes32 first,uint256 second,address third)');
     });
 
-    it('correctly orders struct strings alphabetically', () => {
+    it('should order struct strings alphabetically', () => {
         const encodedAlphabetical = eip712.encodeStruct(alphabetical.primaryType, alphabetical.types);
         expect(encodedAlphabetical).to.equal('Top(ZZZ zfoo,AAA aBar)AAA(bytes32 bar)ZZZ(uint foo)');
     });
 
-    it('correctly calculates the keccak256 hash of a struct', () => {
+    it('should calculate the keccak256 hash of a struct', () => {
         /* eslint-disable max-len */
         const hashed = sha3(`0x${eip712.encodeMessageData(simple.types, simple.primaryType, simple.message)}`);
         const typeData = 'Foo(bytes32 first,uint256 second,address third)';
@@ -108,7 +108,7 @@ describe('eip712 tests', () => {
     });
 });
 
-describe('comparison with reference implementation', () => {
+describe('Comparison with Reference Implementation', () => {
     const typedData = {
         types: {
             EIP712Domain: [
@@ -117,11 +117,7 @@ describe('comparison with reference implementation', () => {
                 { name: 'verifyingContract', type: 'address' },
             ],
             Person: [{ name: 'name', type: 'string' }, { name: 'wallet', type: 'address' }],
-            Mail: [
-                { name: 'from', type: 'Person' },
-                { name: 'to', type: 'Person' },
-                { name: 'contents', type: 'string' },
-            ],
+            Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person' }, { name: 'contents', type: 'string' }],
         },
         primaryType: 'Mail',
         domain: {
@@ -149,11 +145,7 @@ describe('comparison with reference implementation', () => {
                 { name: 'version', type: 'string' },
                 { name: 'verifyingContract', type: 'address' },
             ],
-            Mail: [
-                { name: 'from', type: 'Person' },
-                { name: 'to', type: 'Person' },
-                { name: 'contents', type: 'string' },
-            ],
+            Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person' }, { name: 'contents', type: 'string' }],
             Squirrel: [
                 { name: 'name', type: 'string' },
                 { name: 'topSpeed', type: 'uint256' },
@@ -282,7 +274,7 @@ describe('comparison with reference implementation', () => {
     const privateKey = ethUtil.keccak256('cow');
     const address = ethUtil.privateToAddress(privateKey);
     const sig = ethUtil.ecsign(signHash(typedData), privateKey);
-    it('basic tests', () => {
+    it('should pass basic tests', () => {
         expect(encodeType(typedData.types, 'Mail')).to.equal(
             'Mail(Person from,Person to,string contents)Person(string name,address wallet)',
         );
@@ -304,15 +296,11 @@ describe('comparison with reference implementation', () => {
         );
         expect(ethUtil.bufferToHex(address)).to.equal('0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826');
         expect(sig.v).to.equal(27);
-        expect(ethUtil.bufferToHex(sig.r)).to.equal(
-            '0x5a7f92e9266e41696943dd7b9b0c5fe001241a9c519ac7a8050c9c5487c8e6ce',
-        );
-        expect(ethUtil.bufferToHex(sig.s)).to.equal(
-            '0x4a1f3928d31059a69b0682f0c8c3942139117bdabe72876ebfeae844632ccdec',
-        );
+        expect(ethUtil.bufferToHex(sig.r)).to.equal('0x5a7f92e9266e41696943dd7b9b0c5fe001241a9c519ac7a8050c9c5487c8e6ce');
+        expect(ethUtil.bufferToHex(sig.s)).to.equal('0x4a1f3928d31059a69b0682f0c8c3942139117bdabe72876ebfeae844632ccdec');
     });
 
-    it('reference implementation throws when given arrays', () => {
+    it('should fail if given arrays', () => {
         const types = {
             Test: [{ name: 'from', type: 'uint256[4]' }],
         };
@@ -323,34 +311,36 @@ describe('comparison with reference implementation', () => {
         }
     });
 
-    it('reference implementation and eip712 resolve to the same struct encoding', () => {
-        const result = eip712.encodeStruct(typedData.primaryType, typedData.types);
-        const expected = encodeType(typedData.types, 'Mail');
+    describe('Reference Implementation and EIP712', async () => {
+        it('should resolve to the same struct encoding', () => {
+            const result = eip712.encodeStruct(typedData.primaryType, typedData.types);
+            const expected = encodeType(typedData.types, 'Mail');
 
-        expect(result).to.equal(expected.toString('hex'));
-    });
+            expect(result).to.equal(expected.toString('hex'));
+        });
 
-    it('reference implementation and eip712 resolve to same encoded message data', () => {
-        const result = eip712.encodeMessageData(typedData.types, typedData.primaryType, typedData.message);
-        const expected = ethUtil.bufferToHex(encodeData(typedData.types, typedData.primaryType, typedData.message));
-        expect(`0x${result}`).to.equal(expected);
-    });
+        it('should resolve to same encoded message data', () => {
+            const result = eip712.encodeMessageData(typedData.types, typedData.primaryType, typedData.message);
+            const expected = ethUtil.bufferToHex(encodeData(typedData.types, typedData.primaryType, typedData.message));
+            expect(`0x${result}`).to.equal(expected);
+        });
 
-    it('reference implementation and eip712 resolve to same encoded domain data', () => {
-        const result = eip712.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain);
-        const expected = ethUtil.bufferToHex(encodeData(typedData.types, 'EIP712Domain', typedData.domain));
-        expect(`0x${result}`).to.equal(expected);
-    });
+        it('should resolve to same encoded domain data', () => {
+            const result = eip712.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain);
+            const expected = ethUtil.bufferToHex(encodeData(typedData.types, 'EIP712Domain', typedData.domain));
+            expect(`0x${result}`).to.equal(expected);
+        });
 
-    it('reference implementation and eip712 resolve to same final message', () => {
-        const result = eip712.encodeTypedData(typedData);
-        const expected = ethUtil.bufferToHex(signHash(typedData));
-        expect(result).to.equal(expected);
-    });
+        it('should resolve to same final message', () => {
+            const result = eip712.encodeTypedData(typedData);
+            const expected = ethUtil.bufferToHex(signHash(typedData));
+            expect(result).to.equal(expected);
+        });
 
-    it('reference implementation and eip712 resolve to same final message for second set of typed data', () => {
-        const result = eip712.encodeTypedData(recursiveTypedData);
-        const expected = ethUtil.bufferToHex(signHash(recursiveTypedData));
-        expect(result).to.equal(expected);
+        it('should resolve to same final message for second set of typed data', () => {
+            const result = eip712.encodeTypedData(recursiveTypedData);
+            const expected = ethUtil.bufferToHex(signHash(recursiveTypedData));
+            expect(result).to.equal(expected);
+        });
     });
 });

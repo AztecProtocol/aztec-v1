@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./DividendComputationABIEncoder.sol";
+import "../../../../ACE/validators/dividendComputation/DividendComputationABIEncoder.sol";
 
 /**
  * @title Dividend computation ABI Encoder Test

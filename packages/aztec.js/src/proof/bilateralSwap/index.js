@@ -3,21 +3,20 @@
  *
  * @module bilateralSwap
  */
+const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const { padLeft, sha3 } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
 const crypto = require('crypto');
+const { padLeft, sha3 } = require('web3-utils');
 
 const bn128 = require('../../bn128');
-
-const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
+const verifier = require('./verifier');
 
 const bilateralSwap = {};
 bilateralSwap.verifier = verifier;
 
-const { customError } = utils.errors;
-const { errorTypes } = utils.constants;
+const { customError } = devUtils.errors;
+const { errorTypes } = devUtils.constants;
 
 const { inputCoder, outputCoder } = require('../../abiEncoder');
 
@@ -144,7 +143,7 @@ bilateralSwap.encodeBilateralSwapTransaction = ({ inputNotes, outputNotes, sende
 
     const proofData = inputCoder.bilateralSwap(proofDataRaw, challenge, noteOwners, [outputNotes[0], inputNotes[1]]);
 
-    const publicOwner = '0x0000000000000000000000000000000000000000';
+    const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
     const publicValue = 0;
 
     const expectedOutput = `0x${outputCoder

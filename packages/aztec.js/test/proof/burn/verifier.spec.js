@@ -19,8 +19,8 @@ const { errorTypes } = utils.constants;
 const { expect } = chai;
 
 describe('Burn proof verification tests', () => {
-    describe('success states', () => {
-        it('proof.constructProof creates a valid burn proof', () => {
+    describe('Success States', () => {
+        it('should construct a valid burn proof', () => {
             const newTotalBurned = 50;
             const oldTotalBurned = 30;
             const burnOne = 10;
@@ -37,7 +37,7 @@ describe('Burn proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates burn proof with 0 notes burned i.e. no notes are actually burned', () => {
+        it('should accept a burn proof with 0 notes burned i.e. no notes are actually burned', () => {
             const newTotalBurned = 50;
             const oldTotalBurned = 50;
 
@@ -53,7 +53,7 @@ describe('Burn proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates burn proof with large number of burned notes', () => {
+        it('should accept a burn proof with large number of burned notes', () => {
             const newTotalBurned = 100;
             const oldTotalBurned = 10;
 
@@ -69,7 +69,7 @@ describe('Burn proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates burning without any previous burned number of tokens', () => {
+        it('should burn without any previous burned number of tokens', () => {
             const newTotalBurned = 50;
             const oldTotalBurned = 0;
             const burnOne = 25;
@@ -87,8 +87,8 @@ describe('Burn proof verification tests', () => {
         });
     });
 
-    describe('failure states', () => {
-        it('will REJECT if points not on curve', () => {
+    describe('Failure States', () => {
+        it('should REJECT if points NOT on curve', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
             // we can construct 'proof' where all points and scalars are zero.
             // The challenge response will be correctly reconstructed, but the proof should still be invalid
@@ -124,7 +124,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if malformed challenge', () => {
+        it('should REJECT if malformed challenge', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalBurned = 50;
@@ -144,7 +144,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if notes do not balance', () => {
+        it('should REJECT if notes do NOT balance', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const oldTotalBurned = 30;
@@ -165,7 +165,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for random proof data', () => {
+        it('should REJECT for random proof data', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const proofData = [...Array(4)].map(() =>
@@ -179,7 +179,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if note value response is 0', () => {
+        it('should REJECT if note value response is 0', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalBurned = 50;
@@ -201,7 +201,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor is at infinity', () => {
+        it('should REJECT if blinding factor is at infinity', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalBurned = 50;
@@ -229,7 +229,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalBurned = 50;
@@ -262,7 +262,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if number of notes supplied is less than 2', () => {
+        it('should REJECT if number of notes supplied is less than 2', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const noteValue = 50;

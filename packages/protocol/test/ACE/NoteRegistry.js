@@ -15,13 +15,13 @@ const {
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
-const ACE = artifacts.require('./contracts/ACE/ACE');
-const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const ERC20BrokenTransferTest = artifacts.require('./contracts/ERC20/ERC20BrokenTransferTest');
-const ERC20BrokenTransferFromTest = artifacts.require('./contracts/ERC20/ERC20BrokenTransferFromTest');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
+const ACE = artifacts.require('./ACE');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const ERC20BrokenTransferTest = artifacts.require('./ERC20BrokenTransferTest');
+const ERC20BrokenTransferFromTest = artifacts.require('./ERC20BrokenTransferFromTest');
+const JoinSplit = artifacts.require('./JoinSplit');
 
-contract('Note Registry', (accounts) => {
+contract('NoteRegistry', (accounts) => {
     let ace;
     let aztecAccounts = [];
     let aztecJoinSplit;
@@ -128,7 +128,7 @@ contract('Note Registry', (accounts) => {
         });
     });
 
-    describe('success states', async () => {
+    describe('Success States', async () => {
         beforeEach(async () => {
             await ace.publicApprove(accounts[0], proofHashes[0], 10, { from: accounts[0] });
             await ace.publicApprove(accounts[0], proofHashes[1], 40, { from: accounts[1] });
@@ -277,7 +277,7 @@ contract('Note Registry', (accounts) => {
         });
     });
 
-    describe('failure states', async () => {
+    describe('Failure States', async () => {
         it('should fail to read a non-existent note', async () => {
             await truffleAssert.reverts(ace.getNote(accounts[1], notes[0].noteHash), 'expected note to exist');
         });

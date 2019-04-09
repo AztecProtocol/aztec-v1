@@ -5,7 +5,7 @@
  * @module sign
  */
 
-const { constants, proofs } = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const eip712 = require('./eip712');
 const secp256k1 = require('../secp256k1');
 
@@ -60,33 +60,6 @@ sign.signStructuredData = function signStructuredData(domain, schema, message, p
     const encodedTypedData = eip712.encodeTypedData(typedData);
     const signature = secp256k1.ecdsa.signMessage(encodedTypedData, privateKey);
     return { signature, encodedTypedData };
-};
-
-/**
- * Recover the Ethereum address of an EIP712 AZTEC note signature
- * @method recoverAddress
- * @param {string[]} note bytes32 array of AZTEC zero-knowledge proof note (indices 0 and 1 are not needed here)
- * @param {string} challenge AZTEC zero-knowledge proof challenge variable
- * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
- * @param {string} verifyingContract address of target contract
- * @param {string[]} signature ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
- * @returns {string} Ethereum address of signer
- */
-sign.recoverAddress = function recoverAddress(note, challenge, senderAddress, verifyingContract, signature) {
-    const messageBase = {
-        ...constants.eip712.JOIN_SPLIT_SIGNATURE,
-        domain: sign.generateAZTECDomainParams(verifyingContract),
-        message: {
-            proof: proofs.JOIN_SPLIT_PROOF,
-            note: [note[2], note[3], note[4], note[5]],
-            challenge,
-            sender: senderAddress,
-        },
-    };
-    const message = eip712.encodeTypedData(messageBase);
-    const publicKey = secp256k1.ecdsa.recoverPublicKey(message, signature[1], signature[2], signature[0]);
-    const address = secp256k1.ecdsa.accountFromPublicKey(publicKey);
-    return address;
 };
 
 module.exports = sign;

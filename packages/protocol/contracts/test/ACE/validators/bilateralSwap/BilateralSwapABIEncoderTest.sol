@@ -1,7 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./BilateralSwapABIEncoder.sol";
-
+import "../../../../ACE/validators/bilateralSwap/BilateralSwapABIEncoder.sol";
 
 /**
  * @title Bilateral Swap ABI Encoder Test

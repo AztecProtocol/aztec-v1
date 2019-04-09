@@ -16,18 +16,18 @@ const {
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
-const ACE = artifacts.require('./contracts/ACE/ACE');
-const ACETest = artifacts.require('./contracts/ACE/ACETest');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
-const AdjustSupply = artifacts.require('./contracts/ACE/validators/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupplyInterface');
+const ACE = artifacts.require('./ACE');
+const ACETest = artifacts.require('./ACETest');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
+const AdjustSupply = artifacts.require('./validators/AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 
 contract('ACE', (accounts) => {
-    describe('initialization', () => {
+    describe('Initialization', () => {
         let ace;
 
         beforeEach(async () => {
@@ -55,7 +55,7 @@ contract('ACE', (accounts) => {
         });
     });
 
-    describe('runtime', () => {
+    describe('Runtime', () => {
         let aztecAccounts = [];
         let ace;
         let aztecJoinSplit;
@@ -97,7 +97,7 @@ contract('ACE', (accounts) => {
             validatedProofHash = keccak256(`0x${hashData}`);
         });
 
-        describe('success states', () => {
+        describe('Success States', () => {
             it('should read the validator address', async () => {
                 const validatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
                 expect(validatorAddress).to.equal(aztecJoinSplit.address);
@@ -152,7 +152,7 @@ contract('ACE', (accounts) => {
             });
         });
 
-        describe('failure states', async () => {
+        describe('Failure States', async () => {
             /* eslint-disable no-unused-vars */
             it('should fail to read a validator address', async () => {
                 await truffleAssert.reverts(ace.getValidatorAddress(BOGUS_PROOF), 'expected the validator address to exist');
@@ -215,16 +215,6 @@ contract('ACE', (accounts) => {
                 );
             });
 
-            it('should invalidate a previously validated join-split proof', async () => {
-                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-                await ace.invalidateProof(JOIN_SPLIT_PROOF);
-
-                await truffleAssert.reverts(
-                    ace.validateProofByHash(JOIN_SPLIT_PROOF, validatedProofHash, accounts[0]),
-                    'proof id has been invalidated',
-                );
-            });
-
             it('should not invalidate proof if not owner', async () => {
                 await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
 
@@ -236,6 +226,16 @@ contract('ACE', (accounts) => {
                 await truffleAssert.reverts(
                     ace.clearProofByHashes(JOIN_SPLIT_PROOF, [padLeft('0x0', 64)]),
                     'expected no empty proof hash',
+                );
+            });
+
+            it('should not validate a previously validated join-split proof', async () => {
+                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+                await ace.invalidateProof(JOIN_SPLIT_PROOF);
+
+                await truffleAssert.reverts(
+                    ace.validateProofByHash(JOIN_SPLIT_PROOF, validatedProofHash, accounts[0]),
+                    'proof id has been invalidated',
                 );
             });
 

@@ -18,7 +18,7 @@ contract BilateralSwap {
 
     /**
      * @dev AZTECBilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
-     * If the proof is not valid, the transaction will throw.
+     * If the proof is not valid, the transaction throws.
      * @notice See BilateralSwapInterface for how method calls should be constructed.
      * AZTECBilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
      **/
@@ -196,7 +196,7 @@ contract BilateralSwap {
             /**
              * @dev check that this note's points are on the altbn128 curve(y^2 = x^3 + 3)
              * and that signatures 'k' and 'a' are modulo the order of the curve. Transaction
-             * will throw if this is not the case.
+             * throws if this is not the case.
              * @param note the calldata loation of the note
              **/
             function validateCommitment(note, k, a) {

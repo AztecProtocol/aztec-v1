@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 /**
- * @title Library to ABI encode the output of a join split proof verification operation
+ * @title Library to ABI encode the output of a join-split proof verification operation
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.

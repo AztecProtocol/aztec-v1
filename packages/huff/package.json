@@ -41,6 +41,6 @@
   },
   "scripts": {
     "lint": "eslint --ignore-path ../../.eslintignore .",
-    "test": "mocha ./src/ --trace-warnings --exit --colors --recursive --reporter spec"
+    "test": "mocha ./src/ --bail --colors --exit --recursive --reporter spec --trace-warnings"
   }
 }

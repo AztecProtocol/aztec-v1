@@ -29,9 +29,9 @@ function fakeSignature() {
     return [`0x${padLeft(randomBytes(1), 64)}`, `0x${randomBytes(32)}`, `0x${randomBytes(32)}`];
 }
 
-describe('inputCoder tests', () => {
-    describe('General functionality: metadata encoding, signature encoding...', () => {
-        it('encodeMetadata works', () => {
+describe('abiEncoder.encoderFactory', () => {
+    describe('General Functionality', () => {
+        it('should validate that encodeMetadata works', () => {
             // Setup
             const numNotes = 4;
             const accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -58,7 +58,7 @@ describe('inputCoder tests', () => {
             }
         });
 
-        it('encodeInputSignatures works', () => {
+        it('should validate that encodeInputSignatures works', () => {
             // Setup
             const input = [fakeSignature(), fakeSignature(), fakeSignature()];
             const { data, length } = abiEncoder.encoderFactory.encodeInputSignatures(input);
@@ -75,8 +75,8 @@ describe('inputCoder tests', () => {
         });
     });
 
-    describe('bilateralSwap encoderFactory tests', () => {
-        it('bilateralSwap is correctly formatted', () => {
+    describe('Bilateral Swap', () => {
+        it('should format bilateralSwap properly', () => {
             // Setup
             const numNotes = 4;
             const accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -124,8 +124,8 @@ describe('inputCoder tests', () => {
         });
     });
 
-    describe('joinSplit tests work', () => {
-        it('joinSplit is correctly formatted', () => {
+    describe('Join-Split', () => {
+        it('should format joinSplit properly', () => {
             // Setup
             const accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             const notes = accounts.map(({ publicKey }) => {
@@ -142,11 +142,11 @@ describe('inputCoder tests', () => {
             const { proofData, challenge } = joinSplitProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(contractAddress, constants.AZTEC_TEST_DOMAIN_PARAMS);
+                const domain = sign.generateAZTECDomainParams(contractAddress, constants.ACE_DOMAIN_PARAMS);
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: proofs.JOIN_SPLIT_PROOF,
-                    note: proofData[index].slice(2, 6),
+                    noteHash: inputNote.noteHash,
                     challenge,
                     sender: senderAddress,
                 };
@@ -216,8 +216,8 @@ describe('inputCoder tests', () => {
         });
     });
 
-    describe('mint tests work', () => {
-        it('mint is correctly formatted', () => {
+    describe('Mint', () => {
+        it('should format mint properly', () => {
             // Setup
             let accounts = [];
             let notes = [];
@@ -277,8 +277,8 @@ describe('inputCoder tests', () => {
         });
     });
 
-    describe('burn tests work', () => {
-        it('burn is correctly formatted', () => {
+    describe('Burn', () => {
+        it('should format burn properly', () => {
             // Setup
             let accounts = [];
             let notes = [];
@@ -338,8 +338,8 @@ describe('inputCoder tests', () => {
         });
     });
 
-    describe('dividend computation tests work', () => {
-        it('dividendComputation is correctly formatted', () => {
+    describe('Dividend Computation', () => {
+        it('should format dividendComputation properly', () => {
             // Setup
             let accounts = [];
             let notes = [];

@@ -12,7 +12,6 @@ const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 
 const { errorTypes } = utils.constants;
-
 const { expect } = chai;
 
 function generateNoteValue() {
@@ -50,8 +49,8 @@ function validateGroupElement(xHex, yHex) {
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
 }
 
-describe('AZTEC proof construction tests', () => {
-    it('proof.constructProof creates a proof with well-formed outputs', () => {
+describe('Join-Split Proofs', () => {
+    it('should construct a proof with well-formed outputs', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
@@ -73,7 +72,7 @@ describe('AZTEC proof construction tests', () => {
         expect(new BN(proofData[proofData.length - 1][0].slice(2), 16).eq(kPublic)).to.equal(true);
     });
 
-    it('proof.constructProof will throw if kPublic is malformed', () => {
+    it('should fail to construct a proof with malformed kPublic', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
@@ -87,7 +86,7 @@ describe('AZTEC proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if m is malformed', () => {
+    it('should fail to construct a proof with m malformed', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -100,7 +99,7 @@ describe('AZTEC proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if point not on curve', () => {
+    it('should fail to construct a proof if point NOT on curve', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -113,7 +112,7 @@ describe('AZTEC proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if point at infinity', () => {
+    it('should fail to construct a proof if point at infinity', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -128,7 +127,7 @@ describe('AZTEC proof construction tests', () => {
         expect(message).to.equal(errorTypes.POINT_AT_INFINITY);
     });
 
-    it('proof.constructProof will throw if viewing key response is 0', () => {
+    it('should fail to construct a proof if viewing key response is 0', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
@@ -141,7 +140,7 @@ describe('AZTEC proof construction tests', () => {
         }
     });
 
-    it('proof.constructProof will throw if value > K_MAX', () => {
+    it('should fail to construct a proof if value > K_MAX', () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);

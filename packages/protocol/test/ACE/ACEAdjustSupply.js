@@ -14,21 +14,21 @@ const {
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
-const ACE = artifacts.require('./contracts/ACE/ACE');
-const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/interfaces/JoinSplitInterface');
-const AdjustSupply = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./contracts/interfaces/AdjustSupplyInterface');
-const BilateralSwap = artifacts.require('./contracts/ACE/validators/adjustSupply/BilateralSwap');
-const BilateralSwapInterface = artifacts.require('./contracts/interfaces/BilateralSwapInterface');
+const ACE = artifacts.require('./ACE');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
+const AdjustSupply = artifacts.require('./AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
+const BilateralSwap = artifacts.require('./BilateralSwap');
+const BilateralSwapInterface = artifacts.require('./BilateralSwapInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 BilateralSwap.abi = BilateralSwapInterface.abi;
 
-contract('ACE mint and burn functionality', (accounts) => {
-    describe('success states', () => {
+contract('ACE Mint and Burn Functionality', (accounts) => {
+    describe('Success States', () => {
         let ace;
         let zeroNote;
         let aztecAdjustSupply;
@@ -70,7 +70,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             });
         });
 
-        it('successful call to the mint function', async () => {
+        it('should mint confidential assets', async () => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
@@ -116,7 +116,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
-        it('confirm validateProof() succeeds for valid MINT category proof', async () => {
+        it('should validate mint proof', async () => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
@@ -139,7 +139,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(aceReceipt.status).to.equal(true);
         });
 
-        it('confirm validateProof() succeeds for valid BURN category proof', async () => {
+        it('should validate burn proof', async () => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
@@ -175,7 +175,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(burnReceipt.status).to.equal(true);
         });
 
-        it('confirm validateProof() succeeds for valid UTILITY category proof', async () => {
+        it('should validate utility proof', async () => {
             // Using a bilateral swap proof
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
@@ -199,7 +199,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(utilityReceipt.status).to.equal(true);
         });
 
-        it('successful mint and burn operation', async () => {
+        it('should mint and burn confidential assets', async () => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
@@ -247,7 +247,7 @@ contract('ACE mint and burn functionality', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         let ace;
         let zeroNote;
         let aztecAdjustSupply;
@@ -273,7 +273,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             zeroNote = note.createZeroValueNote();
         });
 
-        it('should validate failure when attempting to transfer greater minted balance than linked token balance', async () => {
+        it('should fail if minted balance is greater than linked token balance', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
             const notes = aztecAccounts.map(({ publicKey }, i) => {
@@ -344,7 +344,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
         });
 
-        it('should validate failure when attempting to mint on an asset that is not mintable', async () => {
+        it('should fail if asset is not mintable', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
             const notes = aztecAccounts.map(({ publicKey }, i) => {
@@ -375,7 +375,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await truffleAssert.reverts(ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]), 'this asset is not mintable');
         });
 
-        it('should validate failure if trying to convert value when the asset is NOT convertible', async () => {
+        it('should fail when converting value and asset is NOT convertible', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
             const notes = aztecAccounts.map(({ publicKey }, i) => {
@@ -447,7 +447,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             );
         });
 
-        it('should validate failure if user has not approved ACE to extract tokens', async () => {
+        it('should fail if ACE has not been approved to extract tokens', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
             const notes = aztecAccounts.map(({ publicKey }, i) => {
@@ -516,7 +516,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
         });
 
-        it('confirm that validateProof does NOT update validatedProofs for a proof that is not BALANCED', async () => {
+        it('should not update the validatedProofs mapping if proof is not balanced', async () => {
             // MINT and BURN proofs are not in the category BALANCED. So will use a MINT proof to demonstrate this
             // failure case
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
@@ -542,7 +542,6 @@ contract('ACE mint and burn functionality', (accounts) => {
             const canConvert = true;
 
             erc20 = await ERC20Mintable.new();
-
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
@@ -559,7 +558,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             );
         });
 
-        it('confirm validateProof() does not store proofHash in validatedProofs for MINT_PROOF', async () => {
+        it('should not update the validatedProofs mapping for mint proofs', async () => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
@@ -596,7 +595,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(aceReceipt.status).to.equal(true);
         });
 
-        it('confirm validateProof() does not store proofHash in validatedProofs for BURN_PROOF', async () => {
+        it('should not update the validatedProofs mapping for burn proofs', async () => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20];
@@ -645,7 +644,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(burnReceipt.status).to.equal(true);
         });
 
-        it('confirm validateProof() does not store proofHash in validatedProofs for UTILITY_PROOF', async () => {
+        it('should not update the validatedProofs mapping for utility proofs', async () => {
             // Using a bilateral swap proof
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
@@ -682,7 +681,7 @@ contract('ACE mint and burn functionality', (accounts) => {
             expect(utilityReceipt.status).to.equal(true);
         });
 
-        it('confirm updateNoteRegistry() fails when two note registries are linked to the same ERC20 token', async () => {
+        it('should fail if two note registries are linked to the same ERC20 token', async () => {
             const scalingFactor = new BN(10);
             const tokensTransferred = new BN(50);
 
