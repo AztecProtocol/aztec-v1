@@ -1,4 +1,4 @@
-# Aztec.js
+## Aztec.js
 
 This library contains methods required to construct AZTEC zero-knowledge proofs, and to create the required [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) signatures in order to spend AZTEC notes.
 
@@ -11,7 +11,7 @@ This repository is under active development, with our interfaces and smart contr
 Install the module:
 
 ```bash
-$ npm install aztec.js
+$ yarn add aztec.js
 ```
 
 Then import it in your project:
@@ -26,7 +26,7 @@ To see how this library can be used to issue AZTEC confidential transactions and
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../.github/CONTRIBUTING.md) before getting started.
 
 ### Notation
 
@@ -35,31 +35,31 @@ Unless stated otherwise, public keys, private keys and addresses are encoded as 
 ### Install Modules
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ### Build
 
 ```bash
-$ npm run build
+$ yarn build
 ```
 
 ### Clean
 
 ```bash
-$ npm run clean
+$ yarn clean
 ```
 
 ### Lint
 
 ```bash
-$ npm run lint
+$ yarn lint
 ```
 
 ### Test
 
 ```bash
-$ npm run test
+$ yarn test
 ```
 
 ## Example

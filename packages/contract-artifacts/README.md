@@ -1,4 +1,4 @@
-# Contract Artifacts
+## Contract Artifacts
 
 Smart contract compilation artifacts for the latest version of AZTEC.
 
@@ -7,7 +7,7 @@ Smart contract compilation artifacts for the latest version of AZTEC.
 Install the module:
 
 ```bash
-$ npm install @aztec/contract-artifacts --global
+$ yarn add @aztec/contract-artifacts
 ```
 
 And import it in your project:
@@ -20,22 +20,22 @@ const aztecContractArtifacts = require('@aztec/contract-artifacts');
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../.github/CONTRIBUTING.md) before getting started.
 
 ### Install Modules
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ### Build
 
 ```bash
-$ npm run build
+$ yarn build
 ```
 
 ### Clean
 
 ```bash
-$ npm run clean
+$ yarn clean
 ```

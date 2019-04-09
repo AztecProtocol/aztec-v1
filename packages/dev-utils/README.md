@@ -7,7 +7,7 @@ Dev utils to be shared across AZTEC projects and packages.
 Install the module:
 
 ```bash
-$ npm install @aztec/dev-utils --global
+$ yarn add @aztec/dev-utils
 ```
 
 And import it in your project:
@@ -20,22 +20,22 @@ const aztecDevUtils = require('@aztec/dev-utils');
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../.github/CONTRIBUTING.md) before getting started.
 
 ### Install Modules
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ### Build
 
 ```bash
-$ npm run build
+$ yarn build
 ```
 
 ### Clean
 
 ```bash
-$ npm run clean
+$ yarn clean
 ```
