@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./ZkAssetOwnable.sol";
+import "../../ERC1724/ZkAssetOwnable.sol";
 
 /**
  * @title ZkAssetOwnableTest

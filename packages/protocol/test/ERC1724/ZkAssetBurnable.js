@@ -14,20 +14,20 @@ const {
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
-const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const ACE = artifacts.require('./contracts/ACE/ACE');
-const AdjustSupply = artifacts.require('./contracts/ACE/validators/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/AdjustSupplyInterface');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplit');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const ACE = artifacts.require('./ACE');
+const AdjustSupply = artifacts.require('./AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplit');
 
-const ZkAssetBurnable = artifacts.require('./contracts/ZkAsset/ZkAssetBurnable');
+const ZkAssetBurnable = artifacts.require('./ZkAssetBurnable');
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAssetBurnable', (accounts) => {
-    describe('success states', () => {
+    describe('Success States', () => {
         let aztecAccounts = [];
         let notes = [];
         let ace;
@@ -99,7 +99,7 @@ contract('ZkAssetBurnable', (accounts) => {
             await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
         });
 
-        it('transfer public value in, then burn it', async () => {
+        it('should transfer public value in, then burn it', async () => {
             const linkedTokenInitialBalance = (await erc20.balanceOf(accounts[0])).toNumber();
             const aceInitialBalance = (await erc20.balanceOf(ace.address)).toNumber();
 
@@ -125,14 +125,14 @@ contract('ZkAssetBurnable', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         let ace;
-        const proofs = [];
-        let erc20;
-        let zkAssetBurnable;
-        let scalingFactor;
         let aztecAdjustSupply;
         let aztecJoinSplit;
+        let erc20;
+        const proofs = [];
+        let scalingFactor;
+        let zkAssetBurnable;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -147,7 +147,7 @@ contract('ZkAssetBurnable', (accounts) => {
             scalingFactor = new BN(1);
         });
 
-        it('validates failure if burn attempted when flag set to false', async () => {
+        it('should fail if flag set to FALSE', async () => {
             const canAdjustSupply = false;
             const canConvert = true;
 
@@ -171,7 +171,6 @@ contract('ZkAssetBurnable', (accounts) => {
             const tokensTransferred = new BN(1000);
 
             erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
-
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
@@ -183,7 +182,6 @@ contract('ZkAssetBurnable', (accounts) => {
                 kPublic,
                 validatorAddress: aztecJoinSplit.address,
             });
-
             const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
             const proofHash = outputCoder.hashProofOutput(proofOutput);
 
@@ -205,7 +203,7 @@ contract('ZkAssetBurnable', (accounts) => {
             );
         });
 
-        it('validate failure if msg.sender is not owner', async () => {
+        it('should fail if msg.sender is not owner', async () => {
             const canAdjustSupply = true;
             const canConvert = true;
 
@@ -264,7 +262,7 @@ contract('ZkAssetBurnable', (accounts) => {
             );
         });
 
-        it('validate failure if ace.burn throws', async () => {
+        it('should fail if ace.burn fails', async () => {
             const canAdjustSupply = true;
             const canConvert = true;
 

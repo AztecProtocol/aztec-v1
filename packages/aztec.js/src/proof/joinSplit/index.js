@@ -221,7 +221,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
 };
 
 /**
- * Encode a join split transaction
+ * Encode a join-split transaction
  *
  * @method encodeJoinSplitTransaction
  * @memberof module:joinSplit

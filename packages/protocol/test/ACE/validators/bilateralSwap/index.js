@@ -16,14 +16,14 @@ const {
 const { constants } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const BilateralSwap = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwap');
-const BilateralSwapInterface = artifacts.require('contracts/ACE/validators/bilateralSwap/BilateralSwapInterface');
+const BilateralSwap = artifacts.require('./BilateralSwap');
+const BilateralSwapInterface = artifacts.require('./BilateralSwapInterface');
 
 BilateralSwap.abi = BilateralSwapInterface.abi;
 
 contract('Bilateral Swap', (accounts) => {
     let bilateralSwapContract;
-    describe('success states', () => {
+    describe('Success States', () => {
         let bilateralSwapAccounts = [];
 
         beforeEach(async () => {
@@ -34,7 +34,7 @@ contract('Bilateral Swap', (accounts) => {
             bilateralSwapAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
         });
 
-        it('successfully validate output encoding for bilateral proof in zero-knowledge', async () => {
+        it('should validate the output encoding for bilateral proof in zero-knowledge', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -75,7 +75,7 @@ contract('Bilateral Swap', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate a proof that uses notes worth 0', async () => {
+        it('should validate a proof that uses notes worth 0', async () => {
             const noteValues = [0, 20, 0, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -97,7 +97,7 @@ contract('Bilateral Swap', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('Validate success if challenge has GROUP_MODULUS added to it', async () => {
+        it('should validate that challenge has GROUP_MODULUS added to it', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -125,7 +125,7 @@ contract('Bilateral Swap', (accounts) => {
                 gas: 4000000,
             });
 
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = 0;
 
             const expectedOutput = `0x${outputCoder
@@ -151,7 +151,7 @@ contract('Bilateral Swap', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         let bilateralSwapAccounts = [];
 
         beforeEach(async () => {
@@ -162,7 +162,7 @@ contract('Bilateral Swap', (accounts) => {
             bilateralSwapAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
         });
 
-        it('Validate failure for incorrect input note values (k1 != k3, k2 != k4)', async () => {
+        it('should fail for incorrect input note values (k1 != k3, k2 != k4)', async () => {
             const noteValues = [10, 50, 20, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -184,7 +184,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure for using random proof data', async () => {
+        it('should fail for random proof data', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -211,7 +211,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure when points not on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
@@ -230,7 +230,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
+        it('should fail if scalars are NOT mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -262,7 +262,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('validate failure when scalars are zero', async () => {
+        it('should fail if scalars are zero', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -304,7 +304,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('validate failure when proof data not correctly encoded', async () => {
+        it('should fail if proof data NOT correctly encoded', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -350,7 +350,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('validate failure when incorrect H_X, H_Y in CRS is supplied)', async () => {
+        it('should fail for incorrect H_X, H_Y in CRS)', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -386,7 +386,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure for using a fake challenge', async () => {
+        it('should fail for a fake challenge', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -411,7 +411,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure when sender address NOT integrated into challenge variable', async () => {
+        it('should fail if sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -445,7 +445,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure if a group element (blinding factor) resolves to the point at infinity', async () => {
+        it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -478,7 +478,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure when initial commitments NOT integrated into challenge variable', async () => {
+        it('should fail if initial commitments NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -512,7 +512,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure when blinding factors NOT integrated into challenge variable', async () => {
+        it('should fail if blinding factors NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -546,7 +546,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure for number of notes less than minimum number required - using 2 instead of 4', async () => {
+        it('should fail for number of notes less than minimum number required - using 2 instead of 4', async () => {
             const noteValues = [20, 20];
             const numNotes = 2;
 
@@ -574,7 +574,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure for number of notes less than minimum number required - using 3 instead of 4', async () => {
+        it('should fail for number of notes less than minimum number required - using 3 instead of 4', async () => {
             const noteValues = [10, 10, 10];
             const numNotes = 3;
 
@@ -602,7 +602,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('validate failure for random note values between [0,...,K_MAX]', async () => {
+        it('should fail for random note values between [0,...,K_MAX]', async () => {
             const noteValues = [
                 proofUtils.generateNoteValue(),
                 proofUtils.generateNoteValue(),
@@ -629,7 +629,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure for incorrect number of input notes', async () => {
+        it('should fail for incorrect number of input notes', async () => {
             const noteValues = [10, 20, 30, 10, 20, 30];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -650,7 +650,7 @@ contract('Bilateral Swap', (accounts) => {
             );
         });
 
-        it('Validate failure for a bid note of zero value that does not satisfy proof relationship', async () => {
+        it('should fail for a bid note of zero value that does NOT satisfy proof relationship', async () => {
             const noteValues = [0, 20, 10, 20];
 
             const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];

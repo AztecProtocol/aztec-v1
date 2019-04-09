@@ -2,9 +2,9 @@
 // ### External Dependencies
 const BN = require('bn.js');
 const crypto = require('crypto');
+const sinon = require('sinon');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, sha3 } = require('web3-utils');
-const sinon = require('sinon');
 
 // ### Internal Dependencies
 const {
@@ -20,14 +20,14 @@ const { constants } = require('@aztec/dev-utils');
 const Keccak = keccak;
 
 // ### Artifacts
-const dividend = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputation');
-const dividendInterface = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputationInterface');
+const dividend = artifacts.require('./DividendComputation');
+const dividendInterface = artifacts.require('./DividendComputationInterface');
 
 dividend.abi = dividendInterface.abi;
 
 contract('Dividend Computation', (accounts) => {
     let dividendContract;
-    describe('success states', () => {
+    describe('Success States', () => {
         let dividendAccounts = [];
 
         beforeEach(async () => {
@@ -37,7 +37,7 @@ contract('Dividend Computation', (accounts) => {
             dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
         });
 
-        it('successfully validates output coding of AZTEC dividend computation zero-knowledge proof', async () => {
+        it('should validate output coding of AZTEC dividend computation zero-knowledge proof', async () => {
             const noteValues = [90, 4, 50];
             const za = 100;
             const zb = 5;
@@ -54,7 +54,7 @@ contract('Dividend Computation', (accounts) => {
                 senderAddress: accounts[0],
             });
 
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
 
             const result = await dividendContract.validateDividendComputation(proofData, accounts[0], constants.CRS, {
                 from: accounts[0],
@@ -82,7 +82,7 @@ contract('Dividend Computation', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('Validate success if challenge has GROUP_MODULUS added to it', async () => {
+        it('should validate that challenge has GROUP_MODULUS added to it', async () => {
             const noteValues = [90, 4, 50];
             const za = 100;
             const zb = 5;
@@ -121,7 +121,7 @@ contract('Dividend Computation', (accounts) => {
                 outputNotes,
             );
 
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = 0;
 
             const expectedOutput = `0x${outputCoder
@@ -145,12 +145,12 @@ contract('Dividend Computation', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         beforeEach(async () => {
             dividendContract = await dividend.new(accounts[0]);
         });
 
-        it('validate failure for residual commitment message that does not satisfy proof relation', async () => {
+        it('should fail for residual commitment message that does NOT satisfy proof relation', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 3, 50];
@@ -179,7 +179,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validates failure for random proof data', async () => {
+        it('should fail for random proof data', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -219,7 +219,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure when points not on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const za = 100;
             const zb = 5;
 
@@ -242,7 +242,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
+        it('should fail if scalars are NOT mod(GROUP_MODULUS)', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -289,7 +289,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validate failure when group element (blinding factor) resolves to infinity', async () => {
+        it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -337,7 +337,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validate failure when scalars are zero', async () => {
+        it('should fail if scalars are zero', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -394,7 +394,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validate failure when proof data not correctly encoded', async () => {
+        it('should fail if proof data NOT correctly encoded', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -451,7 +451,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validate failure when incorrect H_X, H_Y in CRS is supplied)', async () => {
+        it('should fail for incorrect H_X, H_Y in CRS', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -493,7 +493,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validates failure when using a fake challenge', async () => {
+        it('should fail for a fake challenge', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -525,7 +525,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure when sender address NOT integrated into challenge variable', async () => {
+        it('should fail if sender address NOT integrated into challenge variable', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -589,7 +589,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure when za NOT integrated into challenge variable', async () => {
+        it('should fail when za NOT integrated into challenge variable', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -653,7 +653,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure when zb NOT integrated into challenge variable', async () => {
+        it('should fail if zb NOT integrated into challenge variable', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -716,7 +716,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure when initial commitments NOT integrated into challenge variable', async () => {
+        it('should fail if initial commitments NOT integrated into challenge variable', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -779,7 +779,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure when blinding factors NOT integrated into challenge variable', async () => {
+        it('should fail if blinding factors NOT integrated into challenge variable', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -842,7 +842,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('Validate failure for number of notes less than minimum number required - using 2 instead of 4', async () => {
+        it('should fail for number of notes less than minimum number required - using 2 instead of 4', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4];
@@ -894,7 +894,7 @@ contract('Dividend Computation', (accounts) => {
             checkNumNotes.restore();
         });
 
-        it('validates failure for zero input note value', async () => {
+        it('should fail for zero input note value', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [0, 4, 50];
@@ -923,7 +923,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validates failure for zero output note value', async () => {
+        it('should fail for zero output note value', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 0];
@@ -952,7 +952,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validates failure for zero residual note value', async () => {
+        it('should fail for zero residual note value', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 0, 50];
@@ -981,7 +981,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validates failure for z_a > kMax', async () => {
+        it('should fail for for z_a > kMax', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];
@@ -1012,7 +1012,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('validates failure for z_b > kMax', async () => {
+        it('should fail for z_b > kMax', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];

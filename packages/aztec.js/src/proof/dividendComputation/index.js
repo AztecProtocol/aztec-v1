@@ -4,20 +4,20 @@
  * @module dividendComputation
  */
 
+const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
 
-const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
-const verifier = require('./verifier');
+const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
+const verifier = require('./verifier');
 
 const { inputCoder, outputCoder } = require('../../abiEncoder');
 
 const { groupReduction } = bn128;
-const { customError } = utils.errors;
-const { errorTypes } = utils.constants;
+const { customError } = devUtils.errors;
+const { errorTypes } = devUtils.constants;
 
 const dividendComputation = {};
 dividendComputation.verifier = verifier;
@@ -198,7 +198,7 @@ dividendComputation.encodeDividendComputationTransaction = ({ inputNotes, output
 
     const inputOwners = inputNotes.map((m) => m.owner);
     const outputOwners = outputNotes.map((n) => n.owner);
-    const publicOwner = '0x0000000000000000000000000000000000000000';
+    const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
     const publicValue = 0;
 
     const proofDataRawFormatted = [proofDataRaw.slice(0, 6)].concat([proofDataRaw.slice(6, 12), proofDataRaw.slice(12, 18)]);

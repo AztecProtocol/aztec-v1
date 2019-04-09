@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./ERC20Mintable.sol";
+import "../../ERC20/ERC20Mintable.sol";
 
 /**
  * @title ERC20BrokenTransferTest

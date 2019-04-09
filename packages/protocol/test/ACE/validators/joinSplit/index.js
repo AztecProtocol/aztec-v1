@@ -23,15 +23,15 @@ const {
 
 const Keccak = keccak;
 // ### Artifacts
-const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('JoinSplit', (accounts) => {
     let joinSplitContract;
     // Creating a collection of tests that should pass
-    describe('success states', () => {
+    describe('Success States', () => {
         let aztecAccounts = [];
         let notes = [];
         beforeEach(async () => {
@@ -45,7 +45,7 @@ contract('JoinSplit', (accounts) => {
             ];
         });
 
-        it('successfully validates encoding of an AZTEC JOIN-SPLIT zero-knowledge proof', async () => {
+        it('should validate encoding of a JOIN-SPLIT zero-knowledge proof', async () => {
             const inputNotes = notes.slice(2, 4);
             const outputNotes = notes.slice(0, 2);
             const kPublic = 40;
@@ -90,7 +90,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validates proof where kPublic > 0 and kPublic < GROUP_MODULUS/2', async () => {
+        it('should validate proof where kPublic > 0 and kPublic < GROUP_MODULUS/2', async () => {
             const inputNotes = notes.slice(2, 5);
             const outputNotes = notes.slice(0, 2);
             const kPublic = 80;
@@ -113,7 +113,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validates proof where kPublic > GROUP_MODULUS/2', async () => {
+        it('should validate proof where kPublic > GROUP_MODULUS/2', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = -40;
@@ -138,7 +138,7 @@ contract('JoinSplit', (accounts) => {
             expect(decoded[0].publicValue).to.equal(-40);
         });
 
-        it('validates that large numbers of input/output notes work', async () => {
+        it('should validate that large numbers of input/output notes work', async () => {
             const inputNotes = notes.slice(0, 10);
             const outputNotes = notes.slice(10, 20);
             const kPublic = 0;
@@ -162,7 +162,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate that zero quantity of input notes works', async () => {
+        it('should accept zero number of input notes', async () => {
             const outputNotes = notes.slice(0, 10);
             const kPublic = -450;
             const publicOwner = aztecAccounts[0].address;
@@ -185,7 +185,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate that zero quantity of output notes works', async () => {
+        it('should accept zero number of output notes', async () => {
             const inputNotes = notes.slice(0, 10);
             const kPublic = 450;
             const publicOwner = aztecAccounts[0].address;
@@ -208,7 +208,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate that input notes of zero value work', async () => {
+        it('should accept input notes of zero value', async () => {
             const inputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
             const outputNotes = notes.slice(0, 2);
             const kPublic = -10;
@@ -232,7 +232,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate that output notes of zero value work', async () => {
+        it('should accept output notes of zero value', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
             const kPublic = 10;
@@ -256,7 +256,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate the minimum number of notes possible (one input, one output) works', async () => {
+        it('should accept the minimum number of notes possible (one input, one output)', async () => {
             const inputNotes = notes.slice(0, 1);
 
             const outputNotes = [note.create(aztecAccounts[0].publicKey, 0)];
@@ -282,7 +282,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('Validate success if challenge has GROUP_MODULUS added to it', async () => {
+        it('should validate that challenge has GROUP_MODULUS added to it', async () => {
             const inputNotes = notes.slice(0, 2);
             const inputNoteOwners = aztecAccounts.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -351,7 +351,7 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate successful recovery of note owner', async () => {
+        it('should recover the note owner', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
@@ -429,14 +429,14 @@ contract('JoinSplit', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         beforeEach(async () => {
             joinSplitContract = await JoinSplit.new({
                 from: accounts[0],
             });
         });
 
-        it('validates failure when using a fake challenge', async () => {
+        it('should fail for a fake challenge', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
 
             const notes = [
@@ -469,7 +469,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(fakeProofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validates failure for random proof data', async () => {
+        it('should fail for random proof data', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
 
             const notes = [
@@ -527,7 +527,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validates failure for fake signature', async () => {
+        it('should fail for fake signature', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
@@ -586,7 +586,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure if scalars are not mod(GROUP_MODULUS)', async () => {
+        it('should fail if scalars are NOT mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
@@ -649,7 +649,7 @@ contract('JoinSplit', (accounts) => {
             );
         });
 
-        it('Validate failure when kPublic NOT integrated into challenge variable', async () => {
+        it('should fail if kPublic NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -726,7 +726,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validate failure when EIP712 signatures use incorrect domain params (so domain hash incorrect)', async () => {
+        it('should fail if EIP712 signatures use incorrect domain params (so domain hash is NOT correct)', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
@@ -788,7 +788,8 @@ contract('JoinSplit', (accounts) => {
 
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
-        it('Validate failure when publicOwner NOT integrated into challenge variable', async () => {
+
+        it('should fail if publicOwner NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -866,7 +867,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when m NOT integrated into challenge variable', async () => {
+        it('should fail if m NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -945,7 +946,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validate failure for group element (blinding factor) resolving to infinity', async () => {
+        it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -1008,7 +1009,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validate failure when scalars are zero', async () => {
+        it('should fail if scalars are zero', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
@@ -1079,7 +1080,7 @@ contract('JoinSplit', (accounts) => {
             );
         });
 
-        it('validate failure when proof data not correctly encoded', async () => {
+        it('should fail if proof data NOT correctly encoded', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
@@ -1151,7 +1152,7 @@ contract('JoinSplit', (accounts) => {
             );
         });
 
-        it('validate failure when incorrect H_X, H_Y in CRS is supplied', async () => {
+        it('should fail for incorrect H_X, H_Y in CRS', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
@@ -1194,7 +1195,7 @@ contract('JoinSplit', (accounts) => {
             );
         });
 
-        it('Validate failure when sender address NOT integrated into challenge variable', async () => {
+        it('should fail if sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -1273,7 +1274,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when commitments NOT integrated into challenge variable', async () => {
+        it('should fail if commitments NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -1351,7 +1352,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when blinding factors NOT integrated into challenge variable', async () => {
+        it('should fail if blinding factors NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -1429,7 +1430,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure for no notes', async () => {
+        it('should fail for no notes', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const inputNotes = [];
             const outputNotes = [];
@@ -1454,7 +1455,7 @@ contract('JoinSplit', (accounts) => {
             );
         });
 
-        it('validate failure for zero input note value', async () => {
+        it('should fail for zero input note value', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [0, 0, 5, 5];
             const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -1507,7 +1508,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validate failure for zero output note value', async () => {
+        it('should fail for zero output note value', async () => {
             const noteValues = [10, 10, 0, 0];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -1560,7 +1561,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validate failure when using a fake trusted setup key', async () => {
+        it('should fail for a fake trusted setup key', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
             const { commitments, m } = joinSplit.helpers.generateFakeCommitmentSet({
@@ -1612,7 +1613,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validate failure when points not on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = `${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}`;

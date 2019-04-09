@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./LibEIP712.sol";
+import "../../libs/LibEIP712.sol";
 
 /**
  * @title Library of EIP712 utility constants and functions

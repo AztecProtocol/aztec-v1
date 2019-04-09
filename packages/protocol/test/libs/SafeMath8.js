@@ -11,16 +11,16 @@ contract('SafeMath8', () => {
         safeMath8 = await SafeMath8.new();
     });
 
-    describe('Failure states', async () => {
-        it('mul should throw when integer overflow is triggered', async () => {
+    describe('Failure States', async () => {
+        it('should fail if integer overflow is triggered', async () => {
             await truffleAssert.reverts(safeMath8._mul(253, 253));
         });
 
-        it('add should throw when integer overflow is triggered', async () => {
+        it('should fail if integer overflow is triggered', async () => {
             await truffleAssert.reverts(safeMath8._add(254, 25));
         });
 
-        it('sub should throw when integer underflow is triggered', async () => {
+        it('should fail if integer underflow is triggered', async () => {
             await truffleAssert.reverts(safeMath8._sub(0, 25));
         });
     });

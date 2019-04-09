@@ -14,12 +14,12 @@ const {
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
-const ERC20Mintable = artifacts.require('./contracts/ERC20/ERC20Mintable');
-const ACE = artifacts.require('./contracts/ACE/ACE');
-const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
-const ZkAssetOwnable = artifacts.require('./contracts/ZkAsset/ZkAssetOwnable');
-const ZkAssetOwnableTest = artifacts.require('./contracts/ZkAsset/ZkAssetOwnableTest');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const ACE = artifacts.require('./ACE');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
+const ZkAssetOwnable = artifacts.require('./ZkAssetOwnable');
+const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
@@ -44,7 +44,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
     let aztecAccounts = [];
     const epoch = 1;
-    const filter = 17; // 16 + 1, recall that 1 is the join split validator because of 1 * 256**(0)
+    const filter = 17; // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
     let notes = [];
     const proofs = [];
     let proofHashes = [];
@@ -173,7 +173,7 @@ contract('ZkAssetOwnable', (accounts) => {
         await ace.publicApprove(zkAssetOwnable.address, proofHashes[4], 30, { from: accounts[3] });
     });
 
-    describe('success states', () => {
+    describe('Success States', () => {
         it('should set a new proof bit filter', async () => {
             const { receipt } = await zkAssetOwnable.setProofs(epoch, filter);
             expect(receipt.status).to.equal(true);
@@ -219,7 +219,7 @@ contract('ZkAssetOwnable', (accounts) => {
         });
     });
 
-    describe('failure states', async () => {
+    describe('Failure States', async () => {
         it('should fail to set a new proof bit filter if not owner', async () => {
             const opts = { from: accounts[1] };
             await truffleAssert.reverts(zkAssetOwnable.setProofs(epoch, filter, opts), 'only the owner can set the epoch proofs');

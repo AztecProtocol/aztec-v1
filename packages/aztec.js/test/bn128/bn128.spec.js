@@ -9,7 +9,7 @@ const bn128 = require('../../src/bn128');
 
 const { expect } = chai;
 
-describe('bn128 tests', () => {
+describe('bn128', () => {
     let kMaxTemp;
     beforeEach(() => {
         kMaxTemp = bn128.K_MAX;
@@ -20,7 +20,7 @@ describe('bn128 tests', () => {
         bn128.K_MAX = kMaxTemp;
     });
 
-    it('curve exports the bn128 curve', async () => {
+    it('should export the bn128 curve', async () => {
         const testPoint = bn128.randomPoint();
         const scalar = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
         const scalarInverse = scalar.redInvm();
@@ -35,7 +35,7 @@ describe('bn128 tests', () => {
         ).to.equal(true);
     });
 
-    it('random group scalar creates well-formed BN instance', () => {
+    it('should create a well-formed bn.js instance in randomScalarGroup', () => {
         const scalar = bn128.randomGroupScalar();
 
         expect(BN.isBN(scalar)).to.equal(true);
@@ -43,7 +43,7 @@ describe('bn128 tests', () => {
         expect(scalar.fromRed().toString(16).length <= 64).to.equal(true);
     });
 
-    it('random point creates well-formed elliptic.js point instance', () => {
+    it('should create a well-formed elliptic.js point instance in randomPoint', () => {
         for (let i = 0; i < 10; i += 1) {
             const point = bn128.randomPoint();
             const lhs = point.y.redSqr();
@@ -55,7 +55,7 @@ describe('bn128 tests', () => {
         }
     });
 
-    it('AZTEC generator point h is correctly represented', () => {
+    it('should correctly represent the AZTEC generator point h', () => {
         const { h } = bn128;
         const lhs = h.y.redSqr();
         const rhs = h.x
@@ -68,29 +68,31 @@ describe('bn128 tests', () => {
         expect(lhs.fromRed().eq(rhs.fromRed())).to.equal(true);
     });
 
-    it('recoverMessage correctly recovers a note message', async () => {
-        const k = new BN(300);
-        const gamma = bn128.curve.g;
-        const gammaK = bn128.curve.g.mul(k);
-        const result = await bn128.recoverMessage(gamma, gammaK);
-        expect(result).to.equal(300);
-    });
+    describe('Recover Message', async () => {
+        it('should recover a note message', async () => {
+            const k = new BN(300);
+            const gamma = bn128.curve.g;
+            const gammaK = bn128.curve.g.mul(k);
+            const result = await bn128.recoverMessage(gamma, gammaK);
+            expect(result).to.equal(300);
+        });
 
-    it('recoverMessage returns 1 for point at infinity', async () => {
-        const gamma = bn128.curve.g.add(bn128.curve.g.neg());
-        const gammaK = gamma;
-        const result = await bn128.recoverMessage(gamma, gammaK);
-        expect(result).to.equal(1);
-    });
+        it('should return 1 for point at infinity', async () => {
+            const gamma = bn128.curve.g.add(bn128.curve.g.neg());
+            const gammaK = gamma;
+            const result = await bn128.recoverMessage(gamma, gammaK);
+            expect(result).to.equal(1);
+        });
 
-    it('recoverMessage will throw if cannot find a solution from 0 to K_MAX', async () => {
-        const k = new BN(999);
-        const gamma = bn128.curve.g;
-        const gammaK = bn128.curve.g.mul(k);
-        try {
-            await bn128.recoverMessage(gamma, gammaK);
-        } catch (e) {
-            expect(e.message).to.contain('could not find k!');
-        }
+        it('should fail cannot find a solution from 0 to K_MAX', async () => {
+            const k = new BN(999);
+            const gamma = bn128.curve.g;
+            const gammaK = bn128.curve.g.mul(k);
+            try {
+                await bn128.recoverMessage(gamma, gammaK);
+            } catch (e) {
+                expect(e.message).to.contain('could not find k!');
+            }
+        });
     });
 });

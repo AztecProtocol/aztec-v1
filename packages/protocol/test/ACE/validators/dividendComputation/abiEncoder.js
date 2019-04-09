@@ -4,19 +4,17 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const {
-    constants: { CRS },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const ABIEncoder = artifacts.require('./contracts/ACE/validators/dividendComputation/DividendComputationABIEncoderTest');
+const ABIEncoder = artifacts.require('./DividendComputationABIEncoderTest');
 
 contract('Dividend Computation ABI Encoder', (accounts) => {
     let DividendComputationAbiEncoder;
     let dividendAccounts = [];
     let notes = [];
 
-    describe('success states', () => {
+    describe('Success States', () => {
         let za;
         let zb;
 
@@ -35,7 +33,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
             });
         });
 
-        it('successfully encodes output of a join split proof', async () => {
+        it('should encode the output of a join-split proof', async () => {
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
@@ -48,7 +46,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
 
             const proofDataFormatted = [proofData.slice(0, 6)].concat([proofData.slice(6, 12), proofData.slice(12, 18)]);
 
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
 
             const inputOwners = inputNotes.map((m) => m.owner);
             const outputOwners = outputNotes.map((n) => n.owner);
@@ -63,7 +61,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
                 outputNotes,
             );
 
-            const result = await DividendComputationAbiEncoder.validateDividendComputation(data, senderAddress, CRS, {
+            const result = await DividendComputationAbiEncoder.validateDividendComputation(data, senderAddress, constants.CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });

@@ -17,9 +17,9 @@ const { errorTypes } = utils.constants;
 
 const { expect } = chai;
 
-describe('Dividend computation verifier tests', () => {
-    describe('success states', () => {
-        it('dividendComputation.constructProof creates a valid dividend computation proof', () => {
+describe('Dividend Computation Verifier', () => {
+    describe('Success States', () => {
+        it('should construct a valid dividend computation proof', () => {
             /*
             Test case:
             - k_in = 90
@@ -29,7 +29,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
             const za = 100;
             const zb = 5;
@@ -41,8 +40,8 @@ describe('Dividend computation verifier tests', () => {
         });
     });
 
-    describe('failure states', () => {
-        it('will REJECT for unsatisfied proof relations', () => {
+    describe('Failure States', () => {
+        it('should REJECT for unsatisfied proof relations', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -54,7 +53,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -71,7 +69,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for fake challenge', () => {
+        it('should REJECT for fake challenge', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -83,7 +81,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -104,14 +101,13 @@ describe('Dividend computation verifier tests', () => {
                 za,
                 zb,
             );
-
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
-        it('will REJECT for fake proof data', () => {
+        it('should REJECT for fake proof data', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -123,7 +119,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -137,13 +132,12 @@ describe('Dividend computation verifier tests', () => {
             );
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(fakeProofData, challenge, sender, za, zb);
-
             expect(valid).to.equal(false);
             expect(errors).to.contain(errorTypes.CHALLENGE_RESPONSE_FAIL);
             parseInputs.restore();
         });
 
-        it('will REJECT for z_a > k_max', () => {
+        it('should REJECT for z_a > k_max', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -155,7 +149,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -172,7 +165,6 @@ describe('Dividend computation verifier tests', () => {
                 zaLarge,
                 zb,
             );
-
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(errorTypes.ZA_TOO_BIG);
@@ -180,7 +172,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT for z_b > k_max', () => {
+        it('should REJECT for z_b > k_max', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -192,7 +184,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -209,7 +200,6 @@ describe('Dividend computation verifier tests', () => {
                 za,
                 zbLarge,
             );
-
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(errorTypes.ZB_TOO_BIG);
@@ -217,7 +207,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if point not on the curve', () => {
+        it('should REJECT if point not on the curve', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -229,7 +219,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -238,7 +227,7 @@ describe('Dividend computation verifier tests', () => {
 
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
-            // Setting the x coordiante of gamma to zero
+            // Setting the x coordinate of gamma to zero
             proofDataUnformatted[0][2] = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
@@ -249,7 +238,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor at infinity', () => {
+        it('should REJECT if blinding factor at infinity', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -261,7 +250,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -278,7 +266,6 @@ describe('Dividend computation verifier tests', () => {
             const challenge = `0x${padLeft('0a', 64)}`;
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
-
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(2);
             expect(errors[0]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
@@ -286,7 +273,7 @@ describe('Dividend computation verifier tests', () => {
             parseInputs.restore();
         });
 
-        it('will REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -298,7 +285,6 @@ describe('Dividend computation verifier tests', () => {
             - za = 5
             - zb = 100
             */
-
             const za = 100;
             const zb = 5;
 
@@ -314,7 +300,6 @@ describe('Dividend computation verifier tests', () => {
             proofDataUnformatted[0][5] = `0x${padLeft('', 64)}`;
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
-
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(6);
             expect(errors[0]).to.equal(errorTypes.NOT_ON_CURVE);

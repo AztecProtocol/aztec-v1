@@ -47,7 +47,7 @@ contract('NoteUtils', async (accounts) => {
         outputNotes = outputCoder.getOutputNotes(proofOutputs[0]);
     });
 
-    describe('success states', async () => {
+    describe('Success States', async () => {
         it('should return the correct length of the abi encoded proof outputs array', async () => {
             const result = await noteUtils.getLength(proofs[0].expectedOutput);
             expect(result.toNumber()).to.equal(1);
@@ -56,7 +56,7 @@ contract('NoteUtils', async (accounts) => {
         it('should return the correct length of the abi encoded notes array', async () => {
             const formattedOutputNotes = `0x${outputNotes.slice(0x40)}`;
             const result = await noteUtils.getLength(formattedOutputNotes);
-            // there's always only one proof output in the arary in the case of join splits
+            // there's always only one proof output in the arary in the case of join-splits
             expect(result.toNumber()).to.equal(1);
         });
 
@@ -115,7 +115,7 @@ contract('NoteUtils', async (accounts) => {
         });
     });
 
-    describe('failure states', async () => {
+    describe('Failure States', async () => {
         it('should fail when index is out of bounds', async () => {
             await truffleAssert.reverts(noteUtils.get(proofs[0].expectedOutput, 100), 'AZTEC array index is out of bounds');
         });

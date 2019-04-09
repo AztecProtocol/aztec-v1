@@ -1,41 +1,36 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const { padLeft, sha3 } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
+const { padLeft, sha3 } = require('web3-utils');
 
 // ### Internal Dependencies
 const aztec = require('aztec.js');
-const {
-    constants: { CRS },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const BilateralSwapAbiEncoder = artifacts.require('./contracts/ACE/validators/bilateralSwap/BilateralSwapABIEncoderTest');
+const BilateralSwapAbiEncoder = artifacts.require('./BilateralSwapABIEncoderTest');
 
-contract('Bilateral ABI Encoder', (accounts) => {
+contract('Bilateral Swap ABI Encoder', (accounts) => {
     let bilateralSwapAbiEncoder;
     let bilateralSwapAccounts = [];
     let notes = [];
 
-    describe('success states', () => {
+    describe('Success States', () => {
         beforeEach(async () => {
             const noteValues = [10, 20, 10, 20];
-
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
-
             notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i]))];
-
             bilateralSwapAbiEncoder = await BilateralSwapAbiEncoder.new({
                 from: accounts[0],
             });
         });
 
-        it('successfully encodes output of a bilateral swap zero knowledge proof', async () => {
+        it('should encode the output of a bilateral swap zero knowledge proof', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = new BN(0);
             const { proofData, challenge } = aztec.proof.bilateralSwap.constructProof(
                 [...inputNotes, ...outputNotes],
@@ -52,7 +47,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 [outputNotes[0], inputNotes[1]],
             );
 
-            const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, CRS, {
+            const result = await bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, constants.CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
@@ -104,7 +99,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         beforeEach(async () => {
             const noteValues = [10, 20, 10, 20];
 
@@ -117,7 +112,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
             });
         });
 
-        it('will REVERT if number of metadata entries != 2', async () => {
+        it('should REVERT if number of metadata entries != 2', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
@@ -136,10 +131,10 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 [outputNotes[0], outputNotes[1], inputNotes[1]],
             );
 
-            await truffleAssert.reverts(bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, CRS));
+            await truffleAssert.reverts(bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, constants.CRS));
         });
 
-        it('will REVERT if number of outputOwner entries != 4', async () => {
+        it('should REVERT if number of outputOwner entries != 4', async () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
@@ -158,7 +153,7 @@ contract('Bilateral ABI Encoder', (accounts) => {
                 [outputNotes[0], inputNotes[1]],
             );
 
-            await truffleAssert.reverts(bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, CRS));
+            await truffleAssert.reverts(bilateralSwapAbiEncoder.validateBilateralSwap(data, senderAddress, constants.CRS));
         });
     });
 });

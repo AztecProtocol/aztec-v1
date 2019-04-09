@@ -1,5 +1,6 @@
 {
     "branch": "master",
+    "dryRun": true,
     "plugins": [
         ["@semantic-release/commit-analyzer", {
               "preset": "angular",

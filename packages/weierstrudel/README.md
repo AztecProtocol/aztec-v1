@@ -39,7 +39,7 @@ Yes. Doing so saves approximately 500 gas per contract call.
 
 Not yet! We're in the process of applying more rigorous testing to ensure the correctness of `weierstrudel`'s algorithms. In addition we still need to implement the following:
 
-1. Fully supported edge-cases for weierstrudel's point addition formulae - currently the contract will throw an error if the following edge cases are hit:
+1. Fully supported edge-cases for weierstrudel's point addition formulae - currently the contract throws an error if the following edge cases are hit:
     - Adding two points equal to one another
     - Adding a point to the point's negative counterpart
 2. Montgomery batch inverses in Huff - points are currently expressed in Jacobean form.

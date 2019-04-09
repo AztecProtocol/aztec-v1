@@ -3,6 +3,7 @@
  *
  * @module mint
  */
+const { constants } = require('@aztec/dev-utils');
 const { padLeft, sha3 } = require('web3-utils');
 
 const verifier = require('./verifier');
@@ -36,7 +37,7 @@ mint.encodeMintTransaction = ({ newTotalMinted, oldTotalMinted, adjustedNotes, s
 
     const inputOwners = inputNotes.map((m) => m.owner);
     const outputOwners = outputNotes.map((n) => n.owner);
-    const publicOwner = '0x0000000000000000000000000000000000000000';
+    const publicOwner = constants.addresses.ZERO_ADDRESS;
     const publicValue = 0;
 
     const proofData = inputCoder.mint(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);

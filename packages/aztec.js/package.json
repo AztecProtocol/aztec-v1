@@ -63,6 +63,7 @@
     "coverage": "nyc mocha ./test --trace-warnings --exit --colors --recursive --reporter spec",
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --remote origin --cleanup",
-    "test": "mocha ./test --trace-warnings --exit --colors --recursive --reporter spec"
+    "test": "mocha ./test --bail --colors --exit --recursive --reporter spec --trace-warnings",
+    "watch": "yarn build --watch"
   }
 }

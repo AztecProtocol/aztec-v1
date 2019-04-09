@@ -16,7 +16,6 @@ const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const { errorTypes } = utils.constants;
-
 const { expect } = chai;
 
 function generateNoteValue() {
@@ -58,10 +57,10 @@ function randomAddress() {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
-describe('AZTEC verifier tests', function describeVerifier() {
-    describe('success states', function success() {
+describe('Join Split Proof Verifier', function describeVerifier() {
+    describe('Success States', function success() {
         this.timeout(10000);
-        it('proof.constructProof creates a valid join-split proof', () => {
+        it('should construct a valid join-split proof', () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
@@ -72,7 +71,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates join-split proof with 0 input notes', () => {
+        it('should accept a join-split proof with 0 input notes', () => {
             const kIn = [];
             const kOut = [...Array(5)].map(() => generateNoteValue());
 
@@ -86,7 +85,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates join-split proof with 0 output notes', () => {
+        it('should accept a join-split proof with 0 output notes', () => {
             const kIn = [...Array(5)].map(() => generateNoteValue());
             const kOut = [];
 
@@ -101,7 +100,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates join-split proof with large numbers of notes', () => {
+        it('should accept a join-split proof with large numbers of notes', () => {
             const kIn = [...Array(20)].map(() => generateNoteValue());
             const kOut = [...Array(20)].map(() => generateNoteValue());
 
@@ -116,7 +115,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates join-split proof with uneven numberse of notes', () => {
+        it('should accept a join-split proof with uneven number of notes', () => {
             const { kIn, kOut } = generateBalancedNotes(20, 3);
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
@@ -126,7 +125,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('validates join-split proof with kPublic = 0', () => {
+        it('should accept a join-split proof with kPublic = 0', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
@@ -137,11 +136,11 @@ describe('AZTEC verifier tests', function describeVerifier() {
         });
     });
 
-    describe('failure states', function failure() {
+    describe('Failure States', function failure() {
         this.timeout(10000);
         let parseInputs;
         beforeEach(() => {
-            // to test failure states we need to pass in bad data to verifier
+            // to test Failure States we need to pass in bad data to verifier
             // so we need to turn off proof.parseInputs
             parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
         });
@@ -150,7 +149,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             parseInputs.restore();
         });
 
-        it('will REJECT if points not on curve', () => {
+        it('should REJECT if points NOT on curve', () => {
             // we can construct 'proof' where all points and scalars are zero.
             // The challenge response will be correctly reconstructed, but the proof should still be invalid
             const zeroes = `${padLeft('0', 64)}`;
@@ -169,7 +168,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(errors[3]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
         });
 
-        it('will REJECT if malformed challenge', () => {
+        it('should REJECT if malformed challenge', () => {
             const kIn = [...Array(5)].map(() => generateNoteValue());
             const kOut = [...Array(5)].map(() => generateNoteValue());
 
@@ -187,7 +186,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if notes do not balance', () => {
+        it('should REJECT if notes do NOT balance', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             kIn.push(1);
 
@@ -201,7 +200,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT for random proof data', () => {
+        it('should REJECT for random proof data', () => {
             const proofData = [...Array(4)].map(() =>
                 [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
             );
@@ -211,7 +210,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.errors).to.contain(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if kPublic > group modulus', () => {
+        it('should REJECT if kPublic > group modulus', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const kPublic = bn128.curve.n.add(new BN(100));
             kIn.push(100);
@@ -225,7 +224,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.SCALAR_TOO_BIG);
         });
 
-        it('will REJECT if note value response is 0', () => {
+        it('should REJECT if note value response is 0', () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
@@ -238,7 +237,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if blinding factor is at infinity', () => {
+        it('should REJECT if blinding factor is at infinity', () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
@@ -257,7 +256,7 @@ describe('AZTEC verifier tests', function describeVerifier() {
             expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('will REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
             const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();

@@ -1,7 +1,7 @@
 {
   "name": "@aztec/protocol",
   "description": "AZTEC smart contract repository",
-  "version": "1.0.1",
+  "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
@@ -14,7 +14,7 @@
     "@0x/sol-profiler": "^3.1.2",
     "@0x/sol-trace": "^2.0.8",
     "@0x/subproviders": "^4.0.2",
-    "@aztec/dev-utils": "^2.0.0",
+    "@aztec/dev-utils": "0.0.0-semantically-released",
     "aztec.js": "0.0.0-semantically-released",
     "bluebird": "^3.5.3",
     "bn.js": "^4.11.8",

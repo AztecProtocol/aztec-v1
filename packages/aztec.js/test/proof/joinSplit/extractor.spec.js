@@ -48,7 +48,7 @@ function randomAddress() {
  *
  * N.B. This is also why re-using blinding scalars for multiple proofs leaks secrets, so don't try this at home, or in production.
  */
-describe('AZTEC extractor tests', () => {
+describe('Join-Split Proof Extractor', () => {
     let blindingScalars;
     let nIn;
     let nOut;
@@ -74,7 +74,7 @@ describe('AZTEC extractor tests', () => {
         computeChallenge.restore();
     });
 
-    it('extractor can extract witnesses from two satisfying proofs over the same input string in the random oracle model', () => {
+    it('should extract witnesses from two satisfying proofs over the same input string in the random oracle model', () => {
         const kIn = [...Array(nIn)].map(() => generateNoteValue());
         const kOut = [...Array(nOut)].map(() => generateNoteValue());
         const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });

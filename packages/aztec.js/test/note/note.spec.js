@@ -13,8 +13,8 @@ const secp256k1 = require('../../src/secp256k1');
 const { padLeft } = web3Utils;
 const { expect } = chai;
 
-describe('note tests', () => {
-    it('notes.fromPublic and notes.fromViewKey create well formed notes', () => {
+describe('Note', () => {
+    it('should create well formed notes using the fromPublic and fromViewKey methods', () => {
         const aBn = new BN(crypto.randomBytes(32), 16).umod(GROUP_MODULUS);
         const a = padLeft(aBn.toString(16), 64);
 
@@ -32,7 +32,7 @@ describe('note tests', () => {
         expect(importedNote.sigma.encode('hex', false)).to.equal(note.sigma.encode('hex', false));
     });
 
-    it('note.create and note.derive create well formed notes', async () => {
+    it('should create well formed notes using the create and derive functions', async () => {
         const spendingKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
         const result = notes.create(`0x${spendingKey.getPublic(true, 'hex')}`, 1234);
         const expected = await notes.derive(result.getPublic(), `0x${spendingKey.getPrivate('hex')}`);
@@ -43,7 +43,7 @@ describe('note tests', () => {
         expect(expected.k.toString(10)).to.equal('1234');
     });
 
-    it('encodeMetadata correctly encodes the metadata of a set of notes', () => {
+    it('should encode the metadata of a set of notes', () => {
         const accounts = [secp256k1.generateAccount(), secp256k1.generateAccount()];
         const noteArray = [
             notes.create(accounts[0].publicKey, 100),
@@ -73,7 +73,7 @@ describe('note tests', () => {
         expect(new BN(sharedSecrets[3].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[3].a.fromRed())).to.equal(true);
     });
 
-    it('note.exportNote will produce k, a values of 0 for a note created from a note public key', () => {
+    it('should export k, a values of 0 for a note created from a note public key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const publicKey = note.getPublic();
         const imported = notes.fromPublicKey(publicKey);
@@ -84,7 +84,7 @@ describe('note tests', () => {
         expect(result.publicKey).to.equal(publicKey);
     });
 
-    it('Note constructor will throw if given a public key and a viewing key', () => {
+    it('should throw if given both a public key and a viewing key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const { publicKey, viewingKey } = note.exportNote();
         let message = '';
@@ -96,7 +96,7 @@ describe('note tests', () => {
         expect(message).to.equal('expected one of publicKey or viewingKey, not both');
     });
 
-    it('Note constructor will throw if given a non-string public key', () => {
+    it('should throw if given a non-string public key', () => {
         let message = '';
         try {
             notes.Note({ foo: 'bar' }, null);
@@ -106,7 +106,7 @@ describe('note tests', () => {
         expect(message).to.equal('expected key type object to be of type string');
     });
 
-    it('Note constructor will throw if given an incorect length public key', () => {
+    it('should throw if given an incorrect length public key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const { publicKey } = note.exportNote();
         let message = '';
@@ -118,7 +118,7 @@ describe('note tests', () => {
         expect(message).to.equal('invalid public key length, expected 200, got 206');
     });
 
-    it('Note constructor will throw if given a non-string viewing key', () => {
+    it('should throw if given a non-string viewing key', () => {
         let message = '';
         try {
             notes.Note(null, { foo: 'bar' });
@@ -128,7 +128,7 @@ describe('note tests', () => {
         expect(message).to.equal('expected key type object to be of type string');
     });
 
-    it('Note constructor will throw if given an incorect length viewing key', () => {
+    it('should throw if given an incorrect length viewing key', () => {
         const note = notes.create(secp256k1.generateAccount().publicKey, 100);
         const { viewingKey } = note.exportNote();
         let message = '';

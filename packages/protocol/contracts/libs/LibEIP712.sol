@@ -109,7 +109,7 @@ contract LibEIP712 {
             }
             mstore(_signature, byteLength) // and put the byte length back where it belongs
         }
-        // wrap failure states in a single if test, so that happy path only has 1 conditional jump
+        // wrap Failure States in a single if test, so that happy path only has 1 conditional jump
         if (!(result && (_signer == address(0x0)))) {
             require(_signer != address(0x0), "signer address cannot be 0");
             require(result, "signature recovery failed");

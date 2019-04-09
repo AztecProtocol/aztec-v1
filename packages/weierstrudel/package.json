@@ -41,7 +41,7 @@
     "benchmark": "node ./benchmark.js",
     "compile": "node ./compile.js",
     "lint": "eslint --ignore-path ../../.eslintignore .",
-    "test": "mocha ./huff_tests/ --trace-warnings --exit --colors --recursive --reporter spec",
-    "test:js": "mocha ./js_snippets/ --trace-warnings --exit --colors --recursive --reporter spec"
+    "test": "mocha ./huff_tests/ --colors --exit --recursive --reporter spec --trace-warnings",
+    "test:js": "mocha ./js_snippets/ --colors --exit --recursive --reporter spec --trace-warnings"
   }
 }

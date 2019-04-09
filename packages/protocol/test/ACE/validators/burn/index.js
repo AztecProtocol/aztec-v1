@@ -20,21 +20,21 @@ const truffleAssert = require('truffle-assertions');
 const Keccak = keccak;
 
 // ### Artifacts
-const AdjustSupply = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupply/AdjustSupplyInterface');
+const AdjustSupply = artifacts.require('./AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 
-contract('AdjustSupply tests for burn proof', (accounts) => {
+contract('AdjustSupply Tests for Burn Proofs', (accounts) => {
     let adjustSupplyContract;
-    describe('success states', () => {
+    describe('Success States', () => {
         beforeEach(async () => {
             adjustSupplyContract = await AdjustSupply.new({
                 from: accounts[0],
             });
         });
 
-        it('successfully validates encoding of a burn zero-knowledge proof', async () => {
+        it('should validate encoding of a burn zero-knowledge proof', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -46,7 +46,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             const newTotalBurned = notes[0];
             const oldTotalBurned = notes[1];
             const adjustedNotes = notes.slice(2, 4);
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = 0;
 
             const { proofData, expectedOutput } = burn.encodeBurnTransaction({
@@ -93,7 +93,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validates that large numbers of input/output notes work', async () => {
+        it('should accept large numbers of input/output notes', async () => {
             const noteValues = [80, 30, 10, 10, 10, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -123,7 +123,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate that burned notes of zero value work', async () => {
+        it('should accept burned notes of zero value', async () => {
             const noteValues = [50, 30, 0, 20];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -153,7 +153,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate success when using the minimum number of notes (2)', async () => {
+        it('should accept the minimum number of notes (2)', async () => {
             const noteValues = [50, 50];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -183,7 +183,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('Validate success if challenge has GROUP_MODULUS added to it', async () => {
+        it('should validate that challenge has GROUP_MODULUS added to it', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -210,7 +210,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
 
             const inputOwners = inputNotes.map((m) => m.owner);
             const outputOwners = outputNotes.map((n) => n.owner);
-            const publicOwner = '0x0000000000000000000000000000000000000000';
+            const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = 0;
 
             const proofData = inputCoder.burn(proofDataRaw, notModRChallenge, inputOwners, outputOwners, outputNotes);
@@ -254,14 +254,14 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
         });
     });
 
-    describe('failure states', () => {
+    describe('Failure States', () => {
         beforeEach(async () => {
             adjustSupplyContract = await AdjustSupply.new({
                 from: accounts[0],
             });
         });
 
-        it('validates failure for unbalanced input/output notes', async () => {
+        it('should fail for unbalanced input/output notes', async () => {
             const noteValues = [50, 30, 40, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -289,7 +289,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('validates failure when using a fake challenge and fake proof data', async () => {
+        it('should fail for fake challenge and fake proof data', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -321,7 +321,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             );
         });
 
-        it('Validate failure for no notes', async () => {
+        it('should fail if zero notes provided', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const senderAddress = aztecAccounts[0].address;
 
@@ -346,7 +346,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             parseInputs.restore();
         });
 
-        it('validate failure when points not on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = `${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}`;
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
@@ -366,7 +366,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure if scalars are not mod GROUP_MODULUS', async () => {
+        it('should fail if scalars are NOT mod GROUP_MODULUS', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -404,11 +404,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure if scalars are zero', async () => {
+        it('should fail if scalars are zero', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -453,11 +452,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when proof data not correctly encoded', async () => {
+        it('should fail if proof data NOT correctly encoded', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -507,13 +505,12 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(
                 adjustSupplyContract.validateAdjustSupply(incorrectEncoding, senderAddress, constants.CRS, opts),
             );
         });
 
-        it('validate failure when incorrect H_X, H_Y in CRS is supplied', async () => {
+        it('should fail for incorrect H_X, H_Y in CRS', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -556,7 +553,7 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
             );
         });
 
-        it('validate failure when group element (blinding factor) resolves to infinity', async () => {
+        it('should fail if group element (blinding factor) resolves to infinity', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -597,11 +594,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when sender address NOT integrated into challenge variable', async () => {
+        it('should fail if sender address NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -657,11 +653,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when kPublic (set internally in proof to 0) NOT integrated into challenge variable', async () => {
+        it('should fail if kPublic (set internally in proof to 0) NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -716,11 +711,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when commitments NOT integrated into challenge variable', async () => {
+        it('should fail if commitments NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -776,11 +770,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when m NOT integrated into challenge variable', async () => {
+        it('should fail if m NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -836,11 +829,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure when blindingFactors NOT integrated into challenge variable', async () => {
+        it('should fail if blindingFactors NOT integrated into challenge variable', async () => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -896,11 +888,10 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
 
-        it('Validate failure if number of notes supplied is less than the minimum (2) i.e. no output notes', async () => {
+        it('should fail if number of notes supplied is less than the minimum (2) i.e. no output notes', async () => {
             const noteValues = [50];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -926,7 +917,6 @@ contract('AdjustSupply tests for burn proof', (accounts) => {
                 from: senderAddress,
                 gas: 4000000,
             };
-
             await truffleAssert.reverts(adjustSupplyContract.validateAdjustSupply(proofData, senderAddress, constants.CRS, opts));
         });
     });
