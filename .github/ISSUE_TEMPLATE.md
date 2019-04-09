@@ -1,13 +1,13 @@
 <!-- This is just a suggested template for bugs, feel free to scrap it if you're just suggesting or requesting a feature>
 
-## Expected Behavior
+## Expected Behaviour
 <!--- If you're describing a bug, tell us what should happen -->
 <!--- If you're suggesting a change/improvement, tell us how it should work -->
 
-## Current Behavior
+## Current Behaviour
 
-<!--- If describing a bug, tell us what happens instead of the expected behavior -->
-<!--- If suggesting a change/improvement, explain the difference from current behavior -->
+<!--- If describing a bug, tell us what happens instead of the expected behaviour -->
+<!--- If suggesting a change/improvement, explain the difference from current behaviour -->
 
 ## Possible Solution
 
@@ -19,7 +19,10 @@
 <!--- Provide a link to a live example, or an unambiguous set of steps to -->
 <!--- reproduce this bug. Include code to reproduce, if relevant -->
 
-1.  2.  3. 4.
+1. 
+2. 
+3. 
+4. 
 
 ## Context
 
@@ -31,7 +34,7 @@
 <!--- Include as many relevant details about the environment you experienced the bug in -->
 
 -   AZTEC packages and their versions:
--   Node and npm version:
+-   Node and yarn version:
 -   Truffle version:
 -   Lerna version:
--   Operating System and version (desktop or mobile):
+-   Operating System and version:

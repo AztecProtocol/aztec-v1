@@ -39,13 +39,13 @@ Yes. Doing so saves approximately 500 gas per contract call.
 
 Not yet! We're in the process of applying more rigorous testing to ensure the correctness of `weierstrudel`'s algorithms. In addition we still need to implement the following:
 
-1. Fully supported edge-cases for weierstrudel's point addition formulae - currently the contract throws an error if the following edge cases are hit:
-    - Adding two points equal to one another
-    - Adding a point to the point's negative counterpart
-2. Montgomery batch inverses in Huff - points are currently expressed in Jacobean form.
-    - Supplying a point's inverse as a transaction input is the most efficient method of obtaining an inverse (~2,000 gas), but we still want to implement this to maintain a consistent interface when compared to the precompile
-3. Precomputed point lookup tables for generator points
-    - There are substantial gas optimizations to be claimed by integrating a lookup table for bn254's fixed generator point
+1.  Fully supported edge-cases for weierstrudel's point addition formulae - currently the contract throws an error if the following edge cases are hit:
+    -   Adding two points equal to one another
+    -   Adding a point to the point's negative counterpart
+2.  Montgomery batch inverses in Huff - points are currently expressed in Jacobean form.
+    -   Supplying a point's inverse as a transaction input is the most efficient method of obtaining an inverse (~2,000 gas), but we still want to implement this to maintain a consistent interface when compared to the precompile
+3.  Precomputed point lookup tables for generator points
+    -   There are substantial gas optimizations to be claimed by integrating a lookup table for bn254's fixed generator point
 
 ### **"Can I use weierstrudel in my project?"**
 
@@ -53,7 +53,7 @@ Of course! `weierstrudel` is open-source software, licensed under LGPL-3.0. Howe
 
 ### **Benchmarks**
 
-Gas estimates can be obtained by running `npm run benchmark`. For reference, the scalar multiplication precompile costs `40,000` gas per point. This is excluding the overheads of having to make a contract call per point when using the precompiles, as well as calling the point addition precompile to combine points into a single sum.
+Gas estimates can be obtained by running `yarn benchmark`. For reference, the scalar multiplication precompile costs `40,000` gas per point. This is excluding the overheads of having to make a contract call per point when using the precompiles, as well as calling the point addition precompile to combine points into a single sum.
 
 | Number of points | Approximate gas cost (average of 10 runs) | Cost per point |
 | ---------------- | ----------------------------------------- | -------------- |
@@ -79,7 +79,7 @@ Gas estimates can be obtained by running `npm run benchmark`. For reference, the
 
 ### **Usage**
 
-Run weierstrudel tests via `npm run test`  
-Run reference javascript methods via `npm run jstest`  
-Run weierstrudel benchmarks via `npm run benchmark`  
-Compile the weierstrudel smart contract via `npm run compile`
+1.  Run weierstrudel tests via `yarn test`
+2.  Run reference javascript methods via `yarn jstest`
+3.  Run weierstrudel benchmarks via `yarn benchmark`
+4.  Compile the weierstrudel smart contract via `yarn compile`

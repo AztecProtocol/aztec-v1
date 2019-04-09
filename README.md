@@ -58,33 +58,21 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 ## Usage :hammer_and_pick:
 
-To fiddle with cryptography engine and create your own AZTEC notes:
+To fiddle with the Cryptography Engine and create your own AZTEC notes:
 
 ```bash
-$ npm install aztec.js --save
+$ yarn add aztec.js
 ```
 
 Other goodies:
 
 ```bash
-$ npm install @aztec/contract-artifacts
-$ npm install @aztec/contract-addresses
-$ npm install @aztec/dev-utils
+$ yarn add @aztec/contract-artifacts
+$ yarn add @aztec/contract-addresses
+$ yarn add @aztec/dev-utils
 ```
 
-To see a demo, head to the protocol package:
-
-```bash
-$ cd packages/protocol
-```
-
-Make sure you use your own private keys instead of the defaults in `demo/accounts.json`. Then:
-
-```bash
-$ npm install
-$ truffle migrate --network rinkeby
-$ npm run demo:rinkeby
-```
+To see a demo, head to this [tutorial](https://medium.com/aztec-protocol/how-to-code-your-own-confidential-token-on-ethereum-4a8c045c8651).
 
 For more information, check out our [documentation](https://aztecprotocol.github.io/AZTEC/).
 
@@ -92,34 +80,44 @@ For more information, check out our [documentation](https://aztecprotocol.github
 
 ### Requirements
 
--   node ^4.0.0 and npm^2.14.2
--   solidity 0.4.24
+-   node >=8.3
+-   yarn 1.15.2
+-   solidity >=0.5.0 <0.6.0
 
 ### Pre Requisites
 
+Make sure you are using Yarn 1.15.2. To install using brew:
+
 ```bash
-$ npm install lerna@^3.10.6 --global
-$ npm install truffle@^5.0.0 --global
+brew install yarn@1.15.2
+```
+
+Then install dependencies:
+
+```bash
+yarn install
 ```
 
 ### Build
 
-To install the node modules in all packages:
-
-```bash
-$ npm run bootstrap
-```
-
 To build all packages:
 
 ```bash
-$ lerna run build
+$ yarn build
 ```
 
 To build a specific package:
 
 ```bash
-$ lerna run build --scope aztec.js
+$ PKG=aztec.js yarn build
+```
+
+### Watch
+
+To re-build all packages on change:
+
+```bash
+$ yarn watch
 ```
 
 ### Clean
@@ -127,13 +125,13 @@ $ lerna run build --scope aztec.js
 To clean all packages:
 
 ```bash
-$ lerna run clean
+$ yarn clean
 ```
 
 To clean a specific package:
 
 ```bash
-$ lerna run clean --scope aztec.js
+$ PKG=aztec.js yarn clean
 ```
 
 ### Lint
@@ -141,13 +139,13 @@ $ lerna run clean --scope aztec.js
 To lint all packages:
 
 ```bash
-$ lerna run lint
+$ yarn lint
 ```
 
 To lint a specific package:
 
 ```bash
-$ lerna run lint --scope aztec.js
+$ PKG=aztec.js yarn lint
 ```
 
 ### Test
@@ -155,30 +153,30 @@ $ lerna run lint --scope aztec.js
 To run all tests:
 
 ```bash
-$ lerna run test
+$ yarn test
 ```
 
 To run tests in a specific package:
 
 ```bash
-$ lerna run test --scope aztec.js
+$ PKG=aztec.js yarn test
 ```
 
 ## FAQ :question:
 
 ### What is the AZTEC Protocol?
 
-The protocol enables transactions of value, where the _values_ of the transaction are encrypted. The AZTEC protocol smart contract validator, `AZTEC.sol`, validates a unique zero-knowledge proof that determines the legitimacy of a transaction via a combination of **homomorphic encryption** and **range proofs**.
+The protocol enables transactions of value, where the *values* of the transaction are encrypted. The AZTEC protocol smart contract validator, `AZTEC.sol`, validates a unique zero-knowledge proof that determines the legitimacy of a transaction via a combination of **homomorphic encryption** and **range proofs**.
 
 ### What is encrypted 'value'?
 
-Instead of balances, the protocol uses AZTEC **notes**. A note encrypts a number that represents a value (for example a number of ERC-20 tokens). Each note has an owner, defined via an Ethereum address. In order to _spend_ a note the owner must provide a valid ECDSA signature attesting to this.
+Instead of balances, the protocol uses AZTEC **notes**. A note encrypts a number that represents a value (for example a number of ERC-20 tokens). Each note has an owner, defined via an Ethereum address. In order to *spend* a note the owner must provide a valid ECDSA signature attesting to this.
 
 ### What does this enable?
 
 #### Confidential representations of ERC20-tokens
 
-The AZTEC protocol can enable confidential transactions for _any_ generic digital asset on Ethereum, including _existing_ assets. [For our proof of concept implementation of the AZTEC protocol](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F), we attached an AZTEC token to MakerDAO's DAI token. This smart contract can be used to convert DAI from its public ERC-20 form into a confidential AZTEC note form.
+The AZTEC protocol can enable confidential transactions for *any* generic digital asset on Ethereum, including *existing* assets. [For our proof of concept implementation of the AZTEC protocol](https://etherscan.io/address/0xcf65A4e884373Ad12cd91c8C868F1DE9DA48501F), we attached an AZTEC token to MakerDAO's DAI token. This smart contract can be used to convert DAI from its public ERC-20 form into a confidential AZTEC note form.
 
 #### Fully confidential digital assets
 
@@ -198,7 +196,7 @@ Read the AZTEC paper [here](https://github.com/AztecProtocol/AZTEC/blob/master/A
 
 #### The Trusted Setup
 
-Our proof of concept uses a trusted setup generated by our team internally. Whilst we would like to think you can trust us implicitly, we have developed a method of performing the trusted setup via multiparty computation. Each participant generates a piece of _toxic waste_ that must be destroyed. Only _one_ participant must destroy their toxic waste for the protocol to be secure and the trusted setup process can scale indefinitely. We will be releasing our full specification for the trusted setup protocol shortly.
+Our proof of concept uses a trusted setup generated by our team internally. Whilst we would like to think you can trust us implicitly, we have developed a method of performing the trusted setup via multiparty computation. Each participant generates a piece of *toxic waste* that must be destroyed. Only *one* participant must destroy their toxic waste for the protocol to be secure and the trusted setup process can scale indefinitely. We will be releasing our full specification for the trusted setup protocol shortly.
 
 ### Are AZTEC transactions anonymous as well as confidential?
 

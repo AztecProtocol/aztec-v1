@@ -1,4 +1,4 @@
-# Protocol
+## Protocol
 
 This package contains the core smart contracts of the AZTEC Protocol. The contracts are written in solidity and yul.
 
@@ -9,8 +9,8 @@ This package contains the core smart contracts of the AZTEC Protocol. The contra
 ### Truffle
 
 ```bash
-$ npm install truffle@^5.0.0 --global
-$ npm install ganache-cli --global
+$ yarn global add truffle
+$ yarn global add ganache-cli
 ```
 
 ## Usage
@@ -28,28 +28,28 @@ Make sure to have a running ganache instance in the background.
 
 We strongly recommend that the community help us make improvements and determine the future direction of the protocol. To report bugs within this package, please create an issue in this repository.
 
-Please read our [contribution guidelines](../../CONTRIBUTING.md) before getting started.
+Please read our [contribution guidelines](../../.github/CONTRIBUTING.md) before getting started.
 
 ### Install Modules
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ### Clean
 
 ```bash
-$ npm run clean
+$ yarn clean
 ```
 
 ### Lint
 
 ```bash
-$ npm run lint
+$ yarn lint
 ```
 
 ### Test
 
 ```bash
-$ npm run test
+$ yarn test
 ```
