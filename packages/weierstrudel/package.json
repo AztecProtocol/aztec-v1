@@ -1,7 +1,7 @@
 {
   "name": "@aztec/weierstrudel",
   "description": "Highly optimized smart contract that performs elliptic curve scalar multiplication",
-  "version": "0.2.0",
+  "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
