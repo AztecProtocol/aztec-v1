@@ -1,7 +1,7 @@
 {
   "name": "@aztec/contract-artifacts",
   "description": "Smart contract compilation artifacts for the latest version of AZTEC.",
-  "version": "1.4.0",
+  "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"

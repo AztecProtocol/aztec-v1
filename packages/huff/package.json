@@ -1,7 +1,7 @@
 {
   "name": "@aztec/huff",
   "description": "Compiler for Huff, a DSL for low-level Ethereum smart contract programming",
-  "version": "0.2.0",
+  "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
