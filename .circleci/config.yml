@@ -70,6 +70,7 @@ jobs:
             - restore_cache:
                 keys:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
             - run:
                 name: "Release Packages"
                 command: yarn script:publish
