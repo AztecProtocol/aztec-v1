@@ -187,6 +187,5 @@
         "version": "0.5.7+commit.6da8b019.Emscripten.clang"
     },
     "deployedBytecode": "0x",
-    "schemaVersion": "3.0.5",
-    "updatedAt": "2019-04-11T16:23:24.537Z"
+    "schemaVersion": "3.0.5"
 }
