@@ -49,7 +49,6 @@ const cherrypickContractJson = async (filename) => {
         compiler: content.compiler,
         deployedBytecode: content.deployedBytecode || {},
         schemaVersion: content.schemaVersion,
-        updatedAt: content.updatedAt,
     };
 };
 
