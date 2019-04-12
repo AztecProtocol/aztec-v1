@@ -1,0 +1,192 @@
+{
+    "abi": [
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "aceAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "linkedTokenAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "scalingFactor",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": true,
+                    "name": "_canAdjustSupply",
+                    "type": "bool"
+                },
+                {
+                    "indexed": false,
+                    "name": "_canConvert",
+                    "type": "bool"
+                }
+            ],
+            "name": "CreateZkAsset",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "noteRegistryId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "CreateNoteRegistry",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "name": "metadata",
+                    "type": "bytes"
+                }
+            ],
+            "name": "CreateNote",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "name": "metadata",
+                    "type": "bytes"
+                }
+            ],
+            "name": "DestroyNote",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "ConvertTokens",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "RedeemTokens",
+            "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialTransfer",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "name": "_spender",
+                    "type": "address"
+                },
+                {
+                    "name": "_status",
+                    "type": "bool"
+                },
+                {
+                    "name": "_signature",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialApprove",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofOutput",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialTransferFrom",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.5",
+    "updatedAt": "2019-04-11T16:23:24.537Z"
+}
