@@ -16,8 +16,7 @@ import "./ZkAssetOwnable.sol";
  * @author AZTEC
  * @dev A contract defining the standard interface and behaviours of a confidential mintable asset. 
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
-**/
-
+ **/
 contract ZkAssetMintable is ZkAssetOwnable {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
     address public owner;
