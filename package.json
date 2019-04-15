@@ -36,6 +36,7 @@
     "clean": "yarn wsrun --package $PKG --parallel -c clean",
     "clean:node_modules": "lerna clean --yes; shx rm -rf node_modules",
     "commit": "git-cz",
+    "compile:contracts": "yarn wsrun --package $PKG --parallel -c compile",
     "coverage": "yarn wsrun --package $PKG --serial -c coverage",
     "fixpack": "lerna exec --parallel -- yarn fixpack; fixpack",
     "install:all": "yarn install",
@@ -47,6 +48,7 @@
     "rebuild": "run-s clean build",
     "script:publish": "node ./packages/monorepo-scripts/publish/index.js",
     "test": "yarn wsrun --package $PKG --serial -c test",
+    "update:addresses": "node ./packages/monorepo-scripts/addresses/update.js",
     "watch": "yarn wsrun --package $PKG --parallel -c watch",
     "wsrun": "wsrun --exclude-missing --fast-exit"
   },
