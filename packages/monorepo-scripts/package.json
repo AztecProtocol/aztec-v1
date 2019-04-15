@@ -19,5 +19,8 @@
   "license": "LGPL-3.0",
   "scripts": {
     "lint": "eslint --ignore-path ../../.eslintignore ./"
+  },
+  "dependencies": {
+    "require-dir": "^1.2.0"
   }
 }
