@@ -2,7 +2,7 @@
 .0x-artifacts/
 .nyc_output/
 .vscode/
-artifacts/
+build/
 coverage/
 docs/
 lib/
@@ -11,3 +11,7 @@ node_modules/
 # files
 .releaserc
 package.json
+
+# packages
+packages/contract-addresses/addresses/
+packages/contract-artifacts/artifacts/
