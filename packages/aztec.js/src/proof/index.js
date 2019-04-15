@@ -5,6 +5,7 @@ const joinSplit = require('./joinSplit');
 const mint = require('./mint');
 const proofUtils = require('./proofUtils');
 const privateRange = require('./privateRange');
+const publicRange = require('./publicRange');
 
 module.exports = {
     bilateralSwap,
@@ -14,4 +15,5 @@ module.exports = {
     mint,
     proofUtils,
     privateRange,
+    publicRange,
 };
