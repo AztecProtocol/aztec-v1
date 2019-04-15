@@ -1,7 +1,7 @@
 {
   "name": "@aztec/contract-addresses",
   "description": "Addresses of deployed AZTEC contracts on Ethereum mainnet and testnets",
-  "version": "1.2.0",
+  "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
@@ -26,6 +26,7 @@
     "yarn": "1.15.2"
   },
   "files": [
+    "/addresses",
     "/lib"
   ],
   "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
