@@ -5,7 +5,6 @@ const utils = require('@aztec/dev-utils');
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
-const proof = require('./index.js');
 
 const { groupReduction } = bn128;
 const { errorTypes, K_MAX } = utils.constants;
@@ -24,7 +23,7 @@ const verifier = {};
  * @returns {boolean} valid - boolean that describes whether the proof verification is valid
  * @returns {option} errors - an array of all errors that were caught
  */
-verifier.verifyProof = (proofData, challengeHex, sender, u, blindingFactors) => {
+verifier.verifyProof = (proofData, challengeHex, sender, u) => {
     const errors = [];
 
     let uBN;
@@ -74,29 +73,25 @@ verifier.verifyProof = (proofData, challengeHex, sender, u, blindingFactors) => 
         let B;
 
         if (i === 0) {
-            console.log('verification')
             // input note
             B = gamma
                 .mul(kBar)
                 .add(bn128.h.mul(aBar))
                 .add(sigma.mul(challenge).neg());
             kBarArray.push(kBar);
-            console.log('i = 0; B: ', B.x.toString());
         }
 
         if (i === 1) {
             // output note
-            // const bK1 = blindingFactors[0].bk;
-            // // console.log('bk1: ', bK1.toString());
-            // const firstSub = kBarArray[i-1];
-            // const firstMul = challenge.mul(firstSub);
-            kBar = kBarArray[0].sub(uBN);
+            const firstTerm = kBarArray[0]
+            const secondTerm = challenge.mul(uBN);
+            kBar = firstTerm.sub(secondTerm);
+
             B = gamma
                 .mul(kBar)
                 .add(bn128.h.mul(aBar))
                 .add(sigma.mul(challenge).neg());
             kBarArray.push(kBar);
-            console.log('i = 1; B: ', B.x.toString());
         }
 
         if (B === null) {
@@ -123,8 +118,6 @@ verifier.verifyProof = (proofData, challengeHex, sender, u, blindingFactors) => 
 
     const recoveredChallenge = finalHash.keccak(groupReduction);
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
-
-    console.log('recovered challenge: ', finalChallenge);
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (finalChallenge !== challengeHex) {
