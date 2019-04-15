@@ -29,7 +29,7 @@ publicRange.verifier = verifier;
  * @param {Number} uBN - BN instance of the public integer being compared against
  * @returns {Object[]} blinding factors
  */
-publicRange.constructBlindingFactors = (notes, uBN) => {
+publicRange.constructBlindingFactors = (notes) => {
     const bkArray = [];
 
     return notes.map((note, i) => {
@@ -39,21 +39,16 @@ publicRange.constructBlindingFactors = (notes, uBN) => {
 
         // Calculating the blinding factors
         if (i === 0) {
-            console.log('construction')
             // input note
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             bkArray.push(bk);
-            console.log('bk: ', bk.toString());
-            console.log('i = 0; B: ', B.x.toString());
         }
 
         if (i === 1) {
             // output note
-            bk = bkArray[i-1]
+            bk = bkArray[i-1] // .sub(uBN);
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             bkArray.push(bk);
-            console.log('i = 1; B: ', B.x.toString());
-            console.log('');
         }
         return {
             bk,
@@ -112,7 +107,7 @@ publicRange.constructProof = (notes, u, sender) => {
         rollingHash.append(note.sigma);
     });
 
-    const blindingFactors = publicRange.constructBlindingFactors(notes, uBN, rollingHash);
+    const blindingFactors = publicRange.constructBlindingFactors(notes, uBN);
 
     const challenge = proofUtils.computeChallenge(sender, uBN, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
@@ -138,7 +133,6 @@ publicRange.constructProof = (notes, u, sender) => {
     return {
         proofData,
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
-        blindingFactors,
     };
 };
 
