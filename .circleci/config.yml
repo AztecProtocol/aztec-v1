@@ -69,7 +69,9 @@ jobs:
             - image: trufflesuite/ganache-cli:v6.4.1
               command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
         steps:
-            - checkout
+          - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
             - run:
                 name: "Orchestrate Artifacts"
                 command: yarn script:orchestrate:artifacts
