@@ -9,8 +9,7 @@ fi
 PKG=@aztec/protocol yarn compile:contracts
 yarn script:build:artifacts
 
-git diff --name-only
-exit 0
+git status -s
 
 if [[ -z $(git status -s) ]]; then
   echo "Smart contracts have not changed, so do not redeploy them to testnets"
@@ -18,7 +17,7 @@ if [[ -z $(git status -s) ]]; then
 fi
 
 # Set author email and name
-git config credential.helper 'cache --timeout=120'
+git config credential.helper "cache --timeout=120"
 git config user.email "$AZTEC_BOT_EMAIL"
 git config user.name "$AZTEC_BOT_NAME"
 
