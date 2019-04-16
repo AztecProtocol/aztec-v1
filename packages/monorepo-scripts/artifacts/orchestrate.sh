@@ -46,4 +46,4 @@ git add packages/contract-addresses
 git commit -m "feat(contract-addresses): sync with develop 🤖"
 
 # Push quietly to prevent showing the GitHub token in log
-git push --quiet https://${GH_TOKEN}@github.com/AztecProtocol/AZTEC.git develop
+git push --quiet https://${GH_TOKEN}@github.com/AztecProtocol/AZTEC.git develop > /dev/null 2>&1
