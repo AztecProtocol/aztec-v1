@@ -20,7 +20,7 @@ async function getFirstAddress() {
 // You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file
 // Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
 function createProvider(network) {
-    if (process.env.CIRCLECI) {
+    if (process.env.CI && process.env.CIRCLE_JOB !== 'artifacts') {
         return {};
     }
     if (!process.env.PRIVATE_KEY && !process.env.MNEMONIC) {

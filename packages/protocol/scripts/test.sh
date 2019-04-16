@@ -51,7 +51,7 @@ fi
 if [ "$MODE" = "coverage" ]; then
   ./node_modules/.bin/istanbul report html lcov
   
-  if [ "$CIRCLECI" = true ]; then
+  if [ "$CI" = true ]; then
     cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
   fi
 fi
@@ -59,7 +59,7 @@ fi
 if [ "$MODE" = "profile" ]; then
   ./node_modules/.bin/istanbul report html lcov
   
-  if [ "$CIRCLECI" = true ]; then
+  if [ "$CI" = true ]; then
     cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
   fi
 fi
