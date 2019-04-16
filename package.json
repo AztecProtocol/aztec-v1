@@ -35,7 +35,7 @@
     "clean": "yarn wsrun --package $PKG --parallel -c clean",
     "clean:node_modules": "lerna clean --yes; shx rm -rf node_modules",
     "commit": "git-cz",
-    "compile:contracts": "yarn wsrun --package $PKG --parallel -c compile",
+    "compile:contracts": "yarn wsrun --package $PKG --parallel -c compile:contracts",
     "coverage": "yarn wsrun --package $PKG --serial -c coverage",
     "fixpack": "lerna exec --parallel -- yarn fixpack; fixpack",
     "install:all": "yarn install",

@@ -61,7 +61,7 @@
   },
   "scripts": {
     "clean": "shx rm -rf ./.0x-artifacts ./.nyc-output ./build ./coverage ./coverageEnv ./coverage.json || true",
-    "compile": "truffle compile",
+    "compile:contracts": "truffle compile",
     "coverage": "scripts/coverage.sh",
     "deploy:kovan": "truffle migrate --network kovan",
     "deploy:rinkeby": "truffle migrate --network rinkeby",
