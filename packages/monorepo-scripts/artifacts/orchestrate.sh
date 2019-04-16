@@ -9,6 +9,9 @@ fi
 PKG=@aztec/protocol yarn compile:contracts
 yarn script:build:artifacts
 
+git diff --name-only
+exit 0
+
 if [[ -z $(git status -s) ]]; then
   echo "Smart contracts have not changed, so do not redeploy them to testnets"
   exit 0
