@@ -5,21 +5,21 @@ const rinkebyAddresses = require('../addresses/rinkeby');
 const ropstenAddresses = require('../addresses/ropsten');
 
 const NetworkId = {
-    Mainnet: 1,
-    Ropsten: 3,
-    Rinkeby: 4,
-    Kovan: 42,
-    Ganache: 1234,
+    Mainnet: '1',
+    Ropsten: '3',
+    Rinkeby: '4',
+    Kovan: '42',
+    Ganache: '1234',
 };
 
 const networkToAddresses = {
-    3: {
+    '3': {
         ...ropstenAddresses,
     },
-    4: {
+    '4': {
         ...rinkebyAddresses,
     },
-    42: {
+    '42': {
         ...kovanAddresses,
     },
 };
