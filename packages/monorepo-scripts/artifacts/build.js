@@ -1,15 +1,13 @@
 const Promise = require('bluebird');
 const path = require('path');
-
 const fs = Promise.promisifyAll(require('fs-extra'));
 
 const CONTRACTS_DIR = path.join(__dirname, '..', '..', 'protocol', 'build', 'contracts');
 const ARTIFACTS_DIR = path.join(__dirname, '..', '..', 'contract-artifacts', 'artifacts');
 const ARTIFACTS_DIR_AUX = path.join(__dirname, '..', '..', 'contract-artifacts', 'artifacts-aux');
 
-const excludedContracts = ['ERC20', 'IERC20', 'Migrations', 'Ownable', 'SafeMath'];
-
 const abiSwapContracts = ['AdjustSupply', 'BilateralSwap', 'DividendComputation', 'JoinSplit'];
+const excludedContracts = ['ERC20', 'IERC20', 'Migrations', 'Ownable', 'SafeMath'];
 
 const cherrypickContractJson = async (filename) => {
     const filepath = path.join(CONTRACTS_DIR, filename);
@@ -82,4 +80,9 @@ const buildArtifacts = async () => {
     }
 };
 
-buildArtifacts();
+if (process.env.CI && process.env.CIRCLE_BRANCH === 'artifacts') {
+    buildArtifacts();
+} else {
+    console.error('Script can only be run in a CI environment');
+    process.exit(1);
+}
