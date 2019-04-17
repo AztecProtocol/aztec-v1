@@ -10,6 +10,13 @@ import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
 import "./ZkAssetOwnable.sol";
 
+/**
+ * @title ZkAssetBurnable
+ * @author AZTEC
+ * @dev A contract defining the standard interface and behaviours of a confidential burnable asset. 
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+**/
+
 contract ZkAssetBurnable is ZkAssetOwnable {
     event UpdateTotalBurned(bytes32 noteHash, bytes noteData);
 
