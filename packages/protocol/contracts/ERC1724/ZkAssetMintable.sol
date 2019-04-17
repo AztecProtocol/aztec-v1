@@ -38,6 +38,15 @@ contract ZkAssetMintable is ZkAssetOwnable {
         owner = msg.sender;
     }
 
+    /**
+    * @dev Executes a confidential minting procedure, dependent on the provided proofData
+    * being succesfully validated by the zero-knowledge validator
+    * 
+    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables: 
+    * 1) epoch number 2) category number 3) ID number for the proof
+    * @param _proofData - bytes array of proof data, outputted from a proof construction
+    */
     function confidentialMint(uint24 _proof, bytes calldata _proofData) external {
         require(msg.sender == owner, "only the owner can call the confidentialMint() method");
         require(_proofData.length != 0, "proof invalid");
@@ -55,7 +64,21 @@ contract ZkAssetMintable is ZkAssetOwnable {
         logOutputNotes(mintedNotes);
         emit UpdateTotalMinted(noteHash, metadata);
     }
-
+    /**
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes adapted for use with 
+    * a mintable ZkAsset.
+    *
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine. 
+    *
+    *
+    * If public value is being transferred out of the ACE, and the minted value is greater than 
+    * ACE's token balance, then tokens will be minted from the linked ERC20 token using supplementTokens()
+    *
+    * Upon successfull verification, it will update note registry state - creating output notes and 
+    * destroying input notes. 
+    * 
+    * @param _proofData - bytes variable outputted from proof construction
+    */
     function confidentialTransfer(bytes memory _proofData) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid");
