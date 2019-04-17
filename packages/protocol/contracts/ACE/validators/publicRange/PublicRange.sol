@@ -187,8 +187,6 @@ contract PublicRange {
                 // starting at 0x2e0, of size (b - 0x2e0).
                 // Hash this block to reconstruct the initial challenge and validate that they match
                 let expected := mod(keccak256(0x2e0, sub(b, 0x2e0)), gen_order)
-                mstore(0x00, expected)
-                return(0x00, 0x20)
 
                 if iszero(eq(expected, challenge)) {
 
@@ -196,6 +194,8 @@ contract PublicRange {
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
+                mstore(0x00, 0x01)
+                return(0x00, 0x20)
             }
 
             /**
