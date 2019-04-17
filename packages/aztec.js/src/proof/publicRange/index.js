@@ -46,7 +46,7 @@ publicRange.constructBlindingFactors = (notes) => {
 
         if (i === 1) {
             // output note
-            bk = bkArray[i-1] // .sub(uBN);
+            bk = bkArray[i - 1]; // .sub(uBN);
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             bkArray.push(bk);
         }
@@ -148,27 +148,15 @@ publicRange.constructProof = (notes, u, sender) => {
  * @returns {Object} AZTEC proof data and expected output
  */
 publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, u, senderAddress }) => {
-    const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-        [...inputNotes, ...outputNotes],
-        u,
-        senderAddress,
-    );
+    const { proofData: proofDataRaw, challenge } = publicRange.constructProof([...inputNotes, ...outputNotes], u, senderAddress);
 
     const inputOwners = inputNotes.map((m) => m.owner);
     const outputOwners = outputNotes.map((n) => n.owner);
 
-    const proofData = inputCoder.publicRange(
-        proofDataRaw,
-        challenge,
-        u,
-        inputOwners,
-        outputOwners,
-        outputNotes,
-    );
+    const proofData = inputCoder.publicRange(proofDataRaw, challenge, u, inputOwners, outputOwners, outputNotes);
 
     const publicValue = 0;
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
-
 
     const expectedOutput = `0x${outputCoder
         .encodeProofOutputs([

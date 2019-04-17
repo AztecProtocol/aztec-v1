@@ -83,7 +83,7 @@ verifier.verifyProof = (proofData, challengeHex, sender, u) => {
 
         if (i === 1) {
             // output note
-            const firstTerm = kBarArray[0]
+            const firstTerm = kBarArray[0];
             const secondTerm = challenge.mul(uBN);
             kBar = firstTerm.sub(secondTerm);
 

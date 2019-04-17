@@ -49,7 +49,6 @@ describe('Public range proof verifier', () => {
             const u = 10;
             const sender = proofUtils.randomAddress();
 
-
             const { proofData } = publicRange.constructProof(testNotes, u, sender);
 
             const zeroes = `${padLeft('0', 64)}`;
@@ -57,12 +56,7 @@ describe('Public range proof verifier', () => {
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const fakeChallenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const { valid, errors } = publicRange.verifier.verifyProof(
-                proofData,
-                fakeChallenge,
-                sender,
-                u
-            );
+            const { valid, errors } = publicRange.verifier.verifyProof(proofData, fakeChallenge, sender, u);
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
@@ -74,7 +68,6 @@ describe('Public range proof verifier', () => {
             const testNotes = proofUtils.makeTestNotes([50], [40]);
             const u = 10;
             const sender = proofUtils.randomAddress();
-
 
             const { challenge } = publicRange.constructProof(testNotes, u, sender);
 
@@ -88,13 +81,11 @@ describe('Public range proof verifier', () => {
             parseInputs.restore();
         });
 
-
         it('should REJECT if point not on the curve', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
             const testNotes = proofUtils.makeTestNotes([50], [40]);
             const u = 10;
             const sender = proofUtils.randomAddress();
-
 
             const { proofData, challenge } = publicRange.constructProof(testNotes, u, sender);
 
@@ -114,7 +105,6 @@ describe('Public range proof verifier', () => {
             const testNotes = proofUtils.makeTestNotes([50], [40]);
             const u = 10;
             const sender = proofUtils.randomAddress();
-
 
             const { proofData } = publicRange.constructProof(testNotes, u, sender);
 
@@ -139,7 +129,6 @@ describe('Public range proof verifier', () => {
             const testNotes = proofUtils.makeTestNotes([50], [40]);
             const u = 10;
             const sender = proofUtils.randomAddress();
-
 
             const { proofData, challenge } = publicRange.constructProof(testNotes, u, sender);
 

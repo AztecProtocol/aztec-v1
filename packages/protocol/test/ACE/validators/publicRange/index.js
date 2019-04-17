@@ -1,7 +1,6 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 
-
 // ### Internal Dependencies
 const {
     secp256k1,
@@ -11,14 +10,12 @@ const {
 const { constants } = require('@aztec/dev-utils');
 const truffleAssert = require('truffle-assertions');
 
-
 // ### Artifacts
 
 const PublicRange = artifacts.require('./PublicRange');
 const PublicRangeInterface = artifacts.require('./PublicRangeInterface');
 
 PublicRange.abi = PublicRangeInterface.abi;
-
 
 contract('Public range proof tests', (accounts) => {
     let publicRangeContract;
@@ -67,12 +64,11 @@ contract('Public range proof tests', (accounts) => {
                 senderAddress,
             });
 
-
             const result = await publicRangeContract.validatePublicRange(proofData, accounts[0], constants.CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
-            expect(result).to.equal(true)
+            expect(result).to.equal(true);
         });
 
         it('validate success when public integer equals the note value', async () => {
@@ -99,7 +95,7 @@ contract('Public range proof tests', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             });
-            expect(result).to.equal(true)
+            expect(result).to.equal(true);
         });
     });
 
@@ -134,9 +130,7 @@ contract('Public range proof tests', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            await truffleAssert.reverts(
-                publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts),
-            );
+            await truffleAssert.reverts(publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts));
         });
 
         it('validate failure when note value is less than public integer', async () => {
@@ -163,9 +157,7 @@ contract('Public range proof tests', (accounts) => {
                 from: accounts[0],
                 gas: 4000000,
             };
-            await truffleAssert.reverts(
-                publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts),
-            );
+            await truffleAssert.reverts(publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts));
         });
     });
 });
