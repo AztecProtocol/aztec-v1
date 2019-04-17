@@ -166,16 +166,23 @@ publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, u, sender
         outputNotes,
     );
 
+    const publicValue = 0;
+    const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
+
+
     const expectedOutput = `0x${outputCoder
         .encodeProofOutputs([
             {
                 inputNotes,
                 outputNotes,
+                publicOwner,
+                publicValue,
                 challenge,
             },
         ])
         .slice(0x42)}`;
-    return { proofData, expectedOutput, challenge };
+
+    return { proofData, challenge, expectedOutput };
 };
 
 module.exports = publicRange;
