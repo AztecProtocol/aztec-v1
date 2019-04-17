@@ -6,6 +6,7 @@ packages/aztec.js               @zac-williamson @PaulRBerg @thomas-waite
 packages/contract-addresses     @PaulRBerg
 packages/contract-artifacts     @PaulRBerg
 packages/dev-utils              @PaulRBerg @thomas-waite
+packages/monorepo-scripts       @PaulRBerg
 packages/protocol               @zac-williamson @PaulRBerg @thomas-waite
 packages/huff                   @zac-williamson
 packages/weierstrudel           @zac-williamson
