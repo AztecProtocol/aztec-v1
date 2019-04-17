@@ -1,19 +1,12 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const sinon = require('sinon');
-const BN = require('bn.js');
-const crypto = require('crypto');
-const truffleAssert = require('truffle-assertions');
-const { sha3, padLeft } = require('web3-utils');
+
 
 // ### Internal Dependencies
 const {
     secp256k1,
     note,
-    proof: { proofUtils, publicRange },
-    abiEncoder: { outputCoder, inputCoder, encoderFactory },
-    bn128,
-    keccak,
+    proof: { publicRange },
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 
@@ -24,7 +17,6 @@ const PublicRangeInterface = artifacts.require('./PublicRangeInterface');
 
 PublicRange.abi = PublicRangeInterface.abi;
 
-const Keccak = keccak;
 
 contract.only('Public range proof tests', (accounts) => {
     let publicRangeContract;
