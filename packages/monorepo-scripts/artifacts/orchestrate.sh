@@ -17,7 +17,7 @@ yarn script:build:artifacts
 git status -s
 
 if [[ -z $(git status -s) ]]; then
-  echo "Smart contracts have not changed, so do not redeploy them to testnets"
+  echo "Smart contracts have not changed, so the Bot will not redeploy them to testnets"
   exit 0
 fi
 
@@ -43,7 +43,7 @@ yarn script:update:addresses
 
 # Commit contract addresses
 if [[ -z $(git status -s) ]]; then
-  echo "Artifacts have changed but script:update:addresses hasn't modified the files"
+  echo "Artifacts have changed but addresses have not"
   exit 1
 fi
 
