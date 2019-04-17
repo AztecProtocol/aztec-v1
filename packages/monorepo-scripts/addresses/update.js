@@ -80,4 +80,9 @@ const updateAddresses = async () => {
     }
 };
 
-updateAddresses();
+if (process.env.CI && process.env.CIRCLE_BRANCH === 'artifacts') {
+    updateAddresses();
+} else {
+    console.error('Script can only be run in a CI environment');
+    process.exit(1);
+}
