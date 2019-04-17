@@ -10,6 +10,13 @@ import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
 import "./ZkAssetOwnable.sol";
 
+/**
+ * @title ZkAssetBurnable
+ * @author AZTEC
+ * @dev A contract defining the standard interface and behaviours of a confidential burnable asset. 
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+**/
+
 contract ZkAssetBurnable is ZkAssetOwnable {
     event UpdateTotalBurned(bytes32 noteHash, bytes noteData);
 
@@ -28,7 +35,15 @@ contract ZkAssetBurnable is ZkAssetOwnable {
     ){
         owner = msg.sender;
     }
-
+    /**
+    * @dev Executes a confidential burning procedure, dependent on the provided proofData
+    * being succesfully validated by the zero-knowledge validator
+    * 
+    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables: 
+    * 1) epoch number 2) category number 3) ID number for the proof
+    * @param _proofData - bytes array of proof data, outputted from a proof construction
+    */
     function confidentialBurn(uint24 _proof, bytes calldata _proofData) external {
         require(msg.sender == owner, "only the owner can call the confidentialBurn() method");
         require(_proofData.length != 0, "proof invalid");
