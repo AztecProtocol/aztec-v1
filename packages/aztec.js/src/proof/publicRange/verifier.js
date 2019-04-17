@@ -113,9 +113,6 @@ verifier.verifyProof = (proofData, challengeHex, sender, u) => {
         };
     });
 
-
-    // console.log('proof data', proofDataBn);
-
     const recoveredChallenge = finalHash.keccak(groupReduction);
     const finalChallenge = `0x${padLeft(recoveredChallenge.toString(16), 64)}`;
 
