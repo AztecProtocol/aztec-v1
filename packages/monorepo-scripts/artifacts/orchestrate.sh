@@ -2,7 +2,12 @@
 
 # Double, triple check that this only runs on the develop branch
 if [ "$CIRCLE_BRANCH" != "develop" ]; then
-  echo "Artifact orchestration should occur only on the \"develop\" branch"
+  echo "Artifact orchestration should run only on the \"develop\" branch"
+  exit 0
+fi
+
+if [ "$CIRCLE_USERNAME" = "$AZTEC_BOT_NAME" ]; then
+  echo "Artifact orchestration does not run for commits authored by the Bot"
   exit 0
 fi
 
@@ -23,7 +28,7 @@ git config user.name "$AZTEC_BOT_NAME"
 
 # Commit contract artifacts
 git add packages/contract-artifacts
-git commit -m "feat(contract-artifacts): sync with develop 🤖"
+git commit -m "feat(contract-artifacts): sync 🤖"
 
 # Run testnet deployment scripts in parallel
 cd packages/protocol
@@ -43,7 +48,7 @@ if [[ -z $(git status -s) ]]; then
 fi
 
 git add packages/contract-addresses
-git commit -m "feat(contract-addresses): sync with develop 🤖"
+git commit -m "feat(contract-addresses): sync 🤖"
 
 # Push quietly to prevent showing the GitHub token in log
 git push --quiet https://${GH_TOKEN}@github.com/AztecProtocol/AZTEC.git develop > /dev/null 2>&1
