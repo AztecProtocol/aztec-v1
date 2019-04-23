@@ -421,9 +421,7 @@ describe('abiEncoder.encoderFactory', () => {
             const outputOwners = [outputNote[0].owner];
 
             const result = new HexString(
-                abiEncoder.inputCoder
-                    .privateRange(proofData, challenge, inputOwners, outputOwners, outputNote)
-                    .slice(2),
+                abiEncoder.inputCoder.privateRange(proofData, challenge, inputOwners, outputOwners, outputNote).slice(2),
             );
             expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
 

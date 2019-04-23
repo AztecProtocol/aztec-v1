@@ -18,10 +18,7 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 4;
             const utilityValue = 6;
 
-            const testNotes = proofUtils.makeTestNotes(
-                [originalValue, comparisonValue],
-                [utilityValue]
-            );
+            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
@@ -36,10 +33,7 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 0;
             const utilityValue = 10;
 
-            const testNotes = proofUtils.makeTestNotes(
-                [originalValue, comparisonValue],
-                [utilityValue]
-            );
+            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
@@ -56,17 +50,14 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 5;
             const utilityValue = 6;
 
-            const testNotes = proofUtils.makeTestNotes(
-                [originalValue, comparisonValue],
-                [utilityValue]
-            );
+            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(1)
+            expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
@@ -75,17 +66,14 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 30;
             const utilityValue = -10;
 
-            const testNotes = proofUtils.makeTestNotes(
-                [originalValue, comparisonValue],
-                [utilityValue]
-            );
+            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(1)
+            expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
@@ -94,10 +82,7 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 4;
             const utilityValue = 6;
 
-            const testNotes = proofUtils.makeTestNotes(
-                [originalValue, comparisonValue],
-                [utilityValue]
-            );
+            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
@@ -109,7 +94,7 @@ describe('Private range proof verifier', () => {
             const { proofData } = privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, fakeChallenge, sender);
             expect(valid).to.equal(false);
-            expect(errors.length).to.equal(1)
+            expect(errors.length).to.equal(1);
             expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
     });
