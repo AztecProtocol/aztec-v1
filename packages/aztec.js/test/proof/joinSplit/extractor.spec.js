@@ -1,6 +1,4 @@
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
@@ -8,15 +6,16 @@ const { padLeft } = require('web3-utils');
 const sinon = require('sinon');
 
 const bn128 = require('../../../src/bn128');
-const proof = require('../../../src/proof/joinSplit');
 const extractor = require('../../../src/proof/joinSplit/extractor');
+const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const proofUtils = require('../../../src/proof/proofUtils');
 
+const { constants } = devUtils;
 const { expect } = chai;
 
 function generateNoteValue() {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
+    return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
 }
 
 function getKPublic(kIn, kOut) {
@@ -74,10 +73,11 @@ describe('Join-Split Proof Extractor', () => {
         computeChallenge.restore();
     });
 
-    it('should extract witnesses from two satisfying proofs over the same input string in the random oracle model', () => {
+    // eslint-disable-next-line max-len
+    it('should extract witnesses from two satisfying proofs over the same input string in the random oracle model', async () => {
         const kIn = [...Array(nIn)].map(() => generateNoteValue());
         const kOut = [...Array(nOut)].map(() => generateNoteValue());
-        const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         const kPublic = getKPublic(kIn, kOut);
         const sender = randomAddress();
 

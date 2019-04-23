@@ -8,18 +8,18 @@ const secp256k1 = require('../../secp256k1');
 
 const helpers = {};
 
-function generateCommitment(k) {
+const generateCommitment = async (k) => {
     const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
     const kHex = padLeft(toHex(Number(k).toString(10)).slice(2), 8);
     const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
     const viewingKey = `0x${a}${kHex}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
     return note.fromViewKey(viewingKey);
-}
+};
 
 // constructs an AZTEC commitment directly from the setup algorithm's trapdoor key.
 // Used for testing purposes only; we don't know the trapdoor key for the real deal.
-function generateFakeCommitment(k, trapdoor) {
-    const commitment = generateCommitment(k);
+const generateFakeCommitment = async (k, trapdoor) => {
+    const commitment = await generateCommitment(k);
     const kBn = new BN(k).toRed(bn128.groupReduction);
     const mu = bn128.h.mul(trapdoor.redSub(kBn).redInvm());
     const gamma = mu.mul(commitment.a);
@@ -29,7 +29,7 @@ function generateFakeCommitment(k, trapdoor) {
         gamma,
         sigma,
     };
-}
+};
 
 /**
  * Create a set of AZTEC commitments from vectors of input and output values
@@ -40,13 +40,17 @@ function generateFakeCommitment(k, trapdoor) {
  * @param {number[]} values.kOut vector of output note values
  * @returns {Object} AZTEC commitment array
  */
-helpers.generateCommitmentSet = ({ kIn, kOut }) => {
-    const inputs = kIn.map((k) => {
-        return generateCommitment(k);
-    });
-    const outputs = kOut.map((k) => {
-        return generateCommitment(k);
-    });
+helpers.generateCommitmentSet = async ({ kIn, kOut }) => {
+    const inputs = await Promise.all(
+        kIn.map((k) => {
+            return generateCommitment(k);
+        }),
+    );
+    const outputs = await Promise.all(
+        kOut.map((k) => {
+            return generateCommitment(k);
+        }),
+    );
     const commitments = [...inputs, ...outputs];
     return { commitments, m: inputs.length };
 };
@@ -61,14 +65,18 @@ helpers.generateCommitmentSet = ({ kIn, kOut }) => {
  * @param {number[]} values.kOut vector of output note values
  * @returns {Object} AZTEC commitment array
  */
-helpers.generateFakeCommitmentSet = ({ kIn, kOut }) => {
+helpers.generateFakeCommitmentSet = async ({ kIn, kOut }) => {
     const trapdoor = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
-    const inputs = kIn.map((k) => {
-        return generateFakeCommitment(k, trapdoor);
-    });
-    const outputs = kOut.map((k) => {
-        return generateFakeCommitment(k, trapdoor);
-    });
+    const inputs = await Promise.all(
+        kIn.map((k) => {
+            return generateFakeCommitment(k, trapdoor);
+        }),
+    );
+    const outputs = await Promise.all(
+        kOut.map((k) => {
+            return generateFakeCommitment(k, trapdoor);
+        }),
+    );
     const commitments = [...inputs, ...outputs];
     return { commitments, m: inputs.length, trapdoor };
 };

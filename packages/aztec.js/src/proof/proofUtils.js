@@ -16,7 +16,7 @@ const crypto = require('crypto');
 const bn128 = require('../bn128');
 const Keccak = require('../keccak');
 const secp256k1 = require('../secp256k1');
-const notesConstruct = require('../note');
+const note = require('../note');
 
 const { groupReduction } = bn128;
 
@@ -32,9 +32,9 @@ const zero = new BN(0).toRed(groupReduction);
  * @param {string[]} makerNoteValues - array of taker note values
  * @returns {Object[]} Array of AZTEC notes
  */
-proofUtils.makeTestNotes = (makerNoteValues, takerNoteValues) => {
+proofUtils.makeTestNotes = async (makerNoteValues, takerNoteValues) => {
     const noteValues = [...makerNoteValues, ...takerNoteValues];
-    return noteValues.map((value) => notesConstruct.create(secp256k1.generateAccount().publicKey, value));
+    return Promise.all(noteValues.map((value) => note.create(secp256k1.generateAccount().publicKey, value)));
 };
 
 proofUtils.randomAddress = () => {
@@ -154,7 +154,7 @@ proofUtils.generateBlindingScalars = (n, m) => {
  */
 proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
     const bkArray = [];
-    const blindingFactors = noteArray.map((note, i) => {
+    const blindingFactors = noteArray.map((testNote, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
 
@@ -172,7 +172,7 @@ proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
             bk = bkArray[i - 2];
         }
 
-        const B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+        const B = testNote.gamma.mul(bk).add(bn128.h.mul(ba));
 
         finalHash.append(B);
         bkArray.push(bk);
@@ -311,7 +311,7 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
  */
 proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) => {
     if (proofType !== 'joinSplit' && proofType !== 'burn' && proofType !== 'mint') {
-        throw new Error('Enter joinsplit, mint or burn in string format as the proofType variable');
+        throw new Error('Enter join-split, mint or burn in string format as the proofType variable');
     }
 
     const challenge = proofUtils.hexToGroupScalar(challengeHex, errors);
@@ -335,7 +335,7 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
     let runningKBar = zero.redSub(kPublic).redMul(challenge);
     const rollingHash = new Keccak();
 
-    const notes = proofData.map((note, i) => {
+    const notes = proofData.map((testNote, i) => {
         let kBar;
         if (i === n - 1) {
             if (n === m) {
@@ -347,7 +347,7 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
                 errors.push(errorTypes.SCALAR_IS_ZERO);
             }
         } else {
-            kBar = proofUtils.hexToGroupScalar(note[0], errors);
+            kBar = proofUtils.hexToGroupScalar(testNote[0], errors);
             if (i >= m) {
                 runningKBar = runningKBar.redSub(kBar);
             } else {
@@ -356,9 +356,9 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
         }
         const result = {
             kBar,
-            aBar: proofUtils.hexToGroupScalar(note[1], errors),
-            gamma: proofUtils.hexToGroupElement(note[2], note[3], errors),
-            sigma: proofUtils.hexToGroupElement(note[4], note[5], errors),
+            aBar: proofUtils.hexToGroupScalar(testNote[1], errors),
+            gamma: proofUtils.hexToGroupElement(testNote[2], testNote[3], errors),
+            sigma: proofUtils.hexToGroupElement(testNote[4], testNote[5], errors),
         };
         rollingHash.append(result.gamma);
         rollingHash.append(result.sigma);
@@ -425,37 +425,37 @@ proofUtils.computeChallenge = (...challengeVariables) => {
  * @param {string} kPublic public commitment being added to proof
  */
 proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdentifier = 0) => {
-    notes.forEach((note) => {
-        if (!note.a.fromRed().lt(bn128.curve.n) || note.a.fromRed().eq(new BN(0))) {
+    notes.forEach((testNote) => {
+        if (!testNote.a.fromRed().lt(bn128.curve.n) || testNote.a.fromRed().eq(new BN(0))) {
             throw customError(errorTypes.VIEWING_KEY_MALFORMED, {
                 message: 'Viewing key is malformed',
-                viewingKey: note.a.fromRed(),
+                viewingKey: testNote.a.fromRed(),
                 criteria: `Viewing key should be less than ${bn128.curve.n} 
                     and greater than zero`,
             });
         }
 
-        if (!note.k.fromRed().lt(new BN(K_MAX))) {
+        if (!testNote.k.fromRed().lt(new BN(K_MAX))) {
             throw customError(errorTypes.NOTE_VALUE_TOO_BIG, {
                 message: 'Note value is equal to or greater than K_Max',
-                noteValue: note.k.fromRed(),
+                noteValue: testNote.k.fromRed(),
                 K_MAX,
             });
         }
 
-        if (note.gamma.isInfinity() || note.sigma.isInfinity()) {
+        if (testNote.gamma.isInfinity() || testNote.sigma.isInfinity()) {
             throw customError(errorTypes.POINT_AT_INFINITY, {
                 message: 'One of the note points is at infinity',
-                gamma: note.gamma.isInfinity(),
-                sigma: note.sigma.isInfinity(),
+                gamma: testNote.gamma.isInfinity(),
+                sigma: testNote.sigma.isInfinity(),
             });
         }
 
-        if (!proofUtils.isOnCurve(note.gamma) || !proofUtils.isOnCurve(note.sigma)) {
+        if (!proofUtils.isOnCurve(testNote.gamma) || !proofUtils.isOnCurve(testNote.sigma)) {
             throw customError(errorTypes.NOT_ON_CURVE, {
                 message: 'A note group element is not on the curve',
-                gammaOnCurve: proofUtils.isOnCurve(note.gamma),
-                sigmaOnCurve: proofUtils.isOnCurve(note.sigma),
+                gammaOnCurve: proofUtils.isOnCurve(testNote.gamma),
+                sigmaOnCurve: proofUtils.isOnCurve(testNote.sigma),
             });
         }
     });

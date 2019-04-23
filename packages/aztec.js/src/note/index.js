@@ -1,15 +1,15 @@
 const BN = require('bn.js');
-const web3Utils = require('web3-utils');
 const crypto = require('crypto');
+const { keccak256, padLeft, toHex } = require('web3-utils');
 
+const abiEncoder = require('../abiEncoder');
 const bn128 = require('../bn128');
 const secp256k1 = require('../secp256k1');
 const setup = require('../setup');
 const utils = require('./utils');
-const { noteCoder } = require('../abiEncoder');
 
 const { getSharedSecret, getNoteHash } = utils;
-const { padLeft } = web3Utils;
+const { noteCoder } = abiEncoder;
 
 /**
  * Create a Diffie-Hellman shared secret for a given public key
@@ -27,7 +27,7 @@ function createSharedSecret(publicKeyHex) {
     const ephemeralKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
     const sharedSecret = publicKey.getPublic().mul(ephemeralKey.priv);
     const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
-    const encoded = web3Utils.sha3(sharedSecretHex, 'hex');
+    const encoded = keccak256(sharedSecretHex, 'hex');
     return {
         ephemeralKey: `0x${ephemeralKey.getPublic(true, 'hex')}`,
         encoded,
@@ -44,7 +44,7 @@ function createSharedSecret(publicKeyHex) {
  *   Notes have public keys and viewing keys.
  *   The viewing key is required to use note in an AZTEC zero-knowledge proof
  */
-function Note(publicKey, viewingKey, owner = '0x') {
+function Note(publicKey, viewingKey, owner = '0x', setupPoint) {
     if (publicKey && viewingKey) {
         throw new Error('expected one of publicKey or viewingKey, not both');
     }
@@ -96,7 +96,7 @@ function Note(publicKey, viewingKey, owner = '0x') {
         }
         this.a = new BN(viewingKey.slice(2, 66), 16).toRed(bn128.groupReduction);
         this.k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
-        const { x, y } = setup.readSignatureSync(this.k.toNumber());
+        const { x, y } = setupPoint;
         const mu = bn128.curve.point(x, y);
         this.gamma = mu.mul(this.a);
         this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
@@ -234,8 +234,10 @@ note.fromPublicKey = (publicKey) => {
  * @param {string} viewingKey the viewing key for the note
  * @returns {Note} created note instance
  */
-note.fromViewKey = (viewingKey) => {
-    const newNote = new Note(null, viewingKey);
+note.fromViewKey = async (viewingKey) => {
+    const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
+    const setupPoint = await setup.fetchPoint(k.toNumber());
+    const newNote = new Note(null, viewingKey, undefined, setupPoint);
     return newNote;
 };
 
@@ -262,14 +264,16 @@ note.derive = async (publicKey, spendingKey) => {
  * @param {string} owner owner of the not if different from the public key
  * @returns {Note} created note instance
  */
-note.create = (spendingPublicKey, value, noteOwner) => {
+
+note.create = async (spendingPublicKey, value) => {
     const sharedSecret = createSharedSecret(spendingPublicKey);
     const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
-    const k = padLeft(web3Utils.toHex(value).slice(2), 8);
+    const k = padLeft(toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;
-    const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
-    return new Note(null, viewingKey, owner);
+    const owner = secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
+    const setupPoint = await setup.fetchPoint(value);
+    return new Note(null, viewingKey, owner, setupPoint);
 };
 
 /**

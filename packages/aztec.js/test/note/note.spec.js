@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const web3Utils = require('web3-utils');
 const BN = require('bn.js');
 
-const notes = require('../../src/note');
+const note = require('../../src/note');
 const noteUtils = require('../../src/note/utils');
 const secp256k1 = require('../../src/secp256k1');
 
@@ -14,28 +14,28 @@ const { padLeft } = web3Utils;
 const { expect } = chai;
 
 describe('Note', () => {
-    it('should create well formed notes using the fromPublic and fromViewKey methods', () => {
+    it('should create well formed notes using the fromPublic and fromViewKey methods', async () => {
         const aBn = new BN(crypto.randomBytes(32), 16).umod(GROUP_MODULUS);
         const a = padLeft(aBn.toString(16), 64);
 
         const k = padLeft(web3Utils.toHex('13456').slice(2), 8);
         const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
         const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
-        const note = notes.fromViewKey(viewingKey);
-        const expectedViewKey = note.getView();
+        const testNote = await note.fromViewKey(viewingKey);
+        const expectedViewKey = testNote.getView();
         expect(expectedViewKey).to.equal(viewingKey);
-        const exportedPublicKey = note.getPublic();
+        const exportedPublicKey = testNote.getPublic();
 
-        const importedNote = notes.fromPublicKey(exportedPublicKey);
+        const importedNote = note.fromPublicKey(exportedPublicKey);
 
-        expect(importedNote.gamma.encode('hex', false)).to.equal(note.gamma.encode('hex', false));
-        expect(importedNote.sigma.encode('hex', false)).to.equal(note.sigma.encode('hex', false));
+        expect(importedNote.gamma.encode('hex', false)).to.equal(testNote.gamma.encode('hex', false));
+        expect(importedNote.sigma.encode('hex', false)).to.equal(testNote.sigma.encode('hex', false));
     });
 
     it('should create well formed notes using the create and derive functions', async () => {
         const spendingKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
-        const result = notes.create(`0x${spendingKey.getPublic(true, 'hex')}`, 1234);
-        const expected = await notes.derive(result.getPublic(), `0x${spendingKey.getPrivate('hex')}`);
+        const result = await note.create(`0x${spendingKey.getPublic(true, 'hex')}`, 1234);
+        const expected = await note.derive(result.getPublic(), `0x${spendingKey.getPrivate('hex')}`);
         expect(result.gamma.encode('hex', false)).to.equal(expected.gamma.encode('hex', false));
         expect(result.sigma.encode('hex', false)).to.equal(expected.sigma.encode('hex', false));
         expect(result.k.toString(16)).to.equal(expected.k.toString(16));
@@ -43,15 +43,15 @@ describe('Note', () => {
         expect(expected.k.toString(10)).to.equal('1234');
     });
 
-    it('should encode the metadata of a set of notes', () => {
+    it('should encode the metadata of a set of notes', async () => {
         const accounts = [secp256k1.generateAccount(), secp256k1.generateAccount()];
         const noteArray = [
-            notes.create(accounts[0].publicKey, 100),
-            notes.create(accounts[0].publicKey, 100),
-            notes.create(accounts[1].publicKey, 100),
-            notes.create(accounts[1].publicKey, 100),
+            await note.create(accounts[0].publicKey, 100),
+            await note.create(accounts[0].publicKey, 100),
+            await note.create(accounts[1].publicKey, 100),
+            await note.create(accounts[1].publicKey, 100),
         ];
-        const metadata = notes.encodeMetadata(noteArray);
+        const metadata = note.encodeMetadata(noteArray);
         expect(metadata.length).to.equal(266);
 
         const ephemeralKeys = [
@@ -73,10 +73,10 @@ describe('Note', () => {
         expect(new BN(sharedSecrets[3].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[3].a.fromRed())).to.equal(true);
     });
 
-    it('should export k, a values of 0 for a note created from a note public key', () => {
-        const note = notes.create(secp256k1.generateAccount().publicKey, 100);
-        const publicKey = note.getPublic();
-        const imported = notes.fromPublicKey(publicKey);
+    it('should export k, a values of 0 for a note created from a note public key', async () => {
+        const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
+        const publicKey = testNote.getPublic();
+        const imported = note.fromPublicKey(publicKey);
         const result = imported.exportNote();
         expect(result.a).to.equal('0x');
         expect(result.k).to.equal('0x');
@@ -84,12 +84,12 @@ describe('Note', () => {
         expect(result.publicKey).to.equal(publicKey);
     });
 
-    it('should throw if given both a public key and a viewing key', () => {
-        const note = notes.create(secp256k1.generateAccount().publicKey, 100);
-        const { publicKey, viewingKey } = note.exportNote();
+    it('should throw if given both a public key and a viewing key', async () => {
+        const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
+        const { publicKey, viewingKey } = testNote.exportNote();
         let message = '';
         try {
-            notes.Note(publicKey, viewingKey);
+            note.Note(publicKey, viewingKey);
         } catch (e) {
             ({ message } = e);
         }
@@ -99,19 +99,19 @@ describe('Note', () => {
     it('should throw if given a non-string public key', () => {
         let message = '';
         try {
-            notes.Note({ foo: 'bar' }, null);
+            note.Note({ foo: 'bar' }, null);
         } catch (e) {
             ({ message } = e);
         }
         expect(message).to.equal('expected key type object to be of type string');
     });
 
-    it('should throw if given an incorrect length public key', () => {
-        const note = notes.create(secp256k1.generateAccount().publicKey, 100);
-        const { publicKey } = note.exportNote();
+    it('should throw if given an incorrect length public key', async () => {
+        const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
+        const { publicKey } = testNote.exportNote();
         let message = '';
         try {
-            notes.Note(`${publicKey}abcdef`, null);
+            note.Note(`${publicKey}abcdef`, null);
         } catch (e) {
             ({ message } = e);
         }
@@ -121,19 +121,19 @@ describe('Note', () => {
     it('should throw if given a non-string viewing key', () => {
         let message = '';
         try {
-            notes.Note(null, { foo: 'bar' });
+            note.Note(null, { foo: 'bar' });
         } catch (e) {
             ({ message } = e);
         }
         expect(message).to.equal('expected key type object to be of type string');
     });
 
-    it('should throw if given an incorrect length viewing key', () => {
-        const note = notes.create(secp256k1.generateAccount().publicKey, 100);
-        const { viewingKey } = note.exportNote();
+    it('should throw if given an incorrect length viewing key', async () => {
+        const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
+        const { viewingKey } = testNote.exportNote();
         let message = '';
         try {
-            notes.Note(null, `${viewingKey}abcdef`);
+            note.Note(null, `${viewingKey}abcdef`);
         } catch (e) {
             ({ message } = e);
         }
