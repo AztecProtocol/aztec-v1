@@ -11,15 +11,12 @@ describe('Private range Proof', () => {
         const originalValue = 10;
         const comparisonValue = 4;
         const utilityValue = 6;
-        const testNotes = proofUtils.makeTestNotes(
-            [originalValue, comparisonValue],
-            [utilityValue]
-        );
+        const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
         const sender = proofUtils.randomAddress();
 
         const { proofData } = privateRangeProof.constructProof(testNotes, sender);
-        const numNotes = 3
+        const numNotes = 3;
 
         expect(proofData.length).to.equal(numNotes);
         expect(proofData[0].length).to.equal(6);

@@ -1,27 +1,16 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const BN = require('bn.js');
-const crypto = require('crypto');
 const truffleAssert = require('truffle-assertions');
-const { padLeft, sha3 } = require('web3-utils');
 
 // ### Internal Dependencies
-const {
-    constants,
-    proofs: { JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const {
-    bn128,
-    proof: { privateRange, proofUtils },
-    sign,
-    abiEncoder: { outputCoder, inputCoder, encoderFactory },
+    proof: { privateRange },
     note,
     secp256k1,
-    keccak,
 } = require('aztec.js');
 
-const Keccak = keccak;
 // ### Artifacts
 const PrivateRange = artifacts.require('./PrivateRange');
 const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
@@ -35,15 +24,12 @@ contract('PrivateRange', (accounts) => {
             privateRangeContract = await PrivateRange.new({
                 from: accounts[0],
             });
-
         });
 
         it.only('should validate encoding of a JOIN-SPLIT zero-knowledge proof', async () => {
-            const noteValues = [10, 4, 6]
+            const noteValues = [10, 4, 6];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const originalNote = notes[0];
             const comparisonNote = notes[1];
@@ -75,15 +61,12 @@ contract('PrivateRange', (accounts) => {
             privateRangeContract = await PrivateRange.new({
                 from: accounts[0],
             });
-
         });
 
         it.only('should validate encoding of a JOIN-SPLIT zero-knowledge proof', async () => {
-            const noteValues = [10, 5, 6]
+            const noteValues = [10, 5, 6];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = [
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ];
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
 
             const originalNote = notes[0];
             const comparisonNote = notes[1];
@@ -101,9 +84,7 @@ contract('PrivateRange', (accounts) => {
                 gas: 4000000,
             };
 
-            await truffleAssert.reverts(
-                privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts),
-            );
+            await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
     });
 });

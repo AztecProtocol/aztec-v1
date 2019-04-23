@@ -51,7 +51,6 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
 
     let x;
 
-
     proofDataBn.map((proofElement, i) => {
         let kBar = proofElement[0];
         const aBar = proofElement[1];

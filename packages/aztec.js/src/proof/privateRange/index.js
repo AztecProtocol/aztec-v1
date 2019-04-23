@@ -12,7 +12,6 @@ const proofUtils = require('../proofUtils');
 const verifier = require('./verifier');
 const Keccak = require('../../keccak');
 
-
 const privateRange = {};
 privateRange.verifier = verifier;
 
@@ -76,7 +75,6 @@ privateRange.constructBlindingFactors = (notes, rollingHash) => {
  * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
 privateRange.constructProof = (notes, sender) => {
-
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
 
@@ -103,7 +101,6 @@ privateRange.constructProof = (notes, sender) => {
     });
 
     const blindingFactors = privateRange.constructBlindingFactors(notes, rollingHash);
-
 
     const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
