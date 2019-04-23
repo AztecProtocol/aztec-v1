@@ -40,7 +40,8 @@ var Module = function(Module) {
             typeof process === 'object' && typeof require === 'function' && !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_WORKER;
         ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
     }
-    if (ENVIRONMENT_IS_NODE) {
+    // process.env.WEBPACK_ENV is polyfilled in webpack.common.js
+    if (!process.env.WEBPACK_ENV && ENVIRONMENT_IS_NODE) {
         var nodeFS;
         var nodePath;
         Module['read'] = function shell_read(filename, binary) {

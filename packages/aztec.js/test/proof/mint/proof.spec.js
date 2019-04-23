@@ -7,7 +7,7 @@ const { randomHex } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const secp256k1 = require('../../../src/secp256k1');
-const notes = require('../../../src/note');
+const note = require('../../../src/note');
 const proof = require('../../../src/proof/mint');
 const proofUtils = require('../../../src/proof/proofUtils');
 
@@ -37,7 +37,7 @@ function validateGroupElement(xHex, yHex) {
 }
 
 describe('Mint Proof', () => {
-    it('should construct a proof with well-formed outputs', () => {
+    it('should construct a proof with well-formed outputs', async () => {
         const newTotalMinted = 50;
         const oldTotalMinted = 30;
         const mintOne = 10;
@@ -46,7 +46,7 @@ describe('Mint Proof', () => {
         const kIn = [newTotalMinted];
         const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
-        const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+        const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
         const { proofData, challenge } = proof.constructProof(testNotes, sender);
         const numNotes = 4;
@@ -54,15 +54,15 @@ describe('Mint Proof', () => {
         expect(proofData.length).to.equal(numNotes);
         expect(challenge.length).to.equal(66);
         validateGroupScalar(challenge);
-        proofData.forEach((note, i) => {
-            validateGroupScalar(note[0], i === proofData.length - 1);
-            validateGroupScalar(note[1]);
-            validateGroupElement(note[2], note[3]);
-            validateGroupElement(note[4], note[5]);
+        proofData.forEach((testNote, i) => {
+            validateGroupScalar(testNote[0], i === proofData.length - 1);
+            validateGroupScalar(testNote[1]);
+            validateGroupElement(testNote[2], testNote[3]);
+            validateGroupElement(testNote[4], testNote[5]);
         });
     });
 
-    it('should fail to construct a proof if point NOT on curve', () => {
+    it('should fail to construct a proof if point NOT on curve', async () => {
         const newTotalMinted = 50;
         const oldTotalMinted = 30;
         const mintOne = 10;
@@ -71,7 +71,7 @@ describe('Mint Proof', () => {
         const kIn = [newTotalMinted];
         const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
-        const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+        const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
         testNotes[0].gamma.x = new BN(bn128.curve.p.add(new BN(100))).toRed(bn128.curve.red);
         try {
@@ -81,7 +81,7 @@ describe('Mint Proof', () => {
         }
     });
 
-    it('should fail to construct a proof if point at infinity', () => {
+    it('should fail to construct a proof if point at infinity', async () => {
         const newTotalMinted = 50;
         const oldTotalMinted = 30;
         const mintOne = 10;
@@ -90,7 +90,7 @@ describe('Mint Proof', () => {
         const kIn = [newTotalMinted];
         const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
-        const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+        const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
         testNotes[0].gamma = testNotes[0].gamma.add(testNotes[0].gamma.neg());
         let message = '';
@@ -102,7 +102,7 @@ describe('Mint Proof', () => {
         expect(message).to.contain('POINT_AT_INFINITY');
     });
 
-    it('should fail to construct a proof if viewing key response is 0', () => {
+    it('should fail to construct a proof if viewing key response is 0', async () => {
         const newTotalMinted = 50;
         const oldTotalMinted = 30;
         const mintOne = 10;
@@ -111,7 +111,7 @@ describe('Mint Proof', () => {
         const kIn = [newTotalMinted];
         const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
-        const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+        const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
         testNotes[0].a = new BN(0).toRed(bn128.groupReduction);
         try {
@@ -121,7 +121,7 @@ describe('Mint Proof', () => {
         }
     });
 
-    it('should fail to construct a proof if value > K_MAX', () => {
+    it('should fail to construct a proof if value > K_MAX', async () => {
         const newTotalMinted = 50;
         const oldTotalMinted = 30;
         const mintOne = 10;
@@ -130,7 +130,7 @@ describe('Mint Proof', () => {
         const kIn = [newTotalMinted];
         const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
-        const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+        const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
         testNotes[0].k = new BN(K_MAX + 1).toRed(bn128.groupReduction);
         try {
@@ -140,9 +140,9 @@ describe('Mint Proof', () => {
         }
     });
 
-    it('should fail to construct a proof if n < 2', () => {
+    it('should fail to construct a proof if n < 2', async () => {
         const noteValue = 50;
-        const testNote = notes.create(secp256k1.generateAccount().publicKey, noteValue);
+        const testNote = await note.create(secp256k1.generateAccount().publicKey, noteValue);
         const sender = proofUtils.randomAddress();
 
         try {

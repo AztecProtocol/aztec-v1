@@ -60,10 +60,10 @@ function randomAddress() {
 describe('Join Split Proof Verifier', function describeVerifier() {
     describe('Success States', function success() {
         this.timeout(10000);
-        it('should construct a valid join-split proof', () => {
+        it('should construct a valid join-split proof', async () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
-            const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+            const { commitments, m, trapdoor } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, -10);
             const result = verifier.verifyProof(proofData, m, challenge, sender);
@@ -71,11 +71,11 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept a join-split proof with 0 input notes', () => {
+        it('should accept a join-split proof with 0 input notes', async () => {
             const kIn = [];
             const kOut = [...Array(5)].map(() => generateNoteValue());
 
-            const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+            const { commitments, m, trapdoor } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, kPublic);
@@ -85,11 +85,11 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept a join-split proof with 0 output notes', () => {
+        it('should accept a join-split proof with 0 output notes', async () => {
             const kIn = [...Array(5)].map(() => generateNoteValue());
             const kOut = [];
 
-            const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
+            const { commitments, m } = await proofHelpers.generateCommitmentSet({ kIn, kOut });
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, kPublic);
@@ -100,11 +100,11 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept a join-split proof with large numbers of notes', () => {
+        it('should accept a join-split proof with large numbers of notes', async () => {
             const kIn = [...Array(20)].map(() => generateNoteValue());
             const kOut = [...Array(20)].map(() => generateNoteValue());
 
-            const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+            const { commitments, m, trapdoor } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
 
             const kPublic = getKPublic(kIn, kOut);
             const sender = randomAddress();
@@ -115,9 +115,9 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept a join-split proof with uneven number of notes', () => {
+        it('should accept a join-split proof with uneven number of notes', async () => {
             const { kIn, kOut } = generateBalancedNotes(20, 3);
-            const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+            const { commitments, m, trapdoor } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
             const result = verifier.verifyProof(proofData, m, challenge, sender);
@@ -125,9 +125,9 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept a join-split proof with kPublic = 0', () => {
+        it('should accept a join-split proof with kPublic = 0', async () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
-            const { commitments, m, trapdoor } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+            const { commitments, m, trapdoor } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
             const result = verifier.verifyProof(proofData, m, challenge, sender);
@@ -168,11 +168,11 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(errors[3]).to.equal(errorTypes.BAD_BLINDING_FACTOR);
         });
 
-        it('should REJECT if malformed challenge', () => {
+        it('should REJECT if malformed challenge', async () => {
             const kIn = [...Array(5)].map(() => generateNoteValue());
             const kOut = [...Array(5)].map(() => generateNoteValue());
 
-            const { commitments, m } = proofHelpers.generateCommitmentSet({
+            const { commitments, m } = await proofHelpers.generateCommitmentSet({
                 kIn,
                 kOut,
             });
@@ -186,11 +186,11 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should REJECT if notes do NOT balance', () => {
+        it('should REJECT if notes do NOT balance', async () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             kIn.push(1);
 
-            const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
+            const { commitments, m } = await proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
 
@@ -210,11 +210,11 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.errors).to.contain(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should REJECT if kPublic > group modulus', () => {
+        it('should REJECT if kPublic > group modulus', async () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
             const kPublic = bn128.curve.n.add(new BN(100));
             kIn.push(100);
-            const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
+            const { commitments, m } = await proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, kPublic);
 
@@ -224,9 +224,9 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.errors[0]).to.equal(errorTypes.SCALAR_TOO_BIG);
         });
 
-        it('should REJECT if note value response is 0', () => {
+        it('should REJECT if note value response is 0', async () => {
             const { kIn, kOut } = generateBalancedNotes(5, 10);
-            const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
+            const { commitments, m } = await proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData, challenge } = proof.constructProof(commitments, m, sender, 0);
             proofData[0][0] = '0x';
@@ -237,9 +237,9 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should REJECT if blinding factor is at infinity', () => {
+        it('should REJECT if blinding factor is at infinity', async () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
-            const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
+            const { commitments, m } = await proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData } = proof.constructProof(commitments, m, sender, 0);
             proofData[0][0] = `0x${padLeft('05', 64)}`;
@@ -256,9 +256,9 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             expect(result.errors[1]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', async () => {
             const { kIn, kOut } = { kIn: [10], kOut: [10] };
-            const { commitments, m } = proofHelpers.generateCommitmentSet({ kIn, kOut });
+            const { commitments, m } = await proofHelpers.generateCommitmentSet({ kIn, kOut });
             const sender = randomAddress();
             const { proofData } = proof.constructProof(commitments, m, sender, 0);
             proofData[0][0] = `0x${padLeft('', 64)}`;

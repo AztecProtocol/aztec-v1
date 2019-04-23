@@ -9,7 +9,7 @@ const { padLeft, sha3 } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const secp256k1 = require('../../../src/secp256k1');
-const notes = require('../../../src/note');
+const note = require('../../../src/note');
 const proof = require('../../../src/proof/mint');
 const proofUtils = require('../../../src/proof/proofUtils');
 const verifier = require('../../../src/proof/mint/verifier');
@@ -19,7 +19,7 @@ const { expect } = chai;
 
 describe('Mint Proof Verifier', () => {
     describe('Success States', () => {
-        it('should construct a valid mint proof', () => {
+        it('should construct a valid mint proof', async () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 30;
             const mintOne = 10;
@@ -28,7 +28,7 @@ describe('Mint Proof Verifier', () => {
             const kIn = [newTotalMinted];
             const kOut = [oldTotalMinted, mintOne, mintTwo];
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+            const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
             const result = verifier.verifyProof(proofData, challenge, sender);
@@ -36,7 +36,7 @@ describe('Mint Proof Verifier', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept mint proof with 0 notes minted i.e. no notes are actually minted', () => {
+        it('should accept mint proof with 0 note minted i.e. no notes are actually minted', async () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 50;
 
@@ -44,7 +44,7 @@ describe('Mint Proof Verifier', () => {
             const kOut = [oldTotalMinted];
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+            const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
 
@@ -52,7 +52,7 @@ describe('Mint Proof Verifier', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept mint proof with large number of minted notes', () => {
+        it('should accept mint proof with large number of minted notes', async () => {
             const newTotalMinted = 100;
             const oldTotalMinted = 10;
 
@@ -60,7 +60,7 @@ describe('Mint Proof Verifier', () => {
             const kOut = [oldTotalMinted, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+            const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
 
@@ -68,7 +68,7 @@ describe('Mint Proof Verifier', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('should mint without any previous minted number of tokens', () => {
+        it('should mint without any previous minted number of tokens', async () => {
             const newTotalMinted = 50;
             const oldTotalMinted = 0;
             const mintOne = 25;
@@ -77,7 +77,7 @@ describe('Mint Proof Verifier', () => {
             const kIn = [newTotalMinted];
             const kOut = [oldTotalMinted, mintOne, mintTwo];
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes(kIn, kOut);
+            const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
             const result = verifier.verifyProof(proofData, challenge, sender);
@@ -123,7 +123,7 @@ describe('Mint Proof Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if malformed challenge', () => {
+        it('should REJECT if malformed challenge', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -131,7 +131,7 @@ describe('Mint Proof Verifier', () => {
             const mintOne = 10;
             const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender);
@@ -143,7 +143,7 @@ describe('Mint Proof Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if notes do NOT balance', () => {
+        it('should REJECT if notes do NOT balance', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const oldTotalMinted = 30;
@@ -152,7 +152,7 @@ describe('Mint Proof Verifier', () => {
 
             const newTotalMinted = 500; // 500 + oldTotalMinted + mintOne + mintTwo;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
@@ -178,7 +178,7 @@ describe('Mint Proof Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if note value response is 0', () => {
+        it('should REJECT if note value response is 0', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -186,7 +186,7 @@ describe('Mint Proof Verifier', () => {
             const mintOne = 10;
             const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
@@ -200,7 +200,7 @@ describe('Mint Proof Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor is at infinity', () => {
+        it('should REJECT if blinding factor is at infinity', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -208,7 +208,7 @@ describe('Mint Proof Verifier', () => {
             const mintOne = 10;
             const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender);
@@ -228,7 +228,7 @@ describe('Mint Proof Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const newTotalMinted = 50;
@@ -236,7 +236,7 @@ describe('Mint Proof Verifier', () => {
             const mintOne = 10;
             const mintTwo = 10;
 
-            const testNotes = proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender, 0);
@@ -261,11 +261,11 @@ describe('Mint Proof Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should fail if number of notes supplied is less than 2', () => {
+        it('should fail if number of notes supplied is less than 2', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const noteValue = 50;
-            const testNote = notes.create(secp256k1.generateAccount().publicKey, noteValue);
+            const testNote = await note.create(secp256k1.generateAccount().publicKey, noteValue);
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNote, sender, 0);

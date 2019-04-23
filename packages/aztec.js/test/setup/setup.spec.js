@@ -12,7 +12,7 @@ const { expect } = chai;
 describe('Trusted Setup', () => {
     it('should read signature and retrieve well-formed elliptic curve points', async () => {
         const k = Math.floor(Math.random() * (K_MAX - K_MIN + 1)) + K_MIN;
-        const point = await setup.readSignature(k);
+        const point = await setup.fetchPoint(k);
         expect(BN.isBN(point.x)).to.equal(true);
         expect(BN.isBN(point.y)).to.equal(true);
     });
@@ -21,11 +21,11 @@ describe('Trusted Setup', () => {
         const k = K_MAX * 2;
         let message = '';
         try {
-            await setup.readSignature(k);
+            await setup.fetchPoint(k);
         } catch (e) {
             ({ message } = e);
         }
-        expect(message).to.contain('no such file or directory');
+        expect(message).to.equal('point not found');
     });
 
     it('should compress coordinate with even y', () => {
