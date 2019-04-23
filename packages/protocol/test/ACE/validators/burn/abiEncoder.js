@@ -26,9 +26,11 @@ contract('AdjustSupply ABI Encoder on a Burn Proof', (accounts) => {
             const numNotes = 4;
             const noteValues = [50, 30, 10, 10];
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all(aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            }));
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalBurned = notes[0];
             const oldTotalBurned = notes[1];
