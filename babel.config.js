@@ -1,5 +1,5 @@
 /* eslint-disable func-names */
 module.exports = {
-    presets: ['@babel/env'],
+    presets: ['@babel/preset-env'],
     plugins: ['@babel/plugin-proposal-object-rest-spread'],
 };
