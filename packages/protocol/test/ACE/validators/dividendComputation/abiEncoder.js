@@ -24,9 +24,11 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
             zb = 5;
 
             dividendAccounts = [...new Array(3)].map(() => aztec.secp256k1.generateAccount());
-            notes = dividendAccounts.map(({ publicKey }, i) => {
-                return aztec.note.create(publicKey, noteValues[i]);
-            });
+            notes = await Promise.all(
+                dividendAccounts.map(({ publicKey }, i) => {
+                    return aztec.note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             DividendComputationAbiEncoder = await ABIEncoder.new({
                 from: accounts[0],

@@ -34,9 +34,11 @@ contract('Join-Split ABI Encoder', (accounts) => {
         beforeEach(async () => {
             aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
 
-            notes = aztecAccounts.map(({ publicKey }) => {
-                return aztec.note.create(publicKey, randomNoteValue());
-            });
+            notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }) => {
+                    return aztec.note.create(publicKey, randomNoteValue());
+                }),
+            );
 
             joinSplitAbiEncoder = await ABIEncoder.new({
                 from: accounts[0],

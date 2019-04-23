@@ -46,16 +46,18 @@ contract('ZkAssetBurnable', (accounts) => {
 
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             const newTotalBurned = notes[0];
-            const oldTotalBurned = note.createZeroValueNote();
+            const oldTotalBurned = await note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             const canBurnAndBurn = true;
@@ -70,7 +72,6 @@ contract('ZkAssetBurnable', (accounts) => {
             });
 
             erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
-
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
             const publicOwner = accounts[0];
@@ -153,12 +154,14 @@ contract('ZkAssetBurnable', (accounts) => {
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalBurned = notes[0];
-            const oldTotalBurned = note.createZeroValueNote();
+            const oldTotalBurned = await note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
@@ -209,16 +212,18 @@ contract('ZkAssetBurnable', (accounts) => {
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
 
             const newTotalBurned = notes[0];
-            const oldTotalBurned = note.createZeroValueNote();
+            const oldTotalBurned = await note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             const publicOwner = accounts[0];
@@ -227,7 +232,6 @@ contract('ZkAssetBurnable', (accounts) => {
             const tokensTransferred = new BN(1000);
 
             erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
-
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
@@ -272,13 +276,17 @@ contract('ZkAssetBurnable', (accounts) => {
             // total inputs != total outputs
             const burnNoteValues = [50, 0, 30, 21];
 
-            const joinSplitNotes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, joinSplitNoteValues[i]);
-            });
+            const joinSplitNotes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, joinSplitNoteValues[i]);
+                }),
+            );
 
-            const burnNotes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, burnNoteValues[i]);
-            });
+            const burnNotes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, burnNoteValues[i]);
+                }),
+            );
 
             zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
@@ -290,7 +298,6 @@ contract('ZkAssetBurnable', (accounts) => {
             const tokensTransferred = new BN(1000);
 
             erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
-
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
             const outputNotes = joinSplitNotes.slice(2, 4);
@@ -308,7 +315,7 @@ contract('ZkAssetBurnable', (accounts) => {
             const senderAddress = proof.proofUtils.randomAddress();
 
             const newTotalBurned = burnNotes[0];
-            const oldTotalBurned = note.createZeroValueNote();
+            const oldTotalBurned = await note.createZeroValueNote();
             const adjustedNotes = burnNotes.slice(2, 4);
 
             proofs[1] = proof.burn.encodeBurnTransaction({

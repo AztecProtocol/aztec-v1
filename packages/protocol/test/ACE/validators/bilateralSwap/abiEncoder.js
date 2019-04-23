@@ -20,7 +20,9 @@ contract('Bilateral Swap ABI Encoder', (accounts) => {
         beforeEach(async () => {
             const noteValues = [10, 20, 10, 20];
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
-            notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i]))];
+            notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
+            ]);
             bilateralSwapAbiEncoder = await BilateralSwapAbiEncoder.new({
                 from: accounts[0],
             });
@@ -102,11 +104,10 @@ contract('Bilateral Swap ABI Encoder', (accounts) => {
     describe('Failure States', () => {
         beforeEach(async () => {
             const noteValues = [10, 20, 10, 20];
-
             bilateralSwapAccounts = [...new Array(4)].map(() => aztec.secp256k1.generateAccount());
-
-            notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i]))];
-
+            notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => aztec.note.create(publicKey, noteValues[i])),
+            ]);
             bilateralSwapAbiEncoder = await BilateralSwapAbiEncoder.new({
                 from: accounts[0],
             });
