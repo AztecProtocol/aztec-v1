@@ -8,10 +8,10 @@ const { expect } = chai;
 describe('Public range proof', () => {
     it('should construct a proof with well-formed outputs', () => {
         const testNotes = proofUtils.makeTestNotes([50], [40]);
-        const u = 10;
+        const kPublic = 10;
 
         const sender = proofUtils.randomAddress(20);
-        const { proofData, challenge } = publicRange.constructProof(testNotes, u, sender);
+        const { proofData, challenge } = publicRange.constructProof(testNotes, kPublic, sender);
 
         expect(proofData.length).to.equal(2);
         expect(challenge.length).to.equal(66);

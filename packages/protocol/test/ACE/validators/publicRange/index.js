@@ -36,11 +36,11 @@ contract('Public range proof tests', (accounts) => {
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
-            const u = 10;
+            const kPublic = 10;
             const senderAddress = accounts[0];
 
-            const { proofData, challenge } = publicRange.constructProof([...inputNotes, ...outputNotes], u, senderAddress);
-            const { valid } = publicRange.verifier.verifyProof(proofData, challenge, senderAddress, u);
+            const { proofData, challenge } = publicRange.constructProof([...inputNotes, ...outputNotes], kPublic, senderAddress);
+            const { valid } = publicRange.verifier.verifyProof(proofData, challenge, senderAddress, kPublic);
             expect(valid).to.equal(true);
         });
 
@@ -54,13 +54,13 @@ contract('Public range proof tests', (accounts) => {
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
-            const u = 10;
+            const kPublic = 10;
             const senderAddress = accounts[0];
 
             const { proofData } = publicRange.encodePublicRangeTransaction({
                 inputNotes,
                 outputNotes,
-                u,
+                kPublic,
                 senderAddress,
             });
 
@@ -81,13 +81,13 @@ contract('Public range proof tests', (accounts) => {
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
-            const u = 10;
+            const kPublic = 10;
             const senderAddress = accounts[0];
 
             const { proofData } = publicRange.encodePublicRangeTransaction({
                 inputNotes,
                 outputNotes,
-                u,
+                kPublic,
                 senderAddress,
             });
 
@@ -116,13 +116,13 @@ contract('Public range proof tests', (accounts) => {
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
-            const u = 10;
+            const kPublic = 10;
             const senderAddress = accounts[0];
 
             const { proofData } = publicRange.encodePublicRangeTransaction({
                 inputNotes,
                 outputNotes,
-                u,
+                kPublic,
                 senderAddress,
             });
 
@@ -143,13 +143,13 @@ contract('Public range proof tests', (accounts) => {
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
-            const u = 10;
+            const kPublic = 10;
             const senderAddress = accounts[0];
 
             const { proofData } = publicRange.encodePublicRangeTransaction({
                 inputNotes,
                 outputNotes,
-                u,
+                kPublic,
                 senderAddress,
             });
 

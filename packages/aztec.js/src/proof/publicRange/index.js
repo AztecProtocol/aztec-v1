@@ -26,7 +26,7 @@ publicRange.verifier = verifier;
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
- * @param {Number} uBN - BN instance of the public integer being compared against
+ * @param {Number} kPublicBN - BN instance of the public integer being compared against
  * @returns {Object[]} blinding factors
  */
 publicRange.constructBlindingFactors = (notes) => {
@@ -46,7 +46,7 @@ publicRange.constructBlindingFactors = (notes) => {
 
         if (i === 1) {
             // output note
-            bk = bkArray[i - 1]; // .sub(uBN);
+            bk = bkArray[i - 1]; // .sub(kPublicBN);
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             bkArray.push(bk);
         }
@@ -63,12 +63,12 @@ publicRange.constructBlindingFactors = (notes) => {
  *
  * @method constructProof
  * @param {Object[]} notes - array of AZTEC notes
- * @param {Number} u - public integer being compared against
+ * @param {Number} kPublicBN - public integer being compared against
  * @param {sender} sender - Ethereum address
  * @returns {string[]} proofData - constructed cryptographic proof data
  * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
-publicRange.constructProof = (notes, u, sender) => {
+publicRange.constructProof = (notes, kPublic, sender) => {
     const numNotes = 2;
 
     // Used to check the number of input notes. Boolean argument specifies whether the
@@ -78,14 +78,14 @@ publicRange.constructProof = (notes, u, sender) => {
 
     proofUtils.parseInputs(notes, sender);
     // convert z_a and z_b into BN instances if they aren't already
-    let uBN;
+    let kPublicBN;
 
     const rollingHash = new Keccak();
 
-    if (BN.isBN(u)) {
-        uBN = u;
+    if (BN.isBN(kPublic)) {
+        kPublicBN = kPublic;
     } else {
-        uBN = new BN(u);
+        kPublicBN = new BN(kPublic);
     }
     // Check that proof data lies on the bn128 curve
     notes.forEach((note) => {
@@ -107,9 +107,9 @@ publicRange.constructProof = (notes, u, sender) => {
         rollingHash.append(note.sigma);
     });
 
-    const blindingFactors = publicRange.constructBlindingFactors(notes, uBN);
+    const blindingFactors = publicRange.constructBlindingFactors(notes, kPublicBN);
 
-    const challenge = proofUtils.computeChallenge(sender, uBN, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, kPublicBN, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
         const kBar = notes[i].k
             .redMul(challenge)
@@ -147,13 +147,17 @@ publicRange.constructProof = (notes, u, sender) => {
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
-publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, u, senderAddress }) => {
-    const { proofData: proofDataRaw, challenge } = publicRange.constructProof([...inputNotes, ...outputNotes], u, senderAddress);
+publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, kPublic, senderAddress }) => {
+    const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
+        [...inputNotes, ...outputNotes],
+        kPublic,
+        senderAddress,
+    );
 
     const inputOwners = inputNotes.map((m) => m.owner);
     const outputOwners = outputNotes.map((n) => n.owner);
 
-    const proofData = inputCoder.publicRange(proofDataRaw, challenge, u, inputOwners, outputOwners, outputNotes);
+    const proofData = inputCoder.publicRange(proofDataRaw, challenge, kPublic, inputOwners, outputOwners, outputNotes);
 
     const publicValue = 0;
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
