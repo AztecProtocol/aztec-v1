@@ -10,6 +10,7 @@ const burnProof = require('../../src/proof/burn');
 const dividendComputationProof = require('../../src/proof/dividendComputation');
 const joinSplitProof = require('../../src/proof/joinSplit');
 const mintProof = require('../../src/proof/mint');
+const privateRangeProof = require('../../src/proof/privateRange');
 
 const abiEncoder = require('../../src/abiEncoder');
 const note = require('../../src/note');
@@ -390,6 +391,70 @@ describe('abiEncoder.encoderFactory', () => {
 
             const recoveredMetadata = result.slice(offsetToMetadata - 0x20, offsetToMetadata + metadataLength);
             expect(recoveredMetadata).to.equal(abiEncoder.encoderFactory.encodeMetadata(outputNotes).data);
+        });
+    });
+
+    describe('Private range proof', () => {
+        it('should format privateRange properly', () => {
+            // Setup
+            let accounts = [];
+            let notes = [];
+
+            const numNotes = 3;
+            const noteValues = [10, 4, 6];
+            accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            notes = accounts.map(({ publicKey }, i) => {
+                return note.create(publicKey, noteValues[i]);
+            });
+
+            const inputNote = notes.slice(0, 1);
+            const comparisonNote = notes.slice(1, 2);
+            const outputNote = notes.slice(2, 3);
+            const senderAddress = accounts[0].address;
+
+            // Main
+            const { proofData, challenge } = privateRangeProof.constructProof(
+                [...inputNote, ...comparisonNote, ...outputNote],
+                senderAddress,
+            );
+            const inputOwners = [inputNote[0].owner];
+            const outputOwners = [outputNote[0].owner];
+
+            const result = new HexString(
+                abiEncoder.inputCoder
+                    .privateRange(proofData, challenge, inputOwners, outputOwners, outputNote)
+                    .slice(2),
+            );
+            expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
+
+            const numProofDataElements = 3;
+            const offsetToProofData = parseInt(result.slice(0x20, 0x40), 16);
+            expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(numProofDataElements);
+            const recoveredProofData = new HexString(result.slice(offsetToProofData, offsetToProofData + 4 * 0xc0));
+            for (let i = 0; i < numNotes; i += 1) {
+                const recoveredNote = recoveredProofData.slice(i * 0xc0, i * 0xc0 + 0xc0);
+                expect(recoveredNote).to.equal(proofData[i].map((p) => p.slice(2)).join(''));
+            }
+
+            const numInputOwners = 1;
+            const offsetToInputOwners = parseInt(result.slice(0x40, 0x60), 16);
+            expect(parseInt(result.slice(offsetToInputOwners - 0x20, offsetToInputOwners), 16)).to.equal(numInputOwners);
+            const recoveredInputOwners = new HexString(result.slice(offsetToInputOwners, offsetToInputOwners + 0x60));
+            expect(recoveredInputOwners.slice(0x00, 0x20)).to.equal(padLeft(inputOwners[0].slice(2).toLowerCase(), 64));
+
+            const numOutputOwners = 1;
+            const offsetToOutputOwners = parseInt(result.slice(0x60, 0x80), 16);
+            expect(parseInt(result.slice(offsetToOutputOwners - 0x20, offsetToOutputOwners), 16)).to.equal(numOutputOwners);
+            const recoveredOutputOwners = new HexString(result.slice(offsetToOutputOwners, offsetToOutputOwners + 2 * 0x20));
+            expect(recoveredOutputOwners.slice(0x00, 0x20)).to.equal(padLeft(outputOwners[0].slice(2).toLowerCase(), 64));
+
+            const numOutputNotes = 1;
+            const offsetToMetadata = parseInt(result.slice(0x80, 0xa0), 16);
+            const metadataLength = parseInt(result.slice(offsetToMetadata - 0x20, offsetToMetadata), 16);
+            expect(parseInt(result.slice(offsetToMetadata, offsetToMetadata + 0x20), 16)).to.equal(numOutputNotes);
+
+            const recoveredMetadata = result.slice(offsetToMetadata - 0x20, offsetToMetadata + metadataLength);
+            expect(recoveredMetadata).to.equal(abiEncoder.encoderFactory.encodeMetadata(outputNote).data);
         });
     });
 });
