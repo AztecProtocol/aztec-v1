@@ -15,7 +15,7 @@ pragma solidity >=0.5.0 <0.6.0;
 contract PublicRange {
 
     /**
-     * @dev AZTECBilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
+     * @dev PublicRange.sol will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction throws.
      * @notice See BilateralSwapInterface for how method calls should be constructed.
      * AZTECBilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
@@ -31,7 +31,7 @@ contract PublicRange {
             validatePublicRange()
 
             // if we get to here, the proof is valid. We now 'fall through' the assembly block
-            // and into JoinSplitABI.validateJoinSplit()
+            // and into PublicRange.validatePublicRange()
             // reset the free memory pointer because we're touching Solidity code again
             mstore(0x40, 0x60)
             /**
@@ -175,9 +175,10 @@ contract PublicRange {
                     if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
-                // Both bid notes already exist in their revelant AZTEC note registries - so can inductively 
-                // infer that the ask notes are in the required range
-                // Therefore, don't need a range proof
+
+                    // Can assume by induction that k_1 is the output of a previous AZTEC transaction, and therefore 
+                    // it already satisfies a range proof. Only need to perform an explicit range check on k2
+                    validatePairing(0x84)
             
                 /*
                 ////////////////////  RECONSTRUCT INITIAL CHALLENGE AND VERIFY A MATCH  ////////////////////////////////
@@ -247,6 +248,57 @@ contract PublicRange {
                 }
             }
 
+            /**        
+             * @dev evaluate if e(P1, t2) . e(P2, g2) == 0.
+             * @notice we don't hard-code t2 so that contracts that call this library can use different trusted setups.
+             **/
+            function validatePairing(t2) {
+                let field_order := 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
+                let t2_x_1 := calldataload(t2)
+                let t2_x_2 := calldataload(add(t2, 0x20))
+                let t2_y_1 := calldataload(add(t2, 0x40))
+                let t2_y_2 := calldataload(add(t2, 0x60))
+
+                // check provided setup pubkey is not zero or g2
+                if or(or(or(or(or(or(or(
+                    iszero(t2_x_1),
+                    iszero(t2_x_2)),
+                    iszero(t2_y_1)),
+                    iszero(t2_y_2)),
+                    eq(t2_x_1, 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed)),
+                    eq(t2_x_2, 0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2)),
+                    eq(t2_y_1, 0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa)),
+                    eq(t2_y_2, 0x90689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b))
+                {
+                    mstore(0x00, 400)
+                    revert(0x00, 0x20)
+                }
+
+                // store coords in memory
+                // indices are a bit off, scipr lab's libff limb ordering (c0, c1) is opposite
+                // to what precompile expects. We can overwrite the memory we used previously as this function
+                // is called at the end of the validation routine.
+                mstore(0x20, mload(0x1e0)) // sigma accumulator x
+                mstore(0x40, mload(0x200)) // sigma accumulator y
+                mstore(0x80, 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed)
+                mstore(0x60, 0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2)
+                mstore(0xc0, 0x12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa)
+                mstore(0xa0, 0x90689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b)
+                mstore(0xe0, mload(0x260)) // gamma accumulator x
+                mstore(0x100, mload(0x280)) // gamma accumulator y
+                mstore(0x140, t2_x_1)
+                mstore(0x120, t2_x_2)
+                mstore(0x180, t2_y_1)
+                mstore(0x160, t2_y_2)
+
+                let success := staticcall(gas, 8, 0x20, 0x180, 0x20, 0x20)
+
+                if or(iszero(success), iszero(mload(0x20))) {
+                    mstore(0x00, 400)
+                    revert(0x00, 0x20)
+                }
+            }
+
             /**
              * @dev Calculate the keccak256 hash of the commitments for both 
              * input notes and output notes. This is used both as an input to 
@@ -269,6 +321,6 @@ contract PublicRange {
         }
         // if we've reached here, we've validated the bilateral swap and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        // BilateralSwapABIEncoder.encodeAndExit();
+        // PublicRangeABIEncoder.encodeAndExit();
     }
 }
