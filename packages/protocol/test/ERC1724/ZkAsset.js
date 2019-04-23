@@ -44,10 +44,10 @@ contract('ZkAsset', (accounts) => {
     beforeEach(async () => {
         ace = await ACE.new({ from: accounts[0] });
         aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-        notes = [
+        notes = await Promise.all([
             ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
             ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-        ];
+        ]);
         await ace.setCommonReferenceString(constants.CRS);
         aztecJoinSplit = await JoinSplit.new();
         await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);

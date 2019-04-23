@@ -28,9 +28,9 @@ contract('AdjustSupply ABI Encoder on a Mint Proof', (accounts) => {
             const numNotes = 4;
             const noteValues = [50, 30, 10, 10];
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
+            const notes = await Promise.all(aztecAccounts.map(({ publicKey }, i) => {
                 return note.create(publicKey, noteValues[i]);
-            });
+            }));
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];

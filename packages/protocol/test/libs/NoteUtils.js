@@ -23,7 +23,7 @@ contract('NoteUtils', async (accounts) => {
     before(async () => {
         noteUtils = await NoteUtils.new();
         aztecAccounts[0] = secp256k1.generateAccount();
-        aztecNotes[0] = note.create(aztecAccounts[0].publicKey, tokensTransferred);
+        aztecNotes[0] = await note.create(aztecAccounts[0].publicKey, tokensTransferred);
         proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: [],
             outputNotes: [aztecNotes[0]],
