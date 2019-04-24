@@ -1,6 +1,5 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-// import "./PrivateRangeABIEncoder.sol";
 import "../../../interfaces/PrivateRangeInterface.sol";
 
 /**
@@ -61,9 +60,8 @@ contract PrivateRange {
                 let n := 3
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x124), gen_order)
-                let kn := 0
 
-                // add kn and m to final hash table
+                // add sender to final hash table
                 mstore(0x2a0, calldataload(0x24))
                 hashCommitments(notes, n)
                 let b := add(0x2c0, mul(n, 0x80))
@@ -106,8 +104,13 @@ contract PrivateRange {
                     case 1 {
 
                         // k_3 = k_1 - k_2
-                        k := sub(calldataload(sub(noteIndex, 0x180)),
-                            calldataload(sub(noteIndex, 0xc0)))
+                        // this is not being done in modular arithmetic - needs to be
+                        k := addmod(
+                                calldataload(sub(noteIndex, 0x180)), // k_1
+                                sub(
+                                    gen_order,
+                                    calldataload(sub(noteIndex, 0xc0))), // k_2x§
+                                gen_order)
                     } 
                     case 0 {
                         k := calldataload(noteIndex)
@@ -120,8 +123,7 @@ contract PrivateRange {
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
 
                     if gt(i, 0x00) {
-                        kn := addmod(kn, sub(gen_order, k), gen_order)
-                        let x := mload(0x00)
+                        let x := mod(mload(0x00), gen_order)
                         k := mulmod(k, x, gen_order)
                         a := mulmod(a, x, gen_order)
                         c := mulmod(challenge, x, gen_order)
@@ -216,14 +218,15 @@ contract PrivateRange {
                 // Hash this block to reconstruct the initial challenge and validate that they match
                 let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
 
-                mstore(0x00, expected)
-                return(0x00, 0x20)
                 if iszero(eq(expected, challenge)) {
 
                     // No! Bad! No soup for you!
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
+
+                mstore(0x00, 0x01)
+                return(0x00, 0x20)
 
                 // Great! All done. This is a valid proof, so fall through out of the assembly block
                 // so that we can call `ABIEncoder.encodeAndExit`
@@ -352,6 +355,5 @@ contract PrivateRange {
     
         // if we've reached here, we've validated the join-split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        // PrivateRangeABIEncoder.encodeAndExit(domainHash);
     }
 }
