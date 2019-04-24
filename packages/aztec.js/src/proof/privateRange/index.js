@@ -151,7 +151,6 @@ privateRange.encodePrivateRangeTransaction = ({ originalNote, comparisonNote, ut
     const outputOwner = [utilityNote.owner];
 
     const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwner, outputNotes);
-    console.log('original challenge: ', challenge);
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
     const publicValue = 0;
 
