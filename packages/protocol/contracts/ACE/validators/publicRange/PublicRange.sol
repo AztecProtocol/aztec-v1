@@ -196,8 +196,6 @@ contract PublicRange {
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
-                mstore(0x00, 0x01)
-                return(0x00, 0x20)
             }
 
             /**

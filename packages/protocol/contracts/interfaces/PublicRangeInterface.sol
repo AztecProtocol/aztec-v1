@@ -10,6 +10,6 @@ contract PublicRangeInterface {
     ) 
         external 
         pure 
-        returns (bool) 
+        returns (bytes memory) 
     {}
 }
