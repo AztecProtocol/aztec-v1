@@ -1,18 +1,14 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const {
-    constants: { CRS, K_MAX },
+    constants: { CRS },
 } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const {
-    constants,
-    proofs: { PUBLIC_RANGE },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const {
-    sign,
     abiEncoder: { inputCoder, outputCoder },
     secp256k1,
     note,
@@ -32,7 +28,7 @@ contract('Public range ABI encoder', (accounts) => {
             });
         });
 
-        it.only('should encode output of a public range proof', async () => {
+        it('should encode output of a public range proof', async () => {
             const noteValues = [10, 0];
             const kPublic = 10;
             const numNotes = noteValues.length;

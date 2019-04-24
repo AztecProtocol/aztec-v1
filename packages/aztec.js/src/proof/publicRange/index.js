@@ -159,7 +159,7 @@ publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, kPublic, 
 
     const proofData = inputCoder.publicRange(proofDataRaw, challenge, kPublic, inputOwners, outputOwners, outputNotes);
 
-    const publicValue = 0;
+    const publicValue = kPublic;
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
 
     const expectedOutput = `0x${outputCoder
