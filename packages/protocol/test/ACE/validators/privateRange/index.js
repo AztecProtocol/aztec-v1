@@ -167,13 +167,7 @@ contract('PrivateRange', (accounts) => {
 
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
 
-            const proofData = inputCoder.privateRange(
-                proofDataRaw,
-                challenge,
-                inputOwners,
-                outputOwner,
-                outputNotes
-            );
+            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwner, outputNotes);
 
             const opts = {
                 from: accounts[0],
