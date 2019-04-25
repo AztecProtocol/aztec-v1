@@ -16,8 +16,8 @@ const { expect } = chai;
 
 describe('Public range proof verifier', () => {
     describe('Success States', () => {
-        it('should construct a valid dividend computation proof', () => {
-            const testNotes = proofUtils.makeTestNotes([50], [40]);
+        it('should construct a valid dividend computation proof', async () => {
+            const testNotes = await proofUtils.makeTestNotes([50], [40]);
             const kPublic = 10;
             const sender = proofUtils.randomAddress();
             const { proofData, challenge } = publicRange.constructProof(testNotes, kPublic, sender);
@@ -27,9 +27,9 @@ describe('Public range proof verifier', () => {
     });
 
     describe('Failure States', () => {
-        it('should REJECT for unsatisfied proof relations', () => {
+        it('should REJECT for unsatisfied proof relations', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
-            const wrongRelationship = proofUtils.makeTestNotes([50], [41]);
+            const wrongRelationship = await proofUtils.makeTestNotes([50], [41]);
             const kPublic = 10;
             const sender = proofUtils.randomAddress();
 
@@ -43,9 +43,9 @@ describe('Public range proof verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for fake challenge', () => {
+        it('should REJECT for fake challenge', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
-            const testNotes = proofUtils.makeTestNotes([50], [40]);
+            const testNotes = await proofUtils.makeTestNotes([50], [40]);
             const kPublic = 10;
             const sender = proofUtils.randomAddress();
 
@@ -63,9 +63,9 @@ describe('Public range proof verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for fake proof data', () => {
+        it('should REJECT for fake proof data', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
-            const testNotes = proofUtils.makeTestNotes([50], [40]);
+            const testNotes = await proofUtils.makeTestNotes([50], [40]);
             const kPublic = 10;
             const sender = proofUtils.randomAddress();
 
@@ -81,9 +81,9 @@ describe('Public range proof verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if point not on the curve', () => {
+        it('should REJECT if point not on the curve', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
-            const testNotes = proofUtils.makeTestNotes([50], [40]);
+            const testNotes = await proofUtils.makeTestNotes([50], [40]);
             const kPublic = 10;
             const sender = proofUtils.randomAddress();
 
@@ -100,9 +100,9 @@ describe('Public range proof verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor at infinity', () => {
+        it('should REJECT if blinding factor at infinity', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
-            const testNotes = proofUtils.makeTestNotes([50], [40]);
+            const testNotes = await proofUtils.makeTestNotes([50], [40]);
             const kPublic = 10;
             const sender = proofUtils.randomAddress();
 
@@ -124,9 +124,9 @@ describe('Public range proof verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
-            const testNotes = proofUtils.makeTestNotes([50], [40]);
+            const testNotes = await proofUtils.makeTestNotes([50], [40]);
             const kPublic = 10;
             const sender = proofUtils.randomAddress();
 
