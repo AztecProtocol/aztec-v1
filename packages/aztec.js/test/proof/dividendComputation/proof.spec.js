@@ -8,7 +8,7 @@ const proofUtils = require('../../../src/proof/proofUtils');
 const { expect } = chai;
 
 describe('Dividend Computation Proof', () => {
-    it('should construct a proof with well-formed outputs', () => {
+    it('should construct a proof with well-formed outputs', async () => {
         /*
         Test case:
         - k_in = 90
@@ -19,7 +19,7 @@ describe('Dividend Computation Proof', () => {
         - zb = 100
         */
 
-        const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+        const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
         const za = 100;
         const zb = 5;
 

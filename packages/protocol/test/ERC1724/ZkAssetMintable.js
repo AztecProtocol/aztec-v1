@@ -26,14 +26,14 @@ JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
-        let aztecAccounts = [];
         let ace;
-        let erc20;
-        let zkAssetMintable;
-        let scalingFactor;
+        let aztecAccounts = [];
         let aztecAdjustSupply;
         let aztecJoinSplit;
+        let erc20;
         const kPublic = 50;
+        let scalingFactor;
+        let zkAssetMintable;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -59,10 +59,10 @@ contract('ZkAssetMintable', (accounts) => {
 
         it('should complete a mint operation', async () => {
             const [owner, recipient1, recipient2] = aztecAccounts;
-            const newTotalMinted = note.create(owner.publicKey, 50);
-            const oldTotalMinted = note.createZeroValueNote();
+            const newTotalMinted = await note.create(owner.publicKey, 50);
+            const oldTotalMinted = await note.createZeroValueNote();
 
-            const mintedNotes = [note.create(recipient1.publicKey, 20), note.create(recipient2.publicKey, 30)];
+            const mintedNotes = [await note.create(recipient1.publicKey, 20), await note.create(recipient2.publicKey, 30)];
 
             const mintProof = proof.mint.encodeMintTransaction({
                 newTotalMinted, // 50
@@ -81,10 +81,10 @@ contract('ZkAssetMintable', (accounts) => {
             expect(erc20TotalSupply).to.equal(0);
             const initialBalance = (await erc20.balanceOf(accounts[1])).toNumber();
             const [owner, recipient1, recipient2] = aztecAccounts;
-            const newTotalMinted = note.create(owner.publicKey, 50);
-            const oldTotalMinted = note.createZeroValueNote();
+            const newTotalMinted = await note.create(owner.publicKey, 50);
+            const oldTotalMinted = await note.createZeroValueNote();
 
-            const mintedNotes = [note.create(recipient1.publicKey, 20), note.create(recipient2.publicKey, 30)];
+            const mintedNotes = [await note.create(recipient1.publicKey, 20), await note.create(recipient2.publicKey, 30)];
 
             const mintProof = proof.mint.encodeMintTransaction({
                 newTotalMinted, // 50
@@ -148,16 +148,18 @@ contract('ZkAssetMintable', (accounts) => {
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
 
             const newTotalMinted = notes[0];
-            const oldTotalMinted = note.createZeroValueNote();
+            const oldTotalMinted = await note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             // Minting two AZTEC notes, worth 30 and 20
@@ -184,16 +186,18 @@ contract('ZkAssetMintable', (accounts) => {
 
             // total inputs != total outputs - ace.mint throws
             const noteValues = [50, 0, 30, 30];
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
 
             const newTotalMinted = notes[0];
-            const oldTotalMinted = note.createZeroValueNote();
+            const oldTotalMinted = await note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             // Minting two AZTEC notes, worth 30 and 30
@@ -213,16 +217,18 @@ contract('ZkAssetMintable', (accounts) => {
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
 
             const newTotalMinted = notes[0];
-            const oldTotalMinted = note.createZeroValueNote();
+            const oldTotalMinted = await note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
             // Minting two AZTEC notes, worth 30 and 20

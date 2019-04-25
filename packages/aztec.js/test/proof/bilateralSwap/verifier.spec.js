@@ -16,8 +16,8 @@ const { errorTypes } = utils.constants;
 
 describe('Bilateral Swap Verifier', () => {
     describe('Success States', () => {
-        it('should construct a bilateral swap proof', () => {
-            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+        it('should construct a bilateral swap proof', async () => {
+            const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
 
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);
@@ -26,9 +26,9 @@ describe('Bilateral Swap Verifier', () => {
             expect(errors.length).to.equal(0);
         });
 
-        it('should validate that the kbar relations are satisfied i.e. kbar1 = kbar3 and kbar2 = kbar4', () => {
+        it('should validate that the kbar relations are satisfied i.e. kbar1 = kbar3 and kbar2 = kbar4', async () => {
             const errors = [];
-            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
 
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);
@@ -59,12 +59,12 @@ describe('Bilateral Swap Verifier', () => {
     });
 
     describe('Failure States', () => {
-        it('should REJECT if malformed challenge', () => {
+        it('should REJECT if malformed challenge', async () => {
             // to test Failure States we need to pass in bad data to verifier
             // so we need to turn off proof.parseInputs
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
 
             const { proofData } = bilateralProof.constructProof(testNotes, sender);
@@ -78,10 +78,10 @@ describe('Bilateral Swap Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for random note values', () => {
+        it('should REJECT for random note values', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const randomNotes = proofUtils.makeTestNotes(
+            const randomNotes = await proofUtils.makeTestNotes(
                 [proofUtils.generateNoteValue(), proofUtils.generateNoteValue()],
                 [proofUtils.generateNoteValue(), proofUtils.generateNoteValue()],
             );
@@ -98,10 +98,10 @@ describe('Bilateral Swap Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if bilateral swap note balancing relationship not satisfied', () => {
+        it('should REJECT if bilateral swap note balancing relationship not satisfied', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const unbalancedNotes = proofUtils.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
+            const unbalancedNotes = await proofUtils.makeTestNotes([10, 19], [10, 20]); // k_2 != k_4
             const sender = randomHex(20);
 
             const { proofData, challenge } = bilateralProof.constructProof(unbalancedNotes, sender);
@@ -114,14 +114,14 @@ describe('Bilateral Swap Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for random proof data', () => {
+        it('should REJECT for random proof data', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const proofData = [...Array(4)].map(() =>
                 [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
             );
 
-            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
 
             const { challenge } = bilateralProof.constructProof(testNotes, sender);
@@ -133,10 +133,10 @@ describe('Bilateral Swap Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor is at infinity', () => {
+        it('should REJECT if blinding factor is at infinity', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
 
             const { proofData } = bilateralProof.constructProof(testNotes, sender);
@@ -156,10 +156,10 @@ describe('Bilateral Swap Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', () => {
+        it('should REJECT if blinding factor computed from scalars that are zero (kBar = 0 OR/AND aBar = 0)', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+            const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
 
             const { proofData, challenge } = bilateralProof.constructProof(testNotes, sender);

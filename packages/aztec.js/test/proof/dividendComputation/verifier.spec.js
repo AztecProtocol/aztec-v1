@@ -19,7 +19,7 @@ const { expect } = chai;
 
 describe('Dividend Computation Verifier', () => {
     describe('Success States', () => {
-        it('should construct a valid dividend computation proof', () => {
+        it('should construct a valid dividend computation proof', async () => {
             /*
             Test case:
             - k_in = 90
@@ -29,7 +29,7 @@ describe('Dividend Computation Verifier', () => {
             - za = 5
             - zb = 100
             */
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
             const za = 100;
             const zb = 5;
 
@@ -41,7 +41,7 @@ describe('Dividend Computation Verifier', () => {
     });
 
     describe('Failure States', () => {
-        it('should REJECT for unsatisfied proof relations', () => {
+        it('should REJECT for unsatisfied proof relations', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -58,7 +58,7 @@ describe('Dividend Computation Verifier', () => {
 
             const sender = proofUtils.randomAddress();
 
-            const wrongRelationship = proofUtils.makeTestNotes([90], [4, 49]);
+            const wrongRelationship = await proofUtils.makeTestNotes([90], [4, 49]);
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(wrongRelationship, za, zb, sender);
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(proofDataUnformatted, challenge, sender, za, zb);
@@ -69,7 +69,7 @@ describe('Dividend Computation Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for fake challenge', () => {
+        it('should REJECT for fake challenge', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -85,7 +85,7 @@ describe('Dividend Computation Verifier', () => {
             const zb = 5;
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
@@ -107,7 +107,7 @@ describe('Dividend Computation Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for fake proof data', () => {
+        it('should REJECT for fake proof data', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -123,7 +123,7 @@ describe('Dividend Computation Verifier', () => {
             const zb = 5;
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
             const { challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
@@ -137,7 +137,7 @@ describe('Dividend Computation Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for z_a > k_max', () => {
+        it('should REJECT for z_a > k_max', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -153,7 +153,7 @@ describe('Dividend Computation Verifier', () => {
             const zb = 5;
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
             const zaLarge = K_MAX + za;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, zaLarge, zb, sender);
@@ -172,7 +172,7 @@ describe('Dividend Computation Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT for z_b > k_max', () => {
+        it('should REJECT for z_b > k_max', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -188,7 +188,7 @@ describe('Dividend Computation Verifier', () => {
             const zb = 5;
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
             const zbLarge = K_MAX + zb;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zbLarge, sender);
@@ -207,7 +207,7 @@ describe('Dividend Computation Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if point not on the curve', () => {
+        it('should REJECT if point not on the curve', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -223,7 +223,7 @@ describe('Dividend Computation Verifier', () => {
             const zb = 5;
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
 
@@ -238,7 +238,7 @@ describe('Dividend Computation Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor at infinity', () => {
+        it('should REJECT if blinding factor at infinity', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -254,7 +254,7 @@ describe('Dividend Computation Verifier', () => {
             const zb = 5;
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted } = dividendComputation.constructProof(testNotes, za, zb, sender);
             proofDataUnformatted[0][0] = `0x${padLeft('05', 64)}`;
@@ -273,7 +273,7 @@ describe('Dividend Computation Verifier', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if blinding factor computed from invalid point', () => {
+        it('should REJECT if blinding factor computed from invalid point', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             /*
@@ -289,7 +289,7 @@ describe('Dividend Computation Verifier', () => {
             const zb = 5;
 
             const sender = proofUtils.randomAddress();
-            const testNotes = proofUtils.makeTestNotes([90], [4, 50]);
+            const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zb, sender);
             proofDataUnformatted[0][0] = `0x${padLeft('', 64)}`;

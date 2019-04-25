@@ -1,4 +1,4 @@
-const mcl = require('./mcl/mcl.js');
+const mcl = require('./mcl/mcl');
 
 const decodePoint = {};
 

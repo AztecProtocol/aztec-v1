@@ -47,6 +47,7 @@
   },
   "scripts": {
     "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "build:prod": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path ../../.eslintignore ."
   }

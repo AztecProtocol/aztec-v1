@@ -731,7 +731,11 @@
                     setup(exports, curveType);
                     resolve();
                 });
-            } else {
+            }
+            // TODO: we temporarily disabled WebAssembly for the web target because of a nasty webpack issues
+            // @see https://github.com/webpack/webpack/issues/7388
+            // @see https://github.com/webpack/webpack/issues/7352
+            else if (!process.env.WEBPACK_WEB_ENV) {
                 fetch(`./${name}.wasm`) // eslint-disable-line
                     .then((response) => response.arrayBuffer())
                     .then((buffer) => new Uint8Array(buffer))

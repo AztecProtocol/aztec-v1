@@ -39,9 +39,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -97,9 +99,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const noteValues = [80, 30, 10, 10, 10, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -127,9 +131,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const noteValues = [50, 30, 0, 20];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -157,9 +163,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const noteValues = [50, 50];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -188,9 +196,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -265,9 +275,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const noteValues = [50, 30, 40, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -293,9 +305,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const noteValues = [50, 30, 10, 10];
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -371,9 +385,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -413,9 +429,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -462,9 +480,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -518,9 +538,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -561,9 +583,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -606,9 +630,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -666,9 +692,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -725,9 +753,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -785,9 +815,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -845,9 +877,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = notes[1];
@@ -905,9 +939,11 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const senderAddress = accounts[0];
