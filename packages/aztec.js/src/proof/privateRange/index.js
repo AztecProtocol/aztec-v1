@@ -15,8 +15,6 @@ const Keccak = require('../../keccak');
 const privateRange = {};
 privateRange.verifier = verifier;
 
-const { customError } = devUtils.errors;
-const { errorTypes } = devUtils.constants;
 const { groupReduction } = bn128;
 
 const { inputCoder, outputCoder } = require('../../abiEncoder');
@@ -78,20 +76,6 @@ privateRange.constructProof = (notes, sender) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
 
-    // Check that proof data lies on the bn128 curve
-    notes.forEach((note) => {
-        const gammaOnCurve = bn128.curve.validate(note.gamma); // checking gamma point
-        const sigmaOnCurve = bn128.curve.validate(note.sigma); // checking sigma point
-
-        if (gammaOnCurve === false || sigmaOnCurve === false) {
-            throw customError(errorTypes.NOT_ON_CURVE, {
-                message: 'A group element is not on the bn128 curve',
-                gammaOnCurve,
-                sigmaOnCurve,
-                note,
-            });
-        }
-    });
 
     proofUtils.parseInputs(notes, sender);
 
