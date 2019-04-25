@@ -23,6 +23,6 @@
         "encoding": "utf-8",
         "destination": "./docs/",
         "readme": "./README.md",
-        "template": "./node_modules/braintree-jsdoc-template"
+        "template": "../../node_modules/braintree-jsdoc-template"
     }
 }
