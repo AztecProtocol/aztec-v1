@@ -2,6 +2,9 @@
   "name": "@aztec/monorepo-scripts",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
+  "dependencies": {
+    "require-dir": "^1.2.0"
+  },
   "devDependencies": {
     "bluebird": "^3.5.3",
     "eslint": "^5.15.3",
@@ -19,8 +22,5 @@
   "license": "LGPL-3.0",
   "scripts": {
     "lint": "eslint --ignore-path ../../.eslintignore ./"
-  },
-  "dependencies": {
-    "require-dir": "^1.2.0"
   }
 }
