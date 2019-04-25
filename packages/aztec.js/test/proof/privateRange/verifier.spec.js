@@ -13,27 +13,28 @@ const { errorTypes } = utils.constants;
 
 describe('Private range proof verifier', () => {
     describe('Success States', () => {
-        it('should construct a valid private range proof ', () => {
+        it('should construct a valid private range proof ', async () => {
             const originalValue = 10;
             const comparisonValue = 4;
             const utilityValue = 6;
 
-            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, challenge, sender);
+
             expect(valid).to.equal(true);
             expect(errors.length).to.equal(0);
         });
 
-        it('validate success when a comparison note of 0 value is used', () => {
+        it('validate success when a comparison note of 0 value is used', async () => {
             const originalValue = 10;
             const comparisonValue = 0;
             const utilityValue = 10;
 
-            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
@@ -45,12 +46,12 @@ describe('Private range proof verifier', () => {
     });
 
     describe('Failure states', () => {
-        it('validate failure for incorrect balancing relation', () => {
+        it('validate failure for incorrect balancing relation', async () => {
             const originalValue = 10;
             const comparisonValue = 5;
             const utilityValue = 6;
 
-            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
@@ -61,12 +62,12 @@ describe('Private range proof verifier', () => {
             expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('validate failure when comparison is not satisfied', () => {
+        it('validate failure when comparison is not satisfied', async () => {
             const originalValue = 20;
             const comparisonValue = 30;
-            const utilityValue = -10;
+            const utilityValue = 60;
 
-            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
@@ -77,12 +78,12 @@ describe('Private range proof verifier', () => {
             expect(errors[0]).to.equal(errorTypes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('validate failure for random challenge', () => {
+        it('validate failure for random challenge', async () => {
             const originalValue = 10;
             const comparisonValue = 4;
             const utilityValue = 6;
 
-            const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
             const sender = proofUtils.randomAddress();
 

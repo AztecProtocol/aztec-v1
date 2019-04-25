@@ -6,6 +6,7 @@
 const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
+const crypto = require('crypto');
 
 const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
@@ -98,7 +99,7 @@ privateRange.constructProof = (notes, sender) => {
                 .redAdd(blindingFactor.bk)
                 .fromRed();
         } else {
-            kBar = 0;
+            kBar = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
         }
         const aBar = notes[i].a
             .redMul(challenge)
