@@ -174,7 +174,7 @@ publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, kPublic, 
         ])
         .slice(0x42)}`;
 
-    return { proofData, challenge, expectedOutput };
+    return { proofData, expectedOutput };
 };
 
 module.exports = publicRange;
