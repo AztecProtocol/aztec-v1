@@ -6,12 +6,12 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
-describe('Private range Proof', () => {
-    it('should construct a proof with well-formed outputs', () => {
+describe('Private range proof', () => {
+    it('should construct a proof with well-formed outputs', async () => {
         const originalValue = 10;
         const comparisonValue = 4;
         const utilityValue = 6;
-        const testNotes = proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+        const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
         const sender = proofUtils.randomAddress();
 
