@@ -259,15 +259,16 @@ note.derive = async (publicKey, spendingKey) => {
  * @method fromValue
  * @param {string} publicKey hex-string formatted recipient public key
  * @param {number} value value of the note
+ * @param {string} owner owner of the not if different from the public key
  * @returns {Note} created note instance
  */
-note.create = (spendingPublicKey, value) => {
+note.create = (spendingPublicKey, value, noteOwner) => {
     const sharedSecret = createSharedSecret(spendingPublicKey);
     const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
     const k = padLeft(web3Utils.toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;
-    const owner = secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
+    const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
     return new Note(null, viewingKey, owner);
 };
 
