@@ -88,11 +88,18 @@ privateRange.constructProof = (notes, sender) => {
 
     const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
-        const kBar = notes[i].k
-            .redMul(challenge)
-            .redAdd(blindingFactor.bk)
-            .fromRed();
+        let kBar;
 
+        // Only set the first 2 values of kBar - the third is later inferred
+        // from a cryptographic relation. Set the third to 0
+        if (i <= 1) {
+            kBar = notes[i].k
+                .redMul(challenge)
+                .redAdd(blindingFactor.bk)
+                .fromRed();
+        } else {
+            kBar = 0;
+        }
         const aBar = notes[i].a
             .redMul(challenge)
             .redAdd(blindingFactor.ba)
