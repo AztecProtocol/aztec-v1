@@ -6,9 +6,7 @@
   "bugs": {
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
-  "dependencies": {
-    "require-dir": "^1.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "^7.4.3",
     "@babel/core": "^7.4.0",
