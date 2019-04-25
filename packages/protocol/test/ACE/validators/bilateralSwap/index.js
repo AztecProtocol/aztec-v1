@@ -37,7 +37,9 @@ contract('Bilateral Swap', (accounts) => {
         it('should validate the output encoding for bilateral proof in zero-knowledge', async () => {
             const noteValues = [10, 20, 10, 20];
 
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -77,8 +79,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should validate a proof that uses notes worth 0', async () => {
             const noteValues = [0, 20, 0, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -99,8 +102,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should validate that challenge has GROUP_MODULUS added to it', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -164,8 +168,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail for incorrect input note values (k1 != k3, k2 != k4)', async () => {
             const noteValues = [10, 50, 20, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -186,8 +191,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail for random proof data', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -232,8 +238,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail if scalars are NOT mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -264,8 +271,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail if scalars are zero', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -306,8 +314,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail if proof data NOT correctly encoded', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -352,8 +361,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail for incorrect H_X, H_Y in CRS)', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -388,8 +398,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail for a fake challenge', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -413,8 +424,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail if sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -447,8 +459,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -480,8 +493,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail if initial commitments NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -514,8 +528,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail if blinding factors NOT integrated into challenge variable', async () => {
             const noteValues = [10, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -549,10 +564,10 @@ contract('Bilateral Swap', (accounts) => {
         it('should fail for number of notes less than minimum number required - using 2 instead of 4', async () => {
             const noteValues = [20, 20];
             const numNotes = 2;
-
             bilateralSwapAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
@@ -577,10 +592,10 @@ contract('Bilateral Swap', (accounts) => {
         it('should fail for number of notes less than minimum number required - using 3 instead of 4', async () => {
             const noteValues = [10, 10, 10];
             const numNotes = 3;
-
             bilateralSwapAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 3);
@@ -609,8 +624,9 @@ contract('Bilateral Swap', (accounts) => {
                 proofUtils.generateNoteValue(),
                 proofUtils.generateNoteValue(),
             ];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -631,8 +647,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail for incorrect number of input notes', async () => {
             const noteValues = [10, 20, 30, 10, 20, 30];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -652,8 +669,9 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail for a bid note of zero value that does NOT satisfy proof relationship', async () => {
             const noteValues = [0, 20, 10, 20];
-
-            const notes = [...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);

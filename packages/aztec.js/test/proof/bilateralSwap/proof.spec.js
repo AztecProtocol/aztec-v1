@@ -9,9 +9,9 @@ const proofUtils = require('../../../src/proof/proofUtils');
 const { expect } = chai;
 
 describe('Bilateral Swap Proof', () => {
-    it('should construct a proof where blinding scalar relations are satisfied', () => {
-        it('should construct a proof with well-formed outputs', () => {
-            const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+    it('should construct a proof where blinding scalar relations are satisfied', async () => {
+        it('should construct a proof with well-formed outputs', async () => {
+            const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
             const sender = randomHex(20);
 
             const { proofData } = bilateralProof.constructProof(testNotes, sender);
@@ -22,7 +22,7 @@ describe('Bilateral Swap Proof', () => {
             expect(proofData[3].length).to.equal(6);
         });
 
-        const testNotes = proofUtils.makeTestNotes([10, 20], [10, 20]);
+        const testNotes = await proofUtils.makeTestNotes([10, 20], [10, 20]);
 
         // i.e. bk1 = bk3 and bk2 = bk4
         const finalHash = new Keccak();

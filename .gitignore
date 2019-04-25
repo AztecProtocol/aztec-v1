@@ -6,6 +6,7 @@
 build/
 coverage/
 coverageEnv/
+dist/
 docs/
 lib/
 node_modules/

@@ -1,6 +1,6 @@
 /* eslint-disable new-cap */
 /**
- * Wrapper around elliptic.js implemenation of a Barreto-Naehrig curve over a 254 bit prime field
+ * Wrapper around elliptic.js implementation of a Barreto-Naehrig curve over a 254 bit prime field
  *
  * @module bn128
  */

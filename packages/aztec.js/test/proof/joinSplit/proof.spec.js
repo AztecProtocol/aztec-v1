@@ -50,11 +50,11 @@ function validateGroupElement(xHex, yHex) {
 }
 
 describe('Join-Split Proofs', () => {
-    it('should construct a proof with well-formed outputs', () => {
+    it('should construct a proof with well-formed outputs', async () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
-        const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         const k = getKPublic(kIn, kOut);
         const kPublic = bn128.curve.n.add(new BN(k)).umod(bn128.curve.n);
 
@@ -72,11 +72,11 @@ describe('Join-Split Proofs', () => {
         expect(new BN(proofData[proofData.length - 1][0].slice(2), 16).eq(kPublic)).to.equal(true);
     });
 
-    it('should fail to construct a proof with malformed kPublic', () => {
+    it('should fail to construct a proof with malformed kPublic', async () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
 
-        const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         const kPublic = bn128.curve.n.add(new BN(100));
 
         try {
@@ -86,11 +86,11 @@ describe('Join-Split Proofs', () => {
         }
     });
 
-    it('should fail to construct a proof with m malformed', () => {
+    it('should fail to construct a proof with m malformed', async () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
-        const { commitments } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
 
         try {
             proof.constructProof(commitments, 500, randomAddress(), kPublic);
@@ -99,11 +99,11 @@ describe('Join-Split Proofs', () => {
         }
     });
 
-    it('should fail to construct a proof if point NOT on curve', () => {
+    it('should fail to construct a proof if point NOT on curve', async () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
-        const { commitments } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         commitments[0].gamma.x = new BN(bn128.curve.p.add(new BN(100))).toRed(bn128.curve.red);
         try {
             proof.constructProof(commitments, 500, randomAddress(), kPublic);
@@ -112,11 +112,11 @@ describe('Join-Split Proofs', () => {
         }
     });
 
-    it('should fail to construct a proof if point at infinity', () => {
+    it('should fail to construct a proof if point at infinity', async () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
-        const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         commitments[0].gamma = commitments[0].gamma.add(commitments[0].gamma.neg());
         let message = '';
         try {
@@ -127,11 +127,11 @@ describe('Join-Split Proofs', () => {
         expect(message).to.equal(errorTypes.POINT_AT_INFINITY);
     });
 
-    it('should fail to construct a proof if viewing key response is 0', () => {
+    it('should fail to construct a proof if viewing key response is 0', async () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
-        const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         commitments[0].a = new BN(0).toRed(bn128.groupReduction);
         try {
             proof.constructProof(commitments, m, randomAddress(), kPublic);
@@ -140,11 +140,11 @@ describe('Join-Split Proofs', () => {
         }
     });
 
-    it('should fail to construct a proof if value > K_MAX', () => {
+    it('should fail to construct a proof if value > K_MAX', async () => {
         const kIn = [...Array(2)].map(() => generateNoteValue());
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
-        const { commitments, m } = proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
+        const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         commitments[0].k = new BN(K_MAX + 1).toRed(bn128.groupReduction);
         try {
             proof.constructProof(commitments, m, randomAddress(), kPublic);

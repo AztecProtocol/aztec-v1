@@ -54,7 +54,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             await ace.setProof(UTILITY_PROOF, aztecBilateralSwap.address);
 
             // Creating a fixed note
-            zeroNote = note.createZeroValueNote();
+            zeroNote = await note.createZeroValueNote();
 
             erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
@@ -62,7 +62,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const canConvert = true;
 
             await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
             await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
@@ -74,9 +73,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
@@ -120,9 +121,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
@@ -143,9 +146,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
@@ -180,9 +185,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 10, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -203,9 +210,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
@@ -270,15 +279,17 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             await ace.setProof(UTILITY_PROOF, aztecBilateralSwap.address);
 
-            zeroNote = note.createZeroValueNote();
+            zeroNote = await note.createZeroValueNote();
         });
 
         it('should fail if minted balance is greater than linked token balance', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const kPublic = 50; // kPublic is one greater than linked token balance
             const tokensTransferred = new BN(49);
@@ -347,9 +358,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         it('should fail if asset is not mintable', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
@@ -378,9 +391,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         it('should fail when converting value and asset is NOT convertible', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const kPublic = 50; // kPublic is one greater than linked token balance
             const tokensTransferred = new BN(50);
@@ -450,9 +465,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         it('should fail if ACE has not been approved to extract tokens', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
             const proofs = [];
 
             const kPublic = 50;
@@ -521,9 +538,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             // failure case
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
             const proofs = [];
 
             const newTotalMinted = notes[0];
@@ -562,9 +581,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
@@ -599,9 +620,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20];
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const newTotalMinted = notes[0];
             const oldTotalMinted = zeroNote;
@@ -649,9 +672,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 10, 20];
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -709,7 +734,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
                 { from: ownerA, gas: 4700000 },
             );
 
-            const outputNotes = [note.create(recipient1.publicKey, 50)];
+            const outputNotes = [await note.create(recipient1.publicKey, 50)];
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -740,9 +765,9 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
                 from: attacker,
             });
 
-            const newTotalMinted = note.create(recipient2.publicKey, 1);
-            const oldTotalMinted = note.createZeroValueNote();
-            const adjustedNotes = [note.create(recipient2.publicKey, 1)];
+            const newTotalMinted = await note.create(recipient2.publicKey, 1);
+            const oldTotalMinted = await note.createZeroValueNote();
+            const adjustedNotes = [await note.create(recipient2.publicKey, 1)];
 
             const mintProof = proof.mint.encodeMintTransaction({
                 newTotalMinted,

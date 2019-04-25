@@ -42,7 +42,9 @@ contract('Dividend Computation', (accounts) => {
             const za = 100;
             const zb = 5;
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
 
@@ -87,7 +89,9 @@ contract('Dividend Computation', (accounts) => {
             const za = 100;
             const zb = 5;
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -157,7 +161,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -186,7 +192,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -249,7 +257,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -295,7 +305,9 @@ contract('Dividend Computation', (accounts) => {
             const noteValues = [90, 4, 50];
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -343,7 +355,9 @@ contract('Dividend Computation', (accounts) => {
             const noteValues = [90, 4, 50];
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -401,7 +415,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -458,7 +474,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -500,7 +518,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -532,7 +552,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -596,7 +618,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -660,7 +684,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -722,7 +748,9 @@ contract('Dividend Computation', (accounts) => {
             const noteValues = [90, 4, 50];
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -785,7 +813,9 @@ contract('Dividend Computation', (accounts) => {
             const noteValues = [90, 4, 50];
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -851,7 +881,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
@@ -901,7 +933,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -930,7 +964,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -959,7 +995,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -990,7 +1028,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
@@ -1021,7 +1061,9 @@ contract('Dividend Computation', (accounts) => {
 
             const dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
 
-            const notes = [...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([
+                ...dividendAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);

@@ -31,14 +31,16 @@ function fakeSignature() {
 
 describe('abiEncoder.encoderFactory', () => {
     describe('General Functionality', () => {
-        it('should validate that encodeMetadata works', () => {
+        it('should validate that encodeMetadata works', async () => {
             // Setup
             const numNotes = 4;
             const accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 10, 20];
-            const notes = accounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                accounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             // Body of test
             const { data, length } = abiEncoder.encoderFactory.encodeMetadata(notes.slice(0, numNotes));
@@ -76,14 +78,16 @@ describe('abiEncoder.encoderFactory', () => {
     });
 
     describe('Bilateral Swap', () => {
-        it('should format bilateralSwap properly', () => {
+        it('should format bilateralSwap properly', async () => {
             // Setup
             const numNotes = 4;
             const accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 10, 20];
-            const notes = accounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                accounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             // Body of test
             const inputNotes = notes.slice(0, 2);
@@ -125,12 +129,14 @@ describe('abiEncoder.encoderFactory', () => {
     });
 
     describe('Join-Split', () => {
-        it('should format joinSplit properly', () => {
+        it('should format joinSplit properly', async () => {
             // Setup
             const accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-            const notes = accounts.map(({ publicKey }) => {
-                return note.create(publicKey, randomNoteValue());
-            });
+            const notes = await Promise.all(
+                accounts.map(({ publicKey }) => {
+                    return note.create(publicKey, randomNoteValue());
+                }),
+            );
             const numNotes = 4;
             const m = 2;
             const inputNotes = notes.slice(0, 2);
@@ -217,7 +223,7 @@ describe('abiEncoder.encoderFactory', () => {
     });
 
     describe('Mint', () => {
-        it('should format mint properly', () => {
+        it('should format mint properly', async () => {
             // Setup
             let accounts = [];
             let notes = [];
@@ -225,9 +231,11 @@ describe('abiEncoder.encoderFactory', () => {
             const numNotes = 4;
             const noteValues = [50, 30, 10, 10];
             accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            notes = accounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            notes = await Promise.all(
+                accounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 4);
@@ -278,7 +286,7 @@ describe('abiEncoder.encoderFactory', () => {
     });
 
     describe('Burn', () => {
-        it('should format burn properly', () => {
+        it('should format burn properly', async () => {
             // Setup
             let accounts = [];
             let notes = [];
@@ -286,9 +294,11 @@ describe('abiEncoder.encoderFactory', () => {
             const numNotes = 4;
             const noteValues = [50, 30, 10, 10];
             accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            notes = accounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            notes = await Promise.all(
+                accounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 4);
@@ -339,7 +349,7 @@ describe('abiEncoder.encoderFactory', () => {
     });
 
     describe('Dividend Computation', () => {
-        it('should format dividendComputation properly', () => {
+        it('should format dividendComputation properly', async () => {
             // Setup
             let accounts = [];
             let notes = [];
@@ -349,9 +359,11 @@ describe('abiEncoder.encoderFactory', () => {
             const numNotes = 3;
             const noteValues = [90, 4, 50];
             accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            notes = accounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            notes = await Promise.all(
+                accounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                }),
+            );
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);

@@ -28,11 +28,13 @@ describe('abiEncoder.outputCoder', () => {
     let accounts = [];
     let notes = [];
     let challenges = [];
-    beforeEach(() => {
+    beforeEach(async () => {
         accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-        notes = accounts.map(({ publicKey }) => {
-            return note.create(publicKey, randomNoteValue());
-        });
+        notes = await Promise.all(
+            accounts.map(({ publicKey }) => {
+                return note.create(publicKey, randomNoteValue());
+            }),
+        );
         challenges = [
             '0x00112233445566778899aabbccddeeffffeeddccbbaa99887766554433221100',
             '0xff112233445566778899aabbccddeeffffeeddccbbaa998877662544332211de',

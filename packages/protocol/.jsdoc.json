@@ -5,7 +5,7 @@
         "includePattern": ".+\\.js(doc|x)?$",
         "excludePattern": "(^|\\/|\\\\)_",
         "include": ["./"],
-        "exclude": [".nyc_output", "lib", "node_modules", "out", "setupDatabase"]
+        "exclude": [".nyc_output", "lib", "node_modules", "out"]
     },
     "sourceType": "module",
     "tags": {

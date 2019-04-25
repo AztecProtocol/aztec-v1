@@ -2,25 +2,24 @@
  * Read in points from the trusted setup points database.
  * NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY AZTEC ON A SINGLE DEVICE AND
  *   IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY.
- *   We will be launching our multiparty computation trusted setup protocol shortly, where mulitple entities
+ *   We will be launching our multiparty computation trusted setup protocol shortly, where multiple entities
  *   create the trusted setup database and only one of them must act honestly in order for the setup database to be secure.
  *   If you wish to participate please let us know at hello@aztecprotocol.com
  *
  * @module setup
  */
 
-const {
-    constants: { SIGNATURES_PER_FILE },
-} = require('@aztec/dev-utils');
+const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const fs = require('fs');
-const path = require('path');
+const fetch = require('cross-fetch');
 
-const setup = {};
 const bn128 = require('../bn128');
 
-const partialPath = path.posix.resolve(__dirname, '../setupDatabase');
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
+const { constants } = devUtils;
+const POINTS_DB_URL = 'https://s3.eu-west-2.amazonaws.com/aztec-points/data';
+
+const setup = {};
 
 /**
  * Decompress a 256-bit representation of a bn128 G1 element.
@@ -72,58 +71,36 @@ setup.compress = (x, y) => {
 };
 
 /**
- * Load a trusted setup signature point h^{\frac{1}{y - k}}, y = setup key, k = input value
+ * Loads a trusted setup signature point h^{\frac{1}{y - k}}, y = setup key, k = input value
  *
- * @method readSignature
+ * @method fetchPoint
  * @param {number} inputValue the integer whose negation was signed by the trusted setup key
  * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
  */
-setup.readSignature = (inputValue) => {
+setup.fetchPoint = async (inputValue) => {
     const value = Number(inputValue);
-    return new Promise((resolve, reject) => {
-        const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
+    const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
 
-        const fileName = path.posix.resolve(partialPath, `data${fileNum * SIGNATURES_PER_FILE - 1}.dat`);
-        fs.readFile(fileName, (err, data) => {
-            if (err) {
-                return reject(err);
-            }
-            // each file starts at 0 (0, 1024, 2048 etc)
-            const min = (fileNum - 1) * SIGNATURES_PER_FILE;
-            const bytePosition = (value - min) * 32;
-            // eslint-disable-next-line new-cap
-            const signatureBuf = new Buffer.alloc(32);
-            data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
+    try {
+        const res = await fetch(`${POINTS_DB_URL}${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
+        if (res.status === 404) {
+            throw new Error('point not found');
+        }
+        const data = await res.arrayBuffer();
+        const pointString = Buffer.from(data);
 
-            const x = new BN(signatureBuf);
-            return resolve(setup.decompress(x));
-        });
-    });
-};
+        // each file starts at 0 (0, 1024, 2048 etc)
+        const min = (fileNum - 1) * constants.SIGNATURES_PER_FILE;
+        const bytePosition = (value - min) * 32;
+        // eslint-disable-next-line new-cap
+        const signatureBuf = new Buffer.alloc(32);
+        pointString.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
 
-/**
- * Load a trusted setup signature, using synchronous file loading methods (see: {@link module:setup~readSignature})
- *
- * @method readSignatureSync
- * @param {number} inputValue the integer whose negation was signed by the trusted setup key
- * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
- */
-setup.readSignatureSync = (inputValue) => {
-    const value = Number(inputValue);
-    const fileNum = Math.ceil(Number(value + 1) / SIGNATURES_PER_FILE);
-
-    const fileName = path.posix.resolve(partialPath, `data${fileNum * SIGNATURES_PER_FILE - 1}.dat`);
-    const data = fs.readFileSync(fileName);
-
-    // each file starts at 0 (0, 1024, 2048 etc)
-    const min = (fileNum - 1) * SIGNATURES_PER_FILE;
-    const bytePosition = (value - min) * 32;
-    // eslint-disable-next-line new-cap
-    const signatureBuf = new Buffer.alloc(32);
-    data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
-
-    const x = new BN(signatureBuf);
-    return setup.decompress(x);
+        const x = new BN(signatureBuf);
+        return Promise.resolve(setup.decompress(x));
+    } catch (err) {
+        throw err;
+    }
 };
 
 module.exports = setup;

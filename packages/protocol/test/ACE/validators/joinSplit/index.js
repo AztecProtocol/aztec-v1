@@ -39,10 +39,10 @@ contract('JoinSplit', (accounts) => {
                 from: accounts[0],
             });
             aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-            notes = [
+            notes = await Promise.all([
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-            ];
+            ]);
         });
 
         it('should validate encoding of a JOIN-SPLIT zero-knowledge proof', async () => {
@@ -209,7 +209,10 @@ contract('JoinSplit', (accounts) => {
         });
 
         it('should accept input notes of zero value', async () => {
-            const inputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
+            const inputNotes = [
+                await note.create(aztecAccounts[0].publicKey, 0),
+                await note.create(aztecAccounts[1].publicKey, 0),
+            ];
             const outputNotes = notes.slice(0, 2);
             const kPublic = -10;
             const publicOwner = aztecAccounts[0].address;
@@ -234,7 +237,10 @@ contract('JoinSplit', (accounts) => {
 
         it('should accept output notes of zero value', async () => {
             const inputNotes = notes.slice(0, 2);
-            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
+            const outputNotes = [
+                await note.create(aztecAccounts[0].publicKey, 0),
+                await note.create(aztecAccounts[1].publicKey, 0),
+            ];
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
@@ -258,8 +264,7 @@ contract('JoinSplit', (accounts) => {
 
         it('should accept the minimum number of notes possible (one input, one output)', async () => {
             const inputNotes = notes.slice(0, 1);
-
-            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0)];
+            const outputNotes = [await note.create(aztecAccounts[0].publicKey, 0)];
 
             const kPublic = 0;
             const publicOwner = aztecAccounts[0].address;
@@ -439,13 +444,16 @@ contract('JoinSplit', (accounts) => {
         it('should fail for a fake challenge', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
 
-            const notes = [
+            const notes = await Promise.all([
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-            ];
+            ]);
 
             const inputNotes = notes.slice(0, 2);
-            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
+            const outputNotes = [
+                await note.create(aztecAccounts[0].publicKey, 0),
+                await note.create(aztecAccounts[1].publicKey, 0),
+            ];
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
@@ -472,12 +480,15 @@ contract('JoinSplit', (accounts) => {
         it('should fail for random proof data', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
 
-            const notes = [
+            const notes = await Promise.all([
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
                 ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-            ];
+            ]);
             const inputNotes = notes.slice(0, 2);
-            const outputNotes = [note.create(aztecAccounts[0].publicKey, 0), note.create(aztecAccounts[1].publicKey, 0)];
+            const outputNotes = [
+                await note.create(aztecAccounts[0].publicKey, 0),
+                await note.create(aztecAccounts[1].publicKey, 0),
+            ];
             const kPublic = 10;
             const publicOwner = aztecAccounts[0].address;
             const senderAddress = accounts[0];
@@ -531,7 +542,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -590,7 +601,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -654,7 +665,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -730,7 +741,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -794,7 +805,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -872,7 +883,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -949,7 +960,7 @@ contract('JoinSplit', (accounts) => {
         it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
@@ -1013,7 +1024,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1084,7 +1095,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1156,7 +1167,7 @@ contract('JoinSplit', (accounts) => {
             const noteValues = [10, 20, 10, 20];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1200,7 +1211,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -1279,7 +1290,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -1357,7 +1368,7 @@ contract('JoinSplit', (accounts) => {
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const kPublic = 0;
@@ -1458,7 +1469,7 @@ contract('JoinSplit', (accounts) => {
         it('should fail for zero input note value', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [0, 0, 5, 5];
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
@@ -1511,7 +1522,7 @@ contract('JoinSplit', (accounts) => {
         it('should fail for zero output note value', async () => {
             const noteValues = [10, 10, 0, 0];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
 
@@ -1564,7 +1575,7 @@ contract('JoinSplit', (accounts) => {
         it('should fail for a fake trusted setup key', async () => {
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            const { commitments, m } = joinSplit.helpers.generateFakeCommitmentSet({
+            const { commitments, m } = await joinSplit.helpers.generateFakeCommitmentSet({
                 kIn: [11, 22],
                 kOut: [5, 28],
             });
