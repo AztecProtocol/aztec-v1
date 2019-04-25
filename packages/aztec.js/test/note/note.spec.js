@@ -1,10 +1,10 @@
 const {
     constants: { GROUP_MODULUS },
 } = require('@aztec/dev-utils');
+const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const web3Utils = require('web3-utils');
-const BN = require('bn.js');
 
 const note = require('../../src/note');
 const noteUtils = require('../../src/note/utils');

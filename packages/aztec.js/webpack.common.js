@@ -1,9 +1,8 @@
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: ['@babel/polyfill', './src/index.js'],
     module: {
         rules: [
             {
@@ -21,20 +20,10 @@ module.exports = {
                     rootMode: 'upward',
                 },
             },
-            {
-                test: /\.wasm$/,
-                exclude: /node_modules/,
-                loader: 'wasm-loader',
-            },
         ],
-    },
-    node: {
-        // loads crypto-browserify
-        crypto: true,
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'bundle.js',
         library: 'aztec',
         libraryTarget: 'umd',
     },
@@ -44,14 +33,14 @@ module.exports = {
         maxEntrypointSize: 400000,
     },
     plugins: [
-        new CleanWebpackPlugin(),
-        new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-            'process.env.WEBPACK_ENV': JSON.stringify(true),
-        }),
+        new CopyWebpackPlugin([
+            {
+                from: 'src/**/*.wasm',
+                to: '[name].[ext]',
+            },
+        ]),
     ],
     resolve: {
         extensions: ['.js'],
     },
-    target: 'web',
 };
