@@ -18,7 +18,7 @@ const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
 
 PrivateRange.abi = PrivateRangeInterface.abi;
 
-contract.only('PrivateRange', (accounts) => {
+contract('PrivateRange ABI encoder test', (accounts) => {
     let privateRangeContract;
     describe('Success States', () => {
         beforeEach(async () => {
