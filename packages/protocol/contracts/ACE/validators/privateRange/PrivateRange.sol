@@ -1,6 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "../../../interfaces/PrivateRangeInterface.sol";
+import "./PrivateRangeABIEncoder.sol";
 
 /**
  * @title Library to validate AZTEC zero-knowledge private range proofs
@@ -225,9 +226,6 @@ contract PrivateRange {
                     revert(0x00, 0x20)
                 }
 
-                mstore(0x00, 0x01)
-                return(0x00, 0x20)
-
                 // Great! All done. This is a valid proof, so fall through out of the assembly block
                 // so that we can call `ABIEncoder.encodeAndExit`
             }
@@ -355,5 +353,6 @@ contract PrivateRange {
     
         // if we've reached here, we've validated the join-split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
+        PrivateRangeABIEncoder.encodeAndExit();
     }
 }

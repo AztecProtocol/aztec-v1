@@ -12,6 +12,6 @@ contract PrivateRangeInterface {
     ) 
         external
         pure
-        returns (bool) 
+        returns (bytes memory) 
     {}
 }
