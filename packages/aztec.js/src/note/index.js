@@ -243,7 +243,7 @@ note.fromViewKey = async (viewingKey) => {
 
 /**
  * Create Note instance from a public key and a spending key
- * 
+ *
  * @dev This doesn't work in the web version of aztec.js
  *
  * @method derive
