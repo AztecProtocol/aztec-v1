@@ -9,12 +9,15 @@ const BN = require('bn.js');
 const { constants } = require('@aztec/dev-utils');
 
 const {
-    proof: { privateRange },
+    proof: { privateRange, proofUtils },
     note,
     secp256k1,
     abiEncoder: { inputCoder, outputCoder, encoderFactory },
     bn128,
+    keccak,
 } = require('aztec.js');
+
+const Keccak = keccak;
 
 // ### Artifacts
 const PrivateRange = artifacts.require('./PrivateRange');
@@ -356,7 +359,7 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
+        it('validate failure if group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 4, 6];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
             const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -400,7 +403,7 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('should fail if proofData NOT correctly encoded', async () => {
+        it('validate failure if proofData NOT correctly encoded', async () => {
             const noteValues = [10, 4, 6];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
             const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -452,7 +455,7 @@ contract.only('PrivateRange', (accounts) => {
             );
         });
 
-        it('should fail for incorrect H_X, H_Y in CRS', async () => {
+        it('validate failure for incorrect H_X, H_Y in CRS', async () => {
             const noteValues = [10, 4, 6];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
             const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
@@ -490,20 +493,161 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], fakeCRS, opts));
         });
 
-        it('should fail for no notes', async () => {
-            // TODO
-            const originalNote = [];
-            const comparisonNote = [];
-            const utilityNote = [];
+        // it('validate failure for no notes', async () => {
+        //     // TODO
+        //     const originalNote = [];
+        //     const comparisonNote = [];
+        //     const utilityNote = [];
 
-            const { proofData } = privateRange.encodePrivateRangeTransaction({
-                originalNote,
-                comparisonNote,
-                utilityNote,
-                senderAddress: accounts[0],
+        //     const { proofData } = privateRange.encodePrivateRangeTransaction({
+        //         originalNote,
+        //         comparisonNote,
+        //         utilityNote,
+        //         senderAddress: accounts[0],
+        //     });
+
+        //     console.log({ proofData });
+        //     const opts = {
+        //         from: accounts[0],
+        //         gas: 4000000,
+        //     };
+
+        //     await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
+        // });
+
+        it('validate failure if sender address NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4, 6];
+            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
+            const utilityNote = notes[2];
+            const senderAddress = accounts[0];
+
+            const rollingHash = new Keccak();
+
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
             });
 
-            console.log({ proofData });
+            const localConstructBlindingFactors = privateRange.constructBlindingFactors;
+            const blindingFactors = privateRange.constructBlindingFactors(notes, rollingHash);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(notes, blindingFactors);
+            privateRange.constructBlindingFactors = () => blindingFactors;
+
+            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
+                [originalNote, comparisonNote, utilityNote],
+                senderAddress,
+            );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            privateRange.constructBlindingFactors = localConstructBlindingFactors;
+
+            const inputNotes = [originalNote, comparisonNote];
+            const outputNotes = [utilityNote];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwner = [utilityNote.owner];
+
+            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwner, outputNotes);
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
+        });
+
+        it('validate failure if notes NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4, 6];
+            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
+            const utilityNote = notes[2];
+            const senderAddress = accounts[0];
+
+            const rollingHash = new Keccak();
+
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const localConstructBlindingFactors = privateRange.constructBlindingFactors;
+            const blindingFactors = privateRange.constructBlindingFactors(notes, rollingHash);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, blindingFactors);
+            privateRange.constructBlindingFactors = () => blindingFactors;
+
+            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
+                [originalNote, comparisonNote, utilityNote],
+                senderAddress,
+            );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            privateRange.constructBlindingFactors = localConstructBlindingFactors;
+
+            const inputNotes = [originalNote, comparisonNote];
+            const outputNotes = [utilityNote];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwner = [utilityNote.owner];
+
+            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwner, outputNotes);
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
+        });
+
+        it('validate failure if blinding factors NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4, 6];
+            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const notes = [...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))];
+
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
+            const utilityNote = notes[2];
+            const senderAddress = accounts[0];
+
+            const rollingHash = new Keccak();
+
+            notes.forEach((individualNote) => {
+                rollingHash.append(individualNote.gamma);
+                rollingHash.append(individualNote.sigma);
+            });
+
+            const localConstructBlindingFactors = privateRange.constructBlindingFactors;
+            const blindingFactors = privateRange.constructBlindingFactors(notes, rollingHash);
+
+            const localComputeChallenge = proofUtils.computeChallenge;
+            proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, notes);
+            privateRange.constructBlindingFactors = () => blindingFactors;
+
+            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
+                [originalNote, comparisonNote, utilityNote],
+                senderAddress,
+            );
+
+            proofUtils.computeChallenge = localComputeChallenge;
+            privateRange.constructBlindingFactors = localConstructBlindingFactors;
+
+            const inputNotes = [originalNote, comparisonNote];
+            const outputNotes = [utilityNote];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwner = [utilityNote.owner];
+
+            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwner, outputNotes);
+
             const opts = {
                 from: accounts[0],
                 gas: 4000000,
