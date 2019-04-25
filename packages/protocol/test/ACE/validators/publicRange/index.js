@@ -17,7 +17,7 @@ const PublicRangeInterface = artifacts.require('./PublicRangeInterface');
 
 PublicRange.abi = PublicRangeInterface.abi;
 
-contract('Public range proof tests', (accounts) => {
+contract.only('Public range proof tests', (accounts) => {
     let publicRangeContract;
 
     describe('Greater than tests', () => {
@@ -34,9 +34,11 @@ contract('Public range proof tests', (accounts) => {
                 const kPublic = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                });
+                const notes = await Promise.all(
+                    aztecAccounts.map(({ publicKey }, i) => {
+                        return note.create(publicKey, noteValues[i]);
+                    })
+                );
 
                 const inputNotes = notes.slice(0, 1);
                 const outputNotes = notes.slice(1, 2);
@@ -61,9 +63,11 @@ contract('Public range proof tests', (accounts) => {
                 const kPublic = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                });
+                const notes = await Promise.all(
+                    aztecAccounts.map(({ publicKey }, i) => {
+                        return note.create(publicKey, noteValues[i]);
+                    })
+                );
 
                 const inputNotes = notes.slice(0, 1);
                 const outputNotes = notes.slice(1, 2);
@@ -96,9 +100,11 @@ contract('Public range proof tests', (accounts) => {
                 const kPublic = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                });
+                const notes = await Promise.all(
+                    aztecAccounts.map(({ publicKey }, i) => {
+                        return note.create(publicKey, noteValues[i]);
+                    })
+                );
 
                 const inputNotes = notes.slice(0, 1);
                 const outputNotes = notes.slice(1, 2);
@@ -121,42 +127,15 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure when note value is less than public integer', async () => {
-                const noteValues = [9, -1];
+                const noteValues = [9, 0];
                 const kPublic = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                });
-
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const senderAddress = accounts[0];
-
-                const { proofData } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
-                    kPublic,
-                    senderAddress,
-                });
-
-                const opts = {
-                    from: accounts[0],
-                    gas: 4000000,
-                };
-                await truffleAssert.reverts(
-                    publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts),
+                const notes = await Promise.all(
+                    aztecAccounts.map(({ publicKey }, i) => {
+                        return note.create(publicKey, noteValues[i]);
+                    })
                 );
-            });
-
-            it('validate failure when using a negative note', async () => {
-                const noteValues = [20, -20];
-                const kPublic = 40;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                });
 
                 const inputNotes = notes.slice(0, 1);
                 const outputNotes = notes.slice(1, 2);

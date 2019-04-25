@@ -33,9 +33,11 @@ contract('Public range ABI encoder', (accounts) => {
             const kPublic = 10;
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
+            const notes = await Promise.all(
+                aztecAccounts.map(({ publicKey }, i) => {
+                    return note.create(publicKey, noteValues[i]);
+                })
+            );
 
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 2);
