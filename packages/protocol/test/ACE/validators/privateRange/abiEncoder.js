@@ -51,22 +51,20 @@ contract.only('PrivateRange', (accounts) => {
             const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = 0;
 
-            const expectedOutput = outputCoder
-                .encodeProofOutputs([
-                    {
-                        inputNotes,
-                        outputNotes,
-                        publicOwner,
-                        publicValue,
-                        challenge,
-                    },
-                ]);
+            const expectedOutput = outputCoder.encodeProofOutputs([
+                {
+                    inputNotes,
+                    outputNotes,
+                    publicOwner,
+                    publicValue,
+                    challenge,
+                },
+            ]);
 
             const opts = {
                 from: accounts[0],
                 gas: 4000000,
             };
-
 
             const result = await privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts);
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
