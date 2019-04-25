@@ -232,7 +232,7 @@ note.fromPublicKey = (publicKey) => {
  *
  * @method fromViewKey
  * @param {string} viewingKey the viewing key for the note
- * @returns {Note} created note instance
+ * @returns {Promise} promise that resolves to created note instance
  */
 note.fromViewKey = async (viewingKey) => {
     const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
@@ -243,11 +243,13 @@ note.fromViewKey = async (viewingKey) => {
 
 /**
  * Create Note instance from a public key and a spending key
+ * 
+ * @dev This doesn't work in the web version of aztec.js
  *
  * @method derive
  * @param {string} publicKey hex-string formatted note public key
  * @param {string} spendingKey hex-string formatted spending key (can also be an Ethereum private key)
- * @returns {Note} created note instance
+ * @returns {Promise} promise that resolves to created note instance
  */
 note.derive = async (publicKey, spendingKey) => {
     const newNote = new Note(publicKey);
@@ -262,16 +264,16 @@ note.derive = async (publicKey, spendingKey) => {
  * @param {string} publicKey hex-string formatted recipient public key
  * @param {number} value value of the note
  * @param {string} owner owner of the not if different from the public key
- * @returns {Note} created note instance
+ * @returns {Promise} promise that resolves to created note instance
  */
 
-note.create = async (spendingPublicKey, value) => {
+note.create = async (spendingPublicKey, value, noteOwner) => {
     const sharedSecret = createSharedSecret(spendingPublicKey);
     const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
     const k = padLeft(toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;
-    const owner = secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
+    const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
     const setupPoint = await setup.fetchPoint(value);
     return new Note(null, viewingKey, owner, setupPoint);
 };
@@ -296,7 +298,7 @@ note.encodeMetadata = (noteArray) => {
  * mintable assets a constant
  *
  * @method createZeroValueNote
- * @returns {Note} created note instance
+ * @returns {Promise} promise that resolves to created note instance
  */
 note.createZeroValueNote = () => note.fromViewKey(utils.constants.ZERO_VALUE_NOTE_VIEWING_KEY);
 
