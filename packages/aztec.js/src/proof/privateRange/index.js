@@ -77,7 +77,6 @@ privateRange.constructProof = (notes, sender) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
 
-
     proofUtils.parseInputs(notes, sender);
 
     notes.forEach((note) => {
@@ -132,17 +131,14 @@ privateRange.constructProof = (notes, sender) => {
  * @returns {Object} AZTEC proof data and expected output
  */
 privateRange.encodePrivateRangeTransaction = ({ originalNote, comparisonNote, utilityNote, senderAddress }) => {
-    const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
-        [originalNote, comparisonNote, utilityNote],
-        senderAddress,
-    );
-
-    const inputNotes = [originalNote, comparisonNote];
-    const outputNotes = [utilityNote];
+    const inputNotes = [...originalNote, ...comparisonNote];
+    const outputNotes = [...utilityNote];
     const inputOwners = inputNotes.map((m) => m.owner);
-    const outputOwner = [utilityNote.owner];
+    const outputOwners = outputNotes.map((n) => n.owner);
 
-    const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwner, outputNotes);
+    const { proofData: proofDataRaw, challenge } = privateRange.constructProof([...inputNotes, ...outputNotes], senderAddress);
+
+    const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
     const publicValue = 0;
 

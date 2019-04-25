@@ -152,6 +152,7 @@ joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) 
     } else {
         kPublicBn = new BN(kPublic);
     }
+
     proofUtils.parseInputs(notes, sender, m, kPublicBn);
 
     notes.forEach((note) => {
