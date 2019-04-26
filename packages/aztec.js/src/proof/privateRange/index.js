@@ -45,7 +45,7 @@ privateRange.constructBlindingFactors = (notes, rollingHash) => {
             const xba = ba.redMul(x);
 
             B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
-        } else if (i === 2) {
+        } else if (i > 1) {
             bk = bkArray[i - 2].redSub(bkArray[i - 1]);
 
             x = rollingHash.keccak(groupReduction);
