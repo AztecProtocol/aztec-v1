@@ -88,7 +88,11 @@ jobs:
                 command: yarn build:docs
             - run:
                 name: "Prepare Git"
-                command: git remote add docs https://${GH_TOKEN}@github.com/AztecProtocol/AZTEC.git
+                command: |
+                    git remote add docs https://$GH_TOKEN@github.com/AztecProtocol/AZTEC.git
+                    git config credential.helper "cache --timeout=120"
+                    git config user.email $AZTEC_BOT_EMAIL
+                    git config user.name $AZTEC_BOT_NAME
             - run:
                 name: "Publish Docs"
                 command: yarn publish:docs
