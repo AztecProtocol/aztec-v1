@@ -17,7 +17,7 @@ const verifier = {};
  * @method verifyProof
  * @memberof module:privateRange
  * @param {Object[]} proofData - proofData array of AZTEC notes
- * @param {string} challenge - challenge variable used in zero-knowledge protocol
+ * @param {string} challengeHex - challenge variable used in zero-knowledge protocol
  * @param {string} sender - Ethereum address
  * @returns {boolean} valid - boolean that describes whether the proof verification is valid
  * @returns {option} errors - an array of all errors that were caught
@@ -38,13 +38,11 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
 
     const rollingHash = new Keccak();
 
-    // Append note data to rollingHash
     proofDataBn.forEach((proofElement) => {
         rollingHash.append(proofElement[6]);
         rollingHash.append(proofElement[7]);
     });
 
-    // Create finalHash and append to it - in same order as the proof construction code (otherwise final hash will be different)
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));
     finalHash.data = [...finalHash.data, ...rollingHash.data];

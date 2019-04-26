@@ -25,6 +25,7 @@ const { inputCoder, outputCoder } = require('../../abiEncoder');
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
+ * @param {Keccak} rollingHash structure containing the note data, to be hashe
  * @returns {Object[]} blinding factors
  */
 privateRange.constructBlindingFactors = (notes, rollingHash) => {
@@ -125,8 +126,9 @@ privateRange.constructProof = (notes, sender) => {
  *
  * @method encodePrivateRangeTransaction
  * @memberof module:privateRange
- * @param {Note[]} inputNotes input AZTEC notes
- * @param {Note[]} outputNotes output AZTEC notes
+ * @param {Note[]} originalNote original AZTEC note being to be compared
+ * @param {Note[]} comparisonNote note being compared against
+ * @param {Note[]} utilityNote additional note required to construct a valid balancing relationship
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
