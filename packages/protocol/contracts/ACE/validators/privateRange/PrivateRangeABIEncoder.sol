@@ -34,7 +34,7 @@ library PrivateRangeABIEncoder {
         assembly {
             // set up initial variables
             let notes := add(0x104, calldataload(0x144))
-            let n := calldataload(notes)
+            let n := 3
             let m := 2
             let inputOwners := add(0x124, calldataload(0x164)) // one word after inputOwners = 1st
             let outputOwners := add(0x124, calldataload(0x184)) // one word after outputOwners = 1st
