@@ -26,13 +26,13 @@ contract PrivateRange {
     function() external {
         assembly {
             // We don't check for function signatures,
-            // there's only one function that ever gets called: validateJoinSplit()
+            // there's only one function that ever gets called: validatePrivateRange()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract
             // through a compatible ABI
             validatePrivateRange()
 
             // if we get to here, the proof is valid. We now 'fall through' the assembly block
-            // and into JoinSplitABI.validateJoinSplit()
+            // and into PrviateRangeABIEncoder.validatePrivateRange()
             // reset the free memory pointer because we're touching Solidity code again
             mstore(0x40, 0x60)
 
@@ -105,7 +105,6 @@ contract PrivateRange {
                     case 1 {
 
                         // k_3 = k_1 - k_2
-                        // this is not being done in modular arithmetic - needs to be
                         k := addmod(
                                 calldataload(sub(noteIndex, 0x180)), // k_1
                                 sub(
@@ -120,9 +119,7 @@ contract PrivateRange {
                     // Check this commitment is well formed...
                     validateCommitment(noteIndex, k, a)
 
-                    // If i > m then this is an output note.
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-
                     if gt(i, 0x00) {
                         let x := mod(mload(0x00), gen_order)
                         k := mulmod(k, x, gen_order)
@@ -351,7 +348,7 @@ contract PrivateRange {
             }
         }
     
-        // if we've reached here, we've validated the join-split transaction and haven't thrown an error.
+        // if we've reached here, we've validated the private range proof and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
         PrivateRangeABIEncoder.encodeAndExit();
     }
