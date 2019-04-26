@@ -479,10 +479,32 @@ contract('PrivateRange', (accounts) => {
         });
 
         it('validate failure for no notes', async () => {
-            // TODO
             const originalNote = [];
             const comparisonNote = [];
             const utilityNote = [];
+
+            const { proofData } = privateRange.encodePrivateRangeTransaction({
+                originalNote,
+                comparisonNote,
+                utilityNote,
+                senderAddress: accounts[0],
+            });
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
+        });
+
+        it.only('validate failure for too many notes', async () => {
+            const noteValues = [10, 3, 4, 3];
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notes.slice(0, 1);
+            const comparisonNote = notes.slice(1, 3);
+            const utilityNote = notes.slice(3, 4);
 
             const { proofData } = privateRange.encodePrivateRangeTransaction({
                 originalNote,
