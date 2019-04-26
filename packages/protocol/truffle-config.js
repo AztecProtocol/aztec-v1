@@ -47,7 +47,7 @@ const projectRoot = '';
 const isVerbose = true;
 const coverageSubproviderConfig = {
     isVerbose,
-    ignoreFilesGlobs: ['**/node_modules/**', '**/interfaces/**', '**/test/**'],
+    ignoreFilesGlobs: ['**/Migrations.sol', '**/node_modules/**', '**/interfaces/**', '**/test/**'],
 };
 const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);
 const defaultFromAddress = getFirstAddress();
