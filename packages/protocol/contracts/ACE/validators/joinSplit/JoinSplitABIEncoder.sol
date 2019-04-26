@@ -155,24 +155,10 @@ library JoinSplitABIEncoder {
                 mstore(add(s, 0x20), 0x01)
                 mstore(0x80, typeHash)
                 mstore(0xa0, 0x10101)   // proof id 0x010101
-                
-                // store note owner in `s + 0x40`
+
+                // Store note owner at `s + 0x40`
                 mstore(add(s, 0x40), calldataload(add(inputOwners, mul(i, 0x20))))
 
-                let t := staticcall(gas, 0x01, 0x00, 0x80, 0x00, 0x20)
-                let owner := mload(add(s, 0x40))
-                let recoveredAddress := mload(0x00)
-
-                // Check recovered address matches now owner, throw if not
-                if iszero(eq(recoveredAddress, owner)) {
-                    mstore(0x00, 400)
-                    revert(0x00, 0x20)
-                } 
-
-                if iszero(owner) {
-                    mstore(0x00, 400)
-                    revert(0x00, 0x20)
-                } 
                 // store note hash in `s + 0x60`
                 mstore(add(s, 0x60), mload(0xc0))
                 // store note metadata length in `s + 0x60` (just the coordinates)
