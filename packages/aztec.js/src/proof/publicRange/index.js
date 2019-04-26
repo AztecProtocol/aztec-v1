@@ -44,7 +44,7 @@ publicRange.constructBlindingFactors = (notes) => {
             bkArray.push(bk);
         }
 
-        if (i === 1) {
+        if (i > 0) {
             // output note
             bk = bkArray[i - 1]; // .sub(kPublicBN);
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
