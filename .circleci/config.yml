@@ -110,13 +110,6 @@ workflows:
                 filters:
                     branches:
                         ignore: gh-pages
-            - coverage:
-                requires:
-                    - lint
-                    - test
-                filters:
-                    branches:
-                        ignore: gh-pages
             - artifacts:
                 requires:
                     - lint
@@ -125,6 +118,13 @@ workflows:
                     branches:
                         only:
                             - develop
+            - coverage:
+                requires:
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        ignore: gh-pages
             - release:
                 requires:
                     - lint
