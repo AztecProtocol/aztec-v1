@@ -63,7 +63,6 @@
     "clean": "shx rm -rf ./.0x-artifacts ./build ./coverage ./coverageEnv ./coverage.json || true",
     "compile:contracts": "truffle compile",
     "coverage": "scripts/coverage.sh",
-    "deploy:kovan": "truffle migrate --network kovan",
     "deploy:rinkeby": "truffle migrate --network rinkeby",
     "deploy:ropsten": "truffle migrate --network ropsten",
     "lint": "yarn lint:js && yarn lint:sol",

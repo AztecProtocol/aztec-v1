@@ -67,7 +67,6 @@ switch (process.env.MODE) {
         provider.addProvider(new RevertTraceSubprovider(artifactAdapter, defaultFromAddress, isVerbose));
         break;
     default:
-        kovanProvider = createProvider('kovan');
         rinkebyProvider = createProvider('rinkeby');
         mainnetProvider = createProvider('mainnet');
         ropstenProvider = createProvider('ropsten');
@@ -116,12 +115,6 @@ module.exports = {
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,
-        },
-        kovan: {
-            provider: kovanProvider,
-            gas: 6000000,
-            gasPrice: toHex(toWei('10', 'gwei')),
-            network_id: '42',
         },
         mainnet: {
             provider: mainnetProvider,
