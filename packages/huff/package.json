@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "bn.js": "^4.11.8",
-    "ethereumjs-vm": "^2.5.1"
+    "ethereumjs-vm": "^3.0.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
