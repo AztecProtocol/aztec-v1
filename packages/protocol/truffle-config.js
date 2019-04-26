@@ -39,7 +39,6 @@ function createProvider(network) {
     };
 }
 
-let kovanProvider = {};
 let rinkebyProvider = {};
 let mainnetProvider = {};
 let ropstenProvider = {};

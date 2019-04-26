@@ -1,6 +1,5 @@
 const { isUndefined } = require('lodash');
 
-const kovanAddresses = require('../addresses/kovan');
 const rinkebyAddresses = require('../addresses/rinkeby');
 const ropstenAddresses = require('../addresses/ropsten');
 
@@ -8,7 +7,6 @@ const NetworkId = {
     Mainnet: '1',
     Ropsten: '3',
     Rinkeby: '4',
-    Kovan: '42',
     Ganache: '1234',
 };
 
@@ -18,9 +16,6 @@ const networkToAddresses = {
     },
     '4': {
         ...rinkebyAddresses,
-    },
-    '42': {
-        ...kovanAddresses,
     },
 };
 
