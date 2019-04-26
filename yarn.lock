@@ -8036,9 +8036,9 @@ isomorphic-fetch@2.2.1:
     whatwg-fetch ">=0.10.0"
 
 isomorphic-git@^0.54.0:
-  version "0.54.0"
-  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.54.0.tgz#8ae89d1686101996dfa814c0f5b6b2377d3c59a8"
-  integrity sha512-pyKKe2YejiR7AXow8Bt0uK68e0n3ewmiH41RQnGQRBry1UMaUBVCqEgZPcKkUltUzXKML3E10ROY5NykM2R2Bw==
+  version "0.54.2"
+  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.54.2.tgz#0777b183de4c1f7e1155ce0f5f50520f7b22369f"
+  integrity sha512-hAD1AOnD5M1ZtQdgMEN0rG755KfJRA3VRViYdiv+rormrhIgqQA7457fajk22a6Yp0dVd8O73bMW9+4ihLKidQ==
   dependencies:
     async-lock "^1.1.0"
     clean-git-ref "1.0.3"
