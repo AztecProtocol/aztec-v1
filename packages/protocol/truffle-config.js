@@ -89,13 +89,18 @@ provider.start((err) => {
  */
 provider.send = provider.sendAsync.bind(provider);
 
+/**
+ * Disable the solidity optimizer if we're on CI and running coverage
+ */
+const isOptimizerEnabled = !process.env.CI || process.env.CIRCLE_JOB !== 'coverage';
+
 module.exports = {
     compilers: {
         solc: {
             version: compilerConfig.solcVersion,
             settings: {
                 optimizer: {
-                    enabled: true,
+                    enabled: isOptimizerEnabled,
                     runs: 200,
                 },
                 evmVersion: 'petersburg',
