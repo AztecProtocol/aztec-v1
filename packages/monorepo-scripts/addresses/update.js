@@ -7,7 +7,6 @@ const { NetworkId } = require('../../contract-addresses/src');
 const PACKAGES_PATH = path.join(__dirname, '..', '..');
 const CONTRACT_ADDRESSES_PATH = path.join(PACKAGES_PATH, 'contract-addresses');
 const CONTRACTS_DIR = path.join(PACKAGES_PATH, 'protocol', 'build', 'contracts');
-const KOVAN_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'kovan.json');
 const RINKEBY_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'rinkeby.json');
 const ROPSTEN_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'ropsten.json');
 
@@ -21,7 +20,6 @@ const deployedContracts = [
     'ZkAsset',
 ];
 
-const kovanAddresses = {};
 const rinkebyAddresses = {};
 const ropstenAddresses = {};
 
@@ -32,12 +30,6 @@ const extractNetworkAddress = async (filename) => {
     if (!content.networks) {
         throw new Error(`Networks object not found in ${filenameWithoutExtension} artifact`);
     }
-
-    // Kovan
-    if (!content.networks[NetworkId.Kovan]) {
-        throw new Error(`Kovan address not found for ${filenameWithoutExtension}`);
-    }
-    kovanAddresses[filenameWithoutExtension] = content.networks[NetworkId.Kovan].address;
 
     // Rinkeby
     if (!content.networks[NetworkId.Rinkeby]) {
@@ -53,7 +45,6 @@ const extractNetworkAddress = async (filename) => {
 };
 
 const updateTestnetJsons = async () => {
-    await fs.writeFile(KOVAN_ADDRESSES_FILE, JSON.stringify(kovanAddresses, null, 4));
     await fs.writeFile(RINKEBY_ADDRESSES_FILE, JSON.stringify(rinkebyAddresses, null, 4));
     await fs.writeFile(ROPSTEN_ADDRESSES_FILE, JSON.stringify(ropstenAddresses, null, 4));
 };
