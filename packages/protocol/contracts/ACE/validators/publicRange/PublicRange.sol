@@ -85,7 +85,7 @@ contract PublicRange {
                 mstore(0x80, calldataload(0x44)) // h_x
                 mstore(0xa0, calldataload(0x64)) // h_y
                 let notes := add(0x104, calldataload(0x164)) // start position of notes
-                let n := calldataload(notes) // first element of the notes array is it's length
+                let n := 2
                 let m := 1
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x124), gen_order)
@@ -94,7 +94,7 @@ contract PublicRange {
                 mstore(0x2e0, calldataload(0x24)) // store the msg.sender, to be hashed later
                 mstore(0x300, kPublic)
                 hashCommitments(notes, n)
-                let b := add(0x320, mul(n, 0x80)) // set pointer to memory location of commitments where the commitments
+                let b := add(0x320, mul(n, 0x80))
 
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
@@ -111,11 +111,11 @@ contract PublicRange {
                     switch gt(i, 0)
                     case 1 {
                         /*
-                        Enforce the condition k_2 = k_1 - c*y
+                        Enforce the condition k_2 = k_1 - c*k_public
                         */
                         k := addmod(
-                            calldataload(sub(noteIndex, 0xc0)),
-                            mulmod(sub(gen_order, c), kPublic, gen_order),
+                            calldataload(sub(noteIndex, 0xc0)), // k_1
+                            mulmod(sub(gen_order, c), kPublic, gen_order), 
                             gen_order
                         )
                     } 
