@@ -75,6 +75,28 @@ jobs:
             - run:
                 name: "Cover Packages"
                 command: PKG=@aztec/protocol yarn coverage
+    docs:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Build Docs"
+                command: yarn build:docs
+            - run:
+                name: "Prepare Git"
+                command: |
+                    git remote add docs https://$GH_TOKEN@github.com/AztecProtocol/AZTEC.git
+                    git config credential.helper "cache --timeout=120"
+                    git config user.email $AZTEC_BOT_EMAIL
+                    git config user.name $AZTEC_BOT_NAME
+            - run:
+                name: "Publish Docs"
+                command: yarn publish:docs
+
     release:
         working_directory: ~/repo
         docker:
@@ -110,6 +132,14 @@ workflows:
                 filters:
                     branches:
                         ignore: gh-pages
+            - artifacts:
+                requires:
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - develop
             - coverage:
                 requires:
                     - lint
@@ -117,7 +147,7 @@ workflows:
                 filters:
                     branches:
                         ignore: gh-pages
-            - artifacts:
+            - docs:
                 requires:
                     - lint
                     - test

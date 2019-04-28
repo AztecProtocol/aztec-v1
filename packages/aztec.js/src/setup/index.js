@@ -17,7 +17,7 @@ const bn128 = require('../bn128');
 
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 const { constants } = devUtils;
-const POINTS_DB_URL = 'https://s3.eu-west-2.amazonaws.com/aztec-points/data';
+const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
 
 const setup = {};
 

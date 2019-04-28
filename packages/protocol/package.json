@@ -33,7 +33,7 @@
     "solhint": "^2.0.0",
     "truffle": "5.0.14",
     "truffle-assertions": "^0.8.2",
-    "truffle-hdwallet-provider": "^1.0.4",
+    "truffle-hdwallet-provider": "1.0.8",
     "web3": "1.0.0-beta.52",
     "web3-utils": "1.0.0-beta.52"
   },
@@ -63,7 +63,6 @@
     "clean": "shx rm -rf ./.0x-artifacts ./build ./coverage ./coverageEnv ./coverage.json || true",
     "compile:contracts": "truffle compile",
     "coverage": "scripts/coverage.sh",
-    "deploy:kovan": "truffle migrate --network kovan",
     "deploy:rinkeby": "truffle migrate --network rinkeby",
     "deploy:ropsten": "truffle migrate --network ropsten",
     "lint": "yarn lint:js && yarn lint:sol",

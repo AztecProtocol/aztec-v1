@@ -39,7 +39,6 @@ function createProvider(network) {
     };
 }
 
-let kovanProvider = {};
 let rinkebyProvider = {};
 let mainnetProvider = {};
 let ropstenProvider = {};
@@ -48,7 +47,7 @@ const projectRoot = '';
 const isVerbose = true;
 const coverageSubproviderConfig = {
     isVerbose,
-    ignoreFilesGlobs: ['**/node_modules/**', '**/interfaces/**', '**/test/**'],
+    ignoreFilesGlobs: ['**/Migrations.sol', '**/node_modules/**', '**/interfaces/**', '**/test/**'],
 };
 const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);
 const defaultFromAddress = getFirstAddress();
@@ -67,7 +66,6 @@ switch (process.env.MODE) {
         provider.addProvider(new RevertTraceSubprovider(artifactAdapter, defaultFromAddress, isVerbose));
         break;
     default:
-        kovanProvider = createProvider('kovan');
         rinkebyProvider = createProvider('rinkeby');
         mainnetProvider = createProvider('mainnet');
         ropstenProvider = createProvider('ropsten');
@@ -91,13 +89,18 @@ provider.start((err) => {
  */
 provider.send = provider.sendAsync.bind(provider);
 
+/**
+ * Disable the solidity optimizer if we're on CI and running coverage
+ */
+const isOptimizerEnabled = !process.env.CI || process.env.CIRCLE_JOB !== 'coverage';
+
 module.exports = {
     compilers: {
         solc: {
             version: compilerConfig.solcVersion,
             settings: {
                 optimizer: {
-                    enabled: true,
+                    enabled: isOptimizerEnabled,
                     runs: 200,
                 },
                 evmVersion: 'petersburg',
@@ -116,12 +119,6 @@ module.exports = {
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,
-        },
-        kovan: {
-            provider: kovanProvider,
-            gas: 6000000,
-            gasPrice: toHex(toWei('10', 'gwei')),
-            network_id: '42',
         },
         mainnet: {
             provider: mainnetProvider,
