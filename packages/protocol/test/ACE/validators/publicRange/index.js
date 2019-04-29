@@ -26,7 +26,7 @@ const PublicRangeInterface = artifacts.require('./PublicRangeInterface');
 
 PublicRange.abi = PublicRangeInterface.abi;
 
-contract.only('Public range proof tests', (accounts) => {
+contract('Public range proof tests', (accounts) => {
     let publicRangeContract;
 
     describe('Greater than tests', () => {

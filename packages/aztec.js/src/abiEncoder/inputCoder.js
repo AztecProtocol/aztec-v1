@@ -2,10 +2,10 @@
  * Input ABI encoder for the various proofs
  * @module inputCoder
  */
-const BN = require('bn.js')
+const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const encoderFactory = require('./encoderFactory');
 const { constants } = require('@aztec/dev-utils');
+const encoderFactory = require('./encoderFactory');
 
 const inputCoder = {};
 
@@ -160,10 +160,10 @@ inputCoder.publicRange = (proofData, challenge, kPublic, inputOwners, outputOwne
     let K_PUBLIC;
 
     if (kPublic < 0) {
-        const kPublicBN = (constants.GROUP_MODULUS).add(new BN(kPublic));
+        const kPublicBN = constants.GROUP_MODULUS.add(new BN(kPublic));
         K_PUBLIC = padLeft(kPublicBN.toString(16), 64);
     } else {
-        K_PUBLIC = padLeft(Number(kPublic).toString(16), 64)
+        K_PUBLIC = padLeft(Number(kPublic).toString(16), 64);
     }
 
     const configs = {
