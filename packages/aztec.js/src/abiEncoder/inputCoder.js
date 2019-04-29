@@ -2,9 +2,10 @@
  * Input ABI encoder for the various proofs
  * @module inputCoder
  */
-
+const BN = require('bn.js')
 const { padLeft } = require('web3-utils');
 const encoderFactory = require('./encoderFactory');
+const { constants } = require('@aztec/dev-utils');
 
 const inputCoder = {};
 
@@ -155,10 +156,19 @@ inputCoder.burn = (proofData, challenge, inputOwners, outputOwners, metadata) =>
  * @returns {string} data - hexadecimal concatenated string of parameters encoded according
  * to the ABI spec of that particular proof
  */
-inputCoder.publicRange = (proofData, challenge, publicInteger, inputOwners, outputOwners, metadata) => {
+inputCoder.publicRange = (proofData, challenge, kPublic, inputOwners, outputOwners, metadata) => {
+    let K_PUBLIC;
+
+    if (kPublic < 0) {
+        const kPublicBN = (constants.GROUP_MODULUS).add(new BN(kPublic));
+        K_PUBLIC = padLeft(kPublicBN.toString(16), 64);
+    } else {
+        K_PUBLIC = padLeft(Number(kPublic).toString(16), 64)
+    }
+
     const configs = {
         CHALLENGE: challenge.slice(2),
-        PUBLIC_INTEGER: padLeft(Number(publicInteger).toString(16), 64),
+        K_PUBLIC,
         PROOF_DATA: encoderFactory.encodeProofData(proofData),
         INPUT_OWNERS: encoderFactory.encodeInputOwners(inputOwners),
         OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(outputOwners),
