@@ -21,7 +21,7 @@ const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract.only('JoinSplit', (accounts) => {
+contract('JoinSplit', (accounts) => {
     let joinSplitContract;
     // Creating a collection of tests that should pass
     describe('Success States', () => {

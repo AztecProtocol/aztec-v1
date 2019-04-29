@@ -1,20 +1,17 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const BN = require('bn.js');
-const crypto = require('crypto');
-const truffleAssert = require('truffle-assertions');
-const { padLeft, sha3 } = require('web3-utils');
+const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 const {
     constants,
-    proofs: { JOIN_SPLIT_PROOF },
 } = require('@aztec/dev-utils');
 
 const {
-    proof: { joinSplit },
+    proof: { joinSplit, proofUtils },
     note,
     secp256k1,
+    abiEncoder: { outputCoder },
 } = require('aztec.js');
 
 // ### Artifacts
@@ -34,7 +31,7 @@ contract('JoinSplit alternative flow test', (accounts) => {
 
         });
 
-        it('should validate encoding of a JOIN-SPLIT zero-knowledge proof', async () => {
+        it.only('should validate encoding of a JOIN-SPLIT zero-knowledge proof', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             const { publicKey } = aztecAccounts[0];
             const { address: address2 } = aztecAccounts[1];
@@ -49,14 +46,14 @@ contract('JoinSplit alternative flow test', (accounts) => {
             const note2 = await note.create(publicKey, note2Value, address2); // currentInterestBalance (20)
             const note3 = await note.create(publicKey, note3Value); // withdrawInterestNote (30)
 
+            const kPublic = 0;
+
             const { proofData, expectedOutput } = joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [note2],
                 outputNotes: [note3, note1],
                 senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(4, 5),// TODO: sort joinsplit proof construction, so don't need private key,
                 publicOwner: accounts[3],
-                kPublic: 0,
-                validatorAddress: joinSplitContract.address,
+                kPublic,
             });
 
             const opts = {
@@ -64,11 +61,97 @@ contract('JoinSplit alternative flow test', (accounts) => {
                 gas: 4000000,
             };
 
+            const publicOwner = accounts[3];
+
             // TODO: make work without signatures
             const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, opts);
 
-            console.log('result: ', result)
-            // expect(result).to.equal(expectedOutput);
+            const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+
+            expect(decoded[0].outputNotes[0].gamma.eq(note3.gamma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].sigma.eq(note3.sigma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].noteHash).to.equal(note3.noteHash);
+            expect(decoded[0].outputNotes[0].owner).to.equal(note3.owner.toLowerCase());
+            expect(decoded[0].outputNotes[1].gamma.eq(note1.gamma)).to.equal(true);
+            expect(decoded[0].outputNotes[1].sigma.eq(note1.sigma)).to.equal(true);
+            expect(decoded[0].outputNotes[1].noteHash).to.equal(note1.noteHash);
+            expect(decoded[0].outputNotes[1].owner).to.equal(note1.owner.toLowerCase());
+
+            expect(decoded[0].inputNotes[0].gamma.eq(note2.gamma)).to.equal(true);
+            expect(decoded[0].inputNotes[0].sigma.eq(note2.sigma)).to.equal(true);
+            expect(decoded[0].inputNotes[0].noteHash).to.equal(note2.noteHash);
+            expect(decoded[0].inputNotes[0].owner).to.equal(note2.owner.toLowerCase());
+
+            expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
+            expect(decoded[0].publicValue).to.equal(kPublic);
+            expect(result).to.equal(expectedOutput);
+            expect(result).to.equal(expectedOutput);
+        });
+
+        it.only('succeeds for wrong input note owners', async () => {
+            const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
+            const { publicKey } = aztecAccounts[0];
+            const { address: address2 } = aztecAccounts[1];
+
+            const note1Value = 20;
+            const note2Value = 50;
+            const note3Value = 30;
+
+
+            // TODO sort values of notes and owners
+            const note1 = await note.create(publicKey, note1Value, address2); // changeNote (50)
+            const note2 = await note.create(publicKey, note2Value, address2); // currentInterestBalance (20)
+            const note3 = await note.create(publicKey, note3Value); // withdrawInterestNote (30)
+
+            // Reassign note owners
+            const randomAddress1 = proofUtils.randomAddress()
+            const randomAddress2 = proofUtils.randomAddress()
+            const randomAddress3 = proofUtils.randomAddress()
+
+            note1.owner = randomAddress1;
+            note2.owner = randomAddress2;
+            note3.owner = randomAddress3;
+
+            const kPublic = 0;
+
+            const { proofData, expectedOutput } = joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [note2],
+                outputNotes: [note3, note1],
+                senderAddress: accounts[0],
+                publicOwner: accounts[3],
+                kPublic,
+            });
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            const publicOwner = accounts[3];
+
+            // TODO: make work without signatures
+            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, opts);
+
+            const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+
+            expect(decoded[0].outputNotes[0].gamma.eq(note3.gamma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].sigma.eq(note3.sigma)).to.equal(true);
+            expect(decoded[0].outputNotes[0].noteHash).to.equal(note3.noteHash);
+            expect(decoded[0].outputNotes[0].owner).to.equal(randomAddress3.toLowerCase());
+            expect(decoded[0].outputNotes[1].gamma.eq(note1.gamma)).to.equal(true);
+            expect(decoded[0].outputNotes[1].sigma.eq(note1.sigma)).to.equal(true);
+            expect(decoded[0].outputNotes[1].noteHash).to.equal(note1.noteHash);
+            expect(decoded[0].outputNotes[1].owner).to.equal(randomAddress1.toLowerCase());
+
+            expect(decoded[0].inputNotes[0].gamma.eq(note2.gamma)).to.equal(true);
+            expect(decoded[0].inputNotes[0].sigma.eq(note2.sigma)).to.equal(true);
+            expect(decoded[0].inputNotes[0].noteHash).to.equal(note2.noteHash);
+            expect(decoded[0].inputNotes[0].owner).to.equal(randomAddress2.toLowerCase());
+
+            expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
+            expect(decoded[0].publicValue).to.equal(kPublic);
+            expect(result).to.equal(expectedOutput);
+            expect(result).to.equal(expectedOutput);
         });
     });
 });
