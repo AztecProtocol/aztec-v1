@@ -86,7 +86,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     * destroying input notes.
     * 
     * @param _proofData - bytes variable outputted from a proof verification contract, representing 
-    * transfer instructions for the ACE
+    * transfer instructions for the ACE 
     */
     function confidentialTransfer(bytes memory _proofData) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
@@ -111,6 +111,23 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         bool _status,
         bytes memory _signature
     ) public {
+        validateSignature(_noteHash, _spender, _signature);
+        confidentialApproved[_noteHash][_spender] = _status;
+    }
+
+    /**
+    * @dev Perform ECDSA signature validation on a set of notes. For use in joinSplit
+    * transactions in confidentialTransfer()
+    * 
+    * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
+    * @param _spender - address being approved to spend the note
+    * @param _signature - ECDSA signature from the note owner 
+    */
+    function validateSignature(
+        bytes32 _noteHash,
+        address _spender,
+        bytes memory _signature
+    ) internal {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
         address signer;
@@ -131,7 +148,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             signer = msg.sender;
         }
         require(signer == noteOwner, "the note owner did not sign this message");
-        confidentialApproved[_noteHash][_spender] = _status;
     }
 
     /**
