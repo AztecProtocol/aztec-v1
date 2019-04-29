@@ -143,7 +143,7 @@ publicRange.constructProof = (notes, kPublic, sender) => {
  * @memberof module:publicRange
  * @param {Note[]} inputNotes input AZTEC notes
  * @param {Note[]} outputNotes output AZTEC notes
- * @param {Number} y - public integer being compared against
+ * @param {Number} kPublic - public integer being compared against
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
