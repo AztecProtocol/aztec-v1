@@ -16,21 +16,6 @@ const generateCommitment = async (k) => {
     return note.fromViewKey(viewingKey);
 };
 
-// constructs an AZTEC commitment directly from the setup algorithm's trapdoor key.
-// Used for testing purposes only; we don't know the trapdoor key for the real deal.
-const generateFakeCommitment = async (k, trapdoor) => {
-    const commitment = await generateCommitment(k);
-    const kBn = new BN(k).toRed(bn128.groupReduction);
-    const mu = bn128.h.mul(trapdoor.redSub(kBn).redInvm());
-    const gamma = mu.mul(commitment.a);
-    const sigma = gamma.mul(kBn).add(bn128.h.mul(commitment.a));
-    return {
-        ...commitment,
-        gamma,
-        sigma,
-    };
-};
-
 /**
  * Create a set of AZTEC commitments from vectors of input and output values
  * @method generateCommitmentSet
@@ -53,6 +38,21 @@ helpers.generateCommitmentSet = async ({ kIn, kOut }) => {
     );
     const commitments = [...inputs, ...outputs];
     return { commitments, m: inputs.length };
+};
+
+// constructs an AZTEC commitment directly from the setup algorithm's trapdoor key.
+// Used for testing purposes only; we don't know the trapdoor key for the real deal.
+const generateFakeCommitment = async (k, trapdoor) => {
+    const commitment = await generateCommitment(k);
+    const kBn = new BN(k).toRed(bn128.groupReduction);
+    const mu = bn128.h.mul(trapdoor.redSub(kBn).redInvm());
+    const gamma = mu.mul(commitment.a);
+    const sigma = gamma.mul(kBn).add(bn128.h.mul(commitment.a));
+    return {
+        ...commitment,
+        gamma,
+        sigma,
+    };
 };
 
 /**

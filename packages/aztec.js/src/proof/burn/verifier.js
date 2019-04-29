@@ -4,11 +4,11 @@
  * @namespace verifier
  * @memberof module:proof.burn
  */
-const utils = require('@aztec/dev-utils');
 
+const { constants } = require('@aztec/dev-utils');
 const joinSplit = require('../joinSplit');
 
-const { errorTypes } = utils.constants;
+const { errorTypes } = constants;
 
 const verifier = {};
 

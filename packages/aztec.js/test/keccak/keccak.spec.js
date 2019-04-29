@@ -1,6 +1,6 @@
+const BN = require('bn.js');
 const chai = require('chai');
 const { padLeft, sha3 } = require('web3-utils');
-const BN = require('bn.js');
 
 const { expect } = chai;
 

@@ -8,16 +8,15 @@ const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
+const { inputCoder, outputCoder } = require('../../abiEncoder');
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
 const verifier = require('./verifier');
 
-const { inputCoder, outputCoder } = require('../../abiEncoder');
-
-const { groupReduction } = bn128;
 const { customError } = devUtils.errors;
 const { errorTypes } = devUtils.constants;
+const { groupReduction } = bn128;
 
 const dividendComputation = {};
 dividendComputation.verifier = verifier;

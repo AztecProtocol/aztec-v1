@@ -2,26 +2,12 @@
  * Note ABI encoding helper functions
  * @module noteCoder
  */
+
 const secp256k1 = require('@aztec/secp256k1');
 const { padLeft } = require('web3-utils');
 const bn128 = require('../bn128');
 
 const noteCoder = {};
-
-/**
- * Encode a note public key
- *
- * @method encodeNotePublicKey
- * @param {Object[]} gamma_sigma_ephemeral - object containing three elements: gamma, sigma and the ephemeral
- * key of a note
- * @returns {string} data - hexadecimal concatenated string of gamma, sigma and the ephemeral key
- */
-noteCoder.encodeNotePublicKey = ({ gamma, sigma, ephemeral }) => {
-    const gammaEnc = gamma.encode('hex', true);
-    const sigmaEnc = sigma.encode('hex', true);
-    const ephemeralEnc = ephemeral.encode('hex', true);
-    return `0x${padLeft(gammaEnc, 66)}${padLeft(sigmaEnc, 66)}${padLeft(ephemeralEnc, 66)}`;
-};
 
 /**
  * Decode a note from it's event log
@@ -41,6 +27,21 @@ noteCoder.decodeNoteFromEventLog = (parameter) => {
     const sigma = bn128.decompressHex(sigmaCompressed);
     const ephemeral = secp256k1.decompressHex(ephemeralCompressed);
     return noteCoder.encodeNotePublicKey({ gamma, sigma, ephemeral });
+};
+
+/**
+ * Encode a note public key
+ *
+ * @method encodeNotePublicKey
+ * @param {Object[]} gamma_sigma_ephemeral - object containing three elements: gamma, sigma and the ephemeral
+ * key of a note
+ * @returns {string} data - hexadecimal concatenated string of gamma, sigma and the ephemeral key
+ */
+noteCoder.encodeNotePublicKey = ({ gamma, sigma, ephemeral }) => {
+    const gammaEnc = gamma.encode('hex', true);
+    const sigmaEnc = sigma.encode('hex', true);
+    const ephemeralEnc = ephemeral.encode('hex', true);
+    return `0x${padLeft(gammaEnc, 66)}${padLeft(sigmaEnc, 66)}${padLeft(ephemeralEnc, 66)}`;
 };
 
 module.exports = noteCoder;

@@ -1,21 +1,18 @@
 /* eslint-disable prefer-arrow-callback */
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
-const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
-const utils = require('@aztec/dev-utils');
+const { padLeft, sha3 } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
-const verifier = require('../../../src/proof/joinSplit/verifier');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const proofUtils = require('../../../src/proof/proofUtils');
+const verifier = require('../../../src/proof/joinSplit/verifier');
 
-const { errorTypes } = utils.constants;
+const { errorTypes, K_MAX } = constants;
 const { expect } = chai;
 
 function generateNoteValue() {

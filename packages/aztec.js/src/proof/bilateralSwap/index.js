@@ -8,17 +8,16 @@ const BN = require('bn.js');
 const crypto = require('crypto');
 const { padLeft, sha3 } = require('web3-utils');
 
+const { inputCoder, outputCoder } = require('../../abiEncoder');
 const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
 const verifier = require('./verifier');
 
-const bilateralSwap = {};
-bilateralSwap.verifier = verifier;
-
 const { customError } = devUtils.errors;
 const { errorTypes } = devUtils.constants;
 
-const { inputCoder, outputCoder } = require('../../abiEncoder');
+const bilateralSwap = {};
+bilateralSwap.verifier = verifier;
 
 /**
  * Construct blinding factors

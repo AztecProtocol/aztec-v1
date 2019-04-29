@@ -6,14 +6,40 @@
 const { constants } = require('@aztec/dev-utils');
 const { padLeft, sha3 } = require('web3-utils');
 
-const verifier = require('./verifier');
-const proofUtils = require('../proofUtils');
-const joinSplit = require('../joinSplit');
-
 const { inputCoder, outputCoder } = require('../../abiEncoder');
+const joinSplit = require('../joinSplit');
+const proofUtils = require('../proofUtils');
+const verifier = require('./verifier');
 
 const burn = {};
 burn.verifier = verifier;
+
+/**
+ * Construct AZTEC burn proof transcript
+ *
+ * @method constructProof
+ * @memberof burn
+ * @param {Note[]} notes array of AZTEC notes
+ * @param {string} sender Ethereum address of transaction sender
+ * @returns {string[]} proofData - constructed cryptographic proof data
+ * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
+ */
+burn.constructProof = (notes, sender) => {
+    const m = 1;
+    const kPublic = 0;
+    let notesArray;
+
+    if (!Array.isArray(notes)) {
+        notesArray = [notes];
+    } else {
+        notesArray = notes;
+    }
+
+    proofUtils.parseInputs(notesArray, sender);
+
+    const { proofData, challenge } = joinSplit.constructProof(notesArray, m, sender, kPublic);
+    return { proofData, challenge };
+};
 
 /**
  * Encode a burn transaction
@@ -71,33 +97,6 @@ burn.encodeBurnTransaction = ({ newTotalBurned, oldTotalBurned, adjustedNotes, s
         ])
         .slice(0x42)}`;
     return { proofData, expectedOutput, challenge };
-};
-
-/**
- * Construct AZTEC burn proof transcript
- *
- * @method constructProof
- * @memberof burn
- * @param {Note[]} notes array of AZTEC notes
- * @param {string} sender Ethereum address of transaction sender
- * @returns {string[]} proofData - constructed cryptographic proof data
- * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
- */
-burn.constructProof = (notes, sender) => {
-    const m = 1;
-    const kPublic = 0;
-    let notesArray;
-
-    if (!Array.isArray(notes)) {
-        notesArray = [notes];
-    } else {
-        notesArray = notes;
-    }
-
-    proofUtils.parseInputs(notesArray, sender);
-
-    const { proofData, challenge } = joinSplit.constructProof(notesArray, m, sender, kPublic);
-    return { proofData, challenge };
 };
 
 module.exports = burn;

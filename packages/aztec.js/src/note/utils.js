@@ -9,19 +9,9 @@ const { padLeft, sha3 } = require('web3-utils');
 
 const utils = {};
 
-/**
- * Compute a Diffie-Hellman shared secret between an ephemeral point and a private key
- *
- * @method getSharedSecret
- * @private
- * @param {Object} ephemeralPoint secp256k1 point
- * @param {Object} privateKey hex-string formatted private key
- * @returns {string} hex-string formatted shared secret
- */
-utils.getSharedSecret = (ephemeralPoint, privateKey) => {
-    const sharedSecret = ephemeralPoint.mul(Buffer.from(privateKey.slice(2), 'hex'));
-    const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
-    return sha3(sharedSecretHex, 'hex');
+utils.constants = {
+    ZERO_VALUE_NOTE_VIEWING_KEY:
+        '0x00000000000000000000000000000000000000000000000000000000000000010000000002eff9beac9595f45cf86e1d9864f1d3d9460b77a74cb6fbcbd796fd877ef34b34',
 };
 
 /**
@@ -42,9 +32,19 @@ utils.getNoteHash = (gamma, sigma) => {
     return sha3(`0x${noteType}${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
 };
 
-utils.constants = {
-    ZERO_VALUE_NOTE_VIEWING_KEY:
-        '0x00000000000000000000000000000000000000000000000000000000000000010000000002eff9beac9595f45cf86e1d9864f1d3d9460b77a74cb6fbcbd796fd877ef34b34',
+/**
+ * Compute a Diffie-Hellman shared secret between an ephemeral point and a private key
+ *
+ * @method getSharedSecret
+ * @private
+ * @param {Object} ephemeralPoint secp256k1 point
+ * @param {Object} privateKey hex-string formatted private key
+ * @returns {string} hex-string formatted shared secret
+ */
+utils.getSharedSecret = (ephemeralPoint, privateKey) => {
+    const sharedSecret = ephemeralPoint.mul(Buffer.from(privateKey.slice(2), 'hex'));
+    const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
+    return sha3(sharedSecretHex, 'hex');
 };
 
 module.exports = utils;

@@ -1,20 +1,14 @@
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
-const HexString = require('./HexString');
 const bn128 = require('../../src/bn128');
+const HexString = require('./HexString');
 const note = require('../../src/note');
 const outputCoder = require('../../src/abiEncoder/outputCoder');
 
 const { expect } = chai;
-
-function randomNoteValue() {
-    return Math.floor(Math.random() * Math.floor(K_MAX));
-}
 
 function clean(input) {
     return input.replace(/^0+/, '');
@@ -24,10 +18,15 @@ function isHex(input) {
     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
 }
 
+function randomNoteValue() {
+    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
+}
+
 describe('abiEncoder.outputCoder', () => {
     let accounts = [];
     let notes = [];
     let challenges = [];
+
     beforeEach(async () => {
         accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
         notes = await Promise.all(

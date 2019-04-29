@@ -1,21 +1,18 @@
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 
-const { errorTypes } = utils.constants;
+const { errorTypes } = constants;
 const { expect } = chai;
 
 function generateNoteValue() {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
+    return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
 }
 
 function getKPublic(kIn, kOut) {
@@ -145,7 +142,7 @@ describe('Join-Split Proofs', () => {
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
-        commitments[0].k = new BN(K_MAX + 1).toRed(bn128.groupReduction);
+        commitments[0].k = new BN(constants.K_MAX + 1).toRed(bn128.groupReduction);
         try {
             proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
