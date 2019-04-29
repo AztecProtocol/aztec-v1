@@ -1,6 +1,6 @@
 ## secp256k1
 
-Utility wrapper around the secp256k1 curve. Particularly helpful  for generating random Ethereum private/ public key tuples.
+Utility wrapper around the secp256k1 curve. Particularly helpful for generating random Ethereum private/ public key tuples.
 
 ## Usage
 
