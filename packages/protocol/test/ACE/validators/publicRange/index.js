@@ -814,7 +814,6 @@ contract.only('Public range proof tests', (accounts) => {
             });
         });
     });
-    /*
     describe('Less than tests', () => {
         describe('Success States', () => {
             beforeEach(async () => {
@@ -824,22 +823,22 @@ contract.only('Public range proof tests', (accounts) => {
             });
 
             it('validate success when using zk validator contract', async () => {
-                // TODO
-                const noteValues = [0, 0];
-                const kPublic = constants.GROUP_MODULUS;
-                console.log({ kPublic });
+                const noteValues = [20, 30];
+                const kPublic = -10;
 
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                });
+                const notes = await Promise.all(
+                    aztecAccounts.map(({ publicKey }, i) => {
+                        return note.create(publicKey, noteValues[i]);
+                    }),
+                );
 
                 const inputNotes = notes.slice(0, 1);
                 const outputNotes = notes.slice(1, 2);
                 const senderAddress = accounts[0];
 
-                const { proofData } = publicRange.encodePublicRangeTransaction({
+                const { proofData, expectedOutput } = publicRange.encodePublicRangeTransaction({
                     inputNotes,
                     outputNotes,
                     kPublic,
@@ -850,9 +849,8 @@ contract.only('Public range proof tests', (accounts) => {
                     from: accounts[0],
                     gas: 4000000,
                 });
-                expect(result).to.equal(true);
+                expect(result).to.equal(expectedOutput);
             });
         });
     });
-    */
 });
