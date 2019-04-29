@@ -6,5 +6,5 @@
         "version": "0.5.7+commit.6da8b019.Emscripten.clang"
     },
     "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea165627a7a723058207041898bcf5c5add0e872864c9aaf654d7cd621915ce39db01ab9a52f05d0d1f0029",
-    "schemaVersion": "3.0.6"
+    "schemaVersion": "3.0.8"
 }
