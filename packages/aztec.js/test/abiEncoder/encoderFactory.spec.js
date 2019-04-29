@@ -13,7 +13,7 @@ const mintProof = require('../../src/proof/mint');
 
 const abiEncoder = require('../../src/abiEncoder');
 const note = require('../../src/note');
-const sign = require('../../src/sign');
+const signer = require('../../src/signer');
 
 const { expect } = chai;
 
@@ -148,7 +148,7 @@ describe('abiEncoder.encoderFactory', () => {
             const { proofData, challenge } = joinSplitProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(contractAddress, constants.ACE_DOMAIN_PARAMS);
+                const domain = signer.generateAZTECDomainParams(contractAddress, constants.ACE_DOMAIN_PARAMS);
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: proofs.JOIN_SPLIT_PROOF,
@@ -157,7 +157,7 @@ describe('abiEncoder.encoderFactory', () => {
                     sender: senderAddress,
                 };
                 const { privateKey } = accounts[index];
-                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+                const { signature } = signer.signTypedData(domain, schema, message, privateKey);
                 return signature;
             });
 

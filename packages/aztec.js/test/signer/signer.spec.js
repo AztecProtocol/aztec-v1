@@ -1,5 +1,6 @@
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
+const typedData = require('@aztec/typed-data');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const chai = require('chai');
@@ -7,9 +8,8 @@ const ethUtil = require('ethereumjs-util');
 const { padLeft, sha3 } = require('web3-utils');
 
 const bn128 = require('../../src/bn128');
-const eip712 = require('../../src/sign/eip712');
 const proofUtils = require('../../src/proof/proofUtils');
-const sign = require('../../src/sign');
+const signer = require('../../src/signer');
 
 const { expect } = chai;
 
@@ -28,7 +28,7 @@ describe('Sign', () => {
     });
 
     it('should generate correct AZTEC domain params', () => {
-        expect(sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
+        expect(signer.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
             name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
             version: '1',
             verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
@@ -36,8 +36,8 @@ describe('Sign', () => {
     });
 
     it('should have the domain params resolve to expected message', () => {
-        const messageInput = sign.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
-        const result = eip712.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
+        const messageInput = signer.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
+        const result = typedData.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
         const messageData = [
             sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
             sha3('AZTEC_CRYPTOGRAPHY_ENGINE').slice(2),
@@ -56,7 +56,7 @@ describe('Sign', () => {
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const domain = sign.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+            const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
@@ -65,7 +65,7 @@ describe('Sign', () => {
                 sender: senderAddress,
             };
             const { privateKey } = accounts[0];
-            const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
 
             const expectedLength = 3;
             const expectedNumCharacters = 64; // v, r and s should be 32 bytes
@@ -83,7 +83,7 @@ describe('Sign', () => {
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const domain = sign.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+            const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
@@ -92,7 +92,7 @@ describe('Sign', () => {
                 sender: senderAddress,
             };
             const { privateKey, publicKey } = accounts[0];
-            const { signature, encodedTypedData } = sign.signStructuredData(domain, schema, message, privateKey);
+            const { signature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
             const v = parseInt(signature[0], 16); // has to be in number format

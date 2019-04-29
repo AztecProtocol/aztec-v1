@@ -4,7 +4,7 @@ const keccak = require('./keccak');
 const note = require('./note');
 const proof = require('./proof');
 const setup = require('./setup');
-const sign = require('./sign');
+const signer = require('./signer');
 
 module.exports = {
     abiEncoder,
@@ -13,5 +13,5 @@ module.exports = {
     note,
     proof,
     setup,
-    sign,
+    signer,
 };
