@@ -91,19 +91,18 @@ inputCoder.dividendComputation = (proofData, challenge, za, zb, inputOwners, out
  * @returns {string} data - hexadecimal concatenated string of parameters encoded according
  * to the ABI spec of that particular proof
  */
-inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputSignatures, inputOwners, outputOwners, metadata) => {
+inputCoder.joinSplit = (proofData, m, challenge, publicOwner, inputOwners, outputOwners, metadata) => {
     const configs = {
         M: padLeft(Number(m).toString(16), 64),
         CHALLENGE: challenge.slice(2),
         PUBLIC_OWNER: padLeft(publicOwner.slice(2), 64),
         PROOF_DATA: encoderFactory.encodeProofData(proofData),
-        INPUT_SIGNATURES: encoderFactory.encodeInputSignatures(inputSignatures),
         INPUT_OWNERS: encoderFactory.encodeInputOwners(inputOwners),
         OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(outputOwners),
         METADATA: encoderFactory.encodeMetadata(metadata),
     };
 
-    const abiParams = ['PROOF_DATA', 'INPUT_SIGNATURES', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
+    const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'joinSplit');
 };
