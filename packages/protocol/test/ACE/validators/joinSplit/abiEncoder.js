@@ -45,20 +45,13 @@ contract.only('Join-Split ABI Encoder', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const { proofData, challenge } = proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
-            const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = signer.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.eip712.ACE_DOMAIN_PARAMS);
-                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-                const message = {
-                    proof: proofs.JOIN_SPLIT_PROOF,
-                    noteHash: inputNote.noteHash,
-                    challenge,
-                    sender: senderAddress,
-                };
-                const { privateKey } = aztecAccounts[index];
-                const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-                return signature;
-            });
+            const { proofData, challenge } = aztec.proof.joinSplit.constructProof(
+                [...inputNotes, ...outputNotes],
+                m,
+                accounts[0],
+                0,
+            );
+
             const publicOwner = aztecAccounts[0].address;
 
             const outputOwners = outputNotes.map((n) => n.owner);
