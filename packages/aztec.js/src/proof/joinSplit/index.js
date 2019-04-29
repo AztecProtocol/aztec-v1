@@ -14,7 +14,7 @@ const verifier = require('./verifier');
 const abiEncoder = require('../../abiEncoder');
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
-const sign = require('../../sign');
+const signer = require('../../signer');
 
 const { constants, proofs } = devUtils;
 const { groupReduction } = bn128;
@@ -220,7 +220,7 @@ joinSplit.encodeJoinSplitTransaction = ({
     );
 
     const inputSignatures = inputNotes.map((inputNote, index) => {
-        const domain = sign.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
+        const domain = signer.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
         const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
         const message = {
             proof: proofs.JOIN_SPLIT_PROOF,
@@ -229,7 +229,7 @@ joinSplit.encodeJoinSplitTransaction = ({
             sender: senderAddress,
         };
         const { privateKey } = inputNoteOwners[index];
-        const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+        const { signature } = signer.signTypedData(domain, schema, message, privateKey);
         return signature;
     });
 

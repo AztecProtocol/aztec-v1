@@ -22,8 +22,8 @@ const zero = new BN(0).toRed(groupReduction);
 const proofUtils = {};
 
 /**
- * Checks the number of notes. Depending on the boolean argument, shouldThrow, 
- * will either 1) immediately throw if incorrect number, or 2) push the error to 
+ * Checks the number of notes. Depending on the boolean argument, shouldThrow,
+ * will either 1) immediately throw if incorrect number, or 2) push the error to
  * a supplied array of errors
  * @method checkNumNotes
  * @param {Object[]} notes - array of AZTEC notes
