@@ -1,4 +1,5 @@
 const { constants, proofs } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
@@ -11,7 +12,6 @@ const mintProof = require('../../src/proof/mint');
 const burnProof = require('../../src/proof/burn');
 
 const abiEncoder = require('../../src/abiEncoder');
-const secp256k1 = require('../../src/secp256k1');
 const note = require('../../src/note');
 const sign = require('../../src/sign');
 

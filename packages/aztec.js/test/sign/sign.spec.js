@@ -1,5 +1,5 @@
 const { constants, proofs } = require('@aztec/dev-utils');
-
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const chai = require('chai');
@@ -10,7 +10,6 @@ const proofUtils = require('../../src/proof/proofUtils');
 const sign = require('../../src/sign');
 const eip712 = require('../../src/sign/eip712');
 const bn128 = require('../../src/bn128');
-const secp256k1 = require('../../src/secp256k1');
 
 const { expect } = chai;
 

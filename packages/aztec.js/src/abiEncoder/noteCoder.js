@@ -2,9 +2,9 @@
  * Note ABI encoding helper functions
  * @module noteCoder
  */
+const secp256k1 = require('@aztec/secp256k1');
 const { padLeft } = require('web3-utils');
 const bn128 = require('../bn128');
-const secp256k1 = require('../secp256k1');
 
 const noteCoder = {};
 

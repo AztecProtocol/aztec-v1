@@ -2,11 +2,11 @@
  * Output ABI encoding function
  * @module outputCoder
  */
-const { padLeft, sha3 } = require('web3-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
+const { padLeft, sha3 } = require('web3-utils');
 
 const bn128 = require('../bn128');
-const secp256k1 = require('../secp256k1');
 
 const outputCoder = {};
 
