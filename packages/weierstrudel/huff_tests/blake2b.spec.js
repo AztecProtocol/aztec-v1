@@ -27,24 +27,33 @@ const blake2bHelperMacros = `
 #include "blake2b.huff"
 
 #define macro MIX_SECTION__IMPL = takes(0) returns(0) {
+    DEBUG__PLACE_V()
     SLICE_M()
     MIX_SECTION<M0,M1,M2,M3,M4,M5,M6,M7,M8,M9,M10,M11,M12,M13,M14,M15>()
 }
 
-#define macro ROR__IMPL = takes(0) returns(0) {
-    ROR<32>()
+#define macro ROR__IMPL = takes(1) returns(1) {
+    MINUS_ONE() swap1
+    ROR<OVERFLOW_MASK, ROR_32_MULTIPLICAND>()
 }
 
-#define macro ROL__IMPL = takes(0) returns(0) {
-    ROL<32>()
+
+#define macro U64_ADD_THREE__IMPL = takes(1) returns(1) {
+    U64_ADD_THREE<OVERFLOW_MASK>()
+}
+
+#define macro U64_ADD_TWO__IMPL = takes(1) returns(1) {
+    U64_ADD_TWO<OVERFLOW_MASK>()
 }
 
 #define macro COMPRESS__IMPL = takes(0) returns(0) {
+    DEBUG__PLACE_V()
     0x00 // set t = 0 for test
     COMPRESS<NO_V_14_TRANSFORM>()
 }
 
 #define macro COMPRESS_FINAL__IMPL = takes(0) returns(0) {
+    DEBUG__PLACE_V()
     128 // set t = 128
     COMPRESS<DO_V_14_TRANSFORM>()
 }
@@ -67,7 +76,6 @@ function getDummyStack(numElements, stackMasks) {
 describe.only('blake2b', () => {
     let blake2b;
     let blake2bHelpers;
-    let V;
     let memStart;
     let vStart;
     let stackMasks;
@@ -75,18 +83,18 @@ describe.only('blake2b', () => {
         blake2b = new Runtime('blake2b.huff', pathToTestData, true);
         blake2bHelpers = new Runtime(blake2bHelperMacros, pathToTestData, true);
 
-        const { stack: [v01] } = await blake2b('V_0_1', [], [], []);
-        const { stack: [v23] } = await blake2b('V_2_3', [], [], []);
-        const { stack: [v45] } = await blake2b('V_4_5', [], [], []);
-        const { stack: [v67] } = await blake2b('V_6_7', [], [], []);
         const { stack: [m0] } = await blake2b('M0', [], [], []);
         const { stack: [v01Loc] } = await blake2b('V_0_1_LOC', [], [], []);
         const { stack: [hiMask] } = await blake2b('HI_MASK', [], [], []);
         const { stack: [loMask] } = await blake2b('LO_MASK', [], [], []);
         const { stack: [overflowMask] } = await blake2b('OVERFLOW_MASK', [], [], []);
+        const { stack: [ror63Multiplicand] } = await blake2b('ROR_63_MULTIPLICAND', [], [], []);
+        const { stack: [ror32Multiplicand] } = await blake2b('ROR_32_MULTIPLICAND', [], [], []);
+        const { stack: [ror24Multiplicand] } = await blake2b('ROR_24_MULTIPLICAND', [], [], []);
+        const { stack: [ror16Multiplicand] } = await blake2b('ROR_16_MULTIPLICAND', [], [], []);
+        const { stack: [minusOne] } = await blake2b('MINUS_ONE', [], [], []);
 
-        stackMasks = [hiMask, loMask, overflowMask];
-        V = [v01, v23, v45, v67, v01, v23, v45, v67];
+        stackMasks = [hiMask, loMask, overflowMask, minusOne, ror63Multiplicand, ror16Multiplicand, ror24Multiplicand, ror32Multiplicand];
         memStart = m0.toNumber();
         vStart = v01Loc.toNumber();
     });
@@ -98,17 +106,8 @@ describe.only('blake2b', () => {
     it('ROR works', async () => {
         const input = new BN('000000001122334455667788000000000000000099aabbccddeeffde00000000', 16);
         const expected = '0000000055667788112233440000000000000000ddeeffde99aabbcc00000000';
-        const dummyStack = getDummyStack(9, stackMasks);
-        const { stack } = await blake2bHelpers('ROR__IMPL', [...dummyStack, input], [], []);
-        expect(toBytes32(stack[stack.length - 1].toString(16))).to.equal(expected);
-    });
-
-    it('ROL works', async () => {
-        const input = new BN('000000001122334455667788000000000000000099aabbccddeeffde00000000', 16);
-        const expected = '0000000055667788112233440000000000000000ddeeffde99aabbcc00000000';
-        const dummyStack = getDummyStack(9, stackMasks);
-        const { stack } = await blake2bHelpers('ROL__IMPL', [...dummyStack, input], [], []);
-        expect(toBytes32(stack[stack.length - 1].toString(16))).to.equal(expected);
+        const { stack } = await blake2bHelpers('ROR__IMPL', [input], [], []);
+        expect(toBytes32(stack[0].toString(16))).to.equal(expected);
     });
 
     it('U64_ADD_THREE works', async () => {
@@ -116,18 +115,16 @@ describe.only('blake2b', () => {
         const b = new BN('000000000f0e0d0c0b0a09080000000000000000070605040302010000000000', 16);
         const c = new BN('00000000ffffffffffffffff0000000000000000ffffffffffffffff00000000', 16);
         const expected = '000000001f1f1f1f1f1f1f1e00000000000000001f1f1f1f1f1f1f1e00000000';
-        const dummyStack = getDummyStack(9, stackMasks);
-        const { stack } = await blake2b('U64_ADD_THREE', [...dummyStack, a, b, c], [], []);
-        expect(toBytes32(stack[stack.length - 1].toString(16))).to.equal(expected);
+        const { stack } = await blake2bHelpers('U64_ADD_THREE__IMPL', [a, b, c], [], []);
+        expect(toBytes32(stack[0].toString(16))).to.equal(expected);
     });
 
     it('U64_ADD_TWO works', async () => {
         const a = new BN('0000000000000000000000020000000000000000100000000000000300000000', 16);
         const b = new BN('00000000ffffffffffffffff0000000000000000ffffffffffffffff00000000', 16);
         const expected = '0000000000000000000000010000000000000000100000000000000200000000';
-        const dummyStack = getDummyStack(9, stackMasks);
-        const { stack } = await blake2b('U64_ADD_TWO', [...dummyStack, a, b], [], []);
-        expect(toBytes32(stack[stack.length - 1].toString(16))).to.equal(expected);
+        const { stack } = await blake2bHelpers('U64_ADD_TWO__IMPL', [a, b], [], []);
+        expect(toBytes32(stack[0].toString(16))).to.equal(expected);
     });
 
     it('BSWAP_UINT64 works', async () => {
@@ -160,7 +157,7 @@ describe.only('blake2b', () => {
                 value: new BN(memString(0x60, 32), 16),
             },
         ];
-        const dummyStack = getDummyStack(9, stackMasks);
+        const dummyStack = getDummyStack(4, stackMasks);
         const { stack, memory } = await blake2b('SLICE_M', dummyStack, inputMemory, []);
         expect(stack.length).to.equal(12);
         const result = memory.slice(memStart, memStart + 0x200);
@@ -181,29 +178,24 @@ describe.only('blake2b', () => {
         const contractInput = [...new Array(4)].map((_, i) => {
             return new BN([...new Array(32)].map((__, b) => uint8ToString(b + (i * 32))).join(''), 16);
         });
-        const contractMessageInMemory = [
+        const initialMemory = [
             { index: memStart, value: contractInput[0] },
             { index: memStart + 0x20, value: contractInput[1] },
             { index: memStart + 0x40, value: contractInput[2] },
             { index: memStart + 0x60, value: contractInput[3] },
         ];
 
-        const contractV = V.map((vv, i) => ({ index: vStart + i * 32, value: vv }));
-        const initialMemory = [
-            ...contractMessageInMemory,
-            ...contractV,
-        ];
-        const dummyStack = getDummyStack(6, stackMasks);
+        const dummyStack = getDummyStack(2, stackMasks);
         const { stack: almostStack, memory } = await blake2bHelpers('MIX_SECTION__IMPL', dummyStack, initialMemory, []);
+        const stack = almostStack.slice(10);
         const comparison = blake.blake2bMixSectionDebug(javascriptInput, 0);
         const expected = [];
-        const stack = almostStack.slice(9);
         for (let i = 0; i < 32; i += 2) {
             const hi = comparison[i + 1].toString(16);
             const lo = comparison[i].toString(16);
             expected.push(`${numberToString(hi, 8)}${numberToString(lo, 8)}`);
         }
-        const output = memory.slice(vStart, vStart + 0x100);
+        const output = [...memory.slice(vStart, vStart + 0x80), ...memory.slice(vStart + 0xb0, vStart + 0xb0 + 0x80)];
         const result = [];
         for (let i = 0; i < 16; i += 1) {
             const first = output.slice((i * 32) + 4, i * 32 + 12).map(uint8ToString).join('');
@@ -226,22 +218,16 @@ describe.only('blake2b', () => {
         const contractInput = [...new Array(4)].map((_, i) => {
             return new BN([...new Array(32)].map((__, b) => uint8ToString(b + (i * 32))).join(''), 16);
         });
-        const contractMessageInMemory = [
+        const initialMemory = [
             { index: memStart, value: contractInput[0] },
             { index: memStart + 0x20, value: contractInput[1] },
             { index: memStart + 0x40, value: contractInput[2] },
             { index: memStart + 0x60, value: contractInput[3] },
         ];
 
-        const contractV = V.map((vv, i) => ({ index: vStart + i * 32, value: vv }));
-
-        const initialMemory = [
-            ...contractMessageInMemory,
-            ...contractV,
-        ];
         const dummyStack = getDummyStack(1, stackMasks);
         const { stack: almostStack, memory } = await blake2bHelpers('COMPRESS__IMPL', dummyStack, initialMemory, []);
-        const stack = almostStack.slice(4);
+        const stack = almostStack.slice(9);
         const comparison = blake.blake2bCompressDebug(javascriptInput);
         expect(stack.length).to.equal(1);
 
@@ -251,7 +237,7 @@ describe.only('blake2b', () => {
             const lo = comparison[i].toString(16);
             expected.push(`${numberToString(hi, 8)}${numberToString(lo, 8)}`);
         }
-        const output = memory.slice(vStart, vStart + 0x100);
+        const output = [...memory.slice(vStart, vStart + 0x80), ...memory.slice(vStart + 0xb0, vStart + 0xb0 + 0x80)];
         const result = [];
         for (let i = 0; i < 16; i += 1) {
             const first = output.slice((i * 32) + 4, i * 32 + 12).map(uint8ToString).join('');
@@ -274,22 +260,16 @@ describe.only('blake2b', () => {
         const contractInput = [...new Array(4)].map((_, i) => {
             return new BN([...new Array(32)].map((__, b) => uint8ToString(b + (i * 32))).join(''), 16);
         });
-        const contractMessageInMemory = [
+        const initialMemory = [
             { index: memStart, value: contractInput[0] },
             { index: memStart + 0x20, value: contractInput[1] },
             { index: memStart + 0x40, value: contractInput[2] },
             { index: memStart + 0x60, value: contractInput[3] },
         ];
 
-        const contractV = V.map((vv, i) => ({ index: vStart + i * 32, value: vv }));
-
-        const initialMemory = [
-            ...contractMessageInMemory,
-            ...contractV,
-        ];
         const dummyStack = getDummyStack(1, stackMasks);
         const { stack: almostStack, memory } = await blake2bHelpers('COMPRESS_FINAL__IMPL', dummyStack, initialMemory, []);
-        const stack = almostStack.slice(4);
+        const stack = almostStack.slice(9);
         const comparison = blake.blake2bCompressDebug(javascriptInput, 128, true);
         expect(stack.length).to.equal(1);
 
@@ -299,7 +279,7 @@ describe.only('blake2b', () => {
             const lo = comparison[i].toString(16);
             expected.push(`${numberToString(hi, 8)}${numberToString(lo, 8)}`);
         }
-        const output = memory.slice(vStart, vStart + 0x100);
+        const output = [...memory.slice(vStart, vStart + 0x80), ...memory.slice(vStart + 0xb0, vStart + 0xb0 + 0x80)];
         const result = [];
         for (let i = 0; i < 16; i += 1) {
             const first = output.slice((i * 32) + 4, i * 32 + 12).map(uint8ToString).join('');
@@ -339,6 +319,7 @@ describe.only('blake2b', () => {
     it('BLAKE2B__MAIN correctly computes hash for 128 bytes', async () => {
         const { calldata, expected } = generateTestData(128);
         const { stack, returnValue } = await blake2b('BLAKE2B__MAIN', [], [], calldata);
+        console.log(stack.map(s => toBytes32(s.toString(16))));
         expect(stack.length).to.equal(0);
         expect(returnValue.length > 0).to.equal(true);
         expect(returnValue.toString('hex')).to.equal(expected);
