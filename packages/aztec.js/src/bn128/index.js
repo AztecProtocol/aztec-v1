@@ -5,15 +5,14 @@
  * @module bn128
  */
 
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const EC = require('elliptic');
 const crypto = require('crypto');
+const EC = require('elliptic');
 
-const {
-    constants: { FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y, K_MAX },
-} = require('@aztec/dev-utils');
 const decodePoint = require('./decodePoint');
 
+const { FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y, K_MAX } = constants;
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 
 const bn128 = {};

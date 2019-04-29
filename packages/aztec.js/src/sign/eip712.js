@@ -5,16 +5,42 @@
  * @module sign.eip712
  */
 
-const { padLeft, sha3 } = require('web3-utils');
 const { AbiCoder } = require('web3-eth-abi');
+const { padLeft, sha3 } = require('web3-utils');
+
+const abiCoder = new AbiCoder();
+
+const eip712 = {};
 
 function padKeccak256(data) {
     return padLeft(sha3(data).slice(2), 64);
 }
 
-const abiCoder = new AbiCoder();
-
-const eip712 = {};
+/**
+ * Recursively encode a struct's data into a unique string
+ *
+ * @method encodeMessageData
+ * @param {Object} types set of all types encompassed by struct
+ * @param {string} types.name name
+ * @param {string} types.type type
+ * @param {string} primaryType the top-level type of the struct
+ * @param {Object} message the struct instance's data
+ * @returns {string} encoded message data string
+ */
+eip712.encodeMessageData = function encodeMessageData(types, primaryType, message) {
+    return types[primaryType].reduce((acc, { name, type }) => {
+        if (types[type]) {
+            return `${acc}${padKeccak256(`0x${encodeMessageData(types, type, message[name])}`)}`;
+        }
+        if (type === 'string' || type === 'bytes') {
+            return `${acc}${padKeccak256(message[name])}`;
+        }
+        if (type.includes('[')) {
+            return `${acc}${padKeccak256(abiCoder.encodeParameter(type, message[name]))}`;
+        }
+        return `${acc}${abiCoder.encodeParameters([type], [message[name]]).slice(2)}`;
+    }, padKeccak256(eip712.encodeStruct(primaryType, types)));
+};
 
 /**
  * Create 'type' component of a struct
@@ -47,32 +73,6 @@ eip712.encodeStruct = function encodeStruct(primaryType, types) {
                 `${acc}${key}(${types[key].reduce((iacc, { name, type }) => `${iacc}${type} ${name},`, '').slice(0, -1)})`,
             '',
         );
-};
-
-/**
- * Recursively encode a struct's data into a unique string
- *
- * @method encodeMessageData
- * @param {Object} types set of all types encompassed by struct
- * @param {string} types.name name
- * @param {string} types.type type
- * @param {string} primaryType the top-level type of the struct
- * @param {Object} message the struct instance's data
- * @returns {string} encoded message data string
- */
-eip712.encodeMessageData = function encodeMessageData(types, primaryType, message) {
-    return types[primaryType].reduce((acc, { name, type }) => {
-        if (types[type]) {
-            return `${acc}${padKeccak256(`0x${encodeMessageData(types, type, message[name])}`)}`;
-        }
-        if (type === 'string' || type === 'bytes') {
-            return `${acc}${padKeccak256(message[name])}`;
-        }
-        if (type.includes('[')) {
-            return `${acc}${padKeccak256(abiCoder.encodeParameter(type, message[name]))}`;
-        }
-        return `${acc}${abiCoder.encodeParameters([type], [message[name]]).slice(2)}`;
-    }, padKeccak256(eip712.encodeStruct(primaryType, types)));
 };
 
 /**

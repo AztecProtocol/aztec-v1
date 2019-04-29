@@ -1,21 +1,20 @@
 /* eslint-disable prefer-arrow-callback */
 
-const utils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
-const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
-const proofUtils = require('../../../src/proof/proofUtils');
+const { padLeft, sha3 } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const note = require('../../../src/note');
 const proof = require('../../../src/proof/burn');
+const proofUtils = require('../../../src/proof/proofUtils');
 const verifier = require('../../../src/proof/burn/verifier');
 
-const { errorTypes } = utils.constants;
-
+const { errorTypes } = constants;
 const { expect } = chai;
 
 describe('Burn proof verification tests', () => {

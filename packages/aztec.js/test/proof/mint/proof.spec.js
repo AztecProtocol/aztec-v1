@@ -1,6 +1,4 @@
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const chai = require('chai');
@@ -132,7 +130,7 @@ describe('Mint Proof', () => {
         const sender = randomHex(20);
         const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
-        testNotes[0].k = new BN(K_MAX + 1).toRed(bn128.groupReduction);
+        testNotes[0].k = new BN(constants.K_MAX + 1).toRed(bn128.groupReduction);
         try {
             proof.constructProof(testNotes, sender);
         } catch (err) {

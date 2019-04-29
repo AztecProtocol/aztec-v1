@@ -6,10 +6,10 @@ const { padLeft } = require('web3-utils');
 const HexString = require('./HexString');
 
 const bilateralProof = require('../../src/proof/bilateralSwap');
-const joinSplitProof = require('../../src/proof/joinSplit');
-const dividendComputationProof = require('../../src/proof/dividendComputation');
-const mintProof = require('../../src/proof/mint');
 const burnProof = require('../../src/proof/burn');
+const dividendComputationProof = require('../../src/proof/dividendComputation');
+const joinSplitProof = require('../../src/proof/joinSplit');
+const mintProof = require('../../src/proof/mint');
 
 const abiEncoder = require('../../src/abiEncoder');
 const note = require('../../src/note');
@@ -17,12 +17,12 @@ const sign = require('../../src/sign');
 
 const { expect } = chai;
 
-function randomNoteValue() {
-    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
-}
-
 function randomBytes(numBytes) {
     return [...new Array(numBytes * 2)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+}
+
+function randomNoteValue() {
+    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
 }
 
 function fakeSignature() {

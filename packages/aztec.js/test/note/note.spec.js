@@ -1,6 +1,4 @@
-const {
-    constants: { GROUP_MODULUS },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const chai = require('chai');
@@ -10,15 +8,16 @@ const web3Utils = require('web3-utils');
 const note = require('../../src/note');
 const noteUtils = require('../../src/note/utils');
 
-const { padLeft } = web3Utils;
+const { GROUP_MODULUS } = constants;
 const { expect } = chai;
+const { padLeft, toHex } = web3Utils;
 
 describe('Note', () => {
     it('should create well formed notes using the fromPublic and fromViewKey methods', async () => {
         const aBn = new BN(crypto.randomBytes(32), 16).umod(GROUP_MODULUS);
         const a = padLeft(aBn.toString(16), 64);
 
-        const k = padLeft(web3Utils.toHex('13456').slice(2), 8);
+        const k = padLeft(toHex('13456').slice(2), 8);
         const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
         const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
         const testNote = await note.fromViewKey(viewingKey);

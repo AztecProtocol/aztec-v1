@@ -3,13 +3,13 @@ const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const chai = require('chai');
-const { padLeft, sha3 } = require('web3-utils');
 const ethUtil = require('ethereumjs-util');
+const { padLeft, sha3 } = require('web3-utils');
 
+const bn128 = require('../../src/bn128');
+const eip712 = require('../../src/sign/eip712');
 const proofUtils = require('../../src/proof/proofUtils');
 const sign = require('../../src/sign');
-const eip712 = require('../../src/sign/eip712');
-const bn128 = require('../../src/bn128');
 
 const { expect } = chai;
 
