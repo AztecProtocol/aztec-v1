@@ -32,10 +32,9 @@ library JoinSplitABIEncoder {
         * 0x144:0x164    = challenge
         * 0x164:0x184    = publicOwner
         * 0x184:0x1a4    = offset in byte array to notes
-        * 0x1a4:0x1c4    = offset in byte array to inputSignatures
-        * 0x1c4:0x1e4    = offset in byte array to inputOwners
-        * 0x1e4:0x204    = offset in byte array to outputOwners
-        * 0x204:0x224    = offset in byte array to metadata
+        * 0x1a4:0x1c4    = offset in byte array to inputOwners
+        * 0x1c4:0x1e4    = offset in byte array to outputOwners
+        * 0x1e4:0x204    = offset in byte array to metadata
         */
 
     function encodeAndExit(bytes32 domainHash) internal view {
@@ -45,10 +44,9 @@ library JoinSplitABIEncoder {
             let notes := add(0x104, calldataload(0x184))
             let n := calldataload(notes)
             let m := calldataload(0x124)
-            let inputOwners := add(0x124, calldataload(0x1c4)) // one word after inputOwners = 1st
-            let outputOwners := add(0x124, calldataload(0x1e4)) // one word after outputOwners = 1st
-            let signatures := add(0x124, calldataload(0x1a4)) // one word after signatures = 1st
-            let metadata := add(0x144, calldataload(0x204)) // two words after metadata = 1st
+            let inputOwners := add(0x124, calldataload(0x1a4)) // one word after inputOwners = 1st
+            let outputOwners := add(0x124, calldataload(0x1c4)) // one word after outputOwners = 1st
+            let metadata := add(0x144, calldataload(0x1e4)) // two words after metadata = 1st
 
             // memory map of `proofOutputs`
 
@@ -134,8 +132,6 @@ library JoinSplitABIEncoder {
 
             for { let i := 0 } lt(i, m) { i := add(i, 0x01) } {
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
-                // get pointer to input signatures
-                let signatureIndex := add(signatures, mul(i, 0x60))
                 // copy note data to 0x00 - 0x80
                 mstore(0x00, 0x01) // note type
                 calldatacopy(0x20, add(noteIndex, 0x40), 0x80) // get gamma, sigma
@@ -145,9 +141,6 @@ library JoinSplitABIEncoder {
                 // construct EIP712 signature message
                 mstore(0x160, keccak256(0x80, 0xa0))
                 mstore(0x00, keccak256(0x13e, 0x42))
-                // recover address of EIP712 signature
-                mstore(0x20, and(calldataload(signatureIndex), 0xff)) // get 8-bit v
-                calldatacopy(0x40, add(signatureIndex, 0x20), 0x40) // copy r, s into memory
 
                 // store note length in `s`
                 mstore(s, 0xc0)
