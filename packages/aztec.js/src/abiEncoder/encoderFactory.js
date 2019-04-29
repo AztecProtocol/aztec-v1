@@ -3,8 +3,8 @@
  * @module encoderFactory
  */
 
+const secp256k1 = require('@aztec/secp256k1');
 const { padLeft } = require('web3-utils');
-const secp256k1 = require('../secp256k1');
 
 const encoderFactory = {};
 

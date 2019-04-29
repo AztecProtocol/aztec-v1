@@ -1,12 +1,12 @@
 const {
     constants: { K_MAX },
 } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const chai = require('chai');
 const { randomHex } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
-const secp256k1 = require('../../../src/secp256k1');
 const note = require('../../../src/note');
 const proof = require('../../../src/proof/mint');
 const proofUtils = require('../../../src/proof/proofUtils');

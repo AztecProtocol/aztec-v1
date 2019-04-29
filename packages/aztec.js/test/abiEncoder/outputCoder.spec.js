@@ -1,12 +1,12 @@
 const {
     constants: { K_MAX },
 } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const chai = require('chai');
 const { padLeft } = require('web3-utils');
 
 const HexString = require('./HexString');
 const bn128 = require('../../src/bn128');
-const secp256k1 = require('../../src/secp256k1');
 const note = require('../../src/note');
 const outputCoder = require('../../src/abiEncoder/outputCoder');
 

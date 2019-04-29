@@ -1,6 +1,7 @@
 /* eslint-disable prefer-arrow-callback */
 
 const utils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
@@ -9,7 +10,6 @@ const sinon = require('sinon');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const bn128 = require('../../../src/bn128');
-const secp256k1 = require('../../../src/secp256k1');
 const note = require('../../../src/note');
 const proof = require('../../../src/proof/burn');
 const verifier = require('../../../src/proof/burn/verifier');

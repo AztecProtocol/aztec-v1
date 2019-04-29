@@ -1,10 +1,10 @@
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const { keccak256, padLeft, toHex } = require('web3-utils');
 
 const abiEncoder = require('../abiEncoder');
 const bn128 = require('../bn128');
-const secp256k1 = require('../secp256k1');
 const setup = require('../setup');
 const utils = require('./utils');
 

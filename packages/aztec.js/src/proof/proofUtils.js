@@ -4,6 +4,7 @@
  * @module proofUtils
  */
 
+const secp256k1 = require('@aztec/secp256k1');
 const { padLeft } = require('web3-utils');
 const BN = require('bn.js');
 const {
@@ -15,7 +16,6 @@ const crypto = require('crypto');
 
 const bn128 = require('../bn128');
 const Keccak = require('../keccak');
-const secp256k1 = require('../secp256k1');
 const note = require('../note');
 
 const { groupReduction } = bn128;

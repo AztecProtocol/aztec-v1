@@ -6,8 +6,8 @@
  */
 
 const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const eip712 = require('./eip712');
-const secp256k1 = require('../secp256k1');
 
 const sign = {};
 sign.eip712 = eip712;
