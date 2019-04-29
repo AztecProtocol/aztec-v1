@@ -1,0 +1,7 @@
+{
+    "name": "Blake2b",
+    "file": "blake2b.huff",
+    "constructor": "BLAKE2B__CONSTRUCTOR",
+    "entryMacro": "BLAKE2B__MAIN",
+    "abi": []
+}
