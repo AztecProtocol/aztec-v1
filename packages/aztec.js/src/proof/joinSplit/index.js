@@ -205,10 +205,8 @@ joinSplit.encodeJoinSplitTransaction = ({
     inputNotes,
     outputNotes,
     senderAddress,
-    inputNoteOwners,
     publicOwner,
     kPublic,
-    validatorAddress,
 }) => {
     const m = inputNotes.length;
     const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
@@ -219,20 +217,6 @@ joinSplit.encodeJoinSplitTransaction = ({
         publicOwner,
     );
 
-    const inputSignatures = inputNotes.map((inputNote, index) => {
-        const domain = signer.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
-        const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-        const message = {
-            proof: proofs.JOIN_SPLIT_PROOF,
-            noteHash: inputNote.noteHash,
-            challenge,
-            sender: senderAddress,
-        };
-        const { privateKey } = inputNoteOwners[index];
-        const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-        return signature;
-    });
-
     const outputOwners = outputNotes.map((n) => n.owner);
     const inputOwners = inputNotes.map((n) => n.owner);
 
@@ -241,7 +225,6 @@ joinSplit.encodeJoinSplitTransaction = ({
         m,
         challenge,
         publicOwner,
-        inputSignatures,
         inputOwners,
         outputOwners,
         outputNotes,
