@@ -52,7 +52,7 @@ signer.encodeMessageData = function encodeMessageData(types, primaryType, messag
  * @param {string} types.type type
  * @returns {string} encoded type string
  */
-signer.encodeStruct = function encodeStruct(primaryType, types) {
+signer.encodeStruct = (primaryType, types) => {
     const findTypes = (type) =>
         [type].concat(
             types[type].reduce((acc, { type: typeKey }) => {
@@ -83,7 +83,7 @@ signer.encodeStruct = function encodeStruct(primaryType, types) {
  * @param {Object} typedData the EIP712 struct object
  * @returns {string} encoded message string
  */
-signer.encodeTypedData = function encodeTypedData(typedData) {
+signer.encodeTypedData = (typedData) => {
     const domainHash = padKeccak256(`0x${signer.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain)}`);
     const structHash = padKeccak256(`0x${signer.encodeMessageData(typedData.types, typedData.primaryType, typedData.message)}`);
     return `0x${padKeccak256(`0x1901${domainHash}${structHash}`)}`;
