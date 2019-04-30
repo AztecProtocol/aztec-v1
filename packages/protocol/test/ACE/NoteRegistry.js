@@ -6,19 +6,19 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const {
-    constants,
-    proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const { abiEncoder, note, proof } = require('aztec.js');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
+const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
+const { constants } = devUtils;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
-const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ERC20BrokenTransferTest = artifacts.require('./ERC20BrokenTransferTest');
 const ERC20BrokenTransferFromTest = artifacts.require('./ERC20BrokenTransferFromTest');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const JoinSplit = artifacts.require('./JoinSplit');
 
 contract('NoteRegistry', (accounts) => {

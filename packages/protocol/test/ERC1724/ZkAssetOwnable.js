@@ -5,12 +5,12 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const {
-    constants,
-    proofs: { JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const { abiEncoder, note, proof, signer } = require('aztec.js');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
+const { constants } = devUtils;
+const { JOIN_SPLIT_PROOF } = devUtils.proofs;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
@@ -24,7 +24,7 @@ const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 JoinSplit.abi = JoinSplitInterface.abi;
 
 const signNote = (validatorAddress, noteHash, spender, privateKey) => {
-    const domain = sign.generateZKAssetDomainParams(validatorAddress);
+    const domain = signer.generateZKAssetDomainParams(validatorAddress);
     const schema = constants.eip712.NOTE_SIGNATURE;
     const status = true;
     const message = {
@@ -32,7 +32,7 @@ const signNote = (validatorAddress, noteHash, spender, privateKey) => {
         spender,
         status,
     };
-    return sign.signStructuredData(domain, schema, message, privateKey);
+    return signer.signTypedData(domain, schema, message, privateKey);
 };
 
 contract('ZkAssetOwnable', (accounts) => {
