@@ -11,15 +11,7 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 const { expect } = chai;
 
-function validateGroupScalar(hex, canBeZero = false) {
-    const scalar = new BN(hex.slice(2), 16);
-    expect(scalar.lt(bn128.curve.n)).to.equal(true);
-    if (!canBeZero) {
-        expect(scalar.gt(new BN(0))).to.equal(true);
-    }
-}
-
-function validateGroupElement(xHex, yHex) {
+const validateGroupElement = (xHex, yHex) => {
     const x = new BN(xHex.slice(2), 16);
     const y = new BN(yHex.slice(2), 16);
     expect(x.gt(new BN(0))).to.equal(true);
@@ -32,6 +24,14 @@ function validateGroupElement(xHex, yHex) {
         .add(new BN(3));
     const rhs = y.mul(y);
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
+}
+
+const validateGroupScalar = (hex, canBeZero = false) => {
+    const scalar = new BN(hex.slice(2), 16);
+    expect(scalar.lt(bn128.curve.n)).to.equal(true);
+    if (!canBeZero) {
+        expect(scalar.gt(new BN(0))).to.equal(true);
+    }
 }
 
 describe('Burn Proof', () => {

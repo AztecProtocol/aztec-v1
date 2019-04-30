@@ -1,38 +1,13 @@
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const crypto = require('crypto');
-const { keccak256, padLeft, toHex } = require('web3-utils');
+const { padLeft, toHex } = require('web3-utils');
 
-const abiEncoder = require('../abiEncoder');
+const { noteCoder } = require('../abiEncoder');
 const bn128 = require('../bn128');
 const setup = require('../setup');
-const utils = require('./utils');
+const noteUtils = require('./utils');
 
-const { getSharedSecret, getNoteHash } = utils;
-const { noteCoder } = abiEncoder;
-
-/**
- * Create a Diffie-Hellman shared secret for a given public key
- *
- * @method createSharedSecret
- * @private
- * @memberof module:noteUtils
- * @param {Object} pubicKeyHex elliptic.js hex-formatted public key
- * @return {{type: string, name: ephemeralKey}} elliptic.js hex-formatted ephemeral key
- * @return {{type: string, name: encoded}} hex-string formatted shared secret
- */
-function createSharedSecret(publicKeyHex) {
-    const publicKey = secp256k1.ec.keyFromPublic(publicKeyHex.slice(2), 'hex');
-
-    const ephemeralKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
-    const sharedSecret = publicKey.getPublic().mul(ephemeralKey.priv);
-    const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
-    const encoded = keccak256(sharedSecretHex, 'hex');
-    return {
-        ephemeralKey: `0x${ephemeralKey.getPublic(true, 'hex')}`,
-        encoded,
-    };
-}
+const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
 
 /**
  * Initializes a new instance of Note from either a public key or a viewing key.
@@ -198,7 +173,7 @@ Note.prototype.getView = function getView() {
  * @module note
  */
 const note = {};
-note.utils = utils;
+note.utils = noteUtils;
 
 /**
  * Create a Note instance from a recipient public key and a desired value
@@ -228,7 +203,7 @@ note.create = async (spendingPublicKey, value, noteOwner) => {
  * @method createZeroValueNote
  * @returns {Promise} promise that resolves to created note instance
  */
-note.createZeroValueNote = () => note.fromViewKey(utils.constants.ZERO_VALUE_NOTE_VIEWING_KEY);
+note.createZeroValueNote = () => note.fromViewKey(noteUtils.constants.ZERO_VALUE_NOTE_VIEWING_KEY);
 
 /**
  * Create Note instance from a public key and a spending key

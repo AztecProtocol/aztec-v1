@@ -15,15 +15,15 @@ const verifier = require('../../../src/proof/joinSplit/verifier');
 const { errorTypes, K_MAX } = constants;
 const { expect } = chai;
 
-function generateNoteValue() {
+const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
 }
 
-function getKPublic(kIn, kOut) {
+const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
 }
 
-function generateBalancedNotes(nIn, nOut) {
+const generateBalancedNotes = (nIn, nOut) => {
     const kIn = [...Array(nIn)].map(() => generateNoteValue());
     const kOut = [...Array(nOut)].map(() => generateNoteValue());
     let delta = getKPublic(kIn, kOut);
@@ -50,13 +50,12 @@ function generateBalancedNotes(nIn, nOut) {
     return { kIn, kOut };
 }
 
-function randomAddress() {
+const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
 }
 
-describe('Join Split Proof Verifier', function describeVerifier() {
-    describe('Success States', function success() {
-        this.timeout(10000);
+describe('Join Split Proof Verifier', () => {
+    describe('Success States', () => {
         it('should construct a valid join-split proof', async () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
@@ -133,8 +132,7 @@ describe('Join Split Proof Verifier', function describeVerifier() {
         });
     });
 
-    describe('Failure States', function failure() {
-        this.timeout(10000);
+    describe('Failure States', () => {
         let parseInputs;
         beforeEach(() => {
             // to test Failure States we need to pass in bad data to verifier

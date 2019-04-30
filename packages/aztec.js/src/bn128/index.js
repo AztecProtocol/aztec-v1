@@ -48,8 +48,8 @@ bn128.randomGroupScalar = () => {
  * @method randomPoint
  * @returns {Point} a random point
  */
-bn128.randomPoint = function randomPoint() {
-    function recurse() {
+bn128.randomPoint = () => {
+    const recurse = () => {
         const x = new BN(crypto.randomBytes(32), 16).toRed(bn128.curve.red);
         const y2 = x
             .redSqr()
@@ -85,7 +85,7 @@ bn128.K_MAX = K_MAX;
  * @param {Point} gammaK the AZTEC decrypted coordinate \gamma^{k}. Computed from \sigma.h^{-a}
  * @returns {number} the value of the note
  */
-bn128.recoverMessage = function recoverMessage(gamma, gammaK) {
+bn128.recoverMessage = (gamma, gammaK) => {
     if (gammaK.isInfinity()) {
         return 1;
     }

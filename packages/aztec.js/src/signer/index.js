@@ -2,7 +2,7 @@
  * Module to ECDSA signatures over structured data,
  *   following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
  *
- * @module sign
+ * @module signer
  */
 
 const { constants } = require('@aztec/dev-utils');
@@ -17,10 +17,7 @@ const signer = {};
  * @param {string} verifyingContract address of target contract
  * @returns {Object} EIP712 Domain type object
  */
-signer.generateAZTECDomainParams = function generateAZTECDomainParams(
-    verifyingContract,
-    domain = constants.eip712.ACE_DOMAIN_PARAMS,
-) {
+signer.generateAZTECDomainParams = (verifyingContract, domain = constants.eip712.ACE_DOMAIN_PARAMS) => {
     return {
         name: domain.name,
         version: domain.version,
@@ -34,7 +31,7 @@ signer.generateAZTECDomainParams = function generateAZTECDomainParams(
  * @param {string} verifyingContract address of target contract
  * @returns {Object} EIP712 Domain type object
  */
-signer.generateZKAssetDomainParams = function generateZKAssetDomainParams(verifyingContract) {
+signer.generateZKAssetDomainParams = (verifyingContract) => {
     return {
         ...constants.eip712.ZK_ASSET_DOMAIN_PARAMS,
         verifyingContract,
@@ -50,7 +47,7 @@ signer.generateZKAssetDomainParams = function generateZKAssetDomainParams(verify
  * @param {string} privateKey the private key of message signer
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
-signer.signTypedData = function signTypedData(domain, schema, message, privateKey) {
+signer.signTypedData = (domain, schema, message, privateKey) => {
     const encodedTypedData = typedData.encodeTypedData({
         domain,
         ...schema,
