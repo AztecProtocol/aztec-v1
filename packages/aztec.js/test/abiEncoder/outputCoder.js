@@ -10,15 +10,15 @@ const outputCoder = require('../../src/abiEncoder/outputCoder');
 
 const { expect } = chai;
 
-function clean(input) {
+const clean = (input) => {
     return input.replace(/^0+/, '');
 }
 
-function isHex(input) {
+const isHex = (input) => {
     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
 }
 
-function randomNoteValue() {
+const randomNoteValue = () => {
     return Math.floor(Math.random() * Math.floor(constants.K_MAX));
 }
 

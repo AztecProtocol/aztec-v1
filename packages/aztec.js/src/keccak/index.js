@@ -1,7 +1,7 @@
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 
-function hashStrings(inputArr) {
+const hashStrings = (inputArr) => {
     const input = `${inputArr
         .map((i) => {
             const res = padLeft(i, 64);
