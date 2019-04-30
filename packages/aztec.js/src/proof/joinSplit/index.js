@@ -224,7 +224,7 @@ joinSplit.encodeJoinSplitTransaction = ({
 
     const proofData = inputCoder.joinSplit(proofDataRaw, m, challenge, publicOwner, inputOwners, outputOwners, outputNotes);
 
-    const signatures = inputNotes.map((inputNote, index) => {
+    const signaturesArray = inputNotes.map((inputNote, index) => {
         const domain = sign.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
         const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
         const message = {
@@ -235,8 +235,11 @@ joinSplit.encodeJoinSplitTransaction = ({
         };
         const { privateKey } = inputNoteOwners[index];
         const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
-        return signature;
+        return signature.join('');
     });
+
+    const signatures = signaturesArray.join('');
+
 
     const expectedOutput = `0x${outputCoder
         .encodeProofOutputs([
