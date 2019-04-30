@@ -1,7 +1,7 @@
 /* eslint-disable prefer-arrow-callback */
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 const { keccak256, padLeft } = require('web3-utils');
@@ -13,7 +13,6 @@ const proofUtils = require('../../../src/proof/proofUtils');
 const verifier = require('../../../src/proof/joinSplit/verifier');
 
 const { errorTypes, K_MAX } = constants;
-const { expect } = chai;
 
 const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();

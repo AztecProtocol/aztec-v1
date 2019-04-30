@@ -3,7 +3,7 @@
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 const { keccak256, padLeft } = require('web3-utils');
@@ -15,7 +15,6 @@ const proofUtils = require('../../../src/proof/proofUtils');
 const verifier = require('../../../src/proof/burn/verifier');
 
 const { errorTypes } = constants;
-const { expect } = chai;
 
 describe('Burn proof verification tests', () => {
     describe('Success States', () => {

@@ -1,7 +1,7 @@
 /* global, beforeEach, it:true */
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
@@ -12,7 +12,6 @@ const Keccak = require('../../../src/keccak');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const { errorTypes } = constants;
-const { expect } = chai;
 
 describe('Bilateral Swap Verifier', () => {
     describe('Success States', () => {

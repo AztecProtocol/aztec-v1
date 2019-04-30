@@ -2,8 +2,8 @@ const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
 const BN = require('bn.js');
+const { expect } = require('chai');
 const crypto = require('crypto');
-const chai = require('chai');
 const ethUtil = require('ethereumjs-util');
 const { keccak256, padLeft } = require('web3-utils');
 
@@ -11,9 +11,7 @@ const bn128 = require('../../src/bn128');
 const proofUtils = require('../../src/proof/proofUtils');
 const signer = require('../../src/signer');
 
-const { expect } = chai;
-
-describe('Sign', () => {
+describe('Signer', () => {
     let accounts;
     const domainTypes = {
         EIP712Domain: [

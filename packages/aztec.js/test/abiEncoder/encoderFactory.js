@@ -1,6 +1,6 @@
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
-const chai = require('chai');
+const { expect } = require('chai');
 const { padLeft } = require('web3-utils');
 
 const HexString = require('./HexString');
@@ -14,8 +14,6 @@ const mintProof = require('../../src/proof/mint');
 const abiEncoder = require('../../src/abiEncoder');
 const note = require('../../src/note');
 const signer = require('../../src/signer');
-
-const { expect } = chai;
 
 const randomBytes = (numBytes) => {
     return [...new Array(numBytes * 2)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');

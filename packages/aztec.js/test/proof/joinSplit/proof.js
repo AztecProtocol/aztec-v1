@@ -1,6 +1,6 @@
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
 
@@ -9,7 +9,6 @@ const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 
 const { errorTypes } = constants;
-const { expect } = chai;
 
 const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
