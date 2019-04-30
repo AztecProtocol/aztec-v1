@@ -13,15 +13,15 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
-}
+};
 
 const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
-}
+};
 
 const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
-}
+};
 
 /**
  * Extractor test.

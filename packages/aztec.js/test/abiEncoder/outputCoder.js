@@ -10,15 +10,15 @@ const outputCoder = require('../../src/abiEncoder/outputCoder');
 
 const clean = (input) => {
     return input.replace(/^0+/, '');
-}
+};
 
 const isHex = (input) => {
     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
-}
+};
 
 const randomNoteValue = () => {
     return Math.floor(Math.random() * Math.floor(constants.K_MAX));
-}
+};
 
 describe('abiEncoder.outputCoder', () => {
     let accounts = [];

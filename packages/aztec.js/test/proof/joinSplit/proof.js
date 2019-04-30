@@ -12,15 +12,15 @@ const { errorTypes } = constants;
 
 const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
-}
+};
 
 const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
-}
+};
 
 const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
-}
+};
 
 const validateGroupElement = (xHex, yHex) => {
     const x = new BN(xHex.slice(2), 16);
@@ -35,7 +35,7 @@ const validateGroupElement = (xHex, yHex) => {
         .add(new BN(3));
     const rhs = y.mul(y);
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
-}
+};
 
 const validateGroupScalar = (hex, canBeZero = false) => {
     const scalar = new BN(hex.slice(2), 16);
@@ -43,7 +43,7 @@ const validateGroupScalar = (hex, canBeZero = false) => {
     if (!canBeZero) {
         expect(scalar.gt(new BN(0))).to.equal(true);
     }
-}
+};
 
 describe('Join-Split Proofs', () => {
     it('should construct a proof with well-formed outputs', async () => {

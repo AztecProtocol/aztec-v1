@@ -16,11 +16,11 @@ const { errorTypes, K_MAX } = constants;
 
 const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
-}
+};
 
 const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
-}
+};
 
 const generateBalancedNotes = (nIn, nOut) => {
     const kIn = [...Array(nIn)].map(() => generateNoteValue());
@@ -47,11 +47,11 @@ const generateBalancedNotes = (nIn, nOut) => {
         }
     }
     return { kIn, kOut };
-}
+};
 
 const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
-}
+};
 
 describe('Join Split Proof Verifier', () => {
     describe('Success States', () => {

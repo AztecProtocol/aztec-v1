@@ -17,15 +17,15 @@ const signer = require('../../src/signer');
 
 const randomBytes = (numBytes) => {
     return [...new Array(numBytes * 2)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-}
+};
 
 const randomNoteValue = () => {
     return Math.floor(Math.random() * Math.floor(constants.K_MAX));
-}
+};
 
 const fakeSignature = () => {
     return [`0x${padLeft(randomBytes(1), 64)}`, `0x${randomBytes(32)}`, `0x${randomBytes(32)}`];
-}
+};
 
 describe('abiEncoder.encoderFactory', () => {
     describe('General Functionality', () => {
