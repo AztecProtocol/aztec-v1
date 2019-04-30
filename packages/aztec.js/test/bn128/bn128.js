@@ -1,11 +1,9 @@
 const { constants } = require('@aztec/dev-utils');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
 
 const BN = require('bn.js');
 const bn128 = require('../../src/bn128');
-
-const { expect } = chai;
 
 describe('bn128', () => {
     let kMaxTemp;

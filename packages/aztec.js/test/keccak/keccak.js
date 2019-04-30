@@ -1,8 +1,6 @@
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const { keccak256, padLeft } = require('web3-utils');
-
-const { expect } = chai;
 
 const Keccak = require('../../src/keccak');
 const bn128 = require('../../src/bn128');

@@ -1,7 +1,7 @@
 /* global, beforeEach, it:true */
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
 const { keccak256, padLeft } = require('web3-utils');
@@ -11,7 +11,6 @@ const dividendComputation = require('../../../src/proof/dividendComputation');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const { errorTypes } = constants;
-const { expect } = chai;
 
 describe('Dividend Computation Verifier', () => {
     describe('Success States', () => {

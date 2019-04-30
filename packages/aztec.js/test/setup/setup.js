@@ -1,11 +1,10 @@
 const { constants } = require('@aztec/dev-utils');
-const chai = require('chai');
 const BN = require('bn.js');
+const { expect } = require('chai');
 
 const setup = require('../../src/setup');
 const bn128 = require('../../src/bn128');
 
-const { expect } = chai;
 const { K_MAX, K_MIN } = constants;
 
 describe('Trusted Setup', () => {

@@ -1,15 +1,13 @@
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const { randomHex } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const note = require('../../../src/note');
 const proof = require('../../../src/proof/burn');
 const proofUtils = require('../../../src/proof/proofUtils');
-
-const { expect } = chai;
 
 const validateGroupElement = (xHex, yHex) => {
     const x = new BN(xHex.slice(2), 16);
