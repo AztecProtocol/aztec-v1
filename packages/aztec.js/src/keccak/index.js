@@ -1,5 +1,5 @@
 const BN = require('bn.js');
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 function hashStrings(inputArr) {
     const input = `${inputArr
@@ -8,7 +8,7 @@ function hashStrings(inputArr) {
             return res;
         })
         .join('')}`;
-    return sha3(`0x${input}`, 'hex').slice(2);
+    return keccak256(`0x${input}`, 'hex').slice(2);
 }
 
 /**

@@ -5,7 +5,7 @@
  *
  * @module module:noteUtils
  */
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const utils = {};
 
@@ -21,7 +21,7 @@ utils.constants = {
  * @private
  * @param {Object} gamma AZTEC commitment base point
  * @param {Object} sigma AZTEC commitment signed point
- * @returns {string} sha3 hash in hex-string format
+ * @returns {string} keccak256 hash in hex-string format
  */
 utils.getNoteHash = (gamma, sigma) => {
     const noteType = padLeft('1', 64);
@@ -29,7 +29,7 @@ utils.getNoteHash = (gamma, sigma) => {
     const gammaY = padLeft(gamma.y.fromRed().toString(16), 64);
     const sigmaX = padLeft(sigma.x.fromRed().toString(16), 64);
     const sigmaY = padLeft(sigma.y.fromRed().toString(16), 64);
-    return sha3(`0x${noteType}${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
+    return keccak256(`0x${noteType}${gammaX}${gammaY}${sigmaX}${sigmaY}`, 'hex');
 };
 
 /**
@@ -44,7 +44,7 @@ utils.getNoteHash = (gamma, sigma) => {
 utils.getSharedSecret = (ephemeralPoint, privateKey) => {
     const sharedSecret = ephemeralPoint.mul(Buffer.from(privateKey.slice(2), 'hex'));
     const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
-    return sha3(sharedSecretHex, 'hex');
+    return keccak256(sharedSecretHex, 'hex');
 };
 
 module.exports = utils;
