@@ -9,7 +9,7 @@ const hashStrings = (inputArr) => {
         })
         .join('')}`;
     return keccak256(`0x${input}`, 'hex').slice(2);
-}
+};
 
 /**
  *

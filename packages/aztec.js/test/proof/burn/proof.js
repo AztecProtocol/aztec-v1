@@ -22,7 +22,7 @@ const validateGroupElement = (xHex, yHex) => {
         .add(new BN(3));
     const rhs = y.mul(y);
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
-}
+};
 
 const validateGroupScalar = (hex, canBeZero = false) => {
     const scalar = new BN(hex.slice(2), 16);
@@ -30,7 +30,7 @@ const validateGroupScalar = (hex, canBeZero = false) => {
     if (!canBeZero) {
         expect(scalar.gt(new BN(0))).to.equal(true);
     }
-}
+};
 
 describe('Burn Proof', () => {
     it('should construct a proof with well-formed outputs', async () => {

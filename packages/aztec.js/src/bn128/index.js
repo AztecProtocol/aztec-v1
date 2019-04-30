@@ -65,7 +65,7 @@ bn128.randomPoint = () => {
             return recurse();
         }
         return bn128.curve.point(x, y);
-    }
+    };
     return recurse();
 };
 
