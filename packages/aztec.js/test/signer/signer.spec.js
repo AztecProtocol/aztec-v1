@@ -5,7 +5,7 @@ const BN = require('bn.js');
 const crypto = require('crypto');
 const chai = require('chai');
 const ethUtil = require('ethereumjs-util');
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../../src/bn128');
 const proofUtils = require('../../src/proof/proofUtils');
@@ -39,9 +39,9 @@ describe('Sign', () => {
         const messageInput = signer.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
         const result = typedData.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
         const messageData = [
-            sha3('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
-            sha3('AZTEC_CRYPTOGRAPHY_ENGINE').slice(2),
-            sha3('1').slice(2),
+            keccak256('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
+            keccak256('AZTEC_CRYPTOGRAPHY_ENGINE').slice(2),
+            keccak256('1').slice(2),
             padLeft('cccccccccccccccccccccccccccccccccccccccc', 64),
         ];
         const expected = messageData.join('');
@@ -54,7 +54,7 @@ describe('Sign', () => {
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
             const senderAddress = proofUtils.randomAddress();
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+            const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
             const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
@@ -81,7 +81,7 @@ describe('Sign', () => {
             const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
             const senderAddress = proofUtils.randomAddress();
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+            const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
             const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;

@@ -4,7 +4,7 @@
  * @module mint
  */
 const { constants } = require('@aztec/dev-utils');
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../abiEncoder');
 const joinSplit = require('../joinSplit');
@@ -91,7 +91,7 @@ mint.encodeMintTransaction = ({ newTotalMinted, oldTotalMinted, adjustedNotes, s
                 outputNotes: outputNotes.slice(1),
                 publicOwner,
                 publicValue,
-                challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
+                challenge: `0x${padLeft(keccak256(challenge).slice(2), 64)}`,
             },
         ])
         .slice(0x42)}`;

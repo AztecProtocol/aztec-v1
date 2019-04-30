@@ -5,7 +5,7 @@
 
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../bn128');
 
@@ -360,10 +360,10 @@ outputCoder.getProofOutput = (proofOutputsHex, i) => {
  *
  * @method hashProofOutput
  * @param {proofOutput} proofOutput - proofOutput object, contains transfer instructions
- * @returns {string} sha3 hash of the proofOutput
+ * @returns {string} keccak256 hash of the proofOutput
  */
 outputCoder.hashProofOutput = (proofOutput) => {
-    return sha3(`0x${proofOutput.slice(0x40)}`);
+    return keccak256(`0x${proofOutput.slice(0x40)}`);
 };
 
 module.exports = outputCoder;

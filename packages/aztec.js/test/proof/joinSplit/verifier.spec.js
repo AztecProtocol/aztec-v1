@@ -4,7 +4,7 @@ const BN = require('bn.js');
 const chai = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
@@ -153,7 +153,7 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const sender = randomAddress();
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+            const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
             const proofData = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
 
             const { valid, errors } = verifier.verifyProof(proofData, 1, challenge, sender);
