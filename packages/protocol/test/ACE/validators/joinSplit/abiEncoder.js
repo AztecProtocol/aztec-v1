@@ -18,7 +18,7 @@ function randomNoteValue() {
     return Math.floor(Math.random() * Math.floor(K_MAX));
 }
 
-contract.only('Join-Split ABI Encoder', (accounts) => {
+contract('Join-Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
     let aztecAccounts = [];
     let notes = [];
