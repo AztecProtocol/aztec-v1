@@ -5,12 +5,12 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const {
-    constants,
-    proofs: { JOIN_SPLIT_PROOF, MINT_PROOF, BURN_PROOF, UTILITY_PROOF },
-} = require('@aztec/dev-utils');
+const { abiEncoder, note, proof } = require('aztec.js');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
+const { BURN_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF, UTILITY_PROOF } = devUtils.proofs;
+const { constants } = devUtils;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
@@ -30,13 +30,13 @@ BilateralSwap.abi = BilateralSwapInterface.abi;
 contract('ACE Mint and Burn Functionality', (accounts) => {
     describe('Success States', () => {
         let ace;
-        let zeroNote;
         let aztecAdjustSupply;
-        let aztecJoinSplit;
         let aztecBilateralSwap;
-        const tokensTransferred = new BN(1000);
-        const kPublic = 50;
+        let aztecJoinSplit;
         let erc20;
+        const kPublic = 50;
+        const tokensTransferred = new BN(1000);
+        let zeroNote;
 
         beforeEach(async () => {
             ace = await ACE.new({

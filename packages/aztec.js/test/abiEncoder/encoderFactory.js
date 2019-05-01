@@ -1,33 +1,31 @@
 const { constants, proofs } = require('@aztec/dev-utils');
-const chai = require('chai');
+const secp256k1 = require('@aztec/secp256k1');
+const { expect } = require('chai');
 const { padLeft } = require('web3-utils');
 
 const HexString = require('./HexString');
 
 const bilateralProof = require('../../src/proof/bilateralSwap');
-const joinSplitProof = require('../../src/proof/joinSplit');
-const dividendComputationProof = require('../../src/proof/dividendComputation');
-const mintProof = require('../../src/proof/mint');
 const burnProof = require('../../src/proof/burn');
+const dividendComputationProof = require('../../src/proof/dividendComputation');
+const joinSplitProof = require('../../src/proof/joinSplit');
+const mintProof = require('../../src/proof/mint');
 
 const abiEncoder = require('../../src/abiEncoder');
-const secp256k1 = require('../../src/secp256k1');
 const note = require('../../src/note');
-const sign = require('../../src/sign');
+const signer = require('../../src/signer');
 
-const { expect } = chai;
-
-function randomNoteValue() {
-    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
-}
-
-function randomBytes(numBytes) {
+const randomBytes = (numBytes) => {
     return [...new Array(numBytes * 2)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-}
+};
 
-function fakeSignature() {
+const randomNoteValue = () => {
+    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
+};
+
+const fakeSignature = () => {
     return [`0x${padLeft(randomBytes(1), 64)}`, `0x${randomBytes(32)}`, `0x${randomBytes(32)}`];
-}
+};
 
 describe('abiEncoder.encoderFactory', () => {
     describe('General Functionality', () => {
@@ -148,7 +146,7 @@ describe('abiEncoder.encoderFactory', () => {
             const { proofData, challenge } = joinSplitProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
 
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(contractAddress, constants.ACE_DOMAIN_PARAMS);
+                const domain = signer.generateAZTECDomainParams(contractAddress, constants.ACE_DOMAIN_PARAMS);
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
                     proof: proofs.JOIN_SPLIT_PROOF,
@@ -157,7 +155,7 @@ describe('abiEncoder.encoderFactory', () => {
                     sender: senderAddress,
                 };
                 const { privateKey } = accounts[index];
-                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+                const { signature } = signer.signTypedData(domain, schema, message, privateKey);
                 return signature;
             });
 

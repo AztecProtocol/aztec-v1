@@ -1,38 +1,13 @@
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const crypto = require('crypto');
-const { keccak256, padLeft, toHex } = require('web3-utils');
+const { padLeft, toHex } = require('web3-utils');
 
-const abiEncoder = require('../abiEncoder');
+const { noteCoder } = require('../abiEncoder');
 const bn128 = require('../bn128');
-const secp256k1 = require('../secp256k1');
 const setup = require('../setup');
-const utils = require('./utils');
+const noteUtils = require('./utils');
 
-const { getSharedSecret, getNoteHash } = utils;
-const { noteCoder } = abiEncoder;
-
-/**
- * Create a Diffie-Hellman shared secret for a given public key
- *
- * @method createSharedSecret
- * @private
- * @memberof module:noteUtils
- * @param {Object} pubicKeyHex elliptic.js hex-formatted public key
- * @return {{type: string, name: ephemeralKey}} elliptic.js hex-formatted ephemeral key
- * @return {{type: string, name: encoded}} hex-string formatted shared secret
- */
-function createSharedSecret(publicKeyHex) {
-    const publicKey = secp256k1.ec.keyFromPublic(publicKeyHex.slice(2), 'hex');
-
-    const ephemeralKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
-    const sharedSecret = publicKey.getPublic().mul(ephemeralKey.priv);
-    const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;
-    const encoded = keccak256(sharedSecretHex, 'hex');
-    return {
-        ephemeralKey: `0x${ephemeralKey.getPublic(true, 'hex')}`,
-        encoded,
-    };
-}
+const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
 
 /**
  * Initializes a new instance of Note from either a public key or a viewing key.
@@ -111,35 +86,6 @@ function Note(publicKey, viewingKey, owner = '0x', setupPoint) {
 }
 
 /**
- * Get the public key representation of a note
- *
- * @name Note#getPublic
- * @function
- * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
- */
-Note.prototype.getPublic = function getPublic() {
-    const ephemeral = this.ephemeral.getPublic();
-    return noteCoder.encodeNotePublicKey({ gamma: this.gamma, sigma: this.sigma, ephemeral });
-};
-
-/**
- * Get the viewing key of a note
- *
- * @name Note#getView
- * @function
- * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
- */
-Note.prototype.getView = function getView() {
-    if (!BN.isBN(this.k) || !BN.isBN(this.a)) {
-        return '0x';
-    }
-    const a = padLeft(this.a.fromRed().toString(16), 64);
-    const k = padLeft(this.k.fromRed().toString(16), 8);
-    const ephemeral = padLeft(this.ephemeral.getPublic(true, 'hex'), 66);
-    return `0x${a}${k}${ephemeral}`;
-};
-
-/**
  * Compute value of a note, from the public key and the spending key
  *
  * @name Note#derive
@@ -151,6 +97,18 @@ Note.prototype.derive = async function derive(spendingKey) {
     this.a = new BN(sharedSecret.slice(2), 16).toRed(bn128.groupReduction);
     const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
     this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(bn128.groupReduction);
+};
+
+/**
+ * Export note's ephemeral key in compressed string form
+ *
+ * @name Note#exportMetadata
+ * @function
+ * @returns {string} hex-string compressed ephemeral key
+ */
+Note.prototype.exportMetadata = function exportMetadata() {
+    const res = this.ephemeral.getPublic(true, 'hex');
+    return `0x${res}`;
 };
 
 /**
@@ -181,15 +139,32 @@ Note.prototype.exportNote = function exportNote() {
 };
 
 /**
- * Export note's ephemeral key in compressed string form
+ * Get the public key representation of a note
  *
- * @name Note#exportMetadata
+ * @name Note#getPublic
  * @function
- * @returns {string} hex-string compressed ephemeral key
+ * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
  */
-Note.prototype.exportMetadata = function exportMetadata() {
-    const res = this.ephemeral.getPublic(true, 'hex');
-    return `0x${res}`;
+Note.prototype.getPublic = function getPublic() {
+    const ephemeral = this.ephemeral.getPublic();
+    return noteCoder.encodeNotePublicKey({ gamma: this.gamma, sigma: this.sigma, ephemeral });
+};
+
+/**
+ * Get the viewing key of a note
+ *
+ * @name Note#getView
+ * @function
+ * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
+ */
+Note.prototype.getView = function getView() {
+    if (!BN.isBN(this.k) || !BN.isBN(this.a)) {
+        return '0x';
+    }
+    const a = padLeft(this.a.fromRed().toString(16), 64);
+    const k = padLeft(this.k.fromRed().toString(16), 8);
+    const ephemeral = padLeft(this.ephemeral.getPublic(true, 'hex'), 66);
+    return `0x${a}${k}${ephemeral}`;
 };
 
 /**
@@ -198,7 +173,68 @@ Note.prototype.exportMetadata = function exportMetadata() {
  * @module note
  */
 const note = {};
-note.utils = utils;
+note.utils = noteUtils;
+
+/**
+ * Create a Note instance from a recipient public key and a desired value
+ *
+ * @method fromValue
+ * @param {string} publicKey hex-string formatted recipient public key
+ * @param {number} value value of the note
+ * @param {string} owner owner of the not if different from the public key
+ * @returns {Promise} promise that resolves to created note instance
+ */
+
+note.create = async (spendingPublicKey, value, noteOwner) => {
+    const sharedSecret = createSharedSecret(spendingPublicKey);
+    const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
+    const k = padLeft(toHex(value).slice(2), 8);
+    const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
+    const viewingKey = `0x${a}${k}${ephemeral}`;
+    const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
+    const setupPoint = await setup.fetchPoint(value);
+    return new Note(null, viewingKey, owner, setupPoint);
+};
+
+/**
+ * Create a zero value note with from a constant a to make the hash of the initial totalMinted note in
+ * mintable assets a constant
+ *
+ * @method createZeroValueNote
+ * @returns {Promise} promise that resolves to created note instance
+ */
+note.createZeroValueNote = () => note.fromViewKey(noteUtils.constants.ZERO_VALUE_NOTE_VIEWING_KEY);
+
+/**
+ * Create Note instance from a public key and a spending key
+ *
+ * @dev This doesn't work in the web version of aztec.js
+ *
+ * @method derive
+ * @param {string} publicKey hex-string formatted note public key
+ * @param {string} spendingKey hex-string formatted spending key (can also be an Ethereum private key)
+ * @returns {Promise} promise that resolves to created note instance
+ */
+note.derive = async (publicKey, spendingKey) => {
+    const newNote = new Note(publicKey);
+    await newNote.derive(spendingKey);
+    return newNote;
+};
+
+/**
+ * Encode compressed metadata of an array of notes as a hex-string, with each entry occupying 33 bytes
+ *
+ * @method fromValue
+ * @param {string} publicKey hex-string formatted recipient public key
+ * @param {number} value value of the note
+ * @returns {Note} created note instance
+ */
+note.encodeMetadata = (noteArray) => {
+    return noteArray.reduce((acc, aztecNote) => {
+        const ephemeral = aztecNote.exportMetadata();
+        return `${acc}${padLeft(ephemeral.slice(2), 66)}`; // remove elliptic.js encoding byte, broadcast metadata is always compressed
+    }, '0x');
+};
 
 /**
  * Create Note instance from an event log and a spending key
@@ -240,67 +276,6 @@ note.fromViewKey = async (viewingKey) => {
     const newNote = new Note(null, viewingKey, undefined, setupPoint);
     return newNote;
 };
-
-/**
- * Create Note instance from a public key and a spending key
- *
- * @dev This doesn't work in the web version of aztec.js
- *
- * @method derive
- * @param {string} publicKey hex-string formatted note public key
- * @param {string} spendingKey hex-string formatted spending key (can also be an Ethereum private key)
- * @returns {Promise} promise that resolves to created note instance
- */
-note.derive = async (publicKey, spendingKey) => {
-    const newNote = new Note(publicKey);
-    await newNote.derive(spendingKey);
-    return newNote;
-};
-
-/**
- * Create a Note instance from a recipient public key and a desired value
- *
- * @method fromValue
- * @param {string} publicKey hex-string formatted recipient public key
- * @param {number} value value of the note
- * @param {string} owner owner of the not if different from the public key
- * @returns {Promise} promise that resolves to created note instance
- */
-
-note.create = async (spendingPublicKey, value, noteOwner) => {
-    const sharedSecret = createSharedSecret(spendingPublicKey);
-    const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
-    const k = padLeft(toHex(value).slice(2), 8);
-    const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
-    const viewingKey = `0x${a}${k}${ephemeral}`;
-    const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
-    const setupPoint = await setup.fetchPoint(value);
-    return new Note(null, viewingKey, owner, setupPoint);
-};
-
-/**
- * Encode compressed metadata of an array of notes as a hex-string, with each entry occupying 33 bytes
- *
- * @method fromValue
- * @param {string} publicKey hex-string formatted recipient public key
- * @param {number} value value of the note
- * @returns {Note} created note instance
- */
-note.encodeMetadata = (noteArray) => {
-    return noteArray.reduce((acc, aztecNote) => {
-        const ephemeral = aztecNote.exportMetadata();
-        return `${acc}${padLeft(ephemeral.slice(2), 66)}`; // remove elliptic.js encoding byte, broadcast metadata is always compressed
-    }, '0x');
-};
-
-/**
- * Create a zero value note with from a constant a to make the hash of the initial totalMinted note in
- * mintable assets a constant
- *
- * @method createZeroValueNote
- * @returns {Promise} promise that resolves to created note instance
- */
-note.createZeroValueNote = () => note.fromViewKey(utils.constants.ZERO_VALUE_NOTE_VIEWING_KEY);
 
 /**
  * Export the Note class as part of the note module. We shouldn't really use this directly, but useful for testing purposes

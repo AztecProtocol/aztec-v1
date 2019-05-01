@@ -1,21 +1,15 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const aztec = require('aztec.js');
-const {
-    constants: { CRS, K_MAX },
-} = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const {
-    constants,
-    proofs: { JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const { abiEncoder, note, proof, signer } = require('aztec.js');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
-const { sign } = aztec;
-
-const { outputCoder, inputCoder } = aztec.abiEncoder;
-const joinSplitEncode = inputCoder.joinSplit;
+const { constants, proofs } = devUtils;
+const { CRS, K_MAX } = constants;
+const { outputCoder, inputCoder } = abiEncoder;
 
 // ### Artifacts
 const ABIEncoder = artifacts.require('./JoinSplitABIEncoderTest');
@@ -32,11 +26,11 @@ contract('Join-Split ABI Encoder', (accounts) => {
     // Creating a collection of tests that should pass
     describe('Success States', () => {
         beforeEach(async () => {
-            aztecAccounts = [...new Array(10)].map(() => aztec.secp256k1.generateAccount());
+            aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
 
             notes = await Promise.all(
                 aztecAccounts.map(({ publicKey }) => {
-                    return aztec.note.create(publicKey, randomNoteValue());
+                    return note.create(publicKey, randomNoteValue());
                 }),
             );
 
@@ -51,23 +45,18 @@ contract('Join-Split ABI Encoder', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const { proofData, challenge } = aztec.proof.joinSplit.constructProof(
-                [...inputNotes, ...outputNotes],
-                m,
-                accounts[0],
-                0,
-            );
+            const { proofData, challenge } = proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
             const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = sign.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.eip712.ACE_DOMAIN_PARAMS);
+                const domain = signer.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.eip712.ACE_DOMAIN_PARAMS);
                 const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
                 const message = {
-                    proof: JOIN_SPLIT_PROOF,
+                    proof: proofs.JOIN_SPLIT_PROOF,
                     noteHash: inputNote.noteHash,
                     challenge,
                     sender: senderAddress,
                 };
                 const { privateKey } = aztecAccounts[index];
-                const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+                const { signature } = signer.signTypedData(domain, schema, message, privateKey);
                 return signature;
             });
             const publicOwner = aztecAccounts[0].address;
@@ -75,7 +64,7 @@ contract('Join-Split ABI Encoder', (accounts) => {
             const outputOwners = outputNotes.map((n) => n.owner);
             const inputOwners = inputNotes.map((n) => n.owner);
 
-            const data = joinSplitEncode(
+            const data = inputCoder.joinSplit(
                 proofData,
                 m,
                 challenge,

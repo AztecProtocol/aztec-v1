@@ -1,13 +1,11 @@
-const {
-    constants: { K_MAX, K_MIN },
-} = require('@aztec/dev-utils');
-const chai = require('chai');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
+const { expect } = require('chai');
 
 const setup = require('../../src/setup');
 const bn128 = require('../../src/bn128');
 
-const { expect } = chai;
+const { K_MAX, K_MIN } = constants;
 
 describe('Trusted Setup', () => {
     it('should read signature and retrieve well-formed elliptic curve points', async () => {

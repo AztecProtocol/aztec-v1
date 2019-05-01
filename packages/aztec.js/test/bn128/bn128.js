@@ -1,16 +1,13 @@
-const {
-    constants: { H_X, H_Y },
-} = require('@aztec/dev-utils');
-const chai = require('chai');
+const { constants } = require('@aztec/dev-utils');
+const { expect } = require('chai');
 const crypto = require('crypto');
 
 const BN = require('bn.js');
 const bn128 = require('../../src/bn128');
 
-const { expect } = chai;
-
 describe('bn128', () => {
     let kMaxTemp;
+
     beforeEach(() => {
         kMaxTemp = bn128.K_MAX;
         bn128.K_MAX = 500; // *cough*
@@ -63,8 +60,8 @@ describe('bn128', () => {
             .redMul(h.x)
             .redAdd(bn128.curve.b);
 
-        expect(h.x.fromRed().eq(H_X)).to.equal(true);
-        expect(h.y.fromRed().eq(H_Y)).to.equal(true);
+        expect(h.x.fromRed().eq(constants.H_X)).to.equal(true);
+        expect(h.y.fromRed().eq(constants.H_Y)).to.equal(true);
         expect(lhs.fromRed().eq(rhs.fromRed())).to.equal(true);
     });
 

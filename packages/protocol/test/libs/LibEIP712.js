@@ -1,17 +1,19 @@
 /* eslint-disable no-underscore-dangle */
 /* global artifacts, contract, expect: true */
-const { secp256k1, sign } = require('aztec.js');
+const { signer } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
+const typedData = require('@aztec/typed-data');
 const crypto = require('crypto');
 const truffleAssert = require('truffle-assertions');
-const { padLeft, keccak256 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const LibEIP712 = artifacts.require('./LibEIP712Test');
 
 const computeDomainHash = (validatorAddress) => {
     const types = { EIP712Domain: constants.eip712.EIP712_DOMAIN };
-    const domain = sign.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
-    return keccak256(`0x${sign.eip712.encodeMessageData(types, 'EIP712Domain', domain)}`);
+    const domain = signer.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
+    return keccak256(`0x${typedData.encodeMessageData(types, 'EIP712Domain', domain)}`);
 };
 
 const computeMsgHash = (domainHash, sender) => {
@@ -25,7 +27,7 @@ const computeMsgHash = (domainHash, sender) => {
 };
 
 const signNote = (verifyingContract, spender, privateKey) => {
-    const domain = sign.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+    const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
     const schema = constants.eip712.NOTE_SIGNATURE;
 
     const message = {
@@ -33,7 +35,7 @@ const signNote = (verifyingContract, spender, privateKey) => {
         spender,
         status: true,
     };
-    return sign.signStructuredData(domain, schema, message, privateKey);
+    return signer.signTypedData(domain, schema, message, privateKey);
 };
 
 contract('LibEIP712', (accounts) => {

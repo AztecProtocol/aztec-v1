@@ -4,16 +4,41 @@
  * @module mint
  */
 const { constants } = require('@aztec/dev-utils');
-const { padLeft, sha3 } = require('web3-utils');
-
-const verifier = require('./verifier');
-const proofUtils = require('../proofUtils');
-const joinSplit = require('../joinSplit');
+const { keccak256, padLeft } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../abiEncoder');
+const joinSplit = require('../joinSplit');
+const proofUtils = require('../proofUtils');
+const verifier = require('./verifier');
 
 const mint = {};
 mint.verifier = verifier;
+
+/**
+ * Construct AZTEC mint proof transcript
+ *
+ * @method constructProof
+ * @param {Object[]} notes AZTEC notes
+ * @param {string} sender the address calling the constructProof() function
+ * @returns {string[]} proofData - constructed cryptographic proof data
+ * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
+ */
+mint.constructProof = (notes, sender) => {
+    const m = 1;
+    const kPublic = 0;
+    let notesArray;
+
+    if (!Array.isArray(notes)) {
+        notesArray = [notes];
+    } else {
+        notesArray = notes;
+    }
+
+    proofUtils.parseInputs(notesArray, sender);
+    const { proofData, challenge } = joinSplit.constructProof(notesArray, m, sender, kPublic);
+
+    return { proofData, challenge };
+};
 
 /**
  * Encode a mint transaction
@@ -66,38 +91,12 @@ mint.encodeMintTransaction = ({ newTotalMinted, oldTotalMinted, adjustedNotes, s
                 outputNotes: outputNotes.slice(1),
                 publicOwner,
                 publicValue,
-                challenge: `0x${padLeft(sha3(challenge).slice(2), 64)}`,
+                challenge: `0x${padLeft(keccak256(challenge).slice(2), 64)}`,
             },
         ])
         .slice(0x42)}`;
 
     return { proofData, expectedOutput, challenge };
-};
-
-/**
- * Construct AZTEC mint proof transcript
- *
- * @method constructProof
- * @param {Object[]} notes AZTEC notes
- * @param {string} sender the address calling the constructProof() function
- * @returns {string[]} proofData - constructed cryptographic proof data
- * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
- */
-mint.constructProof = (notes, sender) => {
-    const m = 1;
-    const kPublic = 0;
-    let notesArray;
-
-    if (!Array.isArray(notes)) {
-        notesArray = [notes];
-    } else {
-        notesArray = notes;
-    }
-
-    proofUtils.parseInputs(notesArray, sender);
-    const { proofData, challenge } = joinSplit.constructProof(notesArray, m, sender, kPublic);
-
-    return { proofData, challenge };
 };
 
 module.exports = mint;

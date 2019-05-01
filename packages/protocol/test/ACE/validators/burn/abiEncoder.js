@@ -1,13 +1,14 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const {
-    abiEncoder: { outputCoder },
-    secp256k1,
-    note,
-    proof: { burn },
-} = require('aztec.js');
-const { constants } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
+
+// ### Internal Dependencies
+const { abiEncoder, note, proof } = require('aztec.js');
+const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
+
+const { burn } = proof;
+const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ABIEncoder = artifacts.require('./AdjustSupplyABIEncoderTest');
