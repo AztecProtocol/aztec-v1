@@ -1,33 +1,31 @@
 /* eslint-disable prefer-arrow-callback */
 
-const utils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
-const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
-const proofUtils = require('../../../src/proof/proofUtils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
-const secp256k1 = require('../../../src/secp256k1');
 const note = require('../../../src/note');
-const proof = require('../../../src/proof/burn');
-const verifier = require('../../../src/proof/burn/verifier');
+const proof = require('../../../src/proof/mint');
+const proofUtils = require('../../../src/proof/proofUtils');
+const verifier = require('../../../src/proof/mint/verifier');
 
-const { errorTypes } = utils.constants;
+const { errorTypes } = constants;
 
-const { expect } = chai;
-
-describe('Burn proof verification tests', () => {
+describe('Mint Proof Verifier', () => {
     describe('Success States', () => {
-        it('should construct a valid burn proof', async () => {
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+        it('should construct a valid mint proof', async () => {
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned, burnOne, burnTwo];
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted, mintOne, mintTwo];
             const sender = proofUtils.randomAddress();
             const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
@@ -37,28 +35,12 @@ describe('Burn proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('should accept a burn proof with 0 notes burned i.e. no notes are actually burned', async () => {
-            const newTotalBurned = 50;
-            const oldTotalBurned = 50;
+        it('should accept mint proof with 0 note minted i.e. no notes are actually minted', async () => {
+            const newTotalMinted = 50;
+            const oldTotalMinted = 50;
 
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned];
-
-            const sender = proofUtils.randomAddress();
-            const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
-
-            const { proofData, challenge } = proof.constructProof(testNotes, sender);
-
-            const result = verifier.verifyProof(proofData, challenge, sender);
-            expect(result.valid).to.equal(true);
-        });
-
-        it('should accept a burn proof with large number of burned notes', async () => {
-            const newTotalBurned = 100;
-            const oldTotalBurned = 10;
-
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted];
 
             const sender = proofUtils.randomAddress();
             const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
@@ -69,14 +51,30 @@ describe('Burn proof verification tests', () => {
             expect(result.valid).to.equal(true);
         });
 
-        it('should burn without any previous burned number of tokens', async () => {
-            const newTotalBurned = 50;
-            const oldTotalBurned = 0;
-            const burnOne = 25;
-            const burnTwo = 25;
+        it('should accept mint proof with large number of minted notes', async () => {
+            const newTotalMinted = 100;
+            const oldTotalMinted = 10;
 
-            const kIn = [newTotalBurned];
-            const kOut = [oldTotalBurned, burnOne, burnTwo];
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+
+            const sender = proofUtils.randomAddress();
+            const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
+
+            const { proofData, challenge } = proof.constructProof(testNotes, sender);
+
+            const result = verifier.verifyProof(proofData, challenge, sender);
+            expect(result.valid).to.equal(true);
+        });
+
+        it('should mint without any previous minted number of tokens', async () => {
+            const newTotalMinted = 50;
+            const oldTotalMinted = 0;
+            const mintOne = 25;
+            const mintTwo = 25;
+
+            const kIn = [newTotalMinted];
+            const kOut = [oldTotalMinted, mintOne, mintTwo];
             const sender = proofUtils.randomAddress();
             const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
@@ -97,7 +95,7 @@ describe('Burn proof verification tests', () => {
             const sender = proofUtils.randomAddress();
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
 
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+            const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
             const proofData = [
                 [`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0'],
                 [`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0'],
@@ -127,12 +125,12 @@ describe('Burn proof verification tests', () => {
         it('should REJECT if malformed challenge', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = await proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender);
@@ -147,13 +145,13 @@ describe('Burn proof verification tests', () => {
         it('should REJECT if notes do NOT balance', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const newTotalBurned = 500; // 500 + oldTotalBurned + burnOne + burnTwo;
+            const newTotalMinted = 500; // 500 + oldTotalMinted + mintOne + mintTwo;
 
-            const testNotes = await proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
@@ -182,12 +180,12 @@ describe('Burn proof verification tests', () => {
         it('should REJECT if note value response is 0', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = await proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData, challenge } = proof.constructProof(testNotes, sender);
@@ -204,12 +202,12 @@ describe('Burn proof verification tests', () => {
         it('should REJECT if blinding factor is at infinity', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = await proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender);
@@ -232,12 +230,12 @@ describe('Burn proof verification tests', () => {
         it('should REJECT if blinding factor computed from invalid point', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
-            const newTotalBurned = 50;
-            const oldTotalBurned = 30;
-            const burnOne = 10;
-            const burnTwo = 10;
+            const newTotalMinted = 50;
+            const oldTotalMinted = 30;
+            const mintOne = 10;
+            const mintTwo = 10;
 
-            const testNotes = await proofUtils.makeTestNotes([newTotalBurned], [oldTotalBurned, burnOne, burnTwo]);
+            const testNotes = await proofUtils.makeTestNotes([newTotalMinted], [oldTotalMinted, mintOne, mintTwo]);
             const sender = proofUtils.randomAddress();
 
             const { proofData } = proof.constructProof(testNotes, sender, 0);
@@ -262,7 +260,7 @@ describe('Burn proof verification tests', () => {
             parseInputs.restore();
         });
 
-        it('should REJECT if number of notes supplied is less than 2', async () => {
+        it('should fail if number of notes supplied is less than 2', async () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const noteValue = 50;

@@ -1,11 +1,11 @@
-const outputCoder = require('./outputCoder');
-const inputCoder = require('./inputCoder');
 const encoderFactory = require('./encoderFactory');
+const inputCoder = require('./inputCoder');
 const noteCoder = require('./noteCoder');
+const outputCoder = require('./outputCoder');
 
 module.exports = {
     encoderFactory,
     inputCoder,
-    outputCoder,
     noteCoder,
+    outputCoder,
 };

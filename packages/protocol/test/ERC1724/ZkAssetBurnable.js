@@ -5,12 +5,12 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const {
-    constants,
-    proofs: { BURN_PROOF, JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const { abiEncoder, note, proof } = require('aztec.js');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
+const { constants } = devUtils;
+const { BURN_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
@@ -20,7 +20,6 @@ const AdjustSupply = artifacts.require('./AdjustSupply');
 const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 const JoinSplit = artifacts.require('./JoinSplit');
 const JoinSplitInterface = artifacts.require('./JoinSplit');
-
 const ZkAssetBurnable = artifacts.require('./ZkAssetBurnable');
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
@@ -28,16 +27,16 @@ JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAssetBurnable', (accounts) => {
     describe('Success States', () => {
-        let aztecAccounts = [];
-        let notes = [];
         let ace;
-        let erc20;
-        let zkAssetBurnable;
-        let scalingFactor;
+        let aztecAccounts = [];
         let aztecAdjustSupply;
-        const proofs = [];
         let aztecJoinSplit;
+        let erc20;
         const kPublic = -50;
+        let notes = [];
+        const proofs = [];
+        let scalingFactor;
+        let zkAssetBurnable;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });

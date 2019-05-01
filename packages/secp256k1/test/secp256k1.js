@@ -2,7 +2,7 @@ const chai = require('chai');
 const crypto = require('crypto');
 const web3Utils = require('web3-utils');
 
-const secp256k1 = require('../../src/secp256k1');
+const secp256k1 = require('../src');
 
 const { padLeft } = web3Utils;
 const { expect } = chai;

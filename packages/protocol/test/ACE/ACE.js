@@ -2,26 +2,26 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const { padLeft, keccak256 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
-const {
-    constants,
-    proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const { abiEncoder, note, proof } = require('aztec.js');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
+const { constants } = devUtils;
+const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
 const ACETest = artifacts.require('./ACETest');
-const JoinSplit = artifacts.require('./JoinSplit');
-const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 const AdjustSupply = artifacts.require('./validators/AdjustSupply');
 const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
+const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 AdjustSupply.abi = AdjustSupplyInterface.abi;

@@ -1,8 +1,7 @@
-const utils = require('@aztec/dev-utils');
-
+const { constants } = require('@aztec/dev-utils');
 const joinSplit = require('../joinSplit');
 
-const { errorTypes } = utils.constants;
+const { errorTypes } = constants;
 
 const verifier = {};
 
@@ -16,7 +15,6 @@ const verifier = {};
  * @param {string} challengeHex hex-string formatted proof challenge
  * @param {string} sender Ethereum address of transaction sender
  */
-
 verifier.verifyProof = (proofData, challengeHex, sender) => {
     const m = 1;
     let proofDataArray;

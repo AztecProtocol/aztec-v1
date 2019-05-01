@@ -1,32 +1,28 @@
 /* eslint-disable prefer-arrow-callback */
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
-const { padLeft, sha3 } = require('web3-utils');
 const sinon = require('sinon');
-const utils = require('@aztec/dev-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
-const verifier = require('../../../src/proof/joinSplit/verifier');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const proofUtils = require('../../../src/proof/proofUtils');
+const verifier = require('../../../src/proof/joinSplit/verifier');
 
-const { errorTypes } = utils.constants;
-const { expect } = chai;
+const { errorTypes, K_MAX } = constants;
 
-function generateNoteValue() {
+const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
-}
+};
 
-function getKPublic(kIn, kOut) {
+const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
-}
+};
 
-function generateBalancedNotes(nIn, nOut) {
+const generateBalancedNotes = (nIn, nOut) => {
     const kIn = [...Array(nIn)].map(() => generateNoteValue());
     const kOut = [...Array(nOut)].map(() => generateNoteValue());
     let delta = getKPublic(kIn, kOut);
@@ -51,15 +47,14 @@ function generateBalancedNotes(nIn, nOut) {
         }
     }
     return { kIn, kOut };
-}
+};
 
-function randomAddress() {
+const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
-}
+};
 
-describe('Join Split Proof Verifier', function describeVerifier() {
-    describe('Success States', function success() {
-        this.timeout(10000);
+describe('Join Split Proof Verifier', () => {
+    describe('Success States', () => {
         it('should construct a valid join-split proof', async () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
@@ -136,8 +131,7 @@ describe('Join Split Proof Verifier', function describeVerifier() {
         });
     });
 
-    describe('Failure States', function failure() {
-        this.timeout(10000);
+    describe('Failure States', () => {
         let parseInputs;
         beforeEach(() => {
             // to test Failure States we need to pass in bad data to verifier
@@ -156,7 +150,7 @@ describe('Join Split Proof Verifier', function describeVerifier() {
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const sender = randomAddress();
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+            const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
             const proofData = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
 
             const { valid, errors } = verifier.verifyProof(proofData, 1, challenge, sender);

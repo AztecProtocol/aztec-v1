@@ -32,7 +32,7 @@ secp256k1.curve = secp256k1.ec.curve;
  * @param privateKey hex-formatted private key
  * @return {module:secp256k1~Account} an ethereum account
  */
-secp256k1.accountFromPrivateKey = function accountFromPrivateKey(privateKey) {
+secp256k1.accountFromPrivateKey = (privateKey) => {
     const ecKey = secp256k1.ec.keyFromPrivate(privateKey.slice(2), 'hex');
     const publicKey = `0x${ecKey.getPublic(false, 'hex').slice(2)}`; // remove elliptic.js encoding byte
     const publicHash = web3Utils.sha3(publicKey);
@@ -50,7 +50,7 @@ secp256k1.accountFromPrivateKey = function accountFromPrivateKey(privateKey) {
  * @memberof module:secp256k1
  * @return {module:secp256k1~Account} an ethereum account
  */
-secp256k1.generateAccount = function generateAccount() {
+secp256k1.generateAccount = () => {
     return secp256k1.accountFromPrivateKey(`0x${crypto.randomBytes(32).toString('hex')}`);
 };
 
@@ -60,7 +60,7 @@ secp256k1.generateAccount = function generateAccount() {
  * @memberof module:secp256k1
  * @returns {Point} a random point
  */
-secp256k1.randomPoint = function randomPoint() {
+secp256k1.randomPoint = () => {
     function recurse() {
         const x = new BN(crypto.randomBytes(32), 16).toRed(secp256k1.ec.curve.red);
         const y2 = x

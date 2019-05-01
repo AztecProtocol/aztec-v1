@@ -3,14 +3,15 @@
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const aztec = require('aztec.js');
+const { abiEncoder, note, proof } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
 // ### Artifacts
 const ABIEncoder = artifacts.require('./DividendComputationABIEncoderTest');
 
 contract('Dividend Computation ABI Encoder', (accounts) => {
-    let DividendComputationAbiEncoder;
+    let dividendComputationAbiEncoder;
     let dividendAccounts = [];
     let notes = [];
 
@@ -23,14 +24,14 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
             za = 100;
             zb = 5;
 
-            dividendAccounts = [...new Array(3)].map(() => aztec.secp256k1.generateAccount());
+            dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
             notes = await Promise.all(
                 dividendAccounts.map(({ publicKey }, i) => {
-                    return aztec.note.create(publicKey, noteValues[i]);
+                    return note.create(publicKey, noteValues[i]);
                 }),
             );
 
-            DividendComputationAbiEncoder = await ABIEncoder.new({
+            dividendComputationAbiEncoder = await ABIEncoder.new({
                 from: accounts[0],
             });
         });
@@ -39,7 +40,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
             const inputNotes = notes.slice(0, 1);
             const outputNotes = notes.slice(1, 3);
             const senderAddress = accounts[0];
-            const { proofData, challenge } = aztec.proof.dividendComputation.constructProof(
+            const { proofData, challenge } = proof.dividendComputation.constructProof(
                 [...inputNotes, ...outputNotes],
                 za,
                 zb,
@@ -53,7 +54,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
             const inputOwners = inputNotes.map((m) => m.owner);
             const outputOwners = outputNotes.map((n) => n.owner);
 
-            const data = aztec.abiEncoder.inputCoder.dividendComputation(
+            const data = abiEncoder.inputCoder.dividendComputation(
                 proofDataFormatted,
                 challenge,
                 za,
@@ -63,12 +64,12 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
                 outputNotes,
             );
 
-            const result = await DividendComputationAbiEncoder.validateDividendComputation(data, senderAddress, constants.CRS, {
+            const result = await dividendComputationAbiEncoder.validateDividendComputation(data, senderAddress, constants.CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
 
-            const expected = aztec.abiEncoder.outputCoder.encodeProofOutputs([
+            const expected = abiEncoder.outputCoder.encodeProofOutputs([
                 {
                     inputNotes,
                     outputNotes,
@@ -78,7 +79,7 @@ contract('Dividend Computation ABI Encoder', (accounts) => {
                 },
             ]);
 
-            const decoded = aztec.abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+            const decoded = abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);

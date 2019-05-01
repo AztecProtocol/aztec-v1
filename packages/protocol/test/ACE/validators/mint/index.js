@@ -1,29 +1,25 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
-const sinon = require('sinon');
 const BN = require('bn.js');
 const crypto = require('crypto');
+const sinon = require('sinon');
 const truffleAssert = require('truffle-assertions');
-const { sha3, padLeft } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const {
-    secp256k1,
-    note,
-    proof: { mint, proofUtils, joinSplit },
-    abiEncoder: { outputCoder, inputCoder, encoderFactory },
-    bn128,
-    keccak,
-} = require('aztec.js');
+const { abiEncoder, bn128, keccak, note, proof } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
+
+const Keccak = keccak;
+const { mint, proofUtils, joinSplit } = proof;
+const { outputCoder, inputCoder, encoderFactory } = abiEncoder;
 
 // ### Artifacts
 const AdjustSupply = artifacts.require('./AdjustSupply');
 const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;
-
-const Keccak = keccak;
 
 contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
     let adjustSupplyContract;
@@ -249,7 +245,7 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
                         outputNotes: outputNotes.slice(1),
                         publicOwner,
                         publicValue,
-                        challenge: `0x${padLeft(sha3(notModRChallenge).slice(2), 64)}`,
+                        challenge: `0x${padLeft(keccak256(notModRChallenge).slice(2), 64)}`,
                     },
                 ])
                 .slice(0x42)}`;
@@ -364,7 +360,7 @@ contract('AdjustSupply Tests for Mint Proofs', (accounts) => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = `${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}${zeroes}`;
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const challenge = sha3(challengeString, 'hex');
+            const challenge = keccak256(challengeString, 'hex');
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
             const senderAddress = accounts[0];
 

@@ -1,26 +1,15 @@
-const devUtils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const { randomHex } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const note = require('../../../src/note');
-const proof = require('../../../src/proof/burn');
+const proof = require('../../../src/proof/mint');
 const proofUtils = require('../../../src/proof/proofUtils');
-const secp256k1 = require('../../../src/secp256k1');
 
-const { constants } = devUtils;
-const { expect } = chai;
-
-function validateGroupScalar(hex, canBeZero = false) {
-    const scalar = new BN(hex.slice(2), 16);
-    expect(scalar.lt(bn128.curve.n)).to.equal(true);
-    if (!canBeZero) {
-        expect(scalar.gt(new BN(0))).to.equal(true);
-    }
-}
-
-function validateGroupElement(xHex, yHex) {
+const validateGroupElement = (xHex, yHex) => {
     const x = new BN(xHex.slice(2), 16);
     const y = new BN(yHex.slice(2), 16);
     expect(x.gt(new BN(0))).to.equal(true);
@@ -33,17 +22,25 @@ function validateGroupElement(xHex, yHex) {
         .add(new BN(3));
     const rhs = y.mul(y);
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
-}
+};
 
-describe('Burn Proof', () => {
+const validateGroupScalar = (hex, canBeZero = false) => {
+    const scalar = new BN(hex.slice(2), 16);
+    expect(scalar.lt(bn128.curve.n)).to.equal(true);
+    if (!canBeZero) {
+        expect(scalar.gt(new BN(0))).to.equal(true);
+    }
+};
+
+describe('Mint Proof', () => {
     it('should construct a proof with well-formed outputs', async () => {
-        const newTotalBurned = 50;
-        const oldTotalBurned = 30;
-        const burnOne = 10;
-        const burnTwo = 10;
+        const newTotalMinted = 50;
+        const oldTotalMinted = 30;
+        const mintOne = 10;
+        const mintTwo = 10;
 
-        const kIn = [newTotalBurned];
-        const kOut = [oldTotalBurned, burnOne, burnTwo];
+        const kIn = [newTotalMinted];
+        const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
         const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
@@ -62,13 +59,13 @@ describe('Burn Proof', () => {
     });
 
     it('should fail to construct a proof if point NOT on curve', async () => {
-        const newTotalBurned = 50;
-        const oldTotalBurned = 30;
-        const burnOne = 10;
-        const burnTwo = 10;
+        const newTotalMinted = 50;
+        const oldTotalMinted = 30;
+        const mintOne = 10;
+        const mintTwo = 10;
 
-        const kIn = [newTotalBurned];
-        const kOut = [oldTotalBurned, burnOne, burnTwo];
+        const kIn = [newTotalMinted];
+        const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
         const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
@@ -81,13 +78,13 @@ describe('Burn Proof', () => {
     });
 
     it('should fail to construct a proof if point at infinity', async () => {
-        const newTotalBurned = 50;
-        const oldTotalBurned = 30;
-        const burnOne = 10;
-        const burnTwo = 10;
+        const newTotalMinted = 50;
+        const oldTotalMinted = 30;
+        const mintOne = 10;
+        const mintTwo = 10;
 
-        const kIn = [newTotalBurned];
-        const kOut = [oldTotalBurned, burnOne, burnTwo];
+        const kIn = [newTotalMinted];
+        const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
         const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
@@ -102,13 +99,13 @@ describe('Burn Proof', () => {
     });
 
     it('should fail to construct a proof if viewing key response is 0', async () => {
-        const newTotalBurned = 50;
-        const oldTotalBurned = 30;
-        const burnOne = 10;
-        const burnTwo = 10;
+        const newTotalMinted = 50;
+        const oldTotalMinted = 30;
+        const mintOne = 10;
+        const mintTwo = 10;
 
-        const kIn = [newTotalBurned];
-        const kOut = [oldTotalBurned, burnOne, burnTwo];
+        const kIn = [newTotalMinted];
+        const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
         const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 
@@ -121,13 +118,13 @@ describe('Burn Proof', () => {
     });
 
     it('should fail to construct a proof if value > K_MAX', async () => {
-        const newTotalBurned = 50;
-        const oldTotalBurned = 30;
-        const burnOne = 10;
-        const burnTwo = 10;
+        const newTotalMinted = 50;
+        const oldTotalMinted = 30;
+        const mintOne = 10;
+        const mintTwo = 10;
 
-        const kIn = [newTotalBurned];
-        const kOut = [oldTotalBurned, burnOne, burnTwo];
+        const kIn = [newTotalMinted];
+        const kOut = [oldTotalMinted, mintOne, mintTwo];
         const sender = randomHex(20);
         const testNotes = await proofUtils.makeTestNotes(kIn, kOut);
 

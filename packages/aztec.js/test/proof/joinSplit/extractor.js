@@ -1,9 +1,9 @@
-const devUtils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
-const { padLeft } = require('web3-utils');
 const sinon = require('sinon');
+const { padLeft } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const extractor = require('../../../src/proof/joinSplit/extractor');
@@ -11,20 +11,17 @@ const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const proofUtils = require('../../../src/proof/proofUtils');
 
-const { constants } = devUtils;
-const { expect } = chai;
-
-function generateNoteValue() {
+const generateNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
-}
+};
 
-function getKPublic(kIn, kOut) {
+const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
-}
+};
 
-function randomAddress() {
+const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
-}
+};
 
 /**
  * Extractor test.

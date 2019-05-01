@@ -1,21 +1,16 @@
 /* global, beforeEach, it:true */
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
-const { padLeft, sha3 } = require('web3-utils');
+const { expect } = require('chai');
 const crypto = require('crypto');
 const sinon = require('sinon');
-const utils = require('@aztec/dev-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const dividendComputation = require('../../../src/proof/dividendComputation');
 const proofUtils = require('../../../src/proof/proofUtils');
 
-const { errorTypes } = utils.constants;
-
-const { expect } = chai;
+const { errorTypes } = constants;
 
 describe('Dividend Computation Verifier', () => {
     describe('Success States', () => {
@@ -92,7 +87,7 @@ describe('Dividend Computation Verifier', () => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const fakeChallenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+            const fakeChallenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(
                 proofDataUnformatted,
@@ -155,7 +150,7 @@ describe('Dividend Computation Verifier', () => {
             const sender = proofUtils.randomAddress();
             const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
-            const zaLarge = K_MAX + za;
+            const zaLarge = constants.K_MAX + za;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, zaLarge, zb, sender);
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(
@@ -190,7 +185,7 @@ describe('Dividend Computation Verifier', () => {
             const sender = proofUtils.randomAddress();
             const testNotes = await proofUtils.makeTestNotes([90], [4, 50]);
 
-            const zbLarge = K_MAX + zb;
+            const zbLarge = constants.K_MAX + zb;
             const { proofDataUnformatted, challenge } = dividendComputation.constructProof(testNotes, za, zbLarge, sender);
 
             const { valid, errors } = dividendComputation.verifier.verifyProof(

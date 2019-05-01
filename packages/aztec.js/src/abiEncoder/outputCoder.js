@@ -2,11 +2,12 @@
  * Output ABI encoding function
  * @module outputCoder
  */
-const { padLeft, sha3 } = require('web3-utils');
+
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../bn128');
-const secp256k1 = require('../secp256k1');
 
 const outputCoder = {};
 
@@ -67,6 +68,27 @@ outputCoder.decodeNotes = (notes) => {
 };
 
 /**
+ * Decode a bytes proofOutputs object into the constituent variables of each
+ * individual bytes proofOutput object
+ *
+ * @method decodeProofOutputs
+ * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
+ * proofOutput objects
+ * @returns {Object[]} array of decoded proofOutput objects - each element contains the
+ * publicValue and the challenge
+ */
+outputCoder.decodeProofOutputs = (proofOutputsHex) => {
+    const proofOutputs = proofOutputsHex.slice(2);
+    const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
+    const result = [...new Array(numOutputs)].map((x, i) => {
+        const outputOffset = parseInt(proofOutputs.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
+        return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
+    });
+
+    return result;
+};
+
+/**
  * Decode a bytes proofOutput string into it's constitutent objects
  *
  * @method decodeProofOutput
@@ -90,159 +112,6 @@ outputCoder.decodeProofOutput = (proofOutput) => {
         publicValue,
         challenge,
     };
-};
-
-/**
- * Decode a bytes proofOutputs object into the constituent variables of each
- * individual bytes proofOutput object
- *
- * @method decodeProofOutputs
- * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
- * proofOutput objects
- * @returns {Object[]} array of decoded proofOutput objects - each element contains the
- * publicValue and the challenge
- */
-outputCoder.decodeProofOutputs = (proofOutputsHex) => {
-    const proofOutputs = proofOutputsHex.slice(2);
-    const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
-    const result = [...new Array(numOutputs)].map((x, i) => {
-        const outputOffset = parseInt(proofOutputs.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
-        return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
-    });
-
-    return result;
-};
-
-/**
- * Decode a bytes proofOutputs object into the constituent variables of each
- * individual bytes proofOutput object
- *
- * @method getProofOutput
- * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
- * proofOutput objects
- * @param {Number} i - index to the particular proofOutput the user wishes to select
- * @returns {string} selected proofOutput object extracted from proofOutputsHex
- */
-outputCoder.getProofOutput = (proofOutputsHex, i) => {
-    const proofOutputs = proofOutputsHex.slice(2);
-    const offset = parseInt(proofOutputs.slice(0x40 + 0x40 * i, 0x80 + 0x40 * i), 16);
-    const length = parseInt(proofOutputs.slice(offset * 2 - 0x40, offset * 2), 16);
-    return proofOutputs.slice(offset * 2 - 0x40, offset * 2 + length * 2);
-};
-
-/**
- * Extract the note from a bytes notes string
- *
- * @method getNote
- * @param {string} notes - bytes notes string
- * @param {Number} i - index to the particular note the user wishes to select
- * @returns {string} bytes selected note string
- */
-outputCoder.getNote = (notes, i) => {
-    const noteOffset = 2 * parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
-    const length = 2 * parseInt(notes.slice(noteOffset, noteOffset + 0x40), 16);
-    // Add 0x40 because the length itself has to be included
-    return notes.slice(noteOffset, noteOffset + 0x40 + length);
-};
-
-/**
- * Extract the the input notes from a proof output
- *
- * @method getInputNotes
- * @param {string} proofOutput - the particular proofOutput the user wishes to select
- * @returns (string) input notes extracted from proofOutput
- */
-outputCoder.getInputNotes = (proofOutput) => {
-    const inputNotesOffset = 2 * parseInt(proofOutput.slice(0x40, 0x80), 16);
-    const length = 2 * parseInt(proofOutput.slice(inputNotesOffset, inputNotesOffset + 0x40), 16);
-    if (length > 0x0) {
-        const inputNotes = proofOutput.slice(inputNotesOffset, inputNotesOffset + 0x40 + length);
-        return inputNotes;
-    }
-    return padLeft('0x0', 64);
-};
-
-/**
- * Extract the metadata from a notee
- *
- * @method getMetadata
- * @param {string} notes - bytes note string
- * @returns {strings} extracted bytes metadata
- */
-outputCoder.getMetadata = (note) => {
-    let metadata = '';
-    const gamma = note.slice(0x140, 0x180);
-    metadata += gamma;
-    const sigma = note.slice(0x180, 0x1c0);
-    metadata += sigma;
-
-    const length = parseInt(note.slice(0x00, 0x40), 16);
-    let expectedLength;
-    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
-    let ephemeral = null;
-    if (metadataLength === 0x61) {
-        ephemeral = note.slice(0x1c0, 0x202);
-        metadata += ephemeral;
-        expectedLength = 0xe1;
-    } else {
-        expectedLength = 0xc0;
-    }
-
-    if (length !== expectedLength) {
-        throw new Error(`unexpected note length of ${length}`);
-    }
-
-    return metadata;
-};
-
-/**
- * Extract the the input notes from a proof output
- *
- * @method getOutputNotes
- * @param {string} proofOutput - the particular proofOutput the user wishes to select
- * @returns (string) output notes extracted from proofOutput
- */
-outputCoder.getOutputNotes = (proofOutput) => {
-    const outputNotesOffset = 2 * parseInt(proofOutput.slice(0x80, 0xc0), 16);
-    const length = 2 * parseInt(proofOutput.slice(outputNotesOffset, outputNotesOffset + 0x40), 16);
-    if (length > 0x0) {
-        const inputNotes = proofOutput.slice(outputNotesOffset, outputNotesOffset + 0x40 + length);
-        return inputNotes;
-    }
-    return padLeft('0x0', 64);
-};
-
-/**
- * Decode a bytes proofOutputs object into the constituent variables of each
- * individual bytes proofOutput object
- *
- * @method hashProofOutput
- * @param {proofOutput} proofOutput - proofOutput object, contains transfer instructions
- * @returns {string} sha3 hash of the proofOutput
- */
-outputCoder.hashProofOutput = (proofOutput) => {
-    return sha3(`0x${proofOutput.slice(0x40)}`);
-};
-
-/**
- * Encode an output note, according to the ABI encoding specification
- *
- * @method encodeOutputNote
- * @param {note} note - AZTEC note
- * @returns {string} the various components of an AZTEC output note, encoded appropriately and concatenated
- * together
- */
-outputCoder.encodeOutputNote = (note) => {
-    const encoded = [...new Array(7)];
-    encoded[0] = padLeft('e1', 64);
-    encoded[1] = padLeft('1', 64);
-    encoded[2] = padLeft(note.owner.slice(2), 64);
-    encoded[3] = padLeft(note.noteHash.slice(2), 64);
-    encoded[4] = padLeft('61', 64);
-    encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
-    encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-    encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
-    return encoded.join('');
 };
 
 /**
@@ -308,6 +177,27 @@ outputCoder.encodeNotes = (notes, isOutput) => {
 };
 
 /**
+ * Encode an output note, according to the ABI encoding specification
+ *
+ * @method encodeOutputNote
+ * @param {note} note - AZTEC note
+ * @returns {string} the various components of an AZTEC output note, encoded appropriately and concatenated
+ * together
+ */
+outputCoder.encodeOutputNote = (note) => {
+    const encoded = [...new Array(7)];
+    encoded[0] = padLeft('e1', 64);
+    encoded[1] = padLeft('1', 64);
+    encoded[2] = padLeft(note.owner.slice(2), 64);
+    encoded[3] = padLeft(note.noteHash.slice(2), 64);
+    encoded[4] = padLeft('61', 64);
+    encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
+    encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
+    encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
+    return encoded.join('');
+};
+
+/**
  * Encode a proofOutput object according to the ABI specification
  *
  * @method encodeProofOutput
@@ -363,6 +253,117 @@ outputCoder.encodeProofOutputs = (proofOutputs) => {
         ...encodedProofOutputs,
     ];
     return `0x${encoded.join('')}`.toLowerCase();
+};
+
+/**
+ * Extract the the input notes from a proof output
+ *
+ * @method getInputNotes
+ * @param {string} proofOutput - the particular proofOutput the user wishes to select
+ * @returns (string) input notes extracted from proofOutput
+ */
+outputCoder.getInputNotes = (proofOutput) => {
+    const inputNotesOffset = 2 * parseInt(proofOutput.slice(0x40, 0x80), 16);
+    const length = 2 * parseInt(proofOutput.slice(inputNotesOffset, inputNotesOffset + 0x40), 16);
+    if (length > 0x0) {
+        const inputNotes = proofOutput.slice(inputNotesOffset, inputNotesOffset + 0x40 + length);
+        return inputNotes;
+    }
+    return padLeft('0x0', 64);
+};
+
+/**
+ * Extract the metadata from a notee
+ *
+ * @method getMetadata
+ * @param {string} notes - bytes note string
+ * @returns {strings} extracted bytes metadata
+ */
+outputCoder.getMetadata = (note) => {
+    let metadata = '';
+    const gamma = note.slice(0x140, 0x180);
+    metadata += gamma;
+    const sigma = note.slice(0x180, 0x1c0);
+    metadata += sigma;
+
+    const length = parseInt(note.slice(0x00, 0x40), 16);
+    let expectedLength;
+    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
+    let ephemeral = null;
+    if (metadataLength === 0x61) {
+        ephemeral = note.slice(0x1c0, 0x202);
+        metadata += ephemeral;
+        expectedLength = 0xe1;
+    } else {
+        expectedLength = 0xc0;
+    }
+
+    if (length !== expectedLength) {
+        throw new Error(`unexpected note length of ${length}`);
+    }
+
+    return metadata;
+};
+
+/**
+ * Extract the note from a bytes notes string
+ *
+ * @method getNote
+ * @param {string} notes - bytes notes string
+ * @param {Number} i - index to the particular note the user wishes to select
+ * @returns {string} bytes selected note string
+ */
+outputCoder.getNote = (notes, i) => {
+    const noteOffset = 2 * parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
+    const length = 2 * parseInt(notes.slice(noteOffset, noteOffset + 0x40), 16);
+    // Add 0x40 because the length itself has to be included
+    return notes.slice(noteOffset, noteOffset + 0x40 + length);
+};
+
+/**
+ * Extract the the input notes from a proof output
+ *
+ * @method getOutputNotes
+ * @param {string} proofOutput - the particular proofOutput the user wishes to select
+ * @returns (string) output notes extracted from proofOutput
+ */
+outputCoder.getOutputNotes = (proofOutput) => {
+    const outputNotesOffset = 2 * parseInt(proofOutput.slice(0x80, 0xc0), 16);
+    const length = 2 * parseInt(proofOutput.slice(outputNotesOffset, outputNotesOffset + 0x40), 16);
+    if (length > 0x0) {
+        const inputNotes = proofOutput.slice(outputNotesOffset, outputNotesOffset + 0x40 + length);
+        return inputNotes;
+    }
+    return padLeft('0x0', 64);
+};
+
+/**
+ * Decode a bytes proofOutputs object into the constituent variables of each
+ * individual bytes proofOutput object
+ *
+ * @method getProofOutput
+ * @param {string} proofOutputsHex - bytes proofOutputs string, containing multiple individual bytes
+ * proofOutput objects
+ * @param {Number} i - index to the particular proofOutput the user wishes to select
+ * @returns {string} selected proofOutput object extracted from proofOutputsHex
+ */
+outputCoder.getProofOutput = (proofOutputsHex, i) => {
+    const proofOutputs = proofOutputsHex.slice(2);
+    const offset = parseInt(proofOutputs.slice(0x40 + 0x40 * i, 0x80 + 0x40 * i), 16);
+    const length = parseInt(proofOutputs.slice(offset * 2 - 0x40, offset * 2), 16);
+    return proofOutputs.slice(offset * 2 - 0x40, offset * 2 + length * 2);
+};
+
+/**
+ * Decode a bytes proofOutputs object into the constituent variables of each
+ * individual bytes proofOutput object
+ *
+ * @method hashProofOutput
+ * @param {proofOutput} proofOutput - proofOutput object, contains transfer instructions
+ * @returns {string} keccak256 hash of the proofOutput
+ */
+outputCoder.hashProofOutput = (proofOutput) => {
+    return keccak256(`0x${proofOutput.slice(0x40)}`);
 };
 
 module.exports = outputCoder;

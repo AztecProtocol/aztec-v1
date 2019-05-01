@@ -1,12 +1,10 @@
 /* global, beforeEach, it:true */
-const chai = require('chai');
+const { expect } = require('chai');
 const { randomHex } = require('web3-utils');
 
 const bilateralProof = require('../../../src/proof/bilateralSwap');
 const Keccak = require('../../../src/keccak');
 const proofUtils = require('../../../src/proof/proofUtils');
-
-const { expect } = chai;
 
 describe('Bilateral Swap Proof', () => {
     it('should construct a proof where blinding scalar relations are satisfied', async () => {
