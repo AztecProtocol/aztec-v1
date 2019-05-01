@@ -21,8 +21,6 @@ contract IZkAsset {
     event ConvertTokens(address indexed owner, uint256 value);
     event RedeemTokens(address indexed owner, uint256 value);
     
-    function confidentialTransfer(bytes calldata _proofData) external;
-
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
@@ -31,4 +29,6 @@ contract IZkAsset {
     ) external;
 
     function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external;
+    
+    function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public;
 }
