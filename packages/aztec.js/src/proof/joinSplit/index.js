@@ -210,6 +210,7 @@ joinSplit.encodeJoinSplitTransaction = ({
     kPublic,
     validatorAddress,
 }) => {
+    let signatures;
     const m = inputNotes.length;
     const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
         [...inputNotes, ...outputNotes],
@@ -235,10 +236,14 @@ joinSplit.encodeJoinSplitTransaction = ({
         };
         const { privateKey } = inputNoteOwners[index];
         const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
-        return signature.join('');
+        const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
+        return concatenatedSignature;
     });
-
-    const signatures = signaturesArray.join('');
+    if (signaturesArray.length !== 0) {
+        signatures = `0x${signaturesArray.join('')}`;
+    } else {
+        signatures = signaturesArray;
+    }
 
 
     const expectedOutput = `0x${outputCoder
