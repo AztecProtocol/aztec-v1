@@ -116,7 +116,7 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
 
-            const { receipt } = await zkAsset.confidentialTransfer(depositProof.proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
             expect(receipt.status).to.equal(true);
 
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
@@ -154,8 +154,12 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(zkAsset.address, tokenWithdrawalProofHash, 40, { from: accounts[1] });
 
-            await zkAsset.confidentialTransfer(depositProof.proofData);
-            const { receipt } = await zkAsset.confidentialTransfer(tokenWithdrawalProof.proofData);
+            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+
+            const { receipt } = await zkAsset.confidentialTransfer(
+                tokenWithdrawalProof.proofData,
+                tokenWithdrawalProof.signatures,
+            );
             expect(receipt.status).to.equal(true);
         });
 
@@ -193,11 +197,14 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(zkAsset.address, withdrawalAndTransferProofHash, 40, { from: accounts[2] });
 
-            await zkAsset.confidentialTransfer(depositProof.proofData);
+            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const balancePreWithdrawal = await erc20.balanceOf(accounts[2]);
             const expectedBalancePostWithdrawal = balancePreWithdrawal.add(withdrawalAmountBN.mul(scalingFactor));
-            const { receipt } = await zkAsset.confidentialTransfer(withdrawalAndTransferProof.proofData);
+            const { receipt } = await zkAsset.confidentialTransfer(
+                withdrawalAndTransferProof.proofData,
+                withdrawalAndTransferProof.signatures,
+            );
             const balancePostWithdrawal = await erc20.balanceOf(accounts[2]);
             expect(balancePostWithdrawal.toString()).to.equal(expectedBalancePostWithdrawal.toString());
 
@@ -230,8 +237,8 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(zkAsset.address, depositProofHash, 30, { from: accounts[3] });
 
-            await zkAsset.confidentialTransfer(depositProof.proofData);
-            const { receipt } = await zkAsset.confidentialTransfer(transferProof.proofData);
+            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            const { receipt } = await zkAsset.confidentialTransfer(transferProof.proofData, transferProof.signatures);
             expect(receipt.status).to.equal(true);
         });
     });
