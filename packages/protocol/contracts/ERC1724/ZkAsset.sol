@@ -35,12 +35,37 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         ")"
     ));
 
+    bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
+        "JoinSplitSignature(",
+            "uint24 proof,",
+            "bytes32 noteHash,",
+            "uint256 challenge,",
+            "address sender",
+        ")"
+    ));
+
+     // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
+    // bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = 
+        // 0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
+
     ACE public ace;
     IERC20 public linkedToken;
     NoteRegistry.Flags public flags;
 
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
+    event Signature(bytes32 number);
+    event Status(string status);
+    event Value(uint num);
+    event GenVar(bytes number);
+    event Sender(address sender);
+    event Hash(bytes32 number);
+    event SignerAddress(address number);
+    event SigForConfidentialApprove(bytes number);
+    event NoteOwner(address number);
+    event RequiredNoteStatus(uint8 number);
+    event HashStruct(bytes32 number);
+    event MsgHash(bytes32 number);
 
     constructor(
         address _aceAddress,
@@ -132,6 +157,49 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         }
     }
 
+        /**
+    * @dev Perform ECDSA signature validation on a set of notes
+    * 
+    * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
+    * @param _signature - ECDSA signature from the note owner 
+    */
+    function validateSignature(
+        bytes32 _noteHash,
+        address _sender, // in confidentialApprove() this variable is the _spender address.
+                          // BUT, in confidentialTransfer() this variable is the sender
+        bytes memory _signature
+    ) public {
+        ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
+        emit NoteOwner(noteOwner);
+        emit Hash(_noteHash);
+        emit RequiredNoteStatus(status);
+        emit GenVar(_signature);
+        emit Hash(JOIN_SPLIT_SIGNATURE_TYPE_HASH);
+
+        address signer;
+        if (_signature.length != 0) {
+            // validate EIP712 signature
+            bytes32 hashStruct = keccak256(abi.encode(
+                JOIN_SPLIT_SIGNATURE_TYPE_HASH,
+                JOIN_SPLIT_PROOF,
+                _noteHash,
+                _sender
+            ));
+            emit HashStruct(hashStruct);
+            bytes32 msgHash = hashEIP712Message(hashStruct);
+            emit MsgHash(msgHash);
+            signer = recoverSignature(
+                msgHash,
+                _signature
+            );
+        } else {
+            signer = msg.sender;
+        }
+        emit SignerAddress(signer);
+        emit Status("end of validate signature function");
+        // require(signer == noteOwner, "the note owner did not sign this message");
+    }
+
     /**
     * @dev Note owner approving a third party, another address, to spend the note on 
     * owner's behalf. This is necessary to allow the confidentialTransferFrom() method
@@ -150,22 +218,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         bool _status,
         bytes memory _signature
     ) public {
-        validateSignature(_noteHash, _spender, _signature);
-        confidentialApproved[_noteHash][_spender] = _status;
-    }
-
-    /**
-    * @dev Perform ECDSA signature validation on a set of notes
-    * 
-    * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
-    * @param _spender - address being approved to spend the note
-    * @param _signature - ECDSA signature from the note owner 
-    */
-    function validateSignature(
-        bytes32 _noteHash,
-        address _spender,
-        bytes memory _signature
-    ) internal view {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
         address signer;
@@ -186,7 +238,32 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             signer = msg.sender;
         }
         require(signer == noteOwner, "the note owner did not sign this message");
+        confidentialApproved[_noteHash][_spender] = _status;
     }
+
+    function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
+        bytes32 v,
+        bytes32 r,
+        bytes32 s
+    ){
+        // bytes memory result = new bytes(0x60);
+
+        assembly {
+            // callData map of signatures
+            // 0x00 - 0x20 : length of signature array
+            // 0x20 - 0x40 : first sig, v 
+            // 0x40 - 0x60 : first sig, r 
+            // 0x60 - 0x80 : first sig, s
+            // 0x80 - 0xa0 : second sig, v
+            // and so on...
+            // Length of a signature = 0x60
+            
+            v := mload(add(add(_signatures, 0x20), mul(_i, 0x60)))
+            r := mload(add(add(_signatures, 0x40), mul(_i, 0x60)))
+            s := mload(add(add(_signatures, 0x60), mul(_i, 0x60)))
+        }
+    }
+
     
     function confidentialTransferInternal(bytes memory proofOutputs, bytes memory _signatures) internal {
         for (uint i = 0; i < proofOutputs.getLength(); i += 1) {
@@ -197,14 +274,23 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             bytes memory outputNotes,
             address publicOwner,
             int256 publicValue) = proofOutput.extractProofOutput();
+ 
+            if (inputNotes.getLength() > uint(0)) {
+                emit Status("inside the if statement");
+                
+                for (uint j = 0; j < inputNotes.getLength(); j += 1) {
+                    (bytes32 v, bytes32 r, bytes32 s) = extractSignature(_signatures, j);
 
-            // Validating a signature for each input note
-            for (uint j = 0; j < inputNotes.getLength(); j += 1) {
-                // Extract the appropriate note
-                (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
+                    bytes memory result = abi.encode(v, r, s);
+                    emit GenVar(result);
 
-                // Extract and validate the signature
-                validateSignature(noteHash, address(this), _signatures.get(j).extractSignature());
+                    (, bytes32 noteHash, ) = inputNotes.get(j).extractNote();
+                    emit Status("managed to extract note");
+
+                    emit Sender(msg.sender);
+                    validateSignature(noteHash, msg.sender, result);
+                    emit Status("after signature validation");
+                }
             }
 
             logInputNotes(inputNotes);
@@ -215,6 +301,8 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             if (publicValue > 0) {
                 emit RedeemTokens(publicOwner, uint256(publicValue));
             }
+            emit Status("end of confidentialTransferInternal()");
+
         }
     }
 
