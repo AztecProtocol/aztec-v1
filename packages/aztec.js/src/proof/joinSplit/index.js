@@ -95,7 +95,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
 
     // define 'running' blinding factor for the k-parameter in final note
 
-    const blindingScalars = joinSplit.gemakenerateBlindingScalars(notes.length, m);
+    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
 
     const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
 

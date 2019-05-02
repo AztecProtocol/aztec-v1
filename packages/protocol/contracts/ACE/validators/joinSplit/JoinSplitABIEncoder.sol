@@ -12,11 +12,6 @@ pragma solidity >=0.5.0 <0.6.0;
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 library JoinSplitABIEncoder {
-
-    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
-    bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
-        0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
-
         /**
         * Calldata map
         * 0x04:0x24      = calldata location of proofData byte array
@@ -37,8 +32,7 @@ library JoinSplitABIEncoder {
         * 0x1e4:0x204    = offset in byte array to metadata
         */
 
-    function encodeAndExit(bytes32 domainHash) internal view {
-        bytes32 typeHash = JOIN_SPLIT_SIGNATURE_TYPE_HASH;
+    function encodeAndExit() internal pure {
         assembly {
             // set up initial variables
             let notes := add(0x104, calldataload(0x184))
@@ -49,26 +43,6 @@ library JoinSplitABIEncoder {
             let metadata := add(0x144, calldataload(0x1e4)) // two words after metadata = 1st
 
             // memory map of `proofOutputs`
-
-            // 0x00 - 0x160  = scratch data for EIP712 signature computation and note hash computation
-            // JOIN_SPLIT_SIGNATURE struct hash variables
-            // 0x80 = type hash
-            // 0xa0 = proof object (65793)
-            // 0xc0 = noteHash
-            // 0xe0 = challenge
-            // 0x100 = sender
-            // type hash of 'JOIN_SPLIT_SIGNATURE'
-            mstore(0x80, typeHash)
-            mstore(0xa0, 0x10101)
-            mstore(0xe0, calldataload(0x144)) // challenge
-            mstore(0x100, calldataload(0x24))
-
-            // EIP712 Signature variables
-            // 0x13e - 0x140 = 0x1901
-            // 0x140 - 0x160 = domainHash
-            // 0x160 - 0x180 = structHash
-            mstore(0x120, 0x1901)
-            mstore(0x140, domainHash) // domain hash
 
             // `returndata` starts at 0x160
             // `proofOutputs` starts at 0x180
@@ -135,18 +109,13 @@ library JoinSplitABIEncoder {
                 // copy note data to 0x00 - 0x80
                 mstore(0x00, 0x01) // note type
                 calldatacopy(0x20, add(noteIndex, 0x40), 0x80) // get gamma, sigma
-                // construct EIP712 signature parameters
                 mstore(0xc0, keccak256(0x00, 0xa0)) // note hash
-                mstore(0x80, typeHash)              // typeHash - eip signature params
-                // construct EIP712 signature message
-                mstore(0x160, keccak256(0x80, 0xa0))
-                mstore(0x00, keccak256(0x13e, 0x42))
+
 
                 // store note length in `s`
                 mstore(s, 0xc0)
                 // store note type (1)
                 mstore(add(s, 0x20), 0x01)
-                mstore(0x80, typeHash)
                 mstore(0xa0, 0x10101)   // proof id 0x010101
 
                 // Store note owner at `s + 0x40`
