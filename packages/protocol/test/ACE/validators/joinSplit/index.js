@@ -6,14 +6,18 @@ const truffleAssert = require('truffle-assertions');
 const { keccak256, padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const { abiEncoder, bn128, keccak, note, proof, signer } = require('aztec.js');
-const { constants, proofs } = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
-const { encoderFactory, inputCoder, outputCoder } = abiEncoder;
+const {
+    bn128,
+    proof: { joinSplit, proofUtils },
+    abiEncoder: { outputCoder, inputCoder, encoderFactory },
+    note,
+    keccak,
+} = require('aztec.js');
+
 const Keccak = keccak;
-const { JOIN_SPLIT_PROOF } = proofs;
-const { joinSplit, proofUtils } = proof;
 
 // ### Artifacts
 const JoinSplit = artifacts.require('./JoinSplit');
@@ -282,7 +286,6 @@ contract('JoinSplit', (accounts) => {
 
         it('should validate that challenge has GROUP_MODULUS added to it', async () => {
             const inputNotes = notes.slice(0, 2);
-            const inputNoteOwners = aztecAccounts.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
             const kPublic = -40;
@@ -1274,15 +1277,7 @@ contract('JoinSplit', (accounts) => {
             const outputOwners = [];
             const inputOwners = [];
             const publicOwner = aztecAccounts[0].address;
-            const proofData = inputCoder.joinSplit(
-                proofDataRaw,
-                m,
-                challenge,
-                publicOwner,
-                inputOwners,
-                outputOwners,
-                [],
-            );
+            const proofData = inputCoder.joinSplit(proofDataRaw, m, challenge, publicOwner, inputOwners, outputOwners, []);
 
             const opts = {
                 from: senderAddress,
