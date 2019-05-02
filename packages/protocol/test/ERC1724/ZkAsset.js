@@ -263,7 +263,7 @@ contract('ZkAsset', (accounts) => {
             await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
             const malformedProofData = `0x0123${depositProof.proofData.slice(6)}`;
             // no error message because it throws in assembly
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData, depositProof.signatures));
         });
     });
 });

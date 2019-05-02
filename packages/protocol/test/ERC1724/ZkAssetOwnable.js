@@ -180,7 +180,7 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should delegate a contract to update a note registry by consuming input notes, with kPublic negative', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
 
             await confidentialApprove([0, 1]);
 
@@ -192,7 +192,7 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should delegate a contract to update a note registry by consuming input notes, with kPublic positive', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[2].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[2].proofData, proofs[2].signatures);
 
             await confidentialApprove([6, 7]);
 
@@ -207,7 +207,7 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should delegate a contract to update a note registry with kPublic = 0', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[4].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[4].proofData, proofs[4].signatures);
 
             await confidentialApprove([0, 3]);
 
@@ -226,7 +226,7 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it("should fail to approve a contract to update a note registry if note doesn't exist", async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
 
             const { signature } = signNote(
                 zkAssetOwnable.address,
@@ -247,8 +247,8 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should fail to approve a contract to update a note registry if note had already been spent', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
-            await zkAssetOwnable.confidentialTransfer(proofs[1].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
+            await zkAssetOwnable.confidentialTransfer(proofs[1].proofData, proofs[1].signatures);
 
             const { signature } = signNote(
                 zkAssetOwnable.address,
@@ -265,7 +265,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
         // eslint-disable-next-line max-len
         it('should fail to approve a contract to update a note registry if no ECDSA signature is provided and the sender is not the note owner', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
 
             const emptySignature = '0x';
             await truffleAssert.reverts(
@@ -275,7 +275,7 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should fail to delegate a contract to update a note registry is proof is not supported', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
 
             await confidentialApprove([0, 1]);
 
@@ -290,7 +290,7 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should fail to delegate a contract to update a note registry if publicApprove has not been called', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData);
+            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
 
             await confidentialApprove([0, 1]);
 
