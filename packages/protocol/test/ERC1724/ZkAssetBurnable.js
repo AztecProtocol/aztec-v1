@@ -106,7 +106,7 @@ contract('ZkAssetBurnable', (accounts) => {
             expect(linkedTokenInitialBalance).to.equal(-kPublic);
             expect(aceInitialBalance).to.equal(0);
 
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData);
+            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
             expect(joinSplitReceipt.status).to.equal(true);
 
             const linkedTokenIntermediatateBalance = (await erc20.balanceOf(accounts[0])).toNumber();
@@ -197,7 +197,7 @@ contract('ZkAssetBurnable', (accounts) => {
 
             await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
 
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData);
+            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
             expect(joinSplitReceipt.status).to.equal(true);
             await truffleAssert.reverts(
                 zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData),
@@ -257,7 +257,7 @@ contract('ZkAssetBurnable', (accounts) => {
 
             await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
 
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData);
+            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
             expect(joinSplitReceipt.status).to.equal(true);
             await truffleAssert.reverts(
                 zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData, { from: accounts[1] }),
@@ -329,7 +329,7 @@ contract('ZkAssetBurnable', (accounts) => {
 
             await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
 
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData);
+            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
             expect(joinSplitReceipt.status).to.equal(true);
             await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData));
         });
