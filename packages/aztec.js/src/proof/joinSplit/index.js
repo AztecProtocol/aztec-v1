@@ -29,6 +29,11 @@ joinSplit.verifier = verifier;
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
+ * @param {number} m number of input notes
+ * @param {Object} rollingHash hash containing note coordinates (gamma, sigma) 
+ * @param {Object[]} blindingScalars blinding scalars used in generating blindingFactors
+ * @param {Object[]} notes AZTEC notes
+
  * @returns {Object[]} blinding factors
  */
 joinSplit.constructBlindingFactors = (notes, m, rollingHash, blindingScalars) => {
@@ -132,6 +137,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
+ * @param {string} publicOwner address of the public tokens
  * @returns {Object} proof data and challenge
  */
 joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
