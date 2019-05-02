@@ -1,8 +1,6 @@
-const chai = require('chai');
-const { padLeft, sha3 } = require('web3-utils');
 const BN = require('bn.js');
-
-const { expect } = chai;
+const { expect } = require('chai');
+const { keccak256, padLeft } = require('web3-utils');
 
 const Keccak = require('../../src/keccak');
 const bn128 = require('../../src/bn128');
@@ -25,7 +23,7 @@ describe('Keccak', () => {
         keccak.append(bn128.curve.point(new BN(points[1][0], 16), new BN(points[1][1], 16)));
         const hash = keccak.keccak();
 
-        const expected = sha3(points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'), 'hex').slice(2);
+        const expected = keccak256(points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'), 'hex').slice(2);
 
         expect(hash[0]).to.equal(expected);
         expect(
@@ -33,7 +31,7 @@ describe('Keccak', () => {
                 .keccak(bn128.groupReduction)
                 .fromRed()
                 .toString(16),
-        ).to.equal(new BN(sha3(`0x${expected}`).slice(2), 16).umod(bn128.curve.n).toString(16));
+        ).to.equal(new BN(keccak256(`0x${expected}`).slice(2), 16).umod(bn128.curve.n).toString(16));
     });
 
     it('should hash a set of bn.js numbers', () => {
@@ -49,7 +47,7 @@ describe('Keccak', () => {
         });
         keccak.keccak();
 
-        const expected = sha3(numbers.reduce((r, n) => `${r}${padLeft(n, 64)}`, '0x'), 'hex').slice(2);
+        const expected = keccak256(numbers.reduce((r, n) => `${r}${padLeft(n, 64)}`, '0x'), 'hex').slice(2);
         expect(keccak.data[0]).to.equal(expected);
     });
 });

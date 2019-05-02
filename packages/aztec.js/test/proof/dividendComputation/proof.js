@@ -1,11 +1,9 @@
 /* global, beforeEach, it:true */
-const chai = require('chai');
+const { expect } = require('chai');
 const web3Utils = require('web3-utils');
 
 const dividendComputation = require('../../../src/proof/dividendComputation');
 const proofUtils = require('../../../src/proof/proofUtils');
-
-const { expect } = chai;
 
 describe('Dividend Computation Proof', () => {
     it('should construct a proof with well-formed outputs', async () => {

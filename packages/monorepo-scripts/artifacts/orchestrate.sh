@@ -32,8 +32,8 @@ git commit -m "feat(contract-artifacts): sync 🤖"
 
 # Run testnet deployment scripts in parallel
 cd packages/protocol
-yarn deploy:rinkeby > /dev/null
-yarn deploy:ropsten > /dev/null
+yarn deploy:rinkeby
+yarn deploy:ropsten
 
 # Extract addresses from the newly generated truffle artifacts
 cd ../../

@@ -9,14 +9,12 @@
  * @module setup
  */
 
-const devUtils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const fetch = require('cross-fetch');
-
 const bn128 = require('../bn128');
 
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
-const { constants } = devUtils;
 const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
 
 const setup = {};

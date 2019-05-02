@@ -1,13 +1,13 @@
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
 
-const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
+const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
 
+const { errorTypes, K_MAX } = constants;
 const { groupReduction } = bn128;
-const { errorTypes, K_MAX } = utils.constants;
 
 const verifier = {};
 

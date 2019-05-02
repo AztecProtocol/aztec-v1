@@ -1,18 +1,17 @@
 /* global, beforeEach, it:true */
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
-const { padLeft, randomHex, sha3 } = require('web3-utils');
 const sinon = require('sinon');
-const utils = require('@aztec/dev-utils');
+const { keccak256, padLeft, randomHex } = require('web3-utils');
 
-const bn128 = require('../../../src/bn128');
 const bilateralProof = require('../../../src/proof/bilateralSwap');
+const bn128 = require('../../../src/bn128');
 const Keccak = require('../../../src/keccak');
 const proofUtils = require('../../../src/proof/proofUtils');
 
-const { expect } = chai;
-const { errorTypes } = utils.constants;
+const { errorTypes } = constants;
 
 describe('Bilateral Swap Verifier', () => {
     describe('Success States', () => {
@@ -182,7 +181,7 @@ describe('Bilateral Swap Verifier', () => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const challenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
+            const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
             const proofData = [...new Array(4)].map(() =>
                 [...new Array(6)].map(() => '0x0000000000000000000000000000000000000000000000000000000000000000'),

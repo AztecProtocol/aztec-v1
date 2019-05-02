@@ -65,7 +65,8 @@ $ yarn test
 ## Example
 
 ```node
-const { note, proof, secp256k1 } = require('aztec.js');
+const { note, proof } = require('aztec.js');
+const secp256k1 = require('@aztec/secp256k1');
 
 // dummy address of confidential AZTEC - DAI smart contract
 const validatorAddress = '0x76581320dCdFFC93E2FFFF7DADfE668Ba55796a9';

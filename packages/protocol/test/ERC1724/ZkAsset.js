@@ -4,20 +4,21 @@ const BN = require('bn.js');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
-const {
-    constants,
-    proofs: { JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const aztec = require('aztec.js');
+const { constants, proofs } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
+const typedData = require('@aztec/typed-data');
 const truffleAssert = require('truffle-assertions');
 const { keccak256 } = require('web3-utils');
 
-const { outputCoder } = abiEncoder;
+const { JOIN_SPLIT_PROOF } = proofs;
+const { note, proof, signer } = aztec;
+const { outputCoder } = aztec.abiEncoder;
 
 // ### Artifacts
-const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ACE = artifacts.require('./ACE');
 const JoinSplit = artifacts.require('./JoinSplit');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 const ZkAsset = artifacts.require('./ZkAsset');
 
@@ -25,8 +26,8 @@ JoinSplit.abi = JoinSplitInterface.abi;
 
 const computeDomainHash = (validatorAddress) => {
     const types = { EIP712Domain: constants.eip712.EIP712_DOMAIN };
-    const domain = sign.generateZKAssetDomainParams(validatorAddress);
-    return keccak256(`0x${sign.eip712.encodeMessageData(types, 'EIP712Domain', domain)}`);
+    const domain = signer.generateZKAssetDomainParams(validatorAddress);
+    return keccak256(`0x${typedData.encodeMessageData(types, 'EIP712Domain', domain)}`);
 };
 
 contract('ZkAsset', (accounts) => {
