@@ -18,7 +18,7 @@ import "../../../interfaces/JoinSplitInterface.sol";
  * family of AZTEC zero-knowledge proofs
  * and the AZTEC token standard, stay tuned for updates!
  **/
-contract JoinSplit is LibEIP712 {
+contract JoinSplit {
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction throws.
@@ -31,7 +31,6 @@ contract JoinSplit is LibEIP712 {
 
     // solhint-disable payable-fallback
     function() external {
-        bytes32 domainHash = EIP712_DOMAIN_HASH;
         assembly {
             // We don't check for function signatures,
             // there's only one function that ever gets called: validateJoinSplit()
@@ -387,6 +386,6 @@ contract JoinSplit is LibEIP712 {
     
         // if we've reached here, we've validated the join-split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        JoinSplitABIEncoder.encodeAndExit(domainHash);
+        JoinSplitABIEncoder.encodeAndExit();
     }
 }
