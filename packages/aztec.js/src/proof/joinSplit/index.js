@@ -244,7 +244,6 @@ joinSplit.encodeJoinSplitTransaction = ({
         signatures = signaturesArray;
     }
 
-
     const expectedOutput = `0x${outputCoder
         .encodeProofOutputs([
             {

@@ -106,7 +106,7 @@ contract('ZkAssetMintable', (accounts) => {
                 inputNoteOwners: [recipient1, recipient2], // need the owners of the adjustedNotes
                 publicOwner: recipient1.address,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetMintable.address,
             });
 
             const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransfer(
@@ -252,7 +252,7 @@ contract('ZkAssetMintable', (accounts) => {
                 inputNoteOwners, // need the owners of the adjustedNotes
                 publicOwner,
                 kPublic: 50,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetMintable.address,
             });
 
             await truffleAssert.reverts(

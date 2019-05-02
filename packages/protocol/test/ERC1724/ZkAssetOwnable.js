@@ -84,6 +84,14 @@ contract('ZkAssetOwnable', (accounts) => {
         aztecJoinSplit = await JoinSplit.new();
         await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
+        erc20 = await ERC20Mintable.new();
+        const canAdjustSupply = false;
+        const canConvert = true;
+        zkAssetOwnable = await ZkAssetOwnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+        await zkAssetOwnable.setProofs(epoch, filter);
+        zkAssetOwnableTest = await ZkAssetOwnableTest.new();
+        await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
+
         proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: [],
             outputNotes: notes.slice(0, 2),
@@ -91,7 +99,7 @@ contract('ZkAssetOwnable', (accounts) => {
             inputNoteOwners: [],
             publicOwner: accounts[0],
             kPublic: -10,
-            validatorAddress: aztecJoinSplit.address,
+            validatorAddress: zkAssetOwnable.address,
         });
         proofs[1] = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: notes.slice(0, 2),
@@ -100,7 +108,7 @@ contract('ZkAssetOwnable', (accounts) => {
             inputNoteOwners: aztecAccounts.slice(0, 2),
             publicOwner: accounts[1],
             kPublic: -40,
-            validatorAddress: aztecJoinSplit.address,
+            validatorAddress: zkAssetOwnable.address,
         });
         proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: [],
@@ -109,7 +117,7 @@ contract('ZkAssetOwnable', (accounts) => {
             inputNoteOwners: [],
             publicOwner: accounts[2],
             kPublic: -130,
-            validatorAddress: aztecJoinSplit.address,
+            validatorAddress: zkAssetOwnable.address,
         });
         proofs[3] = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: notes.slice(6, 8),
@@ -118,7 +126,7 @@ contract('ZkAssetOwnable', (accounts) => {
             inputNoteOwners: aztecAccounts.slice(6, 8),
             publicOwner: accounts[3],
             kPublic: 40,
-            validatorAddress: aztecJoinSplit.address,
+            validatorAddress: zkAssetOwnable.address,
         });
         proofs[4] = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: [],
@@ -127,7 +135,7 @@ contract('ZkAssetOwnable', (accounts) => {
             inputNoteOwners: [],
             publicOwner: accounts[3],
             kPublic: -30,
-            validatorAddress: aztecJoinSplit.address,
+            validatorAddress: zkAssetOwnable.address,
         });
         proofs[5] = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: [notes[0], notes[3]],
@@ -136,7 +144,7 @@ contract('ZkAssetOwnable', (accounts) => {
             inputNoteOwners: [aztecAccounts[0], aztecAccounts[3]],
             publicOwner: accounts[3],
             kPublic: 0, // perfectly balanced...
-            validatorAddress: aztecJoinSplit.address,
+            validatorAddress: zkAssetOwnable.address,
         });
 
         proofOutputs = proofs.map(({ expectedOutput }) => {
@@ -145,14 +153,6 @@ contract('ZkAssetOwnable', (accounts) => {
         proofHashes = proofOutputs.map((proofOutput) => {
             return outputCoder.hashProofOutput(proofOutput);
         });
-
-        erc20 = await ERC20Mintable.new();
-        const canAdjustSupply = false;
-        const canConvert = true;
-        zkAssetOwnable = await ZkAssetOwnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-        await zkAssetOwnable.setProofs(epoch, filter);
-        zkAssetOwnableTest = await ZkAssetOwnableTest.new();
-        await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
 
         await Promise.all(
             accounts.map((account) => {
