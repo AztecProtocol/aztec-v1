@@ -98,8 +98,9 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     * Upon successfull verification, it will update note registry state - creating output notes and 
     * destroying input notes.
     * 
-    * @param _proofData - bytes variable outputted from a proof verification contract, representing 
+    * @param _proofData - bytes array outputted from a proof verification contract, representing 
     * transfer instructions for the ACE 
+    * @param _signatures - array of the ECDSA signatures over all inputNotes 
     */
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
@@ -187,10 +188,12 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     }
 
     /**
-    * @dev Perform ECDSA signature validation on a set of notes
+    * @dev Perform ECDSA signature validation for a signature over an input note
     * 
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
-    * @param _signature - ECDSA signature from the note owner 
+    * @param _sender - Ethereum address of the transaction sender
+    * @param _challenge - challenge variable from the Sigma protocol
+    * @param _signature - ECDSA signature for a particular input note 
     */
     function validateSignature(
         bytes32 _noteHash,
@@ -199,8 +202,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         bytes memory _signature
     ) internal view {
         (, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
-
-
 
         address signer;
         if (_signature.length != 0) {
@@ -223,7 +224,12 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         require(signer == noteOwner, "the note owner did not sign this message");
     }
 
-
+    /**
+    * @dev Extract the appropriate ECDSA signature from an array of signatures,
+    * 
+    * @param _signatures - array of ECDSA signatures over all inputNotes 
+    * @param _i - index used to determine which signature element is desired
+    */
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
         bytes32 v,
         bytes32 r,
@@ -231,7 +237,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     ){
 
         assembly {
-            // callData map of signatures
+            // memory map of signatures
             // 0x00 - 0x20 : length of signature array
             // 0x20 - 0x40 : first sig, v 
             // 0x40 - 0x60 : first sig, r 
@@ -246,7 +252,15 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         }
     }
 
-    
+    /**
+    * @dev Perform ECDSA signature validation for a signature over an input note
+    * 
+    * @param proofOutputs - transfer instructions from a zero-knowledege proof validator 
+    * contract
+    * @param _signatures - ECDSA signatures over a set of input notes
+    * @param _proofData - cryptographic proof data outputted from a proof construction 
+    * operation
+    */
     function confidentialTransferInternal(
         bytes memory proofOutputs,
         bytes memory _signatures,
