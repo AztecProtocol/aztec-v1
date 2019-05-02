@@ -90,7 +90,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
 
     // define 'running' blinding factor for the k-parameter in final note
 
-    const blindingScalars = joinSplit.generateBlindingScalars(notes.length, m);
+    const blindingScalars = joinSplit.gemakenerateBlindingScalars(notes.length, m);
 
     const blindingFactors = joinSplit.constructBlindingFactors(notes, m, rollingHash, blindingScalars);
 
@@ -219,28 +219,29 @@ joinSplit.encodeJoinSplitTransaction = ({
         publicOwner,
     );
 
+    if (inputNoteOwners.length !== 0 && validatorAddress.length !== 0) {
+        const signaturesArray = inputNotes.map((inputNote, index) => {
+            const domain = signer.generateZKAssetDomainParams(validatorAddress);
+            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
+            const message = {
+                proof: proofs.JOIN_SPLIT_PROOF,
+                noteHash: inputNote.noteHash,
+                challenge,
+                sender: senderAddress,
+            };
+            const { privateKey } = inputNoteOwners[index];
+            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
+            const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
+            return concatenatedSignature;
+        });
+        signatures = `0x${signaturesArray.join('')}`;
+    } else {
+        signatures = [];
+    }
+
     const outputOwners = outputNotes.map((n) => n.owner);
     const inputOwners = inputNotes.map((n) => n.owner);
     const proofData = inputCoder.joinSplit(proofDataRaw, m, challenge, publicOwner, inputOwners, outputOwners, outputNotes);
-    const signaturesArray = inputNotes.map((inputNote, index) => {
-        const domain = signer.generateZKAssetDomainParams(validatorAddress);
-        const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-        const message = {
-            proof: proofs.JOIN_SPLIT_PROOF,
-            noteHash: inputNote.noteHash,
-            challenge,
-            sender: senderAddress,
-        };
-        const { privateKey } = inputNoteOwners[index];
-        const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-        const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
-        return concatenatedSignature;
-    });
-    if (signaturesArray.length !== 0) {
-        signatures = `0x${signaturesArray.join('')}`;
-    } else {
-        signatures = signaturesArray;
-    }
 
     const expectedOutput = `0x${outputCoder
         .encodeProofOutputs([
