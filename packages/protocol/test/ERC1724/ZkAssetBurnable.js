@@ -83,7 +83,7 @@ contract('ZkAssetBurnable', (accounts) => {
                 inputNoteOwners,
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetBurnable.address,
             });
 
             proofs[1] = proof.burn.encodeBurnTransaction({
@@ -185,7 +185,7 @@ contract('ZkAssetBurnable', (accounts) => {
                 inputNoteOwners,
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetBurnable.address,
             });
             const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
             const proofHash = outputCoder.hashProofOutput(proofOutput);
@@ -246,7 +246,7 @@ contract('ZkAssetBurnable', (accounts) => {
                 inputNoteOwners,
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetBurnable.address,
             });
 
             const senderAddress = proof.proofUtils.randomAddress();
@@ -317,7 +317,7 @@ contract('ZkAssetBurnable', (accounts) => {
                 inputNoteOwners,
                 publicOwner,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetBurnable.address,
             });
 
             const senderAddress = proof.proofUtils.randomAddress();

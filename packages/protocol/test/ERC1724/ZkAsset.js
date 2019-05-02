@@ -108,7 +108,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[0],
                 kPublic: transferAmount * -1,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
@@ -131,7 +131,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[0],
                 kPublic: -10,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
@@ -144,7 +144,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner: accounts[1],
                 kPublic: -40,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const tokenWithdrawalProofOutput = outputCoder.getProofOutput(tokenWithdrawalProof.expectedOutput, 0);
@@ -171,7 +171,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[2],
                 kPublic: -130,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
@@ -187,7 +187,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(6, 8),
                 publicOwner: accounts[2],
                 kPublic: withdrawalAmount,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const withdrawalAndTransferProofOutput = outputCoder.getProofOutput(withdrawalAndTransferProof.expectedOutput, 0);
@@ -219,7 +219,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[3],
                 kPublic: -30,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
@@ -232,7 +232,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [aztecAccounts[0], aztecAccounts[3]],
                 publicOwner: accounts[3],
                 kPublic: 0, // perfectly balanced...
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             await ace.publicApprove(zkAsset.address, depositProofHash, 30, { from: accounts[3] });
@@ -254,7 +254,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[0],
                 kPublic: transferAmount * -1,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
