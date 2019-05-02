@@ -6,11 +6,12 @@ const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
+const { abiEncoder, note, proof } = require('aztec.js');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },
 } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const truffleAssert = require('truffle-assertions');
 
 const { outputCoder } = abiEncoder;
