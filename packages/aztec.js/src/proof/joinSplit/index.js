@@ -2,7 +2,7 @@
  * @module joinSplit
  */
 
-const devUtils = require('@aztec/dev-utils');
+const { constants, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
@@ -16,7 +16,6 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const signer = require('../../signer');
 
-const { constants, proofs } = devUtils;
 const { groupReduction } = bn128;
 const { outputCoder, inputCoder } = abiEncoder;
 
@@ -222,19 +221,18 @@ joinSplit.encodeJoinSplitTransaction = ({
 
     const outputOwners = outputNotes.map((n) => n.owner);
     const inputOwners = inputNotes.map((n) => n.owner);
-
     const proofData = inputCoder.joinSplit(proofDataRaw, m, challenge, publicOwner, inputOwners, outputOwners, outputNotes);
     const signaturesArray = inputNotes.map((inputNote, index) => {
-        const domain = sign.generateZKAssetDomainParams(validatorAddress);
+        const domain = signer.generateZKAssetDomainParams(validatorAddress);
         const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
         const message = {
-            proof: JOIN_SPLIT_PROOF,
+            proof: proofs.JOIN_SPLIT_PROOF,
             noteHash: inputNote.noteHash,
             challenge,
             sender: senderAddress,
         };
         const { privateKey } = inputNoteOwners[index];
-        const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+        const { signature } = signer.signTypedData(domain, schema, message, privateKey);
         const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
         return concatenatedSignature;
     });
