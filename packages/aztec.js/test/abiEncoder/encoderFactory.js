@@ -1,4 +1,4 @@
-const { constants, proofs } = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const { expect } = require('chai');
 const { padLeft } = require('web3-utils');
@@ -13,7 +13,6 @@ const mintProof = require('../../src/proof/mint');
 
 const abiEncoder = require('../../src/abiEncoder');
 const note = require('../../src/note');
-const signer = require('../../src/signer');
 
 const randomBytes = (numBytes) => {
     return [...new Array(numBytes * 2)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
@@ -140,24 +139,9 @@ describe('abiEncoder.encoderFactory', () => {
             const inputNotes = notes.slice(0, 2);
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0].address;
-            const contractAddress = accounts[1].address;
 
             // Main
             const { proofData, challenge } = joinSplitProof.constructProof([...inputNotes, ...outputNotes], m, senderAddress, 0);
-
-            const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = signer.generateAZTECDomainParams(contractAddress, constants.ACE_DOMAIN_PARAMS);
-                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-                const message = {
-                    proof: proofs.JOIN_SPLIT_PROOF,
-                    noteHash: inputNote.noteHash,
-                    challenge,
-                    sender: senderAddress,
-                };
-                const { privateKey } = accounts[index];
-                const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-                return signature;
-            });
 
             const publicOwner = accounts[0].address;
             const outputOwners = outputNotes.map((n) => n.owner);
@@ -165,7 +149,7 @@ describe('abiEncoder.encoderFactory', () => {
 
             const result = new HexString(
                 abiEncoder.inputCoder
-                    .joinSplit(proofData, m, challenge, publicOwner, inputSignatures, inputOwners, outputOwners, outputNotes)
+                    .joinSplit(proofData, m, challenge, publicOwner, inputOwners, outputOwners, outputNotes)
                     .slice(2),
             );
 
@@ -185,17 +169,7 @@ describe('abiEncoder.encoderFactory', () => {
                 expect(recoveredNote).to.equal(proofData[i].map((p) => p.slice(2)).join(''));
             }
 
-            const offsetToSignatures = parseInt(result.slice(0x80, 0xa0), 16);
-            expect(parseInt(result.slice(offsetToSignatures - 0x20, offsetToSignatures), 16)).to.equal(2);
-            const recoveredSignatures = new HexString(result.slice(offsetToSignatures, offsetToSignatures + 3 * 0x60));
-            for (let i = 0; i < m; i += 1) {
-                const sigDataStart = i * 0x60;
-                const sigDataFinish = i * 0x60 + 0x60;
-                const recoveredSignature = recoveredSignatures.slice(sigDataStart, sigDataFinish);
-                expect(recoveredSignature).to.equal(inputSignatures[i].map((s) => s.slice(2)).join(''));
-            }
-
-            const offsetToInputOwners = parseInt(result.slice(0xa0, 0xc0), 16);
+            const offsetToInputOwners = parseInt(result.slice(0x80, 0xa0), 16);
             const numInputOwners = 2;
 
             expect(parseInt(result.slice(offsetToInputOwners - 0x20, offsetToInputOwners), 16)).to.equal(numInputOwners);
@@ -203,7 +177,7 @@ describe('abiEncoder.encoderFactory', () => {
             expect(recoveredInputOwners.slice(0x00, 0x20)).to.equal(padLeft(inputOwners[0].slice(2).toLowerCase(), 64));
             expect(recoveredInputOwners.slice(0x20, 0x40)).to.equal(padLeft(inputOwners[1].slice(2).toLowerCase(), 64));
 
-            const offsetToOutputOwners = parseInt(result.slice(0xc0, 0xe0), 16);
+            const offsetToOutputOwners = parseInt(result.slice(0xa0, 0xc0), 16);
             const numOutputOwners = 2;
 
             expect(parseInt(result.slice(offsetToOutputOwners - 0x20, offsetToOutputOwners), 16)).to.equal(numOutputOwners);
@@ -211,7 +185,7 @@ describe('abiEncoder.encoderFactory', () => {
             expect(recoveredOutputOwners.slice(0x00, 0x20)).to.equal(padLeft(outputOwners[0].slice(2).toLowerCase(), 64));
             expect(recoveredOutputOwners.slice(0x20, 0x40)).to.equal(padLeft(outputOwners[1].slice(2).toLowerCase(), 64));
 
-            const offsetToMetadata = parseInt(result.slice(0xe0, 0x100), 16);
+            const offsetToMetadata = parseInt(result.slice(0xc0, 0xe0), 16);
             const metadataLength = parseInt(result.slice(offsetToMetadata - 0x20, offsetToMetadata), 16);
             expect(parseInt(result.slice(offsetToMetadata, offsetToMetadata + 0x20), 16)).to.equal(2);
 
