@@ -145,43 +145,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         }
     }
 
-        /**
-    * @dev Perform ECDSA signature validation on a set of notes
-    * 
-    * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
-    * @param _signature - ECDSA signature from the note owner 
-    */
-    function validateSignature(
-        bytes32 _noteHash,
-        address _sender,
-        bytes32 _challenge,
-        bytes memory _signature
-    ) public {
-        (, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
-
-
-
-        address signer;
-        if (_signature.length != 0) {
-            // validate EIP712 signature
-            bytes32 hashStruct = keccak256(abi.encode(
-                JOIN_SPLIT_SIGNATURE_TYPE_HASH,
-                JOIN_SPLIT_PROOF,
-                _noteHash,
-                _challenge,
-                _sender
-            ));
-            bytes32 msgHash = hashEIP712Message(hashStruct);
-            signer = recoverSignature(
-                msgHash,
-                _signature
-            );
-        } else {
-            signer = msg.sender;
-        }
-        require(signer == noteOwner, "the note owner did not sign this message");
-    }
-
     /**
     * @dev Note owner approving a third party, another address, to spend the note on 
     * owner's behalf. This is necessary to allow the confidentialTransferFrom() method
@@ -223,12 +186,49 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         confidentialApproved[_noteHash][_spender] = _status;
     }
 
+    /**
+    * @dev Perform ECDSA signature validation on a set of notes
+    * 
+    * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
+    * @param _signature - ECDSA signature from the note owner 
+    */
+    function validateSignature(
+        bytes32 _noteHash,
+        address _sender,
+        bytes32 _challenge,
+        bytes memory _signature
+    ) internal view {
+        (, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
+
+
+
+        address signer;
+        if (_signature.length != 0) {
+            // validate EIP712 signature
+            bytes32 hashStruct = keccak256(abi.encode(
+                JOIN_SPLIT_SIGNATURE_TYPE_HASH,
+                JOIN_SPLIT_PROOF,
+                _noteHash,
+                _challenge,
+                _sender
+            ));
+            bytes32 msgHash = hashEIP712Message(hashStruct);
+            signer = recoverSignature(
+                msgHash,
+                _signature
+            );
+        } else {
+            signer = msg.sender;
+        }
+        require(signer == noteOwner, "the note owner did not sign this message");
+    }
+
+
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
         bytes32 v,
         bytes32 r,
         bytes32 s
     ){
-        // bytes memory result = new bytes(0x60);
 
         assembly {
             // callData map of signatures
