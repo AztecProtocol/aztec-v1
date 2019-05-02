@@ -253,5 +253,94 @@ contract('ZkAsset signature validation tests', (accounts) => {
 
             await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
         });
+
+        it('validate failure if validator address is fake', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+            const noteValues = [10, 20, 5, 25];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+
+            const firstTransferAmount = 30;
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: firstTransferAmount * -1,
+                validatorAddress: zkAsset.address,
+            });
+
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+
+            const fakeInputNoteOwners = aztecAccounts.slice(2, 4);
+
+            const randomAddress = proof.proofUtils.randomAddress();
+            const secondTransferAmount = 0;
+            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: fakeInputNoteOwners,
+                publicOwner: accounts[1],
+                kPublic: secondTransferAmount,
+                validatorAddress: randomAddress,
+            });
+
+            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
+            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
+
+            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
+            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
+
+            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
+        });
+
+        it('validate failure if validator address is the joinSplit address', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+            const noteValues = [10, 20, 5, 25];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+
+            const firstTransferAmount = 30;
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: firstTransferAmount * -1,
+                validatorAddress: zkAsset.address,
+            });
+
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+
+            const fakeInputNoteOwners = aztecAccounts.slice(2, 4);
+
+            const secondTransferAmount = 0;
+            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: fakeInputNoteOwners,
+                publicOwner: accounts[1],
+                kPublic: secondTransferAmount,
+                validatorAddress: aztecJoinSplit.address,
+            });
+
+            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
+            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
+
+            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
+            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
+
+            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
+        });
     });
 });
