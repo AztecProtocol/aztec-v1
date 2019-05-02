@@ -1,16 +1,17 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
+const crypto = require('crypto');
+const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, secp256k1, sign } = require('aztec.js');
+const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },
 } = require('@aztec/dev-utils');
 const truffleAssert = require('truffle-assertions');
-const { keccak256 } = require('web3-utils');
 
 const { outputCoder } = abiEncoder;
 
@@ -54,7 +55,7 @@ contract('ZkAsset', (accounts) => {
     });
 
     describe('Success States', async () => {
-        it.only('should successfully transfer notes using confidentialTransfer()', async () => {
+        it('should successfully transfer notes using confidentialTransfer()', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 5, 25];
@@ -72,7 +73,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[0],
                 kPublic: firstTransferAmount * -1,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
@@ -86,7 +87,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner: accounts[1],
                 kPublic: secondTransferAmount,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
@@ -94,15 +95,6 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
             await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
-
-            // console.log('deposit proof signatures: ', depositProof.signatures);
-            // console.log('deposit proofData: ', depositProof.proofData);
-
-            console.log('inputNote[0] noteHash: ', notes[0].noteHash);
-            console.log('inputNote[1] noteHash: ', notes[1].noteHash);
-            console.log('inputNote[0] owner: ', notes[0].owner);
-            console.log('inputNote[1] owner: ', notes[1].owner);
-
 
             const { receipt: depositReceipt } = await zkAsset.confidentialTransfer(
                 depositProof.proofData,
@@ -112,20 +104,13 @@ contract('ZkAsset', (accounts) => {
 
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
-            // console.log('after first confidential transfer');
-            console.log('note transfer proof signatures: ', noteTransfer.signatures);
-            console.log('sender: ', accounts[0]);
 
-            // Think the problem is that the signatures are not formatted properly - they need to be in byte array format
-            // TODO:
-            // 1) Combine all signatures into one bytes array
-            // 2) Split out the appropriate signatures in the smart contract
             const { receipt: transferReceipt } = await zkAsset.confidentialTransfer(
                 noteTransfer.proofData,
                 noteTransfer.signatures,
+                { from: accounts[0] },
             );
-            console.log('after second confidential transfer');
-            // console.log(transferReceipt);
+
             expect(true).to.equal(false);
 
             expect(transferReceipt.status).to.equal(true);
@@ -133,7 +118,7 @@ contract('ZkAsset', (accounts) => {
     });
 
     describe('Failure States', async () => {
-        it('validate note transfer failure if no signatures are provided', async () => {
+        it('validate failure if signatures are zero', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 5, 25];
@@ -151,7 +136,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: [],
                 publicOwner: accounts[0],
                 kPublic: firstTransferAmount * -1,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
@@ -165,7 +150,7 @@ contract('ZkAsset', (accounts) => {
                 inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner: accounts[1],
                 kPublic: secondTransferAmount,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAsset.address,
             });
 
             const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
@@ -173,11 +158,6 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
             await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
-
-            console.log('deposit proof signatures: ', depositProof.signatures);
-            console.log('deposit proofData: ', depositProof.proofData);
-
-            console.log('note transfer proof signatures: ', noteTransfer.signatures);
 
             const { receipt: depositReceipt } = await zkAsset.confidentialTransfer(
                 depositProof.proofData,
@@ -187,14 +167,72 @@ contract('ZkAsset', (accounts) => {
 
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
-            console.log('after first confidential transfer');
 
-            // Think the problem is that the signatures are not formatted properly - they need to be in byte array format
-            // TODO:
-            // 1) Combine all signatures into one bytes array
-            // 2) Split out the appropriate signatures in the smart contract
+            const length = 64;
+            const zeroSignature = new Array(length).fill(0).join('');
+            console.log({ zeroSignature });
+            const zeroSignatures = `0x${zeroSignature + zeroSignature + zeroSignature}`;
+            console.log({ zeroSignatures });
 
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, zeroSignatures));
+        });
+
+        it('validate failure if fake signatures are provided', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
+            const noteValues = [10, 20, 5, 25];
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+
+            const firstTransferAmount = 30;
+            const firstTransferAmountBN = new BN(firstTransferAmount);
+            const balancePreTransfer = await erc20.balanceOf(accounts[0]);
+            const expectedBalancePostTransfer = balancePreTransfer.sub(firstTransferAmountBN.mul(scalingFactor));
+
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: firstTransferAmount * -1,
+                validatorAddress: zkAsset.address,
+            });
+
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+
+            const secondTransferAmount = 0;
+            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: aztecAccounts.slice(0, 2),
+                publicOwner: accounts[1],
+                kPublic: secondTransferAmount,
+                validatorAddress: zkAsset.address,
+            });
+
+            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
+            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
+
+            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
+            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
+
+            const { receipt: depositReceipt } = await zkAsset.confidentialTransfer(
+                depositProof.proofData,
+                depositProof.signatures,
+            );
+            expect(depositReceipt.status).to.equal(true);
+
+            const balancePostTransfer = await erc20.balanceOf(accounts[0]);
+            expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
+
+            const fakeSignature = padLeft(crypto.randomBytes(32).toString('hex'));
+            console.log({ fakeSignature });
+            const fakeSignatures = `0x${fakeSignature + fakeSignature + fakeSignature}`;
+            console.log({ fakeSignatures });
+
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, fakeSignatures));
         });
     });
 });
