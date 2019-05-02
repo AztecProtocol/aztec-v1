@@ -224,9 +224,8 @@ joinSplit.encodeJoinSplitTransaction = ({
     const inputOwners = inputNotes.map((n) => n.owner);
 
     const proofData = inputCoder.joinSplit(proofDataRaw, m, challenge, publicOwner, inputOwners, outputOwners, outputNotes);
-
     const signaturesArray = inputNotes.map((inputNote, index) => {
-        const domain = sign.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
+        const domain = sign.generateZKAssetDomainParams(validatorAddress);
         const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
         const message = {
             proof: JOIN_SPLIT_PROOF,
