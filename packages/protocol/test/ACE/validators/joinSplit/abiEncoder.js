@@ -11,7 +11,6 @@ const {
 
 const { constants } = require('@aztec/dev-utils');
 
-
 // ### Artifacts
 const secp256k1 = require('@aztec/secp256k1');
 
@@ -48,12 +47,7 @@ contract('Join-Split ABI Encoder', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const { proofData, challenge } = joinSplit.constructProof(
-                [...inputNotes, ...outputNotes],
-                m,
-                accounts[0],
-                0,
-            );
+            const { proofData, challenge } = joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
 
             const publicOwner = aztecAccounts[0].address;
 
