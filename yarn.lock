@@ -117,7 +117,7 @@
     loglevel "^1.6.1"
     web3-provider-engine "14.0.6"
 
-"@0x/sol-tracing-utils@^6.0.10", "@0x/sol-tracing-utils@^6.0.9":
+"@0x/sol-tracing-utils@^6.0.10":
   version "6.0.10"
   resolved "https://registry.yarnpkg.com/@0x/sol-tracing-utils/-/sol-tracing-utils-6.0.10.tgz#08b808a122fd3dacf5ca473404ef694f6f0f55b6"
   integrity sha512-sb0nzkH2SWfNcqLLUmBVizkid5YUhqoLO6zMekgd8aEnCxKOT/L/YHyRnqhBMssFSSQ3cEkqVDrOLlookIlq5Q==
@@ -144,7 +144,7 @@
     solc "^0.5.5"
     solidity-parser-antlr "^0.4.2"
 
-"@0x/subproviders@^4.0.2", "@0x/subproviders@^4.0.4", "@0x/subproviders@^4.0.5":
+"@0x/subproviders@^4.0.2", "@0x/subproviders@^4.0.5":
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@0x/subproviders/-/subproviders-4.0.5.tgz#37b57e2cc3a534fedcf39fc7bdbfbedb7fb43a64"
   integrity sha512-tXvzx+iXRddmMM3QHCIYiyktkSkzX9ddWJ7SjMmyayFvRlNGuaMTL+bs3sCpgpsDkqWNejHSqLWA0ZoWr5F+tA==
@@ -183,7 +183,7 @@
     bignumber.js "~8.0.2"
     ethereum-types "^2.1.2"
 
-"@0x/typescript-typings@^4.2.1", "@0x/typescript-typings@^4.2.2":
+"@0x/typescript-typings@^4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@0x/typescript-typings/-/typescript-typings-4.2.2.tgz#6c3e51e479c1ecf9e9b3eeae95a51a91be11570a"
   integrity sha512-KKioCi4rLOiC62DF8mqBgN639DdGcJllW7OSPi6gWG4w2JI0mvH6KpRA7wGS9fyIpupjpKTIvz6ktZBaG+DrWg==
@@ -5779,7 +5779,7 @@ ethereum-common@^0.0.18:
   resolved "https://registry.yarnpkg.com/ethereum-common/-/ethereum-common-0.0.18.tgz#2fdc3576f232903358976eb39da783213ff9523f"
   integrity sha1-L9w1dvIykDNYl26znaeDIT/5Uj8=
 
-ethereum-types@^2.1.1, ethereum-types@^2.1.2:
+ethereum-types@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ethereum-types/-/ethereum-types-2.1.2.tgz#7398873e0eede1dd0956a134e1037032f6ed3c14"
   integrity sha512-JsQnroPOsZ81yN75HVzvobosSxjr/59oEdYnydTgnV13Fg9PwS078CtPyBzARXequBl2Hnz4h7f3VF64u8P01A==
