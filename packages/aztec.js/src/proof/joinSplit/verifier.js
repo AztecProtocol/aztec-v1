@@ -1,12 +1,12 @@
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const utils = require('@aztec/dev-utils');
 
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
 
+const { errorTypes } = constants;
 const { groupReduction } = bn128;
-const { errorTypes } = utils.constants;
 
 const verifier = {};
 

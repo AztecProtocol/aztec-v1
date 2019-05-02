@@ -5,15 +5,14 @@
  * @module bn128
  */
 
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const EC = require('elliptic');
 const crypto = require('crypto');
+const EC = require('elliptic');
 
-const {
-    constants: { FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y, K_MAX },
-} = require('@aztec/dev-utils');
 const decodePoint = require('./decodePoint');
 
+const { FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y, K_MAX } = constants;
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 
 const bn128 = {};
@@ -49,8 +48,8 @@ bn128.randomGroupScalar = () => {
  * @method randomPoint
  * @returns {Point} a random point
  */
-bn128.randomPoint = function randomPoint() {
-    function recurse() {
+bn128.randomPoint = () => {
+    const recurse = () => {
         const x = new BN(crypto.randomBytes(32), 16).toRed(bn128.curve.red);
         const y2 = x
             .redSqr()
@@ -66,7 +65,7 @@ bn128.randomPoint = function randomPoint() {
             return recurse();
         }
         return bn128.curve.point(x, y);
-    }
+    };
     return recurse();
 };
 
@@ -86,7 +85,7 @@ bn128.K_MAX = K_MAX;
  * @param {Point} gammaK the AZTEC decrypted coordinate \gamma^{k}. Computed from \sigma.h^{-a}
  * @returns {number} the value of the note
  */
-bn128.recoverMessage = function recoverMessage(gamma, gammaK) {
+bn128.recoverMessage = (gamma, gammaK) => {
     if (gammaK.isInfinity()) {
         return 1;
     }

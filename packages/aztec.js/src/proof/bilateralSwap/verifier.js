@@ -1,14 +1,15 @@
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
 
-const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
+const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
 
-const verifier = {};
-const { errorTypes } = utils.constants;
+const { errorTypes } = constants;
 const { groupReduction } = bn128;
+
+const verifier = {};
 
 /**
  * Verify AZTEC bilateral swap proof transcript

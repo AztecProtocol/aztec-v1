@@ -1,19 +1,17 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const BN = require('bn.js');
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 const crypto = require('crypto');
 
 // ### Internal Dependencies
-const {
-    proof: { bilateralSwap, proofUtils },
-    abiEncoder: { inputCoder, outputCoder, encoderFactory },
-    note,
-    secp256k1,
-    bn128,
-} = require('aztec.js');
+const { abiEncoder, bn128, note, proof } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
+
+const { bilateralSwap, proofUtils } = proof;
+const { encoderFactory, inputCoder, outputCoder } = abiEncoder;
 
 // ### Artifacts
 const BilateralSwap = artifacts.require('./BilateralSwap');
@@ -146,7 +144,7 @@ contract('Bilateral Swap', (accounts) => {
                         outputNotes: [inputNotes[1]],
                         publicOwner,
                         publicValue,
-                        challenge: `0x${padLeft(sha3(notModRChallenge).slice(2), 64)}`,
+                        challenge: `0x${padLeft(keccak256(notModRChallenge).slice(2), 64)}`,
                     },
                 ])
                 .slice(0x42)}`;
@@ -221,7 +219,7 @@ contract('Bilateral Swap', (accounts) => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const challenge = sha3(challengeString, 'hex');
+            const challenge = keccak256(challengeString, 'hex');
 
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
             const outputOwners = [proofUtils.randomAddress()];

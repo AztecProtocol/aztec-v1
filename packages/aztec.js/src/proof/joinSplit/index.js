@@ -2,62 +2,28 @@
  * @module joinSplit
  */
 
+const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const {
-    constants,
-    proofs: { JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
 
 const extractor = require('./extractor');
 const helpers = require('./helpers');
-const verifier = require('./verifier');
 const proofUtils = require('../proofUtils');
+const verifier = require('./verifier');
 
 const abiEncoder = require('../../abiEncoder');
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
-const sign = require('../../sign');
+const signer = require('../../signer');
 
-const { outputCoder, inputCoder } = abiEncoder;
+const { constants, proofs } = devUtils;
 const { groupReduction } = bn128;
+const { outputCoder, inputCoder } = abiEncoder;
 
 const joinSplit = {};
 joinSplit.extractor = extractor;
 joinSplit.helpers = helpers;
 joinSplit.verifier = verifier;
-
-/**
- * Generate random blinding scalars, conditional on the AZTEC join-split proof statement
- *   Separated out into a distinct method so that we can stub this for extractor tests
- *
- * @method generateBlindingScalars
- * @memberof module:joinSplit
- * @param {number} n number of notes
- * @param {number} m number of input notes
- */
-joinSplit.generateBlindingScalars = (n, m) => {
-    let runningBk = new BN(0).toRed(groupReduction);
-    const scalars = [...Array(n)].map((v, i) => {
-        let bk = bn128.randomGroupScalar();
-        const ba = bn128.randomGroupScalar();
-        if (i === n - 1) {
-            if (n === m) {
-                bk = new BN(0).toRed(groupReduction).redSub(runningBk);
-            } else {
-                bk = runningBk;
-            }
-        }
-
-        if (i + 1 > m) {
-            runningBk = runningBk.redSub(bk);
-        } else {
-            runningBk = runningBk.redAdd(bk);
-        }
-        return { bk, ba };
-    });
-    return scalars;
-};
 
 /**
  * Construct blinding factors
@@ -254,16 +220,16 @@ joinSplit.encodeJoinSplitTransaction = ({
     );
 
     const inputSignatures = inputNotes.map((inputNote, index) => {
-        const domain = sign.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
+        const domain = signer.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
         const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
         const message = {
-            proof: JOIN_SPLIT_PROOF,
+            proof: proofs.JOIN_SPLIT_PROOF,
             noteHash: inputNote.noteHash,
             challenge,
             sender: senderAddress,
         };
         const { privateKey } = inputNoteOwners[index];
-        const { signature } = sign.signStructuredData(domain, schema, message, privateKey);
+        const { signature } = signer.signTypedData(domain, schema, message, privateKey);
         return signature;
     });
 
@@ -293,6 +259,38 @@ joinSplit.encodeJoinSplitTransaction = ({
         ])
         .slice(0x42)}`;
     return { proofData, expectedOutput };
+};
+
+/**
+ * Generate random blinding scalars, conditional on the AZTEC join-split proof statement
+ *   Separated out into a distinct method so that we can stub this for extractor tests
+ *
+ * @method generateBlindingScalars
+ * @memberof module:joinSplit
+ * @param {number} n number of notes
+ * @param {number} m number of input notes
+ */
+joinSplit.generateBlindingScalars = (n, m) => {
+    let runningBk = new BN(0).toRed(groupReduction);
+    const scalars = [...Array(n)].map((v, i) => {
+        let bk = bn128.randomGroupScalar();
+        const ba = bn128.randomGroupScalar();
+        if (i === n - 1) {
+            if (n === m) {
+                bk = new BN(0).toRed(groupReduction).redSub(runningBk);
+            } else {
+                bk = runningBk;
+            }
+        }
+
+        if (i + 1 > m) {
+            runningBk = runningBk.redSub(bk);
+        } else {
+            runningBk = runningBk.redAdd(bk);
+        }
+        return { bk, ba };
+    });
+    return scalars;
 };
 
 module.exports = joinSplit;

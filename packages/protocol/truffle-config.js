@@ -125,18 +125,21 @@ module.exports = {
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
+            skipDryRun: true,
         },
         rinkeby: {
             provider: rinkebyProvider,
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
+            skipDryRun: true,
         },
         ropsten: {
             provider: ropstenProvider,
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
+            skipDryRun: true,
         },
     },
 };

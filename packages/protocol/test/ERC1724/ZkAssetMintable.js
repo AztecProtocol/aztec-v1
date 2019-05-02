@@ -5,20 +5,20 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { note, proof, secp256k1 } = require('aztec.js');
-const {
-    constants,
-    proofs: { MINT_PROOF, JOIN_SPLIT_PROOF },
-} = require('@aztec/dev-utils');
+const { note, proof } = require('aztec.js');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
+
+const { constants } = devUtils;
+const { JOIN_SPLIT_PROOF, MINT_PROOF } = devUtils.proofs;
 
 // ### Artifacts
-const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ACE = artifacts.require('./ACE');
 const AdjustSupply = artifacts.require('./AdjustSupply');
 const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const JoinSplit = artifacts.require('./JoinSplit');
 const JoinSplitInterface = artifacts.require('./JoinSplit');
-
 const ZkAssetMintable = artifacts.require('./ZkAssetMintable');
 
 AdjustSupply.abi = AdjustSupplyInterface.abi;

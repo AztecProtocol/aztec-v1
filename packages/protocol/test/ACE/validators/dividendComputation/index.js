@@ -4,26 +4,22 @@ const BN = require('bn.js');
 const crypto = require('crypto');
 const sinon = require('sinon');
 const truffleAssert = require('truffle-assertions');
-const { padLeft, sha3 } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const {
-    proof: { dividendComputation, proofUtils },
-    abiEncoder: { inputCoder, outputCoder, encoderFactory },
-    note,
-    secp256k1,
-    bn128,
-    keccak,
-} = require('aztec.js');
+const { abiEncoder, bn128, note, proof, keccak } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
+const { dividendComputation, proofUtils } = proof;
+const { encoderFactory, inputCoder, outputCoder } = abiEncoder;
 const Keccak = keccak;
 
 // ### Artifacts
-const dividend = artifacts.require('./DividendComputation');
-const dividendInterface = artifacts.require('./DividendComputationInterface');
+const Dividend = artifacts.require('./DividendComputation');
+const DividendInterface = artifacts.require('./DividendComputationInterface');
 
-dividend.abi = dividendInterface.abi;
+Dividend.abi = DividendInterface.abi;
 
 contract('Dividend Computation', (accounts) => {
     let dividendContract;
@@ -31,7 +27,7 @@ contract('Dividend Computation', (accounts) => {
         let dividendAccounts = [];
 
         beforeEach(async () => {
-            dividendContract = await dividend.new({
+            dividendContract = await Dividend.new({
                 from: accounts[0],
             });
             dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
@@ -151,7 +147,7 @@ contract('Dividend Computation', (accounts) => {
 
     describe('Failure States', () => {
         beforeEach(async () => {
-            dividendContract = await dividend.new(accounts[0]);
+            dividendContract = await Dividend.new(accounts[0]);
         });
 
         it('should fail for residual commitment message that does NOT satisfy proof relation', async () => {
@@ -234,7 +230,7 @@ contract('Dividend Computation', (accounts) => {
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
             const challengeString = `0x${padLeft(accounts[0].slice(2), 64)}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
-            const challenge = sha3(challengeString, 'hex');
+            const challenge = keccak256(challengeString, 'hex');
 
             const proofDataRaw = [[`0x${padLeft('132', 64)}`, '0x0', '0x0', '0x0', '0x0', '0x0']];
             const outputOwners = [proofUtils.randomAddress()];

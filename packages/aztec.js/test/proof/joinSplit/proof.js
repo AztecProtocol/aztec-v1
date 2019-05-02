@@ -1,40 +1,28 @@
-const {
-    constants: { K_MAX },
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const chai = require('chai');
+const { expect } = require('chai');
 const crypto = require('crypto');
 const { padLeft } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 
-const { errorTypes } = utils.constants;
-const { expect } = chai;
+const { errorTypes } = constants;
 
-function generateNoteValue() {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
-}
+const generateNoteValue = () => {
+    return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
+};
 
-function getKPublic(kIn, kOut) {
+const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
-}
+};
 
-function randomAddress() {
+const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'), 64)}`;
-}
+};
 
-function validateGroupScalar(hex, canBeZero = false) {
-    const scalar = new BN(hex.slice(2), 16);
-    expect(scalar.lt(bn128.curve.n)).to.equal(true);
-    if (!canBeZero) {
-        expect(scalar.gt(new BN(0))).to.equal(true);
-    }
-}
-
-function validateGroupElement(xHex, yHex) {
+const validateGroupElement = (xHex, yHex) => {
     const x = new BN(xHex.slice(2), 16);
     const y = new BN(yHex.slice(2), 16);
     expect(x.gt(new BN(0))).to.equal(true);
@@ -47,7 +35,15 @@ function validateGroupElement(xHex, yHex) {
         .add(new BN(3));
     const rhs = y.mul(y);
     expect(lhs.umod(bn128.curve.p).eq(rhs.umod(bn128.curve.p))).that.equal(true);
-}
+};
+
+const validateGroupScalar = (hex, canBeZero = false) => {
+    const scalar = new BN(hex.slice(2), 16);
+    expect(scalar.lt(bn128.curve.n)).to.equal(true);
+    if (!canBeZero) {
+        expect(scalar.gt(new BN(0))).to.equal(true);
+    }
+};
 
 describe('Join-Split Proofs', () => {
     it('should construct a proof with well-formed outputs', async () => {
@@ -145,7 +141,7 @@ describe('Join-Split Proofs', () => {
         const kOut = [...Array(3)].map(() => generateNoteValue());
         const kPublic = getKPublic(kIn, kOut);
         const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
-        commitments[0].k = new BN(K_MAX + 1).toRed(bn128.groupReduction);
+        commitments[0].k = new BN(constants.K_MAX + 1).toRed(bn128.groupReduction);
         try {
             proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {

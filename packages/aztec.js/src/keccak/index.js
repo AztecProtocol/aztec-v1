@@ -1,5 +1,15 @@
 const BN = require('bn.js');
-const { sha3, padLeft } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
+
+const hashStrings = (inputArr) => {
+    const input = `${inputArr
+        .map((i) => {
+            const res = padLeft(i, 64);
+            return res;
+        })
+        .join('')}`;
+    return keccak256(`0x${input}`, 'hex').slice(2);
+};
 
 /**
  *
@@ -12,16 +22,6 @@ function Keccak() {
      * @member {string[]}
      */
     this.data = [];
-}
-
-function hashStrings(inputArr) {
-    const input = `${inputArr
-        .map((i) => {
-            const res = padLeft(i, 64);
-            return res;
-        })
-        .join('')}`;
-    return sha3(`0x${input}`, 'hex').slice(2);
 }
 
 /**
