@@ -164,41 +164,30 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         bool _status,
         bytes memory _signature
     ) public {
-        ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
+        ( uint8 status, , , ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
-        address signer;
-        if (_signature.length != 0) {
-            // validate EIP712 signature
-            bytes32 hashStruct = keccak256(abi.encode(
+
+        bytes32 _hashStruct = keccak256(abi.encode(
                 NOTE_SIGNATURE_TYPEHASH,
                 _noteHash,
                 _spender,
                 status
-            ));
-            bytes32 msgHash = hashEIP712Message(hashStruct);
-            signer = recoverSignature(
-                msgHash,
-                _signature
-            );
-        } else {
-            signer = msg.sender;
-        }
-        require(signer == noteOwner, "the note owner did not sign this message");
+        ));
+
+        validateSignature(_hashStruct, _noteHash, _signature);
         confidentialApproved[_noteHash][_spender] = _status;
     }
 
     /**
     * @dev Perform ECDSA signature validation for a signature over an input note
     * 
+    * @param _hashStruct - the data to sign in an EIP712 signature
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
-    * @param _sender - Ethereum address of the transaction sender
-    * @param _challenge - challenge variable from the Sigma protocol
     * @param _signature - ECDSA signature for a particular input note 
     */
     function validateSignature(
+        bytes32 _hashStruct,
         bytes32 _noteHash,
-        address _sender,
-        bytes32 _challenge,
         bytes memory _signature
     ) internal view {
         (, , , address noteOwner ) = ace.getNote(address(this), _noteHash);
@@ -206,14 +195,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         address signer;
         if (_signature.length != 0) {
             // validate EIP712 signature
-            bytes32 hashStruct = keccak256(abi.encode(
-                JOIN_SPLIT_SIGNATURE_TYPE_HASH,
-                JOIN_SPLIT_PROOF,
-                _noteHash,
-                _challenge,
-                _sender
-            ));
-            bytes32 msgHash = hashEIP712Message(hashStruct);
+            bytes32 msgHash = hashEIP712Message(_hashStruct);
             signer = recoverSignature(
                 msgHash,
                 _signature
@@ -231,11 +213,11 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     * @param _i - index used to determine which signature element is desired
     */
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
-        bytes32 v,
-        bytes32 r,
-        bytes32 s
+        bytes memory _signature
     ){
-
+        bytes32 v;
+        bytes32 r;
+        bytes32 s;
         assembly {
             // memory map of signatures
             // 0x00 - 0x20 : length of signature array
@@ -250,6 +232,7 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             r := mload(add(add(_signatures, 0x40), mul(_i, 0x60)))
             s := mload(add(add(_signatures, 0x60), mul(_i, 0x60)))
         }
+        _signature = abi.encode(v, r, s);
     }
 
     /**
@@ -284,13 +267,19 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
             if (inputNotes.getLength() > uint(0)) {
                 
                 for (uint j = 0; j < inputNotes.getLength(); j += 1) {
-                    (bytes32 v, bytes32 r, bytes32 s) = extractSignature(_signatures, j);
-
-                    bytes memory _signature = abi.encode(v, r, s);
+                    bytes memory _signature = extractSignature(_signatures, j);
 
                     (, bytes32 noteHash, ) = inputNotes.get(j).extractNote();
 
-                    validateSignature(noteHash, msg.sender, _challenge, _signature);
+                    bytes32 hashStruct = keccak256(abi.encode(
+                        JOIN_SPLIT_SIGNATURE_TYPE_HASH,
+                        JOIN_SPLIT_PROOF,
+                        noteHash,
+                        _challenge,
+                        msg.sender
+                    ));
+
+                    validateSignature(hashStruct, noteHash, _signature);
                 }
             }
 
