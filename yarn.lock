@@ -14511,7 +14511,7 @@ web3-eth-abi@1.0.0-beta.37:
     underscore "1.8.3"
     web3-utils "1.0.0-beta.37"
 
-web3-eth-abi@1.0.0-beta.52, web3-eth-abi@^1.0.0-beta.24:
+web3-eth-abi@1.0.0-beta.52:
   version "1.0.0-beta.52"
   resolved "https://registry.yarnpkg.com/web3-eth-abi/-/web3-eth-abi-1.0.0-beta.52.tgz#88dc2d36e2f99dfe255f8f64b6f613bad82779d8"
   integrity sha512-c03sH6y7ncp9tBPt0EZEcyFyou4kyYdr72VJMY8ip0JAfZgl4WI9XcGpD207z0lR4Ki1PSCfkh+ZigoXxggouw==
@@ -14520,6 +14520,16 @@ web3-eth-abi@1.0.0-beta.52, web3-eth-abi@^1.0.0-beta.24:
     ethers "^4.0.27"
     lodash "^4.17.11"
     web3-utils "1.0.0-beta.52"
+
+web3-eth-abi@1.0.0-beta.54, web3-eth-abi@^1.0.0-beta.24:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth-abi/-/web3-eth-abi-1.0.0-beta.54.tgz#4d863e6d4675fa3502e3eba7093d8c2998a66566"
+  integrity sha512-2hePxe8VHtNvGX6i14rntPCjAuwO8Iktn95HcR/VgXW2SoqeKkqmKow+lR6ePjl/D/BQyEa/bWCaLrSpArfK9g==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    ethers "^4.0.27"
+    lodash "^4.17.11"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth-accounts@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14978,6 +14988,22 @@ web3-utils@1.0.0-beta.52:
   version "1.0.0-beta.52"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.52.tgz#27f9beeac3e1ea981eba9824d79e2971f156eebc"
   integrity sha512-WdHyzPcZu/sOnNrkcOZT20QEX9FhwD9OJJXENojQNvMK2a1xo3n8JWBcC2gzAGwsa0Aah6z2B3Xwa1P//8FaoA==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    "@types/bn.js" "^4.11.4"
+    "@types/node" "^10.12.18"
+    bn.js "4.11.8"
+    eth-lib "0.2.8"
+    ethjs-unit "^0.1.6"
+    lodash "^4.17.11"
+    number-to-bn "1.7.0"
+    randomhex "0.1.5"
+    utf8 "2.1.1"
+
+web3-utils@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.54.tgz#90588e45eae7c56b61138b5a4c4034377fca33fd"
+  integrity sha512-yb/cjzjTU99P/9bEaAnb6cjqGjyMUF0OmjD7/ix89IfcDhBJ3jExSuClTAKU8Hz9Rf7IXLiXqBny9W8PdogwmQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/bn.js" "^4.11.4"
