@@ -259,11 +259,15 @@ joinSplit.encodeJoinSplitTransaction = ({
             },
         ])
         .slice(0x42)}`;
+<<<<<<< HEAD
     return {
         proofData,
         expectedOutput,
         signatures,
     };
+=======
+    return { proofData, expectedOutput, inputSignatures };
+>>>>>>> feat(aztec.js): design oop infra for proof construction
 };
 
 /**
