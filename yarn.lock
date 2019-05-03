@@ -14327,10 +14327,10 @@ web3-bzz@1.0.0-beta.37:
     swarm-js "0.1.37"
     underscore "1.8.3"
 
-web3-bzz@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-bzz/-/web3-bzz-1.0.0-beta.52.tgz#36e79ba3b6310485c41528be635fa2b18518903e"
-  integrity sha512-yva0KW0cIEdFyHaGMHuMGjl4jea/esNBVwfFsejNRJy2W2jSMjnji+AFXnkcq8MhOAyNtQD4WzNdad9F51PaZg==
+web3-bzz@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-bzz/-/web3-bzz-1.0.0-beta.54.tgz#6c467551a5bde937187bde51979eef71f32b1834"
+  integrity sha512-YKoYJWSAxyekk52V0v/rx/gtklqFbMpT8S2Wevox+9MjWchizt34MovJOIbAQzUEUpDhMffdoycVoebmJBcVfA==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^10.12.18"
@@ -14355,15 +14355,15 @@ web3-core-helpers@1.0.0-beta.37:
     web3-eth-iban "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-core-helpers@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-core-helpers/-/web3-core-helpers-1.0.0-beta.52.tgz#9ba41078f7e144cc2c9887a2a0039cc8d44c485f"
-  integrity sha512-VJCJMEplvrU7jCgn0MCuLLa+XWkQVttQpShM5i0XkcKs2gmisMtoLO3lATx2b32ruu29EriBYkkAVzc0/nxppg==
+web3-core-helpers@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-core-helpers/-/web3-core-helpers-1.0.0-beta.54.tgz#6b3fc3c2efc45ae8f23a78be5b1b5db687819d99"
+  integrity sha512-tASbzdfWyUd6ICbrhDAkWP8NxzSk8+t8IGrpaTBen00gR4gudz3KLPZKTJXrE7y3FB6YONRFPlpYqbim/TS6XQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     lodash "^4.17.11"
-    web3-eth-iban "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-eth-iban "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-core-method@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14387,10 +14387,10 @@ web3-core-method@1.0.0-beta.37:
     web3-core-subscriptions "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-core-method@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-core-method/-/web3-core-method-1.0.0-beta.52.tgz#0f80551047e097dde5c60ab82f42b16e1686c421"
-  integrity sha512-lLbDsV2pxxrUDIWvRI/u6MsvG8mKGfCYOifXqb+yqAruhoNs/Gahoa/1UTjsn0qhVQafsffFRXaEhi6BQDQOYA==
+web3-core-method@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-core-method/-/web3-core-method-1.0.0-beta.54.tgz#e534ef831287e9e32ae9104f60bae78cf02df24d"
+  integrity sha512-5Ar3+jj1tOdNA8+ra105QD+cYef5w9wmgmaaIyGmjsgPZGMDeCIIPLgdSdFuyOdgPhy0zKhhwJsIzr3fJXtMxw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     eventemitter3 "3.1.0"
@@ -14452,10 +14452,10 @@ web3-core-subscriptions@1.0.0-beta.37:
     underscore "1.8.3"
     web3-core-helpers "1.0.0-beta.37"
 
-web3-core-subscriptions@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-core-subscriptions/-/web3-core-subscriptions-1.0.0-beta.52.tgz#50a10dd1ee80095cc1d117a7bb35da76b3af174e"
-  integrity sha512-ZE6VsTVZ9PHV3FOJHnXOxUr4RuwXUpqC+RxCESb/UXvwHNnPbKNPpQjcoc5shaFrtOVtY14bIl35qTxVHSeGWg==
+web3-core-subscriptions@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-core-subscriptions/-/web3-core-subscriptions-1.0.0-beta.54.tgz#2a1c75682dd642344894eba454ed3b39483cdb8c"
+  integrity sha512-JQK0pgdIPQU0Ff0Muv8eVNeeABRzvEa4rDkqKyEkZtHKd+JcxBFWp7Y9nlDLViAq20ahH5yh4AB/pCGh7mxIiw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     eventemitter3 "^3.1.0"
@@ -14481,16 +14481,16 @@ web3-core@1.0.0-beta.37:
     web3-core-requestmanager "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-core@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-core/-/web3-core-1.0.0-beta.52.tgz#11c949c109871fa1c19b26c70e0e5a3b03f700d2"
-  integrity sha512-UKHNBIj5b4M40DrGJRQKgWTtbqZCCZck38oQgBbtLAUUQmvlZybLf8jGWUfMamyhJg/eBqT/t1l7OcAn5i9zrA==
+web3-core@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-core/-/web3-core-1.0.0-beta.54.tgz#1141dd92dcc3f5ed289db9c54acaa732d65926e8"
+  integrity sha512-phgFlv0LotX1ym1H+5mchhjJY3MVFov3DdUnFg1eZQlgHxsRKNfRI/nf3+ICVkDqOJP6mdX+oSPFizIXZJqLGQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/bn.js" "^4.11.4"
     "@types/node" "^10.12.18"
     lodash "^4.17.11"
-    web3-utils "1.0.0-beta.52"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth-abi@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14520,6 +14520,16 @@ web3-eth-abi@1.0.0-beta.52, web3-eth-abi@^1.0.0-beta.24:
     ethers "^4.0.27"
     lodash "^4.17.11"
     web3-utils "1.0.0-beta.52"
+
+web3-eth-abi@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth-abi/-/web3-eth-abi-1.0.0-beta.54.tgz#4d863e6d4675fa3502e3eba7093d8c2998a66566"
+  integrity sha512-2hePxe8VHtNvGX6i14rntPCjAuwO8Iktn95HcR/VgXW2SoqeKkqmKow+lR6ePjl/D/BQyEa/bWCaLrSpArfK9g==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    ethers "^4.0.27"
+    lodash "^4.17.11"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth-accounts@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14553,10 +14563,10 @@ web3-eth-accounts@1.0.0-beta.37:
     web3-core-method "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-eth-accounts@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-eth-accounts/-/web3-eth-accounts-1.0.0-beta.52.tgz#06be3e1dd3a50fc4457c1cea77fc9a51a7baf0b1"
-  integrity sha512-B52yDVK2/3NKce1CESTZ/sD+6lU9pdNk4tPAtTkWTTPlejAbNlI04SdCX+hn2XJpDjsvU2HRSY3uNugVTrRQ6w==
+web3-eth-accounts@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth-accounts/-/web3-eth-accounts-1.0.0-beta.54.tgz#701b8e9a735f6d4e692a2076b469be960e91d71f"
+  integrity sha512-/cIwYx4vod+W05tyQoLBcmBs2wGcnvuyvptoRk2y+krwsVNY+8OvUCu8hU4pIqhH8lt6Q++D1dshttsZsue5hw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     crypto-browserify "3.12.0"
@@ -14564,11 +14574,11 @@ web3-eth-accounts@1.0.0-beta.52:
     lodash "^4.17.11"
     scrypt.js "0.2.0"
     uuid "3.3.2"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth-contract@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14598,22 +14608,22 @@ web3-eth-contract@1.0.0-beta.37:
     web3-eth-abi "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-eth-contract@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-eth-contract/-/web3-eth-contract-1.0.0-beta.52.tgz#9db66edd01433b3edb2bde9bde1314b64890dd04"
-  integrity sha512-X5Eqi/onxaBw04urowcYXl4L7eS3NuAFdBxSYP14rdTtP03TbgZEJ1GZDftF3cgMorvfGKcTyxyK0VYj/l+lfg==
+web3-eth-contract@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth-contract/-/web3-eth-contract-1.0.0-beta.54.tgz#f4e828b7979153fe88dbba98ffc37beb1950dcfe"
+  integrity sha512-on5LfhA3041VKo1wIlA16HeNIyy+JkyoM/lTLOPHMueD2b+4+USFh+x8rKE4LNrtvjq4wE8+emxLmHrRez459Q==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/bn.js" "^4.11.4"
     lodash "^4.17.11"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-core-subscriptions "1.0.0-beta.52"
-    web3-eth-abi "1.0.0-beta.52"
-    web3-eth-accounts "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-core-subscriptions "1.0.0-beta.54"
+    web3-eth-abi "1.0.0-beta.54"
+    web3-eth-accounts "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth-ens@1.0.0-beta.37:
   version "1.0.0-beta.37"
@@ -14629,22 +14639,22 @@ web3-eth-ens@1.0.0-beta.37:
     web3-eth-contract "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-eth-ens@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-eth-ens/-/web3-eth-ens-1.0.0-beta.52.tgz#430ad56c70076a2cc868cfe999f4958f7f992b9d"
-  integrity sha512-8VTOF+v5pAjq1FmakXRceY6VrIoPB7DqfSc+K4aAOJ/tuIMIpe6pt0Bl9IYAbpgFrFqL7ow22d9xcd77ULIwiQ==
+web3-eth-ens@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth-ens/-/web3-eth-ens-1.0.0-beta.54.tgz#732770b8efd4b4eca5e93ebcb67706f384ac17f1"
+  integrity sha512-YXdBq7qB0Hfp3+FZKwsUOkHxcM0F0mGDNSEhjVrfuJy7+S+qKA4/gXVMoUA3z+M0TbygtHr7cgY0ayz/n8s3BQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     eth-ens-namehash "2.0.8"
     lodash "^4.17.11"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-eth-abi "1.0.0-beta.52"
-    web3-eth-contract "1.0.0-beta.52"
-    web3-net "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-eth-abi "1.0.0-beta.54"
+    web3-eth-contract "1.0.0-beta.54"
+    web3-net "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth-iban@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14662,14 +14672,14 @@ web3-eth-iban@1.0.0-beta.37:
     bn.js "4.11.6"
     web3-utils "1.0.0-beta.37"
 
-web3-eth-iban@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-eth-iban/-/web3-eth-iban-1.0.0-beta.52.tgz#4b953ef78b073701458858872f494edfca4adeab"
-  integrity sha512-LJZRZ+hZZPU9Fb7xR54mX1li5aKMp9xj9wgZZa4ikdL7iWi0rg1tOacEhbxWGQsjEYhGZYcvxhW9RIdHOwAySg==
+web3-eth-iban@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth-iban/-/web3-eth-iban-1.0.0-beta.54.tgz#d09ee445fae7bb8cc5fb81eaa6ee5ab5596e0538"
+  integrity sha512-wgPP7KFb3zKOk7FAeRCcUkGryqRPvPL38eMWNlsqcwcrq3Hmj/wdVSnARYed7Xg0pcagabSyaPtEGuHnxCmtRg==
   dependencies:
     "@babel/runtime" "^7.3.1"
     bn.js "4.11.8"
-    web3-utils "1.0.0-beta.52"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth-personal@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14693,18 +14703,19 @@ web3-eth-personal@1.0.0-beta.37:
     web3-net "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-eth-personal@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-eth-personal/-/web3-eth-personal-1.0.0-beta.52.tgz#5a032d1ea938207be0c077da07ea410dbf7c4c82"
-  integrity sha512-tNjoB9KztpZL2ayjWYxaInwMrEGxBV7rGMt3hkhk9y4UxlK+8rZtrboz5hggzcgzHaVGnG73rdynhbuPU/cSAQ==
+web3-eth-personal@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth-personal/-/web3-eth-personal-1.0.0-beta.54.tgz#78ce9d3d214174eda3cc5ee482b5a73c77b26da2"
+  integrity sha512-bnKbNXgo5lInir8FQ0cyL/55e/vq3xWBNw//fAvUCPKLgL+PQ9eGhr6ftApJTpxapAgMIEHzpP3rjtfLC5djWQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-net "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-eth-accounts "1.0.0-beta.54"
+    web3-net "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-eth@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14743,27 +14754,27 @@ web3-eth@1.0.0-beta.37:
     web3-net "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-eth@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-eth/-/web3-eth-1.0.0-beta.52.tgz#16b03293f648b3f80bf8d19703dfbe467029d06d"
-  integrity sha512-mpuIFSIke/ZVdWfEzq0QRJAxcDh50BJflsdUMbNaxf5prP7Sz8FZJz/fHiu4H4cEM6aW8Bi0Hsoqad4+caX6Uw==
+web3-eth@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-eth/-/web3-eth-1.0.0-beta.54.tgz#469ca08f0919f5afe383f5df6069678973dbe146"
+  integrity sha512-rXjx2I24xY2id43mz66RAH/ZyFpjporKIrIJTGRgyPO6jN+DdGjJbDcFpw7G/H6a+bRdOfVyo5tdl3eW1j6xdg==
   dependencies:
     "@babel/runtime" "^7.3.1"
     ethereumjs-tx "^1.3.7"
     rxjs "^6.4.0"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-core-subscriptions "1.0.0-beta.52"
-    web3-eth-abi "1.0.0-beta.52"
-    web3-eth-accounts "1.0.0-beta.52"
-    web3-eth-contract "1.0.0-beta.52"
-    web3-eth-ens "1.0.0-beta.52"
-    web3-eth-iban "1.0.0-beta.52"
-    web3-eth-personal "1.0.0-beta.52"
-    web3-net "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-core-subscriptions "1.0.0-beta.54"
+    web3-eth-abi "1.0.0-beta.54"
+    web3-eth-accounts "1.0.0-beta.54"
+    web3-eth-contract "1.0.0-beta.54"
+    web3-eth-ens "1.0.0-beta.54"
+    web3-eth-iban "1.0.0-beta.54"
+    web3-eth-personal "1.0.0-beta.54"
+    web3-net "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-net@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14783,18 +14794,18 @@ web3-net@1.0.0-beta.37:
     web3-core-method "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3-net@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-net/-/web3-net-1.0.0-beta.52.tgz#2c6c04639bd24e44ef3b220845669926c323aff7"
-  integrity sha512-rw66c5A5VTF/m3Acnr9ebIAgbr28q5jhXs8A8/F4VjbsDmUhQuQr3deyTPfyOEyupcnn6QRLoQ1EFVzeaUP7Ng==
+web3-net@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-net/-/web3-net-1.0.0-beta.54.tgz#be64a6efd53e7a70d56bfb640b11ea8dd8a5ba75"
+  integrity sha512-3YjdjHvUpitGDs3b+g9HfzWQdd6fd1mpHDCLgBJQUykKgjwxgkEbb0Dm7vqQMSggLm6W37LV2xBQjIOMmYsA/Q==
   dependencies:
     "@babel/runtime" "^7.3.1"
     lodash "^4.17.11"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-provider-engine@14.0.6:
   version "14.0.6"
@@ -14901,10 +14912,10 @@ web3-providers-ws@1.0.0-beta.37:
     web3-core-helpers "1.0.0-beta.37"
     websocket "git://github.com/frozeman/WebSocket-Node.git#browserifyCompatible"
 
-web3-providers@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-providers/-/web3-providers-1.0.0-beta.52.tgz#04a514430dc9740ff6da35334590886a9df4f71c"
-  integrity sha512-eRmWOn6BeYfAt8UQmCRnqXo1++IjSiIz7+EY9WJ+m7J5ncq/gQN3idWQxT3QZzGRiAvZlO8ZUuF7ff0vuufakg==
+web3-providers@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-providers/-/web3-providers-1.0.0-beta.54.tgz#b2401eb72ded5996379e03c2e166113daa50a19a"
+  integrity sha512-P55MQHkfU2VLt3t+3IbqRUVwOziLOMiXxKulVYXzTu9M8p9aogl1tvPjKXpRUGygCY3LsWTpt/UlJR8Aaia+CQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^10.12.18"
@@ -14934,19 +14945,19 @@ web3-shh@1.0.0-beta.37:
     web3-core-subscriptions "1.0.0-beta.37"
     web3-net "1.0.0-beta.37"
 
-web3-shh@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-shh/-/web3-shh-1.0.0-beta.52.tgz#02ce376cb7a20276e49701684b5a9eda4e49c6ab"
-  integrity sha512-Qu9cb9fifUFIDTGujnBnInO3D2OCXDAmCowqMWebEazoZxk9P4oYWmumym1ZErixqEWREb4lkoayyEDSpARzSg==
+web3-shh@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-shh/-/web3-shh-1.0.0-beta.54.tgz#1f0b5d42f9e7a542547d0638aea6911fbb771cec"
+  integrity sha512-YO+sMZ3szof0wTZ+Lh43mkioVGSLhDH2paGzcBB7JM8PoZ9QbuLquNypiM3XWfehNusCQmEGvq0R0nVZe/Juaw==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-core-subscriptions "1.0.0-beta.52"
-    web3-net "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-core-subscriptions "1.0.0-beta.54"
+    web3-net "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 web3-utils@1.0.0-beta.35:
   version "1.0.0-beta.35"
@@ -14978,6 +14989,22 @@ web3-utils@1.0.0-beta.52:
   version "1.0.0-beta.52"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.52.tgz#27f9beeac3e1ea981eba9824d79e2971f156eebc"
   integrity sha512-WdHyzPcZu/sOnNrkcOZT20QEX9FhwD9OJJXENojQNvMK2a1xo3n8JWBcC2gzAGwsa0Aah6z2B3Xwa1P//8FaoA==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    "@types/bn.js" "^4.11.4"
+    "@types/node" "^10.12.18"
+    bn.js "4.11.8"
+    eth-lib "0.2.8"
+    ethjs-unit "^0.1.6"
+    lodash "^4.17.11"
+    number-to-bn "1.7.0"
+    randomhex "0.1.5"
+    utf8 "2.1.1"
+
+web3-utils@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.54.tgz#90588e45eae7c56b61138b5a4c4034377fca33fd"
+  integrity sha512-yb/cjzjTU99P/9bEaAnb6cjqGjyMUF0OmjD7/ix89IfcDhBJ3jExSuClTAKU8Hz9Rf7IXLiXqBny9W8PdogwmQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/bn.js" "^4.11.4"
@@ -15027,23 +15054,23 @@ web3@1.0.0-beta.37:
     web3-shh "1.0.0-beta.37"
     web3-utils "1.0.0-beta.37"
 
-web3@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3/-/web3-1.0.0-beta.52.tgz#a524888b84206d1ceea8abe1d6056bd7a0a8e33f"
-  integrity sha512-IWBV1gS7sElHqD2mkwjdyeEmY4YhWn7C+b+pdOWgDJ6j70ux2bqVMfsP0saZ9nWeF1TWMvUnrFsyZ7C4/VnhTA==
+web3@1.0.0-beta.54:
+  version "1.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/web3/-/web3-1.0.0-beta.54.tgz#d3545ad863be6558ca08b3e41b9491cf16d1eb8b"
+  integrity sha512-rMQaLFwBNR3Lc8Npa9uasdkJKhsnp2FrDA0r8J814mU1VITkAG7l8NPICrlUaDLNiQn0bf6QnONTNujuds+yNg==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^10.12.18"
-    web3-bzz "1.0.0-beta.52"
-    web3-core "1.0.0-beta.52"
-    web3-core-helpers "1.0.0-beta.52"
-    web3-core-method "1.0.0-beta.52"
-    web3-eth "1.0.0-beta.52"
-    web3-eth-personal "1.0.0-beta.52"
-    web3-net "1.0.0-beta.52"
-    web3-providers "1.0.0-beta.52"
-    web3-shh "1.0.0-beta.52"
-    web3-utils "1.0.0-beta.52"
+    web3-bzz "1.0.0-beta.54"
+    web3-core "1.0.0-beta.54"
+    web3-core-helpers "1.0.0-beta.54"
+    web3-core-method "1.0.0-beta.54"
+    web3-eth "1.0.0-beta.54"
+    web3-eth-personal "1.0.0-beta.54"
+    web3-net "1.0.0-beta.54"
+    web3-providers "1.0.0-beta.54"
+    web3-shh "1.0.0-beta.54"
+    web3-utils "1.0.0-beta.54"
 
 webassembly-floating-point-hex-parser@0.1.2:
   version "0.1.2"
