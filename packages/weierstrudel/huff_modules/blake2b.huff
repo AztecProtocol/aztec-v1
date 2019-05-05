@@ -3,11 +3,11 @@
  *
  * @author Zachary Williamson
  * A Huff smart contract that performs the Blake2b hashing algorithm
- * Costs ~16,130 gas per compression round, plus ~630 gas in setup costs
+ * Costs ~14,000 gas per compression round, plus ~630 gas in setup costs
  *
- * Cost to hash 128 bytes ~14,503 gas
- * Cost to hash 5kb data ~551,654 gas
- * Cost of 512 compression rounds (equihash) ~7,061,173 gas
+ * Cost to hash 128 bytes ~14,003 gas
+ * Cost to hash 5kb data ~532,993 gas
+ * Cost of 512 compression rounds (equihash) ~6,821,545 gas
  * 
  **/
 
@@ -15,25 +15,24 @@
  * V arrays
  * We store 2 V entries in a single EVM word
  * Each entry is separated by 8 bytes of zero padding,
- * The most and least significant 4 bytes of the word are also zero padded.
  * This allows us to perform bit rotations and uint64 additions with a
  * minimal amount of masking, and we can cut the # of mixing steps in half per compression
  **/
 #define macro V_0_1 = takes(0) returns(1)
 {
-0x000000006a09e667f3bcc9080000000000000000bb67ae8584caa73b00000000
+0x00000000000000006a09e667f3bcc9080000000000000000bb67ae8584caa73b
 }
 #define macro V_2_3 = takes(0) returns(1)
 {
-0x000000003c6ef372fe94f82b0000000000000000a54ff53a5f1d36f100000000
+0x00000000000000003c6ef372fe94f82b0000000000000000a54ff53a5f1d36f1
 }
 #define macro V_4_5 = takes(0) returns(1)
 {
-0x00000000510e527fade682d100000000000000009b05688c2b3e6c1f00000000
+0x0000000000000000510e527fade682d100000000000000009b05688c2b3e6c1f
 }
 #define macro V_6_7 = takes(0) returns(1)
 {
-0x000000001f83d9abfb41bd6b00000000000000005be0cd19137e217900000000
+0x00000000000000001f83d9abfb41bd6b00000000000000005be0cd19137e2179
 }
 
 /**
@@ -100,13 +99,13 @@
  * ...so many masks
  **/
 #define macro OVERFLOW_MASK = takes(0) returns(1) {
-0x00000000ffffffffffffffff0000000000000000ffffffffffffffff00000000
+0x0000000000000000ffffffffffffffff0000000000000000ffffffffffffffff
 }
 #define macro LO_MASK = takes(0) returns(1) {
-0x0000000000000000000000000000000000000000ffffffffffffffff00000000
+0x000000000000000000000000000000000000000000000000ffffffffffffffff
 }
 #define macro HI_MASK = takes(0) returns(1) {
-0x00000000ffffffffffffffff0000000000000000000000000000000000000000
+0x0000000000000000ffffffffffffffff00000000000000000000000000000000
 }
 #define macro MASK_HIHI = takes(0) returns(1) {
 0xffffffffffffffff000000000000000000000000000000000000000000000000
@@ -139,34 +138,21 @@
 #define macro PAIR_LO_MASK = takes(0) returns(1) {
 0x00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff
 }
-#define macro MINUS_ONE = takes(0) returns(1) {
-0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+#define macro ROR_MULTIPLICAND = takes(0) returns(1) {
+    0x10000000000000001
 }
-#define macro ROR_63_MULTIPLICAND = takes(0) returns(1) {
-    0x2000000000000000000000000000000000000000000000002
+#define macro ROR_SHIFTS = takes(0) returns(3) {
+    63 16 24 32
 }
-#define macro ROR_32_MULTIPLICAND = takes(0) returns(1) {
-    0x100000000000000000000000000000000000000000000000100000000
-}
-#define macro ROR_24_MULTIPLICAND = takes(0) returns(1) {
-    0x10000000000000000000000000000000000000000000000010000000000
-}
-#define macro ROR_16_MULTIPLICAND = takes(0) returns(1) {
-    0x1000000000000000000000000000000000000000000000001000000000000
-}
-
-// Macro to perform right bit rotation
-// we assume we have the following stack state:
-// variable_to_rotate -1
-// We perform bit rotation by multiplication modulo -1.
-// E.g. to rotate right by 32 bits, we multiply by (2^(256 - 32) + 2^32)
-// If our starting word is this: 00 ,xhi,xlo,00 ,00 ,yhi,ylo,00
-// Then we end up with this    : xhi,xlo,xhi,xlo,yhi,ylo,yhi,ylo
-// and we can use a mask to remove unwanted bits
-// leaving us with             : 00 ,xlo,xhi,00, 00 ,ylo,yhi,00
-template <get_mask, get_multiplicand>
+// Macro to perform right bit rotation.
+// This costs as much gas as using mulmod, but this version requires less weird stack
+// shenanigans, and has a faster runtime (if not a low gas cost. Hmmm)
+// We take advantage of the fact that each 8 byte word is padded by 8 zero bytes
+// So we can 'double up' each word by multiplying by (2**64 + 1)
+// and then shifing down to get the appropriate 'rotated' right shift
+template <get_mask, get_ror_multiplicand, get_shift>
 #define macro ROR = takes(2) returns(1) {
-    <get_multiplicand> mulmod <get_mask> and
+    <get_ror_multiplicand> mul <get_shift> shr <get_mask> and
 }
 
 // add three uint64 variable pairs
@@ -235,81 +221,137 @@ template <get_mask>
     pop pop pop pop // pop the masks
 }
 
-#define macro NOOP = takes(0) returns(0) {}
-#define macro LOG_2_4 = takes(0) returns(0) {
-    // stack state: V1 V3 V0 V2
-}
 /**
- * MIX
+ * MIX_PREAMBLE
  *
  * Perform two simultaneous mixing steps.
- * There are 8 mixing steps per mix section.
+ * There are 4 smooshed mixing steps per mix section.
+ * Each mixing step has a common 'preamble section', but
+ * the epilogue changes depending on the words we need to cache
  **/ 
-template <V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>
-#define macro MIX_BASE = takes(0) returns(4) {
-    // stack state: t x ror32 ror24 ror16 ror63 -1 overflow_mask hi_mask lo_mask
-    <V_d_loc> mload <V_c_loc> mload <V_b_loc> mload
-    // Vb Vc Vd t x ror32 ror24 ror16 ror63 -1 overflow hi lo
-    // We need to cache 4 instances of -1 on the stack, as we use multiplications modulo -1
-    // to perform our bit rotations
-    dup10 dup1 dup1 dup1
-    <V_a_loc> mload
-    // Va -1 -1 -1 -1 Vb Vc Vd
+template <V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_PREAMBLE = takes(0) returns(4) {
     // Va = Va + Vb + X
-    dup6 <X_0-4> mload <X_1-20> mload or U64_ADD_THREE<dup16>() // Va -1 -1 -1 -1 Vb Vc Vd
-    // Vd = (Vd xor Va) ror 32
-    // Va -1 -1 -1 -1 Vb Vc Vd
-    swap7 dup8 xor
-    // Va -1 -1 -1 -1 Vb Vd Vd t x ror32 ror24 ror16 ror63 -1 overflow
-    ROR<dup15, dup11>() // ROR<32, get_mask>()  // Vd -1 -1 -1  Vb Vc Va //
+    <V_b_loc> mload
+    <V_a_loc> mload
+    // I feel I should point out that <overflow_mask> is not a constant integer, but a dup opcode.
+    // And yes, we are adding an integer to an templated opcode in this line, intentionally.
+    // What is not intentional, is that if the integer offset becomes large enough, the dup opcode will compile to a swap opcode.
+    // I prefer to think of it as less of a bug, and more like the compiler indulging in whimsical opcode polymorphism
+    dup2 <X_0-8> mload <X_1-24> mload or U64_ADD_THREE<overflow_mask+2>() // Va Vb
+    // Vd = (Vd xor Va) ror32
+    <V_d_loc> mload dup2 xor ROR<overflow_mask+3, overflow_mask+4, overflow_mask+5>() // Vd Va Vb
     // Vc = Vc + Vd
-    swap5 dup6 U64_ADD_TWO<dup15>() // Vc -1 -1 -1 Vb Vd Va
-    // Vb = (Vb xor Vc) ror 24
-    swap4 dup5 xor ROR<dup14, dup11>() // Vb -1 -1 Vc Vd Va
+    <V_c_loc> mload dup2 U64_ADD_TWO<overflow_mask+4>() // Vc Vd Va Vb
+    // Vb = (Vb xor Vc) ror24
+    swap3 dup4 xor ROR<overflow_mask+4, overflow_mask+5, overflow_mask+7>() // Vb Vd Va Vc
     // Va = Va + Vb + Y
-    swap5 dup6 <Y_0-4> mload <Y_1-20> mload or U64_ADD_THREE<dup14>() // Va -1 -1 Vc Vd Vb
+    swap2 dup3 <Y_0-8> mload <Y_1-24> mload or U64_ADD_THREE<overflow_mask+4>() // Va Vd Vb Vc
+}
+
+/**
+ * MIX_EPILOGUE
+ *
+ * This completes a mixing step with the minimum number of swap ops.
+ * Can only use this in 2/4 steps, in the latter 2 steps we need to store
+ * our V elements in memory in a very specific order, which adds swap ops
+ **/ 
+template <V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_EPILOGUE_MINIMUM_SWAPS = takes(0) returns(4) {
+    dup1 <V_a_loc> mstore
     // Vd = Vd xor Va ror 16
-    swap4 dup5 xor ROR<dup13, dup11>() // Vd -1 Vc Va Vb
+    xor ROR<overflow_mask+3, overflow_mask+4, overflow_mask+7>() // Vd Vb Vc
     // Vc = Vc + Vd
-    swap2 dup3 U64_ADD_TWO<dup13>() // Vc -1 Vd Va Vb
+    swap2 dup3 U64_ADD_TWO<overflow_mask+3>() // Vc Vb Vd
     // Vb = Vb xor Vc ror 63
-    swap4 dup5 xor ROR<dup12, dup11>()// Vb Vd Va Vc
-    // <V_b_loc> mstore <V_d_loc> mstore <V_a_loc> mstore <V_c_loc> mstore
+    dup1 <V_c_loc> mstore
+    xor ROR<overflow_mask+2, overflow_mask+3, overflow_mask+7>() // Vb Vd
 }
 
-template <V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>
-#define macro MIX = takes(0) returns(0) {
-    MIX_BASE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>()
-    <V_b_loc> mstore <V_d_loc> mstore <V_a_loc> mstore <V_c_loc> mstore
+/**
+ * MIX_EPILOGUE_PRESERVE_V_C
+ *
+ * In the 3rd mixing step, we want to write V_12_15 at the position of V_12_13 and V_14_15.
+ * We then fix up our weird memory layout by writing V_13_14. However this requires Vc to be stored after Vd
+ **/
+template <V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_EPILOGUE_PRESERVE_V_C = takes(0) returns(4) {
+    dup1 <V_a_loc> mstore
+    // Vd = Vd xor Va ror 16
+    xor ROR<overflow_mask+3, overflow_mask+4, overflow_mask+7>() // Vd Vb Vc
+    // Vc = Vc + Vd
+    swap2 dup3 U64_ADD_TWO<overflow_mask+3>() // Vc Vb Vd
+    // Vb = Vb xor Vc ror 63
+    swap1 dup2 xor ROR<overflow_mask+3, overflow_mask+4, overflow_mask+8>() // Vb Vc Vd
 }
 
-template <V_log_b_loc, V_log_d_loc, V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>
-#define macro MIX_LOG_B_D = takes(0) returns(0) {
-    MIX_BASE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>()
-    // stack state: // Vb Vd Va Vc
-    dup1 <V_log_b_loc> mstore
+/**
+ * MIX_EPILOGUE_PRESERVE_V_A_V_C
+ *
+ * In the 3rd mixing step, we want to write V_7_4 at the position of V_3_4 and V_7_8.
+ * We then fix up our weird memory layout by writing V_5_6. However this requires Va to be stored after Vb
+ **/
+template <V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_EPILOGUE_PRESERVE_V_A_V_C = takes(0) returns(4) {
+    // Vd = Vd xor Va ror 16
+    swap1 dup2 xor ROR<overflow_mask+4, overflow_mask+5, overflow_mask+8>() // Vd Va Vb Vc
+    // Vc = Vc + Vd
+    swap3 dup4 U64_ADD_TWO<overflow_mask+4>() // Vc Va Vb Vd
+    // Vb = Vb xor Vc ror 63
+    swap2 dup3 xor ROR<overflow_mask+4, overflow_mask+5, overflow_mask+9>() // Vb Va Vc Vd
+}
+
+/**
+ * MIX_FIRST_SECTION
+ **/
+template <V_cache_b_loc, V_cache_d_loc, V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_FIRST_SECTION = takes(0) returns(4) {
+    MIX_PREAMBLE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
+    MIX_EPILOGUE_MINIMUM_SWAPS<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
+    dup1 <V_cache_b_loc> mstore
     <V_b_loc> mstore
-    dup1 <V_log_d_loc> mstore
-    <V_d_loc> mstore <V_a_loc> mstore <V_c_loc> mstore
+    dup1 <V_cache_d_loc> mstore
+    <V_d_loc> mstore   
 }
 
-template <V_restore_loc, V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>
-#define macro MIX_RESTORE_D = takes(0) returns(0) {
-    MIX_BASE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>()
-    // stack state: // Vb Vd Va Vc
+/**
+ * MIX_SECOND_SECTION
+ **/
+template <V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_SECOND_SECTION = takes(0) returns(4) {
+    MIX_PREAMBLE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
+    MIX_EPILOGUE_MINIMUM_SWAPS<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
     <V_b_loc> mstore
-    dup1 <V_restore_loc> mstore // V_c_loc will overwrite the word we've erroneously set
+    <V_d_loc> mstore   
+}
+
+/**
+ * MIX_THIRD_SECTION
+ **/
+template <V_restore_d_loc, V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_THIRD_SECTION = takes(0) returns(4) {
+    MIX_PREAMBLE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
+    MIX_EPILOGUE_PRESERVE_V_C<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
+    // Vb Vc Vd
+    dup3 <V_restore_d_loc> mstore // V_c_loc will overwrite the word we've erroneously set here
+    <V_b_loc> mstore
+    <V_c_loc> mstore
+    <V_d_loc> mstore 
+}
+
+/**
+ * MIX_FOURTH_SECTION
+ **/
+template <V_restore_b_loc, V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>
+#define macro MIX_FOURTH_SECTION = takes(0) returns(4) {
+    MIX_PREAMBLE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
+    MIX_EPILOGUE_PRESERVE_V_A_V_C<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1, overflow_mask>()
+    // Vb Va Vc Vd
+    dup1 <V_restore_b_loc> mstore // V_a_loc will overwrite the word we've erroneously set here
+    <V_b_loc> mstore
+    <V_a_loc> mstore
+    <V_c_loc> mstore
     <V_d_loc> mstore
-    <V_a_loc> mstore <V_c_loc> mstore
-}
-
-template <V_restore_loc, V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>
-#define macro MIX_RESTORE_B = takes(0) returns(0) {
-    MIX_BASE<V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>()
-    // stack state: // Vb Vd Va Vc
-    dup1 <V_restore_loc> mstore // V-a_loc will overwtie the word we've erroneously set
-    <V_b_loc> mstore
-    <V_d_loc> mstore <V_a_loc> mstore <V_c_loc> mstore
 }
 
 /**
@@ -317,7 +359,7 @@ template <V_restore_loc, V_a_loc, V_b_loc, V_c_loc, V_d_loc, X_0, X_1, Y_0, Y_1>
  *
  * Perform a round of mixing. There are 16 rounds per compression round
  **/
-template <m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15>
+template <m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15,overflow_mask>
 #define macro MIX_SECTION = takes(8) returns(8) {
     // We start with 4 cached V-values on the stack,
     // followed by variables 't', 'x' and then the cached masks
@@ -327,17 +369,17 @@ template <m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15>
     // Round 1, 2
     // We want to take V_4_7 and V_15_12, and duplicate V[4], V[12] so that
     // V_7_4 and V_15_12 load correct array indices
-    MIX_LOG_B_D<V_7_4_LOC+0x10, V_15_12_LOC+0x10, V_0_1_LOC, V_4_5_LOC, V_8_9_LOC, V_12_13_LOC, m0, m2, m1, m3>()
+    MIX_FIRST_SECTION<V_7_4_LOC+0x10, V_15_12_LOC+0x10, V_0_1_LOC, V_4_5_LOC, V_8_9_LOC, V_12_13_LOC, m0, m2, m1, m3, overflow_mask>()
     // Round 3, 4
-    MIX<V_2_3_LOC, V_6_7_LOC, V_10_11_LOC, V_14_15_LOC, m4, m6, m5, m7>()
+    MIX_SECOND_SECTION<V_2_3_LOC, V_6_7_LOC, V_10_11_LOC, V_14_15_LOC, m4, m6, m5, m7, overflow_mask>()
 
     // Round 5, 6
     // We need to take V_15_12 and store V[12] in correct location
-    MIX_RESTORE_D<V_11_12_LOC, V_0_1_LOC, V_5_6_LOC, V_10_11_LOC, V_15_12_LOC, m8, m10, m9, m11>()
+    MIX_THIRD_SECTION<V_11_12_LOC, V_0_1_LOC, V_5_6_LOC, V_10_11_LOC, V_15_12_LOC, m8, m10, m9, m11, overflow_mask>()
 
     // Round 7, 8
     // We need to take V_7_4 and store V[4] in correct location
-    MIX_RESTORE_B<V_3_4_LOC, V_2_3_LOC, V_7_4_LOC, V_8_9_LOC, V_13_14_LOC, m12, m14, m13, m15>()
+    MIX_FOURTH_SECTION<V_3_4_LOC, V_2_3_LOC, V_7_4_LOC, V_8_9_LOC, V_13_14_LOC, m12, m14, m13, m15, overflow_mask>()
 }
 
 // In COMPRESS, we modify V14 in the final round. Store both
@@ -354,7 +396,7 @@ template <m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15>
  *
  * Perform a compression round
  **/
-template <v_14_transform>
+template <v_14_transform,overflow_mask>
 #define macro COMPRESS = takes(1) returns(0) {
     // starting stack: t
     // data is already in the hash buffer
@@ -362,33 +404,34 @@ template <v_14_transform>
     SLICE_M()
     // copy V[0,...,8] into V[9,...,15]
     // xor t into V_12
-    V_4_5() dup2 160 shl xor V_12_13_LOC() mstore
+    V_4_5() dup2 128 shl xor V_12_13_LOC() mstore
     // if this is the final block, negate V_14
     <v_14_transform>
     V_14_15_LOC() mstore
     V_2_3() V_10_11_LOC() mstore
     V_0_1() V_8_9_LOC() mstore
 
-    // load up V[0,...,8] onto stack. This way we can used the stored
+    // cache V[0,...,8] somewhere else. This way we can used the stored
     // values of V as temporaries, to store the hash result H
     V_0_1_LOC() mload V_0_1_CACHE() mstore
     V_2_3_LOC() mload V_2_3_CACHE() mstore
     V_4_5_LOC() mload V_4_5_CACHE() mstore
     V_6_7_LOC() mload V_6_7_CACHE() mstore
-    // stack state: V_6_7 V_4_5 V_2_3 V_0_1 t x mask
+
+    // stack state: t x
     // *scrambling noises*
-    MIX_SECTION<M0,M1,M2,M3,M4,M5,M6,M7,M8,M9,M10,M11,M12,M13,M14,M15>()
-    MIX_SECTION<M14,M10,M4,M8,M9,M15,M13,M6,M1,M12,M0,M2,M11,M7,M5,M3>()
-    MIX_SECTION<M11,M8,M12,M0,M5,M2,M15,M13,M10,M14,M3,M6,M7,M1,M9,M4>()
-    MIX_SECTION<M7,M9,M3,M1,M13,M12,M11,M14,M2,M6,M5,M10,M4,M0,M15,M8>()
-    MIX_SECTION<M9,M0,M5,M7,M2,M4,M10,M15,M14,M1,M11,M12,M6,M8,M3,M13>()
-    MIX_SECTION<M2,M12,M6,M10,M0,M11,M8,M3,M4,M13,M7,M5,M15,M14,M1,M9>()
-    MIX_SECTION<M12,M5,M1,M15,M14,M13,M4,M10,M0,M7,M6,M3,M9,M2,M8,M11>()
-    MIX_SECTION<M13,M11,M7,M14,M12,M1,M3,M9,M5,M0,M15,M4,M8,M6,M2,M10>()
-    MIX_SECTION<M6,M15,M14,M9,M11,M3,M0,M8,M12,M2,M13,M7,M1,M4,M10,M5>()
-    MIX_SECTION<M10,M2,M8,M4,M7,M6,M1,M5,M15,M11,M9,M14,M3,M12,M13,M0>()
-    MIX_SECTION<M0,M1,M2,M3,M4,M5,M6,M7,M8,M9,M10,M11,M12,M13,M14,M15>()
-    MIX_SECTION<M14,M10,M4,M8,M9,M15,M13,M6,M1,M12,M0,M2,M11,M7,M5,M3>()
+    MIX_SECTION<M0,M1,M2,M3,M4,M5,M6,M7,M8,M9,M10,M11,M12,M13,M14,M15,overflow_mask>()
+    MIX_SECTION<M14,M10,M4,M8,M9,M15,M13,M6,M1,M12,M0,M2,M11,M7,M5,M3,overflow_mask>()
+    MIX_SECTION<M11,M8,M12,M0,M5,M2,M15,M13,M10,M14,M3,M6,M7,M1,M9,M4,overflow_mask>()
+    MIX_SECTION<M7,M9,M3,M1,M13,M12,M11,M14,M2,M6,M5,M10,M4,M0,M15,M8,overflow_mask>()
+    MIX_SECTION<M9,M0,M5,M7,M2,M4,M10,M15,M14,M1,M11,M12,M6,M8,M3,M13,overflow_mask>()
+    MIX_SECTION<M2,M12,M6,M10,M0,M11,M8,M3,M4,M13,M7,M5,M15,M14,M1,M9,overflow_mask>()
+    MIX_SECTION<M12,M5,M1,M15,M14,M13,M4,M10,M0,M7,M6,M3,M9,M2,M8,M11,overflow_mask>()
+    MIX_SECTION<M13,M11,M7,M14,M12,M1,M3,M9,M5,M0,M15,M4,M8,M6,M2,M10,overflow_mask>()
+    MIX_SECTION<M6,M15,M14,M9,M11,M3,M0,M8,M12,M2,M13,M7,M1,M4,M10,M5,overflow_mask>()
+    MIX_SECTION<M10,M2,M8,M4,M7,M6,M1,M5,M15,M11,M9,M14,M3,M12,M13,M0,overflow_mask>()
+    MIX_SECTION<M0,M1,M2,M3,M4,M5,M6,M7,M8,M9,M10,M11,M12,M13,M14,M15,overflow_mask>()
+    MIX_SECTION<M14,M10,M4,M8,M9,M15,M13,M6,M1,M12,M0,M2,M11,M7,M5,M3,overflow_mask>()
 
     // Xor the old V[0,...,8] with the new ones, plus V[9,...,15]
     V_6_7_CACHE() mload V_6_7_LOC() mload xor V_14_15_LOC() mload xor V_6_7_LOC() mstore
@@ -401,15 +444,15 @@ template <v_14_transform>
 // and convert into 64 packed bytes
 // (and also convert into big-endian)
 #define macro BLAKE2B__PROCESS_OUTPUT = takes(0) returns(0) {
-    V_0_1_LOC() mload dup1 HI_MASK() and 0x20 shl
-    swap1 LO_MASK() and 0x60 shl or
-    V_2_3_LOC() mload dup1 HI_MASK() and 0x60 shr
-    swap1 LO_MASK() and 0x20 shr or or BSWAP_UINT64() RESULT_0_LOC() mstore
+    V_0_1_LOC() mload dup1 HI_MASK() and 0x40 shl
+    swap1 LO_MASK() and 0x80 shl or
+    V_2_3_LOC() mload dup1 HI_MASK() and 0x40 shr
+    swap1 LO_MASK() and /* 0x20 shr */ or or BSWAP_UINT64() RESULT_0_LOC() mstore
 
-    V_4_5_LOC() mload dup1 HI_MASK() and 0x20 shl
-    swap1 LO_MASK() and 0x60 shl or
-    V_6_7_LOC() mload dup1 HI_MASK() and 0x60 shr
-    swap1 LO_MASK() and 0x20 shr or or BSWAP_UINT64() RESULT_1_LOC() mstore
+    V_4_5_LOC() mload dup1 HI_MASK() and 0x40 shl
+    swap1 LO_MASK() and 0x80 shl or
+    V_6_7_LOC() mload dup1 HI_MASK() and 0x40 shr
+    swap1 LO_MASK() and /* 0x20 shr */ or or BSWAP_UINT64() RESULT_1_LOC() mstore
 }
 
 /**
@@ -420,11 +463,11 @@ template <v_14_transform>
 #define macro BLAKE2B__INIT_V = takes(0) returns(0) {
     V_0_1() // load V_0_1
     // we want to XOR the input length with V[0]
-    // V[0] is located at byte positions [4 - 12] in V_0_1
-    // so we need to shift the output length by 20 bytes
-    0x00 calldataload 160 shl xor
+    // V[0] is located at byte positions [8 - 16] in V_0_1
+    // so we need to shift the output length by 16 bytes
+    0x00 calldataload 128 shl xor
     // we also want V[0] ^ 0x01010000
-    0x010100000000000000000000000000000000000000000000 xor
+    0x0101000000000000000000000000000000000000 xor
     V_0_1_LOC() mstore
     // store the remainding V indices
     V_2_3() V_2_3_LOC() mstore
@@ -445,14 +488,9 @@ template <v_14_transform>
 
     // cache the most commonly used masks on the stack to reduce code size,
     // first attempt was 50kb large and we need to get below 24kb (currently at ~14kb)
-    HI_MASK()
-    LO_MASK()
+    ROR_SHIFTS()
+    ROR_MULTIPLICAND()
     OVERFLOW_MASK()
-    MINUS_ONE()
-    ROR_63_MULTIPLICAND()
-    ROR_16_MULTIPLICAND()
-    ROR_24_MULTIPLICAND()
-    ROR_32_MULTIPLICAND()
 
     BLAKE2B__INIT_V()
 
@@ -478,7 +516,7 @@ template <v_14_transform>
         // update t
         128 add
         // if we're here, we're not hashing the final word
-        COMPRESS<NO_V_14_TRANSFORM>() // t x
+        COMPRESS<NO_V_14_TRANSFORM,dup3>() // t x overflow
 
         // test if we've finished iterating
     blake2b__main_loop_check:
@@ -508,13 +546,13 @@ template <v_14_transform>
     calldatacopy                 // t x
     // t = x, so swap
     swap1
-    COMPRESS<DO_V_14_TRANSFORM>()
+    COMPRESS<DO_V_14_TRANSFORM,dup3>()
 
     // we're almost done! Remove the weird zero-padding from V
     // and convert into big-endian form
     BLAKE2B__PROCESS_OUTPUT()
     // stack state: t x mask mask mask mask mask mask mask mask
-    pop pop pop pop pop pop pop pop pop pop
+    pop pop pop pop pop pop pop pop
     // exit, returning the number of bytes requested
     0x00 calldataload RESULT_0_LOC() return
 }

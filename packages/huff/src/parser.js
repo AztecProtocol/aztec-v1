@@ -67,6 +67,81 @@ parser.processMacroLiteral = (op, macros) => {
     throw new Error(`I don't know how to process literal ${op}`);
 };
 
+// what a godawful mess! So, this is supposed to unpick
+// a template paramter like 'dup1+4' or 'swap14-3'
+parser.processModifiedOpcode = (literal, macros) => {
+    // oh foobar
+    if (literal.includes('-')) {
+        return normalize(literal.split('-').map((rawOp) => {
+            const op = regex.removeSpacesAndLines(rawOp);
+            if (regex.containsOperators(op)) {
+                return parser.processModifiedOpcode(op, macros);
+            }
+            if (regex.isLiteral(op)) {
+                return parser.processMacroLiteral(op, macros);
+            }
+            if (opcodes[op]) {
+                return new BN(opcodes[op], 16);
+            }
+            if (macros[op]) {
+                check(
+                    macros[op].ops.length === 1,
+                    `cannot sub ${op}, ${macros[op].ops} has more than 1 opcode`
+                );
+                const { value } = new BN(macros[op].ops, 16);
+                check(
+                    value.gt(new BN('80', 16)) && value.lt(new BN('a0', 16)),
+                    `cannot sub ${op}, this is not a dup or swap opcode`
+                );
+                return value;
+            }
+            throw new Error(`I don't know how to process modified template ${op}`);
+        }).reduce((acc, val) => {
+            if (!acc) { return val; }
+            return acc.sub(val);
+        }, null));
+    }
+    if (literal.includes('+')) {
+        return normalize(literal.split('+').map((rawOp) => {
+            const op = regex.removeSpacesAndLines(rawOp);
+            if (regex.containsOperators(op)) {
+                return parser.processModifiedOpcode(op, macros);
+            }
+            if (regex.isLiteral(op)) {
+                return parser.processMacroLiteral(op, macros);
+            }
+            if (opcodes[op]) {
+                return new BN(opcodes[op], 16);
+            }
+            if (macros[op]) {
+                check(
+                    macros[op].ops.length === 1,
+                    `cannot add ${op}, ${macros[op].ops} has more than 1 opcode`
+                );
+                const { value } = new BN(macros[op].ops, 16);
+                check(
+                    value.gt(new BN('80', 16)) && value.lt(new BN('a0', 16)),
+                    `cannot add ${op}, this is not a dup or swap opcode`
+                );
+                return value;
+            }
+            throw new Error(`I don't know how to process modified template ${op}`);
+        }).reduce((acc, val) => {
+            if (!acc) { return val; }
+            return acc.add(val);
+        }, null));
+    }
+    check(
+        BN.isBN(literal),
+        `Honestly, at this point I have no idea what's going on. What have you done?! ${literal}`
+    );
+    check(
+        literal.gt(new BN('80', 16)) && literal.lt(new BN('a0', 16)),
+        `opcode ${literal} is not a valid DUP or SWAP opcode`
+    );
+    return literal; // ?
+};
+
 parser.processTemplateLiteral = (literal, macros) => {
     if (literal.includes('-')) {
         return normalize(literal.split('-').map((rawOp) => {
@@ -145,6 +220,25 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
                         type: TYPES.PUSH,
                         value: opcode,
                         args: [hex],
+                        index,
+                    }],
+                    templateParams: [],
+                },
+            },
+        };
+    }
+    if (regex.isModifiedOpcode(templateName)) {
+        const opcode = parser.processModifiedOpcode(templateName, macros).toString(16);
+        return {
+            templateName: `inline-${templateName}-${macroId}`,
+            macros: {
+                ...macros,
+                [`inline-${templateName}-${macroId}`]: {
+                    name: templateName,
+                    ops: [{
+                        type: TYPES.OPCODE,
+                        value: opcode,
+                        args: [],
                         index,
                     }],
                     templateParams: [],
@@ -274,6 +368,7 @@ parser.processMacroInternal = (
         templateParams,
     } = macro;
     const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommas(t)], []);
+
     check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs!`);
     const templateRegExps = templateParams.map((label, i) => {
         const pattern = new RegExp(`\\b(${label})\\b`, 'g');
@@ -301,6 +396,7 @@ parser.processMacroInternal = (
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
                 let templateName = templateArguments[macroNameIndex];
+
                 const parsedName = parser.substituteTemplateArguments([op.value], templateRegExps);
                 if (parsedName.length !== 1) {
                     throw new Error('cannot parse template invokation ', parsedName);

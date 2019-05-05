@@ -3,6 +3,7 @@ const regex = {};
 const commas = new RegExp('[^,\\s\\n]*', 'g');
 const spaces = new RegExp('^[\\s\\n]*');
 const operators = new RegExp('[\\+\\-\\*]');
+// const characters = new RegExp('[g-zG-Z*]');
 
 // const angleBrackets = new RegExp('^[^<>]*');
 
@@ -36,7 +37,7 @@ regex.isolateTemplate = (val) => {
 };
 
 regex.containsOperators = (input) => {
-    return operators.test(input);
+    return operators.test(input) && !input.includes('dup') && !input.includes('swap'); // .test(input);
 };
 
 regex.isLiteral = (input) => {
@@ -50,6 +51,12 @@ regex.isLiteral = (input) => {
         return true;
     }
     return false;
+};
+
+regex.isModifiedOpcode = (input) => {
+    const hasOperators = input.includes('-') || input.includes('+');
+    const hasStackOpcodes = input.includes('dup') || input.includes('swap');
+    return hasOperators && hasStackOpcodes;
 };
 
 regex.removeSpacesAndLines = (input) => {
