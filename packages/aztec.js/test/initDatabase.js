@@ -1,22 +1,66 @@
-
 const BN = require('bn.js');
 const path = require('path');
 const fs = require('fs');
-const { constants } = require('@aztec/dev-utils');
+const crypto = require('crypto');
+
+const {
+    constants,
+    errors,
+} = require('@aztec/dev-utils');
 
 const setup = require('../src/setup');
+const proofUtils = require('../src/proof/proofUtils');
 
 const partialPath = path.posix.resolve(__dirname, 'localSetupDatabase');
+const TEST_K_MAX = 14336;
+
+proofUtils.randomNoteValue = () => {
+    return new BN(crypto.randomBytes(32), 16).umod(new BN(TEST_K_MAX)).toNumber();
+};
+
+proofUtils.generateBalancedNotes = (nIn, nOut) => {
+    const kIn = [...Array(nIn)].map(() => proofUtils.randomNoteValue());
+    const kOut = [...Array(nOut)].map(() => proofUtils.randomNoteValue());
+    let delta = proofUtils.getKPublic(kIn, kOut);
+    while (delta > 0) {
+        if (delta >= TEST_K_MAX) {
+            const k = proofUtils.randomNoteValue();
+            kOut.push(k);
+            delta -= k;
+        } else {
+            kOut.push(delta);
+            delta = 0;
+        }
+    }
+    while (delta < 0) {
+        if (-delta >= TEST_K_MAX) {
+            const k = proofUtils.randomNoteValue();
+            kIn.push(k);
+            delta += k;
+        } else {
+            kIn.push(-delta);
+            delta = 0;
+        }
+    }
+    return { kIn, kOut };
+};
 
 setup.fetchPoint = async (inputValue) => {
     const value = Number(inputValue);
 
+    if (value > TEST_K_MAX) {
+        throw errors.customError(
+            constants.NOTE_VALUE_TOO_BIG, {
+                message: 'note value is too big, max value is 10240 for the purposes of testing',
+                value,
+                TEST_K_MAX,
+            }
+        )
+    };
+
     return new Promise((resolve, reject) => {
         const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
-        console.log({ fileNum });
-
         const fileName = path.posix.resolve(partialPath, `data${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
-        console.log({ fileName });
 
         fs.readFile(fileName, (err, data) => {
             if (err) {
@@ -34,4 +78,3 @@ setup.fetchPoint = async (inputValue) => {
         });
     });
 };
-
