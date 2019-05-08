@@ -81,8 +81,8 @@ describe('Bilateral Swap Verifier', () => {
             const parseInputs = sinon.stub(proofUtils, 'parseInputs').callsFake(() => {});
 
             const randomNotes = await proofUtils.makeTestNotes(
-                [proofUtils.generateNoteValue(), proofUtils.generateNoteValue()],
-                [proofUtils.generateNoteValue(), proofUtils.generateNoteValue()],
+                [proofUtils.randomNoteValue(), proofUtils.randomNoteValue()],
+                [proofUtils.randomNoteValue(), proofUtils.randomNoteValue()],
             );
 
             const sender = randomHex(20);

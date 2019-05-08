@@ -11,9 +11,6 @@ const proof = require('../../../src/proof/joinSplit');
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 const proofUtils = require('../../../src/proof/proofUtils');
 
-const generateNoteValue = () => {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
-};
 
 const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
@@ -72,8 +69,8 @@ describe('Join-Split Proof Extractor', () => {
 
     // eslint-disable-next-line max-len
     it('should extract witnesses from two satisfying proofs over the same input string in the random oracle model', async () => {
-        const kIn = [...Array(nIn)].map(() => generateNoteValue());
-        const kOut = [...Array(nOut)].map(() => generateNoteValue());
+        const kIn = [...Array(nIn)].map(() => proofUtils.randomNoteValue());
+        const kOut = [...Array(nOut)].map(() => proofUtils.randomNoteValue());
         const { commitments, m } = await proofHelpers.generateFakeCommitmentSet({ kIn, kOut });
         const kPublic = getKPublic(kIn, kOut);
         const sender = randomAddress();

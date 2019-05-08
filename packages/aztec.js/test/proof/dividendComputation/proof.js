@@ -12,7 +12,7 @@ describe('Dividend Computation Proof', () => {
         - k_in = 90
         - Interest rate = 5%
         - k_out = 4
-        - k_res = 5
+        - k_res = 50
         - za = 5
         - zb = 100
         */

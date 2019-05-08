@@ -6,6 +6,7 @@ const { padLeft } = require('web3-utils');
 const bn128 = require('../../src/bn128');
 const HexString = require('./HexString');
 const note = require('../../src/note');
+const proofUtils = require('../../src/proof/proofUtils')
 const outputCoder = require('../../src/abiEncoder/outputCoder');
 
 const clean = (input) => {
@@ -16,9 +17,6 @@ const isHex = (input) => {
     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
 };
 
-const randomNoteValue = () => {
-    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
-};
 
 describe('abiEncoder.outputCoder', () => {
     let accounts = [];
@@ -29,7 +27,7 @@ describe('abiEncoder.outputCoder', () => {
         accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
         notes = await Promise.all(
             accounts.map(({ publicKey }) => {
-                return note.create(publicKey, randomNoteValue());
+                return note.create(publicKey, proofUtils.randomNoteValue());
             }),
         );
         challenges = [
@@ -98,7 +96,7 @@ describe('abiEncoder.outputCoder', () => {
         const inputNotes = [notes[0], notes[1]];
         const outputNotes = [notes[2], notes[3], notes[4]];
         const publicOwner = accounts[5].address;
-        const publicValue = randomNoteValue();
+        const publicValue = proofUtils.randomNoteValue();
         const encoded = new HexString(
             outputCoder.encodeProofOutput({
                 inputNotes,
@@ -138,14 +136,14 @@ describe('abiEncoder.outputCoder', () => {
                 inputNotes: [notes[0], notes[1]],
                 outputNotes: [notes[2], notes[3]],
                 publicOwner: accounts[4].address,
-                publicValue: randomNoteValue(),
+                publicValue: proofUtils.randomNoteValue(),
                 challenge: challenges[0],
             },
             {
                 inputNotes: [notes[5], notes[6]],
                 outputNotes: [notes[7], notes[8]],
                 publicOwner: accounts[9].address,
-                publicValue: randomNoteValue(),
+                publicValue: proofUtils.randomNoteValue(),
                 challenge: challenges[1],
             },
         ];

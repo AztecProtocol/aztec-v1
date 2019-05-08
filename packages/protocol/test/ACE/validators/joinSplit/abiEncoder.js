@@ -5,7 +5,7 @@ const { padLeft } = require('web3-utils');
 // ### Internal Dependencies
 const {
     abiEncoder: { outputCoder, inputCoder },
-    proof: { joinSplit },
+    proof: { joinSplit, proofUtils },
     note,
 } = require('aztec.js');
 
@@ -16,9 +16,6 @@ const secp256k1 = require('@aztec/secp256k1');
 
 const ABIEncoder = artifacts.require('./JoinSplitABIEncoderTest');
 
-function randomNoteValue() {
-    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
-}
 
 contract('Join-Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
@@ -32,7 +29,7 @@ contract('Join-Split ABI Encoder', (accounts) => {
 
             notes = await Promise.all(
                 aztecAccounts.map(({ publicKey }) => {
-                    return note.create(publicKey, randomNoteValue());
+                    return note.create(publicKey, proofUtils.randomNoteValue());
                 }),
             );
 
