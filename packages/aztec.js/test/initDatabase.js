@@ -49,13 +49,7 @@ setup.fetchPoint = async (inputValue) => {
     const value = Number(inputValue);
 
     if (value > TEST_K_MAX) {
-        throw errors.customError(
-            constants.NOTE_VALUE_TOO_BIG, {
-                message: 'note value is too big, max value is 10240 for the purposes of testing',
-                value,
-                TEST_K_MAX,
-            }
-        )
+        throw new Error('point not found');
     };
 
     return new Promise((resolve, reject) => {
