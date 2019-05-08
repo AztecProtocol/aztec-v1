@@ -617,10 +617,10 @@ contract('Bilateral Swap', (accounts) => {
 
         it('should fail for random note values between [0,...,K_MAX]', async () => {
             const noteValues = [
-                proofUtils.generateNoteValue(),
-                proofUtils.generateNoteValue(),
-                proofUtils.generateNoteValue(),
-                proofUtils.generateNoteValue(),
+                proofUtils.randomNoteValue(),
+                proofUtils.randomNoteValue(),
+                proofUtils.randomNoteValue(),
+                proofUtils.randomNoteValue(),
             ];
             const notes = await Promise.all([
                 ...bilateralSwapAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),

@@ -74,6 +74,12 @@ const constants = {
      *  @default 0
      */
     K_MIN: 0,
+    /** Maximum value that can be held in an AZTEC note during tests
+     *  @constant TEST_K_MAX
+     *  @type { string }
+     *  @default 10240
+     */
+    TEST_K_MAX: 10240,
     /** bytes32-formatted trusted setup public key
      *  @constant t2
      *  @type {BN}

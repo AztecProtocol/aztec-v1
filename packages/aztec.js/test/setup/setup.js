@@ -10,6 +10,7 @@ const { K_MAX, K_MIN } = constants;
 describe('Trusted Setup', () => {
     it('should read signature and retrieve well-formed elliptic curve points', async () => {
         const k = Math.floor(Math.random() * (K_MAX - K_MIN + 1)) + K_MIN;
+        console.log('k value: ', k);
         const point = await setup.fetchPoint(k);
         expect(BN.isBN(point.x)).to.equal(true);
         expect(BN.isBN(point.y)).to.equal(true);
