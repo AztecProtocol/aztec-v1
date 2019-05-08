@@ -16,7 +16,6 @@ const secp256k1 = require('@aztec/secp256k1');
 
 const ABIEncoder = artifacts.require('./JoinSplitABIEncoderTest');
 
-
 contract('Join-Split ABI Encoder', (accounts) => {
     let joinSplitAbiEncoder;
     let aztecAccounts = [];

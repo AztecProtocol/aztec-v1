@@ -14,7 +14,6 @@ const verifier = require('../../../src/proof/joinSplit/verifier');
 
 const { errorTypes } = constants;
 
-
 describe('Join Split Proof Verifier', () => {
     describe('Success States', () => {
         it('should construct a valid join-split proof', async () => {

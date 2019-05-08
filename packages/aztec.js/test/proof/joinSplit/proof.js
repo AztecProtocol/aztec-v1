@@ -15,7 +15,6 @@ const proofUtils = require('../../../src/proof/proofUtils');
 
 const { errorTypes } = constants;
 
-
 const getKPublic = (kIn, kOut) => {
     return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
 };

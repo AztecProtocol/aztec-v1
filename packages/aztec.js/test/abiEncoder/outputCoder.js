@@ -1,4 +1,3 @@
-const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const { expect } = require('chai');
 const { padLeft } = require('web3-utils');
@@ -6,7 +5,7 @@ const { padLeft } = require('web3-utils');
 const bn128 = require('../../src/bn128');
 const HexString = require('./HexString');
 const note = require('../../src/note');
-const proofUtils = require('../../src/proof/proofUtils')
+const proofUtils = require('../../src/proof/proofUtils');
 const outputCoder = require('../../src/abiEncoder/outputCoder');
 
 const clean = (input) => {
@@ -16,7 +15,6 @@ const clean = (input) => {
 const isHex = (input) => {
     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
 };
-
 
 describe('abiEncoder.outputCoder', () => {
     let accounts = [];
