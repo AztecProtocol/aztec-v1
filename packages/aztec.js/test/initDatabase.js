@@ -3,10 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const {
-    constants,
-    errors,
-} = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const setup = require('../src/setup');
 const proofUtils = require('../src/proof/proofUtils');
@@ -50,7 +47,7 @@ setup.fetchPoint = async (inputValue) => {
 
     if (value > TEST_K_MAX) {
         throw new Error('point not found');
-    };
+    }
 
     return new Promise((resolve, reject) => {
         const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
