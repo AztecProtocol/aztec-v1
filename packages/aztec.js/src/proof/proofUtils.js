@@ -205,8 +205,39 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
  * @method generateNoteValue
  * @returns {BN} - big number instance of an AZTEC note value
  */
-proofUtils.generateNoteValue = () => {
+proofUtils.randomNoteValue = () => {
     return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
+};
+
+proofUtils.getKPublic = (kIn, kOut) => {
+    return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
+};
+
+proofUtils.generateBalancedNotes = (nIn, nOut) => {
+    const kIn = [...Array(nIn)].map(() => proofUtils.randomNoteValue());
+    const kOut = [...Array(nOut)].map(() => proofUtils.randomNoteValue());
+    let delta = proofUtils.getKPublic(kIn, kOut);
+    while (delta > 0) {
+        if (delta >= K_MAX) {
+            const k = proofUtils.randomNoteValue();
+            kOut.push(k);
+            delta -= k;
+        } else {
+            kOut.push(delta);
+            delta = 0;
+        }
+    }
+    while (delta < 0) {
+        if (-delta >= K_MAX) {
+            const k = proofUtils.randomNoteValue();
+            kIn.push(k);
+            delta += k;
+        } else {
+            kIn.push(-delta);
+            delta = 0;
+        }
+    }
+    return { kIn, kOut };
 };
 
 /**
