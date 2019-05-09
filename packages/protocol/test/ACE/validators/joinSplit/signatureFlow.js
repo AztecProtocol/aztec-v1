@@ -18,9 +18,8 @@ const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('JoinSplit signature flow tests', (accounts) => {
-    // Tests to confirm no signature validation is performed in the JoinSplit.sol
-    // validator
+contract('JoinSplit signature flow', (accounts) => {
+    // Tests to confirm no signature validation is performed in the JoinSplit.sol validator
     let joinSplitContract;
     describe('Success States', () => {
         beforeEach(async () => {
@@ -29,7 +28,7 @@ contract('JoinSplit signature flow tests', (accounts) => {
             });
         });
 
-        it('succeeds for wrong input note owners', async () => {
+        it('should succeed for wrong input note owners', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             const { publicKey } = aztecAccounts[0];
             const { address: address2 } = aztecAccounts[1];
@@ -86,7 +85,7 @@ contract('JoinSplit signature flow tests', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('succeeds for no inputNoteOwners (i.e. no signatures)', async () => {
+        it('should succeed for no inputNoteOwners (i.e. no signatures)', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             const { publicKey } = aztecAccounts[0];
             const { address: address2 } = aztecAccounts[1];
@@ -122,7 +121,7 @@ contract('JoinSplit signature flow tests', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('succeeds for no validatorAddress', async () => {
+        it('should succeed for no validatorAddress', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             const { publicKey } = aztecAccounts[0];
             const { address: address2 } = aztecAccounts[1];
@@ -157,7 +156,7 @@ contract('JoinSplit signature flow tests', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('succeeds for no inputNoteOwners and no validatorAddress', async () => {
+        it('should succeed for no inputNoteOwners and no validatorAddress', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             const { publicKey } = aztecAccounts[0];
             const { address: address2 } = aztecAccounts[1];
