@@ -434,6 +434,12 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
     }
 };
 
+
+/**
+ * Generate a random Ethereum address
+ * @method randomAddress
+ * @returns {string} random Ethereum address
+ */
 proofUtils.randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
 };
