@@ -44,10 +44,6 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
         ")"
     ));
 
-     // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
-    // bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = 
-        // 0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
-
     ACE public ace;
     IERC20 public linkedToken;
     NoteRegistry.Flags public flags;
@@ -236,7 +232,13 @@ contract ZkAsset is IZkAsset, IAZTEC, LibEIP712 {
     }
 
     /**
-    * @dev Perform ECDSA signature validation for a signature over an input note
+    * @dev Internal method to act on transfer instructions from a successful proof validation. 
+    * Specifically, it:
+    * - extracts the relevant objects from the proofOutput object
+    * - validates an EIP712 signature over each input note
+    * - updates note registry state
+    * - emits events for note creation/destruction
+    * - converts or redeems tokens, according to the publicValue
     * 
     * @param proofOutputs - transfer instructions from a zero-knowledege proof validator 
     * contract
