@@ -25,7 +25,7 @@ const ZkAsset = artifacts.require('./ZkAsset');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('ZkAsset signature validation tests', (accounts) => {
+contract('ZkAsset signature validation', (accounts) => {
     let ace;
     let aztecJoinSplit;
     const canAdjustSupply = false;
@@ -117,7 +117,7 @@ contract('ZkAsset signature validation tests', (accounts) => {
     });
 
     describe('Failure States', async () => {
-        it('validate failure if signatures are zero', async () => {
+        it('should fail if signatures are zero', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 5, 25];
@@ -164,7 +164,7 @@ contract('ZkAsset signature validation tests', (accounts) => {
             await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, zeroSignatures));
         });
 
-        it('validate failure if fake signatures are provided', async () => {
+        it('should fail if fake signatures are provided', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 5, 25];
@@ -210,7 +210,7 @@ contract('ZkAsset signature validation tests', (accounts) => {
             await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, fakeSignatures));
         });
 
-        it('validate failure if different note owner signs the transaction', async () => {
+        it('should fail if different note owner signs the transaction', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 5, 25];
@@ -254,7 +254,7 @@ contract('ZkAsset signature validation tests', (accounts) => {
             await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
         });
 
-        it('validate failure if validator address is fake', async () => {
+        it('should fail if validator address is fake', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 5, 25];
@@ -299,7 +299,7 @@ contract('ZkAsset signature validation tests', (accounts) => {
             await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
         });
 
-        it('validate failure if validator address is the joinSplit address', async () => {
+        it('should fail if validator address is the joinSplit address', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [10, 20, 5, 25];
