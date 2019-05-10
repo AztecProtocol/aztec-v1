@@ -79,7 +79,7 @@ contract ZkAssetMintable is ZkAssetOwnable {
     * 
     * @param _proofData - bytes variable outputted from proof construction
     */
-    function confidentialTransfer(bytes memory _proofData) public {
+    function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
         require(proofOutputs.length != 0, "proof invalid");
 
@@ -108,7 +108,7 @@ contract ZkAssetMintable is ZkAssetOwnable {
             }
         }
 
-        confidentialTransferInternal(proofOutputs);
+        confidentialTransferInternal(proofOutputs, _signatures, _proofData);
     }
 }
 

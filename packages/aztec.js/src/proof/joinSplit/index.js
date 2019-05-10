@@ -2,7 +2,7 @@
  * @module joinSplit
  */
 
-const devUtils = require('@aztec/dev-utils');
+const { constants, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
@@ -16,7 +16,6 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const signer = require('../../signer');
 
-const { constants, proofs } = devUtils;
 const { groupReduction } = bn128;
 const { outputCoder, inputCoder } = abiEncoder;
 
@@ -30,6 +29,11 @@ joinSplit.verifier = verifier;
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
+ * @param {number} m number of input notes
+ * @param {Object} rollingHash hash containing note coordinates (gamma, sigma) 
+ * @param {Object[]} blindingScalars blinding scalars used in generating blindingFactors
+ * @param {Object[]} notes AZTEC notes
+
  * @returns {Object[]} blinding factors
  */
 joinSplit.constructBlindingFactors = (notes, m, rollingHash, blindingScalars) => {
@@ -133,6 +137,7 @@ joinSplit.constructProof = (notes, m, sender, kPublic) => {
  * @param {number} m number of input notes
  * @param {string} sender Ethereum address of transaction sender
  * @param {string} kPublic public commitment being added to proof
+ * @param {string} publicOwner address of the public tokens
  * @returns {Object} proof data and challenge
  */
 joinSplit.constructJoinSplitModified = (notes, m, sender, kPublic, publicOwner) => {
@@ -219,33 +224,28 @@ joinSplit.encodeJoinSplitTransaction = ({
         publicOwner,
     );
 
-    const inputSignatures = inputNotes.map((inputNote, index) => {
-        const domain = signer.generateAZTECDomainParams(validatorAddress, constants.eip712.ACE_DOMAIN_PARAMS);
+    proofUtils.checkSignatureParams(inputNoteOwners, validatorAddress, inputNotes);
+
+    const signaturesArray = inputNoteOwners.map((inputNoteOwner, index) => {
+        const domain = signer.generateZKAssetDomainParams(validatorAddress);
         const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
+
         const message = {
             proof: proofs.JOIN_SPLIT_PROOF,
-            noteHash: inputNote.noteHash,
+            noteHash: inputNotes[index].noteHash,
             challenge,
             sender: senderAddress,
         };
-        const { privateKey } = inputNoteOwners[index];
+        const { privateKey } = inputNoteOwner;
         const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-        return signature;
+        const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
+        return concatenatedSignature;
     });
+    const signatures = `0x${signaturesArray.join('')}`;
 
     const outputOwners = outputNotes.map((n) => n.owner);
     const inputOwners = inputNotes.map((n) => n.owner);
-
-    const proofData = inputCoder.joinSplit(
-        proofDataRaw,
-        m,
-        challenge,
-        publicOwner,
-        inputSignatures,
-        inputOwners,
-        outputOwners,
-        outputNotes,
-    );
+    const proofData = inputCoder.joinSplit(proofDataRaw, m, challenge, publicOwner, inputOwners, outputOwners, outputNotes);
 
     const expectedOutput = `0x${outputCoder
         .encodeProofOutputs([
@@ -258,7 +258,11 @@ joinSplit.encodeJoinSplitTransaction = ({
             },
         ])
         .slice(0x42)}`;
-    return { proofData, expectedOutput };
+    return {
+        proofData,
+        expectedOutput,
+        signatures,
+    };
 };
 
 /**
@@ -288,7 +292,10 @@ joinSplit.generateBlindingScalars = (n, m) => {
         } else {
             runningBk = runningBk.redAdd(bk);
         }
-        return { bk, ba };
+        return {
+            bk,
+            ba,
+        };
     });
     return scalars;
 };

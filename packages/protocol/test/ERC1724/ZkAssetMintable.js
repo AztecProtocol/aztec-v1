@@ -106,10 +106,13 @@ contract('ZkAssetMintable', (accounts) => {
                 inputNoteOwners: [recipient1, recipient2], // need the owners of the adjustedNotes
                 publicOwner: recipient1.address,
                 kPublic,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetMintable.address,
             });
 
-            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransfer(withdrawalProof.proofData);
+            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransfer(
+                withdrawalProof.proofData,
+                withdrawalProof.signatures,
+            );
 
             const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
             expect(erc20TotalSupplyAfterWithdrawal).to.equal(kPublic * scalingFactor);
@@ -249,7 +252,7 @@ contract('ZkAssetMintable', (accounts) => {
                 inputNoteOwners, // need the owners of the adjustedNotes
                 publicOwner,
                 kPublic: 50,
-                validatorAddress: aztecJoinSplit.address,
+                validatorAddress: zkAssetMintable.address,
             });
 
             await truffleAssert.reverts(
