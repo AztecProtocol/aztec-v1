@@ -40,15 +40,13 @@ encoderFactory.encode = (config, abiParams, proofType) => {
         },
     );
 
-    if (proofType === 'bilateralSwap') {
+    if (proofType === 'trade') {
         abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
+    } else if (proofType === 'dividend') {
+        abiEncodedParameters = [config.CHALLENGE, config.ZA, config.ZB, ...offsets, ...encodedParameters];
     } else if (proofType === 'joinSplit') {
         abiEncodedParameters = [config.M, config.CHALLENGE, config.PUBLIC_OWNER, ...offsets, ...encodedParameters];
-    } else if (proofType === 'dividendComputation') {
-        abiEncodedParameters = [config.CHALLENGE, config.ZA, config.ZB, ...offsets, ...encodedParameters];
-    } else if (proofType === 'mint') {
-        abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
-    } else if (proofType === 'burn') {
+    } else if (proofType === 'joinSplitFluid') {
         abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
     } else if (proofType === 'privateRange') {
         abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];

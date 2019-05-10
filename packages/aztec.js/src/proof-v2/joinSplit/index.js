@@ -1,23 +1,26 @@
 const { constants } = require('@aztec/dev-utils');
 
 const { inputCoder, outputCoder } = require('../../../src/abiEncoder');
-const { Proof, ProofType } = require('../index');
-const { ProofUtils } = require('../utils');
+const { Proof, ProofType } = require('../proof');
+const ProofUtils = require('../utils');
 const signer = require('../../../src/signer');
 
 class JoinSplitProof extends Proof {
-    constructor(inputNotes, outputNotes, sender, publicOwner, kPublic) {
-        super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicOwner, kPublic);
+    constructor(inputNotes, outputNotes, sender, publicValue, publicOwner) {
+        super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicValue, publicOwner);
+        this.constructBlindingFactors();
+        this.constructChallenge();
+        this.constructData();
+        this.constructOutput();
     }
 
-    constructProofData() {
-        super.constructProofData();
+    constructOutput() {
         this.output = outputCoder.encodeProofOutputs([
             {
                 inputNotes: this.inputNotes,
                 outputNotes: this.outputNotes,
                 publicOwner: this.publicOwner,
-                publicValue: this.kPublic,
+                publicValue: this.publicValue,
                 challenge: this.challengeHex,
             },
         ]);
@@ -69,4 +72,4 @@ class JoinSplitProof extends Proof {
     }
 }
 
-module.exports = { JoinSplitProof };
+module.exports = JoinSplitProof;
