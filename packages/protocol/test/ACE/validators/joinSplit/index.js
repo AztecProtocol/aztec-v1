@@ -218,7 +218,7 @@ contract('JoinSplit', (accounts) => {
                 inputNotes,
                 outputNotes,
                 senderAddress,
-                inputNoteOwners: aztecAccounts.slice(0, 10),
+                inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner,
                 kPublic,
                 validatorAddress: joinSplitContract.address,
@@ -245,7 +245,7 @@ contract('JoinSplit', (accounts) => {
                 inputNotes,
                 outputNotes,
                 senderAddress,
-                inputNoteOwners: aztecAccounts.slice(0, 10),
+                inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner,
                 kPublic,
                 validatorAddress: joinSplitContract.address,
@@ -270,7 +270,7 @@ contract('JoinSplit', (accounts) => {
                 inputNotes,
                 outputNotes,
                 senderAddress,
-                inputNoteOwners: aztecAccounts.slice(0, 10),
+                inputNoteOwners: aztecAccounts.slice(0, 1),
                 publicOwner,
                 kPublic,
                 validatorAddress: joinSplitContract.address,
@@ -491,40 +491,6 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('should succeed for no validatorAddress', async () => {
-            // Test to confirm no signature validation is performed in the JoinSplit.sol validator
-            const { publicKey } = aztecAccounts[0];
-            const { address: address2 } = aztecAccounts[1];
-
-            const note1Value = 20;
-            const note2Value = 50;
-            const note3Value = 30;
-
-            const note1 = await note.create(publicKey, note1Value, address2);
-            const note2 = await note.create(publicKey, note2Value, address2);
-            const note3 = await note.create(publicKey, note3Value);
-
-            const kPublic = 0;
-
-            const { proofData, expectedOutput } = joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [note2],
-                outputNotes: [note3, note1],
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(1, 2), // incorrect account
-                publicOwner: accounts[3],
-                kPublic,
-                validatorAddress: [],
-            });
-
-            const opts = {
-                from: accounts[0],
-                gas: 4000000,
-            };
-
-            const result = await joinSplitContract.validateJoinSplit(proofData, accounts[0], constants.CRS, opts);
-            expect(result.signatures).to.equal(undefined);
-            expect(result).to.equal(expectedOutput);
-        });
 
         it('should succeed for no inputNoteOwners and no validatorAddress', async () => {
             // Test to confirm no signature validation is performed in the JoinSplit.sol validator
@@ -589,7 +555,7 @@ contract('JoinSplit', (accounts) => {
                 inputNotes,
                 outputNotes,
                 senderAddress,
-                inputNoteOwners: aztecAccounts.slice(0, 10),
+                inputNoteOwners: aztecAccounts.slice(0, 2),
                 publicOwner,
                 kPublic,
                 validatorAddress: joinSplitContract.address,
@@ -1297,7 +1263,7 @@ contract('JoinSplit', (accounts) => {
                 inputNotes,
                 outputNotes,
                 senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
+                inputNoteOwners: [],
                 publicOwner,
                 kPublic,
                 validatorAddress: joinSplitContract.address,
