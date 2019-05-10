@@ -35,9 +35,7 @@ const signNote = (validatorAddress, noteHash, spender, privateKey) => {
     return signer.signTypedData(domain, schema, message, privateKey);
 };
 
-
-
-contract.only('ZkAssetOwnable', (accounts) => {
+contract('ZkAssetOwnable', (accounts) => {
     let ace;
     let aztecJoinSplit;
     let erc20;
@@ -109,9 +107,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [0, 10, 30, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -126,7 +122,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
             await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
@@ -154,9 +149,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [60, 70, 50, 40];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -200,9 +193,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [10, 20, 15, 15];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -248,9 +239,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [0, 10, 30];
             const numNotes = 3;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -288,9 +277,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [0, 10, 30, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -339,9 +326,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [0, 10];
             const numNotes = 2;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -369,9 +354,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [0, 10, 30, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -416,9 +399,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [0, 10, 30, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
@@ -465,9 +446,7 @@ contract.only('ZkAssetOwnable', (accounts) => {
             const noteValues = [0, 10, 30, 20];
             const numNotes = 4;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
-            ]);
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
             const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
