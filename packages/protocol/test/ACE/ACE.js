@@ -83,7 +83,6 @@ contract('ACE', (accounts) => {
             aztecJoinSplit = await JoinSplit.new();
             aztecPrivateRange = await PrivateRange.new();
 
-
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             await ace.setProof(PRIVATE_RANGE_PROOF, aztecPrivateRange.address);
 
@@ -144,7 +143,11 @@ contract('ACE', (accounts) => {
                 const privateRangeProofOutput = outputCoder.getProofOutput(privateRangeProof.expectedOutput, 0);
                 const privateRangeProofHash = outputCoder.hashProofOutput(privateRangeProofOutput);
                 const hex = parseInt(PRIVATE_RANGE_PROOF, 10).toString(16);
-                const hashData = [padLeft(privateRangeProofHash.slice(2), 64), padLeft(hex, 64), padLeft(accounts[0].slice(2), 64)].join('');
+                const hashData = [
+                    padLeft(privateRangeProofHash.slice(2), 64),
+                    padLeft(hex, 64),
+                    padLeft(accounts[0].slice(2), 64),
+                ].join('');
                 const privateRangeValidatedProofHash = keccak256(`0x${hashData}`);
 
                 const { receipt } = await ace.validateProof(PRIVATE_RANGE_PROOF, accounts[0], privateRangeProof.proofData);
