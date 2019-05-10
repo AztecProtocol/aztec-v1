@@ -37,7 +37,7 @@ const signNote = (validatorAddress, noteHash, spender, privateKey) => {
 
 
 
-contract('ZkAssetOwnable', (accounts) => {
+contract.only('ZkAssetOwnable', (accounts) => {
     let ace;
     let aztecJoinSplit;
     let erc20;
@@ -132,7 +132,7 @@ contract('ZkAssetOwnable', (accounts) => {
                 inputNotes: notes.slice(0, 2),
                 outputNotes: notes.slice(2, 4),
                 senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
+                inputNoteOwners: [],
                 publicOwner: accounts[1],
                 kPublic: -40,
                 validatorAddress: zkAssetOwnable.address,
@@ -176,7 +176,7 @@ contract('ZkAssetOwnable', (accounts) => {
                 inputNotes: notes.slice(0, 2),
                 outputNotes: notes.slice(2, 4),
                 senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
+                inputNoteOwners: [],
                 publicOwner: accounts[1],
                 kPublic: 40,
                 validatorAddress: zkAssetOwnable.address,
@@ -222,7 +222,7 @@ contract('ZkAssetOwnable', (accounts) => {
                 inputNotes: [notes[0], notes[1]],
                 outputNotes: [notes[2], notes[3]],
                 senderAddress: accounts[0],
-                inputNoteOwners: [aztecAccounts[0], aztecAccounts[1]],
+                inputNoteOwners: [],
                 publicOwner: accounts[1],
                 kPublic: 0, // perfectly balanced...
                 validatorAddress: zkAssetOwnable.address,
@@ -356,7 +356,6 @@ contract('ZkAssetOwnable', (accounts) => {
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
             await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
 
-
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const emptySignature = '0x';
@@ -393,7 +392,7 @@ contract('ZkAssetOwnable', (accounts) => {
                 inputNotes: notes.slice(0, 2),
                 outputNotes: notes.slice(2, 4),
                 senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
+                inputNoteOwners: [],
                 publicOwner: accounts[1],
                 kPublic: -40,
                 validatorAddress: zkAssetOwnable.address,
@@ -439,7 +438,7 @@ contract('ZkAssetOwnable', (accounts) => {
                 inputNotes: notes.slice(0, 2),
                 outputNotes: notes.slice(2, 4),
                 senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
+                inputNoteOwners: [],
                 publicOwner: accounts[1],
                 kPublic: -40,
                 validatorAddress: zkAssetOwnable.address,
