@@ -1,4 +1,5 @@
 const { constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const crypto = require('crypto');
@@ -6,6 +7,9 @@ const { padLeft } = require('web3-utils');
 
 const bn128 = require('../../../src/bn128');
 const proof = require('../../../src/proof/joinSplit');
+const note = require('../../../src/note');
+const proofUtils = require('../../../src/proof/proofUtils');
+
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
 
 const { errorTypes } = constants;
@@ -59,11 +63,11 @@ describe('Join-Split Proofs', () => {
         expect(proofData.length).to.equal(5);
         expect(challenge.length).to.equal(66);
         validateGroupScalar(challenge);
-        proofData.forEach((note, i) => {
-            validateGroupScalar(note[0], i === proofData.length - 1);
-            validateGroupScalar(note[1]);
-            validateGroupElement(note[2], note[3]);
-            validateGroupElement(note[4], note[5]);
+        proofData.forEach((individualNote, i) => {
+            validateGroupScalar(individualNote[0], i === proofData.length - 1);
+            validateGroupScalar(individualNote[1]);
+            validateGroupElement(individualNote[2], individualNote[3]);
+            validateGroupElement(individualNote[4], individualNote[5]);
         });
         expect(new BN(proofData[proofData.length - 1][0].slice(2), 16).eq(kPublic)).to.equal(true);
     });
@@ -146,6 +150,56 @@ describe('Join-Split Proofs', () => {
             proof.constructProof(commitments, m, randomAddress(), kPublic);
         } catch (err) {
             expect(err.message).to.equal(errorTypes.NOTE_VALUE_TOO_BIG);
+        }
+    });
+
+    it('should fail to construct a proof if no validator address, when inputNoteOwners is non-zero', async () => {
+        const noteValues = [10, 10];
+        const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+        const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+
+        const inputNotes = notes.slice(0, 2);
+        const outputNotes = [];
+        const kPublic = -20;
+        const publicOwner = aztecAccounts[0].address;
+        const senderAddress = proofUtils.randomAddress();
+
+        try {
+            proof.encodeJoinSplitTransaction({
+                inputNotes,
+                outputNotes,
+                senderAddress,
+                inputNoteOwners: aztecAccounts.slice(0, 2),
+                publicOwner,
+                kPublic,
+                validatorAddress: [],
+            });
+        } catch (err) {
+            expect(err.message).to.contain('UNABLE_TO_CALCULATE_SIGNATURE');
+        }
+    });
+
+    it('should fail to construct a proof inputNoteOwners are passed, but no inputNotes', async () => {
+        const inputNotes = [];
+        const outputNotes = [];
+        const kPublic = -20;
+        const publicOwner = [];
+        const senderAddress = proofUtils.randomAddress();
+
+        const inputNoteOwners = [proofUtils.randomAddress()];
+
+        try {
+            proof.encodeJoinSplitTransaction({
+                inputNotes,
+                outputNotes,
+                senderAddress,
+                inputNoteOwners,
+                publicOwner,
+                kPublic,
+                validatorAddress: [],
+            });
+        } catch (err) {
+            expect(err.message).to.contain('UNABLE_TO_CALCULATE_SIGNATURE');
         }
     });
 });

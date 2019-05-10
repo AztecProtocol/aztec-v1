@@ -18,7 +18,7 @@ import "../../../interfaces/JoinSplitInterface.sol";
  * family of AZTEC zero-knowledge proofs
  * and the AZTEC token standard, stay tuned for updates!
  **/
-contract JoinSplit is LibEIP712 {
+contract JoinSplit {
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction throws.
@@ -31,7 +31,6 @@ contract JoinSplit is LibEIP712 {
 
     // solhint-disable payable-fallback
     function() external {
-        bytes32 domainHash = EIP712_DOMAIN_HASH;
         assembly {
             // We don't check for function signatures,
             // there's only one function that ever gets called: validateJoinSplit()
@@ -59,10 +58,9 @@ contract JoinSplit is LibEIP712 {
              * 0x144:0x164    = challenge
              * 0x164:0x184    = publicOwner
              * 0x184:0x1a4    = offset in byte array to notes
-             * 0x1a4:0x1c4    = offset in byte array to inputSignatures
-             * 0x1c4:0x1e4    = offset in byte array to inputOwners
-             * 0x1e4:0x204    = offset in byte array to outputOwners
-             * 0x204:0x224    = offset in byte array to metadata
+             * 0x1a4:0x1c4    = offset in byte array to inputOwners
+             * 0x1c4:0x1e4    = offset in byte array to outputOwners
+             * 0x1e4:0x204    = offset in byte array to metadata
              */
             function validateJoinSplit() {
                 mstore(0x80, calldataload(0x44))
@@ -388,6 +386,6 @@ contract JoinSplit is LibEIP712 {
     
         // if we've reached here, we've validated the join-split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        JoinSplitABIEncoder.encodeAndExit(domainHash);
+        JoinSplitABIEncoder.encodeAndExit();
     }
 }

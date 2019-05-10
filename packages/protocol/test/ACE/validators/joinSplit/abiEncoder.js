@@ -3,19 +3,21 @@
 const { padLeft } = require('web3-utils');
 
 // ### Internal Dependencies
-const { abiEncoder, note, proof, signer } = require('aztec.js');
-const devUtils = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
+const {
+    abiEncoder: { outputCoder, inputCoder },
+    proof: { joinSplit },
+    note,
+} = require('aztec.js');
 
-const { constants, proofs } = devUtils;
-const { CRS, K_MAX } = constants;
-const { outputCoder, inputCoder } = abiEncoder;
+const { constants } = require('@aztec/dev-utils');
 
 // ### Artifacts
+const secp256k1 = require('@aztec/secp256k1');
+
 const ABIEncoder = artifacts.require('./JoinSplitABIEncoderTest');
 
 function randomNoteValue() {
-    return Math.floor(Math.random() * Math.floor(K_MAX));
+    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
 }
 
 contract('Join-Split ABI Encoder', (accounts) => {
@@ -45,37 +47,16 @@ contract('Join-Split ABI Encoder', (accounts) => {
             const outputNotes = notes.slice(2, 4);
             const senderAddress = accounts[0];
 
-            const { proofData, challenge } = proof.joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
-            const inputSignatures = inputNotes.map((inputNote, index) => {
-                const domain = signer.generateAZTECDomainParams(joinSplitAbiEncoder.address, constants.eip712.ACE_DOMAIN_PARAMS);
-                const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-                const message = {
-                    proof: proofs.JOIN_SPLIT_PROOF,
-                    noteHash: inputNote.noteHash,
-                    challenge,
-                    sender: senderAddress,
-                };
-                const { privateKey } = aztecAccounts[index];
-                const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-                return signature;
-            });
+            const { proofData, challenge } = joinSplit.constructProof([...inputNotes, ...outputNotes], m, accounts[0], 0);
+
             const publicOwner = aztecAccounts[0].address;
 
             const outputOwners = outputNotes.map((n) => n.owner);
             const inputOwners = inputNotes.map((n) => n.owner);
 
-            const data = inputCoder.joinSplit(
-                proofData,
-                m,
-                challenge,
-                publicOwner,
-                inputSignatures,
-                inputOwners,
-                outputOwners,
-                outputNotes,
-            );
+            const data = inputCoder.joinSplit(proofData, m, challenge, publicOwner, inputOwners, outputOwners, outputNotes);
 
-            const result = await joinSplitAbiEncoder.validateJoinSplit(data, senderAddress, CRS, {
+            const result = await joinSplitAbiEncoder.validateJoinSplit(data, senderAddress, constants.CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });

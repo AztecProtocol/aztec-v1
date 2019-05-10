@@ -12,11 +12,6 @@ pragma solidity >=0.5.0 <0.6.0;
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 library JoinSplitABIEncoder {
-
-    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
-    bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
-        0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
-
         /**
         * Calldata map
         * 0x04:0x24      = calldata location of proofData byte array
@@ -32,45 +27,22 @@ library JoinSplitABIEncoder {
         * 0x144:0x164    = challenge
         * 0x164:0x184    = publicOwner
         * 0x184:0x1a4    = offset in byte array to notes
-        * 0x1a4:0x1c4    = offset in byte array to inputSignatures
-        * 0x1c4:0x1e4    = offset in byte array to inputOwners
-        * 0x1e4:0x204    = offset in byte array to outputOwners
-        * 0x204:0x224    = offset in byte array to metadata
+        * 0x1a4:0x1c4    = offset in byte array to inputOwners
+        * 0x1c4:0x1e4    = offset in byte array to outputOwners
+        * 0x1e4:0x204    = offset in byte array to metadata
         */
 
-    function encodeAndExit(bytes32 domainHash) internal view {
-        bytes32 typeHash = JOIN_SPLIT_SIGNATURE_TYPE_HASH;
+    function encodeAndExit() internal pure {
         assembly {
             // set up initial variables
             let notes := add(0x104, calldataload(0x184))
             let n := calldataload(notes)
             let m := calldataload(0x124)
-            let inputOwners := add(0x124, calldataload(0x1c4)) // one word after inputOwners = 1st
-            let outputOwners := add(0x124, calldataload(0x1e4)) // one word after outputOwners = 1st
-            let signatures := add(0x124, calldataload(0x1a4)) // one word after signatures = 1st
-            let metadata := add(0x144, calldataload(0x204)) // two words after metadata = 1st
+            let inputOwners := add(0x124, calldataload(0x1a4)) // one word after inputOwners = 1st
+            let outputOwners := add(0x124, calldataload(0x1c4)) // one word after outputOwners = 1st
+            let metadata := add(0x144, calldataload(0x1e4)) // two words after metadata = 1st
 
             // memory map of `proofOutputs`
-
-            // 0x00 - 0x160  = scratch data for EIP712 signature computation and note hash computation
-            // JOIN_SPLIT_SIGNATURE struct hash variables
-            // 0x80 = type hash
-            // 0xa0 = proof object (65793)
-            // 0xc0 = noteHash
-            // 0xe0 = challenge
-            // 0x100 = sender
-            // type hash of 'JOIN_SPLIT_SIGNATURE'
-            mstore(0x80, typeHash)
-            mstore(0xa0, 0x10101)
-            mstore(0xe0, calldataload(0x144)) // challenge
-            mstore(0x100, calldataload(0x24))
-
-            // EIP712 Signature variables
-            // 0x13e - 0x140 = 0x1901
-            // 0x140 - 0x160 = domainHash
-            // 0x160 - 0x180 = structHash
-            mstore(0x120, 0x1901)
-            mstore(0x140, domainHash) // domain hash
 
             // `returndata` starts at 0x160
             // `proofOutputs` starts at 0x180
@@ -134,45 +106,21 @@ library JoinSplitABIEncoder {
 
             for { let i := 0 } lt(i, m) { i := add(i, 0x01) } {
                 let noteIndex := add(add(notes, 0x20), mul(i, 0xc0))
-                // get pointer to input signatures
-                let signatureIndex := add(signatures, mul(i, 0x60))
                 // copy note data to 0x00 - 0x80
                 mstore(0x00, 0x01) // note type
                 calldatacopy(0x20, add(noteIndex, 0x40), 0x80) // get gamma, sigma
-                // construct EIP712 signature parameters
                 mstore(0xc0, keccak256(0x00, 0xa0)) // note hash
-                mstore(0x80, typeHash)              // typeHash - eip signature params
-                // construct EIP712 signature message
-                mstore(0x160, keccak256(0x80, 0xa0))
-                mstore(0x00, keccak256(0x13e, 0x42))
-                // recover address of EIP712 signature
-                mstore(0x20, and(calldataload(signatureIndex), 0xff)) // get 8-bit v
-                calldatacopy(0x40, add(signatureIndex, 0x20), 0x40) // copy r, s into memory
+
 
                 // store note length in `s`
                 mstore(s, 0xc0)
                 // store note type (1)
                 mstore(add(s, 0x20), 0x01)
-                mstore(0x80, typeHash)
                 mstore(0xa0, 0x10101)   // proof id 0x010101
-                
-                // store note owner in `s + 0x40`
+
+                // Store note owner at `s + 0x40`
                 mstore(add(s, 0x40), calldataload(add(inputOwners, mul(i, 0x20))))
 
-                let t := staticcall(gas, 0x01, 0x00, 0x80, 0x00, 0x20)
-                let owner := mload(add(s, 0x40))
-                let recoveredAddress := mload(0x00)
-
-                // Check recovered address matches now owner, throw if not
-                if iszero(eq(recoveredAddress, owner)) {
-                    mstore(0x00, 400)
-                    revert(0x00, 0x20)
-                } 
-
-                if iszero(owner) {
-                    mstore(0x00, 400)
-                    revert(0x00, 0x20)
-                } 
                 // store note hash in `s + 0x60`
                 mstore(add(s, 0x60), mload(0xc0))
                 // store note metadata length in `s + 0x60` (just the coordinates)
