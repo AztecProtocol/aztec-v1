@@ -445,6 +445,32 @@ proofUtils.randomAddress = () => {
 };
 
 /**
+ * Checks whether signatures can be generated using the input arguments to a joinSplit proof
+ * 
+ * @method checkSignatureParams
+ * @param {string[]} inputNoteOwners - array of the input note owners
+ * @param {string} validatorAddress - Ethereum address of the transaction validator
+ * @param {Note[]} inputNotes - array of the input notes
+ */
+proofUtils.checkSignatureParams = (inputNoteOwners, validatorAddress, inputNotes) => {
+    if (inputNoteOwners.length > 0 && validatorAddress.length === 0) {
+        throw customError(errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
+            message: 'inputNoteOwners have been passed, but without a validator address',
+            inputNoteOwners,
+            validatorAddress,
+        });
+    }
+
+    if (inputNoteOwners.length > 0 && inputNotes.length === 0) {
+        throw customError(errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
+            message: 'inputNoteOwners have been passed, but without any input notes',
+            inputNoteOwners,
+            validatorAddress,
+        });
+    }
+}
+
+/**
  * Recovers the blinding factors and challenge
  * Used for testing purposes
  * @method getBlindingFactorsAndChallenge
