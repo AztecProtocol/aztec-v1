@@ -2,9 +2,17 @@
  * @module joinSplit
  */
 
-const { constants, proofs } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs,
+    errors: {
+        customError,
+    },
+} = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
+const {
+    padLeft,
+} = require('web3-utils');
 
 const extractor = require('./extractor');
 const helpers = require('./helpers');
@@ -16,8 +24,13 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const signer = require('../../signer');
 
-const { groupReduction } = bn128;
-const { outputCoder, inputCoder } = abiEncoder;
+const {
+    groupReduction,
+} = bn128;
+const {
+    outputCoder,
+    inputCoder,
+} = abiEncoder;
 
 const joinSplit = {};
 joinSplit.extractor = extractor;
@@ -42,7 +55,10 @@ joinSplit.constructBlindingFactors = (notes, m, rollingHash, blindingScalars) =>
     let runningBk = new BN(0).toRed(groupReduction);
 
     return notes.map((note, i) => {
-        const { bk, ba } = blindingScalars[i];
+        const {
+            bk,
+            ba,
+        } = blindingScalars[i];
         if (i + 1 > m) {
             // get next iteration of our rolling hash
             x = rollingHash.keccak(groupReduction);
@@ -215,9 +231,11 @@ joinSplit.encodeJoinSplitTransaction = ({
     kPublic,
     validatorAddress,
 }) => {
-    let signatures;
     const m = inputNotes.length;
-    const { proofData: proofDataRaw, challenge } = joinSplit.constructJoinSplitModified(
+    const {
+        proofData: proofDataRaw,
+        challenge,
+    } = joinSplit.constructJoinSplitModified(
         [...inputNotes, ...outputNotes],
         m,
         senderAddress,
@@ -225,25 +243,34 @@ joinSplit.encodeJoinSplitTransaction = ({
         publicOwner,
     );
 
-    if (inputNoteOwners.length !== 0 && validatorAddress.length !== 0) {
-        const signaturesArray = inputNotes.map((inputNote, index) => {
-            const domain = signer.generateZKAssetDomainParams(validatorAddress);
-            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-            const message = {
-                proof: proofs.JOIN_SPLIT_PROOF,
-                noteHash: inputNote.noteHash,
-                challenge,
-                sender: senderAddress,
-            };
-            const { privateKey } = inputNoteOwners[index];
-            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-            const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
-            return concatenatedSignature;
-        });
-        signatures = `0x${signaturesArray.join('')}`;
-    } else {
-        signatures = [];
+    if ((inputNoteOwners.length > 0 && validatorAddress.length === 0)) {
+        throw customError(constants.errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
+            message: 'unable to calculate signatures, as there is no validator address',
+            inputNoteOwners,
+            validatorAddress,
+        })
     }
+
+    const signaturesArray = inputNoteOwners.map((inputNoteOwner, index) => {
+        const domain = signer.generateZKAssetDomainParams(validatorAddress);
+        const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
+
+        const message = {
+            proof: proofs.JOIN_SPLIT_PROOF,
+            noteHash: inputNotes[index].noteHash,
+            challenge,
+            sender: senderAddress,
+        };
+        const {
+            privateKey,
+        } = inputNoteOwner;
+        const {
+            signature,
+        } = signer.signTypedData(domain, schema, message, privateKey);
+        const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
+        return concatenatedSignature;
+    });
+    const signatures = `0x${signaturesArray.join('')}`;
 
     const outputOwners = outputNotes.map((n) => n.owner);
     const inputOwners = inputNotes.map((n) => n.owner);
@@ -260,7 +287,11 @@ joinSplit.encodeJoinSplitTransaction = ({
             },
         ])
         .slice(0x42)}`;
-    return { proofData, expectedOutput, signatures };
+    return {
+        proofData,
+        expectedOutput,
+        signatures
+    };
 };
 
 /**
@@ -290,7 +321,10 @@ joinSplit.generateBlindingScalars = (n, m) => {
         } else {
             runningBk = runningBk.redAdd(bk);
         }
-        return { bk, ba };
+        return {
+            bk,
+            ba
+        };
     });
     return scalars;
 };
