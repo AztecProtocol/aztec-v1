@@ -29,16 +29,22 @@ module.exports = {
             },
         ],
         'no-console': 'off',
+        'no-trailing-spaces': [
+            'error',
+            {
+                ignoreComments: true,
+            },
+        ],
         'no-underscore-dangle': [
             'error',
             {
                 allow: ['_id'],
             },
         ],
-        'no-trailing-spaces': [
+        'no-unused-vars': [
             'error',
             {
-                ignoreComments: true,
+                varsIgnorePattern: '_',
             },
         ],
         'prefer-template': 'off',
