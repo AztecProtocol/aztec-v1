@@ -7,7 +7,7 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "web3-eth-abi": "1.0.0-beta.52",
+    "web3-eth-abi": "1.0.0-beta.55",
     "web3-utils": "1.0.0-beta.52"
   },
   "devDependencies": {
