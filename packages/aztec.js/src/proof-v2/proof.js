@@ -1,17 +1,14 @@
-<<<<<<< HEAD
-const { constants, errors, proofs } = require('@aztec/dev-utils');
+const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { Enum } = require('enumify');
 const { padLeft } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../abiEncoder');
 const bn128 = require('../bn128');
 const Keccak = require('../keccak');
-const { ProofUtils } = require('./utils');
-const signer = require('../signer');
+const ProofUtils = require('./utils');
 const types = require('./types');
 
-const { AztecError, codes } = errors;
+const { AztecError } = errors;
 const { groupReduction } = bn128;
 
 class ProofType extends Enum {}
@@ -26,10 +23,10 @@ class Proof {
      * @param {Note[]} inputNotes input AZTEC notes
      * @param {Note[]} outputNotes output AZTEC notes
      * @param {string} sender Ethereum address of transaction sender
+     * @param {string} publicValue public commitment being added to proof
      * @param {string} publicOwner holder of a public token being converted
-     * @param {string} kPublic public commitment being added to proof
      */
-    constructor(type, inputNotes, outputNotes, sender, publicOwner, kPublic) {
+    constructor(type, inputNotes, outputNotes, sender, publicValue, publicOwner) {
         if (!ProofType[type]) {
             throw new Error(`proof type should be one of ${ProofType.enumValues}`);
         }
@@ -51,26 +48,24 @@ class Proof {
         }
         this.publicOwner = publicOwner;
 
-        if (BN.isBN(kPublic)) {
-            this.kPublic = kPublic;
-        } else if (kPublic < 0) {
-            this.kPublic = bn128.curve.n.sub(new BN(-kPublic));
+        if (BN.isBN(publicValue)) {
+            this.publicValue = publicValue;
+        } else if (publicValue < 0) {
+            this.publicValue = bn128.curve.n.sub(new BN(-publicValue));
         } else {
-            this.kPublic = new BN(kPublic);
+            this.publicValue = new BN(publicValue);
         }
         this.validateInputs();
 
         // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
-        this.rollingHash = new Keccak();
-        notes.forEach((note) => {
-            this.rollingHash.append(note.gamma);
-            this.rollingHash.append(note.sigma);
+        const rollingHash = new Keccak();
+        this.notes.forEach((note) => {
+            rollingHash.append(note.gamma);
+            rollingHash.append(note.sigma);
         });
+        this.rollingHash = rollingHash;
 
         this.constructBlindingScalars();
-        this.constructBlindingFactors();
-        this.constructChallenge(sender, this.kPublic, this.m, publicOwner, notes, this.blindingFactors);
-        this.constructData();
     }
 
     get challengeHex() {
@@ -148,40 +143,43 @@ class Proof {
     /**
      * Compute the Fiat-Shamir heuristic-ified challenge variable.
      *   Separated out into a distinct method so that we can stub this for extractor tests
-     * @param {string} sender Ethereum address of transaction sender
-     * @param {string} kPublic public commitment being added to proof
-     * @param {number} m number of input notes
-     * @param {Note[]} notes array of AZTEC notes
-     * @param {Object[]} blindingFactors array of computed blinding factors, one for each note
      */
-    constructChallenge(...challengeVariables) {
-        const hash = new Keccak();
-        const recurse = (inputs) => {
-            inputs.forEach((challengeVar) => {
-                if (typeof challengeVar === 'string') {
-                    hash.appendBN(new BN(challengeVar.slice(2), 16));
-                } else if (typeof challengeVar === 'number') {
-                    hash.appendBN(new BN(challengeVar));
-                } else if (BN.isBN(challengeVar)) {
-                    hash.appendBN(challengeVar.umod(bn128.curve.n));
-                } else if (Array.isArray(challengeVar)) {
-                    recurse(challengeVar);
-                } else if (challengeVar.gamma) {
-                    hash.append(challengeVar.gamma);
-                    hash.append(challengeVar.sigma);
-                } else if (challengeVar.B) {
-                    hash.append(challengeVar.B);
-                } else {
-                    throw new AztecError(codes.NO_ADD_CHALLENGEVAR, {
-                        message: 'Can not add the challenge variable to the hash',
-                        challengeVar,
-                        type: typeof challengeVar,
-                    });
-                }
-            });
-        };
-        recurse(challengeVariables);
-        this.challenge = hash.keccak(groupReduction);
+    constructChallengeRecurse(inputs) {
+        inputs.forEach((challengeVar) => {
+            if (typeof challengeVar === 'string') {
+                this.challengeHash.appendBN(new BN(challengeVar.slice(2), 16));
+            } else if (typeof challengeVar === 'number') {
+                this.challengeHash.appendBN(new BN(challengeVar));
+            } else if (BN.isBN(challengeVar)) {
+                this.challengeHash.appendBN(challengeVar.umod(bn128.curve.n));
+            } else if (Array.isArray(challengeVar)) {
+                this.constructChallengeRecurse(challengeVar);
+            } else if (challengeVar.gamma) {
+                this.challengeHash.append(challengeVar.gamma);
+                this.challengeHash.append(challengeVar.sigma);
+            } else if (challengeVar.B) {
+                this.challengeHash.append(challengeVar.B);
+            } else {
+                throw new AztecError(errors.codes.NO_ADD_CHALLENGEVAR, {
+                    message: 'Can not add the challenge variable to the hash',
+                    challengeVar,
+                    type: typeof challengeVar,
+                });
+            }
+        });
+    }
+
+    constructChallenge() {
+        this.challengeHash = new Keccak();
+        this.constructChallengeRecurse([
+            this.sender,
+            this.publicValue,
+            this.m,
+            this.publicOwner,
+            this.notes,
+            this.blindingFactors,
+        ]);
+        this.challenge = this.challengeHash.keccak(groupReduction);
     }
 
     constructData() {
@@ -192,22 +190,26 @@ class Proof {
                 .redAdd(blindingFactor.bk)
                 .fromRed();
             if (i === this.notes.length - 1) {
-                kBar = this.kPublic;
+                kBar = this.publicValue;
             }
             const aBar = note.a
                 .redMul(this.challenge)
                 .redAdd(blindingFactor.ba)
                 .fromRed();
-            return [
-                `0x${padLeft(kBar.toString(16), 64)}`,
-                `0x${padLeft(aBar.toString(16), 64)}`,
-                `0x${padLeft(note.gamma.x.fromRed().toString(16), 64)}`,
-                `0x${padLeft(note.gamma.y.fromRed().toString(16), 64)}`,
-                `0x${padLeft(note.sigma.x.fromRed().toString(16), 64)}`,
-                `0x${padLeft(note.sigma.y.fromRed().toString(16), 64)}`,
+            const items = [
+                kBar,
+                aBar,
+                note.gamma.x.fromRed(),
+                note.gamma.y.fromRed(),
+                note.sigma.x.fromRed(),
+                note.sigma.y.fromRed(),
             ];
+            return items.map((item) => `0x${padLeft(item.toString(16), 64)}`);
         });
     }
+
+    // eslint-disable-next-line class-methods-use-this
+    constructOutput() {}
 
     /**
      * Validate that the inputs in the constructor are well-formed
@@ -215,7 +217,7 @@ class Proof {
     validateInputs() {
         this.notes.forEach((testNote) => {
             if (!testNote.a.fromRed().lt(bn128.curve.n) || testNote.a.fromRed().eq(new BN(0))) {
-                throw new AztecError(codes.VIEWING_KEY_MALFORMED, {
+                throw new AztecError(errors.codes.VIEWING_KEY_MALFORMED, {
                     message: 'Viewing key is malformed',
                     viewingKey: testNote.a.fromRed(),
                     criteria: `Viewing key should be less than ${bn128.curve.n}
@@ -224,7 +226,7 @@ class Proof {
             }
 
             if (!testNote.k.fromRed().lt(new BN(constants.K_MAX))) {
-                throw new AztecError(codes.NOTE_VALUE_TOO_BIG, {
+                throw new AztecError(errors.codes.NOTE_VALUE_TOO_BIG, {
                     message: 'Note value is equal to or greater than K_MAX',
                     noteValue: testNote.k.fromRed(),
                     K_MAX: constants.K_MAX,
@@ -232,26 +234,26 @@ class Proof {
             }
 
             if (testNote.gamma.isInfinity() || testNote.sigma.isInfinity()) {
-                throw new AztecError(codes.POINT_AT_INFINITY, {
+                throw new AztecError(errors.codes.POINT_AT_INFINITY, {
                     message: 'One of the note points is at infinity',
                     gamma: testNote.gamma.isInfinity(),
                     sigma: testNote.sigma.isInfinity(),
                 });
             }
 
-            if (!ProofUtils.isOnCurve(testNote.gamma) || !ProofUtils.isOnCurve(testNote.sigma)) {
-                throw new AztecError(codes.NOT_ON_CURVE, {
+            if (!ProofUtils.validatePointOnCurve(testNote.gamma) || !ProofUtils.validatePointOnCurve(testNote.sigma)) {
+                throw new AztecError(errors.codes.NOT_ON_CURVE, {
                     message: 'A note group element is not on the curve',
-                    gammaOnCurve: ProofUtils.isOnCurve(testNote.gamma),
-                    sigmaOnCurve: ProofUtils.isOnCurve(testNote.sigma),
+                    gammaOnCurve: ProofUtils.validatePointOnCurve(testNote.gamma),
+                    sigmaOnCurve: ProofUtils.validatePointOnCurve(testNote.sigma),
                 });
             }
         });
 
-        if (!this.kPublic.lt(bn128.curve.n)) {
-            throw new AztecError(codes.KPUBLIC_MALFORMED, {
-                message: 'kPublic is too big',
-                kPublic: this.kPublic,
+        if (!this.publicValue.lt(bn128.curve.n)) {
+            throw new AztecError(errors.codes.KPUBLIC_MALFORMED, {
+                message: 'publicValue is too big',
+                publicValue: this.publicValue,
                 maxValue: bn128.curve.n,
             });
         }
@@ -259,7 +261,7 @@ class Proof {
         if (this.type === ProofType.BURN || this.type === ProofType.MINT) {
             const numNotes = this.notes.length;
             if (numNotes < 2) {
-                throw new AztecError(codes.INCORRECT_NOTE_NUMBER, {
+                throw new AztecError(errors.codes.INCORRECT_NOTE_NUMBER, {
                     message: `There are less than 2 notes, this is not possible in a ${this.type} proof`,
                     numNotes,
                 });
@@ -269,20 +271,3 @@ class Proof {
 }
 
 module.exports = { Proof, ProofType };
-=======
-const BurnProof = require('./joinSplitFluid/burn');
-const DividendProof = require('./dividend');
-const JoinSplitProof = require('./joinSplit');
-const JoinSplitProofFluid = require('./joinSplitFluid');
-const MintProof = require('./joinSplitFluid/mint');
-const TradeProof = require('./trade');
-
-module.exports = {
-    BurnProof,
-    DividendProof,
-    JoinSplitProof,
-    JoinSplitProofFluid,
-    MintProof,
-    TradeProof,
-};
->>>>>>> feat(aztec.js): implement new proof construction api

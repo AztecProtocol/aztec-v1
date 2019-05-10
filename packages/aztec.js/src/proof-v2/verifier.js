@@ -3,76 +3,71 @@ const BN = require('bn.js');
 
 const bn128 = require('../bn128');
 const Keccak = require('../keccak');
-const { ProofType } = require('./index');
+const { ProofType } = require('./proof');
 
-const { AztecError, codes } = errors;
-
-const ZERO_BN = new BN(0).toRed(bn128.groupReduction);
+const { groupReduction } = bn128;
+const ZERO_BN = new BN(0).toRed(groupReduction);
 
 /**
  * Class used to verify AZTEC zero-knowledge proofs
  */
 class Verifier {
     /**
-     * @param {string} proofType one of the ProofType enum values
+     * @param {Proof} proof the Proof object to be verified
      */
-    constructor(proofType) {
-        if (!ProofType[proofType]) {
+    constructor(proof) {
+        if (!proof) {
+            throw new Error('proof cannot be undefined');
+        }
+        if (!proof.type || !ProofType[proof.type]) {
             throw new Error(`proof type should be one of ${ProofType.enumValues}`);
         }
-        this.proofType = proofType;
+        this.proof = proof;
+        this.errors = [];
+
+        this.convertTranscript();
+    }
+
+    get isValid() {
+        return this.errors.length === 0;
     }
 
     /**
      * Convert ABI encoded proof transcript back into BN.js form (for scalars) and elliptic.js form (for points)
-     * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
-     * @param {number} m number of input notes
-     * @param {string} challengeHex hex-string formatted proof challenge
-     * @param {string[]} errors container for discovered errors
-     * @returns {Object[]} notes - array of AZTEC notes
-     * @returns {Hash} rolling hash - hash used to generate x in pairing optimisation
-     * @returns {string} challenge - cryptographic challenge in
-     * @returns {BN} kPublic - pubic value being converted in the transaction
      */
-    convertTranscript(proofData, m, challengeHex) {
-        if (this.proofType !== 'joinSplit' && this.proofType !== 'burn' && this.proofType !== 'mint') {
-            throw new Error('Enter join-split, mint or burn in string format as the this.proofType variable');
-        }
+    convertTranscript() {
+        this.challenge = this.hexToGroupScalar(this.proof.challengeHex);
+        const n = this.proof.data.length;
 
-        const challenge = bn128.hexToGroupScalar(challengeHex, errors);
-        const n = proofData.length;
-        let kPublic;
-
-        if (this.proofType === 'joinSplit') {
-            kPublic = bn128.hexToGroupScalar(proofData[proofData.length - 1][0], errors, true);
+        if (this.proof.type === ProofType.JOIN_SPLIT.name) {
+            this.publicValue = this.hexToGroupScalar(this.proof.data[n - 1][0], true);
         } else {
-            kPublic = new BN(0).toRed(bn128.groupReduction);
+            this.publicValue = new BN(0).toRed(groupReduction);
         }
 
-        if (this.proofType === 'mint' || this.proofType === 'burn') {
-            const numNotes = proofData.length;
+        if (this.proof.type === ProofType.BURN.name || this.proof.type === ProofType.MINT.name) {
+            const numNotes = this.proof.data.length;
             if (numNotes < 2) {
-                throw new Error(codes.INCORRECT_NOTE_NUMBER);
+                this.errors.push(errors.codes.INCORRECT_NOTE_NUMBER);
             }
         }
 
-        let runningKBar = ZERO_BN.redSub(kPublic).redMul(challenge);
-        const rollingHash = new Keccak();
-
-        const notes = proofData.map((testNote, i) => {
+        let runningKBar = ZERO_BN.redSub(this.publicValue.redMul(this.challenge));
+        this.rollingHash = new Keccak();
+        this.notes = this.proof.data.map((note, i) => {
             let kBar;
             if (i === n - 1) {
-                if (n === m) {
+                if (n === this.proof.m) {
                     kBar = ZERO_BN.redSub(runningKBar);
                 } else {
                     kBar = runningKBar;
                 }
                 if (kBar.fromRed().eq(new BN(0))) {
-                    throw new AztecError(codes.SCALAR_IS_ZERO);
+                    this.errors.push(errors.codes.SCALAR_IS_ZERO);
                 }
             } else {
-                kBar = bn128.hexToGroupScalar(testNote[0], errors);
-                if (i >= m) {
+                kBar = this.hexToGroupScalar(note[0]);
+                if (i >= this.proof.m) {
                     runningKBar = runningKBar.redSub(kBar);
                 } else {
                     runningKBar = runningKBar.redAdd(kBar);
@@ -80,94 +75,62 @@ class Verifier {
             }
             const result = {
                 kBar,
-                aBar: bn128.hexToGroupScalar(testNote[1], errors),
-                gamma: bn128.hexToGroupElement(testNote[2], testNote[3], errors),
-                sigma: bn128.hexToGroupElement(testNote[4], testNote[5], errors),
+                aBar: this.hexToGroupScalar(note[1]),
+                gamma: this.hexToGroupElement(note[2], note[3]),
+                sigma: this.hexToGroupElement(note[4], note[5]),
             };
-            rollingHash.append(result.gamma);
-            rollingHash.append(result.sigma);
+            this.rollingHash.append(result.gamma);
+            this.rollingHash.append(result.sigma);
             return result;
         });
-        return {
-            notes,
-            rollingHash,
-            challenge,
-            kPublic,
-        };
     }
 
     /**
-     * Verify an AZTEC zero-knowledge proof
-     * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
-     * @param {number} m number of input notes
-     * @param {string} challengeHex hex-string formatted proof challenge
-     * @param {string} sender Ethereum address of transaction sender
+     * Converts a hexadecimal input to a group element
+
+     * @param {string} xHex hexadecimal representation of x coordinate
+     * @param {string} yHex hexadecimal representation of y coordinate
+     * @returns {BN} bn.js formatted version of a point on the bn128 curve
      */
-    verify(proofData, m, challengeHex, sender) {
-        const a = this.b;
-        const errors = [];
-        const { rollingHash, kPublic, notes, challenge } = proofUtils.convertTranscript(
-            proofData,
-            m,
-            challengeHex,
-            errors,
-            'joinSplit',
-        );
-
-        const finalHash = new Keccak();
-        finalHash.appendBN(new BN(sender.slice(2), 16));
-        finalHash.appendBN(kPublic.fromRed());
-        finalHash.appendBN(new BN(m));
-        finalHash.data = [...finalHash.data, ...rollingHash.data];
-
-        let x;
-
-        let pairingGammas;
-        let pairingSigmas;
-        notes.forEach((note, i) => {
-            let { kBar, aBar } = note;
-            let c = challenge;
-            if (i >= m) {
-                x = rollingHash.keccak(bn128.groupReduction);
-                kBar = kBar.redMul(x);
-                aBar = aBar.redMul(x);
-                c = challenge.redMul(x);
-            }
-            const sigma = note.sigma.mul(c).neg();
-            const B = note.gamma
-                .mul(kBar)
-                .add(bn128.h.mul(aBar))
-                .add(sigma);
-            if (i === m) {
-                pairingGammas = note.gamma;
-                pairingSigmas = note.sigma.neg();
-            } else if (i > m) {
-                pairingGammas = pairingGammas.add(note.gamma.mul(c));
-                pairingSigmas = pairingSigmas.add(sigma);
-            }
-            if (B.isInfinity()) {
-                errors.push(errorTypes.BAD_BLINDING_FACTOR);
-                finalHash.appendBN(new BN(0));
-                finalHash.appendBN(new BN(0));
-            } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
-                errors.push(errorTypes.BAD_BLINDING_FACTOR);
-                finalHash.append(B);
-            } else {
-                finalHash.append(B);
-            }
-        });
-        const challengeResponse = finalHash.keccak(groupReduction);
-        if (!challengeResponse.fromRed().eq(challenge.fromRed())) {
-            errors.push(errorTypes.CHALLENGE_RESPONSE_FAIL);
+    hexToGroupElement(xHex, yHex) {
+        let x = new BN(xHex.slice(2), 16);
+        let y = new BN(yHex.slice(2), 16);
+        if (!x.lt(bn128.curve.p)) {
+            this.errors.push(errors.codes.X_TOO_BIG);
         }
-        const valid = errors.length === 0;
-        return {
-            valid,
-            errors,
-            pairingGammas,
-            pairingSigmas,
-        };
+        if (!y.lt(bn128.curve.p)) {
+            this.errors.push(errors.codes.Y_TOO_BIG);
+        }
+        x = x.toRed(bn128.curve.red);
+        y = y.toRed(bn128.curve.red);
+        const lhs = y.redSqr();
+        const rhs = x
+            .redSqr()
+            .redMul(x)
+            .redAdd(bn128.curve.b);
+        if (!lhs.fromRed().eq(rhs.fromRed())) {
+            this.errors.push(errors.codes.NOT_ON_CURVE);
+        }
+        return bn128.curve.point(x, y);
+    }
+
+    /**
+     * Convert a hexadecimal input into a scalar bn.js
+     *
+     * @param {string} hex hex input
+     * @param {boolean} canbeZero control to determine hex input can be zero
+     * @returns {BN} bn.js formatted version of the scalar
+     */
+    hexToGroupScalar(hex, canBeZero = false) {
+        const hexBn = new BN(hex.slice(2), 16);
+        if (!hexBn.lt(bn128.curve.n)) {
+            this.errors.push(errors.codes.SCALAR_TOO_BIG);
+        }
+        if (!canBeZero && hexBn.eq(new BN(0))) {
+            this.errors.push(errors.codes.SCALAR_IS_ZERO);
+        }
+        return hexBn.toRed(groupReduction);
     }
 }
 
-module.exports = { Verifier };
+module.exports = Verifier;

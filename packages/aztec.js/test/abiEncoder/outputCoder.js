@@ -16,7 +16,15 @@ const isHex = (input) => {
     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
 };
 
+<<<<<<< HEAD
 describe('abiEncoder.outputCoder', () => {
+=======
+const randomNoteValue = () => {
+    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
+};
+
+describe.skip('Output Coder', () => {
+>>>>>>> feat(aztec.js): implement new proof construction api
     let accounts = [];
     let notes = [];
     let challenges = [];

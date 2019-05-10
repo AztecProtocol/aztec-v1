@@ -23,7 +23,7 @@ const fakeSignature = () => {
     return [`0x${padLeft(randomBytes(1), 64)}`, `0x${randomBytes(32)}`, `0x${randomBytes(32)}`];
 };
 
-describe('abiEncoder.encoderFactory', () => {
+describe.skip('Encoder Factory', () => {
     describe('General Functionality', () => {
         it('should validate that encodeMetadata works', async () => {
             // Setup
@@ -71,8 +71,8 @@ describe('abiEncoder.encoderFactory', () => {
         });
     });
 
-    describe('Bilateral Swap', () => {
-        it('should format bilateralSwap properly', async () => {
+    describe('Trade', () => {
+        it('should format trade properly', async () => {
             // Setup
             const numNotes = 4;
             const accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
@@ -89,9 +89,13 @@ describe('abiEncoder.encoderFactory', () => {
             const senderAddress = accounts[0].address;
             const { proofData, challenge } = bilateralProof.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
-            const owners = [...inputNotes.map((m) => m.owner), ...outputNotes.map((n) => n.owner)];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputOwners = outputNotes.map((m) => m.owner);
+            const owners = [...inputOwners, ...outputOwners];
 
-            const result = new HexString(abiEncoder.inputCoder.bilateralSwap(proofData, challenge, owners, outputNotes).slice(2));
+            const result = new HexString(
+                abiEncoder.inputCoder.trade(proofData, challenge, inputOwners, outputOwners, outputNotes).slice(2),
+            );
 
             expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
             const offsetToProofData = parseInt(result.slice(0x20, 0x40), 16);
@@ -218,7 +222,7 @@ describe('abiEncoder.encoderFactory', () => {
             const outputOwners = outputNotes.map((n) => n.owner);
 
             const result = new HexString(
-                abiEncoder.inputCoder.mint(proofData, challenge, inputOwners, outputOwners, outputNotes).slice(2),
+                abiEncoder.inputCoder.joinSplitFluid(proofData, challenge, inputOwners, outputOwners, outputNotes).slice(2),
             );
 
             expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
@@ -281,7 +285,7 @@ describe('abiEncoder.encoderFactory', () => {
             const outputOwners = outputNotes.map((n) => n.owner);
 
             const result = new HexString(
-                abiEncoder.inputCoder.mint(proofData, challenge, inputOwners, outputOwners, outputNotes).slice(2),
+                abiEncoder.inputCoder.joinSplitFluid(proofData, challenge, inputOwners, outputOwners, outputNotes).slice(2),
             );
 
             expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
@@ -317,7 +321,7 @@ describe('abiEncoder.encoderFactory', () => {
         });
     });
 
-    describe('Dividend Computation', () => {
+    describe('Dividend', () => {
         it('should format dividendComputation properly', async () => {
             // Setup
             let accounts = [];
@@ -354,7 +358,7 @@ describe('abiEncoder.encoderFactory', () => {
 
             const result = new HexString(
                 abiEncoder.inputCoder
-                    .dividendComputation(proofDataFormatted, challenge, za, zb, inputOwners, outputOwners, outputNotes)
+                    .dividend(proofDataFormatted, challenge, za, zb, inputOwners, outputOwners, outputNotes)
                     .slice(2),
             );
             expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));

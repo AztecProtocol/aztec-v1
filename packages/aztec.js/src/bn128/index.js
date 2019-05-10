@@ -11,7 +11,7 @@ const EC = require('elliptic');
 
 const decodePoint = require('./decodePoint');
 
-const { AztecError, codes } = errors;
+const { AztecError } = errors;
 const { BN128_COMPRESSION_MASK, FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y, K_MAX } = constants;
 
 const bn128 = {};
@@ -117,25 +117,6 @@ bn128.decompressHex = (compressedHex) => {
         y = bn128.curve.p.sub(y);
     }
     return bn128.curve.point(x.fromRed(), y);
-};
-
-/**
- * Convert a hexadecimal input into a scalar bn.js
- * @method hexToGroupScalar
- * @param {string} hex - hex input
- * @param {string[]} errors - collection of all errors that occurred
- * @param {boolean} canbeZero - control to determine hex input can be zero
- * @returns {BN} bn.js formatted version of the scalar
- */
-bn128.hexToGroupScalar = (hex, canBeZero = false) => {
-    const hexBn = new BN(hex.slice(2), 16);
-    if (!hexBn.lt(bn128.curve.n)) {
-        throw new AztecError(codes.SCALAR_TOO_BIG);
-    }
-    if (!canBeZero && hexBn.eq(new BN(0))) {
-        throw new AztecError(codes.SCALAR_IS_ZERO);
-    }
-    return hexBn.toRed(bn128.groupReduction);
 };
 
 /**

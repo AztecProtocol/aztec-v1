@@ -8,7 +8,7 @@ const hashStrings = (inputArr) => {
             return res;
         })
         .join('')}`;
-    return keccak256(`0x${input}`, 'hex').slice(2);
+    return keccak256(`0x${input}`).slice(2);
 };
 
 /**
