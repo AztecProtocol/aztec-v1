@@ -126,20 +126,6 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_proofData",
-                    "type": "bytes"
-                }
-            ],
-            "name": "confidentialTransfer",
-            "outputs": [],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
                     "name": "_noteHash",
                     "type": "bytes32"
                 },
@@ -175,6 +161,24 @@
                 }
             ],
             "name": "confidentialTransferFrom",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_signatures",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialTransfer",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
