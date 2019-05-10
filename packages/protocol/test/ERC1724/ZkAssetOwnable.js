@@ -35,6 +35,8 @@ const signNote = (validatorAddress, noteHash, spender, privateKey) => {
     return signer.signTypedData(domain, schema, message, privateKey);
 };
 
+
+
 contract('ZkAssetOwnable', (accounts) => {
     let ace;
     let aztecJoinSplit;
@@ -42,17 +44,12 @@ contract('ZkAssetOwnable', (accounts) => {
     let zkAssetOwnable;
     let zkAssetOwnableTest;
 
-    let aztecAccounts = [];
     const epoch = 1;
     const filter = 17; // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
-    let notes = [];
-    const proofs = [];
-    let proofHashes = [];
-    let proofOutputs = [];
     const scalingFactor = new BN(10);
     const tokensTransferred = new BN(100000);
 
-    const confidentialApprove = async (indexes) => {
+    const confidentialApprove = async (indexes, notes, aztecAccounts) => {
         await Promise.all(
             indexes.map((i) => {
                 const { signature } = signNote(
@@ -75,11 +72,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
     beforeEach(async () => {
         ace = await ACE.new({ from: accounts[0] });
-        aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-        notes = await Promise.all([
-            ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-            ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-        ]);
+
         await ace.setCommonReferenceString(constants.CRS);
         aztecJoinSplit = await JoinSplit.new();
         await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
@@ -91,68 +84,6 @@ contract('ZkAssetOwnable', (accounts) => {
         await zkAssetOwnable.setProofs(epoch, filter);
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
         await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
-
-        proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
-            inputNotes: [],
-            outputNotes: notes.slice(0, 2),
-            senderAddress: accounts[0],
-            inputNoteOwners: [],
-            publicOwner: accounts[0],
-            kPublic: -10,
-            validatorAddress: zkAssetOwnable.address,
-        });
-        proofs[1] = proof.joinSplit.encodeJoinSplitTransaction({
-            inputNotes: notes.slice(0, 2),
-            outputNotes: notes.slice(2, 4),
-            senderAddress: accounts[0],
-            inputNoteOwners: aztecAccounts.slice(0, 2),
-            publicOwner: accounts[1],
-            kPublic: -40,
-            validatorAddress: zkAssetOwnable.address,
-        });
-        proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
-            inputNotes: [],
-            outputNotes: notes.slice(6, 8),
-            senderAddress: accounts[0],
-            inputNoteOwners: [],
-            publicOwner: accounts[2],
-            kPublic: -130,
-            validatorAddress: zkAssetOwnable.address,
-        });
-        proofs[3] = proof.joinSplit.encodeJoinSplitTransaction({
-            inputNotes: notes.slice(6, 8),
-            outputNotes: notes.slice(4, 6),
-            senderAddress: accounts[0],
-            inputNoteOwners: aztecAccounts.slice(6, 8),
-            publicOwner: accounts[3],
-            kPublic: 40,
-            validatorAddress: zkAssetOwnable.address,
-        });
-        proofs[4] = proof.joinSplit.encodeJoinSplitTransaction({
-            inputNotes: [],
-            outputNotes: [notes[0], notes[3]],
-            senderAddress: accounts[0],
-            inputNoteOwners: [],
-            publicOwner: accounts[3],
-            kPublic: -30,
-            validatorAddress: zkAssetOwnable.address,
-        });
-        proofs[5] = proof.joinSplit.encodeJoinSplitTransaction({
-            inputNotes: [notes[0], notes[3]],
-            outputNotes: [notes[1], notes[2]],
-            senderAddress: accounts[0],
-            inputNoteOwners: [aztecAccounts[0], aztecAccounts[3]],
-            publicOwner: accounts[3],
-            kPublic: 0, // perfectly balanced...
-            validatorAddress: zkAssetOwnable.address,
-        });
-
-        proofOutputs = proofs.map(({ expectedOutput }) => {
-            return outputCoder.getProofOutput(expectedOutput, 0);
-        });
-        proofHashes = proofOutputs.map((proofOutput) => {
-            return outputCoder.hashProofOutput(proofOutput);
-        });
 
         await Promise.all(
             accounts.map((account) => {
@@ -166,11 +97,6 @@ contract('ZkAssetOwnable', (accounts) => {
                 return erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
             }),
         );
-
-        await ace.publicApprove(zkAssetOwnable.address, proofHashes[0], 10, { from: accounts[0] });
-        await ace.publicApprove(zkAssetOwnable.address, proofHashes[1], 40, { from: accounts[1] });
-        await ace.publicApprove(zkAssetOwnable.address, proofHashes[2], 130, { from: accounts[2] });
-        await ace.publicApprove(zkAssetOwnable.address, proofHashes[4], 30, { from: accounts[3] });
     });
 
     describe('Success States', () => {
@@ -180,40 +106,133 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should delegate a contract to update a note registry by consuming input notes, with kPublic negative', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
+            const noteValues = [0, 10, 30, 20];
+            const numNotes = 4;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
-            await confidentialApprove([0, 1]);
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -10,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, proofs[1].proofData);
 
-            const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
+            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: aztecAccounts.slice(0, 2),
+                publicOwner: accounts[1],
+                kPublic: -40,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
+            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+
+            await confidentialApprove([0, 1], notes, aztecAccounts);
+
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
+            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
+
             expect(receipt.status).to.equal(true);
         });
 
         it('should delegate a contract to update a note registry by consuming input notes, with kPublic positive', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[2].proofData, proofs[2].signatures);
+            const noteValues = [60, 70, 50, 40];
+            const numNotes = 4;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
-            await confidentialApprove([6, 7]);
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -130,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 130, { from: accounts[0] });
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, proofs[3].proofData);
+            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: aztecAccounts.slice(0, 2),
+                publicOwner: accounts[1],
+                kPublic: 40,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
 
-            const formattedProofOutput = `0x${proofOutputs[3].slice(0x40)}`;
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
+
+            await confidentialApprove([0, 1], notes, aztecAccounts);
+
+            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
             expect(receipt.status).to.equal(true);
 
-            const result = await ace.getNote(zkAssetOwnable.address, notes[6].noteHash);
+            const spentNoteHash = notes[0].noteHash;
+            const result = await ace.getNote(zkAssetOwnable.address, spentNoteHash);
             expect(result.status.toNumber()).to.equal(constants.statuses.NOTE_SPENT);
         });
 
         it('should delegate a contract to update a note registry with kPublic = 0', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[4].proofData, proofs[4].signatures);
+            const noteValues = [10, 20, 15, 15];
+            const numNotes = 4;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
-            await confidentialApprove([0, 3]);
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: [notes[0], notes[1]],
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -30,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, { from: accounts[0] });
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, proofs[5].proofData);
+            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [notes[0], notes[1]],
+                outputNotes: [notes[2], notes[3]],
+                senderAddress: accounts[0],
+                inputNoteOwners: [aztecAccounts[0], aztecAccounts[1]],
+                publicOwner: accounts[1],
+                kPublic: 0, // perfectly balanced...
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
+            await confidentialApprove([0, 1], notes, aztecAccounts);
 
-            const formattedProofOutput = `0x${proofOutputs[5].slice(0x40)}`;
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
+
+            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
             expect(receipt.status).to.equal(true);
         });
@@ -226,7 +245,26 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it("should fail to approve a contract to update a note registry if note doesn't exist", async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
+            const noteValues = [0, 10, 30];
+            const numNotes = 3;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
+
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -10,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, { from: accounts[0] });
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const { signature } = signNote(
                 zkAssetOwnable.address,
@@ -247,8 +285,41 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should fail to approve a contract to update a note registry if note had already been spent', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
-            await zkAssetOwnable.confidentialTransfer(proofs[1].proofData, proofs[1].signatures);
+            const noteValues = [0, 10, 30, 20];
+            const numNotes = 4;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
+
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -10,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+
+            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: aztecAccounts.slice(0, 2),
+                publicOwner: accounts[1],
+                kPublic: -40,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
+            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(transferProof.proofData, transferProof.signatures);
 
             const { signature } = signNote(
                 zkAssetOwnable.address,
@@ -265,7 +336,28 @@ contract('ZkAssetOwnable', (accounts) => {
 
         // eslint-disable-next-line max-len
         it('should fail to approve a contract to update a note registry if no ECDSA signature is provided and the sender is not the note owner', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
+            const noteValues = [0, 10];
+            const numNotes = 2;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
+
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -10,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+
+
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const emptySignature = '0x';
             await truffleAssert.reverts(
@@ -275,14 +367,46 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should fail to delegate a contract to update a note registry is proof is not supported', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
+            const noteValues = [0, 10, 30, 20];
+            const numNotes = 4;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
-            await confidentialApprove([0, 1]);
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -10,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
 
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, proofs[1].proofData);
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+
+            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: aztecAccounts.slice(0, 2),
+                publicOwner: accounts[1],
+                kPublic: -40,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
+            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+
+            await confidentialApprove([0, 1], notes, aztecAccounts);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
 
             const bogusProof = `${parseInt(JOIN_SPLIT_PROOF, 10) + 1}`; // adding 1 changes the proof id from the proof object
-            const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
+            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callConfidentialTransferFrom(bogusProof, formattedProofOutput),
                 'expected proof to be supported',
@@ -290,16 +414,48 @@ contract('ZkAssetOwnable', (accounts) => {
         });
 
         it('should fail to delegate a contract to update a note registry if publicApprove has not been called', async () => {
-            await zkAssetOwnable.confidentialTransfer(proofs[0].proofData, proofs[0].signatures);
+            const noteValues = [0, 10, 30, 20];
+            const numNotes = 4;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
-            await confidentialApprove([0, 1]);
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -10,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+
+            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: aztecAccounts.slice(0, 2),
+                publicOwner: accounts[1],
+                kPublic: -40,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
+            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+
+            await confidentialApprove([0, 1], notes, aztecAccounts);
 
             const opts = { from: accounts[1] };
-            await ace.publicApprove(zkAssetOwnable.address, proofHashes[1], 0, opts);
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 0, opts);
 
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, proofs[1].proofData);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
 
-            const formattedProofOutput = `0x${proofOutputs[1].slice(0x40)}`;
+            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput),
                 'public owner has not validated a transfer of tokens',
