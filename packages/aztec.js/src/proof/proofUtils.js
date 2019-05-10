@@ -446,7 +446,7 @@ proofUtils.randomAddress = () => {
 
 /**
  * Checks whether signatures can be generated using the input arguments to a joinSplit proof
- * 
+ *
  * @method checkSignatureParams
  * @param {string[]} inputNoteOwners - array of the input note owners
  * @param {string} validatorAddress - Ethereum address of the transaction validator
@@ -468,7 +468,7 @@ proofUtils.checkSignatureParams = (inputNoteOwners, validatorAddress, inputNotes
             validatorAddress,
         });
     }
-}
+};
 
 /**
  * Recovers the blinding factors and challenge
