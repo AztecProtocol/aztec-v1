@@ -74,13 +74,12 @@ contract('ZkAssetBurnable', (accounts) => {
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
             const publicOwner = accounts[0];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
 
             proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [],
                 outputNotes: adjustedNotes,
                 senderAddress: accounts[0],
-                inputNoteOwners,
+                inputNoteOwners: [],
                 publicOwner,
                 kPublic,
                 validatorAddress: zkAssetBurnable.address,
@@ -171,7 +170,6 @@ contract('ZkAssetBurnable', (accounts) => {
             });
 
             const publicOwner = accounts[0];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
             const kPublic = -50;
             const tokensTransferred = new BN(1000);
 
@@ -182,7 +180,7 @@ contract('ZkAssetBurnable', (accounts) => {
                 inputNotes: [],
                 outputNotes: adjustedNotes,
                 senderAddress: accounts[0],
-                inputNoteOwners,
+                inputNoteOwners: [],
                 publicOwner,
                 kPublic,
                 validatorAddress: zkAssetBurnable.address,
@@ -232,7 +230,6 @@ contract('ZkAssetBurnable', (accounts) => {
             const adjustedNotes = notes.slice(2, 4);
 
             const publicOwner = accounts[0];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
             const kPublic = -50;
             const tokensTransferred = new BN(1000);
 
@@ -243,7 +240,7 @@ contract('ZkAssetBurnable', (accounts) => {
                 inputNotes: [],
                 outputNotes: adjustedNotes,
                 senderAddress: accounts[0],
-                inputNoteOwners,
+                inputNoteOwners: [],
                 publicOwner,
                 kPublic,
                 validatorAddress: zkAssetBurnable.address,
@@ -301,7 +298,6 @@ contract('ZkAssetBurnable', (accounts) => {
             });
 
             const publicOwner = accounts[0];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
             const kPublic = -50;
             const tokensTransferred = new BN(1000);
 
@@ -314,7 +310,7 @@ contract('ZkAssetBurnable', (accounts) => {
                 inputNotes: [],
                 outputNotes,
                 senderAddress: accounts[0],
-                inputNoteOwners,
+                inputNoteOwners: [],
                 publicOwner,
                 kPublic,
                 validatorAddress: zkAssetBurnable.address,
