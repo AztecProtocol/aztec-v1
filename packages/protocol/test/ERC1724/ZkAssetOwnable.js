@@ -460,5 +460,54 @@ contract.only('ZkAssetOwnable', (accounts) => {
                 'public owner has not validated a transfer of tokens',
             );
         });
+
+        it('should fail to confidentialTransferFrom() if confidentialApprove() has not been called', async () => {
+            const noteValues = [0, 10, 30, 20];
+            const numNotes = 4;
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
+
+            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: [],
+                outputNotes: notes.slice(0, 2),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[0],
+                kPublic: -10,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+
+            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
+                inputNotes: notes.slice(0, 2),
+                outputNotes: notes.slice(2, 4),
+                senderAddress: accounts[0],
+                inputNoteOwners: [],
+                publicOwner: accounts[1],
+                kPublic: -40,
+                validatorAddress: zkAssetOwnable.address,
+            });
+            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
+            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+
+            // No confidentialApprove() call
+
+            const opts = { from: accounts[1] };
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 0, opts);
+
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
+
+            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
+            await truffleAssert.reverts(
+                zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput),
+                'sender does not have approval to spend input note',
+            );
+        });
     });
 });
