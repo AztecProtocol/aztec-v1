@@ -4,7 +4,10 @@
  * @module proofUtils
  */
 
-const devUtils = require('@aztec/dev-utils');
+const {
+    errors: { customError },
+    constants: { errorTypes, K_MAX },
+} = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const crypto = require('crypto');
@@ -14,8 +17,6 @@ const bn128 = require('../bn128');
 const Keccak = require('../keccak');
 const note = require('../note');
 
-const { customError } = devUtils.errors;
-const { errorTypes, K_MAX } = devUtils.constants;
 const { groupReduction } = bn128;
 const zero = new BN(0).toRed(groupReduction);
 
@@ -433,7 +434,6 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
         }
     }
 };
-
 
 /**
  * Generate a random Ethereum address

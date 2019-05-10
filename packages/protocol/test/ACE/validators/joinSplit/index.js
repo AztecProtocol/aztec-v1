@@ -491,7 +491,6 @@ contract('JoinSplit', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-
         it('should succeed for no inputNoteOwners and no validatorAddress', async () => {
             // Test to confirm no signature validation is performed in the JoinSplit.sol validator
             const { publicKey } = aztecAccounts[0];
