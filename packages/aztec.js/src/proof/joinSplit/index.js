@@ -2,11 +2,7 @@
  * @module joinSplit
  */
 
-const {
-    constants,
-    proofs,
-    errors: { customError },
-} = require('@aztec/dev-utils');
+const { constants, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
@@ -229,7 +225,6 @@ joinSplit.encodeJoinSplitTransaction = ({
     );
 
     proofUtils.checkSignatureParams(inputNoteOwners, validatorAddress, inputNotes);
-
 
     const signaturesArray = inputNoteOwners.map((inputNoteOwner, index) => {
         const domain = signer.generateZKAssetDomainParams(validatorAddress);
