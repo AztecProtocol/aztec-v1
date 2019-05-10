@@ -228,13 +228,8 @@ joinSplit.encodeJoinSplitTransaction = ({
         publicOwner,
     );
 
-    if (inputNoteOwners.length > 0 && validatorAddress.length === 0) {
-        throw customError(constants.errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
-            message: 'unable to calculate signatures, as there is no validator address',
-            inputNoteOwners,
-            validatorAddress,
-        });
-    }
+    proofUtils.checkSignatureParams(inputNoteOwners, validatorAddress, inputNotes);
+
 
     const signaturesArray = inputNoteOwners.map((inputNoteOwner, index) => {
         const domain = signer.generateZKAssetDomainParams(validatorAddress);
