@@ -1,23 +1,51 @@
 /**
- * Error module to be used in aztec.js and protocol
- * @module Errors
+ * Error codes for use during proof construction
  */
+const codes = {
+    BAD_BLINDING_FACTOR: 'BAD_BLINDING_FACTOR',
+    BAD_K: 'BAD_K',
+    BLINDING_FACTOR_IS_NULL: 'BLINDING_FACTOR_IS_NULL',
+    CHALLENGE_RESPONSE_FAIL: 'CHALLENGE_RESPONSE_FAIL',
+    GAMMA_IS_INFINITY: 'GAMMA_IS_INFINTY',
+    GAMMA_SIGMA_NOT_ON_CURVE: 'GAMMA_SIGMA_NOT_ON_CURVE',
+    INCORRECT_NOTE_NUMBER: 'INCORRECT_NOTE_NUMBER',
+    KA_TOO_BIG: 'KA_TOO_BIG',
+    KB_TOO_BIG: 'KB_TOO_BIG',
+    KPUBLIC_MALFORMED: 'KPUBLIC_MALFORMED',
+    M_TOO_BIG: 'M_TOO_BIG',
+    NO_ADD_CHALLENGEVAR: 'NO_ADD_CHALLENGEVAR',
+    NOT_ON_CURVE: 'NOT_ON_CURVE',
+    NOTE_VALUE_TOO_BIG: 'NOTE_VALUE_TOO_BIG',
+    POINT_AT_INFINITY: 'POINT_AT_INFINITY',
+    SCALAR_IS_ZERO: 'SCALAR_IS_ZERO',
+    SCALAR_TOO_BIG: 'SCALAR_TOO_BIG',
+    SHOULD_THROW_IS_UNDEFINED: 'SHOULD_THROW_IS_UNDEFINED',
+    SIGMA_IS_INFINTY: 'SIGMA_IS_INFINITY',
+    VIEWING_KEY_MALFORMED: 'VIEWING_KEY_MALFORMED',
+    X_TOO_BIG: 'X_TOO_BIG',
+    Y_TOO_BIG: 'Y_TOO_BIG',
+    ZA_TOO_BIG: 'ZA_TOO_BIG',
+    ZB_TOO_BIG: 'ZB_TOO_BIG',
+};
 
 /**
  * Take in the error to be thrown, throw it and return additional debugging
  * information alongside
- * @method customError
- * @param {string} errorType - the type of error thrown
+ *
+ * @class AztecError
+ * @param {string} code - the code of the error thrown
  * @param {Object} data - additional debugging information to be thrown alongside the
  * error
  */
 
-const customError = (errorType, data) => {
-    const error = new Error(errorType);
-    error.data = data;
-    return error;
-};
+class AztecError extends Error {
+    constructor(code, data) {
+        super(code);
+        this.data = data;
+    }
+}
 
 module.exports = {
-    customError,
+    AztecError,
+    codes,
 };
