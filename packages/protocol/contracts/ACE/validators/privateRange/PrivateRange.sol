@@ -122,7 +122,7 @@ contract PrivateRange {
                     validateCommitment(noteIndex, k, a)
 
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-                    if gt(i, 0x00) {
+                    if i {
                         let x := mod(mload(0x00), gen_order)
                         k := mulmod(k, x, gen_order)
                         a := mulmod(a, x, gen_order)
