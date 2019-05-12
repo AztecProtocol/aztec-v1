@@ -75,10 +75,12 @@ privateRange.constructBlindingFactors = (notes, rollingHash) => {
  * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
 privateRange.constructProof = (notes, sender) => {
+    const numNotes = 3;
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
 
     proofUtils.parseInputs(notes, sender);
+    proofUtils.checkNumNotes(notes, numNotes, true);
 
     notes.forEach((note) => {
         rollingHash.append(note.gamma);
