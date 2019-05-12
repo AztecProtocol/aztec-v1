@@ -18,7 +18,7 @@ const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
 
 PrivateRange.abi = PrivateRangeInterface.abi;
 
-contract.only('PrivateRange ABI encoder test', (accounts) => {
+contract('PrivateRange ABI encoder test', (accounts) => {
     let privateRangeContract;
     describe('Success States', () => {
         beforeEach(async () => {
@@ -28,26 +28,28 @@ contract.only('PrivateRange ABI encoder test', (accounts) => {
         });
 
         it('validate zk validator success', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
-            const originalNote = notes[0];
-            const comparisonNote = notes[1];
-            const utilityNote = notes[2];
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
             const senderAddress = accounts[0];
 
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+
             const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
-                [originalNote, comparisonNote, utilityNote],
+                notes,
                 senderAddress,
             );
 
-            const inputNotes = [originalNote, comparisonNote];
-            const outputNotes = [utilityNote];
-            const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwner = [utilityNote.owner];
 
-            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwner, outputNotes);
+
+            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
             const publicOwner = constants.addresses.ZERO_ADDRESS;
             const publicValue = 0;
 
