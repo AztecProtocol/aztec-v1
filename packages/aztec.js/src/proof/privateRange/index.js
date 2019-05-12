@@ -3,7 +3,7 @@
  *
  * @module privateRange
  */
-const devUtils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const crypto = require('crypto');
@@ -78,6 +78,8 @@ privateRange.constructProof = (notes, sender) => {
     const numNotes = 3;
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
+    const kPublicBN = new BN(0);
+    const publicOwner = constants.ZERO_ADDRESS;
 
     proofUtils.parseInputs(notes, sender);
     proofUtils.checkNumNotes(notes, numNotes, true);
@@ -89,7 +91,7 @@ privateRange.constructProof = (notes, sender) => {
 
     const blindingFactors = privateRange.constructBlindingFactors(notes, rollingHash);
 
-    const challenge = proofUtils.computeChallenge(sender, notes, blindingFactors);
+    const challenge = proofUtils.computeChallenge(sender, kPublicBN, publicOwner, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar;
 
@@ -143,7 +145,7 @@ privateRange.encodePrivateRangeTransaction = ({ originalNote, comparisonNote, ut
     const { proofData: proofDataRaw, challenge } = privateRange.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
     const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
-    const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
+    const publicOwner = constants.addresses.ZERO_ADDRESS;
     const publicValue = 0;
 
     const expectedOutput = `0x${outputCoder

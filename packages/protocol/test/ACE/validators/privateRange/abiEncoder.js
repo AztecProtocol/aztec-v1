@@ -1,14 +1,14 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
 const { padLeft } = require('web3-utils');
+const secp256k1 = require('@aztec/secp256k1');
+const { constants } = require('@aztec/dev-utils');
 
 // ### Internal Dependencies
-const { constants } = require('@aztec/dev-utils');
 
 const {
     proof: { privateRange },
     note,
-    secp256k1,
     abiEncoder: { inputCoder, outputCoder },
 } = require('aztec.js');
 
@@ -18,7 +18,7 @@ const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
 
 PrivateRange.abi = PrivateRangeInterface.abi;
 
-contract('PrivateRange ABI encoder test', (accounts) => {
+contract.only('PrivateRange ABI encoder test', (accounts) => {
     let privateRangeContract;
     describe('Success States', () => {
         beforeEach(async () => {

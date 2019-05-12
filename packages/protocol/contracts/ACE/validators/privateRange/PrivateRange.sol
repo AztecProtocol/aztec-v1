@@ -62,10 +62,12 @@ contract PrivateRange {
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x124), gen_order)
 
-                // add sender to final hash table
-                mstore(0x2a0, calldataload(0x24))
+                // add sender, kPublic, publicOwner to final hash table
+                mstore(0x2a0, calldataload(0x24)) // sender
+                mstore(0x2c0, 0) // kPublic
+                mstore(0x2e0, 0) // publicOwner
                 hashCommitments(notes, n)
-                let b := add(0x2c0, mul(n, 0x80))
+                let b := add(0x300, mul(n, 0x80))
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
@@ -342,9 +344,9 @@ contract PrivateRange {
             function hashCommitments(notes, n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
                 let index := add(add(notes, mul(i, 0xc0)), 0x60)
-                calldatacopy(add(0x2c0, mul(i, 0x80)), index, 0x80)
+                calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
-                mstore(0x00, keccak256(0x2c0, mul(n, 0x80)))
+                mstore(0x00, keccak256(0x300, mul(n, 0x80)))
             }
         }
     

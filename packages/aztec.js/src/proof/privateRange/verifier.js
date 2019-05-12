@@ -1,13 +1,12 @@
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
-const { errorTypes } = utils.constants;
 
 const verifier = {};
 
@@ -26,6 +25,8 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
     const errors = [];
     const kBarArray = [];
     const numNotes = 3;
+    const kPublicBN = new BN(0);
+    const publicOwner = constants.ZERO_ADDRESS;
 
     // Used to check the number of notes. Boolean argument specifies whether the
     // check should throw if not satisfied, or if we seek to collect all errors
@@ -45,6 +46,8 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
 
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));
+    finalHash.appendBN(kPublicBN);
+    finalHash.appendBN(new BN(publicOwner.slice(2), 16));
     finalHash.data = [...finalHash.data, ...rollingHash.data];
 
     let x;
@@ -90,13 +93,13 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
         }
 
         if (B === null) {
-            errors.push(errorTypes.BLINDING_FACTOR_IS_NULL);
+            errors.push(constants.errorTypes.BLINDING_FACTOR_IS_NULL);
         } else if (B.isInfinity()) {
-            errors.push(errorTypes.BAD_BLINDING_FACTOR);
+            errors.push(constants.errorTypes.BAD_BLINDING_FACTOR);
             finalHash.appendBN(new BN(0));
             finalHash.appendBN(new BN(0));
         } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
-            errors.push(errorTypes.BAD_BLINDING_FACTOR);
+            errors.push(constants.errorTypes.BAD_BLINDING_FACTOR);
             finalHash.append(B);
         } else {
             finalHash.append(B);
@@ -112,7 +115,7 @@ verifier.verifyProof = (proofData, challengeHex, sender) => {
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (challengeResponse !== challengeHex) {
-        errors.push(errorTypes.CHALLENGE_RESPONSE_FAIL);
+        errors.push(constants.errorTypes.CHALLENGE_RESPONSE_FAIL);
     }
     const valid = errors.length === 0;
 
