@@ -36,19 +36,18 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate zk validator success', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
 
-            const { proofData, expectedOutput } = privateRange.encodePrivateRangeTransaction({
+            const { proofData, expectedOutput } = await privateRange.encodePrivateRangeTransaction({
                 originalNote,
                 comparisonNote,
-                utilityNote,
                 senderAddress: accounts[0],
             });
+
 
             const opts = {
                 from: accounts[0],
@@ -61,17 +60,15 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate it works with input notes of zero value', async () => {
-            const noteValues = [10, 0, 10];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const noteValues = [10, 0];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
 
-            const { proofData, expectedOutput } = privateRange.encodePrivateRangeTransaction({
+            const { proofData, expectedOutput } = await privateRange.encodePrivateRangeTransaction({
                 originalNote,
                 comparisonNote,
-                utilityNote,
                 senderAddress: accounts[0],
             });
 
@@ -85,18 +82,16 @@ contract.only('PrivateRange', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate it works with output notes of zero value', async () => {
-            const noteValues = [0, 0, 0];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+        it.skip('validate it works with output notes of zero value', async () => {
+            const noteValues = [0, 0];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
 
-            const { proofData, expectedOutput } = privateRange.encodePrivateRangeTransaction({
+            const { proofData, expectedOutput } = await privateRange.encodePrivateRangeTransaction({
                 originalNote,
                 comparisonNote,
-                utilityNote,
                 senderAddress: accounts[0],
             });
 
@@ -111,21 +106,21 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate success when challenge has GROUP_MODULUS added to it', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
             const senderAddress = accounts[0];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
 
             const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
-                [...inputNotes, ...outputNotes],
+                notes,
                 senderAddress,
             );
 
@@ -173,17 +168,15 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure for incorrect balancing relation', async () => {
-            const noteValues = [10, 20, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const noteValues = [10, 20];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
 
-            const { proofData } = privateRange.encodePrivateRangeTransaction({
+            const { proofData } = await privateRange.encodePrivateRangeTransaction({
                 originalNote,
                 comparisonNote,
-                utilityNote,
                 senderAddress: accounts[0],
             });
 
@@ -196,19 +189,19 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure for fake challenge', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
 
-            const { proofData } = privateRange.encodePrivateRangeTransaction({
+            const { proofData } = await privateRange.encodePrivateRangeTransaction({
                 originalNote,
                 comparisonNote,
-                utilityNote,
                 senderAddress: accounts[0],
             });
+
+            console.log('proof data: ', proofData);
 
             const fakeChallenge = padLeft(crypto.randomBytes(32).toString('hex'), 64);
             const fakeProofData = `0x${proofData.slice(0x02, 0x42)}${fakeChallenge}${proofData.slice(0x82)}`;
@@ -224,20 +217,21 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure for fake proof data', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
             const senderAddress = accounts[0];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
 
-            const { challenge } = privateRange.constructProof([...inputNotes, ...outputNotes], senderAddress);
+
+            const { challenge } = privateRange.constructProof(notes, senderAddress);
 
             const fakeProofData = [...Array(4)].map(() =>
                 [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
@@ -254,17 +248,17 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure if points not on the curve', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
 
             const zeroes = `${padLeft('0', 64)}`;
             const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
@@ -284,18 +278,19 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure if scalars are zero', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
+
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
             const senderAddress = accounts[0];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
-            const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
 
             const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
                 [...inputNotes, ...outputNotes],
@@ -317,18 +312,18 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure if scalars are NOT mod(GROUP_MODULUS)', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
-            const senderAddress = accounts[0];
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+            const senderAddress = accounts[0];
 
             const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
                 [...inputNotes, ...outputNotes],
@@ -352,18 +347,18 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure if group element (blinding factor) resolves to the point at infinity', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
-            const senderAddress = accounts[0];
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+            const senderAddress = accounts[0];
 
             const { proofData: proofDataRaw } = privateRange.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
@@ -392,18 +387,18 @@ contract.only('PrivateRange', (accounts) => {
         });
 
         it('validate failure if proofData NOT correctly encoded', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
-            const senderAddress = accounts[0];
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+            const senderAddress = accounts[0];
 
             const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
                 [...inputNotes, ...outputNotes],
@@ -442,18 +437,16 @@ contract.only('PrivateRange', (accounts) => {
             );
         });
 
-        it('validate failure for incorrect H_X, H_Y in CRS', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+        it.only('validate failure for incorrect H_X, H_Y in CRS', async () => {
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
 
-            const { proofData } = privateRange.encodePrivateRangeTransaction({
+            const { proofData } = await privateRange.encodePrivateRangeTransaction({
                 originalNote,
                 comparisonNote,
-                utilityNote,
                 senderAddress: accounts[0],
             });
 
@@ -479,17 +472,15 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], fakeCRS, opts));
         });
 
-        it('validate failure for no notes', async () => {
+        it.skip('validate failure for no notes', async () => {
             const originalNote = [];
             const comparisonNote = [];
-            const utilityNote = [];
 
             const stubNoteNumberCheck = sinon.stub(proofUtils, 'checkNumNotes');
 
-            const { proofData } = privateRange.encodePrivateRangeTransaction({
+            const { proofData } = await privateRange.encodePrivateRangeTransaction({
                 originalNote,
                 comparisonNote,
-                utilityNote,
                 senderAddress: accounts[0],
             });
 
@@ -502,44 +493,43 @@ contract.only('PrivateRange', (accounts) => {
             stubNoteNumberCheck.restore();
         });
 
-        it('validate failure for too many notes', async () => {
-            const noteValues = [10, 3, 4, 3];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 3);
-            const utilityNote = notes.slice(3, 4);
-            const stubNoteNumberCheck = sinon.stub(proofUtils, 'checkNumNotes');
-
-            const { proofData } = privateRange.encodePrivateRangeTransaction({
-                originalNote,
-                comparisonNote,
-                utilityNote,
-                senderAddress: accounts[0],
-            });
-
-            const opts = {
-                from: accounts[0],
-                gas: 4000000,
-            };
-
-            await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
-            stubNoteNumberCheck.restore();
-        });
-
-        it('validate failure if sender address NOT integrated into challenge variable', async () => {
-            const noteValues = [10, 4, 6];
+        it.skip('validate failure for too many notes', async () => {
+            const noteValues = [10, 3, 4];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
-            const senderAddress = accounts[0];
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const stubNoteNumberCheck = sinon.stub(proofUtils, 'checkNumNotes');
+
+            const { proofData } = await privateRange.encodePrivateRangeTransaction({
+                originalNote,
+                comparisonNote,
+                senderAddress: accounts[0],
+            });
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
+            stubNoteNumberCheck.restore();
+        });
+
+        it.only('validate failure if sender address NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
+
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+            const senderAddress = accounts[0];
 
             const rollingHash = new Keccak();
             const kPublicBN = new BN(0);
@@ -575,22 +565,23 @@ contract.only('PrivateRange', (accounts) => {
         });
 
 
-        it('validate failure if kPublic NOT integrated into challenge variable', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
+        it.only('validate failure if kPublic NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
+
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
             const senderAddress = accounts[0];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
-            const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const rollingHash = new Keccak();
             const publicOwner = constants.ZERO_ADDRESS;
 
-            const rollingHash = new Keccak();
 
             notes.forEach((individualNote) => {
                 rollingHash.append(individualNote.gamma);
@@ -621,19 +612,19 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if public owner NOT integrated into challenge variable', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
-            const senderAddress = accounts[0];
+        it.only('validate failure if public owner NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+            const senderAddress = accounts[0];
             const kPublicBN = new BN(0);
 
             const rollingHash = new Keccak();
@@ -667,19 +658,19 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if notes NOT integrated into challenge variable', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
-            const senderAddress = accounts[0];
+        it.only('validate failure if notes NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+            const senderAddress = accounts[0];
 
             const rollingHash = new Keccak();
             const kPublicBN = new BN(0);
@@ -715,19 +706,19 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if blinding factors NOT integrated into challenge variable', async () => {
-            const noteValues = [10, 4, 6];
-            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-            const originalNote = notes.slice(0, 1);
-            const comparisonNote = notes.slice(1, 2);
-            const utilityNote = notes.slice(2, 3);
-            const senderAddress = accounts[0];
+        it.only('validate failure if blinding factors NOT integrated into challenge variable', async () => {
+            const noteValues = [10, 4];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notesWithoutUtility[0];
+            const comparisonNote = notesWithoutUtility[1];
 
-            const inputNotes = [...originalNote, ...comparisonNote];
-            const outputNotes = [...utilityNote];
+            const notes = await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote]);
+            const inputNotes = [originalNote, comparisonNote];
             const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const outputNotes = [notes[2]];
+            const outputOwners = [notes[2].owner];
+            const senderAddress = accounts[0];
 
             const rollingHash = new Keccak();
             const kPublicBN = new BN(0);
