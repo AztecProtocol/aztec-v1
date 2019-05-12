@@ -18,11 +18,11 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 4;
             const utilityValue = 6;
 
-            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue], [comparisonValue, utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
-            const { proofData, challenge } = privateRangeProof.constructProof(testNotes, sender);
+            const { proofData, challenge } = await privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, challenge, sender);
 
             expect(valid).to.equal(true);
@@ -34,11 +34,11 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 0;
             const utilityValue = 10;
 
-            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue], [comparisonValue, utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
-            const { proofData, challenge } = privateRangeProof.constructProof(testNotes, sender);
+            const { proofData, challenge } = await privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(true);
             expect(errors.length).to.equal(0);
@@ -49,13 +49,13 @@ describe('Private range proof verifier', () => {
         it('validate failure for incorrect balancing relation', async () => {
             const originalValue = 10;
             const comparisonValue = 5;
-            const utilityValue = 6;
+            const utilityValue = 20;
 
-            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue], [comparisonValue, utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
-            const { proofData, challenge } = privateRangeProof.constructProof(testNotes, sender);
+            const { proofData, challenge } = await privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);
@@ -65,12 +65,11 @@ describe('Private range proof verifier', () => {
         it('validate failure when comparison is not satisfied', async () => {
             const originalValue = 20;
             const comparisonValue = 30;
-            const utilityValue = 60;
+            const utilityValue = 10;
 
-            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue], [comparisonValue, utilityValue]);
 
             const sender = proofUtils.randomAddress();
-
             const { proofData, challenge } = privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, challenge, sender);
             expect(valid).to.equal(false);
@@ -83,7 +82,7 @@ describe('Private range proof verifier', () => {
             const comparisonValue = 4;
             const utilityValue = 6;
 
-            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+            const testNotes = await proofUtils.makeTestNotes([originalValue], [comparisonValue, utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
@@ -92,7 +91,7 @@ describe('Private range proof verifier', () => {
             const challengeString = `${sender}${padLeft('132', 64)}${padLeft('1', 64)}${noteString}`;
             const fakeChallenge = `0x${new BN(sha3(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const { proofData } = privateRangeProof.constructProof(testNotes, sender);
+            const { proofData } = await privateRangeProof.constructProof(testNotes, sender);
             const { valid, errors } = privateRangeProof.verifier.verifyProof(proofData, fakeChallenge, sender);
             expect(valid).to.equal(false);
             expect(errors.length).to.equal(1);

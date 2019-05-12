@@ -12,11 +12,12 @@ describe('Private range proof', () => {
             const originalValue = 10;
             const comparisonValue = 4;
             const utilityValue = 6;
-            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+
+            const testNotes = await proofUtils.makeTestNotes([originalValue], [comparisonValue, utilityValue]);
 
             const sender = proofUtils.randomAddress();
 
-            const { proofData } = privateRangeProof.constructProof(testNotes, sender);
+            const { proofData } = await privateRangeProof.constructProof(testNotes, sender);
             const numNotes = 3;
 
             expect(proofData.length).to.equal(numNotes);
@@ -30,14 +31,15 @@ describe('Private range proof', () => {
         it('should fail if number of notes is greater than 3', async () => {
             const originalValue = 10;
             const comparisonValue = 4;
-            const utilityValue = 6;
             const extraTestNote = 5
+            const utilityValue = 1;
+
             const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue, extraTestNote]);
 
             const sender = proofUtils.randomAddress();
 
             try {
-                privateRangeProof.constructProof(testNotes, sender);
+                await privateRangeProof.constructProof(testNotes, sender);
             } catch (err) {
                 expect(err.message).to.contain('INCORRECT_NOTE_NUMBER');
             }
