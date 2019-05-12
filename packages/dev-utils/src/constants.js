@@ -92,6 +92,13 @@ const constants = {
      * @default 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c
      */
     ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
+    /**
+     * 
+     * @constant ZERO_ADDRESS
+     * @type {string}
+     * @default 
+     */
+    ZERO_ADDRESS: '0x00000000000000000000000000000000000000',
 };
 
 /**
