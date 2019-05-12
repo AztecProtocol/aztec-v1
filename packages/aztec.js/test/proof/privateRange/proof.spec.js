@@ -7,20 +7,40 @@ const proofUtils = require('../../../src/proof/proofUtils');
 const { expect } = chai;
 
 describe('Private range proof', () => {
-    it('should construct a proof with well-formed outputs', async () => {
-        const originalValue = 10;
-        const comparisonValue = 4;
-        const utilityValue = 6;
-        const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
+    describe('Success states', () => {
+        it('should construct a proof with well-formed outputs', async () => {
+            const originalValue = 10;
+            const comparisonValue = 4;
+            const utilityValue = 6;
+            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue]);
 
-        const sender = proofUtils.randomAddress();
+            const sender = proofUtils.randomAddress();
 
-        const { proofData } = privateRangeProof.constructProof(testNotes, sender);
-        const numNotes = 3;
+            const { proofData } = privateRangeProof.constructProof(testNotes, sender);
+            const numNotes = 3;
 
-        expect(proofData.length).to.equal(numNotes);
-        expect(proofData[0].length).to.equal(6);
-        expect(proofData[1].length).to.equal(6);
-        expect(proofData[2].length).to.equal(6);
-    });
+            expect(proofData.length).to.equal(numNotes);
+            expect(proofData[0].length).to.equal(6);
+            expect(proofData[1].length).to.equal(6);
+            expect(proofData[2].length).to.equal(6);
+        });
+    })
+
+    describe('Failure states', () => {
+        it('should fail if number of notes is greater than 3', async () => {
+            const originalValue = 10;
+            const comparisonValue = 4;
+            const utilityValue = 6;
+            const extraTestNote = 5
+            const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue, extraTestNote]);
+
+            const sender = proofUtils.randomAddress();
+
+            try {
+                privateRangeProof.constructProof(testNotes, sender);
+            } catch (err) {
+                expect(err.message).to.contain('INCORRECT_NOTE_NUMBER');
+            }
+        });
+    })
 });
