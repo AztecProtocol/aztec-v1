@@ -2,6 +2,18 @@
  * Constructs AZTEC private range zero-knowledge proofs
  *
  * @module privateRange
+ * @dev This module constructs the proof data required 
+ * to prove in zero knowledge that the value of one note is 'greater
+ * than or equal to', or 'less than or equal to' another note. 
+ * 
+ * The 'encodePrivateRangeTransaction()` function takes two 
+ * inputs: originalNote and comparisonNote. The originalNote is the one
+ * that a user is seeking to prove has a value greater than or equal to, or
+ * less than or equal to the comparison note. 
+ * 
+ * To prove a greater than relation, the originalNote is input first and the 
+ * comparisonNote second. To prove a less than relationship, the notes are swapped 
+ * around. 
  */
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
@@ -12,9 +24,11 @@ const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
 const verifier = require('./verifier');
 const Keccak = require('../../keccak');
+const helpers = require('./helpers');
 
 const privateRange = {};
 privateRange.verifier = verifier;
+privateRange.helpers = helpers;
 
 const { groupReduction } = bn128;
 
@@ -34,18 +48,18 @@ privateRange.constructBlindingFactors = (notes, rollingHash) => {
     let B;
     let x = new BN(0).toRed(groupReduction);
 
-    return notes.map((note, i) => {
+    return notes.map((individualNote, i) => {
         const ba = bn128.randomGroupScalar();
         bk = bn128.randomGroupScalar();
 
         if (i === 0) {
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+            B = individualNote.gamma.mul(bk).add(bn128.h.mul(ba));
         } else if (i === 1) {
             x = rollingHash.keccak(groupReduction);
             const xbk = bk.redMul(x);
             const xba = ba.redMul(x);
 
-            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            B = individualNote.gamma.mul(xbk).add(bn128.h.mul(xba));
         } else if (i > 1) {
             bk = bkArray[i - 2].redSub(bkArray[i - 1]);
 
@@ -53,7 +67,7 @@ privateRange.constructBlindingFactors = (notes, rollingHash) => {
             const xbk = bk.redMul(x);
             const xba = ba.redMul(x);
 
-            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            B = individualNote.gamma.mul(xbk).add(bn128.h.mul(xba));
         }
         bkArray.push(bk);
 
@@ -69,7 +83,7 @@ privateRange.constructBlindingFactors = (notes, rollingHash) => {
  * Construct AZTEC private range proof transcript
  *
  * @method constructProof
- * @param {Object[]} notes AZTEC notes
+ * @param {Object[]} notesWithoutUtility AZTEC notes
  * @param {string} sender the address calling the constructProof() function
  * @returns {string[]} proofData - constructed cryptographic proof data
  * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
@@ -84,14 +98,14 @@ privateRange.constructProof = (notes, sender) => {
     proofUtils.parseInputs(notes, sender);
     proofUtils.checkNumNotes(notes, numNotes, true);
 
-    notes.forEach((note) => {
-        rollingHash.append(note.gamma);
-        rollingHash.append(note.sigma);
+    notes.forEach((individualNote) => {
+        rollingHash.append(individualNote.gamma);
+        rollingHash.append(individualNote.sigma);
     });
 
     const blindingFactors = privateRange.constructBlindingFactors(notes, rollingHash);
-
     const challenge = proofUtils.computeChallenge(sender, kPublicBN, publicOwner, notes, blindingFactors);
+
     const proofData = blindingFactors.map((blindingFactor, i) => {
         let kBar;
 
@@ -119,6 +133,7 @@ privateRange.constructProof = (notes, sender) => {
             `0x${padLeft(notes[i].sigma.y.fromRed().toString(16), 64)}`,
         ];
     });
+
     return {
         proofData,
         challenge: `0x${padLeft(challenge.toString(16), 64)}`,
@@ -136,13 +151,15 @@ privateRange.constructProof = (notes, sender) => {
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
-privateRange.encodePrivateRangeTransaction = ({ originalNote, comparisonNote, utilityNote, senderAddress }) => {
-    const inputNotes = [...originalNote, ...comparisonNote];
-    const outputNotes = [...utilityNote];
-    const inputOwners = inputNotes.map((m) => m.owner);
-    const outputOwners = outputNotes.map((n) => n.owner);
+privateRange.encodePrivateRangeTransaction = async ({ originalNote, comparisonNote, senderAddress }) => {
 
-    const { proofData: proofDataRaw, challenge } = privateRange.constructProof([...inputNotes, ...outputNotes], senderAddress);
+    const notes = await helpers.constructUtilityNote([originalNote, comparisonNote]);
+    const inputNotes = [originalNote, comparisonNote];
+    const inputOwners = inputNotes.map((m) => m.owner);
+    const outputNotes = [notes[2]];
+    const outputOwners = [notes[2].owner];
+
+    const { proofData: proofDataRaw, challenge } = privateRange.constructProof(notes, senderAddress);
 
     const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
     const publicOwner = constants.addresses.ZERO_ADDRESS;
