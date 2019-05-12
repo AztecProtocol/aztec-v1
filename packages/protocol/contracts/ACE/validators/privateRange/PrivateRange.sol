@@ -167,7 +167,7 @@ contract PrivateRange {
                     // Store resulting point B at memory index b
                     result := and(result, staticcall(gas, 6, 0x160, 0x80, b, 0x40))
                     
-                    if eq(i, m) { // m = 0
+                    if eq(i, 0) { // m = 0
                         mstore(0x260, mload(0x20))
                         mstore(0x280, mload(0x40))
                         mstore(0x1e0, mload(0xe0))
@@ -180,7 +180,7 @@ contract PrivateRange {
                     // If i > m + 1 (i.e. subsequent output notes)
                     // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
                     // we then calculate \gamma^{cx} and add into \gamma_{acc}
-                    if gt(i, m) {
+                    if gt(i, 0) {  // performing bilinear pairing comparison on all notes
                         mstore(0x60, c)
 
                         result := and(
@@ -207,10 +207,6 @@ contract PrivateRange {
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
 
-                // If the AZTEC protocol is implemented correctly then any input notes were previously outputs of
-                // a JoinSplit transaction. We can inductively assume that all input notes
-                // are well-formed AZTEC commitments and do not need to validate the implicit range proof
-                // This is not the case for any output commitments, so if (m < n) call validatePairing()
                 validatePairing(0x84)
 
                 // We now have the note commitments and the calculated blinding factors in a block of memory
