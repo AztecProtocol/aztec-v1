@@ -1,11 +1,11 @@
 /**
  * @module initDatabase
- * 
- * This initialises the local trusted setup database, used for testing purposes. 
+ *
+ * This initialises the local trusted setup database, used for testing purposes.
  * It contains 14,000 points - representing ~1.5% of the original in house experimental
- * setup. 
- * 
- * This script redefines functions that either try to fetch a point remotely, or 
+ * setup.
+ *
+ * This script redefines functions that either try to fetch a point remotely, or
  * use the original value of K_MAX rather than the testing value.
  */
 
