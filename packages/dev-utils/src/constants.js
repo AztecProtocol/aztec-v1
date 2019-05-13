@@ -93,10 +93,10 @@ const constants = {
      */
     ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
     /**
-     * 
+     *
      * @constant ZERO_ADDRESS
      * @type {string}
-     * @default 
+     * @default
      */
     ZERO_ADDRESS: '0x00000000000000000000000000000000000000',
 };
@@ -213,6 +213,7 @@ constants.errorTypes = {
     NOTE_VALUE_TOO_BIG: 'NOTE_VALUE_TOO_BIG',
     SHOULD_THROW_IS_UNDEFINED: 'SHOULD_THROW_IS_UNDEFINED',
     UNABLE_TO_CALCULATE_SIGNATURE: 'UNABLE_TO_CALCULATE_SIGNATURE',
+    INCORRECT_NOTE_RELATION: 'INCORRECT_NOTE_RELATION',
 };
 
 /**

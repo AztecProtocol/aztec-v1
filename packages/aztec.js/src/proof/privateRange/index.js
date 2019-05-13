@@ -2,18 +2,18 @@
  * Constructs AZTEC private range zero-knowledge proofs
  *
  * @module privateRange
- * @dev This module constructs the proof data required 
+ * @dev This module constructs the proof data required
  * to prove in zero knowledge that the value of one note is 'greater
- * than or equal to', or 'less than or equal to' another note. 
- * 
- * The 'encodePrivateRangeTransaction()` function takes two 
+ * than or equal to', or 'less than or equal to' another note.
+ *
+ * The 'encodePrivateRangeTransaction()` function takes two
  * inputs: originalNote and comparisonNote. The originalNote is the one
  * that a user is seeking to prove has a value greater than or equal to, or
- * less than or equal to the comparison note. 
- * 
- * To prove a greater than relation, the originalNote is input first and the 
- * comparisonNote second. To prove a less than relationship, the notes are swapped 
- * around. 
+ * less than or equal to the comparison note.
+ *
+ * To prove a greater than relation, the originalNote is input first and the
+ * comparisonNote second. To prove a less than relationship, the notes are swapped
+ * around.
  */
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
@@ -152,7 +152,6 @@ privateRange.constructProof = (notes, sender) => {
  * @returns {Object} AZTEC proof data and expected output
  */
 privateRange.encodePrivateRangeTransaction = async ({ originalNote, comparisonNote, senderAddress }) => {
-
     const notes = await helpers.constructUtilityNote([originalNote, comparisonNote]);
     const inputNotes = [originalNote, comparisonNote];
     const inputOwners = inputNotes.map((m) => m.owner);

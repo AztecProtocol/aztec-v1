@@ -115,7 +115,7 @@ inputCoder.mint = (proofData, challenge, inputOwners, outputOwners, metadata) =>
     const abiParams = ['PROOF_DATA', 'INPUT_OWNERS', 'OUTPUT_OWNERS', 'METADATA'];
 
     return encoderFactory.encode(configs, abiParams, 'mint');
-}
+};
 
 /**
  * @method mint
