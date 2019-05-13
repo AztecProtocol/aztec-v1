@@ -66,7 +66,6 @@ proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
  */
 proofUtils.computeChallenge = (...challengeVariables) => {
     const hash = new Keccak();
-
     const recurse = (inputs) => {
         inputs.forEach((challengeVar) => {
             if (typeof challengeVar === 'string') {
