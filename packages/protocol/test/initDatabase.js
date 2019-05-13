@@ -15,7 +15,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 const { constants } = require('@aztec/dev-utils');
-const { setup, proofUtils } = require('aztec.js')
+const { setup, proof: { proofUtils } } = require('aztec.js')
 
 const partialPath = path.posix.resolve(__dirname, 'localSetupDatabase');
 const TEST_K_MAX = 14336;
