@@ -14,4 +14,5 @@ module.exports = {
     MINT_PROOF: '66049',
     // TODO: remove this duplicate value
     UTILITY_PROOF: '66561',
+    PRIVATE_RANGE_PROOF: '66562',
 };

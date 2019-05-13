@@ -31,6 +31,20 @@
         {
             "constant": true,
             "inputs": [],
+            "name": "PRIVATE_RANGE_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
             "name": "MINT_PROOF",
             "outputs": [
                 {
