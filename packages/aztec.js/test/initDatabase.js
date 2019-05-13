@@ -7,8 +7,8 @@
  *
  * This script redefines the setup.fetchPoint() method that attempts to fetch a point remotely.
  * It also redefines the K_MAX constant in the @aztec/dev-utils package to be TEST_K_MAX - the new lower
- * value of K_MAX for tests. 
- * 
+ * value of K_MAX for tests.
+ *
  * This script is called first in the test folder when tests are running, overriding existing behaviour.
  */
 
@@ -28,10 +28,10 @@ const { TEST_K_MAX } = constants;
 constants.K_MAX = TEST_K_MAX;
 
 /**
- * Override the existing setup.fetchPoint in src. Load a trusted setup signature 
- * point, sourcing it from the local trusted setup database rather 
- * than remotely. 
- * 
+ * Override the existing setup.fetchPoint in src. Load a trusted setup signature
+ * point, sourcing it from the local trusted setup database rather
+ * than remotely.
+ *
  * @method setup.fetchPoint
  * @param {number} inputValue the integer whose negation was signed by the trusted setup key
  * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
@@ -63,4 +63,3 @@ setup.fetchPoint = async (inputValue) => {
         });
     });
 };
-
