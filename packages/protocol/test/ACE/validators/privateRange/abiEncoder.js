@@ -30,7 +30,9 @@ contract('PrivateRange ABI encoder test', (accounts) => {
         it('validate zk validator success', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
 
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
@@ -42,12 +44,7 @@ contract('PrivateRange ABI encoder test', (accounts) => {
             const outputNotes = [notes[2]];
             const outputOwners = [notes[2].owner];
 
-            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
-                notes,
-                senderAddress,
-            );
-
-
+            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(notes, senderAddress);
 
             const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
             const publicOwner = constants.addresses.ZERO_ADDRESS;

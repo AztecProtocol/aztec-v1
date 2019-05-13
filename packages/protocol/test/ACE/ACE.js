@@ -4,10 +4,11 @@
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
+const secp256k1 = require('@aztec/secp256k1');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof, secp256k1 } = require('aztec.js');
+const { abiEncoder, note, proof } = require('aztec.js');
 const {
     constants,
     proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF, PRIVATE_RANGE_PROOF },
@@ -127,16 +128,14 @@ contract('ACE', (accounts) => {
             });
 
             it('should validate a private range proof', async () => {
-                const originalNote = notes.slice(3, 4); // 30
-                const comparisonNote = notes.slice(1, 2); // 10
-                const utilityNote = notes.slice(2, 3); // 20
+                const originalNote = notes[3]; // 30
+                const comparisonNote = notes[1]; // 10
 
                 const senderAddress = accounts[0];
 
-                const privateRangeProof = proof.privateRange.encodePrivateRangeTransaction({
+                const privateRangeProof = await proof.privateRange.encodePrivateRangeTransaction({
                     originalNote,
                     comparisonNote,
-                    utilityNote,
                     senderAddress,
                 });
 

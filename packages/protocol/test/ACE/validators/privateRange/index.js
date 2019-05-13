@@ -26,7 +26,7 @@ const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
 
 PrivateRange.abi = PrivateRangeInterface.abi;
 
-contract.only('PrivateRange', (accounts) => {
+contract('PrivateRange', (accounts) => {
     let privateRangeContract;
     describe('Success States', () => {
         beforeEach(async () => {
@@ -47,7 +47,6 @@ contract.only('PrivateRange', (accounts) => {
                 comparisonNote,
                 senderAddress: accounts[0],
             });
-
 
             const opts = {
                 from: accounts[0],
@@ -82,7 +81,7 @@ contract.only('PrivateRange', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it.skip('validate it works with output notes of zero value', async () => {
+        it('validate it works with output notes of zero value', async () => {
             const noteValues = [0, 0];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -108,7 +107,9 @@ contract.only('PrivateRange', (accounts) => {
         it('validate success when challenge has GROUP_MODULUS added to it', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
             const senderAddress = accounts[0];
@@ -119,10 +120,7 @@ contract.only('PrivateRange', (accounts) => {
             const outputNotes = [notes[2]];
             const outputOwners = [notes[2].owner];
 
-            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
-                notes,
-                senderAddress,
-            );
+            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(notes, senderAddress);
 
             const challengeBN = new BN(challenge.slice(2), 16);
             const challengePlusGroupModulus = `0x${challengeBN.add(constants.GROUP_MODULUS).toString(16)}`;
@@ -174,11 +172,25 @@ contract.only('PrivateRange', (accounts) => {
             const originalNote = notes[0];
             const comparisonNote = notes[1];
 
-            const { proofData } = await privateRange.encodePrivateRangeTransaction({
-                originalNote,
-                comparisonNote,
-                senderAddress: accounts[0],
-            });
+            const inputOwners = [originalNote.owner];
+            const outputNotes = [comparisonNote];
+            const outputOwners = [comparisonNote.owner];
+            const senderAddress = accounts[0];
+
+            const stubNoteNumCheck = sinon.stub(proofUtils, 'checkNumNotes');
+
+            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(notes, senderAddress);
+
+            const challengeBN = new BN(challenge.slice(2), 16);
+            const challengePlusGroupModulus = `0x${challengeBN.add(constants.GROUP_MODULUS).toString(16)}`;
+
+            const proofData = inputCoder.privateRange(
+                proofDataRaw,
+                challengePlusGroupModulus,
+                inputOwners,
+                outputOwners,
+                outputNotes,
+            );
 
             const opts = {
                 from: accounts[0],
@@ -186,6 +198,7 @@ contract.only('PrivateRange', (accounts) => {
             };
 
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
+            stubNoteNumCheck.restore();
         });
 
         it('validate failure for fake challenge', async () => {
@@ -200,8 +213,6 @@ contract.only('PrivateRange', (accounts) => {
                 comparisonNote,
                 senderAddress: accounts[0],
             });
-
-            console.log('proof data: ', proofData);
 
             const fakeChallenge = padLeft(crypto.randomBytes(32).toString('hex'), 64);
             const fakeProofData = `0x${proofData.slice(0x02, 0x42)}${fakeChallenge}${proofData.slice(0x82)}`;
@@ -219,7 +230,9 @@ contract.only('PrivateRange', (accounts) => {
         it('validate failure for fake proof data', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
             const senderAddress = accounts[0];
@@ -229,7 +242,6 @@ contract.only('PrivateRange', (accounts) => {
             const inputOwners = inputNotes.map((m) => m.owner);
             const outputNotes = [notes[2]];
             const outputOwners = [notes[2].owner];
-
 
             const { challenge } = privateRange.constructProof(notes, senderAddress);
 
@@ -250,7 +262,9 @@ contract.only('PrivateRange', (accounts) => {
         it('validate failure if points not on the curve', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -280,7 +294,9 @@ contract.only('PrivateRange', (accounts) => {
         it('validate failure if scalars are zero', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -290,7 +306,6 @@ contract.only('PrivateRange', (accounts) => {
             const outputNotes = [notes[2]];
             const outputOwners = [notes[2].owner];
             const senderAddress = accounts[0];
-
 
             const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
                 [...inputNotes, ...outputNotes],
@@ -314,7 +329,9 @@ contract.only('PrivateRange', (accounts) => {
         it('validate failure if scalars are NOT mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -349,7 +366,9 @@ contract.only('PrivateRange', (accounts) => {
         it('validate failure if group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -389,7 +408,9 @@ contract.only('PrivateRange', (accounts) => {
         it('validate failure if proofData NOT correctly encoded', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -437,7 +458,7 @@ contract.only('PrivateRange', (accounts) => {
             );
         });
 
-        it.only('validate failure for incorrect H_X, H_Y in CRS', async () => {
+        it('validate failure for incorrect H_X, H_Y in CRS', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -472,17 +493,21 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], fakeCRS, opts));
         });
 
-        it.skip('validate failure for no notes', async () => {
-            const originalNote = [];
-            const comparisonNote = [];
+        it('validate failure for no notes', async () => {
+            const inputNotes = [];
+            const inputOwners = [];
+            const outputNotes = [];
+            const outputOwners = [];
+            const senderAddress = accounts[0];
 
-            const stubNoteNumberCheck = sinon.stub(proofUtils, 'checkNumNotes');
+            const stubNoteNumCheck = sinon.stub(proofUtils, 'checkNumNotes');
 
-            const { proofData } = await privateRange.encodePrivateRangeTransaction({
-                originalNote,
-                comparisonNote,
-                senderAddress: accounts[0],
-            });
+            const { proofData: proofDataRaw, challenge } = await privateRange.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
+
+            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
 
             const opts = {
                 from: accounts[0],
@@ -490,23 +515,35 @@ contract.only('PrivateRange', (accounts) => {
             };
 
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
-            stubNoteNumberCheck.restore();
+            stubNoteNumCheck.restore();
         });
 
-        it.skip('validate failure for too many notes', async () => {
+        it('validate failure for too many notes', async () => {
             const noteValues = [10, 3, 4];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
+            const extraTestNote = notesWithoutUtility[2];
 
-            const stubNoteNumberCheck = sinon.stub(proofUtils, 'checkNumNotes');
+            const notes = (await privateRange.helpers.constructUtilityNote([originalNote, comparisonNote])).concat(extraTestNote);
+            expect(notes.length).to.equal(4);
 
-            const { proofData } = await privateRange.encodePrivateRangeTransaction({
-                originalNote,
-                comparisonNote,
-                senderAddress: accounts[0],
-            });
+            const inputNotes = [originalNote, comparisonNote];
+            const inputOwners = inputNotes.map((m) => m.owner);
+            const outputNotes = [notes[2], notes[3]];
+            const outputOwners = outputNotes.map((m) => m.owner);
+            const senderAddress = accounts[0];
+
+            const stubNoteNumCheck = sinon.stub(proofUtils, 'checkNumNotes');
+
+            const { proofData: proofDataRaw, challenge } = privateRange.constructProof(
+                [...inputNotes, ...outputNotes],
+                senderAddress,
+            );
+            const proofData = inputCoder.privateRange(proofDataRaw, challenge, inputOwners, outputOwners, outputNotes);
 
             const opts = {
                 from: accounts[0],
@@ -514,13 +551,15 @@ contract.only('PrivateRange', (accounts) => {
             };
 
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
-            stubNoteNumberCheck.restore();
+            stubNoteNumCheck.restore();
         });
 
-        it.only('validate failure if sender address NOT integrated into challenge variable', async () => {
+        it('validate failure if sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -564,11 +603,12 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-
-        it.only('validate failure if kPublic NOT integrated into challenge variable', async () => {
+        it('validate failure if kPublic NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -581,7 +621,6 @@ contract.only('PrivateRange', (accounts) => {
 
             const rollingHash = new Keccak();
             const publicOwner = constants.ZERO_ADDRESS;
-
 
             notes.forEach((individualNote) => {
                 rollingHash.append(individualNote.gamma);
@@ -612,10 +651,12 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it.only('validate failure if public owner NOT integrated into challenge variable', async () => {
+        it('validate failure if public owner NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -658,10 +699,12 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it.only('validate failure if notes NOT integrated into challenge variable', async () => {
+        it('validate failure if notes NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
@@ -706,10 +749,12 @@ contract.only('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it.only('validate failure if blinding factors NOT integrated into challenge variable', async () => {
+        it('validate failure if blinding factors NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const notesWithoutUtility = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const notesWithoutUtility = await Promise.all([
+                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i])),
+            ]);
             const originalNote = notesWithoutUtility[0];
             const comparisonNote = notesWithoutUtility[1];
 
