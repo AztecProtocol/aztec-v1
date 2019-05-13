@@ -141,13 +141,21 @@ privateRange.constructProof = (notes, sender) => {
 };
 
 /**
- * Encode a private range proof transaction
+ * Encode a private range proof transaction. It will construct proofData for a private range zero
+ * knowledge proof and then ABI encode according to the standard compatible with the ACE.
+ *
+ * This function can be used in two flows:
+ * 1) Default - the default is that only the originalNote and comparisonNote are input
+ * 2) Manual - this is when a utility note is manually constructed by the user and passed in as a fourth
+ * argument. For some use cases, this is the desired behaviour
+ *
+ * It is expected that for most functionality, this function will be used in the default flow.
  *
  * @method encodePrivateRangeTransaction
  * @memberof module:privateRange
  * @param {Note[]} originalNote original AZTEC note being to be compared
  * @param {Note[]} comparisonNote note being compared against
- * @param {Note[]} utilityNote additional note required to construct a valid balancing relationship
+ * @param {Note[]} utilityNote (optional) additional note required to construct a valid balancing relationship
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
@@ -158,7 +166,7 @@ privateRange.encodePrivateRangeTransaction = async ({ originalNote, comparisonNo
     if (!utilityNoteVariable) {
         notes = await helpers.constructUtilityNote([originalNote, comparisonNote]);
     } else {
-        notes = [originalNote, comparisonNote, utilityNote]
+        notes = [originalNote, comparisonNote, utilityNote];
     }
 
     const inputNotes = [originalNote, comparisonNote];

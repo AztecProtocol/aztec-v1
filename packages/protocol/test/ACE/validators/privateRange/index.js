@@ -26,7 +26,7 @@ const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
 
 PrivateRange.abi = PrivateRangeInterface.abi;
 
-contract.only('PrivateRange', (accounts) => {
+contract('PrivateRange', (accounts) => {
     let privateRangeContract;
     describe('Success States', () => {
         beforeEach(async () => {
@@ -58,7 +58,7 @@ contract.only('PrivateRange', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it.only('should validate zero-knowledge proof for manual construction', async () => {
+        it('should validate zero-knowledge proof for manual construction', async () => {
             const noteValues = [10, 4, 6];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -82,7 +82,6 @@ contract.only('PrivateRange', (accounts) => {
 
             expect(result).to.equal(expectedOutput);
         });
-
 
         it('should validate for input notes of zero value', async () => {
             const noteValues = [10, 0];
