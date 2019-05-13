@@ -11,7 +11,6 @@ const note = require('../../../src/note');
 const proofUtils = require('../../../src/proof/proofUtils');
 
 const proofHelpers = require('../../../src/proof/joinSplit/helpers');
-const proofUtils = require('../../../src/proof/proofUtils');
 
 const { errorTypes } = constants;
 
