@@ -201,9 +201,9 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
 };
 
 /**
- * Override the behaviour of this method in the src folder. 
+ * Override the behaviour of this method in the src folder.
  * Use the redefined constants.K_MAX value of TEST_constants.K_MAX
- * 
+ *
  * Generate a random note value that is less than constants.K_MAX
  * @method generateNoteValue
  * @returns {BN} - big number instance of an AZTEC note value
@@ -215,9 +215,9 @@ proofUtils.randomNoteValue = () => {
 /**
  * Determine the kPublic value for a joinSplit transaction from the input values
  * (kIn) and output values (kOut).
- * 
+ *
  * k corresponds to the value that a note represents
- * 
+ *
  * @method getKPublic
  * @param {Number[]} kIn - array of input note values
  * @param {Number[]} kOut - array of output note values
@@ -230,9 +230,9 @@ proofUtils.getKPublic = (kIn, kOut) => {
 
 /**
  * Generate a set of input and output note values that balance
- * 
+ *
  * k corresponds to the value that a note represents
- * 
+ *
  * @method generateBalancedNotes
  * @param {Number} nIn - number of input notes
  * @param {Number} nOut - number of output notes
