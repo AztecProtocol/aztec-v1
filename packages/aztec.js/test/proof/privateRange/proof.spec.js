@@ -25,13 +25,13 @@ describe('Private range proof', () => {
             expect(proofData[1].length).to.equal(6);
             expect(proofData[2].length).to.equal(6);
         });
-    })
+    });
 
     describe('Failure states', () => {
         it('should fail if number of notes is greater than 3', async () => {
             const originalValue = 10;
             const comparisonValue = 4;
-            const extraTestNote = 5
+            const extraTestNote = 5;
             const utilityValue = 1;
 
             const testNotes = await proofUtils.makeTestNotes([originalValue, comparisonValue], [utilityValue, extraTestNote]);
@@ -44,5 +44,5 @@ describe('Private range proof', () => {
                 expect(err.message).to.contain('INCORRECT_NOTE_NUMBER');
             }
         });
-    })
+    });
 });
