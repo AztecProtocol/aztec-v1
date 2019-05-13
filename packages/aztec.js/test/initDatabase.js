@@ -2,61 +2,44 @@
  * @module initDatabase
  *
  * This initialises the local trusted setup database, used for testing purposes.
- * It contains 14,000 points - representing ~1.5% of the original in house experimental
+ * It contains 14,000 points - representing ~1.5% of the original in house trusted
  * setup.
  *
- * This script redefines functions that either try to fetch a point remotely, or
- * use the original value of K_MAX rather than the testing value.
+ * This script redefines the setup.fetchPoint() method that attempts to fetch a point remotely.
+ * It also redefines the K_MAX constant in the @aztec/dev-utils package to be TEST_K_MAX - the new lower
+ * value of K_MAX for tests. 
+ * 
+ * This script is called first in the test folder when tests are running, overriding existing behaviour.
  */
 
 const BN = require('bn.js');
 const path = require('path');
 const fs = require('fs');
-const crypto = require('crypto');
 
 const { constants } = require('@aztec/dev-utils');
 
 const setup = require('../src/setup');
-const proofUtils = require('../src/proof/proofUtils');
 
 const partialPath = path.posix.resolve(__dirname, 'localSetupDatabase');
-const TEST_K_MAX = 14336;
 
-proofUtils.randomNoteValue = () => {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(TEST_K_MAX)).toNumber();
-};
+const { TEST_K_MAX } = constants;
 
-proofUtils.generateBalancedNotes = (nIn, nOut) => {
-    const kIn = [...Array(nIn)].map(() => proofUtils.randomNoteValue());
-    const kOut = [...Array(nOut)].map(() => proofUtils.randomNoteValue());
-    let delta = proofUtils.getKPublic(kIn, kOut);
-    while (delta > 0) {
-        if (delta >= TEST_K_MAX) {
-            const k = proofUtils.randomNoteValue();
-            kOut.push(k);
-            delta -= k;
-        } else {
-            kOut.push(delta);
-            delta = 0;
-        }
-    }
-    while (delta < 0) {
-        if (-delta >= TEST_K_MAX) {
-            const k = proofUtils.randomNoteValue();
-            kIn.push(k);
-            delta += k;
-        } else {
-            kIn.push(-delta);
-            delta = 0;
-        }
-    }
-    return { kIn, kOut };
-};
+// Redfine K_MAX in the tests
+constants.K_MAX = TEST_K_MAX;
 
+/**
+ * Override the existing setup.fetchPoint in src. Load a trusted setup signature 
+ * point, sourcing it from the local trusted setup database rather 
+ * than remotely. 
+ * 
+ * @method setup.fetchPoint
+ * @param {number} inputValue the integer whose negation was signed by the trusted setup key
+ * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
+ */
 setup.fetchPoint = async (inputValue) => {
     const value = Number(inputValue);
 
-    if (value > TEST_K_MAX) {
+    if (value > constants.K_MAX) {
         throw new Error('point not found');
     }
 
@@ -80,3 +63,4 @@ setup.fetchPoint = async (inputValue) => {
         });
     });
 };
+
