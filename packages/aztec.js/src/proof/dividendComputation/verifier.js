@@ -6,7 +6,7 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
 
-const { errorTypes, K_MAX } = constants;
+const { errorTypes } = constants;
 const { groupReduction } = bn128;
 
 const verifier = {};
@@ -29,7 +29,7 @@ verifier.verifyProof = (proofData, challenge, sender, za, zb) => {
 
     let zaBN;
     let zbBN;
-    const K_MAXBN = new BN(K_MAX);
+    const K_MAXBN = new BN(constants.K_MAX);
     const kBarArray = [];
     const numNotes = 3;
 
