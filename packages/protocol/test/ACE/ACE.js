@@ -4,27 +4,31 @@
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
+const secp256k1 = require('@aztec/secp256k1');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { abiEncoder, note, proof } = require('aztec.js');
-const devUtils = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
+const {
+    constants,
+    proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF, PRIVATE_RANGE_PROOF },
+} = require('@aztec/dev-utils');
 
-const { constants } = devUtils;
-const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
 const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
 const ACETest = artifacts.require('./ACETest');
-const AdjustSupply = artifacts.require('./validators/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 const JoinSplit = artifacts.require('./JoinSplit');
 const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
+const PrivateRange = artifacts.require('./PrivateRange');
+const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
+const AdjustSupply = artifacts.require('./validators/AdjustSupply');
+const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 AdjustSupply.abi = AdjustSupplyInterface.abi;
+PrivateRange.abi = PrivateRangeInterface.abi;
 
 contract('ACE', (accounts) => {
     describe('Initialization', () => {
@@ -59,6 +63,7 @@ contract('ACE', (accounts) => {
         let aztecAccounts = [];
         let ace;
         let aztecJoinSplit;
+        let aztecPrivateRange;
         let notes = [];
         let proofData;
         let proofOutput;
@@ -77,7 +82,11 @@ contract('ACE', (accounts) => {
             ]);
             await ace.setCommonReferenceString(constants.CRS);
             aztecJoinSplit = await JoinSplit.new();
+            aztecPrivateRange = await PrivateRange.new();
+
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
+            await ace.setProof(PRIVATE_RANGE_PROOF, aztecPrivateRange.address);
+
             const inputNotes = notes.slice(2, 4);
             const outputNotes = notes.slice(0, 2);
             const kPublic = 40;
@@ -116,6 +125,35 @@ contract('ACE', (accounts) => {
 
                 const result = await ace.validatedProofs(validatedProofHash);
                 expect(result).to.equal(true);
+            });
+
+            it('should validate a private range proof', async () => {
+                const originalNote = notes[3]; // 30
+                const comparisonNote = notes[1]; // 10
+
+                const senderAddress = accounts[0];
+
+                const privateRangeProof = await proof.privateRange.encodePrivateRangeTransaction({
+                    originalNote,
+                    comparisonNote,
+                    senderAddress,
+                });
+
+                const privateRangeProofOutput = outputCoder.getProofOutput(privateRangeProof.expectedOutput, 0);
+                const privateRangeProofHash = outputCoder.hashProofOutput(privateRangeProofOutput);
+                const hex = parseInt(PRIVATE_RANGE_PROOF, 10).toString(16);
+                const hashData = [
+                    padLeft(privateRangeProofHash.slice(2), 64),
+                    padLeft(hex, 64),
+                    padLeft(accounts[0].slice(2), 64),
+                ].join('');
+                const privateRangeValidatedProofHash = keccak256(`0x${hashData}`);
+
+                const { receipt } = await ace.validateProof(PRIVATE_RANGE_PROOF, accounts[0], privateRangeProof.proofData);
+                expect(receipt.status).to.equal(true);
+
+                const result = await ace.validatedProofs(privateRangeValidatedProofHash);
+                expect(result).to.equal(false); // privateRange is a utility proof, so hash should not be stored
             });
 
             it('should have a wrapper contract validate a join-split transaction', async () => {
