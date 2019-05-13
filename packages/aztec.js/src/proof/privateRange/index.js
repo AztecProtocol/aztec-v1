@@ -151,8 +151,16 @@ privateRange.constructProof = (notes, sender) => {
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */
-privateRange.encodePrivateRangeTransaction = async ({ originalNote, comparisonNote, senderAddress }) => {
-    const notes = await helpers.constructUtilityNote([originalNote, comparisonNote]);
+privateRange.encodePrivateRangeTransaction = async ({ originalNote, comparisonNote, senderAddress, utilityNote }) => {
+    let notes;
+    const utilityNoteVariable = utilityNote || 0;
+
+    if (!utilityNoteVariable) {
+        notes = await helpers.constructUtilityNote([originalNote, comparisonNote]);
+    } else {
+        notes = [originalNote, comparisonNote, utilityNote]
+    }
+
     const inputNotes = [originalNote, comparisonNote];
     const inputOwners = inputNotes.map((m) => m.owner);
     const outputNotes = [notes[2]];

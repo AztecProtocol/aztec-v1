@@ -26,7 +26,7 @@ const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
 
 PrivateRange.abi = PrivateRangeInterface.abi;
 
-contract('PrivateRange', (accounts) => {
+contract.only('PrivateRange', (accounts) => {
     let privateRangeContract;
     describe('Success States', () => {
         beforeEach(async () => {
@@ -35,7 +35,7 @@ contract('PrivateRange', (accounts) => {
             });
         });
 
-        it('validate zk validator success', async () => {
+        it('should validate zero-knowledge proof for default construction', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -58,7 +58,33 @@ contract('PrivateRange', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate it works with input notes of zero value', async () => {
+        it.only('should validate zero-knowledge proof for manual construction', async () => {
+            const noteValues = [10, 4, 6];
+            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const originalNote = notes[0];
+            const comparisonNote = notes[1];
+            const utilityNote = notes[2];
+
+            const { proofData, expectedOutput } = await privateRange.encodePrivateRangeTransaction({
+                originalNote,
+                comparisonNote,
+                utilityNote,
+                senderAddress: accounts[0],
+            });
+
+            const opts = {
+                from: accounts[0],
+                gas: 4000000,
+            };
+
+            const result = await privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts);
+
+            expect(result).to.equal(expectedOutput);
+        });
+
+
+        it('should validate for input notes of zero value', async () => {
             const noteValues = [10, 0];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -81,7 +107,7 @@ contract('PrivateRange', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate it works with output notes of zero value', async () => {
+        it('should validate for output notes of zero value', async () => {
             const noteValues = [0, 0];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -104,7 +130,7 @@ contract('PrivateRange', (accounts) => {
             expect(result).to.equal(expectedOutput);
         });
 
-        it('validate success when challenge has GROUP_MODULUS added to it', async () => {
+        it('should validate when challenge has GROUP_MODULUS added to it', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -165,7 +191,7 @@ contract('PrivateRange', (accounts) => {
             });
         });
 
-        it('validate failure for incorrect balancing relation', async () => {
+        it('should fail for incorrect balancing relation', async () => {
             const noteValues = [10, 20];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -201,7 +227,7 @@ contract('PrivateRange', (accounts) => {
             stubNoteNumCheck.restore();
         });
 
-        it('validate failure for fake challenge', async () => {
+        it('should fail for fake challenge', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -227,7 +253,7 @@ contract('PrivateRange', (accounts) => {
             );
         });
 
-        it('validate failure for fake proof data', async () => {
+        it('should fail for fake proof data', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -259,7 +285,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if points not on the curve', async () => {
+        it('should fail if points not on the curve', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -291,7 +317,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if scalars are zero', async () => {
+        it('should fail if scalars are zero', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -326,7 +352,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if scalars are NOT mod(GROUP_MODULUS)', async () => {
+        it('should fail if scalars are NOT mod(GROUP_MODULUS)', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -363,7 +389,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if group element (blinding factor) resolves to the point at infinity', async () => {
+        it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -405,7 +431,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if proofData NOT correctly encoded', async () => {
+        it('should fail if proofData NOT correctly encoded', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -458,7 +484,7 @@ contract('PrivateRange', (accounts) => {
             );
         });
 
-        it('validate failure for incorrect H_X, H_Y in CRS', async () => {
+        it('should fail for incorrect H_X, H_Y in CRS', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
@@ -493,7 +519,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], fakeCRS, opts));
         });
 
-        it('validate failure for no notes', async () => {
+        it('should fail for no notes', async () => {
             const inputNotes = [];
             const inputOwners = [];
             const outputNotes = [];
@@ -518,7 +544,7 @@ contract('PrivateRange', (accounts) => {
             stubNoteNumCheck.restore();
         });
 
-        it('validate failure for too many notes', async () => {
+        it('should fail for too many notes', async () => {
             const noteValues = [10, 3, 4];
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -554,7 +580,7 @@ contract('PrivateRange', (accounts) => {
             stubNoteNumCheck.restore();
         });
 
-        it('validate failure if sender address NOT integrated into challenge variable', async () => {
+        it('should fail if sender address NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -603,7 +629,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if kPublic NOT integrated into challenge variable', async () => {
+        it('should fail if kPublic NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -651,7 +677,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if public owner NOT integrated into challenge variable', async () => {
+        it('should fail if public owner NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -699,7 +725,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if notes NOT integrated into challenge variable', async () => {
+        it('should fail if notes NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
@@ -749,7 +775,7 @@ contract('PrivateRange', (accounts) => {
             await truffleAssert.reverts(privateRangeContract.validatePrivateRange(proofData, accounts[0], constants.CRS, opts));
         });
 
-        it('validate failure if blinding factors NOT integrated into challenge variable', async () => {
+        it('should fail if blinding factors NOT integrated into challenge variable', async () => {
             const noteValues = [10, 4];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notesWithoutUtility = await Promise.all([
