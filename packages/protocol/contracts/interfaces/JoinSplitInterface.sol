@@ -1,17 +1,17 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-contract JoinSplitInterface {
+/**
+ * @title JoinSplitInterface
+ * @author AZTEC
+ * @dev An interface defining the JoinSplitInterface standard.
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
+interface JoinSplitInterface {
     /* solhint-disable-next-line var-name-mixedcase */
-
-    constructor() public {}
     
     function validateJoinSplit(
         bytes calldata, 
         address, 
         uint[6] calldata
-    ) 
-        external
-        pure
-        returns (bytes memory) 
-    {}
+    ) external pure returns (bytes memory);
 }
