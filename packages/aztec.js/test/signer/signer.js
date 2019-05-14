@@ -26,7 +26,7 @@ describe('Signer', () => {
     });
 
     it('should generate correct AZTEC domain params', () => {
-        expect(signer.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
+        expect(signer.generateACEDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC')).to.deep.equal({
             name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
             version: '1',
             verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
@@ -34,7 +34,7 @@ describe('Signer', () => {
     });
 
     it('should have the domain params resolve to expected message', () => {
-        const messageInput = signer.generateAZTECDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
+        const messageInput = signer.generateACEDomainParams('0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC');
         const result = typedData.encodeMessageData(domainTypes, 'EIP712Domain', messageInput);
         const messageData = [
             keccak256('EIP712Domain(string name,string version,address verifyingContract)').slice(2),
@@ -54,7 +54,7 @@ describe('Signer', () => {
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+            const domain = signer.generateACEDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
@@ -81,7 +81,7 @@ describe('Signer', () => {
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
-            const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+            const domain = signer.generateACEDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
