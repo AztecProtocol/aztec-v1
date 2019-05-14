@@ -37,6 +37,25 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
         verifyingContract,
     };
 };
+/**
+ * Create an EIP712 ECDSA signature over an AZTEC note 
+ * @method signNote
+ * @param {string} verifyingContract address of target contract
+ * @param {string} spender address of the note spender
+ * @param {string} privateKey the private key of message signer
+ * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ */
+signer.signNote = (verifyingContract, spender, privateKey) => {
+    const domain = signer.generateAZTECDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
+    const schema = constants.eip712.NOTE_SIGNATURE;
+
+    const message = {
+        noteHash: `0x${crypto.randomBytes(32).toString('hex')}`,
+        spender,
+        status: true,
+    };
+    return signer.signTypedData(domain, schema, message, privateKey);
+};
 
 /**
  * Create an EIP712 ECDSA signature over structured data
