@@ -11,7 +11,7 @@ import "../libs/ProofUtils.sol";
 import "../libs/SafeMath8.sol";
 
 /**
- * @title The AZTEC Cryptography Engine Interface
+ * @title IACE
  * @author AZTEC
  * @dev Standard defining the interface for ACE.sol
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
