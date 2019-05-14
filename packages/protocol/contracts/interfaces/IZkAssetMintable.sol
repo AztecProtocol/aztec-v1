@@ -12,7 +12,7 @@ import "../libs/ProofUtils.sol";
 import "../ERC1724/ZkAssetOwnable.sol";
 
 /**
- * @title ZkAssetMintableInterface
+ * @title IZkAssetMintable
  * @author AZTEC
  * @dev An interface defining the ZkAssetMintable standard.
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
