@@ -23,18 +23,6 @@ const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-const signNote = (validatorAddress, noteHash, spender, privateKey) => {
-    const domain = signer.generateZKAssetDomainParams(validatorAddress);
-    const schema = constants.eip712.NOTE_SIGNATURE;
-    const status = true;
-    const message = {
-        noteHash,
-        spender,
-        status,
-    };
-    return signer.signTypedData(domain, schema, message, privateKey);
-};
-
 contract('ZkAssetOwnable', (accounts) => {
     let ace;
     let aztecJoinSplit;
@@ -50,7 +38,7 @@ contract('ZkAssetOwnable', (accounts) => {
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
         await Promise.all(
             indexes.map((i) => {
-                const { signature } = signNote(
+                const { signature } = signer.signNote(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
@@ -255,7 +243,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, { from: accounts[0] });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
-            const { signature } = signNote(
+            const { signature } = signer.signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
@@ -308,7 +296,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
             await zkAssetOwnable.confidentialTransfer(transferProof.proofData, transferProof.signatures);
 
-            const { signature } = signNote(
+            const { signature } = signer.signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
