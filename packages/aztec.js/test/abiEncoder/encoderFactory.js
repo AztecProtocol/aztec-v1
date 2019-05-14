@@ -1,4 +1,3 @@
-const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const { expect } = require('chai');
 const { padLeft } = require('web3-utils');
@@ -11,16 +10,13 @@ const dividendComputationProof = require('../../src/proof/dividendComputation');
 const joinSplitProof = require('../../src/proof/joinSplit');
 const mintProof = require('../../src/proof/mint');
 const privateRangeProof = require('../../src/proof/privateRange');
+const proofUtils = require('../../src/proof/proofUtils');
 
 const abiEncoder = require('../../src/abiEncoder');
 const note = require('../../src/note');
 
 const randomBytes = (numBytes) => {
     return [...new Array(numBytes * 2)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-};
-
-const randomNoteValue = () => {
-    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
 };
 
 const fakeSignature = () => {
@@ -132,7 +128,7 @@ describe('abiEncoder.encoderFactory', () => {
             const accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all(
                 accounts.map(({ publicKey }) => {
-                    return note.create(publicKey, randomNoteValue());
+                    return note.create(publicKey, proofUtils.randomNoteValue());
                 }),
             );
             const numNotes = 4;

@@ -6,7 +6,7 @@
 
 const {
     errors: { customError },
-    constants: { errorTypes, K_MAX },
+    constants,
 } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -35,7 +35,7 @@ const proofUtils = {};
 proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
     if (shouldThrow) {
         if (notes.length !== numNotes) {
-            throw customError(errorTypes.INCORRECT_NOTE_NUMBER, {
+            throw customError(constants.errorTypes.INCORRECT_NOTE_NUMBER, {
                 message: 'Incorrect number of input notes',
                 expectedNumber: numNotes,
                 actualNumber: notes.length,
@@ -43,10 +43,10 @@ proofUtils.checkNumNotes = (notes, numNotes, shouldThrow, errors = []) => {
         }
     } else if (!shouldThrow) {
         if (notes.length !== numNotes) {
-            errors.push(errorTypes.INCORRECT_NOTE_NUMBER);
+            errors.push(constants.errorTypes.INCORRECT_NOTE_NUMBER);
         }
     } else {
-        throw customError(errorTypes.SHOULD_THROW_IS_UNDEFINED, {
+        throw customError(constants.errorTypes.SHOULD_THROW_IS_UNDEFINED, {
             message: 'shouldThrow input argument not defined (3rd input argument)',
             shouldThrow,
         });
@@ -82,7 +82,7 @@ proofUtils.computeChallenge = (...challengeVariables) => {
             } else if (challengeVar.B) {
                 hash.append(challengeVar.B);
             } else {
-                throw customError(errorTypes.NO_ADD_CHALLENGEVAR, {
+                throw customError(constants.errorTypes.NO_ADD_CHALLENGEVAR, {
                     message: 'Can not add the challenge variable to the hash',
                     challengeVar,
                     type: typeof challengeVar,
@@ -156,7 +156,7 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
         const numNotes = proofData.length;
 
         if (numNotes < 2) {
-            errors.push(errorTypes.INCORRECT_NOTE_NUMBER);
+            errors.push(constants.errorTypes.INCORRECT_NOTE_NUMBER);
         }
     }
 
@@ -172,7 +172,7 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
                 kBar = runningKBar;
             }
             if (kBar.fromRed().eq(new BN(0))) {
-                errors.push(errorTypes.SCALAR_IS_ZERO);
+                errors.push(constants.errorTypes.SCALAR_IS_ZERO);
             }
         } else {
             kBar = proofUtils.hexToGroupScalar(testNote[0], errors);
@@ -201,12 +201,67 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
 };
 
 /**
- * Generate a random note value that is less than K_MAX
+ * Use the redefined constants.K_MAX value of TEST_constants.K_MAX
+ *
+ * Generate a random note value that is less than constants.K_MAX
  * @method generateNoteValue
  * @returns {BN} - big number instance of an AZTEC note value
  */
-proofUtils.generateNoteValue = () => {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(K_MAX)).toNumber();
+proofUtils.randomNoteValue = () => {
+    return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
+};
+
+/**
+ * Determine the kPublic value for a joinSplit transaction from the input values
+ * (kIn) and output values (kOut).
+ *
+ * k corresponds to the value that a note represents
+ *
+ * @method getKPublic
+ * @param {Number[]} kIn - array of input note values
+ * @param {Number[]} kOut - array of output note values
+ * @returns {Number} kPublic - integer corresponding to public tokens being converted or
+ * redeemed
+ */
+proofUtils.getKPublic = (kIn, kOut) => {
+    return kOut.reduce((acc, v) => acc - v, kIn.reduce((acc, v) => acc + v, 0));
+};
+
+/**
+ * Generate a set of input and output note values that balance
+ *
+ * k corresponds to the value that a note represents
+ *
+ * @method generateBalancedNotes
+ * @param {Number} nIn - number of input notes
+ * @param {Number} nOut - number of output notes
+ * @returns {Object} object containing balanced kIn and kOut values
+ */
+proofUtils.generateBalancedNotes = (nIn, nOut) => {
+    const kIn = [...Array(nIn)].map(() => proofUtils.randomNoteValue());
+    const kOut = [...Array(nOut)].map(() => proofUtils.randomNoteValue());
+    let delta = proofUtils.getKPublic(kIn, kOut);
+    while (delta > 0) {
+        if (delta >= constants.K_MAX) {
+            const k = proofUtils.randomNoteValue();
+            kOut.push(k);
+            delta -= k;
+        } else {
+            kOut.push(delta);
+            delta = 0;
+        }
+    }
+    while (delta < 0) {
+        if (-delta >= constants.K_MAX) {
+            const k = proofUtils.randomNoteValue();
+            kIn.push(k);
+            delta += k;
+        } else {
+            kIn.push(-delta);
+            delta = 0;
+        }
+    }
+    return { kIn, kOut };
 };
 
 /**
@@ -296,10 +351,10 @@ proofUtils.getBlindingFactorsAndChallenge = (noteArray, finalHash) => {
 proofUtils.hexToGroupScalar = (hex, errors, canBeZero = false) => {
     const hexBn = new BN(hex.slice(2), 16);
     if (!hexBn.lt(bn128.curve.n)) {
-        errors.push(errorTypes.SCALAR_TOO_BIG);
+        errors.push(constants.errorTypes.SCALAR_TOO_BIG);
     }
     if (!canBeZero && hexBn.eq(new BN(0))) {
-        errors.push(errorTypes.SCALAR_IS_ZERO);
+        errors.push(constants.errorTypes.SCALAR_IS_ZERO);
     }
     return hexBn.toRed(groupReduction);
 };
@@ -316,10 +371,10 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
     let x = new BN(xHex.slice(2), 16);
     let y = new BN(yHex.slice(2), 16);
     if (!x.lt(bn128.curve.p)) {
-        errors.push(errorTypes.X_TOO_BIG);
+        errors.push(constants.errorTypes.X_TOO_BIG);
     }
     if (!y.lt(bn128.curve.p)) {
-        errors.push(errorTypes.Y_TOO_BIG);
+        errors.push(constants.errorTypes.Y_TOO_BIG);
     }
     x = x.toRed(bn128.curve.red);
     y = y.toRed(bn128.curve.red);
@@ -329,7 +384,7 @@ proofUtils.hexToGroupElement = (xHex, yHex, errors) => {
         .redMul(x)
         .redAdd(bn128.curve.b);
     if (!lhs.fromRed().eq(rhs.fromRed())) {
-        errors.push(errorTypes.NOT_ON_CURVE);
+        errors.push(constants.errorTypes.NOT_ON_CURVE);
     }
     return bn128.curve.point(x, y);
 };
@@ -374,7 +429,7 @@ proofUtils.makeTestNotes = async (makerNoteValues, takerNoteValues) => {
 proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdentifier = 0) => {
     notes.forEach((testNote) => {
         if (!testNote.a.fromRed().lt(bn128.curve.n) || testNote.a.fromRed().eq(new BN(0))) {
-            throw customError(errorTypes.VIEWING_KEY_MALFORMED, {
+            throw customError(constants.errorTypes.VIEWING_KEY_MALFORMED, {
                 message: 'Viewing key is malformed',
                 viewingKey: testNote.a.fromRed(),
                 criteria: `Viewing key should be less than ${bn128.curve.n} 
@@ -382,16 +437,16 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
             });
         }
 
-        if (!testNote.k.fromRed().lt(new BN(K_MAX))) {
-            throw customError(errorTypes.NOTE_VALUE_TOO_BIG, {
-                message: 'Note value is equal to or greater than K_Max',
+        if (!testNote.k.fromRed().lt(new BN(constants.K_MAX))) {
+            throw customError(constants.errorTypes.NOTE_VALUE_TOO_BIG, {
+                message: 'Note value is equal to or greater than constants.K_MAX',
                 noteValue: testNote.k.fromRed(),
-                K_MAX,
+                K_MAX: constants.K_MAX,
             });
         }
 
         if (testNote.gamma.isInfinity() || testNote.sigma.isInfinity()) {
-            throw customError(errorTypes.POINT_AT_INFINITY, {
+            throw customError(constants.errorTypes.POINT_AT_INFINITY, {
                 message: 'One of the note points is at infinity',
                 gamma: testNote.gamma.isInfinity(),
                 sigma: testNote.sigma.isInfinity(),
@@ -399,7 +454,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
         }
 
         if (!proofUtils.isOnCurve(testNote.gamma) || !proofUtils.isOnCurve(testNote.sigma)) {
-            throw customError(errorTypes.NOT_ON_CURVE, {
+            throw customError(constants.errorTypes.NOT_ON_CURVE, {
                 message: 'A note group element is not on the curve',
                 gammaOnCurve: proofUtils.isOnCurve(testNote.gamma),
                 sigmaOnCurve: proofUtils.isOnCurve(testNote.sigma),
@@ -408,7 +463,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
     });
 
     if (!kPublic.lt(bn128.curve.n)) {
-        throw customError(errorTypes.KPUBLIC_MALFORMED, {
+        throw customError(constants.errorTypes.KPUBLIC_MALFORMED, {
             message: 'kPublic is too big',
             kPublic,
             maxValue: bn128.curve.n,
@@ -416,7 +471,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
     }
 
     if (m > notes.length) {
-        throw customError(errorTypes.M_TOO_BIG, {
+        throw customError(constants.errorTypes.M_TOO_BIG, {
             message: 'm (input note number) is greater than the total number of notes',
             m,
             numberNotes: notes.length,
@@ -426,7 +481,7 @@ proofUtils.parseInputs = (notes, sender, m = 0, kPublic = new BN(0), proofIdenti
     if (proofIdentifier === 'mint' || proofIdentifier === 'burn') {
         const numNotes = notes.length;
         if (numNotes < 2) {
-            throw customError(errorTypes.INCORRECT_NOTE_NUMBER, {
+            throw customError(constants.errorTypes.INCORRECT_NOTE_NUMBER, {
                 message: 'There is less than 2 notes, this is not possible in a mint proof',
                 numNotes,
             });
@@ -453,7 +508,7 @@ proofUtils.randomAddress = () => {
  */
 proofUtils.checkSignatureParams = (inputNoteOwners, validatorAddress, inputNotes) => {
     if (inputNoteOwners.length > 0 && validatorAddress.length === 0) {
-        throw customError(errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
+        throw customError(constants.errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
             message: 'inputNoteOwners have been passed, but without a validator address',
             inputNoteOwners,
             validatorAddress,
@@ -461,7 +516,7 @@ proofUtils.checkSignatureParams = (inputNoteOwners, validatorAddress, inputNotes
     }
 
     if (inputNoteOwners.length > 0 && inputNotes.length === 0) {
-        throw customError(errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
+        throw customError(constants.errorTypes.UNABLE_TO_CALCULATE_SIGNATURE, {
             message: 'inputNoteOwners have been passed, but without any input notes',
             inputNoteOwners,
             validatorAddress,
