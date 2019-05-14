@@ -23,18 +23,6 @@ const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-const signNote = (validatorAddress, noteHash, spender, privateKey) => {
-    const domain = signer.generateZKAssetDomainParams(validatorAddress);
-    const schema = constants.eip712.NOTE_SIGNATURE;
-    const status = true;
-    const message = {
-        noteHash,
-        spender,
-        status,
-    };
-    return signer.signTypedData(domain, schema, message, privateKey);
-};
-
 contract('ZkAssetOwnable', (accounts) => {
     let ace;
     let aztecJoinSplit;
@@ -50,7 +38,7 @@ contract('ZkAssetOwnable', (accounts) => {
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
         await Promise.all(
             indexes.map((i) => {
-                const { signature } = signNote(
+                const { signature } = signer.signNote(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
@@ -69,7 +57,9 @@ contract('ZkAssetOwnable', (accounts) => {
     };
 
     beforeEach(async () => {
-        ace = await ACE.new({ from: accounts[0] });
+        ace = await ACE.new({
+            from: accounts[0],
+        });
 
         await ace.setCommonReferenceString(constants.CRS);
         aztecJoinSplit = await JoinSplit.new();
@@ -85,13 +75,19 @@ contract('ZkAssetOwnable', (accounts) => {
 
         await Promise.all(
             accounts.map((account) => {
-                const opts = { from: accounts[0], gas: 4700000 };
+                const opts = {
+                    from: accounts[0],
+                    gas: 4700000,
+                };
                 return erc20.mint(account, scalingFactor.mul(tokensTransferred), opts);
             }),
         );
         await Promise.all(
             accounts.map((account) => {
-                const opts = { from: account, gas: 4700000 };
+                const opts = {
+                    from: account,
+                    gas: 4700000,
+                };
                 return erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
             }),
         );
@@ -120,7 +116,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+                from: accounts[0],
+            });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
@@ -134,7 +132,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
             const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
+                from: accounts[1],
+            });
 
             await confidentialApprove([0, 1], notes, aztecAccounts);
 
@@ -162,7 +162,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 130, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 130, {
+                from: accounts[0],
+            });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
@@ -206,7 +208,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, {
+                from: accounts[0],
+            });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
@@ -231,7 +235,9 @@ contract('ZkAssetOwnable', (accounts) => {
 
     describe('Failure States', async () => {
         it('should fail to set a new proof bit filter if not owner', async () => {
-            const opts = { from: accounts[1] };
+            const opts = {
+                from: accounts[1],
+            };
             await truffleAssert.reverts(zkAssetOwnable.setProofs(epoch, filter, opts), 'only the owner can set the epoch proofs');
         });
 
@@ -252,10 +258,12 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, {
+                from: accounts[0],
+            });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
-            const { signature } = signNote(
+            const { signature } = signer.signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
@@ -290,7 +298,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+                from: accounts[0],
+            });
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
@@ -303,12 +313,14 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
             const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
+                from: accounts[1],
+            });
 
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
             await zkAssetOwnable.confidentialTransfer(transferProof.proofData, transferProof.signatures);
 
-            const { signature } = signNote(
+            const { signature } = signer.signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
@@ -339,7 +351,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+                from: accounts[0],
+            });
 
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
@@ -367,7 +381,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+                from: accounts[0],
+            });
 
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
@@ -382,7 +398,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
             const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
+                from: accounts[1],
+            });
 
             await confidentialApprove([0, 1], notes, aztecAccounts);
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
@@ -412,7 +430,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+                from: accounts[0],
+            });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
@@ -426,11 +446,15 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
             const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
+                from: accounts[1],
+            });
 
             await confidentialApprove([0, 1], notes, aztecAccounts);
 
-            const opts = { from: accounts[1] };
+            const opts = {
+                from: accounts[1],
+            };
             await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 0, opts);
 
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
@@ -459,7 +483,9 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
             const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, { from: accounts[0] });
+            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+                from: accounts[0],
+            });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
@@ -473,11 +499,15 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
             const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, { from: accounts[1] });
+            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
+                from: accounts[1],
+            });
 
             // No confidentialApprove() call
 
-            const opts = { from: accounts[1] };
+            const opts = {
+                from: accounts[1],
+            };
             await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 0, opts);
 
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
