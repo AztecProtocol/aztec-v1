@@ -201,7 +201,6 @@ proofUtils.convertTranscript = (proofData, m, challengeHex, errors, proofType) =
 };
 
 /**
- * Override the behaviour of this method in the src folder.
  * Use the redefined constants.K_MAX value of TEST_constants.K_MAX
  *
  * Generate a random note value that is less than constants.K_MAX
