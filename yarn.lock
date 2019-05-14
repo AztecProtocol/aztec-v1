@@ -2838,14 +2838,14 @@ babel-jest@^23.6.0:
     babel-preset-jest "^23.2.0"
 
 babel-loader@^8.0.5:
-  version "8.0.5"
-  resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-8.0.5.tgz#225322d7509c2157655840bba52e46b6c2f2fe33"
-  integrity sha512-NTnHnVRd2JnRqPC0vW+iOQWU5pchDbYXsG2E6DMXEpMfUcQKclF9gmf3G3ZMhzG7IG9ji4coL0cm+FxeWxDpnw==
+  version "8.0.6"
+  resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-8.0.6.tgz#e33bdb6f362b03f4bb141a0c21ab87c501b70dfb"
+  integrity sha512-4BmWKtBOBm13uoUwd08UwjZlaw3O9GWf456R9j+5YykFZ6LUIjIKLc0zEZf+hauxPOJs96C8k6FvYD09vWzhYw==
   dependencies:
     find-cache-dir "^2.0.0"
     loader-utils "^1.0.2"
     mkdirp "^0.5.1"
-    util.promisify "^1.0.0"
+    pify "^4.0.1"
 
 babel-messages@^6.23.0:
   version "6.23.0"
@@ -15009,22 +15009,6 @@ web3-utils@1.0.0-beta.37:
     number-to-bn "1.7.0"
     randomhex "0.1.5"
     underscore "1.8.3"
-    utf8 "2.1.1"
-
-web3-utils@1.0.0-beta.52:
-  version "1.0.0-beta.52"
-  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.52.tgz#27f9beeac3e1ea981eba9824d79e2971f156eebc"
-  integrity sha512-WdHyzPcZu/sOnNrkcOZT20QEX9FhwD9OJJXENojQNvMK2a1xo3n8JWBcC2gzAGwsa0Aah6z2B3Xwa1P//8FaoA==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
-    "@types/bn.js" "^4.11.4"
-    "@types/node" "^10.12.18"
-    bn.js "4.11.8"
-    eth-lib "0.2.8"
-    ethjs-unit "^0.1.6"
-    lodash "^4.17.11"
-    number-to-bn "1.7.0"
-    randomhex "0.1.5"
     utf8 "2.1.1"
 
 web3-utils@1.0.0-beta.55:
