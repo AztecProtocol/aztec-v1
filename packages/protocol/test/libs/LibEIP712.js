@@ -49,7 +49,11 @@ contract('LibEIP712', (accounts) => {
 
         it('should recover the sender address', async () => {
             const aztecAccount = secp256k1.generateAccount();
-            const { signature, encodedTypedData } = signer.signNote(libEIP712.address, aztecAccount.address, aztecAccount.privateKey);
+            const { signature, encodedTypedData } = signer.signNote(
+                libEIP712.address,
+                aztecAccount.address,
+                aztecAccount.privateKey,
+            );
             const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
             const result = await libEIP712._recoverSignature(encodedTypedData, concatenatedSignature);
             expect(result).to.equal(aztecAccount.address);
@@ -59,7 +63,11 @@ contract('LibEIP712', (accounts) => {
     describe('Failure States', async () => {
         it('should fail when signer is 0x0', async () => {
             const aztecAccount = secp256k1.generateAccount();
-            const { signature, encodedTypedData } = signer.signNote(libEIP712.address, aztecAccount.address, aztecAccount.privateKey);
+            const { signature, encodedTypedData } = signer.signNote(
+                libEIP712.address,
+                aztecAccount.address,
+                aztecAccount.privateKey,
+            );
 
             // see https://ethereum.stackexchange.com/questions/69328/how-to-get-0x0-from-ecrecover/69329#69329
             const v = padLeft('0x10', 64);

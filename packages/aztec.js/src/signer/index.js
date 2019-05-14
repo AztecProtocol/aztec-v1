@@ -38,7 +38,7 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
     };
 };
 /**
- * Create an EIP712 ECDSA signature over an AZTEC note 
+ * Create an EIP712 ECDSA signature over an AZTEC note
  * @method signNote
  * @param {string} verifyingContract address of target contract
  * @param {string} spender address of the note spender
