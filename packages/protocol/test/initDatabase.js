@@ -29,6 +29,8 @@ const { TEST_K_MAX } = constants;
 // Redfine K_MAX in the tests
 constants.K_MAX = TEST_K_MAX;
 
+console.log('Initialised the local trusted setup database');
+
 /**
  * Override the existing setup.fetchPoint in src. Load a trusted setup signature
  * point, sourcing it from the local trusted setup database rather
