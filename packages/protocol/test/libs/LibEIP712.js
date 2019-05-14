@@ -31,7 +31,7 @@ const computeMsgHash = (domainHash, sender) => {
     };
 };
 
-contract.only('LibEIP712', (accounts) => {
+contract('LibEIP712', (accounts) => {
     let libEIP712;
 
     beforeEach(async () => {

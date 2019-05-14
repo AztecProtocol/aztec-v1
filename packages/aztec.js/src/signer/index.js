@@ -41,14 +41,18 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
 
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, for a ZkAsset.sol domain
- * @method signNoteZkAssetDomain
+ *
+ * This is expected to be the default signNote() function. However for use cases, such as
+ * testing, where ACE domain params are required then the signNoteACEDomain() function is
+ * available.
+ * @method signNote
  * @param {string} verifyingContract address of target contract
  * @param {string} noteHash noteHash of the note being signed
  * @param {string} spender address of the note spender
  * @param {string} privateKey the private key of message signer
  * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
-signer.signNoteZkAssetDomain = (validatorAddress, noteHash, spender, privateKey) => {
+signer.signNote = (validatorAddress, noteHash, spender, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(validatorAddress);
     const schema = constants.eip712.NOTE_SIGNATURE;
     const status = true;
