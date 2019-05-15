@@ -4,12 +4,6 @@
  * This initialises the local trusted setup database, used for testing purposes.
  * It contains 14,000 points - representing ~1.4% of the original in house trusted
  * setup.
- *
- * This script redefines the setup.fetchPoint() method that attempts to fetch a point remotely.
- * It also redefines the K_MAX constant in the @aztec/dev-utils package to be TEST_K_MAX - the new lower
- * value of K_MAX for tests.
- *
- * This script is called first in the test folder when tests are running, overriding existing behaviour.
  */
 
 const BN = require('bn.js');
@@ -24,13 +18,14 @@ const partialPath = path.posix.resolve(__dirname, 'localSetupDatabase');
 
 const { TEST_K_MAX } = constants;
 
-// Redfine K_MAX in the tests
+// Redfine K_MAX in the tests to be TEST_K_MAX, lower as using smaller
+// local point database
 constants.K_MAX = TEST_K_MAX;
 
 console.log('Initialised the local trusted setup database');
 
 /**
- * Override the existing setup.fetchPoint in src. Load a trusted setup signature
+ * Override the existing setup.fetchPoint() in src. Load a trusted setup signature
  * point, sourcing it from the local trusted setup database rather
  * than remotely.
  *
