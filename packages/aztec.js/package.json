@@ -47,8 +47,7 @@
     "webpack-merge": "^4.2.1"
   },
   "engines": {
-    "node": ">=8.3",
-    "yarn": "1.15.2"
+    "node": ">=8.3"
   },
   "files": [
     "/dist"

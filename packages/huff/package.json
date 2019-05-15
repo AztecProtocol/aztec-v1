@@ -21,8 +21,7 @@
     "sinon": "^7.2.3"
   },
   "engines": {
-    "node": ">=8.3",
-    "yarn": ">=1.15.2"
+    "node": ">=8.3"
   },
   "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/huff#readme",
   "keywords": [
