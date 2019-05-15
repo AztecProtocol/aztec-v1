@@ -50,10 +50,10 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
  * @param {string} noteHash noteHash of the note being signed
  * @param {string} spender address of the note spender
  * @param {string} privateKey the private key of message signer
- * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ * @returns {string} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
  */
-signer.signNote = (validatorAddress, noteHash, spender, privateKey) => {
-    const domain = signer.generateZKAssetDomainParams(validatorAddress);
+signer.signNote = (verifyingContract, noteHash, spender, privateKey) => {
+    const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.NOTE_SIGNATURE;
     const status = true;
     const message = {
