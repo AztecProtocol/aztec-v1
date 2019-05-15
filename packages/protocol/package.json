@@ -40,8 +40,7 @@
     "web3-utils": "1.0.0-beta.55"
   },
   "engines": {
-    "node": ">=8.3",
-    "yarn": "1.15.2"
+    "node": ">=8.3"
   },
   "files": [
     "/contracts"
