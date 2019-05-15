@@ -61,7 +61,8 @@ signer.signNote = (validatorAddress, noteHash, spender, privateKey) => {
         spender,
         status,
     };
-    return signer.signTypedData(domain, schema, message, privateKey);
+    const { signature } = signer.signTypedData(domain, schema, message, privateKey);
+    return signature[0] + signature[1].slice(2) + signature[2].slice(2);
 };
 
 /**
