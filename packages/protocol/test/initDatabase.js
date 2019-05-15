@@ -1,7 +1,7 @@
 /**
  * @module initDatabase
  *
- * This initialises the local trusted setup database, used for testing purposes.
+ * @dev This initialises the local trusted setup database, used for testing purposes.
  * It contains 14,000 points - representing ~1.4% of the original in house trusted
  * setup.
  */
