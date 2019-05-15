@@ -18,6 +18,9 @@ const JoinSplitInterface = require('../artifacts/JoinSplitInterface');
 const LibEIP712 = require('../artifacts/LibEIP712');
 const NoteRegistry = require('../artifacts/NoteRegistry');
 const NoteUtils = require('../artifacts/NoteUtils');
+const PrivateRange = require('../artifacts/PrivateRange');
+const PrivateRangeABIEncoder = require('../artifacts/PrivateRangeABIEncoder');
+const PrivateRangeInterface = require('../artifacts/PrivateRangeInterface');
 const ProofUtils = require('../artifacts/ProofUtils');
 const SafeMath8 = require('../artifacts/SafeMath8');
 const ZkAsset = require('../artifacts/ZkAsset');
@@ -47,6 +50,9 @@ module.exports = {
     LibEIP712,
     NoteRegistry,
     NoteUtils,
+    PrivateRange,
+    PrivateRangeABIEncoder,
+    PrivateRangeInterface,
     ProofUtils,
     SafeMath8,
     ZkAsset,
