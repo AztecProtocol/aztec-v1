@@ -1,0 +1,29 @@
+{
+    "abi": [
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialBurn",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.9"
+}

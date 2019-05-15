@@ -1,0 +1,225 @@
+{
+    "abi": [
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_proofSender",
+                    "type": "address"
+                }
+            ],
+            "name": "mint",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bytes"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_proofSender",
+                    "type": "address"
+                }
+            ],
+            "name": "burn",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bytes"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_sender",
+                    "type": "address"
+                },
+                {
+                    "name": "",
+                    "type": "bytes"
+                }
+            ],
+            "name": "validateProof",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bytes"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofHashes",
+                    "type": "bytes32[]"
+                }
+            ],
+            "name": "clearProofByHashes",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_commonReferenceString",
+                    "type": "bytes32[6]"
+                }
+            ],
+            "name": "setCommonReferenceString",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                }
+            ],
+            "name": "invalidateProof",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofHash",
+                    "type": "bytes32"
+                },
+                {
+                    "name": "_sender",
+                    "type": "address"
+                }
+            ],
+            "name": "validateProofByHash",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_validatorAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "setProof",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "incrementLatestEpoch",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "getCommonReferenceString",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bytes32[6]"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                }
+            ],
+            "name": "getValidatorAddress",
+            "outputs": [
+                {
+                    "name": "validatorAddress",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.9"
+}
