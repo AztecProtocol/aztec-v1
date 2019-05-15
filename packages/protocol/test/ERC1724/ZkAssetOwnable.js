@@ -38,20 +38,14 @@ contract('ZkAssetOwnable', (accounts) => {
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
         await Promise.all(
             indexes.map((i) => {
-                const { signature } = signer.signNote(
+                const signature = signer.signNote(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
                     aztecAccounts[i].privateKey,
                 );
-                const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
                 // eslint-disable-next-line no-await-in-loop
-                return zkAssetOwnable.confidentialApprove(
-                    notes[i].noteHash,
-                    zkAssetOwnableTest.address,
-                    true,
-                    concatenatedSignature,
-                );
+                return zkAssetOwnable.confidentialApprove(notes[i].noteHash, zkAssetOwnableTest.address, true, signature);
             }),
         );
     };
@@ -263,19 +257,18 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
-            const { signature } = signer.signNote(
+            const signature = signer.signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
                 aztecAccounts[0].privateKey,
             );
-            const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
             await truffleAssert.reverts(
                 zkAssetOwnable.confidentialApprove(
                     notes[2].noteHash, // wrong note hash
                     zkAssetOwnableTest.address,
                     true,
-                    concatenatedSignature,
+                    signature,
                 ),
                 'expected note to exist',
             );
@@ -320,15 +313,14 @@ contract('ZkAssetOwnable', (accounts) => {
             await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
             await zkAssetOwnable.confidentialTransfer(transferProof.proofData, transferProof.signatures);
 
-            const { signature } = signer.signNote(
+            const signature = signer.signNote(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
                 aztecAccounts[0].privateKey,
             );
-            const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
             await truffleAssert.reverts(
-                zkAssetOwnable.confidentialApprove(notes[0].noteHash, zkAssetOwnableTest.address, true, concatenatedSignature),
+                zkAssetOwnable.confidentialApprove(notes[0].noteHash, zkAssetOwnableTest.address, true, signature),
                 'only unspent notes can be approved',
             );
         });
