@@ -75,7 +75,7 @@
     "clean": "shx rm -rf ./.nyc_output ./build ./coverage ./coverageEnv ./coverage.json ./dist ./docs ./lib || true",
     "coverage": "nyc mocha ./test --bail --trace-warnings --exit --colors --recursive --reporter spec",
     "lint": "eslint --ignore-path ../../.eslintignore .",
-    "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --cleanup",
+    "publish:docs": "yarn build:docs && push-dir --dir ./docs --branch gh-pages --remote docs --cleanup",
     "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
     "watch": "yarn build --watch"
   }
