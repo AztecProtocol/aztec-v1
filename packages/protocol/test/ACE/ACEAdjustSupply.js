@@ -9,7 +9,7 @@ const { abiEncoder, note, proof } = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
-const { BURN_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF, UTILITY_PROOF } = devUtils.proofs;
+const { BURN_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF, BILATERAL_SWAP_PROOF, DIVIDEND_PROOF } = devUtils.proofs;
 const { constants } = devUtils;
 const { outputCoder } = abiEncoder;
 
@@ -22,10 +22,13 @@ const AdjustSupply = artifacts.require('./AdjustSupply');
 const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 const BilateralSwap = artifacts.require('./BilateralSwap');
 const BilateralSwapInterface = artifacts.require('./BilateralSwapInterface');
+const Dividend = artifacts.require('./DividendComputation');
+const DividendInterface = artifacts.require('./DividendComputationInterface');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 AdjustSupply.abi = AdjustSupplyInterface.abi;
 BilateralSwap.abi = BilateralSwapInterface.abi;
+Dividend.abi = DividendInterface.abi;
 
 contract('ACE Mint and Burn Functionality', (accounts) => {
     describe('Success States', () => {
@@ -33,6 +36,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         let aztecAdjustSupply;
         let aztecBilateralSwap;
         let aztecJoinSplit;
+        let aztecDividend;
         let erc20;
         const kPublic = 50;
         const tokensTransferred = new BN(1000);
@@ -46,12 +50,14 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             aztecAdjustSupply = await AdjustSupply.new();
             aztecJoinSplit = await JoinSplit.new();
             aztecBilateralSwap = await BilateralSwap.new();
+            aztecDividend = await Dividend.new();
 
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-            await ace.setProof(UTILITY_PROOF, aztecBilateralSwap.address);
+            await ace.setProof(BILATERAL_SWAP_PROOF, aztecBilateralSwap.address);
+            await ace.setProof(DIVIDEND_PROOF, aztecDividend.address);
 
             // Creating a fixed note
             zeroNote = await note.createZeroValueNote();
@@ -180,7 +186,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             expect(burnReceipt.status).to.equal(true);
         });
 
-        it('should validate utility proof', async () => {
+        it('should validate bilateral swap proof', async () => {
             // Using a bilateral swap proof
             const proofs = [];
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
@@ -201,7 +207,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
                 senderAddress,
             });
 
-            const { receipt: utilityReceipt } = await ace.validateProof(UTILITY_PROOF, accounts[0], proofs[0].proofData);
+            const { receipt: utilityReceipt } = await ace.validateProof(BILATERAL_SWAP_PROOF, accounts[0], proofs[0].proofData);
 
             expect(utilityReceipt.status).to.equal(true);
         });
@@ -261,7 +267,8 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         let zeroNote;
         let aztecAdjustSupply;
         let aztecJoinSplit;
-        let aztecBilateralSwap;
+        let aztecDividend;
+
         let erc20;
 
         beforeEach(async () => {
@@ -271,13 +278,13 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
 
             aztecAdjustSupply = await AdjustSupply.new();
             aztecJoinSplit = await JoinSplit.new();
-            aztecBilateralSwap = await BilateralSwap.new();
+            aztecDividend = await Dividend.new();
 
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
             await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-            await ace.setProof(UTILITY_PROOF, aztecBilateralSwap.address);
+            await ace.setProof(DIVIDEND_PROOF, aztecDividend.address);
 
             zeroNote = await note.createZeroValueNote();
         });
@@ -667,25 +674,26 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             expect(burnReceipt.status).to.equal(true);
         });
 
-        it('should not update the validatedProofs mapping for utility proofs', async () => {
+        it.only('should not update the validatedProofs mapping for utility proofs', async () => {
             // Using a bilateral swap proof
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [10, 20, 10, 20];
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
+            console.log('entered the test');
+            console.log('dividend proof number', DIVIDEND_PROOF);
 
-            const inputNotes = notes.slice(0, 2);
-            const outputNotes = notes.slice(2, 4);
-            const senderAddress = accounts[0];
+            const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
+            const noteValues = [90, 4, 50];
+            const za = 100;
+            const zb = 5;
 
-            proofs[0] = proof.bilateralSwap.encodeBilateralSwapTransaction({
+            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const inputNotes = notes.slice(0, 1);
+            const outputNotes = notes.slice(1, 3);
+
+            const dividendProof = proof.dividendComputation.encodeDividendComputationTransaction({
                 inputNotes,
                 outputNotes,
-                senderAddress,
+                za,
+                zb,
+                senderAddress: accounts[0],
             });
 
             erc20 = await ERC20Mintable.new();
@@ -697,9 +705,12 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
                 from: accounts[0],
             });
 
-            const { receipt: utilityReceipt } = await ace.validateProof(UTILITY_PROOF, accounts[0], proofs[0].proofData);
+            console.log('created the note registry');
+
+            const { receipt: utilityReceipt } = await ace.validateProof(DIVIDEND_PROOF, accounts[0], dividendProof.proofData);
+            console.log('validated the proof');
             await truffleAssert.reverts(
-                ace.updateNoteRegistry(UTILITY_PROOF, proofs[0].proofData, accounts[0]),
+                ace.updateNoteRegistry(DIVIDEND_PROOF, dividendProof.proofData, accounts[0]),
                 'ACE has not validated a matching proof',
             );
 
