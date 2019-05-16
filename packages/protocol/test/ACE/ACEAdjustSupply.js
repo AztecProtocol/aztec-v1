@@ -674,7 +674,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             expect(burnReceipt.status).to.equal(true);
         });
 
-        it.only('should not update the validatedProofs mapping for utility proofs', async () => {
+        it('should not update the validatedProofs mapping for utility proofs', async () => {
             // Using a bilateral swap proof
             console.log('entered the test');
             console.log('dividend proof number', DIVIDEND_PROOF);
