@@ -1,7 +1,8 @@
 const BN = require('bn.js');
-const { padLeft } = require('./utils');
+const { padLeft, padRight } = require('./utils');
 
-// Pre-compute the commonly used values
+const FIELD_MODULUS = new BN('21888242871839275222246405745257275088696311157297823662689037894645226208583', 10);
+const GROUP_MODULUS = new BN('21888242871839275222246405745257275088548364400416034343698204186575808495617', 10);
 const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
 const H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
 const t2 = [
@@ -10,6 +11,9 @@ const t2 = [
     `0x${padLeft('204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2', 64)}`,
     `0x${padLeft('2cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc', 64)}`,
 ];
+
+const BN128_COMPRESSION_MASK = new BN(padRight('8', 64), 16);
+const BN128_GROUP_REDUCTION = BN.red(GROUP_MODULUS);
 
 /**
  * Helper module that contains key constants for our zero-knowledge proving system
@@ -20,14 +24,18 @@ const constants = {
     /**
      * BN128 compression mask
      */
-    BN128_COMPRESSION_MASK: new BN('8000000000000000000000000000000000000000000000000000000000000000', 16),
+    BN128_COMPRESSION_MASK,
+    /**
+     * BN.js reduction context for bn128 curve group's prime modulus
+     */
+    BN128_GROUP_REDUCTION,
     /**
      * Common reference string
      */
     CRS: [`0x${padLeft(H_X.toString(16), 64)}`, `0x${padLeft(H_Y.toString(16), 64)}`, ...t2],
     /**
-     * Generic scaling factor that maps between AZTEC note values and ERC20 token balances. when used for DAI token, 1
-     * AZTEC note value = 0.1 DAI
+     * Generic scaling factor that maps between AZTEC note values and ERC20 token balances. When used for DAI,
+     * 1 note value = 0.1 DAI
      */
     ERC20_SCALING_FACTOR: new BN('100000000000000000', 10),
     /**
@@ -40,14 +48,14 @@ const constants = {
      *  @default
      *  21888242871839275222246405745257275088696311157297823662689037894645226208583
      */
-    FIELD_MODULUS: new BN('21888242871839275222246405745257275088696311157297823662689037894645226208583', 10),
+    FIELD_MODULUS,
     /** modulus of bn128's elliptic curve group (n)
      *  @constant GROUP_MODULUS
      *  @type {BN}
      *  @default
      *  21888242871839275222246405745257275088548364400416034343698204186575808495617
      */
-    GROUP_MODULUS: new BN('21888242871839275222246405745257275088548364400416034343698204186575808495617', 10),
+    GROUP_MODULUS,
     /**
      * X-Coordinate of AZTEC's second generator point 'h'. Created by taking the keccak256 hash of the ascii string
      *      'just read the instructions', right-padded to 32 bytes. i.e:
@@ -101,6 +109,14 @@ const constants = {
      *  @default 1024
      */
     SIGNATURES_PER_FILE: 1024,
+    /**
+     * BN value equal to 0
+     */
+    ZERO_BN: new BN(0),
+    /**
+     * BN value equal to 0 in reduction context
+     */
+    ZERO_BN_RED: new BN(0).toRed(BN128_GROUP_REDUCTION),
     /**
      * Hash of a dummy AZTEC note with k = 0 and a = 1
      * @constant ZERO_VALUE_NOTE_HASH

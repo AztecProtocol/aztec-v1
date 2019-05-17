@@ -1,25 +1,25 @@
 const { constants } = require('@aztec/dev-utils');
 const { expect } = require('chai');
 const crypto = require('crypto');
+const sinon = require('sinon');
 
 const BN = require('bn.js');
 const bn128 = require('../../src/bn128');
 
 describe('bn128', () => {
-    let kMaxTemp;
+    let kMaxStub;
 
     beforeEach(() => {
-        kMaxTemp = bn128.K_MAX;
-        bn128.K_MAX = 500; // *cough*
+        kMaxStub = sinon.stub(constants, 'K_MAX').value(500);
     });
 
     afterEach(() => {
-        bn128.K_MAX = kMaxTemp;
+        kMaxStub.restore();
     });
 
     it('should export the bn128 curve', async () => {
         const testPoint = bn128.randomPoint();
-        const scalar = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
+        const scalar = new BN(crypto.randomBytes(32), 16).toRed(constants.BN128_GROUP_REDUCTION);
         const scalarInverse = scalar.redInvm();
         const result = testPoint.mul(scalar).mul(scalarInverse);
         expect(result.eq(testPoint));
@@ -36,7 +36,7 @@ describe('bn128', () => {
         const scalar = bn128.randomGroupScalar();
 
         expect(BN.isBN(scalar)).to.equal(true);
-        expect(scalar.red).to.deep.equal(bn128.groupReduction);
+        expect(scalar.red).to.deep.equal(constants.BN128_GROUP_REDUCTION);
         expect(scalar.fromRed().toString(16).length <= 64).to.equal(true);
     });
 

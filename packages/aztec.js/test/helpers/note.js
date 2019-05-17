@@ -6,7 +6,7 @@ const { padLeft, toHex } = require('web3-utils');
 
 const bn128 = require('../../src/bn128');
 const note = require('../../src/note');
-const ProofUtils = require('../../src/proof-v2/utils');
+const ProofUtils = require('../../src/proof/utils');
 
 const mockLightNote = async (k) => {
     const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
@@ -17,12 +17,12 @@ const mockLightNote = async (k) => {
 };
 
 /**
- * Constructs a mock note directly from the setup algorithm's trapdoor key.
+ * Construct a mock note directly from the setup algorithm's trapdoor key.
  * Used for testing purposes only; we don't know the trapdoor key for the real deal.
  */
 const mockNote = async (k, trapdoor) => {
     const lightNote = await mockLightNote(k);
-    const kBn = new BN(k).toRed(bn128.groupReduction);
+    const kBn = new BN(k).toRed(constants.BN128_GROUP_REDUCTION);
     const mu = bn128.h.mul(trapdoor.redSub(kBn).redInvm());
     const gamma = mu.mul(lightNote.a);
     const sigma = gamma.mul(kBn).add(bn128.h.mul(lightNote.a));
@@ -65,7 +65,7 @@ const mockLightNoteSet = async (kIn, kOut) => {
  * @returns {Object} input notes, output notes and trapdoor function
  */
 const mockNoteSet = async (kIn, kOut) => {
-    const trapdoor = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
+    const trapdoor = new BN(crypto.randomBytes(32), 16).toRed(constants.BN128_GROUP_REDUCTION);
     const inputNotes = await Promise.all(
         kIn.map((k) => {
             return mockNote(k, trapdoor);
@@ -90,14 +90,18 @@ const randomNoteValue = () => {
 };
 
 /**
- * Generates a set of random input and output values based on the number of notes.
+ * Generate a set of random input and output values based on the number of notes.
  *
  * @param {number} nIn number of input notes
  * @param {number} nOut number of output notes
  */
-const randomPublicValues = (nIn, nOut) => {
-    const kIn = [...Array(nIn)].map(() => randomNoteValue());
-    const kOut = [...Array(nOut)].map(() => randomNoteValue());
+const balancedPublicValues = (nIn, nOut) => {
+    const kIn = Array(nIn)
+        .fill()
+        .map(() => randomNoteValue());
+    const kOut = Array(nOut)
+        .fill()
+        .map(() => randomNoteValue());
     let delta = ProofUtils.getPublicValue(kIn, kOut);
     while (delta > 0) {
         if (delta >= constants.K_MAX) {
@@ -123,8 +127,8 @@ const randomPublicValues = (nIn, nOut) => {
 };
 
 module.exports = {
+    balancedPublicValues,
     mockLightNoteSet,
     mockNoteSet,
     randomNoteValue,
-    randomPublicValues,
 };

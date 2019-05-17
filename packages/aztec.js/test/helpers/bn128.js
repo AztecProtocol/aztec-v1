@@ -1,3 +1,4 @@
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { expect } = require('chai');
 
@@ -6,8 +7,8 @@ const bn128 = require('../../src/bn128');
 const validateElement = (xHex, yHex) => {
     const x = new BN(xHex.slice(2), 16);
     const y = new BN(yHex.slice(2), 16);
-    expect(x.gt(new BN(0))).to.equal(true);
-    expect(y.gt(new BN(0))).to.equal(true);
+    expect(x.gt(constants.ZERO_BN)).to.equal(true);
+    expect(y.gt(constants.ZERO_BN)).to.equal(true);
     expect(x.lt(bn128.curve.p)).to.equal(true);
     expect(y.lt(bn128.curve.p)).to.equal(true);
     const lhs = x
@@ -23,7 +24,7 @@ const validateScalar = (hex, canBeZero = false) => {
     const scalar = new BN(hex.slice(2), 16);
     expect(scalar.lt(bn128.curve.n)).to.equal(true);
     if (!canBeZero) {
-        expect(scalar.gt(new BN(0))).to.equal(true);
+        expect(scalar.gt(constants.ZERO_BN)).to.equal(true);
     }
 };
 

@@ -1,3 +1,4 @@
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 
@@ -25,18 +26,6 @@ function Keccak() {
 }
 
 /**
- * Append an elliptic.js group element to {@link Keccak#data}
- *
- * @name Keccak#append
- * @function
- * @param {Point} point elliptic.js point
- */
-Keccak.prototype.append = function append(point) {
-    this.data.push(padLeft(point.x.fromRed().toString(16), 64));
-    this.data.push(padLeft(point.y.fromRed().toString(16), 64));
-};
-
-/**
  * Append a BN.js instance {@link Keccak#data}
  *
  * @name Keccak#appendBN
@@ -48,11 +37,23 @@ Keccak.prototype.appendBN = function append(scalar) {
 };
 
 /**
+ * Append an elliptic.js group element to {@link Keccak#data}
+ *
+ * @name Keccak#append
+ * @function
+ * @param {Point} point elliptic.js point
+ */
+Keccak.prototype.appendPoint = function appendPoint(point) {
+    this.data.push(padLeft(point.x.fromRed().toString(16), 64));
+    this.data.push(padLeft(point.y.fromRed().toString(16), 64));
+};
+
+/**
  * Compute keccak256 hash of {@link Keccak#data}, set {@link Keccak#data} to resulting hash
  *
- * @name Keccak#appendBN
+ * @name Keccak#keccak
  * @function
- * @param {scalar} scalar BN.js number
+ * @param {reductionContext} reductionContext BN.js reduction context for Montgomery modular multiplication
  */
 Keccak.prototype.keccak = function keccak(reductionContext = null) {
     const result = hashStrings(this.data);
@@ -62,5 +63,12 @@ Keccak.prototype.keccak = function keccak(reductionContext = null) {
     }
     return this.data;
 };
+
+/**
+ * Interface for the {@function keccak} with the reduction context set to the constant found in @aztec/dev-utils
+ */
+Keccak.prototype.redKeccak = function redKeccak() {
+    return this.keccak(constants.BN128_GROUP_REDUCTION);
+}
 
 module.exports = Keccak;

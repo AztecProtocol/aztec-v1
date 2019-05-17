@@ -61,7 +61,7 @@ outputCoder.decodeNote = (note) => {
  */
 outputCoder.decodeNotes = (notes) => {
     const n = parseInt(notes.slice(0x40, 0x80), 16);
-    return [...new Array(n)].map((x, i) => {
+    return Array(n).fill().map((x, i) => {
         const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
         return outputCoder.decodeNote(notes.slice(noteOffset * 2));
     });
@@ -80,7 +80,7 @@ outputCoder.decodeNotes = (notes) => {
 outputCoder.decodeProofOutputs = (proofOutputsHex) => {
     const proofOutputs = proofOutputsHex.slice(2);
     const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
-    const result = [...new Array(numOutputs)].map((x, i) => {
+    const result = Array(numOutputs).fill().map((x, i) => {
         const outputOffset = parseInt(proofOutputs.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
         return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
     });
@@ -122,7 +122,7 @@ outputCoder.decodeProofOutput = (proofOutput) => {
  * @returns {string} ABI encoded representation of the notes array
  */
 outputCoder.encodeInputNote = (note) => {
-    const encoded = [...new Array(6)];
+    const encoded = Array(6).fill();
     encoded[0] = padLeft('c0', 64);
     encoded[1] = padLeft('1', 64);
     encoded[2] = padLeft(note.owner.slice(2), 64);
@@ -185,7 +185,7 @@ outputCoder.encodeNotes = (notes, isOutput) => {
  * together
  */
 outputCoder.encodeOutputNote = (note) => {
-    const encoded = [...new Array(7)];
+    const encoded = Array(7).fill();
     encoded[0] = padLeft('e1', 64);
     encoded[1] = padLeft('1', 64);
     encoded[2] = padLeft(note.owner.slice(2), 64);
@@ -217,7 +217,7 @@ outputCoder.encodeProofOutput = ({ inputNotes, outputNotes, publicOwner, publicV
     } else {
         formattedValue = padLeft(publicValue.toString(16), 64);
     }
-    const encoded = [...new Array(8)];
+    const encoded = Array(8).fill();
     encoded[0] = padLeft((0xa0 + (encodedInputNotes.length + encodedOutputNotes.length) / 2).toString(16), 64);
     encoded[1] = padLeft('c0', 64);
     encoded[2] = padLeft((0xc0 + encodedInputNotes.length / 2).toString(16), 64);

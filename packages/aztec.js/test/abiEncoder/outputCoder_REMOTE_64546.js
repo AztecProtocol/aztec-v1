@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const { padLeft } = require('web3-utils');
-
-const bn128 = require('../../src/bn128');
-const HexString = require('./HexString');
-const note = require('../../src/note');
-const proofUtils = require('../../src/proof/proofUtils');
-const outputCoder = require('../../src/abiEncoder/outputCoder');
-=======
 // const { constants } = require('@aztec/dev-utils');
 // const secp256k1 = require('@aztec/secp256k1');
 // const { expect } = require('chai');
@@ -18,7 +7,6 @@ const outputCoder = require('../../src/abiEncoder/outputCoder');
 // const HexString = require('./HexString');
 // const note = require('../../src/note');
 // const outputCoder = require('../../src/abiEncoder/outputCoder');
->>>>>>> feat(aztec.js): implement new verifiers classes
 
 // const clean = (input) => {
 //     return input.replace(/^0+/, '');
@@ -28,33 +16,6 @@ const outputCoder = require('../../src/abiEncoder/outputCoder');
 //     return input.match(new RegExp('^[0-9a-fA-F]+$')) !== null;
 // };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-describe('abiEncoder.outputCoder', () => {
-=======
-const randomNoteValue = () => {
-    return Math.floor(Math.random() * Math.floor(constants.K_MAX));
-};
-
-describe.skip('Output Coder', () => {
->>>>>>> feat(aztec.js): implement new proof construction api
-    let accounts = [];
-    let notes = [];
-    let challenges = [];
-
-    beforeEach(async () => {
-        accounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-        notes = await Promise.all(
-            accounts.map(({ publicKey }) => {
-                return note.create(publicKey, proofUtils.randomNoteValue());
-            }),
-        );
-        challenges = [
-            '0x00112233445566778899aabbccddeeffffeeddccbbaa99887766554433221100',
-            '0xff112233445566778899aabbccddeeffffeeddccbbaa998877662544332211de',
-        ];
-    });
-=======
 // const randomNoteValue = () => {
 //     return Math.floor(Math.random() * Math.floor(constants.K_MAX));
 // };
@@ -76,7 +37,6 @@ describe.skip('Output Coder', () => {
 //             '0xff112233445566778899aabbccddeeffffeeddccbbaa998877662544332211de',
 //         ];
 //     });
->>>>>>> feat(aztec.js): implement new verifiers classes
 
 //     afterEach(() => {});
 
@@ -134,34 +94,6 @@ describe.skip('Output Coder', () => {
 //         expect(encoded.hexLength()).to.equal(sum);
 //     });
 
-<<<<<<< HEAD
-    it('should encode a proof output', () => {
-        const inputNotes = [notes[0], notes[1]];
-        const outputNotes = [notes[2], notes[3], notes[4]];
-        const publicOwner = accounts[5].address;
-        const publicValue = proofUtils.randomNoteValue();
-        const encoded = new HexString(
-            outputCoder.encodeProofOutput({
-                inputNotes,
-                outputNotes,
-                publicOwner,
-                publicValue,
-                challenge: challenges[0],
-            }),
-        );
-        expect(isHex(encoded)).to.equal(true);
-        const encodedLength = parseInt(encoded.slice(0x00, 0x20), 16);
-        const inputsLocation = parseInt(encoded.slice(0x20, 0x40), 16);
-        const outputsLocation = parseInt(encoded.slice(0x40, 0x60), 16);
-        const recoveredOwner = encoded.slice(0x60, 0x80);
-        const recoveredValue = parseInt(encoded.slice(0x80, 0xa0), 16);
-        const recoveredChallenge = encoded.slice(0xa0, 0xc0);
-        const inputsLength = parseInt(encoded.slice(inputsLocation, inputsLocation + 0x20), 16);
-        const outputsLength = parseInt(encoded.slice(outputsLocation, outputsLocation + 0x20), 16);
-        const encodedInputNotes = new HexString(encoded.slice(inputsLocation, inputsLocation + 0x20 + inputsLength));
-        const encodedOutputNotes = new HexString(encoded.slice(outputsLocation, outputsLocation + 0x20 + outputsLength));
-        const totalLength = encodedInputNotes.hexLength() + encodedOutputNotes.hexLength() + 0xc0;
-=======
 //     it('should encode a proof output', () => {
 //         const inputNotes = [notes[0], notes[1]];
 //         const outputNotes = [notes[2], notes[3], notes[4]];
@@ -188,7 +120,6 @@ describe.skip('Output Coder', () => {
 //         const encodedInputNotes = new HexString(encoded.slice(inputsLocation, inputsLocation + 0x20 + inputsLength));
 //         const encodedOutputNotes = new HexString(encoded.slice(outputsLocation, outputsLocation + 0x20 + outputsLength));
 //         const totalLength = encodedInputNotes.hexLength() + encodedOutputNotes.hexLength() + 0xc0;
->>>>>>> feat(aztec.js): implement new verifiers classes
 
 //         expect(encodedLength).to.equal(encoded.hexLength() - 0x20);
 //         expect(recoveredOwner).to.equal(padLeft(publicOwner.slice(2), 64));
@@ -201,27 +132,6 @@ describe.skip('Output Coder', () => {
 //         expect(encoded.hexLength()).to.equal(totalLength);
 //     });
 
-<<<<<<< HEAD
-    it('should encode proof outputs', () => {
-        const proofs = [
-            {
-                inputNotes: [notes[0], notes[1]],
-                outputNotes: [notes[2], notes[3]],
-                publicOwner: accounts[4].address,
-                publicValue: proofUtils.randomNoteValue(),
-                challenge: challenges[0],
-            },
-            {
-                inputNotes: [notes[5], notes[6]],
-                outputNotes: [notes[7], notes[8]],
-                publicOwner: accounts[9].address,
-                publicValue: proofUtils.randomNoteValue(),
-                challenge: challenges[1],
-            },
-        ];
-        const encoded = new HexString(outputCoder.encodeProofOutputs(proofs).slice(2));
-        expect(isHex(encoded)).to.equal(true);
-=======
 //     it('should encode proof outputs', () => {
 //         const proofs = [
 //             {
@@ -241,7 +151,6 @@ describe.skip('Output Coder', () => {
 //         ];
 //         const encoded = new HexString(outputCoder.encodeProofOutputs(proofs).slice(2));
 //         expect(isHex(encoded)).to.equal(true);
->>>>>>> feat(aztec.js): implement new verifiers classes
 
 //         const encodedLength = parseInt(encoded.slice(0x00, 0x20), 16);
 //         const numProofs = parseInt(encoded.slice(0x20, 0x40), 16);
