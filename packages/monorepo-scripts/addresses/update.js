@@ -17,6 +17,7 @@ const deployedContracts = [
     'DividendComputation',
     'ERC20Mintable',
     'JoinSplit',
+    'PrivateRange',
     'ZkAsset',
 ];
 

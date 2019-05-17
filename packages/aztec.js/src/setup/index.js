@@ -15,9 +15,10 @@ const fetch = require('cross-fetch');
 const bn128 = require('../bn128');
 
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
-const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
 
-const setup = {};
+const setup = {
+    POINTS_DB_URL: 'https://ds8m7zxw3jpbz.cloudfront.net/data',
+};
 
 /**
  * Decompress a 256-bit representation of a bn128 G1 element.
@@ -80,7 +81,7 @@ setup.fetchPoint = async (inputValue) => {
     const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
 
     try {
-        const res = await fetch(`${POINTS_DB_URL}${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
+        const res = await fetch(`${setup.POINTS_DB_URL}${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
         if (res.status === 404) {
             throw new Error('point not found');
         }
