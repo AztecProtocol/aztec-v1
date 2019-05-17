@@ -92,7 +92,7 @@ outputCoder.decodeProofOutputs = (proofOutputsHex) => {
  * Decode a bytes proofOutput string into it's constitutent objects
  *
  * @method decodeProofOutput
- * @param {proofOutput} proofOutput - bytes proofOutput string, outputted from a zero-knowledge proof
+ * @param {Object} proofOutput - bytes proofOutput string, outputted from a zero-knowledge proof
  * @returns {Object[]} decoded constituent proofOutput objects - including inputNotes, outputNotes,
  * publicOwner, publicValue and the challenge
  */
@@ -118,7 +118,7 @@ outputCoder.decodeProofOutput = (proofOutput) => {
  * Encode an input note, according to the ABI encoding specification
  *
  * @method encodeInputNote
- * @param {note} note - AZTEC note
+ * @param {Note} note - AZTEC note
  * @returns {string} ABI encoded representation of the notes array
  */
 outputCoder.encodeInputNote = (note) => {
@@ -233,7 +233,7 @@ outputCoder.encodeProofOutput = ({ inputNotes, outputNotes, publicOwner, publicV
  * Encode a proofOutputs object according to the ABI specification
  *
  * @method encodeProofOutputs
- * @param {proofOutputs} proofOutputs - array of notes to be input to a zero-knowledge proof
+ * @param {Object[]} proofOutputs - array of notes to be input to a zero-knowledge proof
  * @returns {string} ABI encoded representation of the proofOutputs object
  */
 outputCoder.encodeProofOutputs = (proofOutputs) => {
@@ -359,7 +359,7 @@ outputCoder.getProofOutput = (proofOutputsHex, i) => {
  * individual bytes proofOutput object
  *
  * @method hashProofOutput
- * @param {proofOutput} proofOutput - proofOutput object, contains transfer instructions
+ * @param {Object} proofOutput - proofOutput object, contains transfer instructions
  * @returns {string} keccak256 hash of the proofOutput
  */
 outputCoder.hashProofOutput = (proofOutput) => {

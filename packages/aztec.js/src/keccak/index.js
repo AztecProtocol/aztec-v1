@@ -29,6 +29,8 @@ class Keccak {
     /**
      * Append an elliptic.js group element to {@link Keccak#data}
      *
+     * @name Keccak#appendPoint
+     * @function
      * @param {Point} point elliptic.js point
      */
     appendPoint(point) {
@@ -54,6 +56,9 @@ class Keccak {
 
     /**
      * Interface for the {@function keccak} with the reduction context set to the constant found in @aztec/dev-utils
+     *
+     * @name Keccak#redKeccak
+     * @function
      */
     redKeccak() {
         return this.keccak(constants.BN128_GROUP_REDUCTION);
