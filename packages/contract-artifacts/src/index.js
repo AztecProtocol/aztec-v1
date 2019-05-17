@@ -10,8 +10,11 @@ const DividendComputationABIEncoder = require('../artifacts/DividendComputationA
 const DividendComputationInterface = require('../artifacts/DividendComputationInterface');
 const ERC20Mintable = require('../artifacts/ERC20Mintable');
 const GenericABIEncoder = require('../artifacts/GenericABIEncoder');
+const IACE = require('../artifacts/IACE');
 const IAZTEC = require('../artifacts/IAZTEC');
 const IZkAsset = require('../artifacts/IZkAsset');
+const IZkAssetBurnable = require('../artifacts/IZkAssetBurnable');
+const IZkAssetMintable = require('../artifacts/IZkAssetMintable');
 const JoinSplit = require('../artifacts/JoinSplit');
 const JoinSplitABIEncoder = require('../artifacts/JoinSplitABIEncoder');
 const JoinSplitInterface = require('../artifacts/JoinSplitInterface');
@@ -42,8 +45,11 @@ module.exports = {
     DividendComputationInterface,
     ERC20Mintable,
     GenericABIEncoder,
+    IACE,
     IAZTEC,
     IZkAsset,
+    IZkAssetBurnable,
+    IZkAssetMintable,
     JoinSplit,
     JoinSplitABIEncoder,
     JoinSplitInterface,
