@@ -11,162 +11,166 @@ const noteUtils = require('./utils');
 const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
 
 /**
- * Initializes a new instance of Note from either a public key or a viewing key.
  * @class
- * @param {string} publicKey hex-formatted public key
- * @param {string} viewingKey hex-formatted viewing key
- * @param {string} owner Ethereum address of note owner
- * @classdesc Class for AZTEC zero-knowledge notes.
- *   Notes have public keys and viewing keys.
+ * @classdesc Class for AZTEC zero-knowledge notes. Notes have public keys and viewing keys.
  *   The viewing key is required to use note in an AZTEC zero-knowledge proof
  */
-function Note(publicKey, viewingKey, owner = '0x', setupPoint) {
-    if (publicKey && viewingKey) {
-        throw new Error('expected one of publicKey or viewingKey, not both');
-    }
+class Note {
     /**
-     * Ethereum address of note's owner
-     * @member {string}
+     * Initializes a new instance of Note from either a public key or a viewing key.
+     *
+     * @param {string} publicKey hex-formatted public key
+     * @param {string} viewingKey hex-formatted viewing key
+     * @param {string} owner Ethereum address of note owner
+     * @param {Object} setupPoint trusted setup point
      */
-    this.owner = owner;
-    if (publicKey) {
-        if (typeof publicKey !== 'string') {
-            throw new Error(`expected key type ${typeof publicKey} to be of type string`);
-        }
-        if (publicKey.length !== 200) {
-            throw new Error(`invalid public key length, expected 200, got ${publicKey.length}`);
+    constructor(publicKey, viewingKey, owner = '0x', setupPoint) {
+        if (publicKey && viewingKey) {
+            throw new Error('expected one of publicKey or viewingKey, not both');
         }
         /**
-         * Viewing key of note. BN instance in bn128 group's reduction context
-         * @member {BN}
+         * Ethereum address of note's owner
+         * @member {string}
          */
-        this.a = null;
+        this.owner = owner;
+        if (publicKey) {
+            if (typeof publicKey !== 'string') {
+                throw new Error(`expected key type ${typeof publicKey} to be of type string`);
+            }
+            if (publicKey.length !== 200) {
+                throw new Error(`invalid public key length, expected 200, got ${publicKey.length}`);
+            }
+            /**
+             * Viewing key of note. BN instance in bn128 group's reduction context
+             * @member {BN}
+             */
+            this.a = null;
+            /**
+             * Value of note. BN instance in bn128 group's reduction context
+             * @member {BN}
+             */
+            this.k = null;
+            /**
+             * AZTEC commitment point \gamma, a bn128 group element
+             * @member {Point}
+             */
+            this.gamma = bn128.curve.decodePoint(publicKey.slice(2, 68), 'hex');
+            /**
+             * AZTEC commitment point \sigma, a bn128 group element
+             * @member {Point}
+             */
+            this.sigma = bn128.curve.decodePoint(publicKey.slice(68, 134), 'hex');
+            /**
+             * Note's ephemeral key, a secp256k1 group element. A note owner can use this point
+             * to compute the note's viewing key.
+             * @member {Point}
+             */
+            this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
+        }
+        if (viewingKey) {
+            if (typeof viewingKey !== 'string') {
+                throw new Error(`expected key type ${typeof viewingKey} to be of type string`);
+            }
+            if (viewingKey.length !== 140) {
+                throw new Error(`invalid viewing key length, expected 140, got ${viewingKey.length}`);
+            }
+            this.a = new BN(viewingKey.slice(2, 66), 16).toRed(constants.BN128_GROUP_REDUCTION);
+            this.k = new BN(viewingKey.slice(66, 74), 16).toRed(constants.BN128_GROUP_REDUCTION);
+            const { x, y } = setupPoint;
+            const mu = bn128.curve.point(x, y);
+            this.gamma = mu.mul(this.a);
+            this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
+            this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
+        }
         /**
-         * Value of note. BN instance in bn128 group's reduction context
-         * @member {BN}
+         * keccak256 hash of note coordinates, aligned in 32-byte chunks.
+         *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
+         * @member {string}
          */
-        this.k = null;
-        /**
-         * AZTEC commitment point \gamma, a bn128 group element
-         * @member {Point}
-         */
-        this.gamma = bn128.curve.decodePoint(publicKey.slice(2, 68), 'hex');
-        /**
-         * AZTEC commitment point \sigma, a bn128 group element
-         * @member {Point}
-         */
-        this.sigma = bn128.curve.decodePoint(publicKey.slice(68, 134), 'hex');
-        /**
-         * Note's ephemeral key, a secp256k1 group element. A note owner can use this point
-         * to compute the note's viewing key.
-         * @member {Point}
-         */
-        this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
+        this.noteHash = getNoteHash(this.gamma, this.sigma);
     }
-    if (viewingKey) {
-        if (typeof viewingKey !== 'string') {
-            throw new Error(`expected key type ${typeof viewingKey} to be of type string`);
-        }
-        if (viewingKey.length !== 140) {
-            throw new Error(`invalid viewing key length, expected 140, got ${viewingKey.length}`);
-        }
-        this.a = new BN(viewingKey.slice(2, 66), 16).toRed(constants.BN128_GROUP_REDUCTION);
-        this.k = new BN(viewingKey.slice(66, 74), 16).toRed(constants.BN128_GROUP_REDUCTION);
-        const { x, y } = setupPoint;
-        const mu = bn128.curve.point(x, y);
-        this.gamma = mu.mul(this.a);
-        this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
-        this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
-    }
+
     /**
-     * keccak256 hash of note coordinates, aligned in 32-byte chunks.
-     *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
-     * @member {string}
+     * Compute value of a note, from the public key and the spending key
+     *
+     * @name Note#derive
+     * @function
+     * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
      */
-    this.noteHash = getNoteHash(this.gamma, this.sigma);
+    async derive(spendingKey) {
+        const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), spendingKey);
+        this.a = new BN(sharedSecret.slice(2), 16).toRed(constants.BN128_GROUP_REDUCTION);
+        const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
+        this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(constants.BN128_GROUP_REDUCTION);
+    }
+
+    /**
+     * Export note's ephemeral key in compressed string form
+     *
+     * @name Note#exportMetadata
+     * @function
+     * @returns {string} hex-string compressed ephemeral key
+     */
+    exportMetadata() {
+        return `0x${this.ephemeral.getPublic(true, 'hex')}`;
+    }
+
+    /**
+     * Export note coordinates in a form that can be used by proof.js
+     *
+     * @name Note#exportNote
+     * @function
+     * @returns {{ publicKey:string, viewingKey: string, k: string, a: string, noteHash: string }}
+     */
+    exportNote() {
+        const publicKey = this.getPublic();
+        const viewingKey = this.getView();
+        let k = '0x';
+        let a = '0x';
+        if (BN.isBN(this.k)) {
+            k = padLeft(this.k.fromRed().toString(16), 64);
+        }
+        if (BN.isBN(this.a)) {
+            a = padLeft(this.a.fromRed().toString(16), 64);
+        }
+        return {
+            publicKey,
+            viewingKey,
+            k,
+            a,
+            noteHash: this.noteHash,
+        };
+    }
+
+    /**
+     * Get the public key representation of a note
+     *
+     * @name Note#getPublic
+     * @function
+     * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
+     */
+    getPublic() {
+        const ephemeral = this.ephemeral.getPublic();
+        return noteCoder.encodeNotePublicKey({ gamma: this.gamma, sigma: this.sigma, ephemeral });
+    }
+
+    /**
+     * Get the viewing key of a note
+     *
+     * @name Note#getView
+     * @function
+     * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
+     */
+    getView() {
+        if (!BN.isBN(this.k) || !BN.isBN(this.a)) {
+            return '0x';
+        }
+        const a = padLeft(this.a.fromRed().toString(16), 64);
+        const k = padLeft(this.k.fromRed().toString(16), 8);
+        const ephemeral = padLeft(this.ephemeral.getPublic(true, 'hex'), 66);
+        return `0x${a}${k}${ephemeral}`;
+    }
 }
-
-/**
- * Compute value of a note, from the public key and the spending key
- *
- * @name Note#derive
- * @function
- * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
- */
-Note.prototype.derive = async function derive(spendingKey) {
-    const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), spendingKey);
-    this.a = new BN(sharedSecret.slice(2), 16).toRed(constants.BN128_GROUP_REDUCTION);
-    const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
-    this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(constants.BN128_GROUP_REDUCTION);
-};
-
-/**
- * Export note's ephemeral key in compressed string form
- *
- * @name Note#exportMetadata
- * @function
- * @returns {string} hex-string compressed ephemeral key
- */
-Note.prototype.exportMetadata = function exportMetadata() {
-    const res = this.ephemeral.getPublic(true, 'hex');
-    return `0x${res}`;
-};
-
-/**
- * Export note coordinates in a form that can be used by proof.js
- *
- * @name Note#exportNote
- * @function
- * @returns {{ publicKey:string, viewingKey: string, k: string, a: string, noteHash: string }}
- */
-Note.prototype.exportNote = function exportNote() {
-    const publicKey = this.getPublic();
-    const viewingKey = this.getView();
-    let k = '0x';
-    let a = '0x';
-    if (BN.isBN(this.k)) {
-        k = padLeft(this.k.fromRed().toString(16), 64);
-    }
-    if (BN.isBN(this.a)) {
-        a = padLeft(this.a.fromRed().toString(16), 64);
-    }
-    return {
-        publicKey,
-        viewingKey,
-        k,
-        a,
-        noteHash: this.noteHash,
-    };
-};
-
-/**
- * Get the public key representation of a note
- *
- * @name Note#getPublic
- * @function
- * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
- */
-Note.prototype.getPublic = function getPublic() {
-    const ephemeral = this.ephemeral.getPublic();
-    return noteCoder.encodeNotePublicKey({ gamma: this.gamma, sigma: this.sigma, ephemeral });
-};
-
-/**
- * Get the viewing key of a note
- *
- * @name Note#getView
- * @function
- * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
- */
-Note.prototype.getView = function getView() {
-    if (!BN.isBN(this.k) || !BN.isBN(this.a)) {
-        return '0x';
-    }
-    const a = padLeft(this.a.fromRed().toString(16), 64);
-    const k = padLeft(this.k.fromRed().toString(16), 8);
-    const ephemeral = padLeft(this.ephemeral.getPublic(true, 'hex'), 66);
-    return `0x${a}${k}${ephemeral}`;
-};
 
 /**
  * Helper module to create Notes from public keys and view keys
