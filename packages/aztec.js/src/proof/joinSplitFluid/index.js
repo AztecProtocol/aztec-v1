@@ -19,18 +19,6 @@ class JoinSplitFluidProof extends JoinSplitProof {
         this.type = type;
     }
 
-    constructChallenge() {
-        this.constructChallengeRecurse([
-            this.sender,
-            this.publicValue,
-            this.m,
-            this.publicOwner,
-            this.notes,
-            this.blindingFactors,
-        ]);
-        this.challenge = this.challengeHash.keccak(constants.BN128_GROUP_REDUCTION);
-    }
-
     constructOutput() {
         this.output = outputCoder.encodeProofOutputs([
             {
