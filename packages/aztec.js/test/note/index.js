@@ -6,7 +6,6 @@ const crypto = require('crypto');
 const web3Utils = require('web3-utils');
 
 const note = require('../../src/note');
-const noteUtils = require('../../src/note/utils');
 
 const { GROUP_MODULUS } = constants;
 const { padLeft, toHex } = web3Utils;
@@ -22,10 +21,9 @@ describe('Note', () => {
         const testNote = await note.fromViewKey(viewingKey);
         const expectedViewKey = testNote.getView();
         expect(expectedViewKey).to.equal(viewingKey);
+
         const exportedPublicKey = testNote.getPublic();
-
         const importedNote = note.fromPublicKey(exportedPublicKey);
-
         expect(importedNote.gamma.encode('hex', false)).to.equal(testNote.gamma.encode('hex', false));
         expect(importedNote.sigma.encode('hex', false)).to.equal(testNote.sigma.encode('hex', false));
     });
@@ -60,11 +58,12 @@ describe('Note', () => {
         ];
 
         const sharedSecrets = [
-            noteUtils.getSharedSecret(ephemeralKeys[0], accounts[0].privateKey),
-            noteUtils.getSharedSecret(ephemeralKeys[1], accounts[0].privateKey),
-            noteUtils.getSharedSecret(ephemeralKeys[2], accounts[1].privateKey),
-            noteUtils.getSharedSecret(ephemeralKeys[3], accounts[1].privateKey),
+            note.utils.getSharedSecret(ephemeralKeys[0], accounts[0].privateKey),
+            note.utils.getSharedSecret(ephemeralKeys[1], accounts[0].privateKey),
+            note.utils.getSharedSecret(ephemeralKeys[2], accounts[1].privateKey),
+            note.utils.getSharedSecret(ephemeralKeys[3], accounts[1].privateKey),
         ];
+
         expect(new BN(sharedSecrets[0].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[0].a.fromRed())).to.equal(true);
         expect(new BN(sharedSecrets[1].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[1].a.fromRed())).to.equal(true);
         expect(new BN(sharedSecrets[2].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[2].a.fromRed())).to.equal(true);
@@ -85,56 +84,46 @@ describe('Note', () => {
     it('should throw if given both a public key and a viewing key', async () => {
         const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
         const { publicKey, viewingKey } = testNote.exportNote();
-        let message = '';
         try {
-            note.Note(publicKey, viewingKey);
-        } catch (e) {
-            ({ message } = e);
+            const _ = new note.Note(publicKey, viewingKey);
+        } catch (err) {
+            expect(err.message).to.equal('expected one of publicKey or viewingKey, not both');
         }
-        expect(message).to.equal('expected one of publicKey or viewingKey, not both');
     });
 
     it('should throw if given a non-string public key', () => {
-        let message = '';
         try {
-            note.Note({ foo: 'bar' }, null);
-        } catch (e) {
-            ({ message } = e);
+            const _ = new note.Note({ foo: 'bar' }, null);
+        } catch (err) {
+            expect(err.message).to.equal('expected key type object to be of type string');
         }
-        expect(message).to.equal('expected key type object to be of type string');
     });
 
     it('should throw if given an incorrect length public key', async () => {
         const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
         const { publicKey } = testNote.exportNote();
-        let message = '';
         try {
-            note.Note(`${publicKey}abcdef`, null);
-        } catch (e) {
-            ({ message } = e);
+            const _ = new note.Note(`${publicKey}abcdef`, null);
+        } catch (err) {
+            expect(err.message).to.equal('invalid public key length, expected 200, got 206');
         }
-        expect(message).to.equal('invalid public key length, expected 200, got 206');
     });
 
     it('should throw if given a non-string viewing key', () => {
-        let message = '';
         try {
-            note.Note(null, { foo: 'bar' });
-        } catch (e) {
-            ({ message } = e);
+            const _ = new note.Note(null, { foo: 'bar' });
+        } catch (err) {
+            expect(err.message).to.equal('expected key type object to be of type string');
         }
-        expect(message).to.equal('expected key type object to be of type string');
     });
 
     it('should throw if given an incorrect length viewing key', async () => {
         const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
         const { viewingKey } = testNote.exportNote();
-        let message = '';
         try {
-            note.Note(null, `${viewingKey}abcdef`);
-        } catch (e) {
-            ({ message } = e);
+            const _ = new note.Note(null, `${viewingKey}abcdef`);
+        } catch (err) {
+            expect(err.message).to.equal('invalid viewing key length, expected 140, got 146');
         }
-        expect(message).to.equal('invalid viewing key length, expected 140, got 146');
     });
 });
