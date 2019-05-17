@@ -19,8 +19,12 @@ describe('Join-Split Proof', () => {
     let sender;
 
     before(() => {
-        kIn = Array(2).fill().map(() => randomNoteValue());
-        kOut = Array(3).fill().map(() => randomNoteValue());
+        kIn = Array(2)
+            .fill()
+            .map(() => randomNoteValue());
+        kOut = Array(3)
+            .fill()
+            .map(() => randomNoteValue());
         publicOwner = randomHex(20);
         sender = randomHex(20);
     });

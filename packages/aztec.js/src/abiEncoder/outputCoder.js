@@ -61,10 +61,12 @@ outputCoder.decodeNote = (note) => {
  */
 outputCoder.decodeNotes = (notes) => {
     const n = parseInt(notes.slice(0x40, 0x80), 16);
-    return Array(n).fill().map((x, i) => {
-        const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
-        return outputCoder.decodeNote(notes.slice(noteOffset * 2));
-    });
+    return Array(n)
+        .fill()
+        .map((x, i) => {
+            const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
+            return outputCoder.decodeNote(notes.slice(noteOffset * 2));
+        });
 };
 
 /**
@@ -80,10 +82,12 @@ outputCoder.decodeNotes = (notes) => {
 outputCoder.decodeProofOutputs = (proofOutputsHex) => {
     const proofOutputs = proofOutputsHex.slice(2);
     const numOutputs = parseInt(proofOutputs.slice(0x40, 0x80), 16);
-    const result = Array(numOutputs).fill().map((x, i) => {
-        const outputOffset = parseInt(proofOutputs.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
-        return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
-    });
+    const result = Array(numOutputs)
+        .fill()
+        .map((x, i) => {
+            const outputOffset = parseInt(proofOutputs.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
+            return outputCoder.decodeProofOutput(proofOutputs.slice(outputOffset * 2));
+        });
 
     return result;
 };
