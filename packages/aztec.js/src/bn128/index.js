@@ -4,18 +4,16 @@
  * @module bn128
  */
 
-const { constants, errors } = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const EC = require('elliptic');
 
 const decodePoint = require('./decodePoint');
 
-const { AztecError } = errors;
-const { BN128_COMPRESSION_MASK, FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y, K_MAX } = constants;
+const { BN128_COMPRESSION_MASK, BN128_GROUP_REDUCTION, FIELD_MODULUS, GROUP_MODULUS, H_X, H_Y } = constants;
 
 const bn128 = {};
-bn128.K_MAX = K_MAX;
 
 /**
  * The elliptic.js curve object
@@ -28,11 +26,6 @@ bn128.curve = new EC.curve.short({
     gRed: false,
     g: ['1', '2'],
 });
-
-/**
- * BN.js reduction context for bn128 curve group's prime modulus
- */
-bn128.groupReduction = BN.red(bn128.curve.n);
 
 /**
  * elliptic.js point representation of AZTEC generator point
@@ -125,7 +118,7 @@ bn128.decompressHex = (compressedHex) => {
  * @returns {BN} BN.js instance
  */
 bn128.randomGroupScalar = () => {
-    return new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
+    return new BN(crypto.randomBytes(32), 16).toRed(BN128_GROUP_REDUCTION);
 };
 
 // TODO: replace with optimized C++ implementation, this is way too slow
@@ -143,7 +136,7 @@ bn128.recoverMessage = (gamma, gammaK) => {
     }
     const a = decodePoint.serializePointForMcl(gamma);
     const b = decodePoint.serializePointForMcl(gammaK);
-    return decodePoint.decode(a, b, bn128.K_MAX);
+    return decodePoint.decode(a, b, constants.K_MAX);
 };
 
 /**

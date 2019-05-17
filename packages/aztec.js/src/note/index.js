@@ -1,3 +1,4 @@
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { padLeft, toHex } = require('web3-utils');
@@ -15,7 +16,7 @@ const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
  * @param {string} publicKey hex-formatted public key
  * @param {string} viewingKey hex-formatted viewing key
  * @param {string} owner Ethereum address of note owner
- * @classdesc A class for AZTEC zero-knowledge notes.
+ * @classdesc Class for AZTEC zero-knowledge notes.
  *   Notes have public keys and viewing keys.
  *   The viewing key is required to use note in an AZTEC zero-knowledge proof
  */
@@ -69,8 +70,8 @@ function Note(publicKey, viewingKey, owner = '0x', setupPoint) {
         if (viewingKey.length !== 140) {
             throw new Error(`invalid viewing key length, expected 140, got ${viewingKey.length}`);
         }
-        this.a = new BN(viewingKey.slice(2, 66), 16).toRed(bn128.groupReduction);
-        this.k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
+        this.a = new BN(viewingKey.slice(2, 66), 16).toRed(constants.BN128_GROUP_REDUCTION);
+        this.k = new BN(viewingKey.slice(66, 74), 16).toRed(constants.BN128_GROUP_REDUCTION);
         const { x, y } = setupPoint;
         const mu = bn128.curve.point(x, y);
         this.gamma = mu.mul(this.a);
@@ -94,9 +95,9 @@ function Note(publicKey, viewingKey, owner = '0x', setupPoint) {
  */
 Note.prototype.derive = async function derive(spendingKey) {
     const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), spendingKey);
-    this.a = new BN(sharedSecret.slice(2), 16).toRed(bn128.groupReduction);
+    this.a = new BN(sharedSecret.slice(2), 16).toRed(constants.BN128_GROUP_REDUCTION);
     const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
-    this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(bn128.groupReduction);
+    this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(constants.BN128_GROUP_REDUCTION);
 };
 
 /**
@@ -271,7 +272,7 @@ note.fromPublicKey = (publicKey) => {
  * @returns {Promise} promise that resolves to created note instance
  */
 note.fromViewKey = async (viewingKey) => {
-    const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
+    const k = new BN(viewingKey.slice(66, 74), 16).toRed(constants.BN128_GROUP_REDUCTION);
     const setupPoint = await setup.fetchPoint(k.toNumber());
     const newNote = new Note(null, viewingKey, undefined, setupPoint);
     return newNote;

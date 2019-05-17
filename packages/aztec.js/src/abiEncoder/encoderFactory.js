@@ -40,7 +40,7 @@ encoderFactory.encode = (config, abiParams, proofType) => {
         },
     );
 
-    if (proofType === 'trade') {
+    if (proofType === 'swap') {
         abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
     } else if (proofType === 'dividend') {
         abiEncodedParameters = [config.CHALLENGE, config.ZA, config.ZB, ...offsets, ...encodedParameters];

@@ -1,88 +1,108 @@
-const { constants } = require('@aztec/dev-utils');
-const BN = require('bn.js');
+const { constants, errors } = require('@aztec/dev-utils');
 
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
-const proofUtils = require('../proofUtils');
+const Verifier = require('../verifier');
 
-const { errorTypes } = constants;
-const { groupReduction } = bn128;
+const { BN128_GROUP_REDUCTION, ZERO_BN, ZERO_BN_RED } = constants;
 
-const verifier = {};
+class JoinSplitVerifier extends Verifier {
+    extractData() {
+        this.data = [];
+        const dataLength = this.proof.data.length;
+        const inputDataLength = this.proof.m;
 
-/**
- * Verify an AZTEC zero-knowledge proof
- *
- * @method verifyProof
- * @memberof module:joinSplit
- * @param {string[]} proofData AZTEC join-split zero-knowledge proof data
- * @param {number} m number of input notes
- * @param {string} challengeHex hex-string formatted proof challenge
- * @param {string} sender Ethereum address of transaction sender
- */
-verifier.verifyProof = (proofData, m, challengeHex, sender) => {
-    const errors = [];
-    const { rollingHash, kPublic, notes, challenge } = proofUtils.convertTranscript(
-        proofData,
-        m,
-        challengeHex,
-        errors,
-        'joinSplit',
-    );
-
-    const finalHash = new Keccak();
-    finalHash.appendBN(new BN(sender.slice(2), 16));
-    finalHash.appendBN(kPublic.fromRed());
-    finalHash.appendBN(new BN(m));
-    finalHash.data = [...finalHash.data, ...rollingHash.data];
-
-    let x;
-
-    let pairingGammas;
-    let pairingSigmas;
-    notes.forEach((note, i) => {
-        let { kBar, aBar } = note;
-        let c = challenge;
-        if (i >= m) {
-            x = rollingHash.keccak(groupReduction);
-            kBar = kBar.redMul(x);
-            aBar = aBar.redMul(x);
-            c = challenge.redMul(x);
-        }
-        const sigma = note.sigma.mul(c).neg();
-        const B = note.gamma
-            .mul(kBar)
-            .add(bn128.h.mul(aBar))
-            .add(sigma);
-        if (i === m) {
-            pairingGammas = note.gamma;
-            pairingSigmas = note.sigma.neg();
-        } else if (i > m) {
-            pairingGammas = pairingGammas.add(note.gamma.mul(c));
-            pairingSigmas = pairingSigmas.add(sigma);
-        }
-        if (B.isInfinity()) {
-            errors.push(errorTypes.BAD_BLINDING_FACTOR);
-            finalHash.appendBN(new BN(0));
-            finalHash.appendBN(new BN(0));
-        } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
-            errors.push(errorTypes.BAD_BLINDING_FACTOR);
-            finalHash.append(B);
-        } else {
-            finalHash.append(B);
-        }
-    });
-    const challengeResponse = finalHash.keccak(groupReduction);
-    if (!challengeResponse.fromRed().eq(challenge.fromRed())) {
-        errors.push(errorTypes.CHALLENGE_RESPONSE_FAIL);
+        let kBarAux = ZERO_BN_RED.redSub(this.publicValue.redMul(this.challenge));
+        this.data = this.proof.data.map((item, i) => {
+            let kBar;
+            if (i < dataLength - 1) {
+                kBar = this.hexToGroupScalar(item[0]);
+                if (i < inputDataLength) {
+                    kBarAux = kBarAux.redAdd(kBar);
+                } else {
+                    kBarAux = kBarAux.redSub(kBar);
+                }
+            } else {
+                if (inputDataLength !== dataLength) {
+                    kBar = kBarAux;
+                } else {
+                    kBar = ZERO_BN_RED.redSub(kBarAux);
+                }
+                if (kBar.fromRed().eq(ZERO_BN_RED)) {
+                    this.errors.push(errors.codes.SCALAR_IS_ZERO);
+                }
+            }
+            return {
+                kBar,
+                aBar: this.hexToGroupScalar(item[1]),
+                gamma: this.hexToGroupPoint(item[2], item[3]),
+                sigma: this.hexToGroupPoint(item[4], item[5]),
+            };
+        });
     }
-    const valid = errors.length === 0;
-    return {
-        valid,
-        errors,
-        pairingGammas,
-        pairingSigmas,
-    };
-};
 
-module.exports = verifier;
+    verifyProof() {
+        const rollingHash = new Keccak();
+        this.data.forEach((item) => {
+            rollingHash.appendPoint(item.gamma);
+            rollingHash.appendPoint(item.sigma);
+        });
+
+        const challengeResponse = new Keccak();
+        challengeResponse.appendBN(this.proof.sender.slice(2));
+        challengeResponse.appendBN(this.publicValue);
+        challengeResponse.appendBN(this.proof.m);
+        challengeResponse.appendBN(this.proof.publicOwner.slice(2));
+        challengeResponse.data = [...challengeResponse.data, ...rollingHash.data];
+
+        let pairingGammas;
+        let pairingSigmas;
+        this.data.forEach((item, i) => {
+            let { kBar, aBar } = item;
+            let c = this.challenge;
+            if (i >= this.proof.m) {
+                // the reducer is the "x" in the white paper
+                const reducer = rollingHash.keccak(BN128_GROUP_REDUCTION);
+                kBar = kBar.redMul(reducer);
+                aBar = aBar.redMul(reducer);
+                c = this.challenge.redMul(reducer);
+            }
+            const gamma = item.gamma.mul(c);
+            const sigma = item.sigma.mul(c).neg();
+            const blindingFactor = item.gamma
+                .mul(kBar)
+                .add(bn128.h.mul(aBar))
+                .add(sigma);
+            if (i === this.proof.m) {
+                pairingGammas = item.gamma;
+                pairingSigmas = item.sigma.neg();
+            } else if (i > this.proof.m) {
+                pairingGammas = pairingGammas.add(gamma);
+                pairingSigmas = pairingSigmas.add(sigma);
+            }
+
+            if (blindingFactor.isInfinity()) {
+                challengeResponse.appendBN(ZERO_BN);
+                challengeResponse.appendBN(ZERO_BN);
+                this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
+            } else {
+                challengeResponse.appendPoint(blindingFactor);
+                if (blindingFactor.x.fromRed().eq(ZERO_BN_RED) && blindingFactor.y.fromRed().eq(ZERO_BN_RED)) {
+                    this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
+                }
+            }
+        });
+
+        if (
+            !challengeResponse
+                .keccak(BN128_GROUP_REDUCTION)
+                .fromRed()
+                .eq(this.challenge.fromRed())
+        ) {
+            this.errors.push(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        }
+        return { pairingGammas, pairingSigmas };
+    }
+}
+
+module.exports = JoinSplitVerifier;

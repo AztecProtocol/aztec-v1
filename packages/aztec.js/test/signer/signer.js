@@ -5,10 +5,9 @@ const BN = require('bn.js');
 const { expect } = require('chai');
 const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
-const { keccak256, padLeft } = require('web3-utils');
+const { keccak256, padLeft, randomHex } = require('web3-utils');
 
 const bn128 = require('../../src/bn128');
-const proofUtils = require('../../src/proof/proofUtils');
 const signer = require('../../src/signer');
 
 describe('Signer', () => {
@@ -48,9 +47,11 @@ describe('Signer', () => {
 
     describe('Join Split Signature', () => {
         it('should output a well formed signature', () => {
-            const verifyingContract = proofUtils.randomAddress();
-            const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
-            const senderAddress = proofUtils.randomAddress();
+            const verifyingContract = randomHex(20);
+            const noteString = Array(4)
+                .fill()
+                .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
+            const senderAddress = randomHex(20);
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 
@@ -75,9 +76,11 @@ describe('Signer', () => {
         });
 
         it('should recover public key from signature params', () => {
-            const verifyingContract = proofUtils.randomAddress();
-            const noteString = [...new Array(4)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
-            const senderAddress = proofUtils.randomAddress();
+            const verifyingContract = randomHex(20);
+            const noteString = Array(4)
+                .fill()
+                .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
+            const senderAddress = randomHex(20);
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
 

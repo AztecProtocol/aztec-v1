@@ -1,3 +1,4 @@
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const { keccak256, padLeft } = require('web3-utils');
@@ -19,8 +20,8 @@ describe('Keccak', () => {
         ];
 
         const keccak = new Keccak();
-        keccak.append(bn128.curve.point(new BN(points[0][0], 16), new BN(points[0][1], 16)));
-        keccak.append(bn128.curve.point(new BN(points[1][0], 16), new BN(points[1][1], 16)));
+        keccak.appendPoint(bn128.curve.point(new BN(points[0][0], 16), new BN(points[0][1], 16)));
+        keccak.appendPoint(bn128.curve.point(new BN(points[1][0], 16), new BN(points[1][1], 16)));
         const hash = keccak.keccak();
 
         const expected = keccak256(points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'), 'hex').slice(2);
@@ -28,7 +29,7 @@ describe('Keccak', () => {
         expect(hash[0]).to.equal(expected);
         expect(
             keccak
-                .keccak(bn128.groupReduction)
+                .keccak(constants.BN128_GROUP_REDUCTION)
                 .fromRed()
                 .toString(16),
         ).to.equal(new BN(keccak256(`0x${expected}`).slice(2), 16).umod(bn128.curve.n).toString(16));
