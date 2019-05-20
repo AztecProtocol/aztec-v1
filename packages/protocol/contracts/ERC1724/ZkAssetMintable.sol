@@ -17,10 +17,8 @@ import "./ZkAssetOwnable.sol";
  * @dev A contract defining the standard interface and behaviours of a confidential mintable asset. 
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
 **/
-
 contract ZkAssetMintable is ZkAssetOwnable {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
-    address public owner;
 
     constructor(
         address _aceAddress,
@@ -35,7 +33,6 @@ contract ZkAssetMintable is ZkAssetOwnable {
         _canAdjustSupply,
         _canConvert
     ) {
-        owner = msg.sender;
     }
 
     /**
@@ -47,8 +44,7 @@ contract ZkAssetMintable is ZkAssetOwnable {
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofData - bytes array of proof data, outputted from a proof construction
     */
-    function confidentialMint(uint24 _proof, bytes calldata _proofData) external {
-        require(msg.sender == owner, "only the owner can call the confidentialMint() method");
+    function confidentialMint(uint24 _proof, bytes calldata _proofData) external onlyOwner {
         require(_proofData.length != 0, "proof invalid");
 
         (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, address(this));
