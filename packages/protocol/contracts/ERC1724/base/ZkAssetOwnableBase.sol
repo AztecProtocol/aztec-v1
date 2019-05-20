@@ -6,6 +6,8 @@ import "../../libs/SafeMath8.sol";
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 /**
  * @title ZkAssetOwnableBase
  * @author AZTEC
