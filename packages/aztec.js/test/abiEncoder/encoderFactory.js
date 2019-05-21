@@ -436,10 +436,14 @@ describe('abiEncoder.encoderFactory', () => {
 
             const numOutputOwners = 1;
             const offsetToOutputOwners = parseInt(result.slice(0x60, 0x80), 16);
+            expect(parseInt(result.slice(offsetToOutputOwners - 0x20, offsetToOutputOwners), 16)).to.equal(numOutputOwners);
+            const recoveredOutputOwners = new HexString(result.slice(offsetToOutputOwners, offsetToOutputOwners + 0x60));
+            expect(recoveredOutputOwners.slice(0x00, 0x20)).to.equal(padLeft(outputOwners[0].slice(2).toLowerCase(), 64));
+
             const numOutputNotes = 1;
             const offsetToMetadata = parseInt(result.slice(0x80, 0xa0), 16);
             const metadataLength = parseInt(result.slice(offsetToMetadata - 0x20, offsetToMetadata), 16);
-            expect(parseInt(result.slice(offsetToMetadata, offsetToMetadata + 0x20), 16)).to.equal(numOutputOwners);
+            expect(parseInt(result.slice(offsetToMetadata, offsetToMetadata + 0x20), 16)).to.equal(numOutputNotes);
 
             const recoveredMetadata = result.slice(offsetToMetadata - 0x20, offsetToMetadata + metadataLength);
             expect(recoveredMetadata).to.equal(abiEncoder.encoderFactory.encodeMetadata(outputNote).data);
