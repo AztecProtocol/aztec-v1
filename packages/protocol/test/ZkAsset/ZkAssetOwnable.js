@@ -16,7 +16,7 @@ const ACE = artifacts.require('./contracts/ACE/ACE');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplitInterface');
 const ZkAssetOwnable = artifacts.require('./contracts/ZkAsset/ZkAssetOwnable');
-const ZkAssetOwnableTest = artifacts.require('./contracts/ZkAsset/ZkAssetOwnableTest');
+const ZkAssetOwnableTest = artifacts.require('./contracts/test/ZkAssetOwnableTest');
 
 
 JoinSplit.abi = JoinSplitInterface.abi;
