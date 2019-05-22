@@ -4,14 +4,19 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "./ZkAsset.sol";
 import "../ACE/ACE.sol";
 import "../ERC20/ERC20Mintable.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
-import "./ZkAssetOwnableBase.sol";
+import "./base/ZkAssetOwnableBase.sol";
 
-
+/**
+ * @title ZkAsset
+ * @author AZTEC
+ * @dev A contract defining the standard interface and behaviours of a confidential asset.
+ * The ownership values and transfer values are encrypted.
+ * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ **/
 contract ZkAssetMintable is ZkAssetOwnableBase {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
 
