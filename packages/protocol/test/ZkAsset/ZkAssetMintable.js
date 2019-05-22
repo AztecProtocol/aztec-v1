@@ -44,9 +44,6 @@ contract('ZkAssetMintable', (accounts) => {
             await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
-            const canAdjustSupply = true;
-            const canConvert = true;
-
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
 
@@ -54,8 +51,6 @@ contract('ZkAssetMintable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canAdjustSupply,
-                canConvert,
                 { from: accounts[0] }
             );
         });
@@ -162,8 +157,6 @@ contract('ZkAssetMintable', (accounts) => {
 
         it('validate failure if msg.sender is not owner', async () => {
             const proofs = [];
-            const canAdjustSupply = true;
-            const canConvert = true;
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
@@ -175,8 +168,6 @@ contract('ZkAssetMintable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canAdjustSupply,
-                canConvert,
                 { from: accounts[0] }
             );
 
@@ -198,8 +189,6 @@ contract('ZkAssetMintable', (accounts) => {
         it('validate failure if ace.mint throws', async () => {
             // ace.mint will throw if total inputs != total outputs in the mint proof
             const proofs = [];
-            const canAdjustSupply = true;
-            const canConvert = true;
 
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
@@ -213,8 +202,6 @@ contract('ZkAssetMintable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canAdjustSupply,
-                canConvert,
                 { from: accounts[0] }
             );
 
@@ -231,55 +218,6 @@ contract('ZkAssetMintable', (accounts) => {
                 senderAddress: zkAssetMintable.address,
             });
             await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData));
-        });
-
-        it('validates failure if mint attempted when flag set to false', async () => {
-            const proofs = [];
-            const canAdjustSupply = false;
-            const canConvert = true;
-
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
-
-            zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = note.createZeroValueNote();
-            const adjustedNotes = notes.slice(2, 4);
-
-            // Minting two AZTEC notes, worth 30 and 20
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: zkAssetMintable.address,
-            });
-
-            const publicOwner = accounts[0];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
-
-            proofs[1] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: accounts[0],
-                inputNoteOwners, // need the owners of the adjustedNotes
-                publicOwner,
-                kPublic: 50,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, proofs[0].proofData),
-                'this asset is not mintable');
         });
     });
 });
