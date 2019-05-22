@@ -34,27 +34,4 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         _canAdjustSupply
     ) {
     }
-
-    function setProofs(
-        uint8 _epoch,
-        uint256 _proofs
-    ) external onlyOwner {
-        proofs[_epoch] = _proofs;
-    }
-
-    function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
-        bool result = supportsProof(_proof);
-        require(result == true, "expected proof to be supported");
-        super.confidentialTransferFrom(_proof, _proofOutput);
-    }
-
-    // @dev Return whether the proof is supported or not by this asset. Note that we have
-    //      to subtract 1 from the proof id because the original representation is uint8,
-    //      but here that id is considered to be an exponent
-    function supportsProof(uint24 _proof) public view returns (bool) {
-        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
-        require(category == uint8(ProofCategory.BALANCED), "this asset only supports balanced proofs");
-        uint8 bit = uint8(proofs[epoch] >> (id.sub(1)) & 1);
-        return bit == 1;
-    }
 }

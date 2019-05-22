@@ -56,9 +56,6 @@ contract('ZkAssetBurnable', (accounts) => {
             const oldTotalBurned = note.createZeroValueNote();
             const adjustedNotes = notes.slice(2, 4);
 
-            const canBurnAndBurn = true;
-            const canConvert = true;
-
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(1);
             const tokensTransferred = new BN(50);
@@ -67,8 +64,6 @@ contract('ZkAssetBurnable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canBurnAndBurn,
-                canConvert,
                 { from: accounts[0] }
             );
 
@@ -161,83 +156,7 @@ contract('ZkAssetBurnable', (accounts) => {
             scalingFactor = new BN(1);
         });
 
-        it('validates failure if burn attempted when flag set to false', async () => {
-            const canAdjustSupply = false;
-            const canConvert = true;
-
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = aztecAccounts.map(({ publicKey }, i) => {
-                return note.create(publicKey, noteValues[i]);
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = note.createZeroValueNote();
-            const adjustedNotes = notes.slice(2, 4);
-
-            zkAssetBurnable = await ZkAssetBurnable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                { from: accounts[0] }
-            );
-
-            const publicOwner = accounts[0];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
-            const kPublic = -50;
-            const tokensTransferred = new BN(1000);
-
-            erc20.mint(
-                accounts[0],
-                scalingFactor.mul(tokensTransferred)
-            );
-
-            erc20.approve(
-                ace.address,
-                scalingFactor.mul(tokensTransferred)
-            );
-
-
-            proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: adjustedNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners,
-                publicOwner,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-            const proofHash = outputCoder.hashProofOutput(proofOutput);
-
-            // Burning two AZTEC notes, worth 30 and 20
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: zkAssetBurnable.address,
-            });
-
-            await ace.publicApprove(
-                zkAssetBurnable.address,
-                proofHash,
-                50,
-                { from: accounts[0] }
-            );
-
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(proofs[0].proofData);
-            expect(joinSplitReceipt.status).to.equal(true);
-            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData),
-                'this asset is not burnable');
-        });
-
         it('validate failure if msg.sender is not owner', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
             const notes = aztecAccounts.map(({ publicKey }, i) => {
@@ -249,8 +168,6 @@ contract('ZkAssetBurnable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canAdjustSupply,
-                canConvert,
                 { from: accounts[0] }
             );
 
@@ -310,9 +227,6 @@ contract('ZkAssetBurnable', (accounts) => {
         });
 
         it('validate failure if ace.burn throws', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-
             const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
             const joinSplitNoteValues = [50, 0, 30, 20];
 
@@ -332,8 +246,6 @@ contract('ZkAssetBurnable', (accounts) => {
                 ace.address,
                 erc20.address,
                 scalingFactor,
-                canAdjustSupply,
-                canConvert,
                 { from: accounts[0] }
             );
 
