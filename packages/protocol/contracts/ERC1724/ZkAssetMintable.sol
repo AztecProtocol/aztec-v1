@@ -9,7 +9,7 @@ import "../ACE/ACE.sol";
 import "../ERC20/ERC20Mintable.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
-import "./ZkAssetOwnable.sol";
+import "./ZkAssetOwnableBase.sol";
 
 /**
  * @title ZkAssetMintable
@@ -17,21 +17,18 @@ import "./ZkAssetOwnable.sol";
  * @dev A contract defining the standard interface and behaviours of a confidential mintable asset. 
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
 **/
-contract ZkAssetMintable is ZkAssetOwnable {
+contract ZkAssetMintable is ZkAssetOwnableBase {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
 
     constructor(
         address _aceAddress,
         address _linkedTokenAddress,
-        uint256 _scalingFactor,
-        bool _canAdjustSupply,
-        bool _canConvert
-    ) public ZkAssetOwnable(
+        uint256 _scalingFactor
+    ) public ZkAssetOwnableBase(
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor,
-        _canAdjustSupply,
-        _canConvert
+        true // canAdjustSupply
     ) {
     }
 
