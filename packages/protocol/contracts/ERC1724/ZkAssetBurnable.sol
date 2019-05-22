@@ -4,11 +4,10 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "./ZkAsset.sol";
 import "../ACE/ACE.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
-import "./ZkAssetOwnableBase.sol";
+import "./base/ZkAssetOwnableBase.sol";
 
 /**
  * @title ZkAssetBurnable

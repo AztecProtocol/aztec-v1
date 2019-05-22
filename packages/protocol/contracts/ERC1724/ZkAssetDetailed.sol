@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./ZkAssetBase.sol";
+import "./base/ZkAssetBase.sol";
 
 /**
  * @title ZkAssetDetailed implementation that inherits from ZkAsset

@@ -4,7 +4,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "../ACE/NoteRegistry.sol";
 import "../ACE/ACE.sol";
-import "./ZkAssetBase.sol";
+import "./base/ZkAssetBase.sol";
 
 import "../libs/ProofUtils.sol";
 
