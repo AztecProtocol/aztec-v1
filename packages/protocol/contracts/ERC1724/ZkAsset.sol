@@ -21,11 +21,11 @@ contract ZkAsset is ZkAssetBase {
         address _aceAddress,
         address _linkedTokenAddress,
         uint256 _scalingFactor
-    ) ZkAssetBase(
+    ) public ZkAssetBase(
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor,
         false // Can adjust supply
-    ) public {
+    ) {
     }
 }
