@@ -37,6 +37,7 @@ contract('ZkAsset', (accounts) => {
         const scalingFactor = new BN(10);
         const tokensTransferred = new BN(100000);
         let zkAsset;
+        let nonConvertibleZkAsset;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -53,6 +54,12 @@ contract('ZkAsset', (accounts) => {
             zkAsset = await ZkAsset.new(
                 ace.address,
                 erc20.address,
+                scalingFactor
+            );
+
+            nonConvertibleZkAsset = await ZkAsset.new(
+                ace.address,
+                constants.addresses.ZERO_ADDRESS,
                 scalingFactor
             );
 
@@ -82,6 +89,24 @@ contract('ZkAsset', (accounts) => {
             });
 
             it('should correctly set the linked token', async () => {
+                const result = await zkAsset.linkedToken();
+                expect(result).to.equal(erc20.address);
+            });
+
+            it('should set canConvert flag to false if 0x0 is linked token address', async () => {
+                const registry = await ace.getRegistry(nonConvertibleZkAsset.address);
+
+                expect(registry.canConvert).to.equal(false);
+                expect(registry.canAdjustSupply).to.equal(false);
+                const result = await nonConvertibleZkAsset.linkedToken();
+                expect(result).to.equal(constants.addresses.ZERO_ADDRESS);
+            });
+
+            it('should set canConvert flag to true if linked token address is provided', async () => {
+                const registry = await ace.getRegistry(zkAsset.address);
+
+                expect(registry.canConvert).to.equal(true);
+                expect(registry.canAdjustSupply).to.equal(false);
                 const result = await zkAsset.linkedToken();
                 expect(result).to.equal(erc20.address);
             });
