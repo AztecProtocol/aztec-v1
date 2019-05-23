@@ -13,7 +13,7 @@ import "./base/ZkAssetOwnableBase.sol";
 /**
  * @title ZkAsset
  * @author AZTEC
- * @dev A contract defining the standard interface and behaviours of a confidential asset.
+ * @dev A contract defining the standard interface and behaviours of a mintable confidential asset.
  * The ownership values and transfer values are encrypted.
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
