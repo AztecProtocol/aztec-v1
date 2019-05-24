@@ -467,7 +467,7 @@ describe.skip('Encoder Factory', () => {
 
 // const HexString = require('./HexString');
 
-// const bilateralProof = require('../../src/proof/bilateralSwap');
+// const swapProof = require('../../src/proof/swapProof');
 // const burnProof = require('../../src/proof/burn');
 // const dividendComputationProof = require('../../src/proof/dividendComputation');
 // const joinSplitProof = require('../../src/proof/joinSplit');
@@ -553,7 +553,7 @@ describe.skip('Encoder Factory', () => {
 //             const inputNotes = notes.slice(0, 2);
 //             const outputNotes = notes.slice(2, 4);
 //             const senderAddress = accounts[0].address;
-//             const { proofData, challenge } = bilateralProof.constructProof([...inputNotes, ...outputNotes], senderAddress);
+//             const { proofData, challenge } = swapProof.constructProof([...inputNotes, ...outputNotes], senderAddress);
 
 //             const inputOwners = inputNotes.map((m) => m.owner);
 //             const outputOwners = outputNotes.map((m) => m.owner);

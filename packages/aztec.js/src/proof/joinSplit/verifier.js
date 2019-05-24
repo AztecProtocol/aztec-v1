@@ -4,7 +4,7 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const Verifier = require('../verifier');
 
-const { BN128_GROUP_REDUCTION, ZERO_BN, ZERO_BN_RED } = constants;
+const { ZERO_BN, ZERO_BN_RED } = constants;
 
 class JoinSplitVerifier extends Verifier {
     extractData() {
@@ -62,7 +62,7 @@ class JoinSplitVerifier extends Verifier {
             let c = this.challenge;
             if (i >= this.proof.m) {
                 // the reducer is the "x" in the white paper
-                const reducer = rollingHash.keccak(BN128_GROUP_REDUCTION);
+                const reducer = rollingHash.redKeccak();
                 kBar = kBar.redMul(reducer);
                 aBar = aBar.redMul(reducer);
                 c = this.challenge.redMul(reducer);
@@ -95,7 +95,7 @@ class JoinSplitVerifier extends Verifier {
 
         if (
             !challengeResponse
-                .keccak(BN128_GROUP_REDUCTION)
+                .redKeccak()
                 .fromRed()
                 .eq(this.challenge.fromRed())
         ) {

@@ -1,18 +1,20 @@
-const { constants } = require('@aztec/dev-utils');
+const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
 const { inputCoder } = require('../../abiEncoder');
 const bn128 = require('../../bn128');
+const { outputCoder } = require('../../abiEncoder');
 const { Proof, ProofType } = require('../proof');
 
+const { AztecError } = errors;
 const { BN128_GROUP_REDUCTION } = constants;
 
 class DividendProof extends Proof {
-    constructor(notionalNote, residualNote, targetNote, sender, za, zb) {
+    constructor(notionalNote, residualNote, targetNote, sender, za, zb, metadata) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
-        super(ProofType.DIVIDEND.name, [notionalNote], [residualNote, targetNote], sender, publicValue, publicOwner);
+        super(ProofType.DIVIDEND.name, [notionalNote], [residualNote, targetNote], sender, publicValue, publicOwner, metadata);
 
         this.za = new BN(za);
         this.zb = new BN(zb);
@@ -33,7 +35,7 @@ class DividendProof extends Proof {
                 };
             });
 
-        let reducer = this.rollingHash.keccak(BN128_GROUP_REDUCTION); // "x" in the white paper
+        let reducer = this.rollingHash.redKeccak(); // "x" in the white paper
         this.blindingFactors = this.notes.map((note, i) => {
             let { bk } = blindingScalars[i];
             const { ba } = blindingScalars[i];
@@ -49,14 +51,14 @@ class DividendProof extends Proof {
             const xbk = bk.redMul(reducer); // xbk = bk*x
             const xba = ba.redMul(reducer); // xba = ba*x
             const B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
-            reducer = this.rollingHash.keccak(BN128_GROUP_REDUCTION);
+            reducer = this.rollingHash.redKeccak();
             return { B, bk, ba };
         });
     }
 
     constructChallenge() {
         this.constructChallengeRecurse([this.sender, this.za, this.zb, this.notes, this.blindingFactors]);
-        this.challenge = this.challengeHash.keccak(BN128_GROUP_REDUCTION);
+        this.challenge = this.challengeHash.redKeccak();
     }
 
     constructData() {
@@ -81,12 +83,19 @@ class DividendProof extends Proof {
             ];
             return items.map((item) => `0x${padLeft(item.toString(16), 64)}`);
         });
-        // console.log('Construction', this.data);
-        // console.log('Construction Length', this.data.length);
     }
 
     constructOutput() {
-        this.output = '';
+        this.output = outputCoder.encodeProofOutputs([
+            {
+                inputNotes: this.inputNotes,
+                outputNotes: this.outputNotes,
+                publicValue: this.publicValue,
+                publicOwner: this.publicOwner,
+                challenge: this.challengeHex,
+            },
+        ]);
+        this.hash = outputCoder.hashProofOutput(this.output);
     }
 
     encodeABI() {
@@ -100,6 +109,16 @@ class DividendProof extends Proof {
             this.outputNotes,
         );
         return data;
+    }
+
+    validateInputs() {
+        super.validateInputs();
+        if (this.notes.length !== 3) {
+            throw new AztecError(errors.codes.INCORRECT_NOTE_NUMBER, {
+                message: `Dividend proofs must contain 4 notes`,
+                numNotes: this.notes.length,
+            });
+        }
     }
 }
 

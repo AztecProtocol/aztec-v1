@@ -34,7 +34,6 @@ describe('Swap Proof', () => {
         const testk2 = proof.blindingFactors[1].bk.toString(16);
         const testk3 = proof.blindingFactors[2].bk.toString(16);
         const testk4 = proof.blindingFactors[3].bk.toString(16);
-
         expect(testk1).to.equal(testk3);
         expect(testk2).to.equal(testk4);
     });

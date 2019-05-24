@@ -1,14 +1,16 @@
-const { constants } = require('@aztec/dev-utils');
+const { constants, proofs } = require('@aztec/dev-utils');
+const { padLeft } = require('web3-utils');
 
 const bn128 = require('../../bn128');
+const { encoder } = require('../../abiCoder');
 const { inputCoder, outputCoder } = require('../../abiEncoder');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
 const signer = require('../../signer');
 
 class JoinSplitProof extends Proof {
-    constructor(inputNotes, outputNotes, sender, publicValue, publicOwner) {
-        super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicValue, publicOwner);
+    constructor(inputNotes, outputNotes, sender, publicValue, publicOwner, metadata = outputNotes) {
+        super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicValue, publicOwner, metadata);
 
         this.constructBlindingScalars();
         this.constructBlindingFactors();
@@ -32,7 +34,7 @@ class JoinSplitProof extends Proof {
                 B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             } else {
                 // Get next iteration of our rolling hash
-                reducer = this.rollingHash.keccak(constants.BN128_GROUP_REDUCTION);
+                reducer = this.rollingHash.redKeccak();
                 const xbk = bk.redMul(reducer);
                 const xba = ba.redMul(reducer);
                 bkAux = bkAux.redSub(bk);
@@ -78,7 +80,37 @@ class JoinSplitProof extends Proof {
             this.notes,
             this.blindingFactors,
         ]);
-        this.challenge = this.challengeHash.keccak(constants.BN128_GROUP_REDUCTION);
+        this.challenge = this.challengeHash.redKeccak();
+    }
+
+    constructData() {
+        this.data = this.blindingFactors.map(({ bk, ba }, i) => {
+            const note = this.notes[i];
+            let kBar;
+
+            if (i < this.notes.length - 1) {
+                kBar = note.k
+                    .redMul(this.challenge)
+                    .redAdd(bk)
+                    .fromRed();
+            } else {
+                kBar = this.publicValue;
+            }
+            const aBar = note.a
+                .redMul(this.challenge)
+                .redAdd(ba)
+                .fromRed();
+
+            const items = [
+                kBar,
+                aBar,
+                note.gamma.x.fromRed(),
+                note.gamma.y.fromRed(),
+                note.sigma.x.fromRed(),
+                note.sigma.y.fromRed(),
+            ];
+            return items.map((item) => `0x${padLeft(item.toString(16), 64)}`);
+        });
     }
 
     constructOutput() {
@@ -86,8 +118,8 @@ class JoinSplitProof extends Proof {
             {
                 inputNotes: this.inputNotes,
                 outputNotes: this.outputNotes,
-                publicOwner: this.publicOwner,
                 publicValue: this.publicValue,
+                publicOwner: this.publicOwner,
                 challenge: this.challengeHex,
             },
         ]);
@@ -96,15 +128,11 @@ class JoinSplitProof extends Proof {
 
     /**
      * Encode the join-split proof as data for an Ethereum transaction
-     * @param {number} proof compressed AZTEC proof uint24 composed of three uint8s
      * @param {string} validator Ethereum address of the join-split validator contract
      * @param {string[]} inputNotePrivateKeys array with the private keys of the owners of the input notes
-     * @returns {Object} AZTEC proof data and expected output
+     * @returns {Object} proof data and expected output
      */
-    encodeABI(proof, validator, inputNotePrivateKeys) {
-        if (proof < 65536) {
-            throw new Error('compressed proof has to be bigger than 65536');
-        }
+    encodeABI(validator, inputNotePrivateKeys) {
         if (!ProofUtils.isEthereumAddress(validator)) {
             throw new Error('validator is not an Ethereum address');
         }
@@ -116,9 +144,9 @@ class JoinSplitProof extends Proof {
             const domain = signer.generateAZTECDomainParams(validator, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
-                proof,
+                proof: proofs.JOIN_SPLIT_PROOF,
                 noteHash: inputNote.noteHash,
-                challenge: this.challenge,
+                challenge: this.challengeHex,
                 sender: this.sender,
             };
             const privateKey = inputNotePrivateKeys[index];
@@ -126,16 +154,38 @@ class JoinSplitProof extends Proof {
             return signature;
         });
 
-        const data = inputCoder.joinSplit(
-            this.data,
-            this.m,
-            this.challenge,
-            inputSignatures,
-            this.inputNoteOwners,
-            this.outputNoteOwners,
-            this.outputNotes,
+        const encodedParams = [
+            encoder.encodeProofData(this.data),
+            encoder.encodeInputSignatures(inputSignatures),
+            encoder.encodeOwners(this.inputNoteOwners),
+            encoder.encodeOwners(this.outputNoteOwners),
+            encoder.encodeMetadata(this.metadata),
+        ];
+
+        const length = 3 + encodedParams.length + 1;
+        const { offsets } = encodedParams.reduce(
+            (acc, encodedParameter) => {
+                acc.offsets.push(padLeft(acc.offset.toString(16), 64));
+                acc.offset += encodedParameter.length / 2;
+                return acc;
+            },
+            {
+                offset: length * 32,
+                offsets: [],
+            },
         );
-        return { data, inputSignatures };
+
+        const abiEncodedParams = [
+            padLeft(this.m.toString(16), 64),
+            this.challengeHex.slice(2),
+            padLeft(this.publicOwner.slice(2), 64),
+            ...offsets,
+            ...encodedParams,
+        ];
+        return {
+            data: `0x${abiEncodedParams.join('').toLowerCase()}`,
+            inputSignatures,
+        };
     }
 }
 

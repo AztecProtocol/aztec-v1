@@ -410,9 +410,7 @@ describe('Join-Split Proof Verifier', () => {
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-
-            const bogusChallengeHex = randomHex(31);
-            sinon.stub(proof, 'challengeHex').get(() => bogusChallengeHex);
+            proof.challenge = new BN(randomHex(31), 16);
 
             const verifier = new JoinSplitVerifier(proof);
             const _ = verifier.verifyProof();
@@ -458,7 +456,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if blinding factor is at infinity', async () => {
+        it('should reject if blinding factor at infinity', async () => {
             const kIn = [10];
             const kOut = [10];
             const publicValue = 0;
@@ -471,9 +469,7 @@ describe('Join-Split Proof Verifier', () => {
             proof.data[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
             proof.data[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
             proof.data[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
-
-            const bogusChallengeHex = `0x${padLeft('0a', 64)}`;
-            sinon.stub(proof, 'challengeHex').get(() => bogusChallengeHex);
+            proof.challenge = new BN('0a', 16);
 
             const verifier = new JoinSplitVerifier(proof);
             const _ = verifier.verifyProof();
@@ -497,9 +493,7 @@ describe('Join-Split Proof Verifier', () => {
             proof.data[0][3] = `0x${padLeft('0', 64)}`;
             proof.data[0][4] = `0x${padLeft('0', 64)}`;
             proof.data[0][5] = `0x${padLeft('0', 64)}`;
-
-            const bogusChallengeHex = `0x${padLeft('0', 64)}`;
-            sinon.stub(proof, 'challengeHex').get(() => bogusChallengeHex);
+            proof.challenge = new BN(0);
 
             const verifier = new JoinSplitVerifier(proof);
             const _ = verifier.verifyProof();

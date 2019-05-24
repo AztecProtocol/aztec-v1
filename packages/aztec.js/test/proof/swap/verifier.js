@@ -1,9 +1,9 @@
-const { errors } = require('@aztec/dev-utils');
+const { constants, errors } = require('@aztec/dev-utils');
+const BN = require('bn.js');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { padLeft, padRight, randomHex } = require('web3-utils');
 
-const bn128 = require('../../../src/bn128');
 const { mockNoteSet, randomNoteValue } = require('../../helpers/note');
 const { mockZeroSwapProof } = require('../../helpers/proof');
 const { Proof, SwapProof } = require('../../../src/proof');
@@ -37,7 +37,7 @@ describe('Swap Proof Verifier', () => {
             validateInputsStub.restore();
         });
 
-        it('should reject if notes do NOT balance', async () => {
+        it('should reject if notes do NOT balance ((k1 != k3, k2 != k4)', async () => {
             const kIn = [10, 19];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -67,23 +67,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if malformed challenge', async () => {
-            const kIn = [10, 20];
-            const kOut = [10, 20];
-            const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
-            const proof = new SwapProof(inputNotes, outputNotes, sender);
-
-            const bogusChallengeHex = randomHex(31);
-            sinon.stub(proof, 'challengeHex').get(() => bogusChallengeHex);
-
-            const verifier = new SwapVerifier(proof);
-            verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(1);
-            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
-        });
-
-        it('should reject if random proof data', async () => {
+        it('should reject if malformed proof data', async () => {
             const kIn = [10, 20];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -94,13 +78,27 @@ describe('Swap Proof Verifier', () => {
                 .map(() =>
                     Array(6)
                         .fill()
-                        .map(() => randomHex(64)),
+                        .map(() => randomHex(32)),
                 );
 
             const verifier = new SwapVerifier(proof);
             verifier.verifyProof();
             expect(verifier.isValid).to.equal(false);
             expect(verifier.errors).to.contain(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        });
+
+        it('should reject if malformed challenge', async () => {
+            const kIn = [10, 20];
+            const kOut = [10, 20];
+            const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
+            const proof = new SwapProof(inputNotes, outputNotes, sender);
+            proof.challenge = new BN(randomHex(31).slice(2), 16);
+
+            const verifier = new SwapVerifier(proof);
+            verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(1);
+            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('should reject if blinding factor at infinity', async () => {
@@ -111,13 +109,11 @@ describe('Swap Proof Verifier', () => {
 
             proof.data[0][0] = `0x${padLeft('05', 64)}`;
             proof.data[0][1] = `0x${padLeft('05', 64)}`;
-            proof.data[0][2] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
-            proof.data[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
-            proof.data[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
-            proof.data[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
-
-            const bogusChallengeHex = `0x${padLeft('0a', 64)}`;
-            sinon.stub(proof, 'challengeHex').get(() => bogusChallengeHex);
+            proof.data[0][2] = `0x${constants.H_X.toString(16)}`;
+            proof.data[0][3] = `0x${constants.H_Y.toString(16)}`;
+            proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
+            proof.data[0][5] = `0x${constants.H_Y.toString(16)}`;
+            proof.challenge = new BN('0a', 16);
 
             const verifier = new SwapVerifier(proof);
             verifier.verifyProof();

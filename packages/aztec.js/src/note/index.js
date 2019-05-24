@@ -8,6 +8,7 @@ const bn128 = require('../bn128');
 const setup = require('../setup');
 const noteUtils = require('./utils');
 
+const { BN128_GROUP_REDUCTION } = constants;
 const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
 
 /**
@@ -74,8 +75,8 @@ class Note {
             if (viewingKey.length !== 140) {
                 throw new Error(`invalid viewing key length, expected 140, got ${viewingKey.length}`);
             }
-            this.a = new BN(viewingKey.slice(2, 66), 16).toRed(constants.BN128_GROUP_REDUCTION);
-            this.k = new BN(viewingKey.slice(66, 74), 16).toRed(constants.BN128_GROUP_REDUCTION);
+            this.a = new BN(viewingKey.slice(2, 66), 16).toRed(BN128_GROUP_REDUCTION);
+            this.k = new BN(viewingKey.slice(66, 74), 16).toRed(BN128_GROUP_REDUCTION);
             const { x, y } = setupPoint;
             const mu = bn128.curve.point(x, y);
             this.gamma = mu.mul(this.a);
@@ -93,22 +94,20 @@ class Note {
     /**
      * Compute value of a note, from the public key and the spending key
      *
-     * @name Note#derive
-     * @function
+     * @method
      * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
      */
     async derive(spendingKey) {
         const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), spendingKey);
-        this.a = new BN(sharedSecret.slice(2), 16).toRed(constants.BN128_GROUP_REDUCTION);
+        this.a = new BN(sharedSecret.slice(2), 16).toRed(BN128_GROUP_REDUCTION);
         const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
-        this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(constants.BN128_GROUP_REDUCTION);
+        this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(BN128_GROUP_REDUCTION);
     }
 
     /**
      * Export note's ephemeral key in compressed string form
      *
-     * @name Note#exportMetadata
-     * @function
+     * @method
      * @returns {string} hex-string compressed ephemeral key
      */
     exportMetadata() {
@@ -116,10 +115,9 @@ class Note {
     }
 
     /**
-     * Export note coordinates in a form that can be used by proof.js
+     * Export note coordinates in a form that can be used by proofs
      *
-     * @name Note#exportNote
-     * @function
+     * @method
      * @returns {{ publicKey:string, viewingKey: string, k: string, a: string, noteHash: string }}
      */
     exportNote() {
@@ -146,7 +144,7 @@ class Note {
      * Get the public key representation of a note
      *
      * @name Note#getPublic
-     * @function
+     * @method
      * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
      */
     getPublic() {
@@ -158,7 +156,7 @@ class Note {
      * Get the viewing key of a note
      *
      * @name Note#getView
-     * @function
+     * @method
      * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
      */
     getView() {
@@ -276,7 +274,7 @@ note.fromPublicKey = (publicKey) => {
  * @returns {Promise} promise that resolves to created note instance
  */
 note.fromViewKey = async (viewingKey) => {
-    const k = new BN(viewingKey.slice(66, 74), 16).toRed(constants.BN128_GROUP_REDUCTION);
+    const k = new BN(viewingKey.slice(66, 74), 16).toRed(BN128_GROUP_REDUCTION);
     const setupPoint = await setup.fetchPoint(k.toNumber());
     const newNote = new Note(null, viewingKey, undefined, setupPoint);
     return newNote;
