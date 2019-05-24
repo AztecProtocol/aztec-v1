@@ -13,11 +13,10 @@ const ROPSTEN_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', '
 const deployedContracts = [
     'ACE',
     'AdjustSupply',
-    'BilateralSwap',
     'DividendComputation',
     'ERC20Mintable',
     'JoinSplit',
-    'PrivateRange',
+    'Swap',
     'ZkAsset',
 ];
 
