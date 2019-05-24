@@ -1,18 +1,17 @@
 const BN = require('bn.js');
-const { padLeft, padRight } = require('./utils');
 
 const FIELD_MODULUS = new BN('21888242871839275222246405745257275088696311157297823662689037894645226208583', 10);
 const GROUP_MODULUS = new BN('21888242871839275222246405745257275088548364400416034343698204186575808495617', 10);
 const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
 const H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
 const t2 = [
-    `0x${padLeft('1cf7cc93bfbf7b2c5f04a3bc9cb8b72bbcf2defcabdceb09860c493bdf1588d', 64)}`,
-    `0x${padLeft('8d554bf59102bbb961ba81107ec71785ef9ce6638e5332b6c1a58b87447d181', 64)}`,
-    `0x${padLeft('204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2', 64)}`,
-    `0x${padLeft('2cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc', 64)}`,
+    '0x01cf7cc93bfbf7b2c5f04a3bc9cb8b72bbcf2defcabdceb09860c493bdf1588d',
+    '0x08d554bf59102bbb961ba81107ec71785ef9ce6638e5332b6c1a58b87447d181',
+    '0x204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2',
+    '0x02cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc',
 ];
 
-const BN128_COMPRESSION_MASK = new BN(padRight('8', 64), 16);
+const BN128_COMPRESSION_MASK = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 const BN128_GROUP_REDUCTION = BN.red(GROUP_MODULUS);
 
 /**
@@ -32,16 +31,12 @@ const constants = {
     /**
      * Common reference string
      */
-    CRS: [`0x${padLeft(H_X.toString(16), 64)}`, `0x${padLeft(H_Y.toString(16), 64)}`, ...t2],
+    CRS: [`0x${H_X.toString(16)}`, `0x${H_Y.toString(16)}`, ...t2],
     /**
      * Generic scaling factor that maps between AZTEC note values and ERC20 token balances. When used for DAI,
      * 1 note value = 0.1 DAI
      */
     ERC20_SCALING_FACTOR: new BN('100000000000000000', 10),
-    /**
-     * Dummy network id used in contract testing
-     */
-    FAKE_NETWORK_ID: 100,
     /** modulus of bn128 curve's finite field (p)
      *  @constant FIELD_MODULUS
      *  @type {BN}
