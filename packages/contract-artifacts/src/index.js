@@ -2,9 +2,6 @@ const ACE = require('../artifacts/ACE');
 const AdjustSupply = require('../artifacts/AdjustSupply');
 const AdjustSupplyABIEncoder = require('../artifacts/AdjustSupplyABIEncoder');
 const AdjustSupplyInterface = require('../artifacts/AdjustSupplyInterface');
-const BilateralSwap = require('../artifacts/BilateralSwap');
-const BilateralSwapABIEncoder = require('../artifacts/BilateralSwapABIEncoder');
-const BilateralSwapInterface = require('../artifacts/BilateralSwapInterface');
 const DividendComputation = require('../artifacts/DividendComputation');
 const DividendComputationABIEncoder = require('../artifacts/DividendComputationABIEncoder');
 const DividendComputationInterface = require('../artifacts/DividendComputationInterface');
@@ -26,6 +23,9 @@ const PrivateRangeABIEncoder = require('../artifacts/PrivateRangeABIEncoder');
 const PrivateRangeInterface = require('../artifacts/PrivateRangeInterface');
 const ProofUtils = require('../artifacts/ProofUtils');
 const SafeMath8 = require('../artifacts/SafeMath8');
+const Swap = require('../artifacts/Swap');
+const SwapABIEncoder = require('../artifacts/SwapABIEncoder');
+const SwapInterface = require('../artifacts/SwapInterface');
 const ZkAsset = require('../artifacts/ZkAsset');
 const ZkAssetBurnable = require('../artifacts/ZkAssetBurnable');
 const ZkAssetDetailed = require('../artifacts/ZkAssetDetailed');
@@ -37,9 +37,6 @@ module.exports = {
     AdjustSupply,
     AdjustSupplyABIEncoder,
     AdjustSupplyInterface,
-    BilateralSwap,
-    BilateralSwapABIEncoder,
-    BilateralSwapInterface,
     DividendComputation,
     DividendComputationABIEncoder,
     DividendComputationInterface,
@@ -61,6 +58,9 @@ module.exports = {
     PrivateRangeInterface,
     ProofUtils,
     SafeMath8,
+    Swap,
+    SwapABIEncoder,
+    SwapInterface,
     ZkAsset,
     ZkAssetBurnable,
     ZkAssetDetailed,
