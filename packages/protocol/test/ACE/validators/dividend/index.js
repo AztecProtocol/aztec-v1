@@ -181,7 +181,7 @@ contract('Dividend Computation', (accounts) => {
             );
         });
 
-        it('should fail for random proof data', async () => {
+        it('should fail for malformed proof data', async () => {
             const za = 100;
             const zb = 5;
             const noteValues = [90, 4, 50];

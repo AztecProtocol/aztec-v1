@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 /**
- * @title Library to ABI encode the output of a bilateral swap proof verification
+ * @title Library to ABI encode the output of a Swap proof verification
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.
@@ -12,20 +12,19 @@ pragma solidity >=0.5.0 <0.6.0;
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 
-library BilateralSwapABIEncoder {
+library SwapABIEncoder {
 
     /**
     * Calldata map
-    * 0x04:0x24      = calldata location of proofData byte array - pointer to the proofData. 
+    * 0x04:0x24      = calldata location of proofData byte array - pointer to the proofData.
     * 0x24:0x44      = message sender // sender
     * 0x44:0x64      = h_x     // crs
     * 0x64:0x84      = h_y     // crs
     * 0x84:0xa4      = t2_x0   // crs
     * 0xa4:0xc4      = t2_x1   // crs
-    * 0xa4:0xc4      = t2_x1   // crs
     * 0xc4:0xe4      = t2_y0   // crs
     * 0xe4:0x104     = t2_y1   // crs
-    * 0x104:0x124    = length of proofData byte array 
+    * 0x104:0x124    = length of proofData byte array
     * 0x124:0x144    = challenge
     * 0x144:0x164    = offset in byte array to notes
     * 0x164:0x184    = offset in byte array to inputOwners
@@ -42,7 +41,7 @@ library BilateralSwapABIEncoder {
 
             // First up, we need to do some checks to ensure we have been provided with correct data.
             // We should only have 2 entries inside `bytes metadata` (only 2 output notes in total),
-            // and only 4 entries inside `noteOwners` (4 notes in bilateral swap proof)
+            // and only 4 entries inside `noteOwners` (4 notes in a Swap proof)
             if iszero(and(
                 eq(0x02, calldataload(sub(metadataPtr, 0x20))),
                 eq(0x04, calldataload(sub(noteOwners, 0x20)))
@@ -60,7 +59,7 @@ library BilateralSwapABIEncoder {
             // 0x1a0 - 0x1c0 = number of `proofOutputs` entries (2)
             // 0x1c0 - 0x1e0 = relative memory offset between `v` and start of `proofOutputs[0]` (0x80)
             // 0x1e0 - 0x200 = relative memory offset between `v` and start of `proofOutputs[1]`
-    
+
             // `proofOutput` - t, starts at 0x200
             // 0x200 - 0x220 = length of `proofOutput`
             // 0x220 - 0x240 = relative offset between `t` and `inputNotes`
@@ -85,7 +84,7 @@ library BilateralSwapABIEncoder {
             // 0xc0 - ???? = remaining note metadata
 
             // Note organisation...
-            // The bilateral swap proof proves the following:
+            // The Swap proof proves the following:
             //   1. note[0].value == note[2].value
             //   2. note[1].value == note[3].value
             // In other words...
@@ -124,7 +123,7 @@ library BilateralSwapABIEncoder {
             * 0x80 : 0x80 + L1    = start of proofOutputs[0]
             * 0x80 + L1   : 0x80 + L1 + L2 = start of proofOutputs[1]
             **/
-        
+
             // 0x180 stores the total size of `bytes proofOutputs`. We don't know that yet, so leave blank
 
             // 0x1a0 = number of proof outputs (2)
@@ -158,7 +157,7 @@ library BilateralSwapABIEncoder {
             // => relative offset to outputNotes = 0x140 + 0xc0 = 0x200
             mstore(0x240, 0x200)                           // location of outputNotes
 
-            // bilateral swap proof hardcodes `publicOwner` and `publicValue` to 0 (no public tokens)
+            // Swap proof hardcodes `publicOwner` and `publicValue` to 0 (no public tokens)
             mstore(0x260, 0x00)                             // publicOwner
             mstore(0x280, 0x00)                             // publicValue
             mstore(0x2a0, calldataload(0x124))              // challenge
@@ -246,7 +245,7 @@ library BilateralSwapABIEncoder {
                     )
                 )
             )
-            
+
             // 0x3e0 = sigma
             mstore(
                 0x3e0,
@@ -370,7 +369,7 @@ library BilateralSwapABIEncoder {
                     )
                 )
             )
-            
+
             // To complete `noteData`, we need to copy note metadata into memory (0x540)
             // We know that metadataIndex + metadataPtr - 0x40 points to the start of the metadata entry in calldata.
             // But the first word is the length of the metadata entry, which we don't want.
@@ -404,11 +403,11 @@ library BilateralSwapABIEncoder {
             // i.e. relative offset = 0x340 + 0x80 + metadataLength = 0x3c0 + metadataLength
             mstore(0x1e0, add(0x3c0, metadataLength))
 
-            /** 
+            /**
             * proofOutput[1]
             **/
 
-            // When writing data into proofOutputs[1], we cannot use an absolute offset as 
+            // When writing data into proofOutputs[1], we cannot use an absolute offset as
             // metadataLength is not known at compile time.
             // `proofPtr` points to the start of `proofOutputs[1]`
             let proofPtr := add(0x540, metadataLength)
@@ -432,7 +431,7 @@ library BilateralSwapABIEncoder {
             mstore(0xe0, calldataload(0x124))
             mstore(add(proofPtr, 0xa0), keccak256(0xe0, 0x20)) // challenge
 
-            /** 
+            /**
             * proofOutput[1].inputNotes
             *
             * starts at (proofPtr + 0xc0)
@@ -447,7 +446,7 @@ library BilateralSwapABIEncoder {
             // (proofPtr + 0x100) = relative offset to input note data (0x60)
             mstore(add(proofPtr, 0x100), 0x60)
 
-            /** 
+            /**
             * proofOutput[1].inputNotes[0]
             *
             * starts at (proofPtr + 0x120)
@@ -497,7 +496,7 @@ library BilateralSwapABIEncoder {
                 )
             )
 
-            /** 
+            /**
             * proofOutput[1].outputNotes
             *
             * starts at (proofPtr + 0x200)
@@ -511,7 +510,7 @@ library BilateralSwapABIEncoder {
             // (proofPtr + 0x240) = offset to output notes (0x60)
             mstore(add(proofPtr, 0x240), 0x60)
 
-            /** 
+            /**
             * proofOutput[1].outputNotes[0]
             *
             * starts at (proofPtr + 0x260)
@@ -584,7 +583,7 @@ library BilateralSwapABIEncoder {
             // 2. proofOutputs[1].length + 0x20 (^^)
             // 3. data to record relative offsets (0x20 * number of outputs) = (0x40)
             // 4. data to record number of entries (0x20)
-            
+
             // We stored proofOutputs[0].length at 0x200
             // and we know that proofOutputs[1].length = 0x320 + metadataLength
             // => length = mload(0x200) + metadataLength + 0x320 + 0x40 + 0x40 + 0x20

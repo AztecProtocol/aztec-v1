@@ -570,7 +570,7 @@ contract('JoinSplit', (accounts) => {
             await truffleAssert.reverts(joinSplitContract.validateJoinSplit(fakeProofData, senderAddress, constants.CRS, opts));
         });
 
-        it('should fail for random proof data', async () => {
+        it('should fail for malformed proof data', async () => {
             const aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
 
             const notes = await Promise.all([

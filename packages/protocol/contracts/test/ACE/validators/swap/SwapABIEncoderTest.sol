@@ -1,9 +1,9 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../../../ACE/validators/bilateralSwap/BilateralSwapABIEncoder.sol";
+import "../../../../ACE/validators/swap/SwapABIEncoder.sol";
 
 /**
- * @title Bilateral Swap ABI Encoder Test
+ * @title Swap ABI Encoder Test
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.
@@ -13,16 +13,16 @@ import "../../../../ACE/validators/bilateralSwap/BilateralSwapABIEncoder.sol";
  * storage and makes no external calls (other than to precompiles)
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract BilateralSwapABIEncoderTest {
-    function validateBilateralSwap(
-        bytes calldata, 
-        address, 
+contract SwapABIEncoderTest {
+    function validateSwap(
+        bytes calldata,
+        address,
         uint[6] calldata
-    ) 
-        external 
-        pure 
-        returns (bytes memory) 
+    )
+        external
+        pure
+        returns (bytes memory)
     {
-        BilateralSwapABIEncoder.encodeAndExit();
+        SwapABIEncoder.encodeAndExit();
     }
 }
