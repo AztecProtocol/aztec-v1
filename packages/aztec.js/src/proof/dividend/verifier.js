@@ -36,7 +36,7 @@ class DividendVerifier extends Verifier {
 
         challengeResponse.data.push(...rollingHash.data);
 
-        let reducer = rollingHash.keccak(BN128_GROUP_REDUCTION); // "x" in the white paper
+        let reducer = rollingHash.redKeccak(); // "x" in the white paper
         this.data.forEach((item, i) => {
             const { aBar, gamma, sigma } = item;
             let challengeX = this.challenge.mul(reducer);
@@ -69,12 +69,12 @@ class DividendVerifier extends Verifier {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }
-            reducer = rollingHash.keccak(BN128_GROUP_REDUCTION);
+            reducer = rollingHash.redKeccak();
         });
 
         if (
             !challengeResponse
-                .keccak(BN128_GROUP_REDUCTION)
+                .redKeccak()
                 .fromRed()
                 .eq(this.challenge.fromRed())
         ) {

@@ -67,6 +67,16 @@ describe('Join-Split Proof', () => {
             }
         });
 
+        it('should fail if public value > K_MAX', async () => {
+            const publicValue = ProofUtils.getPublicValue(kIn, kOut);
+            inputNotes[0].k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
+            try {
+                const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            } catch (err) {
+                expect(err.message).to.equal(errors.codes.NOTE_VALUE_TOO_BIG);
+            }
+        });
+
         it('should fail if point NOT on curve', async () => {
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             inputNotes[0].gamma.x = new BN(bn128.curve.p.add(new BN(100))).toRed(bn128.curve.red);
@@ -94,16 +104,6 @@ describe('Join-Split Proof', () => {
                 const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             } catch (err) {
                 expect(err.message).to.equal(errors.codes.VIEWING_KEY_MALFORMED);
-            }
-        });
-
-        it('should fail if public value > K_MAX', async () => {
-            const publicValue = ProofUtils.getPublicValue(kIn, kOut);
-            inputNotes[0].k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
-            try {
-                const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            } catch (err) {
-                expect(err.message).to.equal(errors.codes.NOTE_VALUE_TOO_BIG);
             }
         });
     });

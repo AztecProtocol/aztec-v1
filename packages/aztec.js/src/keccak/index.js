@@ -18,8 +18,7 @@ class Keccak {
     /**
      * Append a BN.js instance {@link Keccak#data}
      *
-     * @name Keccak#appendBN
-     * @function
+     * @method
      * @param {scalar} scalar BN.js number
      */
     appendBN(scalar) {
@@ -29,8 +28,7 @@ class Keccak {
     /**
      * Append an elliptic.js group element to {@link Keccak#data}
      *
-     * @name Keccak#appendPoint
-     * @function
+     * @method
      * @param {Point} point elliptic.js point
      */
     appendPoint(point) {
@@ -41,9 +39,9 @@ class Keccak {
     /**
      * Compute keccak256 hash of {@link Keccak#data}, set {@link Keccak#data} to resulting hash
      *
-     * @name Keccak#keccak
-     * @function
+     * @method
      * @param {reductionContext} reductionContext BN.js reduction context for Montgomery modular multiplication
+     * @returns keccak-ed data
      */
     keccak(reductionContext = null) {
         const paddedData = this.data.map((i) => padLeft(i, 64)).join('');
@@ -55,10 +53,10 @@ class Keccak {
     }
 
     /**
-     * Interface for the {@function keccak} with the reduction context set to the constant found in @aztec/dev-utils
+     * Interface for the {@method keccak} with the reduction context set to the constant found in @aztec/dev-utils
      *
-     * @name Keccak#redKeccak
-     * @function
+     * @method
+     * @returns keccak-ed data
      */
     redKeccak() {
         return this.keccak(constants.BN128_GROUP_REDUCTION);

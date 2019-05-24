@@ -53,7 +53,7 @@ class SwapVerifier extends Verifier {
 
         if (
             !challengeResponse
-                .keccak(BN128_GROUP_REDUCTION)
+                .redKeccak()
                 .fromRed()
                 .eq(this.challenge.fromRed())
         ) {

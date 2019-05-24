@@ -64,23 +64,23 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if bogus challenge', async () => {
+        it('should reject if points NOT on curve', async () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
 
-            proof.challenge = new BN(1).toRed(constants.BN128_GROUP_REDUCTION);
-            const bogusChallengeHex = `0x${padLeft(proof.challenge.toString(16), 64)}`;
-            sinon.stub(proof, 'challengeHex').value(bogusChallengeHex);
+            // Set the x coordinate of gamma to zero
+            proof.data[0][2] = `0x${padLeft('', 64)}`;
 
             const verifier = new DividendVerifier(proof);
             verifier.verifyProof();
             expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(1);
-            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
+            expect(verifier.errors.length).to.equal(2);
+            expect(verifier.errors[0]).to.equal(errors.codes.NOT_ON_CURVE);
+            expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if fake proof data', async () => {
+        it('should reject if malformed proof data', async () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
@@ -97,6 +97,19 @@ describe('Dividend Proof Verifier', () => {
             verifier.verifyProof();
             expect(verifier.isValid).to.equal(false);
             expect(verifier.errors[verifier.errors.length - 1]).to.contain(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        });
+
+        it('should reject if malformed challenge', async () => {
+            const za = 100;
+            const zb = 5;
+            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
+            proof.challenge = new BN(1).toRed(constants.BN128_GROUP_REDUCTION);
+
+            const verifier = new DividendVerifier(proof);
+            verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(1);
+            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('should reject if z_a > K_MAX', async () => {
@@ -125,22 +138,6 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if point not on the curve', async () => {
-            const za = 100;
-            const zb = 5;
-            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-
-            // Set the x coordinate of gamma to zero
-            proof.data[0][2] = `0x${padLeft('', 64)}`;
-
-            const verifier = new DividendVerifier(proof);
-            verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(2);
-            expect(verifier.errors[0]).to.equal(errors.codes.NOT_ON_CURVE);
-            expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
-        });
-
         it('should reject if blinding factor at infinity', async () => {
             const za = 100;
             const zb = 5;
@@ -152,10 +149,7 @@ describe('Dividend Proof Verifier', () => {
             proof.data[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
             proof.data[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
             proof.data[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
-
             proof.challenge = new BN(10).toRed(constants.BN128_GROUP_REDUCTION);
-            const bogusChallengeHex = `0x${padLeft(proof.challenge.toString(16), 64)}`;
-            sinon.stub(proof, 'challengeHex').value(bogusChallengeHex);
 
             const verifier = new DividendVerifier(proof);
             verifier.verifyProof();

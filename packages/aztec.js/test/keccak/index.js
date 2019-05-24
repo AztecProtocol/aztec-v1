@@ -29,7 +29,7 @@ describe('Keccak', () => {
         expect(hash[0]).to.equal(expected);
         expect(
             keccak
-                .keccak(constants.BN128_GROUP_REDUCTION)
+                .redKeccak()
                 .fromRed()
                 .toString(16),
         ).to.equal(new BN(keccak256(`0x${expected}`).slice(2), 16).umod(bn128.curve.n).toString(16));

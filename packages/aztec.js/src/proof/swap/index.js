@@ -1,18 +1,20 @@
 /* eslint-disable prefer-destructuring */
-const { constants } = require('@aztec/dev-utils');
+const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const crypto = require('crypto');
-const { keccak256, padLeft } = require('web3-utils');
+const { keccak256, padLeft, randomHex } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../../abiEncoder');
+const { encoder } = require('../../abiCoder');
+const { outputCoder } = require('../../abiEncoder');
 const bn128 = require('../../bn128');
 const { Proof, ProofType } = require('../proof');
 
+const { AztecError } = errors;
+
 class SwapProof extends Proof {
-    constructor(inputNotes, outputNotes, sender) {
+    constructor(inputNotes, outputNotes, sender, metadata = [outputNotes[0], inputNotes[1]]) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
-        super(ProofType.SWAP.name, inputNotes, outputNotes, sender, publicValue, publicOwner);
+        super(ProofType.SWAP.name, inputNotes, outputNotes, sender, publicValue, publicOwner, metadata);
 
         this.constructBlindingFactors();
         this.constructChallenge();
@@ -55,7 +57,7 @@ class SwapProof extends Proof {
 
     constructChallenge() {
         this.constructChallengeRecurse([this.sender, this.notes, this.blindingFactors]);
-        this.challenge = this.challengeHash.keccak(constants.BN128_GROUP_REDUCTION);
+        this.challenge = this.challengeHash.redKeccak();
     }
 
     constructData() {
@@ -64,7 +66,7 @@ class SwapProof extends Proof {
             let kBar;
 
             // Only set the first 2 values of kBar - the third and fourth are later inferred
-            // from a cryptographic relation (this is why the the third and fourth to random values,
+            // from a cryptographic relation (this is why set the the third and fourth to random values,
             // leaving them zeroed or null-ed produces an error).
             if (i <= 1) {
                 kBar = note.k
@@ -72,7 +74,7 @@ class SwapProof extends Proof {
                     .redAdd(bk)
                     .fromRed();
             } else {
-                kBar = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
+                kBar = new BN(randomHex(32), 16).umod(bn128.curve.n).toString(16);
             }
 
             const aBar = note.a
@@ -93,28 +95,57 @@ class SwapProof extends Proof {
     }
 
     constructOutput() {
-        this.output = `0x${outputCoder.encodeProofOutputs([
+        this.output = outputCoder.encodeProofOutputs([
             {
                 inputNotes: [this.inputNotes[0]],
                 outputNotes: [this.outputNotes[0]],
-                publicOwner: this.publicOwner,
                 publicValue: this.publicValue,
+                publicOwner: this.publicOwner,
                 challenge: this.challengeHex,
             },
             {
                 inputNotes: [this.outputNotes[1]],
                 outputNotes: [this.inputNotes[1]],
-                publicOwner: this.publicOwner,
                 publicValue: this.publicValue,
-                challenge: `0x${padLeft(keccak256(this.challengeHex).slice(2), 64)}`,
+                publicOwner: this.publicOwner,
+                challenge: `0x${keccak256(this.challengeHex).slice(2)}`,
             },
-        ])}`;
+        ]);
         this.hash = outputCoder.hashProofOutput(this.output);
     }
 
     encodeABI() {
-        const data = inputCoder.swap(this.data, this.challenge, this.inputNoteOwners, [this.outputNotes[0], this.inputNotes[1]]);
-        return data;
+        const encodedParams = [
+            encoder.encodeProofData(this.data),
+            encoder.encodeOwners([...this.inputNoteOwners, ...this.outputNoteOwners]),
+            encoder.encodeMetadata(this.metadata),
+        ];
+
+        const length = 1 + encodedParams.length + 1;
+        const { offsets } = encodedParams.reduce(
+            (acc, encodedParameter) => {
+                acc.offsets.push(padLeft(acc.offset.toString(16), 64));
+                acc.offset += encodedParameter.length / 2;
+                return acc;
+            },
+            {
+                offset: length * 32,
+                offsets: [],
+            },
+        );
+
+        const abiEncodedParams = [this.challengeHex.slice(2), ...offsets, ...encodedParams];
+        return `0x${abiEncodedParams.join('').toLowerCase()}`;
+    }
+
+    validateInputs() {
+        super.validateInputs();
+        if (this.notes.length !== 4) {
+            throw new AztecError(errors.codes.INCORRECT_NOTE_NUMBER, {
+                message: `Swap proofs must contain 4 notes`,
+                numNotes: this.notes.length,
+            });
+        }
     }
 }
 

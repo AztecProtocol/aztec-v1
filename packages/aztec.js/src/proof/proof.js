@@ -25,8 +25,9 @@ class Proof {
      * @param {string} sender Ethereum address of transaction sender
      * @param {string} publicValue public commitment being added to proof
      * @param {string} publicOwner holder of a public token being converted
+     * @param {Object} metadata arbitrarily-sized object
      */
-    constructor(type, inputNotes, outputNotes, sender, publicValue, publicOwner) {
+    constructor(type, inputNotes, outputNotes, sender, publicValue, publicOwner, metadata = []) {
         this.type = type;
         this.inputNotes = inputNotes;
         this.m = inputNotes.length;
@@ -34,6 +35,7 @@ class Proof {
         this.notes = [...inputNotes, ...outputNotes];
         this.sender = sender;
         this.publicOwner = publicOwner;
+        this.metadata = metadata;
         if (BN.isBN(publicValue)) {
             this.publicValue = publicValue;
         } else if (publicValue < 0) {
@@ -96,7 +98,6 @@ class Proof {
                 this.challengeHash.appendPoint(challengeVar.gamma);
                 this.challengeHash.appendPoint(challengeVar.sigma);
             } else if (challengeVar.B) {
-                // console.log('B', challengeVar.B);
                 this.challengeHash.appendPoint(challengeVar.B);
             } else {
                 throw new AztecError(errors.codes.NO_ADD_CHALLENGEVAR, {
@@ -108,35 +109,8 @@ class Proof {
         });
     }
 
-    constructData() {
-        this.data = this.blindingFactors.map(({ bk, ba }, i) => {
-            const note = this.notes[i];
-            let kBar;
-
-            if (i < this.notes.length - 1) {
-                kBar = note.k
-                    .redMul(this.challenge)
-                    .redAdd(bk)
-                    .fromRed();
-            } else {
-                kBar = this.publicValue;
-            }
-            const aBar = note.a
-                .redMul(this.challenge)
-                .redAdd(ba)
-                .fromRed();
-
-            const items = [
-                kBar,
-                aBar,
-                note.gamma.x.fromRed(),
-                note.gamma.y.fromRed(),
-                note.sigma.x.fromRed(),
-                note.sigma.y.fromRed(),
-            ];
-            return items.map((item) => `0x${padLeft(item.toString(16), 64)}`);
-        });
-    }
+    // eslint-disable-next-line class-methods-use-this
+    constructData() {}
 
     // eslint-disable-next-line class-methods-use-this
     constructOutput() {}
