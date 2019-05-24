@@ -1,36 +1,36 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./BilateralSwapABIEncoder.sol";
+import "./SwapABIEncoder.sol";
 
 /**
- * @title Library to validate AZTEC Bilateral Swap zero-knowledge proofs
+ * @title Library to validate Swap proofs
  * @author AZTEC
- * @dev Don't include this as an internal library. This contract uses 
+ * @dev Don't include this as an internal library. This contract uses
  * a static memory table to cache elliptic curve primitives and hashes.
- * Calling this internally from another function will lead to memory 
+ * Calling this internally from another function will lead to memory
  * mutation and undefined behaviour.
- * The intended use case is to call this externally via `staticcall`. External 
- * calls to OptimizedAZTEC can be treated as pure functions as this contract 
+ * The intended use case is to call this externally via `staticcall`. External
+ * calls to OptimizedAZTEC can be treated as pure functions as this contract
  * contains no storage and makes no external calls (other than to precompiles)
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract BilateralSwap {
+contract Swap {
 
     /**
-     * @dev AZTECBilateralSwap will take any transaction sent to it and attempt to validate a zero knowledge proof.
+     * @dev Swap will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction throws.
-     * @notice See BilateralSwapInterface for how method calls should be constructed.
-     * AZTECBilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
+     * @notice See SwapInterface for how method calls should be constructed.
+     * This contract is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     // solhint-disable payable-fallback
     function() external {
         assembly {
 
-            // We don't check for function signatures, there's only one function that 
-            // ever gets called: validateBilateralSwap()
-            // We still assume calldata is offset by 4 bytes so that we can represent 
+            // We don't check for function signatures, there's only one function that
+            // ever gets called: validateSwap()
+            // We still assume calldata is offset by 4 bytes so that we can represent
             // this contract through a comp\atible ABI
-            validateBilateralSwap()
+            validateSwap()
 
             // if we get to here, the proof is valid. We now 'fall through' the assembly block
             // and into JoinSplitABI.validateJoinSplit()
@@ -38,7 +38,7 @@ contract BilateralSwap {
             mstore(0x40, 0x60)
             /**
              * New calldata map
-             * 0x04:0x24      = calldata location of proofData byte array 
+             * 0x04:0x24      = calldata location of proofData byte array
              * 0x24:0x44      = message sender // sender
              * 0x44:0x64      = h_x     // crs
              * 0x64:0x84      = h_y     // crs
@@ -47,7 +47,7 @@ contract BilateralSwap {
              * 0xa4:0xc4      = t2_x1   // crs
              * 0xc4:0xe4      = t2_y0   // crs
              * 0xe4:0x104     = t2_y1   // crs
-             * 0x104:0x124    = length of proofData byte array 
+             * 0x104:0x124    = length of proofData byte array
              * 0x124:0x144    = challenge
              * 0x144:0x164    = offset in byte array to notes
              * 0x164:0x184    = offset in byte array to inputOwners
@@ -61,7 +61,7 @@ contract BilateralSwap {
              * 0x40:0x80       = G1 element \gamma_i
              * 0x80:0xc0       = G1 element \sigma_i
              *
-             * We use a hard-coded memory map to reduce gas costs - if this is not called as an 
+             * We use a hard-coded memory map to reduce gas costs - if this is not called as an
              * external contract then terrible things will happen!
              *
              * 0x00:0x20       = scratch data to store result of keccak256 calls
@@ -74,10 +74,10 @@ contract BilateralSwap {
              * 0x1a0:0x1c0     = scratch data to store result of \sigma_i^{-cx_{i-m-1}}
              * 0x220:0x260     = scratch data to store \gamma_i^{cx_{i-m-1}}
              * 0x2e0:0x300     = msg.sender (contract should be called via delegatecall/staticcall)
-             * 0x300:???       = block of memory that contains (\gamma_i, \sigma_i)_{i=0}^{n-1} 
+             * 0x300:???       = block of memory that contains (\gamma_i, \sigma_i)_{i=0}^{n-1}
              *                   concatenated with (B_i)_{i=0}^{n-1}
              **/
-            function validateBilateralSwap() {
+            function validateSwap() {
                 /*
                 ///////////////////////////////////////////  SETUP  //////////////////////////////////////////////
                 */
@@ -120,8 +120,8 @@ contract BilateralSwap {
 
                         // indexing the k value of the note that is 2 indices behind the current note
                         k := calldataload(sub(noteIndex, 0x180))
-                    } 
-                        
+                    }
+
                     case 0 { // if it's a maker note
                         k := calldataload(noteIndex)
                     }
@@ -129,7 +129,7 @@ contract BilateralSwap {
 
                     // Check this commitment is well formed
                     validateCommitment(noteIndex, k, a)
-                    
+
                     // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
                     // Memory map:
                     // 0x20: \gamma_iX
@@ -145,7 +145,7 @@ contract BilateralSwap {
                     // loading into memory
                     calldatacopy(0xe0, add(noteIndex, 0x80), 0x40)
                     calldatacopy(0x20, add(noteIndex, 0x40), 0x40)
-                    mstore(0x120, sub(gen_order, c)) 
+                    mstore(0x120, sub(gen_order, c))
                     mstore(0x60, k)
                     mstore(0xc0, a)
 
@@ -172,10 +172,10 @@ contract BilateralSwap {
                     if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
-                // Both bid notes already exist in their revelant AZTEC note registries - so can inductively 
+                // Both bid notes already exist in their revelant AZTEC note registries - so can inductively
                 // infer that the ask notes are in the required range
                 // Therefore, don't need a range proof
-            
+
                 /*
                 ////////////////////  RECONSTRUCT INITIAL CHALLENGE AND VERIFY A MATCH  ////////////////////////////////
                 */
@@ -221,16 +221,16 @@ contract BilateralSwap {
                         and(
                             eq( // y^2 ?= x^3 + 3
                                 addmod(mulmod(
-                                    mulmod(sigmaX, sigmaX, field_order), sigmaX, field_order), 
-                                    3, 
+                                    mulmod(sigmaX, sigmaX, field_order), sigmaX, field_order),
+                                    3,
                                     field_order),
                                 mulmod(sigmaY, sigmaY, field_order)
                             ),
                             eq( // y^2 ?= x^3 + 3
                                 addmod(mulmod(
-                                    mulmod(gammaX, gammaX, field_order), 
-                                    gammaX, 
-                                    field_order), 
+                                    mulmod(gammaX, gammaX, field_order),
+                                    gammaX,
+                                    field_order),
                                     3, field_order),
                                 mulmod(gammaY, gammaY, field_order)
                             )
@@ -243,11 +243,11 @@ contract BilateralSwap {
             }
 
             /**
-             * @dev Calculate the keccak256 hash of the commitments for both 
-             * input notes and output notes. This is used both as an input to 
+             * @dev Calculate the keccak256 hash of the commitments for both
+             * input notes and output notes. This is used both as an input to
              * validate the challenge `c` and also to generate pseudorandom relationships
-             * between commitments for different outputNotes, so that we can combine 
-             * them into a single multi-exponentiation for the purposes of validating 
+             * between commitments for different outputNotes, so that we can combine
+             * them into a single multi-exponentiation for the purposes of validating
              * the bilinear pairing relationships.
              * @param notes calldata location notes
              * @param n number of notes
@@ -257,13 +257,13 @@ contract BilateralSwap {
                 let index := add(add(notes, mul(i, 0xc0)), 0x60)
                 calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
-                // storing at position 0x00 in memory, the kecca hash of everything from 
+                // storing at position 0x00 in memory, the kecca hash of everything from
                 // start of the commitments to the end
                 mstore(0x00, keccak256(0x300, mul(n, 0x80)))
             }
         }
-        // if we've reached here, we've validated the bilateral swap and haven't thrown an error.
+        // if we've reached here, we've validated the Swap and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        BilateralSwapABIEncoder.encodeAndExit();
+        SwapABIEncoder.encodeAndExit();
     }
 }

@@ -2,14 +2,14 @@
 const { proofs } = require('@aztec/dev-utils');
 
 const ACE = artifacts.require('./ACE.sol');
-const BilateralSwap = artifacts.require('./BilateralSwap.sol');
-const BilateralSwapInterface = artifacts.require('./BilateralSwapInterface.sol');
+const Swap = artifacts.require('./Swap.sol');
+const SwapInterface = artifacts.require('./SwapInterface.sol');
 
-BilateralSwap.abi = BilateralSwapInterface.abi;
+Swap.abi = SwapInterface.abi;
 
 module.exports = (deployer) => {
-    return deployer.deploy(BilateralSwap).then(async ({ address: bilateralSwapAddress }) => {
+    return deployer.deploy(Swap).then(async ({ address: swapAddress }) => {
         const ace = await ACE.at(ACE.address);
-        await ace.setProof(proofs.BILATERAL_SWAP_PROOF, bilateralSwapAddress);
+        await ace.setProof(proofs.SWAP_PROOF, swapAddress);
     });
 };
