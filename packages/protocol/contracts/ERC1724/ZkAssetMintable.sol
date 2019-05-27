@@ -103,5 +103,53 @@ contract ZkAssetMintable is ZkAssetOwnableBase {
 
         confidentialTransferInternal(proofOutputs, _signatures, _proofData);
     }
+
+    function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
+        (bytes memory inputNotes,
+        bytes memory outputNotes,
+        address publicOwner,
+        int256 publicValue) = _proofOutput.extractProofOutput();
+        
+        uint256 length = inputNotes.getLength();
+        for (uint i = 0; i < length; i += 1) {
+            (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
+            require(
+                confidentialApproved[noteHash][msg.sender] == true,
+                "sender does not have approval to spend input note"
+            );
+        }
+
+        (
+            ,
+            uint256 scalingFactor,
+            uint256 totalSupply,
+            ,
+            ,
+            ,
+        ) = ace.getRegistry(address(this));
+
+        if (publicValue > 0) {
+            if (totalSupply < uint256(publicValue)) {
+                uint256 supplementValue = uint256(publicValue).sub(totalSupply);
+                ERC20Mintable(address(linkedToken)).mint(address(this), supplementValue.mul(scalingFactor));
+                ERC20Mintable(address(linkedToken)).approve(address(ace), supplementValue.mul(scalingFactor));
+
+                ace.supplementTokens(supplementValue);
+            }
+        }
+
+
+        ace.updateNoteRegistry(_proof, _proofOutput, msg.sender);
+
+        logInputNotes(inputNotes);
+        logOutputNotes(outputNotes);
+
+        if (publicValue < 0) {
+            emit ConvertTokens(publicOwner, uint256(-publicValue));
+        }
+        if (publicValue > 0) {
+            emit RedeemTokens(publicOwner, uint256(publicValue));
+        }
+    }
 }
 
