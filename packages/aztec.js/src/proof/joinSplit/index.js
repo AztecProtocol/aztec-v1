@@ -129,18 +129,15 @@ class JoinSplitProof extends Proof {
     /**
      * Encode the join-split proof as data for an Ethereum transaction
      * @param {string} validator Ethereum address of the join-split validator contract
-     * @param {string[]} inputNotePrivateKeys array with the private keys of the owners of the input notes
+     * @param {Object} aztecAccounts mapping between owners and private keys
      * @returns {Object} proof data and expected output
      */
-    encodeABI(validator, inputNotePrivateKeys) {
+    encodeABI(validator, aztecAccounts) {
         if (!ProofUtils.isEthereumAddress(validator)) {
             throw new Error('validator is not an Ethereum address');
         }
-        if (this.inputNotes.length !== inputNotePrivateKeys.length) {
-            throw new Error("the length of the inputNoteOwners array doesn't match the length of the inputNotes array");
-        }
 
-        const inputSignatures = this.inputNotes.map((inputNote, index) => {
+        const inputSignatures = this.inputNotes.map((inputNote) => {
             const domain = signer.generateAZTECDomainParams(validator, constants.eip712.ACE_DOMAIN_PARAMS);
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
@@ -149,7 +146,7 @@ class JoinSplitProof extends Proof {
                 challenge: this.challengeHex,
                 sender: this.sender,
             };
-            const privateKey = inputNotePrivateKeys[index];
+            const privateKey = aztecAccounts[inputNote.owner];
             const { signature } = signer.signTypedData(domain, schema, message, privateKey);
             return signature;
         });
@@ -182,10 +179,7 @@ class JoinSplitProof extends Proof {
             ...offsets,
             ...encodedParams,
         ];
-        return {
-            data: `0x${abiEncodedParams.join('').toLowerCase()}`,
-            inputSignatures,
-        };
+        return `0x${abiEncodedParams.join('').toLowerCase()}`;
     }
 }
 

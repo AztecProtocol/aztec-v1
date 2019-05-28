@@ -68,9 +68,8 @@ describe('Dividend Proof Verifier', () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-
             // Set the x coordinate of gamma to zero
-            proof.data[0][2] = `0x${padLeft('', 64)}`;
+            proof.data[0][2] = padLeft('0x00', 64);
 
             const verifier = new DividendVerifier(proof);
             verifier.verifyProof();
@@ -84,15 +83,13 @@ describe('Dividend Proof Verifier', () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-
-            proof.data = Array(3)
-                .fill()
-                .map(() => {
-                    return Array(6)
-                        .fill()
-                        .map(() => randomHex(64));
-                });
-
+            proof.data = [];
+            for (let i = 0; i < 3; i += 1) {
+                proof.data[i] = [];
+                for (let j = 0; j < 6; j += 1) {
+                    proof.data[i][j] = randomHex(32);
+                }
+            }
             const verifier = new DividendVerifier(proof);
             verifier.verifyProof();
             expect(verifier.isValid).to.equal(false);
@@ -142,13 +139,12 @@ describe('Dividend Proof Verifier', () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-
-            proof.data[0][0] = `0x${padLeft('05', 64)}`;
-            proof.data[0][1] = `0x${padLeft('05', 64)}`;
-            proof.data[0][2] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
-            proof.data[0][3] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
-            proof.data[0][4] = `0x${padLeft(bn128.h.x.fromRed().toString(16), 64)}`;
-            proof.data[0][5] = `0x${padLeft(bn128.h.y.fromRed().toString(16), 64)}`;
+            proof.data[0][0] = padLeft('0x05', 64);
+            proof.data[0][1] = padLeft('0x05', 64);
+            proof.data[0][2] = `0x${constants.H_X.toString(16)}`;
+            proof.data[0][3] = `0x${constants.H_Y.toString(16)}`;
+            proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
+            proof.data[0][5] = `0x${constants.H_Y.toString(16)}`;
             proof.challenge = new BN(10).toRed(constants.BN128_GROUP_REDUCTION);
 
             const verifier = new DividendVerifier(proof);
