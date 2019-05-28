@@ -3,7 +3,6 @@ const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
 const BN = require('bn.js');
 const { expect } = require('chai');
-const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
@@ -50,7 +49,7 @@ describe('Signer', () => {
             const verifyingContract = randomHex(20);
             const noteString = Array(4)
                 .fill()
-                .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
+                .map(() => randomHex(32));
             const senderAddress = randomHex(20);
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
@@ -59,7 +58,7 @@ describe('Signer', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
+                noteHash: randomHex(32),
                 challenge,
                 sender: senderAddress,
             };
@@ -79,7 +78,7 @@ describe('Signer', () => {
             const verifyingContract = randomHex(20);
             const noteString = Array(4)
                 .fill()
-                .map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`);
+                .map(() => randomHex(32));
             const senderAddress = randomHex(20);
             const challengeString = `${senderAddress}${padLeft('132', 64)}${padLeft('1', 64)}${[...noteString]}`;
             const challenge = `0x${new BN(keccak256(challengeString, 'hex').slice(2), 16).umod(bn128.curve.n).toString(16)}`;
@@ -88,7 +87,7 @@ describe('Signer', () => {
             const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
             const message = {
                 proof: proofs.JOIN_SPLIT_PROOF,
-                noteHash: `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`,
+                noteHash: randomHex(32),
                 challenge,
                 sender: senderAddress,
             };

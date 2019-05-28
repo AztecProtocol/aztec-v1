@@ -53,6 +53,8 @@ class Proof {
 
     get eth() {
         return {
+            // Ethereum will automatically prepend a bytes array with an evm word that
+            // represents the length of the bytes array
             output: `0x${this.output.slice(0x42)}`,
         };
     }
@@ -120,7 +122,7 @@ class Proof {
      */
     validateInputs() {
         if (!this.type || !ProofType[this.type]) {
-            throw new Error(`proof type should be one of ${ProofType.enumValues}`);
+            throw new Error(`Proof type should be one of ${ProofType.enumValues}`);
         }
         if (!ProofUtils.isEthereumAddress(this.sender)) {
             throw new Error('sender is not an Ethereum address');
@@ -147,8 +149,7 @@ class Proof {
                 throw new AztecError(errors.codes.VIEWING_KEY_MALFORMED, {
                     message: 'Viewing key is malformed',
                     viewingKey: testNote.a.fromRed(),
-                    criteria: `Viewing key should be less than ${bn128.curve.n}
-                    and greater than zero`,
+                    criteria: `Viewing key should be less than ${bn128.curve.n} and greater than zero`,
                 });
             }
 

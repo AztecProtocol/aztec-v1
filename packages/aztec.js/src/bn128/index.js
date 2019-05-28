@@ -6,8 +6,8 @@
 
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const crypto = require('crypto');
 const EC = require('elliptic');
+const { randomHex } = require('web3-utils');
 
 const decodePoint = require('./decodePoint');
 
@@ -118,7 +118,7 @@ bn128.decompressHex = (compressedHex) => {
  * @returns {BN} BN.js instance
  */
 bn128.randomGroupScalar = () => {
-    return new BN(crypto.randomBytes(32), 16).toRed(BN128_GROUP_REDUCTION);
+    return new BN(randomHex(32), 16).toRed(BN128_GROUP_REDUCTION);
 };
 
 // TODO: replace with optimized C++ implementation, this is way too slow
@@ -146,7 +146,7 @@ bn128.recoverMessage = (gamma, gammaK) => {
  */
 bn128.randomPoint = () => {
     const recurse = () => {
-        const x = new BN(crypto.randomBytes(32), 16).toRed(bn128.curve.red);
+        const x = new BN(randomHex(32), 16).toRed(bn128.curve.red);
         const y2 = x
             .redSqr()
             .redMul(x)

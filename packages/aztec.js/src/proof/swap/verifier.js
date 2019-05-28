@@ -5,7 +5,7 @@ const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const Verifier = require('../verifier');
 
-const { BN128_GROUP_REDUCTION, ZERO_BN, ZERO_BN_RED } = constants;
+const { ZERO_BN, ZERO_BN_RED } = constants;
 
 class SwapVerifier extends Verifier {
     verifyProof() {

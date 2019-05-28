@@ -1,7 +1,7 @@
 const encoder = require('./encoder');
-const decoder = require('./decoder');
+const outputCoder = require('./outputCoder');
 
 module.exports = {
     encoder,
-    decoder,
+    outputCoder,
 };

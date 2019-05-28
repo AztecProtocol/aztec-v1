@@ -217,7 +217,7 @@ outputCoder.encodeProofOutput = ({ inputNotes, outputNotes, publicOwner, publicV
     const encodedInputNotes = outputCoder.encodeNotes(inputNotes, false);
     const encodedOutputNotes = outputCoder.encodeNotes(outputNotes, true);
     let formattedValue;
-    // TODO: store this constant somewhere else
+    // TODO: store this constant somewhere else and also explain what it does
     const predicate = new BN('10944121435919637611123202872628637544274182200208017171849102093287904247808', 10);
     let adjustedPublicValue = publicValue;
     if (publicValue.gt(predicate)) {

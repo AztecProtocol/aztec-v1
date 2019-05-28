@@ -72,14 +72,13 @@ describe('Swap Proof Verifier', () => {
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
-
-            proof.data = Array(4)
-                .fill()
-                .map(() =>
-                    Array(6)
-                        .fill()
-                        .map(() => randomHex(32)),
-                );
+            proof.data = [];
+            for (let i = 0; i < 4; i += 1) {
+                proof.data[i] = [];
+                for (let j = 0; j < 6; j += 1) {
+                    proof.data[i][j] = randomHex(32);
+                }
+            }
 
             const verifier = new SwapVerifier(proof);
             verifier.verifyProof();
@@ -107,8 +106,8 @@ describe('Swap Proof Verifier', () => {
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
 
-            proof.data[0][0] = `0x${padLeft('05', 64)}`;
-            proof.data[0][1] = `0x${padLeft('05', 64)}`;
+            proof.data[0][0] = padLeft('0x05', 64);
+            proof.data[0][1] = padLeft('0x05', 64);
             proof.data[0][2] = `0x${constants.H_X.toString(16)}`;
             proof.data[0][3] = `0x${constants.H_Y.toString(16)}`;
             proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
@@ -129,8 +128,8 @@ describe('Swap Proof Verifier', () => {
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
 
-            proof.data[0][0] = `0x${padLeft('0', 64)}`; // kBar
-            proof.data[0][1] = `0x${padLeft('0', 64)}`; // aBar
+            proof.data[0][0] = padLeft('0x00', 64); // kBar
+            proof.data[0][1] = padLeft('0x00', 64); // aBar
 
             const verifier = new SwapVerifier(proof);
             verifier.verifyProof();
@@ -145,18 +144,17 @@ describe('Swap Proof Verifier', () => {
             // We can construct 'proof' where all points and scalars are zero. The challenge response
             // is correctly reconstructed, but the proof should still be invalid
             const zeroProof = mockZeroSwapProof();
-
             // Make the kBars satisfy the proof relation, to ensure it's not an incorrect balancing
             // relationship that causes the test to fail
-            zeroProof.data[0][0] = padRight('0x1', 64); // k_1
-            zeroProof.data[1][0] = padRight('0x2', 64); // k_2
-            zeroProof.data[2][0] = padRight('0x1', 64); // k_3
-            zeroProof.data[3][0] = padRight('0x2', 64); // k_4
+            zeroProof.data[0][0] = padRight('0x10', 64); // k_1
+            zeroProof.data[1][0] = padRight('0x20', 64); // k_2
+            zeroProof.data[2][0] = padRight('0x10', 64); // k_3
+            zeroProof.data[3][0] = padRight('0x20', 64); // k_4
             // Set aBars to arbitrarily chosen values, to ensure it's not failing due to aBar = 0
-            zeroProof.data[0][1] = padRight('0x4', 64); // a_1
-            zeroProof.data[1][1] = padRight('0x5', 64); // a_2
-            zeroProof.data[2][1] = padRight('0x6', 64); // a_3
-            zeroProof.data[3][1] = padRight('0x7', 64); // a_4
+            zeroProof.data[0][1] = padRight('0x40', 64); // a_1
+            zeroProof.data[1][1] = padRight('0x50', 64); // a_2
+            zeroProof.data[2][1] = padRight('0x60', 64); // a_3
+            zeroProof.data[3][1] = padRight('0x70', 64); // a_4
 
             const verifier = new SwapVerifier(zeroProof);
             verifier.verifyProof();
