@@ -1,5 +1,5 @@
 /**
- * Duplicated from aztec.js/test to avoid creating a test-utils package.
+ * Duplicated from aztec.js/test and delayed the creation of a test-utils package.
  */
 const { bn128, ProofType } = require('aztec.js');
 const BN = require('bn.js');
