@@ -2,7 +2,7 @@ pragma solidity >=0.5.0 <0.6.0;
 import "./PublicRangeABIEncoder.sol";
 
 /**
- * @title Library to validate AZTEC Bilateral Swap zero-knowledge proofs
+ * @title Library to validate AZTEC public range zero-knowledge proofs
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses 
  * a static memory table to cache elliptic curve primitives and hashes.
@@ -18,17 +18,17 @@ contract PublicRange {
     /**
      * @dev PublicRange.sol will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction throws.
-     * @notice See BilateralSwapInterface for how method calls should be constructed.
-     * AZTECBilateralSwap is written in YUL to enable manual memory management and for other efficiency savings.
+     * @notice See PublicRangeInterface for how method calls should be constructed.
+     * PublicRange.sol is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     // solhint-disable payable-fallback
     function() external {
         assembly {
 
             // We don't check for function signatures, there's only one function that 
-            // ever gets called: validateBilateralSwap()
+            // ever gets called: validatePublicRange()
             // We still assume calldata is offset by 4 bytes so that we can represent 
-            // this contract through a comp\atible ABI
+            // this contract through a compatible ABI
             validatePublicRange()
 
             // if we get to here, the proof is valid. We now 'fall through' the assembly block
@@ -111,7 +111,7 @@ contract PublicRange {
                     switch gt(i, 0)
                     case 1 {
                         /*
-                        Enforce the condition k_2 = k_1 - c*k_public
+                        Enforce the condition k_2 = k_1 - c*publicComparison
                         */
                         k := addmod(
                             calldataload(sub(noteIndex, 0xc0)), // k_1
@@ -318,7 +318,7 @@ contract PublicRange {
                 mstore(0x00, keccak256(0x320, mul(n, 0x80)))
             }
         }
-        // if we've reached here, we've validated the bilateral swap and haven't thrown an error.
+        // if we've reached here, we've validated the public range proof and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
         PublicRangeABIEncoder.encodeAndExit();
     }

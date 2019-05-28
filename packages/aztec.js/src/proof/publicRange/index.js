@@ -22,11 +22,10 @@ const publicRange = {};
 publicRange.verifier = verifier;
 
 /**
- * Construct blinding factors
+ * Construct blinding factors for the public range proof
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
- * @param {Number} publicComparisonBN - BN instance of the public integer being compared against
  * @returns {Object[]} blinding factors
  */
 publicRange.constructBlindingFactors = (notes) => {
@@ -63,7 +62,7 @@ publicRange.constructBlindingFactors = (notes) => {
  *
  * @method constructProof
  * @param {Object[]} notes - array of AZTEC notes
- * @param {Number} publicComparisonBN - public integer being compared against
+ * @param {Number} publicComparison - public integer against which the comparison is being made
  * @param {sender} sender - Ethereum address
  * @returns {string[]} proofData - constructed cryptographic proof data
  * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
@@ -137,13 +136,13 @@ publicRange.constructProof = (notes, publicComparison, sender) => {
 };
 
 /**
- * Encode a dividend computation transaction
+ * Encode a publicRange computation transaction
  *
  * @method encodePublicRangeTransaction
  * @memberof module:publicRange
  * @param {Note[]} inputNotes input AZTEC notes
  * @param {Note[]} outputNotes output AZTEC notes
- * @param {Number} publicComparison - public integer being compared against
+ * @param {Number} publicComparison - public integer against which the comparison is being made
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @returns {Object} AZTEC proof data and expected output
  */

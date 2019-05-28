@@ -16,7 +16,7 @@ const { expect } = chai;
 
 describe('Public range proof verifier', () => {
     describe('Success States', () => {
-        it('should construct a valid dividend computation proof', async () => {
+        it('should construct a valid public range proof', async () => {
             const testNotes = await proofUtils.makeTestNotes([50], [40]);
             const publicComparison = 10;
             const sender = proofUtils.randomAddress();

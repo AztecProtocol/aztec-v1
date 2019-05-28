@@ -43,22 +43,22 @@ library PublicRangeABIEncoder {
 
             // `returndata` starts at 0x160
             // `proofOutputs` starts at 0x180
-            // 0x160 - 0x180 = DONE relative offset in returndata to first bytes argument (0x20)
-            // 0x180 - 0x1a0 = DONE byte length of `proofOutputs`
-            // 0x1a0 - 0x1c0 = DONE number of `proofOutputs` entries (1)
-            // 0x1c0 - 0x1e0 = DONE relative memory offset between `v` and start of `proofOutput`
+            // 0x160 - 0x180 = relative offset in returndata to first bytes argument (0x20)
+            // 0x180 - 0x1a0 = byte length of `proofOutputs`
+            // 0x1a0 - 0x1c0 = number of `proofOutputs` entries (1)
+            // 0x1c0 - 0x1e0 = relative memory offset between `v` and start of `proofOutput`
 
             // `proofOutput` - t, starts at 0x1e0
             // 0x1e0 - 0x200 = length of `proofOutput`
-            // 0x200 - 0x220 = DONE relative offset between `t` and `inputNotes`
-            // 0x220 - 0x240 = DONE relative offset between `t` and `outputNotes`
-            // 0x240 - 0x260 = DONE `publicOwner`
-            // 0x260 - 0x280 = DONE `publicValue`
+            // 0x200 - 0x220 = relative offset between `t` and `inputNotes`
+            // 0x220 - 0x240 = relative offset between `t` and `outputNotes`
+            // 0x240 - 0x260 = `publicOwner`
+            // 0x260 - 0x280 = `publicValue`
 
             // `inputNotes` starts at 0x2a0
             // structure of `inputNotes` and `outputNotes`
-            // 0x00 - 0x20 = DONE byte length of notes array
-            // 0x20 - 0x40 = DONE number of notes `i`
+            // 0x00 - 0x20 = byte length of notes array
+            // 0x20 - 0x40 = number of notes `i`
             // DONE the next `i` consecutive blocks of 0x20-sized memory contain relative offset between
             // start of notes array and the location of the `note`
 
@@ -83,7 +83,7 @@ library PublicRangeABIEncoder {
             mstore(0x200, 0xc0)                            // location of inputNotes
             // location of outputNotes is at s + 0xc0
             mstore(0x240, 0x00)             // publicOwner
-            // store publicComparison. If publicComparison is negative, store correct signed representation,
+            // store publicComparison integer. If publicComparison is negative, store correct signed representation,
             // relative to 2^256, not to the order of the bn128 group
 
             let publicComparison := calldataload(0x144)

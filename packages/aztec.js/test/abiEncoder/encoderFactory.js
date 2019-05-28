@@ -455,7 +455,7 @@ describe('abiEncoder.encoderFactory', () => {
             // Setup
             let accounts = [];
             let notes = [];
-            const u = 10;
+            const publicComparison = 10;
 
             const numNotes = 2;
             const noteValues = [50, 40];
@@ -478,11 +478,11 @@ describe('abiEncoder.encoderFactory', () => {
             const outputOwners = outputNotes.map((n) => n.owner);
 
             const result = new HexString(
-                abiEncoder.inputCoder.publicRange(proofData, challenge, u, inputOwners, outputOwners, outputNotes).slice(2),
+                abiEncoder.inputCoder.publicRange(proofData, challenge, publicComparison, inputOwners, outputOwners, outputNotes).slice(2),
             );
             expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
 
-            expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(u);
+            expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(publicComparison);
 
             const offsetToProofData = parseInt(result.slice(0x40, 0x60), 16);
             expect(parseInt(result.slice(offsetToProofData - 0x20, offsetToProofData), 16)).to.equal(numNotes);
