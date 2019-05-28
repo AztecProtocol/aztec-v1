@@ -181,18 +181,18 @@ inputCoder.privateRange = (proofData, challenge, inputOwners, outputOwners, meta
  * @returns {string} data - hexadecimal concatenated string of parameters encoded according
  * to the ABI spec of that particular proof
  */
-inputCoder.publicRange = (proofData, challenge, kPublic, inputOwners, outputOwners, metadata) => {
-    let K_PUBLIC;
-    if (kPublic < 0) {
-        const kPublicBN = constants.GROUP_MODULUS.add(new BN(kPublic));
-        K_PUBLIC = padLeft(kPublicBN.toString(16), 64);
+inputCoder.publicRange = (proofData, challenge, publicComparison, inputOwners, outputOwners, metadata) => {
+    let PUBLIC_COMPARISON;
+    if (publicComparison < 0) {
+        const publicComparisonBN = constants.GROUP_MODULUS.add(new BN(publicComparison));
+        PUBLIC_COMPARISON = padLeft(publicComparisonBN.toString(16), 64);
     } else {
-        K_PUBLIC = padLeft(Number(kPublic).toString(16), 64);
+        PUBLIC_COMPARISON = padLeft(Number(publicComparison).toString(16), 64);
     }
 
     const configs = {
         CHALLENGE: challenge.slice(2),
-        K_PUBLIC,
+        PUBLIC_COMPARISON,
         PROOF_DATA: encoderFactory.encodeProofData(proofData),
         INPUT_OWNERS: encoderFactory.encodeInputOwners(inputOwners),
         OUTPUT_OWNERS: encoderFactory.encodeOutputOwners(outputOwners),

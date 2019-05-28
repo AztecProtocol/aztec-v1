@@ -675,10 +675,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         });
 
         it('should not update the validatedProofs mapping for utility proofs', async () => {
-            // Using a bilateral swap proof
-            console.log('entered the test');
-            console.log('dividend proof number', DIVIDEND_PROOF);
-
             const aztecAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
             const noteValues = [90, 4, 50];
             const za = 100;
@@ -705,10 +701,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
                 from: accounts[0],
             });
 
-            console.log('created the note registry');
-
             const { receipt: utilityReceipt } = await ace.validateProof(DIVIDEND_PROOF, accounts[0], dividendProof.proofData);
-            console.log('validated the proof');
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(DIVIDEND_PROOF, dividendProof.proofData, accounts[0]),
                 'ACE has not validated a matching proof',

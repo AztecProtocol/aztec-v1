@@ -53,7 +53,7 @@ encoderFactory.encode = (config, abiParams, proofType) => {
     } else if (proofType === 'privateRange') {
         abiEncodedParameters = [config.CHALLENGE, ...offsets, ...encodedParameters];
     } else if (proofType === 'publicRange') {
-        abiEncodedParameters = [config.CHALLENGE, config.K_PUBLIC, ...offsets, ...encodedParameters];
+        abiEncodedParameters = [config.CHALLENGE, config.PUBLIC_COMPARISON, ...offsets, ...encodedParameters];
     } else {
         throw new Error('incorrect proof name input');
     }

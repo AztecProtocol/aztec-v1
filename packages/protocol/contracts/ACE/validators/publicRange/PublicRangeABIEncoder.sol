@@ -25,7 +25,7 @@ library PublicRangeABIEncoder {
     * 0xe4:0x104     = t2_y1   // crs
     * 0x104:0x124    = length of proofData byte array
     * 0x124:0x144    = challenge
-    * 0x144:0x164    = kPublic
+    * 0x144:0x164    = publicComparison
     * 0x164:0x184    = offset in byte array to notes
     * 0x184:0x1a4    = offset in byte array to inputOwners
     * 0x1a4:0x1c4    = offset in byte array to outputOwners
@@ -83,16 +83,16 @@ library PublicRangeABIEncoder {
             mstore(0x200, 0xc0)                            // location of inputNotes
             // location of outputNotes is at s + 0xc0
             mstore(0x240, 0x00)             // publicOwner
-            // store kPublic. If kPublic is negative, store correct signed representation,
+            // store publicComparison. If publicComparison is negative, store correct signed representation,
             // relative to 2^256, not to the order of the bn128 group
 
-            let kPublic := calldataload(0x144)
-            switch gt(kPublic, 10944121435919637611123202872628637544274182200208017171849102093287904247808)
+            let publicComparison := calldataload(0x144)
+            switch gt(publicComparison, 10944121435919637611123202872628637544274182200208017171849102093287904247808)
             case 1 {
-                mstore(0x260, sub(kPublic, 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001))
+                mstore(0x260, sub(publicComparison, 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001))
             }
             case 0 {
-                mstore(0x260, kPublic)
+                mstore(0x260, publicComparison)
             }
 
             // 0x280 = challenge

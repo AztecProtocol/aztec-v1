@@ -48,7 +48,7 @@ contract PublicRange {
              * 0xe4:0x104     = t2_y1   // crs
              * 0x104:0x124    = length of proofData byte array 
              * 0x124:0x144    = challenge
-             * 0x144:0x164    = kPublic
+             * 0x144:0x164    = publicComparison
              * 0x164:0x184    = offset in byte array to notes
              * 0x184:0x1a4    = offset in byte array to inputOwners
              * 0x1a4:0x1c4    = offset in byte array to outputOwners
@@ -89,10 +89,10 @@ contract PublicRange {
                 let m := 1
                 let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x124), gen_order)
-                let kPublic := mod(calldataload(0x144), gen_order)
+                let publicComparison := mod(calldataload(0x144), gen_order)
 
                 mstore(0x2e0, calldataload(0x24)) // store the msg.sender, to be hashed later
-                mstore(0x300, kPublic)
+                mstore(0x300, publicComparison)
                 hashCommitments(notes, n)
                 let b := add(0x320, mul(n, 0x80))
 
@@ -115,7 +115,7 @@ contract PublicRange {
                         */
                         k := addmod(
                             calldataload(sub(noteIndex, 0xc0)), // k_1
-                            mulmod(sub(gen_order, c), kPublic, gen_order), 
+                            mulmod(sub(gen_order, c), publicComparison, gen_order), 
                             gen_order
                         )
                     } 

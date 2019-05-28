@@ -19,14 +19,14 @@ const verifier = {};
  * @param {Object[]} proofData - proofData array of AZTEC notes
  * @param {string} challenge - challenge variable used in zero-knowledge protocol
  * @param {string} sender - Ethereum address
- * @param {Number} kPublic - public integer being compared against
+ * @param {Number} publicComparison - public integer being compared against
  * @returns {boolean} valid - boolean that describes whether the proof verification is valid
  * @returns {option} errors - an array of all errors that were caught
  */
-verifier.verifyProof = (proofData, challengeHex, sender, kPublic) => {
+verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
     const errors = [];
 
-    let kPublicBN;
+    let publicComparisonBN;
     const K_MAXBN = new BN(K_MAX);
     const kBarArray = [];
     const numNotes = 2;
@@ -42,14 +42,14 @@ verifier.verifyProof = (proofData, challengeHex, sender, kPublic) => {
     const challenge = new BN(challengeHex.slice(2), 16).toRed(groupReduction);
 
     // convert to bn.js instances if not already
-    if (BN.isBN(kPublic)) {
-        kPublicBN = kPublic.toRed(groupReduction);
+    if (BN.isBN(publicComparison)) {
+        publicComparisonBN = publicComparison.toRed(groupReduction);
     } else {
-        kPublicBN = new BN(kPublic).toRed(groupReduction);
+        publicComparisonBN = new BN(publicComparison).toRed(groupReduction);
     }
 
-    // Check that kPublic is less than k_max
-    if (kPublicBN.gte(K_MAXBN)) {
+    // Check that publicComparison is less than k_max
+    if (publicComparisonBN.gte(K_MAXBN)) {
         errors.push(errorTypes.U_TOO_BIG);
     }
     const rollingHash = new Keccak();
@@ -62,7 +62,7 @@ verifier.verifyProof = (proofData, challengeHex, sender, kPublic) => {
     // Create finalHash and append to it - in same order as the proof construction code (otherwise final hash will be different)
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));
-    finalHash.appendBN(kPublicBN);
+    finalHash.appendBN(publicComparisonBN);
     finalHash.data = [...finalHash.data, ...rollingHash.data];
 
     proofDataBn.map((proofElement, i) => {
@@ -84,7 +84,7 @@ verifier.verifyProof = (proofData, challengeHex, sender, kPublic) => {
         if (i === 1) {
             // output note
             const firstTerm = kBarArray[0];
-            const secondTerm = challenge.mul(kPublicBN);
+            const secondTerm = challenge.mul(publicComparisonBN);
             kBar = firstTerm.sub(secondTerm);
 
             B = gamma
