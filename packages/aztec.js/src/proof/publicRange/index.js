@@ -8,6 +8,7 @@ const devUtils = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
+const helpers = require('./helpers');
 const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const proofUtils = require('../proofUtils');
@@ -45,7 +46,7 @@ publicRange.constructBlindingFactors = (notes) => {
 
         if (i > 0) {
             // output note
-            bk = bkArray[i - 1]; // .sub(publicComparisonBN);
+            bk = bkArray[i - 1];
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             bkArray.push(bk);
         }
@@ -136,29 +137,68 @@ publicRange.constructProof = (notes, publicComparison, sender) => {
 };
 
 /**
- * Encode a publicRange computation transaction
+ * Encode a public range proof transaction. It will construct proofData for a public range zero
+ * knowledge proof and then ABI encode according to the standard compatible with the ACE.
+ *
+ * This function can be used in two flows:
+ * 1) Default - the default is that in terms of notes, only the originalNote is input
+ * 2) Manual - this is when a utility note is manually constructed by the user and passed in as a fourth
+ * argument. For some use cases, this is the desired behaviour
+ *
+ * It is expected that for most functionality, this function will be used in the default flow.
+ *
+ * Note that this proof is capable of
  *
  * @method encodePublicRangeTransaction
  * @memberof module:publicRange
- * @param {Note[]} inputNotes input AZTEC notes
- * @param {Note[]} outputNotes output AZTEC notes
- * @param {Number} publicComparison - public integer against which the comparison is being made
+ * @param {Note[]} originalNote original AZTEC note being to be compared
+ * @param {Number} publicComparison public integer against which the comparison is being made. Must be positive and an integer
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
+ * @param {bool} isGreaterThan boolean controlling whether this is a greater than or less than proof. If true, then the proof
+ * data constructed is for originalNoteValue > publicComparisonValue. If false, then the proof data constructed is for
+ * originalNoteValue < publicComparisonValue.
+ * @param {Note[]} utilityNote (optional) additional note required to construct a valid balancing relationship
  * @returns {Object} AZTEC proof data and expected output
  */
-publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, publicComparison, senderAddress }) => {
-    const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-        [...inputNotes, ...outputNotes],
-        publicComparison,
-        senderAddress,
+publicRange.encodePublicRangeTransaction = async ({
+    originalNote,
+    publicComparison,
+    senderAddress,
+    isGreaterThan,
+    utilityNote,
+}) => {
+    let notes;
+    const utilityNoteVariable = utilityNote || 0;
+    let signedPublicComparison;
+
+    helpers.checkPublicComparisonWellFormed(publicComparison);
+
+    if (!isGreaterThan) {
+        signedPublicComparison = publicComparison * -1;
+    }
+
+    if (!utilityNoteVariable) {
+        notes = await helpers.constructUtilityNote(originalNote, signedPublicComparison);
+    } else {
+        notes = [originalNote, utilityNote];
+    }
+
+    const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, signedPublicComparison, senderAddress);
+
+    const inputNotes = [originalNote];
+    const inputOwners = [originalNote.owner];
+    const outputNotes = [utilityNote];
+    const outputOwners = [utilityNote.owner];
+
+    const proofData = inputCoder.publicRange(
+        proofDataRaw,
+        challenge,
+        signedPublicComparison,
+        inputOwners,
+        outputOwners,
+        outputNotes,
     );
 
-    const inputOwners = inputNotes.map((m) => m.owner);
-    const outputOwners = outputNotes.map((n) => n.owner);
-
-    const proofData = inputCoder.publicRange(proofDataRaw, challenge, publicComparison, inputOwners, outputOwners, outputNotes);
-
-    const publicValue = publicComparison;
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
 
     const expectedOutput = `0x${outputCoder
@@ -167,7 +207,7 @@ publicRange.encodePublicRangeTransaction = ({ inputNotes, outputNotes, publicCom
                 inputNotes,
                 outputNotes,
                 publicOwner,
-                publicValue,
+                publicValue: signedPublicComparison,
                 challenge,
             },
         ])
