@@ -104,6 +104,20 @@ contract ZkAssetMintable is ZkAssetOwnableBase {
         confidentialTransferInternal(proofOutputs, _signatures, _proofData);
     }
 
+    /**
+    * @dev Executes a value transfer mediated by smart contracts. The method is supplied with
+    * transfer instructions represented by a bytes _proofOutput argument that was outputted
+    * from a proof verification contract. Adapted for use with a mintable ZkAsset.
+
+    * If public value is being transferred out of the ACE, and the minted value is greater than 
+    * ACE's token balance, then tokens will be minted from the linked ERC20 token using supplementTokens()
+    * 
+    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables: 
+    * 1) epoch number 2) category number 3) ID number for the proof
+    * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
+    * transfer instructions for the ACE
+    */
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
         (bytes memory inputNotes,
         bytes memory outputNotes,
