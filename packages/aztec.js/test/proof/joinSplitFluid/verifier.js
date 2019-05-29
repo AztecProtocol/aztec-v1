@@ -43,7 +43,7 @@ describe('Join-Split Fluid Proof Verifier', () => {
         });
 
         describe('Failure States', () => {
-            it('should reject if number of notes supplied is less than 2', async () => {
+            it('should fail if number of notes supplied is less than 2', async () => {
                 const validateInputs = sinon.stub(Proof.prototype, 'validateInputs').callsFake(() => {});
                 const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
 
@@ -92,7 +92,7 @@ describe('Join-Split Fluid Proof Verifier', () => {
         });
 
         describe('Failure States', () => {
-            it('should reject if number of notes supplied is less than 2', async () => {
+            it('should fail if number of notes supplied is less than 2', async () => {
                 const validateInputs = sinon.stub(Proof.prototype, 'validateInputs').callsFake(() => {});
                 const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
 

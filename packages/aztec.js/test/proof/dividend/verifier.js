@@ -50,7 +50,7 @@ describe('Dividend Proof Verifier', () => {
             validateInputsStub.restore();
         });
 
-        it('should reject if unsatisfied proof relations', async () => {
+        it('should fail if unsatisfied proof relations', async () => {
             const za = 100;
             const zb = 5;
             const bogusTargetNoteValue = 49;
@@ -64,7 +64,7 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if points NOT on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
@@ -79,7 +79,7 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if malformed proof data', async () => {
+        it('should fail if malformed proof data', async () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
@@ -96,7 +96,7 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[verifier.errors.length - 1]).to.contain(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if malformed challenge', async () => {
+        it('should fail if malformed challenge', async () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
@@ -109,7 +109,7 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if z_a > K_MAX', async () => {
+        it('should fail if z_a > K_MAX', async () => {
             const za = constants.K_MAX + 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
@@ -122,7 +122,7 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if z_b > k_max', async () => {
+        it('should fail if z_b > k_max', async () => {
             const za = 100;
             const zb = constants.K_MAX + 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
@@ -135,7 +135,7 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if blinding factor at infinity', async () => {
+        it('should fail if blinding factor at infinity', async () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
