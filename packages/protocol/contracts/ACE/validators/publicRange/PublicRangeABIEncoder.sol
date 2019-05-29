@@ -83,17 +83,8 @@ library PublicRangeABIEncoder {
             mstore(0x200, 0xc0)                            // location of inputNotes
             // location of outputNotes is at s + 0xc0
             mstore(0x240, 0x00)             // publicOwner
-            // store publicComparison integer. If publicComparison is negative, store correct signed representation,
-            // relative to 2^256, not to the order of the bn128 group
 
-            let publicComparison := calldataload(0x144)
-            switch gt(publicComparison, 10944121435919637611123202872628637544274182200208017171849102093287904247808)
-            case 1 {
-                mstore(0x260, sub(publicComparison, 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001))
-            }
-            case 0 {
-                mstore(0x260, publicComparison)
-            }
+            mstore(0x260, 0) // store kPublic (public value) = 0
 
             // 0x280 = challenge
             mstore(0x280, calldataload(0x124))
