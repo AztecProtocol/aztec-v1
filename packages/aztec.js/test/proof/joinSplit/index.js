@@ -60,7 +60,7 @@ describe('Join-Split Proof', () => {
     });
 
     describe('Failure States', () => {
-        it('should fail if malformed publicValue', async () => {
+        it('should fail if malformed public value', async () => {
             const publicValue = GROUP_MODULUS.add(new BN(100));
             try {
                 const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
@@ -79,7 +79,7 @@ describe('Join-Split Proof', () => {
             }
         });
 
-        it('should fail if point NOT on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             inputNotes[0].gamma.x = new BN(FIELD_MODULUS.add(new BN(100))).toRed(bn128.curve.red);
             try {
@@ -89,7 +89,7 @@ describe('Join-Split Proof', () => {
             }
         });
 
-        it('should fail if point at infinity', async () => {
+        it('should fail if gamma at infinity', async () => {
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             inputNotes[0].gamma = inputNotes[0].gamma.add(inputNotes[0].gamma.neg());
             try {

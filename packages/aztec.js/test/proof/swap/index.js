@@ -27,7 +27,7 @@ describe('Swap Proof', () => {
         expect(proof.data[3].length).to.equal(6);
     });
 
-    it('should construct a Swap proof where blinding scalar relations are satisfied', async () => {
+    it('should construct a Swap proof with satisfied blinding scalar relations', async () => {
         // i.e. bk1 = bk3 and bk2 = bk4
         const proof = new SwapProof(inputNotes, outputNotes, sender);
         const testk1 = proof.blindingFactors[0].bk.toString(16);

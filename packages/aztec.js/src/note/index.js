@@ -94,7 +94,7 @@ class Note {
     /**
      * Compute value of a note, from the public key and the spending key
      *
-     * @method
+     * @param {string} spendingKey the key that allows the holder to spend the note
      * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
      */
     async derive(spendingKey) {
@@ -107,7 +107,6 @@ class Note {
     /**
      * Export note's ephemeral key in compressed string form
      *
-     * @method
      * @returns {string} hex-string compressed ephemeral key
      */
     exportMetadata() {
@@ -117,7 +116,6 @@ class Note {
     /**
      * Export note coordinates in a form that can be used by proofs
      *
-     * @method
      * @returns {{ publicKey:string, viewingKey: string, k: string, a: string, noteHash: string }}
      */
     exportNote() {
@@ -143,8 +141,6 @@ class Note {
     /**
      * Get the public key representation of a note
      *
-     * @name Note#getPublic
-     * @method
      * @returns {string} hex-string concatenation of the note coordinates and the ephemeral key (compressed)
      */
     getPublic() {
@@ -155,8 +151,6 @@ class Note {
     /**
      * Get the viewing key of a note
      *
-     * @name Note#getView
-     * @method
      * @returns {string} hex-string concatenation of the note value and AZTEC viewing key
      */
     getView() {

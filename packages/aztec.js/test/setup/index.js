@@ -2,8 +2,8 @@ const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { expect } = require('chai');
 
-const setup = require('../../src/setup');
 const bn128 = require('../../src/bn128');
+const setup = require('../../src/setup');
 
 const { K_MAX, K_MIN } = constants;
 
@@ -13,17 +13,6 @@ describe('Trusted Setup', () => {
         const point = await setup.fetchPoint(k);
         expect(BN.isBN(point.x)).to.equal(true);
         expect(BN.isBN(point.y)).to.equal(true);
-    });
-
-    it('should fail if asked for a point > K_MAX', async () => {
-        const k = K_MAX * 2;
-        let message = '';
-        try {
-            await setup.fetchPoint(k);
-        } catch (e) {
-            ({ message } = e);
-        }
-        expect(message).to.equal('point not found');
     });
 
     it('should compress coordinate with even y', () => {
@@ -45,14 +34,21 @@ describe('Trusted Setup', () => {
         expect(y.eq(point.y.fromRed())).to.equal(true);
     });
 
+    it('should fail if asked for a point > K_MAX', async () => {
+        const k = K_MAX * 2;
+        try {
+            await setup.fetchPoint(k);
+        } catch (err) {
+            expect(err.message).to.equal('point not found');
+        }
+    });
+
     it('should fail to decompress if given malformed input', () => {
-        let message = '';
         try {
             // this will produce a value that is not a quadratic residue
             setup.decompress(new BN('2e4d6a154b5bf6bf2387ed08793d059f6e43247587c5fed538f861101f08dc52', 16));
-        } catch (e) {
-            ({ message } = e);
+        } catch (err) {
+            expect(err.message).to.equal('x^3 + 3 not a square, malformed input');
         }
-        expect(message).to.equal('x^3 + 3 not a square, malformed input');
     });
 });

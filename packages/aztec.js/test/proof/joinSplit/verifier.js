@@ -91,7 +91,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(result.pairingGammas.mul(trapdoor).eq(result.pairingSigmas.neg())).to.equal(true);
         });
 
-        it('should verify a Join-Split proof with kPublic = 0', async () => {
+        it('should verify a Join-Split proof with public value = 0', async () => {
             const { kIn, kOut } = balancedPublicValues(5, 10);
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             const { inputNotes, outputNotes, trapdoor } = await mockNoteSet(kIn, kOut);
@@ -117,21 +117,6 @@ describe('Join-Split Proof Verifier', () => {
 
         afterEach(() => {
             validateInputsStub.restore();
-        });
-
-        it('should fail if points NOT on curve', () => {
-            // We can construct 'proof' where all points and scalars are zero. The challenge response
-            // will be correctly reconstructed, but the proof should still be invalid
-            const zeroProof = mockZeroJoinSplitProof();
-
-            const verifier = new JoinSplitVerifier(zeroProof);
-            const _ = verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(4);
-            expect(verifier.errors[0]).to.equal(errors.codes.SCALAR_IS_ZERO);
-            expect(verifier.errors[1]).to.equal(errors.codes.NOT_ON_CURVE);
-            expect(verifier.errors[2]).to.equal(errors.codes.NOT_ON_CURVE);
-            expect(verifier.errors[3]).to.equal(errors.codes.BAD_BLINDING_FACTOR);
         });
 
         it('should fail if notes do NOT balance', async () => {
@@ -162,25 +147,6 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.SCALAR_TOO_BIG);
         });
 
-        it('should fail if malformed challenge', async () => {
-            const kIn = Array(5)
-                .fill()
-                .map(() => randomNoteValue());
-            const kOut = Array(5)
-                .fill()
-                .map(() => randomNoteValue());
-            const publicValue = ProofUtils.getPublicValue(kIn, kOut);
-            const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
-            const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            proof.challenge = new BN(randomHex(31), 16);
-
-            const verifier = new JoinSplitVerifier(proof);
-            const _ = verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(1);
-            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
-        });
-
         it('should fail if malformed proof data', async () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
@@ -201,7 +167,22 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[verifier.errors.length - 1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should fail if scalar is zero', async () => {
+        it('should fail if points NOT on curve', () => {
+            // We can construct 'proof' where all points and scalars are zero. The challenge response
+            // will be correctly reconstructed, but the proof should still be invalid
+            const zeroProof = mockZeroJoinSplitProof();
+
+            const verifier = new JoinSplitVerifier(zeroProof);
+            const _ = verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(4);
+            expect(verifier.errors[0]).to.equal(errors.codes.SCALAR_IS_ZERO);
+            expect(verifier.errors[1]).to.equal(errors.codes.NOT_ON_CURVE);
+            expect(verifier.errors[2]).to.equal(errors.codes.NOT_ON_CURVE);
+            expect(verifier.errors[3]).to.equal(errors.codes.BAD_BLINDING_FACTOR);
+        });
+
+        it('should fail if scalars are zero', async () => {
             const { kIn, kOut } = balancedPublicValues(5, 10);
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -216,7 +197,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should fail if blinding factor at infinity', async () => {
+        it('should fail if blinding factors resolve to point at infinity', async () => {
             const kIn = [10];
             const kOut = [10];
             const publicValue = 0;
@@ -238,8 +219,8 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        // TODO: hasn't this input been tested in a test above...?
-        it('should fail if blinding factor computed from invalid point', async () => {
+        // TODO: hasn't this exact same behaviour been tested above...?
+        it('should fail if blinding factors computed from invalid point', async () => {
             const kIn = [10];
             const kOut = [10];
             const publicValue = 0;
@@ -265,6 +246,25 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[5]).to.equal(errors.codes.SCALAR_IS_ZERO);
             expect(verifier.errors[6]).to.equal(errors.codes.BAD_BLINDING_FACTOR);
             expect(verifier.errors[7]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        });
+
+        it('should fail if malformed challenge', async () => {
+            const kIn = Array(5)
+                .fill()
+                .map(() => randomNoteValue());
+            const kOut = Array(5)
+                .fill()
+                .map(() => randomNoteValue());
+            const publicValue = ProofUtils.getPublicValue(kIn, kOut);
+            const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
+            const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            proof.challenge = new BN(randomHex(31), 16);
+
+            const verifier = new JoinSplitVerifier(proof);
+            const _ = verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(1);
+            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
     });
 });

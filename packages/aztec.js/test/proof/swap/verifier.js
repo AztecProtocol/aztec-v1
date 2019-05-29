@@ -86,21 +86,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors).to.contain(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should fail if malformed challenge', async () => {
-            const kIn = [10, 20];
-            const kOut = [10, 20];
-            const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
-            const proof = new SwapProof(inputNotes, outputNotes, sender);
-            proof.challenge = new BN(randomHex(31).slice(2), 16);
-
-            const verifier = new SwapVerifier(proof);
-            verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(1);
-            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
-        });
-
-        it('should fail if blinding factor at infinity', async () => {
+        it('should fail if blinding factors resolve to point at infinity', async () => {
             const kIn = [10, 20];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -122,7 +108,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should fail if blinding factor computed from scalars that are zero', async () => {
+        it('should fail if blinding factors computed from scalars that are zero', async () => {
             const kIn = [10, 20];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -140,7 +126,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[2]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should fail if blinding factor computed from points NOT on the curve', async () => {
+        it('should fail if blinding factors computed from points NOT on curve', async () => {
             // We can construct 'proof' where all points and scalars are zero. The challenge response
             // is correctly reconstructed, but the proof should still be invalid
             const zeroProof = mockZeroSwapProof();
@@ -173,6 +159,20 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[10]).to.equal(errors.codes.NOT_ON_CURVE);
             expect(verifier.errors[11]).to.equal(errors.codes.NOT_ON_CURVE);
             expect(verifier.errors[12]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        });
+
+        it('should fail if malformed challenge', async () => {
+            const kIn = [10, 20];
+            const kOut = [10, 20];
+            const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
+            const proof = new SwapProof(inputNotes, outputNotes, sender);
+            proof.challenge = new BN(randomHex(31).slice(2), 16);
+
+            const verifier = new SwapVerifier(proof);
+            verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(1);
+            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
     });
 });
