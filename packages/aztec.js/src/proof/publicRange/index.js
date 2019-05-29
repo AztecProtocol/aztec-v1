@@ -70,6 +70,8 @@ publicRange.constructBlindingFactors = (notes) => {
  */
 publicRange.constructProof = (notes, publicComparison, sender) => {
     const numNotes = 2;
+    const kPublicBN = new BN(0);
+    const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
 
     // Used to check the number of input notes. Boolean argument specifies whether the
     // check should throw if not satisfied, or if we seek to collect all errors
@@ -109,7 +111,9 @@ publicRange.constructProof = (notes, publicComparison, sender) => {
 
     const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
 
-    const challenge = proofUtils.computeChallenge(sender, publicComparisonBN, notes, blindingFactors);
+    // also to input to challenge: publicValue and publicOwner
+    // 
+    const challenge = proofUtils.computeChallenge(sender, publicComparisonBN, kPublicBN, publicOwner, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
         const kBar = notes[i].k
             .redMul(challenge)
@@ -154,7 +158,7 @@ publicRange.constructProof = (notes, publicComparison, sender) => {
  * @param {Note[]} originalNote original AZTEC note being to be compared
  * @param {Number} publicComparison public integer against which the comparison is being made. Must be positive and an integer
  * @param {string} senderAddress the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
- * @param {bool} isGreaterThan boolean controlling whether this is a greater than or less than proof. If true, then the proof
+ * @param {bool} isGreaterOrEqual boolean controlling whether this is a greater than or less than proof. If true, then the proof
  * data constructed is for originalNoteValue > publicComparisonValue. If false, then the proof data constructed is for
  * originalNoteValue < publicComparisonValue.
  * @param {Note[]} utilityNote (optional) additional note required to construct a valid balancing relationship
@@ -164,7 +168,7 @@ publicRange.encodePublicRangeTransaction = async ({
     originalNote,
     publicComparison,
     senderAddress,
-    isGreaterThan,
+    isGreaterOrEqual,
     utilityNote,
 }) => {
     let notes;
@@ -173,7 +177,7 @@ publicRange.encodePublicRangeTransaction = async ({
 
     helpers.checkPublicComparisonWellFormed(publicComparison);
 
-    if (!isGreaterThan) {
+    if (!isGreaterOrEqual) {
         signedPublicComparison = publicComparison * -1;
     }
 
@@ -200,18 +204,17 @@ publicRange.encodePublicRangeTransaction = async ({
     );
 
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
+    const publicValue = 0;
 
-    const expectedOutput = `0x${outputCoder
-        .encodeProofOutputs([
-            {
-                inputNotes,
-                outputNotes,
-                publicOwner,
-                publicValue: signedPublicComparison,
-                challenge,
-            },
-        ])
-        .slice(0x42)}`;
+    const expectedOutput = `0x${outputCoder.encodeProofOutputs([
+        {
+            inputNotes,
+            outputNotes,
+            publicOwner,
+            publicValue,
+            challenge,
+        },
+    ]).slice(0x42)}`;
 
     return { proofData, expectedOutput };
 };

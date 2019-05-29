@@ -1,13 +1,12 @@
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
-const utils = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
 const bn128 = require('../../bn128');
 const proofUtils = require('../proofUtils');
 
 const { groupReduction } = bn128;
-const { errorTypes, K_MAX } = utils.constants;
 
 const verifier = {};
 
@@ -25,9 +24,11 @@ const verifier = {};
  */
 verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
     const errors = [];
+    const kPublicBN = new BN(0);
+    const publicOwner = constants.addresses.ZERO_ADDRESS;
 
     let publicComparisonBN;
-    const K_MAXBN = new BN(K_MAX);
+    const K_MAXBN = new BN(constants.K_MAX);
     const kBarArray = [];
     const numNotes = 2;
 
@@ -50,7 +51,7 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
 
     // Check that publicComparison is less than k_max
     if (publicComparisonBN.gte(K_MAXBN)) {
-        errors.push(errorTypes.U_TOO_BIG);
+        errors.push(constants.errorTypes.U_TOO_BIG);
     }
     const rollingHash = new Keccak();
     // Append note data to rollingHash
@@ -63,6 +64,8 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
     const finalHash = new Keccak();
     finalHash.appendBN(new BN(sender.slice(2), 16));
     finalHash.appendBN(publicComparisonBN);
+    finalHash.appendBN(kPublicBN);
+    finalHash.appendBN(new BN(publicOwner.slice(2), 16));
     finalHash.data = [...finalHash.data, ...rollingHash.data];
 
     proofDataBn.map((proofElement, i) => {
@@ -95,13 +98,13 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
         }
 
         if (B === null) {
-            errors.push(errorTypes.BLINDING_FACTOR_IS_NULL);
+            errors.push(constants.errorTypes.BLINDING_FACTOR_IS_NULL);
         } else if (B.isInfinity()) {
-            errors.push(errorTypes.BAD_BLINDING_FACTOR);
+            errors.push(constants.errorTypes.BAD_BLINDING_FACTOR);
             finalHash.appendBN(new BN(0));
             finalHash.appendBN(new BN(0));
         } else if (B.x.fromRed().eq(new BN(0)) && B.y.fromRed().eq(new BN(0))) {
-            errors.push(errorTypes.BAD_BLINDING_FACTOR);
+            errors.push(constants.errorTypes.BAD_BLINDING_FACTOR);
             finalHash.append(B);
         } else {
             finalHash.append(B);
@@ -118,7 +121,7 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
 
     // Check if the recovered challenge, matches the original challenge. If so, proof construction is validated
     if (finalChallenge !== challengeHex) {
-        errors.push(errorTypes.CHALLENGE_RESPONSE_FAIL);
+        errors.push(constants.errorTypes.CHALLENGE_RESPONSE_FAIL);
     }
     const valid = errors.length === 0;
 

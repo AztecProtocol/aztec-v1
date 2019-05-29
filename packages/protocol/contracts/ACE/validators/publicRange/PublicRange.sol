@@ -93,8 +93,10 @@ contract PublicRange {
 
                 mstore(0x2e0, calldataload(0x24)) // store the msg.sender, to be hashed later
                 mstore(0x300, publicComparison)
+                mstore(0x320, 0) // add kPublic = 0 to the hash
+                mstore(0x340, 0) // add publicOwner to the hash
                 hashCommitments(notes, n)
-                let b := add(0x320, mul(n, 0x80))
+                let b := add(0x360, mul(n, 0x80))
 
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
@@ -311,11 +313,11 @@ contract PublicRange {
             function hashCommitments(notes, n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
                 let index := add(add(notes, mul(i, 0xc0)), 0x60)
-                calldatacopy(add(0x320, mul(i, 0x80)), index, 0x80)
+                calldatacopy(add(0x360, mul(i, 0x80)), index, 0x80)
                 }
                 // storing at position 0x00 in memory, the kecca hash of everything from 
                 // start of the commitments to the end
-                mstore(0x00, keccak256(0x320, mul(n, 0x80)))
+                mstore(0x00, keccak256(0x360, mul(n, 0x80)))
             }
         }
         // if we've reached here, we've validated the public range proof and haven't thrown an error.
