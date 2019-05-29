@@ -37,7 +37,7 @@ describe('Swap Proof Verifier', () => {
             validateInputsStub.restore();
         });
 
-        it('should reject if notes do NOT balance ((k1 != k3, k2 != k4)', async () => {
+        it('should fail if notes do NOT balance ((k1 != k3, k2 != k4)', async () => {
             const kIn = [10, 19];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -50,7 +50,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if random note values', async () => {
+        it('should fail if random note values', async () => {
             const kIn = Array(2)
                 .fill()
                 .map(() => randomNoteValue());
@@ -67,7 +67,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if malformed proof data', async () => {
+        it('should fail if malformed proof data', async () => {
             const kIn = [10, 20];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -86,7 +86,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors).to.contain(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if malformed challenge', async () => {
+        it('should fail if malformed challenge', async () => {
             const kIn = [10, 20];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -100,7 +100,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if blinding factor at infinity', async () => {
+        it('should fail if blinding factor at infinity', async () => {
             const kIn = [10, 20];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -122,7 +122,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if blinding factor computed from scalars that are zero', async () => {
+        it('should fail if blinding factor computed from scalars that are zero', async () => {
             const kIn = [10, 20];
             const kOut = [10, 20];
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -140,7 +140,7 @@ describe('Swap Proof Verifier', () => {
             expect(verifier.errors[2]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if blinding factor computed from points NOT on the curve', async () => {
+        it('should fail if blinding factor computed from points NOT on the curve', async () => {
             // We can construct 'proof' where all points and scalars are zero. The challenge response
             // is correctly reconstructed, but the proof should still be invalid
             const zeroProof = mockZeroSwapProof();

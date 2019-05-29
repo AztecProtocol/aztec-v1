@@ -119,7 +119,7 @@ describe('Join-Split Proof Verifier', () => {
             validateInputsStub.restore();
         });
 
-        it('should reject if points NOT on curve', () => {
+        it('should fail if points NOT on curve', () => {
             // We can construct 'proof' where all points and scalars are zero. The challenge response
             // will be correctly reconstructed, but the proof should still be invalid
             const zeroProof = mockZeroJoinSplitProof();
@@ -134,7 +134,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[3]).to.equal(errors.codes.BAD_BLINDING_FACTOR);
         });
 
-        it('should reject if notes do NOT balance', async () => {
+        it('should fail if notes do NOT balance', async () => {
             const { kIn, kOut } = balancedPublicValues(5, 10);
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             kIn.push(1);
@@ -148,7 +148,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if public value > group modulus', async () => {
+        it('should fail if public value > group modulus', async () => {
             const { kIn, kOut } = balancedPublicValues(5, 10);
             kIn.push(100);
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -162,7 +162,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.SCALAR_TOO_BIG);
         });
 
-        it('should reject if malformed challenge', async () => {
+        it('should fail if malformed challenge', async () => {
             const kIn = Array(5)
                 .fill()
                 .map(() => randomNoteValue());
@@ -181,7 +181,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if malformed proof data', async () => {
+        it('should fail if malformed proof data', async () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
             const publicValue = -10;
@@ -201,7 +201,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[verifier.errors.length - 1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if scalar is zero', async () => {
+        it('should fail if scalar is zero', async () => {
             const { kIn, kOut } = balancedPublicValues(5, 10);
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
             const { inputNotes, outputNotes } = await mockNoteSet(kIn, kOut);
@@ -216,7 +216,7 @@ describe('Join-Split Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should reject if blinding factor at infinity', async () => {
+        it('should fail if blinding factor at infinity', async () => {
             const kIn = [10];
             const kOut = [10];
             const publicValue = 0;
@@ -239,7 +239,7 @@ describe('Join-Split Proof Verifier', () => {
         });
 
         // TODO: hasn't this input been tested in a test above...?
-        it('should reject if blinding factor computed from invalid point', async () => {
+        it('should fail if blinding factor computed from invalid point', async () => {
             const kIn = [10];
             const kOut = [10];
             const publicValue = 0;
