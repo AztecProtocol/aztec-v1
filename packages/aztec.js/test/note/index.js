@@ -91,7 +91,7 @@ describe('Note', () => {
         }
     });
 
-    it('should throw if given a non-string public key', () => {
+    it('should throw if malformed public key', () => {
         try {
             const _ = new note.Note({ foo: 'bar' }, null);
         } catch (err) {
@@ -99,7 +99,7 @@ describe('Note', () => {
         }
     });
 
-    it('should throw if given an incorrect length public key', async () => {
+    it('should throw if incorrect length public key', async () => {
         const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
         const { publicKey } = testNote.exportNote();
         try {
@@ -109,7 +109,7 @@ describe('Note', () => {
         }
     });
 
-    it('should throw if given a non-string viewing key', () => {
+    it('should throw if malformed viewing key', () => {
         try {
             const _ = new note.Note(null, { foo: 'bar' });
         } catch (err) {
@@ -117,7 +117,7 @@ describe('Note', () => {
         }
     });
 
-    it('should throw if given an incorrect length viewing key', async () => {
+    it('should throw if incorrect length viewing key', async () => {
         const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
         const { viewingKey } = testNote.exportNote();
         try {

@@ -58,7 +58,16 @@ describe('Join-Split Fluid Proof', () => {
         });
 
         describe('Failure States', () => {
-            it('should fail if point NOT on curve', async () => {
+            it('should fail if value > K_MAX', async () => {
+                newMintCounterNote.k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
+                try {
+                    const _ = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
+                } catch (err) {
+                    expect(err.message).to.contain(errors.codes.NOTE_VALUE_TOO_BIG);
+                }
+            });
+
+            it('should fail if gamma NOT on curve', async () => {
                 newMintCounterNote.gamma.x = new BN(bn128.curve.p.add(new BN(100))).toRed(bn128.curve.red);
                 try {
                     const _ = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
@@ -67,7 +76,7 @@ describe('Join-Split Fluid Proof', () => {
                 }
             });
 
-            it('should fail if point at infinity', async () => {
+            it('should fail if blinding factors resolve to point at infinity', async () => {
                 newMintCounterNote.gamma = newMintCounterNote.gamma.add(newMintCounterNote.gamma.neg());
                 try {
                     const _ = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
@@ -82,15 +91,6 @@ describe('Join-Split Fluid Proof', () => {
                     const _ = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
                 } catch (err) {
                     expect(err.message).to.contain(errors.codes.VIEWING_KEY_MALFORMED);
-                }
-            });
-
-            it('should fail if value > K_MAX', async () => {
-                newMintCounterNote.k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
-                try {
-                    const _ = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
-                } catch (err) {
-                    expect(err.message).to.contain(errors.codes.NOTE_VALUE_TOO_BIG);
                 }
             });
         });
@@ -135,7 +135,16 @@ describe('Join-Split Fluid Proof', () => {
         });
 
         describe('Failure States', () => {
-            it('should fail if point NOT on curve', async () => {
+            it('should fail if value > K_MAX', async () => {
+                newBurnCounterNote.k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
+                try {
+                    const _ = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
+                } catch (err) {
+                    expect(err.message).to.contain(errors.codes.NOTE_VALUE_TOO_BIG);
+                }
+            });
+
+            it('should fail if gamma NOT on curve', async () => {
                 newBurnCounterNote.gamma.x = new BN(bn128.curve.p.add(new BN(100))).toRed(bn128.curve.red);
                 try {
                     const _ = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
@@ -144,7 +153,7 @@ describe('Join-Split Fluid Proof', () => {
                 }
             });
 
-            it('should fail if point at infinity', async () => {
+            it('should fail if blinding factors resolve to point at infinity', async () => {
                 newBurnCounterNote.gamma = newBurnCounterNote.gamma.add(newBurnCounterNote.gamma.neg());
                 try {
                     const _ = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
@@ -159,15 +168,6 @@ describe('Join-Split Fluid Proof', () => {
                     const _ = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
                 } catch (err) {
                     expect(err.message).to.contain(errors.codes.VIEWING_KEY_MALFORMED);
-                }
-            });
-
-            it('should fail if value > K_MAX', async () => {
-                newBurnCounterNote.k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
-                try {
-                    const _ = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
-                } catch (err) {
-                    expect(err.message).to.contain(errors.codes.NOTE_VALUE_TOO_BIG);
                 }
             });
         });

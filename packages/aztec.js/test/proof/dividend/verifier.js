@@ -64,51 +64,6 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should fail if points NOT on curve', async () => {
-            const za = 100;
-            const zb = 5;
-            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-            // Set the x coordinate of gamma to zero
-            proof.data[0][2] = padLeft('0x00', 64);
-
-            const verifier = new DividendVerifier(proof);
-            verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(2);
-            expect(verifier.errors[0]).to.equal(errors.codes.NOT_ON_CURVE);
-            expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
-        });
-
-        it('should fail if malformed proof data', async () => {
-            const za = 100;
-            const zb = 5;
-            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-            proof.data = [];
-            for (let i = 0; i < 3; i += 1) {
-                proof.data[i] = [];
-                for (let j = 0; j < 6; j += 1) {
-                    proof.data[i][j] = randomHex(32);
-                }
-            }
-            const verifier = new DividendVerifier(proof);
-            verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors[verifier.errors.length - 1]).to.contain(errors.codes.CHALLENGE_RESPONSE_FAIL);
-        });
-
-        it('should fail if malformed challenge', async () => {
-            const za = 100;
-            const zb = 5;
-            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-            proof.challenge = new BN(1).toRed(constants.BN128_GROUP_REDUCTION);
-
-            const verifier = new DividendVerifier(proof);
-            verifier.verifyProof();
-            expect(verifier.isValid).to.equal(false);
-            expect(verifier.errors.length).to.equal(1);
-            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
-        });
-
         it('should fail if z_a > K_MAX', async () => {
             const za = constants.K_MAX + 100;
             const zb = 5;
@@ -135,7 +90,52 @@ describe('Dividend Proof Verifier', () => {
             expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
-        it('should fail if blinding factor at infinity', async () => {
+        it('should fail if malformed proof data', async () => {
+            const za = 100;
+            const zb = 5;
+            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
+            proof.data = [];
+            for (let i = 0; i < 3; i += 1) {
+                proof.data[i] = [];
+                for (let j = 0; j < 6; j += 1) {
+                    proof.data[i][j] = randomHex(32);
+                }
+            }
+            const verifier = new DividendVerifier(proof);
+            verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors[verifier.errors.length - 1]).to.contain(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        });
+
+        it('should fail if points NOT on curve', async () => {
+            const za = 100;
+            const zb = 5;
+            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
+            // Set the x coordinate of gamma to zero
+            proof.data[0][2] = padLeft('0x00', 64);
+
+            const verifier = new DividendVerifier(proof);
+            verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(2);
+            expect(verifier.errors[0]).to.equal(errors.codes.NOT_ON_CURVE);
+            expect(verifier.errors[1]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        });
+
+        it('should fail if malformed challenge', async () => {
+            const za = 100;
+            const zb = 5;
+            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
+            proof.challenge = new BN(1).toRed(constants.BN128_GROUP_REDUCTION);
+
+            const verifier = new DividendVerifier(proof);
+            verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(1);
+            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
+        });
+
+        it('should fail if blinding factors resolve to point at infinity', async () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
