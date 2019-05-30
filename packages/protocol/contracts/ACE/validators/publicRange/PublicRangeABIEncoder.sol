@@ -15,8 +15,8 @@ pragma solidity >=0.5.0 <0.6.0;
 library PublicRangeABIEncoder {
     /**
     * New calldata map
-    * 0x04:0x24      = calldata location of proofData byte array  // proof data byte array
-    * 0x24:0x44      = message sender // address
+    * 0x04:0x24      = calldata location of proofData byte array
+    * 0x24:0x44      = message sender
     * 0x44:0x64      = h_x     // crs
     * 0x64:0x84      = h_y     // crs
     * 0x84:0xa4      = t2_x0   // crs

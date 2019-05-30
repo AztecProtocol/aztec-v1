@@ -92,7 +92,7 @@ contract PublicRange {
                 let publicComparison := mod(calldataload(0x144), gen_order)
 
                 mstore(0x2e0, calldataload(0x24)) // store the msg.sender, to be hashed later
-                mstore(0x300, publicComparison)
+                mstore(0x300, publicComparison) 
                 mstore(0x320, 0) // add kPublic = 0 to the hash
                 mstore(0x340, 0) // add publicOwner to the hash
                 hashCommitments(notes, n)
@@ -129,6 +129,14 @@ contract PublicRange {
 
                     // Check this commitment is well formed
                     validateCommitment(noteIndex, k, a)
+
+                    if gt(i, 0) {
+                        // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
+                        let x := mod(mload(0x00), gen_order) // x is the kecca hash of the input commitments
+                        k := mulmod(k, x, gen_order) // kx
+                        a := mulmod(a, x, gen_order) // ax
+                        c := mulmod(challenge, x, gen_order) // cx
+                    }
                     
                     // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
                     // Memory map:
@@ -173,6 +181,20 @@ contract PublicRange {
                     // \gamma_i^{k}h^{a} and \sigma^{-c} in memory block 0x160:0x1e0
                     // Store resulting point B at memory index b
                     result := and(result, staticcall(gas, 6, 0x160, 0x80, b, 0x40))
+
+                    // If i > 0 (i.e. if it is the utility note)
+                    // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
+                    // we then calculate \gamma^{cx} and add into \gamma_{acc}
+                    if gt(i, 0) { // m = 0
+                        mstore(0x60, c)
+                        result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
+
+                       // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
+                        result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
+
+                       // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
+                        result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40))
+                    }
 
                     // throw transaction if any calls to precompiled contracts failed
                     if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
