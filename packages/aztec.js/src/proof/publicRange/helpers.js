@@ -24,17 +24,16 @@ helpers.constructUtilityNote = async (originalNote, publicComparison) => {
     const aztecAccount = secp256k1.generateAccount();
     if (originalNote.k !== undefined && publicComparison !== undefined) {
         const originalValue = originalNote.k.toNumber();
-        const comparisonValue = publicComparison.toNumber();
 
-        if (originalValue > comparisonValue) {
-            utilityValue = originalValue - comparisonValue;
-        } else if (originalValue === comparisonValue) {
-            utilityValue = comparisonValue;
+        if (originalValue > publicComparison) {
+            utilityValue = originalValue - publicComparison;
+        } else if (originalValue === publicComparison) {
+            utilityValue = 0;
         } else {
             throw errors.customError(constants.errorTypes.INCORRECT_NOTE_RELATION, {
                 message: 'notes supplied with comparisonValue being less than originalValue',
                 originalValue,
-                comparisonValue,
+                publicComparison,
             });
         }
 
@@ -63,7 +62,7 @@ helpers.checkPublicComparisonWellFormed = (publicComparison) => {
         });
     }
 
-    if (publicComparison.isInteger()) {
+    if (!helpers.isInteger(publicComparison)) {
         throw errors.customError(constants.errorTypes.NOT_INTEGER, {
             message: 'publicComparison is not an integer, it has to be',
             publicComparison,
@@ -71,5 +70,17 @@ helpers.checkPublicComparisonWellFormed = (publicComparison) => {
         });
     }
 };
+
+/**
+ * Check whether publicComparison is an integer
+ * 
+ * @method isFloat
+ * @param number - JavaScript number to be checked whether it is a float or not
+ * @returns boolean - true if input is an integer, false if it is a float 
+ */
+helpers.isInteger = (number) => {
+    return number % 1 === 0
+}
+
 
 module.exports = helpers;
