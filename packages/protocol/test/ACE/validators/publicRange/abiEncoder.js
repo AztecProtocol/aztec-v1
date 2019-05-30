@@ -29,13 +29,14 @@ contract('Public range ABI encoder', (accounts) => {
         });
 
         it('should encode output of a public range proof', async () => {
-            const noteValues = [10, 0];
+            const originalNoteValue = 10;
+            const utilityNoteValue = 0;
             const publicComparison = 10;
-            const numNotes = noteValues.length;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const numNotes = 2;
 
-            const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-            const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+            const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+            const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
             const senderAddress = accounts[0];
             const notes = [originalNote, utilityNote];
 

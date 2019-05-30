@@ -37,15 +37,13 @@ contract('Public range proof tests', (accounts) => {
                 });
             });
 
-            it('validate success when using zk validator contract', async () => {
-                // k1 > publicComparison
-                const noteValues = [50];
+            it('validate success when a correct proof', async () => {
+                const originalNoteValue = 50;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
                 const isGreaterOrEqual = true;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const aztecAccount = secp256k1.generateAccount();
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const originalNote = await note.create(aztecAccount.publicKey, originalNoteValue);
 
                 const senderAddress = accounts[0];
 
@@ -65,13 +63,12 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate success for note value of zero', async () => {
-                const noteValues = [10];
+                const originalNoteValue = 10;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
                 const isGreaterOrEqual = true;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const aztecAccount = secp256k1.generateAccount();
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const originalNote = await note.create(aztecAccount.publicKey, originalNoteValue);
 
                 const senderAddress = accounts[0];
 
@@ -91,13 +88,14 @@ contract('Public range proof tests', (accounts) => {
 
             it('validate success when challenge has GROUP_MODULUS added to it', async () => {
                 // k1 > publicComparison
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
+                const numNotes = 2;
 
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputNotes = [originalNote];
@@ -151,14 +149,15 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure when balancing relationship not held', async () => {
-                const noteValues = [50, 41];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 41;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
+                const numNotes = 2;
                 const isGreaterOrEqual = true;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
 
                 const senderAddress = accounts[0];
 
@@ -180,14 +179,15 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure when note value is less than public integer', async () => {
-                const noteValues = [9, 0];
+                const originalNoteValue = 9;
+                const utilityNoteValue = 0;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
+                const numNotes = 2;
                 const isGreaterOrEqual = true;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
 
                 const senderAddress = accounts[0];
 
@@ -209,13 +209,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure for random proof data', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
+                const numNotes = 2;
 
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -248,13 +249,12 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure for fake challenge', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
                 const isGreaterOrEqual = true;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const aztecAccounts = secp256k1.generateAccount();
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const originalNote = await note.create(aztecAccounts.publicKey, originalNoteValue);
 
                 const senderAddress = accounts[0];
 
@@ -278,13 +278,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if scalars are NOT mod(GROUP_MODULUS)', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -319,13 +320,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if group element (blinding factor) resolves to the point at infinity', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -361,13 +363,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if scalars are zero', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -400,13 +403,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if proofData NOT correctly encoded', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -450,14 +454,15 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure for incorrect H_X, H_Y in CRS', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
+                const numNotes = 2;
                 const isGreaterOrEqual = true;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
 
                 const senderAddress = accounts[0];
 
@@ -523,14 +528,17 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure for too many notes', async () => {
-                const noteValues = [50, 20, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 20;
+                const extraTestNoteValue = 40;
                 const publicComparison = 30;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 3;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
-                const extraTestNote = await note.create(aztecAccounts[2].publicKey, noteValues[2]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
+                const extraTestNote = await note.create(aztecAccounts[2].publicKey, extraTestNoteValue);
+
                 const notes = [originalNote, utilityNote, extraTestNote];
 
                 const inputOwners = [originalNote.owner];
@@ -561,13 +569,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if sender address NOT integrated into challenge variable', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -618,13 +627,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if publicComparison NOT integrated into challenge variable', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -675,13 +685,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if kPublic NOT integrated into challenge variable', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -732,13 +743,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if publicOwner NOT integrated into challenge variable', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -788,13 +800,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if notes NOT integrated into challenge variable', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -845,13 +858,14 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate failure if blindingFactors NOT integrated into challenge variable', async () => {
-                const noteValues = [50, 40];
+                const originalNoteValue = 50;
+                const utilityNoteValue = 40;
                 const publicComparison = 10;
-                const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const numNotes = 2;
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
-                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
                 const notes = [originalNote, utilityNote];
 
                 const inputOwners = [originalNote.owner];
@@ -946,17 +960,15 @@ contract('Public range proof tests', (accounts) => {
                 });
             });
 
-            it('validate success when using zk validator contract', async () => {
-                const noteValues = [20];
-                const publicComparison = 10;
+            it('should succeed for a less than proof', async () => {
+                // proof that originalNoteValue <= publicComparison
+                const originalNoteValue = 10;
+                const publicComparison = 20;
 
-                // originalValue <
-
-                const numNotes = noteValues.length;
                 const isGreaterOrEqual = false;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const aztecAccount = secp256k1.generateAccount();
 
-                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const originalNote = await note.create(aztecAccount.publicKey, originalNoteValue);
 
                 const senderAddress = accounts[0];
 
@@ -972,6 +984,64 @@ contract('Public range proof tests', (accounts) => {
                     gas: 4000000,
                 });
                 expect(result).to.equal(expectedOutput);
+            });
+
+            it('should succeed for originalValeu = publicComparison, when making a less than or equal to proof', async () => {
+                const originalNoteValue = 20;
+                const publicComparison = 20;
+
+                const isGreaterOrEqual = false;
+                const aztecAccount = secp256k1.generateAccount();
+
+                const originalNote = await note.create(aztecAccount.publicKey, originalNoteValue);
+
+                const senderAddress = accounts[0];
+
+                const { proofData, expectedOutput } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
+                    publicComparison,
+                    senderAddress,
+                    isGreaterOrEqual,
+                });
+
+                const result = await publicRangeContract.validatePublicRange(proofData, accounts[0], constants.CRS, {
+                    from: accounts[0],
+                    gas: 4000000,
+                });
+                expect(result).to.equal(expectedOutput);
+            });
+        });
+
+        describe('Failure States', () => {
+            beforeEach(async () => {
+                publicRangeContract = await PublicRange.new({
+                    from: accounts[0],
+                });
+            });
+
+            it('should fail for an unbalanced less than proof', async () => {
+                const originalNoteValue = 10;
+                const utilityNoteValue = 9;
+                const publicComparison = 20;
+                const numNotes = 2;
+
+                const isGreaterOrEqual = false;
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
+
+                const senderAddress = accounts[0];
+
+                const { proofData } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
+                    publicComparison,
+                    senderAddress,
+                    isGreaterOrEqual,
+                    utilityNote,
+                });
+
+                await truffleAssert.reverts(publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS));
             });
         });
     });

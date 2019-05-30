@@ -13,9 +13,10 @@ const helpers = {};
  *
  * @method constructUtilityNote
  * @memberof module:publicRange
- * @param {Note[]} notesWithoutUtility - array of notes without a utility note.
- * Specifically, includes originalNote and comparisonNote.
- * @returns {Note[]} array of AZTEC notes, specifically including originalNote,
+ * @param {Note[]} originalNote - note whose value is being compared to publicComparison
+ * @param {Integer} publicComparison - public integer which the originalNote is being compared against
+ *
+ * @returns {Integer} array of AZTEC notes, specifically including originalNote,
  * comparisonNote and utilityNote
  */
 helpers.constructUtilityNote = async (originalNote, publicComparison) => {
