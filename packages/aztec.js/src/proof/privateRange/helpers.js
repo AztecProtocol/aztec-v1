@@ -29,7 +29,7 @@ helpers.constructUtilityNote = async (notesWithoutUtility) => {
         if (originalValue > comparisonValue) {
             utilityValue = originalValue - comparisonValue;
         } else if (originalValue === comparisonValue) {
-            utilityValue = comparisonValue;
+            utilityValue = 0;
         } else {
             throw errors.customError(constants.errorTypes.INCORRECT_NOTE_RELATION, {
                 message: 'notes supplied with comparisonValue being less than originalValue',

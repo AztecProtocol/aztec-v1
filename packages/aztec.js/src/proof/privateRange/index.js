@@ -93,7 +93,7 @@ privateRange.constructProof = (notes, sender) => {
     // rolling hash is used to combine multiple bilinear pairing comparisons into a single comparison
     const rollingHash = new Keccak();
     const kPublicBN = new BN(0);
-    const publicOwner = constants.ZERO_ADDRESS;
+    const publicOwner = constants.addresses.ZERO_ADDRESS;
 
     proofUtils.parseInputs(notes, sender);
     proofUtils.checkNumNotes(notes, numNotes, true);
