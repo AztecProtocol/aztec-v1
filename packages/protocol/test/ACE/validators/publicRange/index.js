@@ -15,12 +15,9 @@ const {
 } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 
-// ### Internal Dependencies
-
 const Keccak = keccak;
 
 // ### Artifacts
-
 const PublicRange = artifacts.require('./PublicRange');
 const PublicRangeInterface = artifacts.require('./PublicRangeInterface');
 
@@ -37,7 +34,7 @@ contract('Public range proof tests', (accounts) => {
                 });
             });
 
-            it('validate success when a correct proof', async () => {
+            it('validate success when a correct proof is supplied', async () => {
                 const originalNoteValue = 50;
                 const publicComparison = 10;
                 const isGreaterOrEqual = true;
@@ -148,7 +145,7 @@ contract('Public range proof tests', (accounts) => {
                 });
             });
 
-            it('validate failure when balancing relationship not held', async () => {
+            it('should fail when balancing relationship not held', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 41;
                 const publicComparison = 10;
@@ -178,7 +175,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure when note value is less than public integer', async () => {
+            it('should fail when note value is less than public integer', async () => {
                 const originalNoteValue = 9;
                 const utilityNoteValue = 0;
                 const publicComparison = 10;
@@ -208,7 +205,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure for random proof data', async () => {
+            it('should fail for random proof data', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -248,7 +245,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure for fake challenge', async () => {
+            it('should fail for fake challenge', async () => {
                 const originalNoteValue = 50;
                 const publicComparison = 10;
                 const isGreaterOrEqual = true;
@@ -277,7 +274,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if scalars are NOT mod(GROUP_MODULUS)', async () => {
+            it('should fail if scalars are NOT mod(GROUP_MODULUS)', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -319,7 +316,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if group element (blinding factor) resolves to the point at infinity', async () => {
+            it('should fail if group element (blinding factor) resolves to the point at infinity', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -362,7 +359,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if scalars are zero', async () => {
+            it('should fail if scalars are zero', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -402,7 +399,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if proofData NOT correctly encoded', async () => {
+            it('should fail if proofData NOT correctly encoded', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -453,7 +450,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure for incorrect H_X, H_Y in CRS', async () => {
+            it('should fail for incorrect H_X, H_Y in CRS', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -495,7 +492,7 @@ contract('Public range proof tests', (accounts) => {
                 await truffleAssert.reverts(publicRangeContract.validatePublicRange(proofData, senderAddress, fakeCRS, opts));
             });
 
-            it('validate failure for no notes', async () => {
+            it('should fail for no notes', async () => {
                 const publicComparison = 100;
                 const checkNumNotes = sinon.stub(proofUtils, 'checkNumNotes');
 
@@ -527,7 +524,7 @@ contract('Public range proof tests', (accounts) => {
                 checkNumNotes.restore();
             });
 
-            it('validate failure for too many notes', async () => {
+            it('should fail for too many notes', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 20;
                 const extraTestNoteValue = 40;
@@ -568,7 +565,7 @@ contract('Public range proof tests', (accounts) => {
                 checkNumNotes.restore();
             });
 
-            it('validate failure if sender address NOT integrated into challenge variable', async () => {
+            it('should fail if sender address NOT integrated into challenge variable', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -596,7 +593,7 @@ contract('Public range proof tests', (accounts) => {
                 const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
-                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+                const blindingFactors = publicRange.constructBlindingFactors(notes, rollingHash);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
                 proofUtils.computeChallenge = () =>
@@ -626,7 +623,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if publicComparison NOT integrated into challenge variable', async () => {
+            it('should fail if publicComparison NOT integrated into challenge variable', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -649,12 +646,11 @@ contract('Public range proof tests', (accounts) => {
                     rollingHash.append(individualNote.sigma);
                 });
 
-                const publicComparisonBN = new BN(publicComparison);
                 const kPublicBN = new BN(0);
                 const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
-                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+                const blindingFactors = publicRange.constructBlindingFactors(notes, rollingHash);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
                 proofUtils.computeChallenge = () =>
@@ -684,7 +680,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if kPublic NOT integrated into challenge variable', async () => {
+            it('should fail if kPublic NOT integrated into challenge variable', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -707,12 +703,11 @@ contract('Public range proof tests', (accounts) => {
                     rollingHash.append(individualNote.sigma);
                 });
 
-                const publicComparisonBN = new BN(publicComparison);
                 const kPublicBN = new BN(0);
                 const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
-                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+                const blindingFactors = publicRange.constructBlindingFactors(notes, rollingHash);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
                 proofUtils.computeChallenge = () =>
@@ -742,7 +737,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if publicOwner NOT integrated into challenge variable', async () => {
+            it('should fail if publicOwner NOT integrated into challenge variable', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -769,7 +764,7 @@ contract('Public range proof tests', (accounts) => {
                 const kPublicBN = new BN(0);
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
-                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+                const blindingFactors = publicRange.constructBlindingFactors(notes, rollingHash);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
                 proofUtils.computeChallenge = () =>
@@ -799,7 +794,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if notes NOT integrated into challenge variable', async () => {
+            it('should fail if notes NOT integrated into challenge variable', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -827,7 +822,7 @@ contract('Public range proof tests', (accounts) => {
                 const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
-                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+                const blindingFactors = publicRange.constructBlindingFactors(notes, rollingHash);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
                 proofUtils.computeChallenge = () =>
@@ -857,7 +852,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if blindingFactors NOT integrated into challenge variable', async () => {
+            it('should fail if blindingFactors NOT integrated into challenge variable', async () => {
                 const originalNoteValue = 50;
                 const utilityNoteValue = 40;
                 const publicComparison = 10;
@@ -885,7 +880,7 @@ contract('Public range proof tests', (accounts) => {
                 const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
-                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+                const blindingFactors = publicRange.constructBlindingFactors(notes, rollingHash);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
                 proofUtils.computeChallenge = () =>
@@ -916,7 +911,7 @@ contract('Public range proof tests', (accounts) => {
                 );
             });
 
-            it('validate failure if points are NOT on the curve', async () => {
+            it('should fail if points are NOT on the curve', async () => {
                 const publicComparison = 0;
                 const zeroes = `${padLeft('0', 64)}`;
                 const noteString = [...Array(6)].reduce((acc) => `${acc}${zeroes}`, '');
@@ -1026,6 +1021,31 @@ contract('Public range proof tests', (accounts) => {
                 const numNotes = 2;
 
                 const isGreaterOrEqual = false;
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+                const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, utilityNoteValue);
+
+                const senderAddress = accounts[0];
+
+                const { proofData } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
+                    publicComparison,
+                    senderAddress,
+                    isGreaterOrEqual,
+                    utilityNote,
+                });
+
+                await truffleAssert.reverts(publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS));
+            });
+
+            it('should fail for a less than proof, when a greater than proof is specified', async () => {
+                const originalNoteValue = 10;
+                const utilityNoteValue = 10;
+                const publicComparison = 20;
+                const numNotes = 2;
+
+                const isGreaterOrEqual = true;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
 
                 const originalNote = await note.create(aztecAccounts[0].publicKey, originalNoteValue);

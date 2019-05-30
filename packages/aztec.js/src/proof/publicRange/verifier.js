@@ -90,14 +90,14 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
             let kBarX;
             const firstTerm = kBarArray[0];
             const secondTerm = challenge.mul(publicComparisonBN);
-            kBar = (firstTerm.sub(secondTerm))
+            kBar = firstTerm.sub(secondTerm);
 
             // multiplication in reduction context only works for positive numbers
             // So, have to check if kBar is negative and if it is, negate it (to make positive),
             // perform the operation and then negate back
             if (kBar < 0) {
                 kBar = kBar.neg();
-                kBarX = (kBar.redMul(x)).neg();
+                kBarX = kBar.redMul(x).neg();
             } else {
                 kBarX = kBar.redMul(x);
             }

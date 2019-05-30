@@ -28,7 +28,7 @@ publicRange.verifier = verifier;
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
- * @param {Object} rollingHash hash containing note coordinates (gamma, sigma) 
+ * @param {Object} rollingHash hash containing note coordinates (gamma, sigma)
  * @returns {Object[]} blinding factors
  */
 publicRange.constructBlindingFactors = (notes, rollingHash) => {
