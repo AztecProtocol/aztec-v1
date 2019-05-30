@@ -11,7 +11,7 @@ const { groupReduction } = bn128;
 const verifier = {};
 
 /**
- * Verify AZTEC dividend computation proof transcript
+ * Verify AZTEC public range proof transcript
  *
  * @method verifyProof
  * @memberof module:publicRange
@@ -68,6 +68,9 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
     finalHash.appendBN(new BN(publicOwner.slice(2), 16));
     finalHash.data = [...finalHash.data, ...rollingHash.data];
 
+    let x = new BN(0).toRed(groupReduction);
+    x = rollingHash.keccak(groupReduction);
+
     proofDataBn.map((proofElement, i) => {
         let kBar = proofElement[0];
         const aBar = proofElement[1];
@@ -76,7 +79,6 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
         let B;
 
         if (i === 0) {
-            // input note
             B = gamma
                 .mul(kBar)
                 .add(bn128.h.mul(aBar))
@@ -85,16 +87,30 @@ verifier.verifyProof = (proofData, challengeHex, sender, publicComparison) => {
         }
 
         if (i === 1) {
-            // output note
+            let kBarX;
             const firstTerm = kBarArray[0];
             const secondTerm = challenge.mul(publicComparisonBN);
-            kBar = firstTerm.sub(secondTerm);
+            kBar = (firstTerm.sub(secondTerm))
+
+            // multiplication in reduction context only works for positive numbers
+            // So, have to check if kBar is negative and if it is, negate it (to make positive),
+            // perform the operation and then negate back
+            if (kBar < 0) {
+                kBar = kBar.neg();
+                kBarX = (kBar.redMul(x)).neg();
+            } else {
+                kBarX = kBar.redMul(x);
+            }
+
+            const challengeX = challenge.redMul(x);
+            const aBarX = aBar.redMul(x);
 
             B = gamma
-                .mul(kBar)
-                .add(bn128.h.mul(aBar))
-                .add(sigma.mul(challenge).neg());
-            kBarArray.push(kBar);
+                .mul(kBarX)
+                .add(bn128.h.mul(aBarX))
+                .add(sigma.mul(challengeX).neg());
+            kBarArray.push(kBarX);
+            x = rollingHash.keccak(groupReduction);
         }
 
         if (B === null) {

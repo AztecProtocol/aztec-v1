@@ -18,6 +18,7 @@ const { inputCoder, outputCoder } = require('../../abiEncoder');
 
 const { customError } = devUtils.errors;
 const { errorTypes } = devUtils.constants;
+const { groupReduction } = bn128;
 
 const publicRange = {};
 publicRange.verifier = verifier;
@@ -27,28 +28,30 @@ publicRange.verifier = verifier;
  *
  * @method constructBlindingFactors
  * @param {Object[]} notes AZTEC notes
+ * @param {Object} rollingHash hash containing note coordinates (gamma, sigma) 
  * @returns {Object[]} blinding factors
  */
-publicRange.constructBlindingFactors = (notes) => {
+publicRange.constructBlindingFactors = (notes, rollingHash) => {
     const bkArray = [];
 
+    let x = new BN(0).toRed(groupReduction);
     return notes.map((note, i) => {
         let bk = bn128.randomGroupScalar();
         const ba = bn128.randomGroupScalar();
         let B;
 
-        // Calculating the blinding factors
         if (i === 0) {
-            // input note
             B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             bkArray.push(bk);
         }
 
         if (i > 0) {
-            // output note
+            x = rollingHash.keccak(groupReduction);
             bk = bkArray[i - 1];
-            B = note.gamma.mul(bk).add(bn128.h.mul(ba));
-            bkArray.push(bk);
+            const xbk = bk.redMul(x);
+            const xba = ba.redMul(x);
+            B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            bkArray.push(xbk);
         }
         return {
             bk,
@@ -69,19 +72,17 @@ publicRange.constructBlindingFactors = (notes) => {
  * @returns {string} challenge - crypographic challenge variable, part of the sigma protocol
  */
 publicRange.constructProof = (notes, publicComparison, sender) => {
+    let publicComparisonBN;
     const numNotes = 2;
     const kPublicBN = new BN(0);
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
+    const rollingHash = new Keccak();
 
     // Used to check the number of input notes. Boolean argument specifies whether the
     // check should throw if not satisfied, or if we seek to collect all errors
     // and only throw at the end. Here, set to true - immediately throw if error
     proofUtils.checkNumNotes(notes, numNotes, true);
     proofUtils.parseInputs(notes, sender);
-    // convert z_a and z_b into BN instances if they aren't already
-    let publicComparisonBN;
-
-    const rollingHash = new Keccak();
 
     if (BN.isBN(publicComparison)) {
         publicComparisonBN = publicComparison;
@@ -108,10 +109,7 @@ publicRange.constructProof = (notes, publicComparison, sender) => {
         rollingHash.append(note.sigma);
     });
 
-    const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
-
-    // also to input to challenge: publicValue and publicOwner
-    //
+    const blindingFactors = publicRange.constructBlindingFactors(notes, rollingHash);
     const challenge = proofUtils.computeChallenge(sender, publicComparisonBN, kPublicBN, publicOwner, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
         const kBar = notes[i].k
