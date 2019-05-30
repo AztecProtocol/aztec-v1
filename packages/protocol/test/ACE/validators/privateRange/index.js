@@ -107,7 +107,7 @@ contract('PrivateRange', (accounts) => {
         });
 
         it('should validate for output notes of zero value', async () => {
-            const noteValues = [0, 0];
+            const noteValues = [10, 10];
             const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
             const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
             const originalNote = notes[0];

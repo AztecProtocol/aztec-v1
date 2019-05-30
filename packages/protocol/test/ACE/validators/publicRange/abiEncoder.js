@@ -33,44 +33,47 @@ contract('Public range ABI encoder', (accounts) => {
             const publicComparison = 10;
             const numNotes = noteValues.length;
             const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
 
-            const inputNotes = notes.slice(0, 1);
-            const outputNotes = notes.slice(1, 2);
+            const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+            const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
             const senderAddress = accounts[0];
+            const notes = [originalNote, utilityNote];
 
-            const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                [...inputNotes, ...outputNotes],
+            const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
+
+            const inputNotes = [originalNote];
+            const inputOwners = [originalNote.owner];
+            const outputNotes = [utilityNote];
+            const outputOwners = [utilityNote.owner];
+
+            const proofData = inputCoder.publicRange(
+                proofDataRaw,
+                challenge,
                 publicComparison,
-                senderAddress,
+                inputOwners,
+                outputOwners,
+                outputNotes,
             );
 
-            const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
-
-            const proofData = inputCoder.publicRange(proofDataRaw, challenge, publicComparison, inputOwners, outputOwners, outputNotes);
-
-            const publicValue = publicComparison;
             const publicOwner = constants.addresses.ZERO_ADDRESS;
+            const publicValue = 0;
+
+            const expectedOutput = `0x${outputCoder
+                .encodeProofOutputs([
+                    {
+                        inputNotes,
+                        outputNotes,
+                        publicOwner,
+                        publicValue,
+                        challenge,
+                    },
+                ])
+                .slice(0x42)}`;
 
             const result = await publicRangeAbiEncoder.validatePublicRange(proofData, senderAddress, CRS, {
                 from: accounts[0],
                 gas: 4000000,
             });
-
-            const expected = outputCoder.encodeProofOutputs([
-                {
-                    inputNotes,
-                    outputNotes,
-                    publicOwner,
-                    publicValue,
-                    challenge,
-                },
-            ]);
 
             const decoded = outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
 
@@ -88,10 +91,9 @@ contract('Public range ABI encoder', (accounts) => {
             expect(decoded[0].inputNotes[1]).to.equal(undefined);
 
             expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
-            expect(decoded[0].publicValue).to.equal(publicComparison);
+            expect(decoded[0].publicValue).to.equal(publicValue);
             expect(decoded[0].challenge).to.equal(challenge);
-            expect(result.slice(2)).to.equal(expected.slice(0x42));
-            expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
+            expect(result).to.equal(expectedOutput);
         });
     });
 });

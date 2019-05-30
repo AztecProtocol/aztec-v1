@@ -17,7 +17,6 @@ const { constants } = require('@aztec/dev-utils');
 
 // ### Internal Dependencies
 
-
 const Keccak = keccak;
 
 // ### Artifacts
@@ -40,25 +39,21 @@ contract('Public range proof tests', (accounts) => {
 
             it('validate success when using zk validator contract', async () => {
                 // k1 > publicComparison
-                const noteValues = [50, 40];
+                const noteValues = [50];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
+                const isGreaterOrEqual = true;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+
                 const senderAddress = accounts[0];
 
-                const { proofData, expectedOutput } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const { proofData, expectedOutput } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
                     publicComparison,
                     senderAddress,
+                    isGreaterOrEqual,
                 });
 
                 const result = await publicRangeContract.validatePublicRange(proofData, accounts[0], constants.CRS, {
@@ -70,25 +65,21 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate success for note value of zero', async () => {
-                const noteValues = [10, 0];
+                const noteValues = [10];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
+                const isGreaterOrEqual = true;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+
                 const senderAddress = accounts[0];
 
-                const { proofData, expectedOutput } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const { proofData, expectedOutput } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
                     publicComparison,
                     senderAddress,
+                    isGreaterOrEqual,
                 });
 
                 const result = await publicRangeContract.validatePublicRange(proofData, accounts[0], constants.CRS, {
@@ -103,24 +94,19 @@ contract('Public range proof tests', (accounts) => {
                 const noteValues = [50, 40];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputNotes = [originalNote];
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
-                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
-                    publicComparison,
-                    senderAddress,
-                );
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 const challengeBN = new BN(challenge.slice(2), 16);
                 const challengePlusGroupModulus = `0x${challengeBN.add(constants.GROUP_MODULUS).toString(16)}`;
@@ -134,7 +120,7 @@ contract('Public range proof tests', (accounts) => {
                     outputNotes,
                 );
 
-                const publicValue = publicComparison;
+                const publicValue = 0;
                 const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const expectedOutput = `0x${outputCoder
@@ -168,22 +154,20 @@ contract('Public range proof tests', (accounts) => {
                 const noteValues = [50, 41];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
+                const isGreaterOrEqual = true;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+
                 const senderAddress = accounts[0];
 
-                const { proofData } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const { proofData } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
                     publicComparison,
                     senderAddress,
+                    isGreaterOrEqual,
+                    utilityNote,
                 });
 
                 const opts = {
@@ -199,22 +183,20 @@ contract('Public range proof tests', (accounts) => {
                 const noteValues = [9, 0];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
+                const isGreaterOrEqual = true;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+
                 const senderAddress = accounts[0];
 
-                const { proofData } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const { proofData } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
                     publicComparison,
                     senderAddress,
+                    isGreaterOrEqual,
+                    utilityNote,
                 });
 
                 const opts = {
@@ -230,20 +212,18 @@ contract('Public range proof tests', (accounts) => {
                 const noteValues = [50, 40];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
-                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
-                const { challenge } = publicRange.constructProof([...inputNotes, ...outputNotes], publicComparison, senderAddress);
+                const { challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 const fakeProofData = [...Array(4)].map(() =>
                     [...Array(6)].map(() => `0x${padLeft(crypto.randomBytes(32).toString('hex'), 64)}`),
@@ -271,22 +251,18 @@ contract('Public range proof tests', (accounts) => {
                 const noteValues = [50, 40];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
+                const isGreaterOrEqual = true;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+
                 const senderAddress = accounts[0];
 
-                const { proofData } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const { proofData } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
                     publicComparison,
                     senderAddress,
+                    isGreaterOrEqual,
                 });
 
                 const fakeChallenge = padLeft(crypto.randomBytes(32).toString('hex'), 64);
@@ -306,23 +282,17 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
-                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
-                    publicComparison,
-                    senderAddress,
-                );
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 // Generate scalars that NOT mod r
                 const kBarBN = new BN(proofDataRaw[0][0].slice(2), 16);
@@ -353,23 +323,17 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
-                const { proofData: proofDataRaw } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
-                    publicComparison,
-                    senderAddress,
-                );
+                const { proofData: proofDataRaw } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 proofDataRaw[0][0] = `0x${padLeft('05', 64)}`;
                 proofDataRaw[0][1] = `0x${padLeft('05', 64)}`;
@@ -387,12 +351,6 @@ contract('Public range proof tests', (accounts) => {
                     outputOwners,
                     outputNotes,
                 );
-                // Generate scalars that NOT mod r
-                const kBarBN = new BN(proofDataRaw[0][0].slice(2), 16);
-                const notModRKBar = `0x${kBarBN.add(constants.GROUP_MODULUS).toString(16)}`;
-
-                proofDataRaw[0][0] = notModRKBar;
-
                 const opts = {
                     from: accounts[0],
                     gas: 4000000,
@@ -407,23 +365,17 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
-                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
-                    publicComparison,
-                    senderAddress,
-                );
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 const scalarZeroProofData = proofDataRaw.map((proofElement) => {
                     return [padLeft(0, 64), padLeft(0, 64), proofElement[2], proofElement[3], proofElement[4], proofElement[5]];
@@ -452,25 +404,19 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
-                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
-                    publicComparison,
-                    senderAddress,
-                );
-
                 const metadata = outputNotes;
+
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 const { length } = proofDataRaw;
                 const noteString = proofDataRaw.map((individualNotes) => encoderFactory.encodeNote(individualNotes));
@@ -507,22 +453,20 @@ contract('Public range proof tests', (accounts) => {
                 const noteValues = [50, 40];
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
+                const isGreaterOrEqual = true;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+
                 const senderAddress = accounts[0];
 
-                const { proofData } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const { proofData } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
                     publicComparison,
                     senderAddress,
+                    isGreaterOrEqual,
+                    utilityNote,
                 });
 
                 const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
@@ -548,18 +492,24 @@ contract('Public range proof tests', (accounts) => {
 
             it('validate failure for no notes', async () => {
                 const publicComparison = 100;
-                const inputNotes = [];
+                const checkNumNotes = sinon.stub(proofUtils, 'checkNumNotes');
+
+                const notes = [];
+                const inputOwners = [];
                 const outputNotes = [];
+                const outputOwners = [];
                 const senderAddress = accounts[0];
 
-                const checkNumNotes = sinon.stub(proofUtils, 'checkNumNotes').callsFake(() => {});
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
-                const { proofData } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const proofData = inputCoder.publicRange(
+                    proofDataRaw,
+                    challenge,
                     publicComparison,
-                    senderAddress,
-                });
+                    inputOwners,
+                    outputOwners,
+                    outputNotes,
+                );
 
                 const opts = {
                     from: accounts[0],
@@ -577,24 +527,28 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 30;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 2);
-                const outputNotes = notes.slice(2, 3);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const extraTestNote = await note.create(aztecAccounts[2].publicKey, noteValues[2]);
+                const notes = [originalNote, utilityNote, extraTestNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote, extraTestNote];
+                const outputOwners = [utilityNote.owner, extraTestNote.owner];
                 const senderAddress = accounts[0];
+
                 const checkNumNotes = sinon.stub(proofUtils, 'checkNumNotes').callsFake(() => {});
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
-                const { proofData } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const proofData = inputCoder.publicRange(
+                    proofDataRaw,
+                    challenge,
                     publicComparison,
-                    senderAddress,
-                });
-
+                    inputOwners,
+                    outputOwners,
+                    outputNotes,
+                );
                 const opts = {
                     from: accounts[0],
                     gas: 4000000,
@@ -611,16 +565,14 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
                 const rollingHash = new Keccak();
@@ -631,19 +583,188 @@ contract('Public range proof tests', (accounts) => {
                 });
 
                 const publicComparisonBN = new BN(publicComparison);
+                const kPublicBN = new BN(0);
+                const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
                 const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
-                proofUtils.computeChallenge = () => localComputeChallenge(notes, blindingFactors);
+                proofUtils.computeChallenge = () =>
+                    localComputeChallenge(publicComparisonBN, kPublicBN, publicOwner, notes, blindingFactors);
                 publicRange.constructBlindingFactors = () => blindingFactors;
 
-                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
+
+                proofUtils.computeChallenge = localComputeChallenge;
+                publicRange.constructBlindingFactors = localConstructBlindingFactors;
+
+                const proofData = inputCoder.publicRange(
+                    proofDataRaw,
+                    challenge,
                     publicComparison,
-                    senderAddress,
+                    inputOwners,
+                    outputOwners,
+                    outputNotes,
                 );
+
+                const opts = {
+                    from: accounts[0],
+                    gas: 4000000,
+                };
+                await truffleAssert.reverts(
+                    publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts),
+                );
+            });
+
+            it('validate failure if publicComparison NOT integrated into challenge variable', async () => {
+                const noteValues = [50, 40];
+                const publicComparison = 10;
+                const numNotes = noteValues.length;
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
+                const senderAddress = accounts[0];
+
+                const rollingHash = new Keccak();
+
+                notes.forEach((individualNote) => {
+                    rollingHash.append(individualNote.gamma);
+                    rollingHash.append(individualNote.sigma);
+                });
+
+                const publicComparisonBN = new BN(publicComparison);
+                const kPublicBN = new BN(0);
+                const publicOwner = constants.addresses.ZERO_ADDRESS;
+
+                const localConstructBlindingFactors = publicRange.constructBlindingFactors;
+                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+
+                const localComputeChallenge = proofUtils.computeChallenge;
+                proofUtils.computeChallenge = () =>
+                    localComputeChallenge(senderAddress, kPublicBN, publicOwner, notes, blindingFactors);
+                publicRange.constructBlindingFactors = () => blindingFactors;
+
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
+
+                proofUtils.computeChallenge = localComputeChallenge;
+                publicRange.constructBlindingFactors = localConstructBlindingFactors;
+
+                const proofData = inputCoder.publicRange(
+                    proofDataRaw,
+                    challenge,
+                    publicComparison,
+                    inputOwners,
+                    outputOwners,
+                    outputNotes,
+                );
+
+                const opts = {
+                    from: accounts[0],
+                    gas: 4000000,
+                };
+                await truffleAssert.reverts(
+                    publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts),
+                );
+            });
+
+            it('validate failure if kPublic NOT integrated into challenge variable', async () => {
+                const noteValues = [50, 40];
+                const publicComparison = 10;
+                const numNotes = noteValues.length;
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
+                const senderAddress = accounts[0];
+
+                const rollingHash = new Keccak();
+
+                notes.forEach((individualNote) => {
+                    rollingHash.append(individualNote.gamma);
+                    rollingHash.append(individualNote.sigma);
+                });
+
+                const publicComparisonBN = new BN(publicComparison);
+                const kPublicBN = new BN(0);
+                const publicOwner = constants.addresses.ZERO_ADDRESS;
+
+                const localConstructBlindingFactors = publicRange.constructBlindingFactors;
+                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+
+                const localComputeChallenge = proofUtils.computeChallenge;
+                proofUtils.computeChallenge = () =>
+                    localComputeChallenge(senderAddress, kPublicBN, publicOwner, notes, blindingFactors);
+                publicRange.constructBlindingFactors = () => blindingFactors;
+
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
+
+                proofUtils.computeChallenge = localComputeChallenge;
+                publicRange.constructBlindingFactors = localConstructBlindingFactors;
+
+                const proofData = inputCoder.publicRange(
+                    proofDataRaw,
+                    challenge,
+                    publicComparison,
+                    inputOwners,
+                    outputOwners,
+                    outputNotes,
+                );
+
+                const opts = {
+                    from: accounts[0],
+                    gas: 4000000,
+                };
+                await truffleAssert.reverts(
+                    publicRangeContract.validatePublicRange(proofData, senderAddress, constants.CRS, opts),
+                );
+            });
+
+            it('validate failure if publicOwner NOT integrated into challenge variable', async () => {
+                const noteValues = [50, 40];
+                const publicComparison = 10;
+                const numNotes = noteValues.length;
+                const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
+                const senderAddress = accounts[0];
+
+                const rollingHash = new Keccak();
+
+                notes.forEach((individualNote) => {
+                    rollingHash.append(individualNote.gamma);
+                    rollingHash.append(individualNote.sigma);
+                });
+
+                const publicComparisonBN = new BN(publicComparison);
+                const kPublicBN = new BN(0);
+
+                const localConstructBlindingFactors = publicRange.constructBlindingFactors;
+                const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
+
+                const localComputeChallenge = proofUtils.computeChallenge;
+                proofUtils.computeChallenge = () =>
+                    localComputeChallenge(senderAddress, publicComparisonBN, kPublicBN, notes, blindingFactors);
+                publicRange.constructBlindingFactors = () => blindingFactors;
+
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 proofUtils.computeChallenge = localComputeChallenge;
                 publicRange.constructBlindingFactors = localConstructBlindingFactors;
@@ -671,16 +792,14 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
                 const rollingHash = new Keccak();
@@ -691,19 +810,18 @@ contract('Public range proof tests', (accounts) => {
                 });
 
                 const publicComparisonBN = new BN(publicComparison);
+                const kPublicBN = new BN(0);
+                const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
                 const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
-                proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, blindingFactors);
+                proofUtils.computeChallenge = () =>
+                    localComputeChallenge(senderAddress, publicComparisonBN, kPublicBN, publicOwner, blindingFactors);
                 publicRange.constructBlindingFactors = () => blindingFactors;
 
-                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
-                    publicComparison,
-                    senderAddress,
-                );
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 proofUtils.computeChallenge = localComputeChallenge;
                 publicRange.constructBlindingFactors = localConstructBlindingFactors;
@@ -731,16 +849,14 @@ contract('Public range proof tests', (accounts) => {
                 const publicComparison = 10;
                 const numNotes = noteValues.length;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
-                const inputOwners = inputNotes.map((m) => m.owner);
-                const outputOwners = outputNotes.map((n) => n.owner);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+                const utilityNote = await note.create(aztecAccounts[1].publicKey, noteValues[1]);
+                const notes = [originalNote, utilityNote];
+
+                const inputOwners = [originalNote.owner];
+                const outputNotes = [utilityNote];
+                const outputOwners = [utilityNote.owner];
                 const senderAddress = accounts[0];
 
                 const rollingHash = new Keccak();
@@ -751,19 +867,19 @@ contract('Public range proof tests', (accounts) => {
                 });
 
                 const publicComparisonBN = new BN(publicComparison);
+                const kPublicBN = new BN(0);
+                const publicOwner = constants.addresses.ZERO_ADDRESS;
 
                 const localConstructBlindingFactors = publicRange.constructBlindingFactors;
                 const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
 
                 const localComputeChallenge = proofUtils.computeChallenge;
-                proofUtils.computeChallenge = () => localComputeChallenge(senderAddress, notes, blindingFactors);
+                proofUtils.computeChallenge = () =>
+                    localComputeChallenge(senderAddress, publicComparisonBN, kPublicBN, publicOwner, notes);
+
                 publicRange.constructBlindingFactors = () => blindingFactors;
 
-                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(
-                    [...inputNotes, ...outputNotes],
-                    publicComparison,
-                    senderAddress,
-                );
+                const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, publicComparison, senderAddress);
 
                 proofUtils.computeChallenge = localComputeChallenge;
                 publicRange.constructBlindingFactors = localConstructBlindingFactors;
@@ -803,7 +919,14 @@ contract('Public range proof tests', (accounts) => {
 
                 const senderAddress = accounts[0];
 
-                const proofData = inputCoder.publicRange(proofDataRaw, challenge, publicComparison, inputOwners, outputOwners, metadata);
+                const proofData = inputCoder.publicRange(
+                    proofDataRaw,
+                    challenge,
+                    publicComparison,
+                    inputOwners,
+                    outputOwners,
+                    metadata,
+                );
 
                 const opts = {
                     from: accounts[0],
@@ -824,26 +947,24 @@ contract('Public range proof tests', (accounts) => {
             });
 
             it('validate success when using zk validator contract', async () => {
-                const noteValues = [20, 30];
-                const publicComparison = -10;
+                const noteValues = [20];
+                const publicComparison = 10;
+
+                // originalValue <
 
                 const numNotes = noteValues.length;
+                const isGreaterOrEqual = false;
                 const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-                const notes = await Promise.all(
-                    aztecAccounts.map(({ publicKey }, i) => {
-                        return note.create(publicKey, noteValues[i]);
-                    }),
-                );
 
-                const inputNotes = notes.slice(0, 1);
-                const outputNotes = notes.slice(1, 2);
+                const originalNote = await note.create(aztecAccounts[0].publicKey, noteValues[0]);
+
                 const senderAddress = accounts[0];
 
-                const { proofData, expectedOutput } = publicRange.encodePublicRangeTransaction({
-                    inputNotes,
-                    outputNotes,
+                const { proofData, expectedOutput } = await publicRange.encodePublicRangeTransaction({
+                    originalNote,
                     publicComparison,
                     senderAddress,
+                    isGreaterOrEqual,
                 });
 
                 const result = await publicRangeContract.validatePublicRange(proofData, accounts[0], constants.CRS, {

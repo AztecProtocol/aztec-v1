@@ -77,7 +77,6 @@ publicRange.constructProof = (notes, publicComparison, sender) => {
     // check should throw if not satisfied, or if we seek to collect all errors
     // and only throw at the end. Here, set to true - immediately throw if error
     proofUtils.checkNumNotes(notes, numNotes, true);
-
     proofUtils.parseInputs(notes, sender);
     // convert z_a and z_b into BN instances if they aren't already
     let publicComparisonBN;
@@ -112,7 +111,7 @@ publicRange.constructProof = (notes, publicComparison, sender) => {
     const blindingFactors = publicRange.constructBlindingFactors(notes, publicComparisonBN);
 
     // also to input to challenge: publicValue and publicOwner
-    // 
+    //
     const challenge = proofUtils.computeChallenge(sender, publicComparisonBN, kPublicBN, publicOwner, notes, blindingFactors);
     const proofData = blindingFactors.map((blindingFactor, i) => {
         const kBar = notes[i].k
@@ -179,6 +178,8 @@ publicRange.encodePublicRangeTransaction = async ({
 
     if (!isGreaterOrEqual) {
         signedPublicComparison = publicComparison * -1;
+    } else {
+        signedPublicComparison = publicComparison;
     }
 
     if (!utilityNoteVariable) {
@@ -189,10 +190,10 @@ publicRange.encodePublicRangeTransaction = async ({
 
     const { proofData: proofDataRaw, challenge } = publicRange.constructProof(notes, signedPublicComparison, senderAddress);
 
-    const inputNotes = [originalNote];
-    const inputOwners = [originalNote.owner];
-    const outputNotes = [utilityNote];
-    const outputOwners = [utilityNote.owner];
+    const inputNotes = [notes[0]];
+    const inputOwners = [notes[0].owner];
+    const outputNotes = [notes[1]];
+    const outputOwners = [notes[1].owner];
 
     const proofData = inputCoder.publicRange(
         proofDataRaw,
@@ -206,15 +207,17 @@ publicRange.encodePublicRangeTransaction = async ({
     const publicOwner = devUtils.constants.addresses.ZERO_ADDRESS;
     const publicValue = 0;
 
-    const expectedOutput = `0x${outputCoder.encodeProofOutputs([
-        {
-            inputNotes,
-            outputNotes,
-            publicOwner,
-            publicValue,
-            challenge,
-        },
-    ]).slice(0x42)}`;
+    const expectedOutput = `0x${outputCoder
+        .encodeProofOutputs([
+            {
+                inputNotes,
+                outputNotes,
+                publicOwner,
+                publicValue,
+                challenge,
+            },
+        ])
+        .slice(0x42)}`;
 
     return { proofData, expectedOutput };
 };

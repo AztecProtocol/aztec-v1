@@ -454,31 +454,30 @@ describe('abiEncoder.encoderFactory', () => {
         it('should format publicRange properly', async () => {
             // Setup
             let accounts = [];
-            let notes = [];
             const publicComparison = 10;
 
             const numNotes = 2;
             const noteValues = [50, 40];
             accounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            notes = await Promise.all(
-                accounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
+            const originalNote = await note.create(accounts[0].publicKey, noteValues[0]);
+            const utilityNote = await note.create(accounts[1].publicKey, noteValues[0]);
 
-            const inputNotes = notes.slice(0, 1);
-            const outputNotes = notes.slice(1, 2);
-
+            const inputOwners = [originalNote.owner];
+            const outputOwners = [utilityNote.owner];
             const senderAddress = accounts[0].address;
 
-            // Main
-            const { proofData, challenge } = publicRangeProof.constructProof([...inputNotes, ...outputNotes], u, senderAddress);
+            const outputNotes = [utilityNote];
 
-            const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
+            const { proofData, challenge } = publicRangeProof.constructProof(
+                [originalNote, utilityNote],
+                publicComparison,
+                senderAddress,
+            );
 
             const result = new HexString(
-                abiEncoder.inputCoder.publicRange(proofData, challenge, publicComparison, inputOwners, outputOwners, outputNotes).slice(2),
+                abiEncoder.inputCoder
+                    .publicRange(proofData, challenge, publicComparison, inputOwners, outputOwners, outputNotes)
+                    .slice(2),
             );
             expect(result.slice(0x00, 0x20)).to.equal(padLeft(challenge.slice(2), 64));
 

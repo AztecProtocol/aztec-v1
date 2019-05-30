@@ -47,10 +47,9 @@ helpers.constructUtilityNote = async (originalNote, publicComparison) => {
     return notes;
 };
 
-
 /**
- * Check that the publicComparison integer is well formed. Specifically, check that it is positive and 
- * that it is an integer. 
+ * Check that the publicComparison integer is well formed. Specifically, check that it is positive and
+ * that it is an integer.
  * @method checkPublicComparisonWellFormed
  * @param {string[]} publicComparison - array of proof data from proof construction
  */
@@ -66,21 +65,20 @@ helpers.checkPublicComparisonWellFormed = (publicComparison) => {
         throw errors.customError(constants.errorTypes.NOT_INTEGER, {
             message: 'publicComparison is not an integer, it has to be',
             publicComparison,
-            type: typeof(publicComparison),
+            type: typeof publicComparison,
         });
     }
 };
 
 /**
  * Check whether publicComparison is an integer
- * 
+ *
  * @method isFloat
  * @param number - JavaScript number to be checked whether it is a float or not
- * @returns boolean - true if input is an integer, false if it is a float 
+ * @returns boolean - true if input is an integer, false if it is a float
  */
 helpers.isInteger = (number) => {
-    return number % 1 === 0
-}
-
+    return number % 1 === 0;
+};
 
 module.exports = helpers;
