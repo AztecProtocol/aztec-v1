@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./AdjustSupplyABIEncoder.sol";
-import "../../../interfaces/AdjustSupplyInterface.sol";
+import "./JoinSplitFluidABIEncoder.sol";
+import "../../../interfaces/JoinSplitFluidInterface.sol";
 import "../../../libs/LibEIP712.sol";
 
 /**
@@ -15,23 +15,23 @@ import "../../../libs/LibEIP712.sol";
  * storage and makes no external calls (other than to precompiles)
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract AdjustSupply is LibEIP712 {
+contract JoinSplitFluid is LibEIP712 {
     /**
      * @dev AZTEC will take any transaction sent to it and attempt to validate a zero knowledge proof.
      * If the proof is not valid, the transaction throws.
      * @notice See AZTECInterface for how method calls should be constructed.
      * 'Cost' of raw elliptic curve primitives for a transaction:
      * 260,700 gas + (124,500 * number of input notes) + (167,600 * number of output notes).
-     * For a basic 'AdjustSupply' with 2 inputs and 2 outputs = 844,900 gas.
+     * For a basic 'JoinSplitFluid' with 2 inputs and 2 outputs = 844,900 gas.
      * AZTEC is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     function() external payable {
         assembly {
             // We don't check for function signatures,
-            // there's only one function that ever gets called: validateAdjustSupply()
+            // there's only one function that ever gets called: validateJoinSplitFluid()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract
             // through a compatible ABI
-            validateAdjustSupply()
+            validateJoinSplitFluid()
 
             /**
              * New calldata map
@@ -50,7 +50,7 @@ contract AdjustSupply is LibEIP712 {
              * 0x184:0x1a4    = offset in byte array to outputOwners
              * 0x1a4:0x1c4    = offset in byte array to metadata
              */
-            function validateAdjustSupply() {
+            function validateJoinSplitFluid() {
                 mstore(0x80, calldataload(0x44))
                 mstore(0xa0, calldataload(0x64))
                 let notes := add(0x104, calldataload(0x144)) // get the length of notes
@@ -61,16 +61,16 @@ contract AdjustSupply is LibEIP712 {
 
 
                 // validate m < n
-                if gt(m, n) { 
+                if gt(m, n) {
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
 
-                if eq(m, n) { 
+                if eq(m, n) {
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
-                
+
                 let kn := 0
 
                 // add sender final hash table
@@ -111,7 +111,7 @@ contract AdjustSupply is LibEIP712 {
                 let k
                 let a := calldataload(add(noteIndex, 0x20))
                 let c := challenge
-                
+
                 switch eq(add(i, 0x01), n)
                     case 1 {
                         k := kn
@@ -157,7 +157,7 @@ contract AdjustSupply is LibEIP712 {
                 // 0x120: -c
                 calldatacopy(0xe0, add(noteIndex, 0x80), 0x40)
                 calldatacopy(0x20, add(noteIndex, 0x40), 0x40)
-                mstore(0x120, sub(gen_order, c)) 
+                mstore(0x120, sub(gen_order, c))
                 mstore(0x60, k)
                 mstore(0xc0, a)
 
@@ -211,7 +211,7 @@ contract AdjustSupply is LibEIP712 {
                 }
 
                 // If the AZTEC protocol is implemented correctly then any input notes were previously outputs of
-                // a AdjustSupply transaction. We can inductively assume that all input notes
+                // a JoinSplitFluid transaction. We can inductively assume that all input notes
                 // are well-formed AZTEC commitments and do not need to validate the implicit range proof
                 // This is not the case for any output commitments, so if (m < n) call validatePairing()
                 if lt(m, n) {
@@ -238,7 +238,7 @@ contract AdjustSupply is LibEIP712 {
             }
 
 
-            /**        
+            /**
              * @dev evaluate if e(P1, t2) . e(P2, g2) == 0.
              * @notice we don't hard-code t2 so that contracts that call this library can use
              * different trusted setups.
@@ -362,6 +362,6 @@ contract AdjustSupply is LibEIP712 {
 
         // if we've reached here, we've validated the join-split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
-        AdjustSupplyABIEncoder.encodeAndExit();
+        JoinSplitFluidABIEncoder.encodeAndExit();
     }
 }

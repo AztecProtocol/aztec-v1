@@ -38,7 +38,7 @@ const getDefaultNotes = async () => {
 
 /**
  * Note that these tests only validate note-related cryptography. We should consider
- * exploring more edge cases on the agency side, i.e. when the public key, the sender or
+ * exploring more edge cases on the agency side, i.`e`. when the public key, the sender or
  * the public owner have bogus values.
  */
 contract.only('Join-Split Validator', (accounts) => {
@@ -81,10 +81,11 @@ contract.only('Join-Split Validator', (accounts) => {
         });
 
         it('should validate Join-Split proof with no input notes', async () => {
+            const inputNoteValues = [];
             const outputNoteValues = [90, 80, 70, 60, 50, 40, 30, 20, 10];
             const publicValue = -450;
-            const { outputNotes } = await getNotes([], outputNoteValues);
-            const proof = new JoinSplitProof([], outputNotes, sender, publicValue, publicOwner);
+            const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
+            const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
@@ -92,15 +93,16 @@ contract.only('Join-Split Validator', (accounts) => {
 
         it('should validate Join-Split proof with no output notes', async () => {
             const inputNoteValues = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+            const outputNoteValues = [];
             const publicValue = 450;
-            const { inputNotes } = await getNotes(inputNoteValues);
-            const proof = new JoinSplitProof(inputNotes, [], sender, publicValue, publicOwner);
+            const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
+            const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
 
-        it('should validate Join-Split proof with input notes of zero value', async () => {
+        it('should validate Join-Split proof with input notes of 0 value', async () => {
             const inputNoteValues = [0, 0];
             const outputNoteValues = [20, 30];
             const publicValue = -50;
@@ -111,7 +113,7 @@ contract.only('Join-Split Validator', (accounts) => {
             expect(result).to.equal(proof.eth.output);
         });
 
-        it('should validate Join-Split proof with output notes of zero value', async () => {
+        it('should validate Join-Split proof with output notes of 0 value', async () => {
             const inputNoteValues = [20, 30];
             const outputNoteValues = [0, 0];
             const publicValue = 50;
@@ -122,7 +124,7 @@ contract.only('Join-Split Validator', (accounts) => {
             expect(result).to.equal(proof.eth.output);
         });
 
-        it('should validate Join-Split proof with the minimum number of notes possible (one input, one output)', async () => {
+        it('should validate Join-Split proof with the minimum number of notes possible (1 input, 1 output)', async () => {
             const inputNoteValues = [10];
             const outputNoteValues = [10];
             const publicValue = 0;
@@ -134,16 +136,17 @@ contract.only('Join-Split Validator', (accounts) => {
         });
 
         it('should validate Join-Split proof with challenge that has GROUP_MODULUS added to it', async () => {
-            const inputNoteValues = [10, 10];
-            const outputNoteValues = [20, 20];
-            const publicValue = -20;
-            const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
+            const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
             proof.constructOutput();
             const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
+        });
+
+        it('should succeed for wrong input note owners', async () => {
+            // TODO
         });
     });
 
@@ -165,7 +168,7 @@ contract.only('Join-Split Validator', (accounts) => {
             );
         });
 
-        it('should fail if proof data points NOT on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const zeroJoinSplitProof = await mockZeroJoinSplitProof();
@@ -177,7 +180,7 @@ contract.only('Join-Split Validator', (accounts) => {
             );
         });
 
-        it('should fail if proof data scalars NOT modulo GROUP_MODULUS', async () => {
+        it('should fail if scalars NOT modulo GROUP_MODULUS', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
@@ -189,7 +192,7 @@ contract.only('Join-Split Validator', (accounts) => {
             );
         });
 
-        it('should fail if proof data scalars are zero', async () => {
+        it('should fail if scalars are 0', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const zeroScalar = padLeft('0x00', 64);
@@ -252,7 +255,7 @@ contract.only('Join-Split Validator', (accounts) => {
         it('should fail if public value NOT integrated into challenge variable', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            // Second element should have been the sender
+            // Second element should have been the public value
             proof.constructChallengeRecurse([proof.sender, proof.m, proof.publicOwner, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
@@ -320,7 +323,7 @@ contract.only('Join-Split Validator', (accounts) => {
             );
         });
 
-        it('should fail if malformed H_X, H_Y in CRS)', async () => {
+        it('should fail if malformed H_X, H_Y in CRS', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);

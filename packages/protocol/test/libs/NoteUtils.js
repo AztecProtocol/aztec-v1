@@ -1,6 +1,6 @@
 /* eslint-disable object-curly-newline */
 /* global artifacts, contract, describe, expect, it: true */
-const { abiEncoder, note, proof } = require('aztec.js');
+const { encoder, note, proof } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const truffleAssert = require('truffle-assertions');
@@ -8,7 +8,7 @@ const { padLeft } = require('web3-utils');
 
 const NoteUtils = artifacts.require('./NoteUtilsTest');
 
-const { outputCoder } = abiEncoder;
+const { outputCoder } = encoder;
 
 contract('NoteUtils', async (accounts) => {
     const aztecAccounts = [];

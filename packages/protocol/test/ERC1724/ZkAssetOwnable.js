@@ -5,13 +5,13 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof, signer } = require('aztec.js');
+const { encoder, note, proof, signer } = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
 const { constants } = devUtils;
 const { JOIN_SPLIT_PROOF } = devUtils.proofs;
-const { outputCoder } = abiEncoder;
+const { outputCoder } = encoder;
 
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./ERC20Mintable');

@@ -14,21 +14,21 @@ const { JOIN_SPLIT_PROOF, MINT_PROOF } = devUtils.proofs;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
-const AdjustSupply = artifacts.require('./AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const JoinSplit = artifacts.require('./JoinSplit');
 const JoinSplitInterface = artifacts.require('./JoinSplit');
+const JoinSplitFluid = artifacts.require('./JoinSplitFluid');
+const JoinSplitFluidInterface = artifacts.require('./JoinSplitFluidInterface');
 const ZkAssetMintable = artifacts.require('./ZkAssetMintable');
 
-AdjustSupply.abi = AdjustSupplyInterface.abi;
+JoinSplitFluid.abi = JoinSplitFluidInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let aztecAccounts = [];
-        let aztecAdjustSupply;
+        let aztecJoinSplitFluid;
         let aztecJoinSplit;
         let erc20;
         const kPublic = 50;
@@ -37,13 +37,13 @@ contract('ZkAssetMintable', (accounts) => {
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
-            aztecAdjustSupply = await AdjustSupply.new();
+            aztecJoinSplitFluid = await JoinSplitFluid.new();
             aztecJoinSplit = await JoinSplit.new();
 
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
             await ace.setCommonReferenceString(constants.CRS);
-            await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
+            await ace.setProof(MINT_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             const canAdjustSupply = true;
@@ -128,16 +128,16 @@ contract('ZkAssetMintable', (accounts) => {
         let erc20;
         let zkAssetMintable;
         let scalingFactor;
-        let aztecAdjustSupply;
+        let aztecJoinSplitFluid;
         let aztecJoinSplit;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
-            aztecAdjustSupply = await AdjustSupply.new();
+            aztecJoinSplitFluid = await JoinSplitFluid.new();
             aztecJoinSplit = await JoinSplit.new();
 
             await ace.setCommonReferenceString(constants.CRS);
-            await ace.setProof(MINT_PROOF, aztecAdjustSupply.address);
+            await ace.setProof(MINT_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             erc20 = await ERC20Mintable.new();

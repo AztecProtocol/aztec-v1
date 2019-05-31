@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../../../ACE/validators/dividendComputation/DividendComputationABIEncoder.sol";
+import "../../../../ACE/validators/dividend/DividendABIEncoder.sol";
 
 /**
  * @title Dividend computation ABI Encoder Test
@@ -13,16 +13,16 @@ import "../../../../ACE/validators/dividendComputation/DividendComputationABIEnc
  * storage and makes no external calls (other than to precompiles)
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract DividendComputationABIEncoderTest {
-    function validateDividendComputation(
-        bytes calldata, 
-        address, 
+contract DividendABIEncoderTest {
+    function validateDividend(
+        bytes calldata,
+        address,
         uint[6] calldata
-    ) 
-        external 
-        pure 
-        returns (bytes memory) 
+    )
+        external
+        pure
+        returns (bytes memory)
     {
-        DividendComputationABIEncoder.encodeAndExit();
+        DividendABIEncoder.encodeAndExit();
     }
 }

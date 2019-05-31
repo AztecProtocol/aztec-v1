@@ -87,30 +87,22 @@ contract.only('Swap Validator', (accounts) => {
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
         });
 
-        it('should fail if using 2 notes instead of 4', async () => {
+        it('should fail if provided 2 notes instead of 4', async () => {
             // We have to first use the correct number of input and output notes and later swap them
             // because otherwise the proof construction fails
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
-            const asks = [20];
-            const bids = [20];
-            const { inputNotes: testInputNotes, outputNotes: testOutputNotes } = await getNotes(asks, bids);
-            proof.inputNotes = testInputNotes;
-            proof.outputNotes = testOutputNotes;
-            proof.notes = [...testInputNotes, ...testOutputNotes];
+            proof.data = [proof.data[0], proof.data[1]];
             const data = proof.encodeABI();
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
         });
 
-        it('should fail if using 3 notes instead of 4', async () => {
+        it('should fail if provided 3 notes instead of 4', async () => {
+            // We have to first use the correct number of input and output notes and later swap them
+            // because otherwise the proof construction fails
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
-            const asks = [10, 20];
-            const bids = [20];
-            const { inputNotes: testInputNotes, outputNotes: testOutputNotes } = await getNotes(asks, bids);
-            proof.inputNotes = testInputNotes;
-            proof.outputNotes = testOutputNotes;
-            proof.notes = [...inputNotes, ...testOutputNotes];
+            proof.data = [proof.data[0], proof.data[1], proof.data[2]];
             const data = proof.encodeABI();
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
         });
@@ -129,7 +121,7 @@ contract.only('Swap Validator', (accounts) => {
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
         });
 
-        it('should fail if proof data points NOT on curve', async () => {
+        it('should fail if points NOT on curve', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const zeroSwapProof = await mockZeroSwapProof();
@@ -138,17 +130,16 @@ contract.only('Swap Validator', (accounts) => {
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
         });
 
-        it('should fail if proof data scalars NOT modulo GROUP_MODULUS', async () => {
+        it('should fail if scalars NOT modulo GROUP_MODULUS', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
-            const notModKBar = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
-            proof.data[0][0] = notModKBar;
+            proof.data[0][0] = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
             const data = proof.encodeABI();
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
         });
 
-        it('should fail if proof data scalars are zero', async () => {
+        it('should fail if scalars are 0', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const zeroScalar = padLeft('0x00', 64);
@@ -189,7 +180,8 @@ contract.only('Swap Validator', (accounts) => {
         it('should fail if sender NOT integrated into challenge variable', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
-            proof.constructChallengeRecurse([[...inputNotes, ...outputNotes], proof.blindingFactors]);
+            // First element should have been the sender
+            proof.constructChallengeRecurse([proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
@@ -198,7 +190,8 @@ contract.only('Swap Validator', (accounts) => {
         it('should fail if notes NOT integrated into challenge variable', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
-            proof.constructChallengeRecurse([sender, proof.blindingFactors]);
+            // Second element should have been the notes
+            proof.constructChallengeRecurse([proof.sender, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
@@ -207,7 +200,8 @@ contract.only('Swap Validator', (accounts) => {
         it('should fail if blinding factors NOT integrated into challenge variable', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
-            proof.constructChallengeRecurse([sender, [...inputNotes, ...outputNotes]]);
+            // Third element should have been the blinding factors
+            proof.constructChallengeRecurse([proof.sender, proof.notes]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
@@ -217,9 +211,9 @@ contract.only('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
-            const bogusHx = constants.H_X.add(new BN(1));
-            const bogusHy = constants.H_Y.add(new BN(1));
-            const bogusCRS = [`0x${bogusHx.toString(16)}`, `0x${bogusHy.toString(16)}`, ...constants.t2];
+            const malformedHx = constants.H_X.add(new BN(1));
+            const malformedHy = constants.H_Y.add(new BN(1));
+            const bogusCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...constants.t2];
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bogusCRS), truffleAssert.ErrorType.REVERT);
         });
     });

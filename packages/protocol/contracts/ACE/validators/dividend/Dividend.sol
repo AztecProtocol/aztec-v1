@@ -1,38 +1,38 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./DividendComputationABIEncoder.sol";
-import "../../../interfaces/DividendComputationInterface.sol";
+import "./DividendABIEncoder.sol";
+import "../../../interfaces/DividendInterface.sol";
 
 /**
- * @title Library to validate AZTEC dividend computation proofs
+ * @title Library to validate AZTEC dividend proofs
  * @author AZTEC
- * @dev Don't include this as an internal library. This contract uses a static memory table 
+ * @dev Don't include this as an internal library. This contract uses a static memory table
  * to cache elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
- * The intended use case is to call this externally via `staticcall`. External calls to OptimizedAZTEC 
- * can be treated as pure functions as this contract contains no storage and makes no external calls 
+ * The intended use case is to call this externally via `staticcall`. External calls to OptimizedAZTEC
+ * can be treated as pure functions as this contract contains no storage and makes no external calls
  * (other than to precompiles).
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract DividendComputation {
+contract Dividend {
     /**
      * @dev This will take any dividend calculation proof data and attempt to verify it in zero-knowledge
      * If the proof is not valid, the transaction throws.
-     * @notice See DividendComputationInterface for how method calls should be constructed.
-     * DividendComputation is written in YUL to enable manual memory management and for other efficiency savings.
+     * @notice See DividendInterface for how method calls should be constructed.
+     * Dividend is written in YUL to enable manual memory management and for other efficiency savings.
      **/
     // solhint-disable payable-fallback
     function() external {
         assembly {
 
-            // We don't check for function signatures, there's only one function 
-            // that ever gets called: validateDividendComputation()
-            // We still assume calldata is offset by 4 bytes so that we can 
+            // We don't check for function signatures, there's only one function
+            // that ever gets called: validateDividend()
+            // We still assume calldata is offset by 4 bytes so that we can
             // represent this contract through a compatible ABI
-            validateDividendComputation()
+            validateDividend()
 
             // if we get to here, the proof is valid. We now 'fall through' the assembly block
-            // and into DividendComputationABIEncoder.encodeAndExit()
+            // and into DividendABIEncoder.encodeAndExit()
             // reset the free memory pointer because we're touching Solidity code again
             mstore(0x40, 0x60)
 
@@ -54,10 +54,10 @@ contract DividendComputation {
              * 0x1a4:0x1c4    = offset in byte array to inputOwners
              * 0x1c4:0x1e4    = offset in byte array to outputOwners
              * 0x1e4:0x204    = offset in byte array to metadata
-             */ 
+             */
 
-            function validateDividendComputation() {
-                
+            function validateDividend() {
+
                 /*
                 ///////////////////////////////////////////  SETUP  //////////////////////////////////////////////
                 */
@@ -65,7 +65,7 @@ contract DividendComputation {
                 mstore(0xa0, calldataload(0x64))
                 let notes := add(0x104, calldataload(0x184))
                 let n := calldataload(notes)
-                let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001                
+                let gen_order := 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001
                 let challenge := mod(calldataload(0x124), gen_order)
 
                 let za := mod(calldataload(0x144), gen_order)
@@ -85,7 +85,7 @@ contract DividendComputation {
                 }
 
                 /*
-                m is the deliminator between input and output notes. 
+                m is the deliminator between input and output notes.
                 We only have one input note, and then the next two are output notes.
 
                 m = 0 and n = 3
@@ -98,8 +98,8 @@ contract DividendComputation {
                 mstore(0x2c0, za)
                 mstore(0x2e0, zb)
 
-                hashCommitments(notes, n) 
-                let b := add(0x300, mul(n, 0x80)) 
+                hashCommitments(notes, n)
+                let b := add(0x300, mul(n, 0x80))
 
                 /*
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
@@ -151,13 +151,13 @@ contract DividendComputation {
                                         sub(gen_order, calldataload(sub(noteIndex, 0xc0))),
                                         za,
                                         gen_order), //-(k_2 * z_a)
-                                    gen_order)       
+                                    gen_order)
                     }
 
                     case 0 { // input note
                         /*
                         Input commitments just have the k factors as according to the note data
-                        */  
+                        */
                         k := calldataload(noteIndex)
                     }
 
@@ -187,10 +187,10 @@ contract DividendComputation {
                     // 0x120: -c
 
                     // loading key variables into memory to be operated on later
-                    calldatacopy(0xe0, add(noteIndex, 0x80), 0x40)  
+                    calldatacopy(0xe0, add(noteIndex, 0x80), 0x40)
                     calldatacopy(0x20, add(noteIndex, 0x40), 0x40)
                     mstore(0x120, sub(gen_order, c))
-                    mstore(0x60, k) 
+                    mstore(0x60, k)
                     mstore(0xc0, a)
 
                     // Call bn128 scalar multiplication precompiles
@@ -198,8 +198,8 @@ contract DividendComputation {
                     // Store \sigma_i^{-c} at 0x1a0:0x200
                     // Store \gamma_i^{k} at 0x120:0x160
                     // Store h^{a} at 0x160:0x1a0
-                    
-                    // result is a boolean. It keeps track of whether the call to the pre-compile was 
+
+                    // result is a boolean. It keeps track of whether the call to the pre-compile was
                     // successful. True if it was, False if it wasn't
                     let result := staticcall(gas, 7, 0xe0, 0x60, 0x1a0, 0x40) // sigma_i^{-c}
                     result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x120, 0x40)) // gamma_i^{k}
@@ -250,25 +250,25 @@ contract DividendComputation {
                     if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
-                
+
 
                     validatePairing(0x84)
 
-                // We now have the message sender, z_a, z_b, note commitments and the 
+                // We now have the message sender, z_a, z_b, note commitments and the
                 // calculated blinding factors in a block of memory starting at 0x2a0, of size (b - 0x2a0).
                 // Hash this block to reconstruct the initial challenge and validate that they match
                 let expected := mod(keccak256(0x2a0, sub(b, 0x2a0)), gen_order)
 
 
                 if iszero(eq(expected, challenge)) {
-                    
+
                     // Proof failed
                     mstore(0x00, 404)
                     revert(0x00, 0x20)
                 }
             }
 
-            /**        
+            /**
              * @dev evaluate if e(P1, t2) . e(P2, g2) == 0.
              * @notice we don't hard-code t2 so that contracts that call this library can use different trusted setups.
              **/
@@ -321,7 +321,7 @@ contract DividendComputation {
 
             /**
              * @dev check that this note's points are on the altbn128 curve(y^2 = x^3 + 3)
-             * and that signatures 'k' and 'a' are modulo the order of the curve. 
+             * and that signatures 'k' and 'a' are modulo the order of the curve.
              * Transaction throws if this is not the case.
              * @param note the calldata loation of the note
              **/
@@ -347,8 +347,8 @@ contract DividendComputation {
                         and(
                             eq( // y^2 ?= x^3 + 3
                                 addmod(
-                                    mulmod(mulmod(sigmaX, sigmaX, field_order), sigmaX, field_order), 
-                                    3, 
+                                    mulmod(mulmod(sigmaX, sigmaX, field_order), sigmaX, field_order),
+                                    3,
                                     field_order),
                                 mulmod(sigmaY, sigmaY, field_order)
                             ),
@@ -369,25 +369,25 @@ contract DividendComputation {
 
             /**
              * @dev Calculate the keccak256 hash of the commitments for both input notes and output notes.
-             * This is used both as an input to validate the challenge `c` and also 
-             * to generate pseudorandom relationships between commitments for different outputNotes, so 
-             * that we can combine them into a single multi-exponentiation for the purposes of 
+             * This is used both as an input to validate the challenge `c` and also
+             * to generate pseudorandom relationships between commitments for different outputNotes, so
+             * that we can combine them into a single multi-exponentiation for the purposes of
              * validating the bilinear pairing relationships.
              * @param notes calldata location of notes
              * @param n number of notes
-             * 
+             *
              * @notice
              */
 
             function hashCommitments(notes, n) {
-                for { let i := 0 } lt(i, n) { i := add(i, 0x01) } { 
-                    let index := add(add(notes, mul(i, 0xc0)), 0x60) 
+                for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
+                    let index := add(add(notes, mul(i, 0xc0)), 0x60)
                     calldatacopy(add(0x300, mul(i, 0x80)), index, 0x80)
                 }
                 mstore(0x00, keccak256(0x300, mul(n, 0x80)))
             }
         }
 
-        DividendComputationABIEncoder.encodeAndExit();
+        DividendABIEncoder.encodeAndExit();
     }
 }
