@@ -114,7 +114,8 @@ module.exports = {
     },
     networks: {
         development: {
-            provider,
+            host: '127.0.0.1',
+            // provider,
             gas: 6500000,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase

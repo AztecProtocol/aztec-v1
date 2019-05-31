@@ -1,0 +1,40 @@
+{
+  "name": "@aztec/graph",
+  "version": "0.0.0",
+  "author": "AZTEC",
+  "license": "LGPL-3.0",
+  "dependencies": {
+    "@aztec/protocol": "0.0.0-semantically-released",
+    "@graphprotocol/graph-cli": "^0.12.0",
+    "@graphprotocol/graph-ts": "^0.12.0",
+    "chalk": "^2.4.2",
+    "detect-port": "^1.3.0",
+    "dotenv": "^8.0.0",
+    "ganache-cli": "^6.4.3",
+    "js-yaml": "^3.13.1",
+    "kill-port": "^1.5.0",
+    "node-fetch": "^2.6.0",
+    "path": "^0.12.7",
+    "terminal-kit": "^1.28.0",
+    "truffle": "^5.0.19",
+    "web3": "^1.0.0-beta.55"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/node": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "jest": "^24.8.0",
+    "mocha": "^6.1.4"
+  },
+  "scripts": {
+    "copy": "babel-node scripts/run copy",
+    "deploy:contracts": "babel-node scripts/run deployContracts",
+    "graph": "babel-node scripts/run graph",
+    "rebuild": "yarn deploy:contracts && yarn copy && yarn graph",
+    "test": "NODE_ENV=test babel-node scripts/run test",
+    "test:run": "jest ./tests"
+  }
+}
