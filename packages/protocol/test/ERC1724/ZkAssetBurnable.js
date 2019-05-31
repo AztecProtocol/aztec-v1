@@ -5,31 +5,31 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof } = require('aztec.js');
+const { encoder, note, proof } = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
 const { constants } = devUtils;
 const { BURN_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
-const { outputCoder } = abiEncoder;
+const { outputCoder } = encoder;
 
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ACE = artifacts.require('./ACE');
-const AdjustSupply = artifacts.require('./AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 const JoinSplit = artifacts.require('./JoinSplit');
 const JoinSplitInterface = artifacts.require('./JoinSplit');
+const JoinSplitFluid = artifacts.require('./JoinSplitFluid');
+const JoinSplitFluidInterface = artifacts.require('./JoinSplitFluidInterface');
 const ZkAssetBurnable = artifacts.require('./ZkAssetBurnable');
 
-AdjustSupply.abi = AdjustSupplyInterface.abi;
+JoinSplitFluid.abi = JoinSplitFluidInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
 contract('ZkAssetBurnable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let aztecAccounts = [];
-        let aztecAdjustSupply;
+        let aztecJoinSplitFluid;
         let aztecJoinSplit;
         let erc20;
         const kPublic = -50;
@@ -40,7 +40,7 @@ contract('ZkAssetBurnable', (accounts) => {
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
-            aztecAdjustSupply = await AdjustSupply.new();
+            aztecJoinSplitFluid = await JoinSplitFluid.new();
             aztecJoinSplit = await JoinSplit.new();
 
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
@@ -52,7 +52,7 @@ contract('ZkAssetBurnable', (accounts) => {
             );
 
             await ace.setCommonReferenceString(constants.CRS);
-            await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
+            await ace.setProof(BURN_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             const newTotalBurned = notes[0];
@@ -129,7 +129,7 @@ contract('ZkAssetBurnable', (accounts) => {
 
     describe('Failure States', () => {
         let ace;
-        let aztecAdjustSupply;
+        let aztecJoinSplitFluid;
         let aztecJoinSplit;
         let erc20;
         const proofs = [];
@@ -138,11 +138,11 @@ contract('ZkAssetBurnable', (accounts) => {
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
-            aztecAdjustSupply = await AdjustSupply.new();
+            aztecJoinSplitFluid = await JoinSplitFluid.new();
             aztecJoinSplit = await JoinSplit.new();
 
             await ace.setCommonReferenceString(constants.CRS);
-            await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
+            await ace.setProof(BURN_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
             erc20 = await ERC20Mintable.new();

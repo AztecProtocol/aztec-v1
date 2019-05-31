@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-library AdjustSupplyABIEncoder {
+library JoinSplitFluidABIEncoder {
     /**
      * Calldata map
      * 0x04:0x24      = calldata location of proofData byte array
@@ -18,8 +18,8 @@ library AdjustSupplyABIEncoder {
      * 0x184:0x1a4    = offset in byte array to outputOwners
      * 0x1a4:0x1c4    = offset in byte array to metadata
      */
-    
-    
+
+
     function encodeAndExit() internal pure {
         assembly {
             // set up initial variables
@@ -83,7 +83,7 @@ library AdjustSupplyABIEncoder {
             // `inputPtr` points to the start of the current `notes` dynamic bytes array
 
             // length of proofOutputs is at s
-            mstore(0x1a0, 0x02)                            // there are two proofOutput objects for an adjustSupply
+            mstore(0x1a0, 0x02)                            // there are two proofOutput objects for a join-split fluid
             mstore(0x1c0, 0x80)                            // offset to 1st proof
             // 0x1e0 = offset to 2nd proof
             // length of proofOutput is at s + 0x60
@@ -152,14 +152,14 @@ library AdjustSupplyABIEncoder {
             ///////////////// PROOF OUTPUT A: START OF OUTPUT NOTES (1) ///////////////////
 
             // transition between input and output notes
-            
+
             // 0x400 + metadataLength = byte length of output notes (0x120)
             // 0x420 + metadataLength = # of output notes (1)
             // 0x440 + metadataLength = offset to outputNotes[0] (0x60)
             mstore(add(0x400, metadataLength), 0x120) // store length of output notes
             mstore(add(0x420, metadataLength), 0x01) // store number of output notes
             mstore(add(0x440, metadataLength), 0x60) // store offset to outputNotes[0]
-        
+
             // construct note hash
             // copy 1st note note to 0x20 - 0xa0
             calldatacopy(0x20, add(notes, 0x60), 0x80) // get gamma, sigma
@@ -192,7 +192,7 @@ library AdjustSupplyABIEncoder {
             )
             // compute the relative offset to index this note in our returndata
             mstore(add(0x440, metadataLength), 0x60) // relative offset to note
-    
+
             // now we need to transition between first and second proofOutput
             // s is going to point to the end of the outputNotes array
             // so, s is our absolute pointer to the start of the 2nd proofOutputs entry

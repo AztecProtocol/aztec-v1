@@ -5,7 +5,7 @@ const crypto = require('crypto');
 
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
-const aztec = require('aztec.js');
+const { encoder, note, proof, signer } = require('aztec.js');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
@@ -13,8 +13,6 @@ const truffleAssert = require('truffle-assertions');
 const { keccak256, padLeft } = require('web3-utils');
 
 const { JOIN_SPLIT_PROOF } = proofs;
-const { note, proof, signer } = aztec;
-const { outputCoder } = aztec.abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
@@ -113,8 +111,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: zkAsset.address,
             });
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
 
             await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
 
@@ -141,8 +139,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: zkAsset.address,
             });
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
 
             const tokenWithdrawalProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: notes.slice(0, 2),
@@ -154,8 +152,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: zkAsset.address,
             });
 
-            const tokenWithdrawalProofOutput = outputCoder.getProofOutput(tokenWithdrawalProof.expectedOutput, 0);
-            const tokenWithdrawalProofHash = outputCoder.hashProofOutput(tokenWithdrawalProofOutput);
+            const tokenWithdrawalProofOutput = encoder.outputCoder.getProofOutput(tokenWithdrawalProof.expectedOutput, 0);
+            const tokenWithdrawalProofHash = encoder.outputCoder.hashProofOutput(tokenWithdrawalProofOutput);
 
             await ace.publicApprove(zkAsset.address, depositProofHash, 10, { from: accounts[0] });
 
@@ -186,8 +184,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: zkAsset.address,
             });
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
 
             const withdrawalAmount = 40;
             const withdrawalAmountBN = new BN(withdrawalAmount);
@@ -202,8 +200,11 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: zkAsset.address,
             });
 
-            const withdrawalAndTransferProofOutput = outputCoder.getProofOutput(withdrawalAndTransferProof.expectedOutput, 0);
-            const withdrawalAndTransferProofHash = outputCoder.hashProofOutput(withdrawalAndTransferProofOutput);
+            const withdrawalAndTransferProofOutput = encoder.outputCoder.getProofOutput(
+                withdrawalAndTransferProof.expectedOutput,
+                0,
+            );
+            const withdrawalAndTransferProofHash = encoder.outputCoder.hashProofOutput(withdrawalAndTransferProofOutput);
 
             await ace.publicApprove(zkAsset.address, depositProofHash, 130, { from: accounts[2] });
 
@@ -239,8 +240,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: zkAsset.address,
             });
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
 
             const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
                 inputNotes: [notes[0], notes[3]],
@@ -279,8 +280,8 @@ contract('ZkAsset', (accounts) => {
                 validatorAddress: zkAsset.address,
             });
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
+            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
 
             await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
             const malformedProofData = `0x0123${depositProof.proofData.slice(6)}`;

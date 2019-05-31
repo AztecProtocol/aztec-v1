@@ -6,13 +6,12 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof } = require('aztec.js');
+const { encoder, note, proof } = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
 const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
 const { constants } = devUtils;
-const { outputCoder } = abiEncoder;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
@@ -121,10 +120,10 @@ contract('NoteRegistry', (accounts) => {
         );
 
         proofOutputs = proofs.map(({ expectedOutput }) => {
-            return outputCoder.getProofOutput(expectedOutput, 0);
+            return encoder.outputCoder.getProofOutput(expectedOutput, 0);
         });
         proofHashes = proofOutputs.map((proofOutput) => {
-            return outputCoder.hashProofOutput(proofOutput);
+            return encoder.outputCoder.hashProofOutput(proofOutput);
         });
     });
 
@@ -433,8 +432,8 @@ contract('NoteRegistry', (accounts) => {
                 kPublic: -10,
                 validatorAddress: aztecJoinSplit.address,
             });
-            proofOutputs[6] = outputCoder.getProofOutput(proofs[6].expectedOutput, 0);
-            proofHashes[6] = outputCoder.hashProofOutput(proofOutputs[6]);
+            proofOutputs[6] = encoder.outputCoder.getProofOutput(proofs[6].expectedOutput, 0);
+            proofHashes[6] = encoder.outputCoder.hashProofOutput(proofOutputs[6]);
 
             await ace.publicApprove(accounts[0], proofHashes[6], 10);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[6].proofData);

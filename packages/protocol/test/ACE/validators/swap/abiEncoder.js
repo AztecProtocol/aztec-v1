@@ -1,5 +1,5 @@
 /* global artifacts, contract, expect */
-const { abiCoder, note, SwapProof } = require('aztec.js');
+const { encoder, note, SwapProof } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const sinon = require('sinon');
@@ -10,6 +10,7 @@ const SwapABIEncoderTest = artifacts.require('./SwapABIEncoderTest');
 
 const maker = secp256k1.generateAccount();
 const publicOwner = constants.addresses.ZERO_ADDRESS;
+const publicValue = 0;
 let swapAbiEncoderTest;
 const taker = secp256k1.generateAccount();
 
@@ -51,32 +52,34 @@ contract.only('Swap Validator ABI Encoder', (accounts) => {
             const data = proof.encodeABI();
 
             const result = await swapAbiEncoderTest.validateSwap(data, sender, constants.CRS, { from: sender });
+            const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(result).to.equal(proof.eth.output);
-            expect(result.length).to.equal(proof.eth.output.length);
 
-            const decoded = abiCoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(decoded[0].inputNotes[0].gamma.eq(inputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].inputNotes[0].noteHash).to.equal(inputNotes[0].noteHash);
             expect(decoded[0].inputNotes[0].owner).to.equal(inputNotes[0].owner.toLowerCase());
+
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
             expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
             expect(decoded[0].outputNotes[0].owner).to.equal(outputNotes[0].owner.toLowerCase());
 
+            expect(decoded[0].publicValue).to.equal(publicValue);
+            expect(decoded[0].publicOwner).to.equal(publicOwner);
+            expect(decoded[0].challenge).to.equal(proof.challengeHex);
+
             expect(decoded[1].inputNotes[0].gamma.eq(outputNotes[1].gamma)).to.equal(true);
             expect(decoded[1].inputNotes[0].sigma.eq(outputNotes[1].sigma)).to.equal(true);
             expect(decoded[1].inputNotes[0].noteHash).to.equal(outputNotes[1].noteHash);
             expect(decoded[1].inputNotes[0].owner).to.equal(outputNotes[1].owner.toLowerCase());
+
             expect(decoded[1].outputNotes[0].gamma.eq(inputNotes[1].gamma)).to.equal(true);
             expect(decoded[1].outputNotes[0].sigma.eq(inputNotes[1].sigma)).to.equal(true);
             expect(decoded[1].outputNotes[0].noteHash).to.equal(inputNotes[1].noteHash);
             expect(decoded[1].outputNotes[0].owner).to.equal(inputNotes[1].owner.toLowerCase());
 
-            expect(decoded[0].publicValue).to.equal(0);
-            expect(decoded[0].publicOwner).to.equal(publicOwner);
-            expect(decoded[0].challenge).to.equal(proof.challengeHex);
-            expect(decoded[1].publicValue).to.equal(0);
+            expect(decoded[1].publicValue).to.equal(publicValue);
             expect(decoded[1].publicOwner).to.equal(publicOwner);
             expect(decoded[1].challenge).to.equal(keccak256(proof.challengeHex));
         });

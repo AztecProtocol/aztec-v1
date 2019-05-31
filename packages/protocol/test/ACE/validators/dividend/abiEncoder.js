@@ -1,104 +1,66 @@
-/* global artifacts, expect, contract, beforeEach, it:true */
-// ### External Dependencies
-const { padLeft } = require('web3-utils');
-
-// ### Internal Dependencies
-const { abiEncoder, note, proof } = require('aztec.js');
+/* global artifacts, expect, contract, it:true */
+const { DividendProof, encoder, note } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
+const { padLeft } = require('web3-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
-// ### Artifacts
-const ABIEncoder = artifacts.require('./DividendComputationABIEncoderTest');
+const DividendABIEncoderTest = artifacts.require('./DividendABIEncoderTest');
 
-contract('Dividend Computation ABI Encoder', (accounts) => {
-    let dividendComputationAbiEncoder;
-    let dividendAccounts = [];
-    let notes = [];
+let dividendAbiEncoderTest;
+const { publicKey } = secp256k1.generateAccount();
 
-    describe('Success States', () => {
-        let za;
-        let zb;
+const getNotes = async (notionalNoteValue, residualNoteValue, targetNoteValue) => {
+    const notionalNote = await note.create(publicKey, notionalNoteValue);
+    const residualNote = await note.create(publicKey, residualNoteValue);
+    const targetNote = await note.create(publicKey, targetNoteValue);
+    return { notionalNote, residualNote, targetNote };
+};
 
-        beforeEach(async () => {
-            const noteValues = [90, 4, 50];
-            za = 100;
-            zb = 5;
+const getDefaultNotes = async () => {
+    const notionalNoteValue = 90;
+    const targetNoteValue = 50;
+    const residualNoteValue = 4;
+    const { notionalNote, residualNote, targetNote } = await getNotes(notionalNoteValue, residualNoteValue, targetNoteValue);
+    const za = 100;
+    const zb = 5;
+    return { notionalNote, residualNote, targetNote, za, zb };
+};
 
-            dividendAccounts = [...new Array(3)].map(() => secp256k1.generateAccount());
-            notes = await Promise.all(
-                dividendAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
+contract('Dividend ABI Encoder', (accounts) => {
+    const sender = accounts[0];
 
-            dividendComputationAbiEncoder = await ABIEncoder.new({
-                from: accounts[0],
-            });
-        });
-
-        it('should encode the output of a join-split proof', async () => {
-            const inputNotes = notes.slice(0, 1);
-            const outputNotes = notes.slice(1, 3);
-            const senderAddress = accounts[0];
-            const { proofData, challenge } = proof.dividendComputation.constructProof(
-                [...inputNotes, ...outputNotes],
-                za,
-                zb,
-                accounts[0],
-            );
-
-            const proofDataFormatted = [proofData.slice(0, 6)].concat([proofData.slice(6, 12), proofData.slice(12, 18)]);
-
-            const publicOwner = constants.addresses.ZERO_ADDRESS;
-
-            const inputOwners = inputNotes.map((m) => m.owner);
-            const outputOwners = outputNotes.map((n) => n.owner);
-
-            const data = abiEncoder.inputCoder.dividendComputation(
-                proofDataFormatted,
-                challenge,
-                za,
-                zb,
-                inputOwners,
-                outputOwners,
-                outputNotes,
-            );
-
-            const result = await dividendComputationAbiEncoder.validateDividendComputation(data, senderAddress, constants.CRS, {
-                from: accounts[0],
-                gas: 4000000,
-            });
-
-            const expected = abiEncoder.outputCoder.encodeProofOutputs([
-                {
-                    inputNotes,
-                    outputNotes,
-                    publicOwner,
-                    publicValue: 0,
-                    challenge,
-                },
-            ]);
-
-            const decoded = abiEncoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-
-            expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
-            expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
-            expect(decoded[0].outputNotes[0].noteHash).to.equal(outputNotes[0].noteHash);
-            expect(decoded[0].outputNotes[0].owner).to.equal(outputNotes[0].owner.toLowerCase());
-            expect(decoded[0].outputNotes[1].gamma.eq(outputNotes[1].gamma)).to.equal(true);
-            expect(decoded[0].outputNotes[1].sigma.eq(outputNotes[1].sigma)).to.equal(true);
-            expect(decoded[0].outputNotes[1].noteHash).to.equal(outputNotes[1].noteHash);
-            expect(decoded[0].outputNotes[1].owner).to.equal(outputNotes[1].owner.toLowerCase());
-
-            expect(decoded[0].inputNotes[0].gamma.eq(inputNotes[0].gamma)).to.equal(true);
-            expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);
-            expect(decoded[0].inputNotes[0].noteHash).to.equal(inputNotes[0].noteHash);
-            expect(decoded[0].inputNotes[0].owner).to.equal(inputNotes[0].owner.toLowerCase());
-
-            expect(decoded[0].publicOwner).to.equal(publicOwner.toLowerCase());
-            expect(decoded[0].publicValue).to.equal(0);
-            expect(result.slice(2)).to.equal(expected.slice(0x42));
-            expect(result.slice(2).length / 2).to.equal(parseInt(expected.slice(0x02, 0x42), 16));
-        });
+    before(async () => {
+        dividendAbiEncoderTest = await DividendABIEncoderTest.new({ from: sender });
     });
+
+    it('should encode output of Dividend proof', async () => {
+        const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
+        const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
+        const data = proof.encodeABI();
+
+        const result = await dividendAbiEncoderTest.validateDividend(data, sender, constants.CRS);
+        const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
+        expect(result).to.equal(proof.eth.output);
+
+        expect(decoded[0].inputNotes[0].gamma.eq(notionalNote.gamma)).to.equal(true);
+        expect(decoded[0].inputNotes[0].sigma.eq(notionalNote.sigma)).to.equal(true);
+        expect(decoded[0].inputNotes[0].noteHash).to.equal(notionalNote.noteHash);
+        expect(decoded[0].inputNotes[0].owner).to.equal(notionalNote.owner.toLowerCase());
+
+        expect(decoded[0].outputNotes[0].gamma.eq(residualNote.gamma)).to.equal(true);
+        expect(decoded[0].outputNotes[0].sigma.eq(residualNote.sigma)).to.equal(true);
+        expect(decoded[0].outputNotes[0].noteHash).to.equal(residualNote.noteHash);
+        expect(decoded[0].outputNotes[0].owner).to.equal(residualNote.owner.toLowerCase());
+
+        expect(decoded[0].outputNotes[1].gamma.eq(targetNote.gamma)).to.equal(true);
+        expect(decoded[0].outputNotes[1].sigma.eq(targetNote.sigma)).to.equal(true);
+        expect(decoded[0].outputNotes[1].noteHash).to.equal(targetNote.noteHash);
+        expect(decoded[0].outputNotes[1].owner).to.equal(targetNote.owner.toLowerCase());
+
+        expect(decoded[0].publicOwner).to.equal(proof.publicOwner.toLowerCase());
+        expect(decoded[0].publicValue).to.equal(proof.publicValue.toNumber());
+        expect(decoded[0].challenge).to.equal(proof.challengeHex);
+    });
+
+    describe('Success States', () => {});
 });

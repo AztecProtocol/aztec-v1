@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 /**
- * @title Library to ABI encode the output of a dividend computation proof verification operation
+ * @title Library to ABI encode the output of a dividend proof verification operation
  * @author AZTEC
  * @dev Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.
@@ -12,7 +12,7 @@ pragma solidity >=0.5.0 <0.6.0;
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 
-library DividendComputationABIEncoder {
+library DividendABIEncoder {
     /**
     * New calldata map
     * 0x04:0x24      = calldata location of proofData byte array  // proof data byte array
@@ -31,7 +31,7 @@ library DividendComputationABIEncoder {
     * 0x1a4:0x1c4    = offset in byte array to inputOwners
     * 0x1c4:0x1e4    = offset in byte array to outputOwners
     * 0x1e4:0x204    = offset in byte array to metadata
-    */ 
+    */
     function encodeAndExit() internal pure {
         assembly {
             // set up initial variables
@@ -110,7 +110,7 @@ library DividendComputationABIEncoder {
                 mstore(add(s, 0x20), 0x01)
                 // store note owner in `s + 0x20`
                 mstore(add(s, 0x40), calldataload(inputOwners))
-            
+
                 // store note hash in `s + 0x60`
                 mstore(add(s, 0x60), keccak256(0x00, 0xa0))
 
@@ -140,13 +140,13 @@ library DividendComputationABIEncoder {
                 )
                 // compute the relative offset to index this note in our returndata
                 mstore(add(add(inputPtr, 0x40), mul(i, 0x20)), sub(s, inputPtr)) // relative offset to note
-        
+
                 // increase s by note length
                 s := add(s, 0xe0)
             }
 
             // transition between input and output notes
-            // store total length of inputNotes at first index of inputNotes 
+            // store total length of inputNotes at first index of inputNotes
             mstore(inputPtr, sub(sub(s, inputPtr), 0x20))
             mstore(0x220, add(0xc0, sub(s, inputPtr))) // store relative memory offset to outputNotes
             inputPtr := s
