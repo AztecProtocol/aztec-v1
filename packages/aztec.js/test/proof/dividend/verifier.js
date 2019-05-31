@@ -5,7 +5,6 @@ const { expect } = require('chai');
 const { padLeft, randomHex } = require('web3-utils');
 const sinon = require('sinon');
 
-const bn128 = require('../../../src/bn128');
 const { DividendProof } = require('../../../src/proof');
 const DividendVerifier = require('../../../src/proof/dividend/verifier');
 const note = require('../../../src/note');

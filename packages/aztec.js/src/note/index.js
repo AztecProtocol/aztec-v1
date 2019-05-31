@@ -3,7 +3,7 @@ const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { padLeft, toHex } = require('web3-utils');
 
-const { noteCoder } = require('../abiEncoder');
+const { noteCoder } = require('../encoder');
 const bn128 = require('../bn128');
 const setup = require('../setup');
 const noteUtils = require('./utils');

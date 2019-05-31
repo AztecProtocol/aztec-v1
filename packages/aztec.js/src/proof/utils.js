@@ -1,8 +1,28 @@
-const { isHexStrict } = require('web3-utils');
+const { isHexStrict, padLeft } = require('web3-utils');
 
 const bn128 = require('../bn128');
 
 class ProofUtils {
+
+    /**
+     * @param {number} length
+     * @param {array} encodedParams
+     */
+    static getOffsets(length, encodedParams) {
+        const { offsets } = encodedParams.reduce(
+            (acc, encodedParameter) => {
+                acc.offsets.push(padLeft(acc.offset.toString(16), 64));
+                acc.offset += encodedParameter.length / 2;
+                return acc;
+            },
+            {
+                offset: length * 32,
+                offsets: [],
+            },
+        );
+        return offsets;
+    }
+
     /**
      * Calculate the public value based on the values of the input notes and output notes
      *
