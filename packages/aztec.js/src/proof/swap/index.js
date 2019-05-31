@@ -3,10 +3,10 @@ const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
-const { encoder } = require('../../abiCoder');
-const { outputCoder } = require('../../abiEncoder');
+const { inputCoder, outputCoder } = require('../../encoder');
 const bn128 = require('../../bn128');
 const { Proof, ProofType } = require('../proof');
+const ProofUtils = require('../utils');
 
 const { AztecError } = errors;
 
@@ -116,24 +116,13 @@ class SwapProof extends Proof {
 
     encodeABI() {
         const encodedParams = [
-            encoder.encodeProofData(this.data),
-            encoder.encodeOwners([...this.inputNoteOwners, ...this.outputNoteOwners]),
-            encoder.encodeMetadata(this.metadata),
+            inputCoder.encodeProofData(this.data),
+            inputCoder.encodeOwners([...this.inputNoteOwners, ...this.outputNoteOwners]),
+            inputCoder.encodeMetadata(this.metadata),
         ];
 
         const length = 1 + encodedParams.length + 1;
-        const { offsets } = encodedParams.reduce(
-            (acc, encodedParameter) => {
-                acc.offsets.push(padLeft(acc.offset.toString(16), 64));
-                acc.offset += encodedParameter.length / 2;
-                return acc;
-            },
-            {
-                offset: length * 32,
-                offsets: [],
-            },
-        );
-
+        const offsets = ProofUtils.getOffsets(length, encodedParams);
         const abiEncodedParams = [this.challengeHex.slice(2), ...offsets, ...encodedParams];
         return `0x${abiEncodedParams.join('').toLowerCase()}`;
     }

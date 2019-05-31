@@ -57,12 +57,13 @@ class JoinSplitVerifier extends Verifier {
 
         let pairingGammas;
         let pairingSigmas;
+        let reducer = ZERO_BN_RED;
         this.data.forEach((item, i) => {
             let { kBar, aBar } = item;
             let c = this.challenge;
             if (i >= this.proof.m) {
                 // the reducer is the "x" in the white paper
-                const reducer = rollingHash.redKeccak();
+                reducer = rollingHash.redKeccak();
                 kBar = kBar.redMul(reducer);
                 aBar = aBar.redMul(reducer);
                 c = this.challenge.redMul(reducer);

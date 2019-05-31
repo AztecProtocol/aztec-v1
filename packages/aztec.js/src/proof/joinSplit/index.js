@@ -2,8 +2,7 @@ const { constants, proofs } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 const bn128 = require('../../bn128');
-const { encoder } = require('../../abiCoder');
-const { inputCoder, outputCoder } = require('../../abiEncoder');
+const { inputCoder, outputCoder } = require('../../encoder');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
 const signer = require('../../signer');
@@ -19,25 +18,22 @@ class JoinSplitProof extends Proof {
         this.constructOutput();
     }
 
+    /**
+     * Generate blinding factors based on the previous blinding scalars
+     */
     constructBlindingFactors() {
         const inputNotesLength = this.m;
-
-        // Generate blinding factors based on the previous blinding scalars
-        let bkAux = constants.ZERO_BN_RED;
+        let reducer = constants.ZERO_BN_RED; // "x" in the white paper
         this.blindingFactors = this.notes.map((note, i) => {
             const { bk, ba } = this.blindingScalars[i];
             let B;
-            let reducer = constants.ZERO_BN_RED; // "x" in the white paper
-
             if (i < inputNotesLength) {
-                bkAux = bkAux.redAdd(bk);
                 B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             } else {
                 // Get next iteration of our rolling hash
                 reducer = this.rollingHash.redKeccak();
                 const xbk = bk.redMul(reducer);
                 const xba = ba.redMul(reducer);
-                bkAux = bkAux.redSub(bk);
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             }
             return { B, bk, ba, reducer };
@@ -56,7 +52,7 @@ class JoinSplitProof extends Proof {
                 let bk = bn128.randomGroupScalar();
                 const ba = bn128.randomGroupScalar();
                 if (i === notesLength - 1) {
-                    if (notesLength === this.m) {
+                    if (this.m === notesLength) {
                         bk = constants.ZERO_BN_RED.redSub(bkAux);
                     } else {
                         bk = bkAux;
@@ -152,26 +148,15 @@ class JoinSplitProof extends Proof {
         });
 
         const encodedParams = [
-            encoder.encodeProofData(this.data),
-            encoder.encodeInputSignatures(inputSignatures),
-            encoder.encodeOwners(this.inputNoteOwners),
-            encoder.encodeOwners(this.outputNoteOwners),
-            encoder.encodeMetadata(this.metadata),
+            inputCoder.encodeProofData(this.data),
+            inputCoder.encodeInputSignatures(inputSignatures),
+            inputCoder.encodeOwners(this.inputNoteOwners),
+            inputCoder.encodeOwners(this.outputNoteOwners),
+            inputCoder.encodeMetadata(this.metadata),
         ];
 
         const length = 3 + encodedParams.length + 1;
-        const { offsets } = encodedParams.reduce(
-            (acc, encodedParameter) => {
-                acc.offsets.push(padLeft(acc.offset.toString(16), 64));
-                acc.offset += encodedParameter.length / 2;
-                return acc;
-            },
-            {
-                offset: length * 32,
-                offsets: [],
-            },
-        );
-
+        const offsets = ProofUtils.getOffsets(length, encodedParams);
         const abiEncodedParams = [
             padLeft(this.m.toString(16), 64),
             this.challengeHex.slice(2),

@@ -2,16 +2,16 @@ const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 
-const { inputCoder } = require('../../abiEncoder');
 const bn128 = require('../../bn128');
-const { outputCoder } = require('../../abiEncoder');
+const { inputCoder, outputCoder } = require('../../encoder');
 const { Proof, ProofType } = require('../proof');
+const ProofUtils = require('../utils');
 
 const { AztecError } = errors;
 const { BN128_GROUP_REDUCTION } = constants;
 
 class DividendProof extends Proof {
-    constructor(notionalNote, residualNote, targetNote, sender, za, zb, metadata) {
+    constructor(notionalNote, residualNote, targetNote, sender, za, zb, metadata = [residualNote, targetNote]) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
         super(ProofType.DIVIDEND.name, [notionalNote], [residualNote, targetNote], sender, publicValue, publicOwner, metadata);
@@ -99,23 +99,30 @@ class DividendProof extends Proof {
     }
 
     encodeABI() {
-        const data = inputCoder.dividend(
-            this.data,
-            this.challenge,
-            this.za,
-            this.zb,
-            this.inputNoteOwners,
-            this.outputNoteOwners,
-            this.outputNotes,
-        );
-        return data;
+        const encodedParams = [
+            inputCoder.encodeProofData(this.data),
+            inputCoder.encodeOwners(this.inputNoteOwners),
+            inputCoder.encodeOwners(this.outputNoteOwners),
+            inputCoder.encodeMetadata(this.metadata),
+        ];
+
+        const length = 3 + encodedParams.length + 1;
+        const offsets = ProofUtils.getOffsets(length, encodedParams);
+        const abiEncodedParams = [
+            this.challengeHex.slice(2),
+            padLeft(this.za.toString(16), 64),
+            padLeft(this.zb.toString(16), 64),
+            ...offsets,
+            ...encodedParams,
+        ];
+        return `0x${abiEncodedParams.join('').toLowerCase()}`;
     }
 
     validateInputs() {
         super.validateInputs();
         if (this.notes.length !== 3) {
             throw new AztecError(errors.codes.INCORRECT_NOTE_NUMBER, {
-                message: `Dividend proofs must contain 4 notes`,
+                message: `Dividend proofs must contain 3 notes`,
                 numNotes: this.notes.length,
             });
         }

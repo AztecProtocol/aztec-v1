@@ -17,20 +17,20 @@ describe('Join-Split Fluid Proof Verifier', () => {
         let currentMintCounter;
         let currentMintCounterNote;
         let mintedNotes;
-        let mintedValues;
+        let mintedNoteValues;
         let newMintCounter;
         let newMintCounterNote;
 
         before(() => {
             currentMintCounter = 30;
             newMintCounter = 50;
-            mintedValues = [10, 10];
+            mintedNoteValues = [10, 10];
         });
 
         beforeEach(async () => {
             currentMintCounterNote = await note.create(publicKey, currentMintCounter);
             newMintCounterNote = await note.create(publicKey, newMintCounter);
-            mintedNotes = await Promise.all(mintedValues.map((mintedValue) => note.create(publicKey, mintedValue)));
+            mintedNotes = await Promise.all(mintedNoteValues.map((mintedValue) => note.create(publicKey, mintedValue)));
         });
 
         describe('Success States', () => {
