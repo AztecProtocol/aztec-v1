@@ -1,6 +1,14 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 contract IAZTEC {
+    event CreateNoteRegistry(
+        address zkAssetAddress,
+        address linkedTokenAddress,
+        uint256 scalingFactor,
+        bool canAdjustSupply,
+        bool canConvert
+    );
+
     enum ProofCategory {
         NULL,
         BALANCED,

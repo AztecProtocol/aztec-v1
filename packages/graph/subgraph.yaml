@@ -1,0 +1,47 @@
+specVersion: 0.0.1
+description: Aztec Note Management
+repository: https://github.com/AztecProtocol/AZTEC
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: ACE
+    network: development
+    source:
+      address: '0x8a863D4615D00caf2271059035EF28f9b8967cA3'
+      abi: ACE
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.2
+      language: wasm/assemblyscript
+      file: ./mappings/ACE.ts
+      entities:
+        - ZkAsset
+      abis:
+        - name: ACE
+          file: ./build/abis/ACE.json
+      eventHandlers:
+        - event: CreateNoteRegistry(address,address,uint256,bool,bool)
+          handler: createNoteRegistry
+    templates:
+      - name: ZkAsset
+        kind: ethereum/contract
+        network: development
+        source:
+          abi: ZkAsset
+        mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.2
+          language: wasm/assemblyscript
+          file: ./mappings/ZkAsset.ts
+          entities:
+            - Note
+              Account
+          abis:
+            - name: ZkAsset
+              file: ./build/abis/ZkAsset.json
+          eventHandlers:
+            - event: CreateNote(address,bytes32,bytes)
+              handler: createNote
+            - event: DestroyNote(address,bytes32,bytes)
+              handler: destroyNote
