@@ -15,8 +15,6 @@ const AdjustSupply = artifacts.require('./contracts/ACE/validators/AdjustSupply'
 const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/AdjustSupplyInterface');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/JoinSplit');
-const ZkAssetMintableTest = artifacts.require('./contracts/ZkAsset/ZkAssetMintableTest');
-
 
 const ZkAssetMintable = artifacts.require('./contracts/ZkAsset/ZkAssetMintable');
 
@@ -37,7 +35,7 @@ const signNote = (validatorAddress, noteHash, spender, privateKey) => {
 };
 
 
-contract('ZkAssetMintable', (accounts) => {
+contract.only('ZkAssetMintable', (accounts) => {
     describe('success states', () => {
         let aztecAccounts = [];
         let ace;
@@ -154,13 +152,10 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
 
-        it('should perform mint using confidentialTransferFrom()', async () => {
+        it.only('should perform mint using confidentialTransferFrom()', async () => {
             const [owner, recipient1, recipient2] = aztecAccounts;
             const inputNoteOwners = [recipient1, recipient2];
-
-            // Create dummy ZkAsset, through which confidentialTransferFrom() will be called
-            const zkAssetMintableTest = await ZkAssetMintableTest.new();
-            await zkAssetMintableTest.setZkAssetMintableAddress(zkAssetMintable.address);
+            const delegateAddresss = accounts[2];
 
             const erc20TotalSupply = (await erc20.totalSupply()).toNumber();
             const initialAceBalance = (await erc20.balanceOf(ace.address)).toNumber();
@@ -201,14 +196,14 @@ contract('ZkAssetMintable', (accounts) => {
                 const { signature } = signNote(
                     zkAssetMintable.address,
                     mintedNotes[i].noteHash,
-                    zkAssetMintableTest.address,
+                    delegateAddresss,
                     inputNoteOwners[i].privateKey
                 );
                 const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
                 // eslint-disable-next-line no-await-in-loop
                 return zkAssetMintable.confidentialApprove(
                     mintedNotes[i].noteHash,
-                    zkAssetMintableTest.address,
+                    delegateAddresss,
                     true,
                     concatenatedSignature
                 );
@@ -219,17 +214,18 @@ contract('ZkAssetMintable', (accounts) => {
                 .encodeJoinSplitTransaction({
                     inputNotes: mintedNotes, // 20 + 30
                     outputNotes: [],
-                    senderAddress: accounts[0],
+                    senderAddress: delegateAddresss,
                     inputNoteOwners: [recipient1, recipient2],
                     publicOwner: recipient1.address,
                     kPublic, // 50
                     validatorAddress: aztecJoinSplit.address,
                 });
 
-            await zkAssetMintableTest.callValidateProof(JOIN_SPLIT_PROOF, withdrawalProof.proofData);
+            await ace.validateProof(JOIN_SPLIT_PROOF, accounts[2], withdrawalProof.proofData, { from: delegateAddresss });
+
             const withdrawalProofOutput = abiEncoder.outputCoder.getProofOutput(withdrawalProof.expectedOutput, 0);
             const formattedProofOutput = `0x${withdrawalProofOutput.slice(0x40)}`;
-            const { receipt: transferReceipt } = await zkAssetMintableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
+            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput, { from: delegateAddresss });
             expect(transferReceipt.status).to.equal(true);
 
             const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
@@ -240,14 +236,11 @@ contract('ZkAssetMintable', (accounts) => {
             expect(finalAceBalance).to.equal(0);
         });
 
-        it('should not perform mint if ACE has sufficient number of tokens when using confidentialTransferFrom()', async () => {
+        it.only('should not perform mint if ACE has sufficient number of tokens when using confidentialTransferFrom()', async () => {
             const [recipient1, recipient2] = aztecAccounts;
             const inputNoteOwners = [recipient1, recipient2];
+            const delegateAddresss = accounts[2];
             const totalTransfer = (scalingFactor.mul(new BN(kPublic))).toNumber();
-
-            // Create dummy ZkAsset, through which confidentialTransferFrom() will be called
-            const zkAssetMintableTest = await ZkAssetMintableTest.new();
-            await zkAssetMintableTest.setZkAssetMintableAddress(zkAssetMintable.address);
 
             await erc20.mint(accounts[0], (scalingFactor.mul(new BN(kPublic))), { from: accounts[0] });
 
@@ -308,14 +301,14 @@ contract('ZkAssetMintable', (accounts) => {
                 const { signature } = signNote(
                     zkAssetMintable.address,
                     outputNotes[i].noteHash,
-                    zkAssetMintableTest.address,
+                    delegateAddresss,
                     inputNoteOwners[i].privateKey
                 );
                 const concatenatedSignature = signature[0] + signature[1].slice(2) + signature[2].slice(2);
                 // eslint-disable-next-line no-await-in-loop
                 return zkAssetMintable.confidentialApprove(
                     outputNotes[i].noteHash,
-                    zkAssetMintableTest.address,
+                    delegateAddresss,
                     true,
                     concatenatedSignature
                 );
@@ -327,17 +320,17 @@ contract('ZkAssetMintable', (accounts) => {
                 .encodeJoinSplitTransaction({
                     inputNotes: outputNotes, // 20 + 30
                     outputNotes: [],
-                    senderAddress: accounts[0],
+                    senderAddress: delegateAddresss,
                     inputNoteOwners: [recipient1, recipient2],
                     publicOwner: recipient1.address,
                     kPublic, // 50
                     validatorAddress: aztecJoinSplit.address,
                 });
 
-            await zkAssetMintableTest.callValidateProof(JOIN_SPLIT_PROOF, withdrawalProof.proofData);
+            await ace.validateProof(JOIN_SPLIT_PROOF, delegateAddresss, withdrawalProof.proofData, { from: delegateAddresss });
             const withdrawalProofOutput = abiEncoder.outputCoder.getProofOutput(withdrawalProof.expectedOutput, 0);
             const formattedProofOutput = `0x${withdrawalProofOutput.slice(0x40)}`;
-            const { receipt: transferReceipt } = await zkAssetMintableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
+            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput, { from: delegateAddresss });
             expect(transferReceipt.status).to.equal(true);
 
             // Key check that checks total minted, and checks that ACE has not minted
