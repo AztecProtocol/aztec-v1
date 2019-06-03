@@ -1,4 +1,3 @@
-
 class HexString extends String {
     slice(a, b = null) {
         if (b) {

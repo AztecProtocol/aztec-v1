@@ -60,13 +60,7 @@ const mockZeroJoinSplitProof = () => {
 const mockZeroJoinSplitFluidProof = () => {
     const zeroProof = mockZeroProof();
     const publicValue = padLeft('00', 64);
-    const challengeArray = [
-        zeroProof.sender,
-        publicValue,
-        padLeft(`${zeroProof.m}`, 64),
-        ...zeroNote,
-        ...zeroBlindingFactors,
-    ];
+    const challengeArray = [zeroProof.sender, publicValue, padLeft(`${zeroProof.m}`, 64), ...zeroNote, ...zeroBlindingFactors];
     const challengeHash = keccak256(`0x${challengeArray.join('')}`);
 
     zeroProof.challenge = new BN(challengeHash.slice(2), 16).umod(bn128.curve.n);

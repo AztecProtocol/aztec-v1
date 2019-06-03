@@ -3,7 +3,6 @@ const { isHexStrict, padLeft } = require('web3-utils');
 const bn128 = require('../bn128');
 
 class ProofUtils {
-
     /**
      * @param {number} length
      * @param {array} encodedParams

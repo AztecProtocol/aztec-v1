@@ -10,15 +10,7 @@ const CONTRACTS_DIR = path.join(PACKAGES_PATH, 'protocol', 'build', 'contracts')
 const RINKEBY_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'rinkeby.json');
 const ROPSTEN_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'ropsten.json');
 
-const deployedContracts = [
-    'ACE',
-    'AdjustSupply',
-    'Dividend',
-    'ERC20Mintable',
-    'JoinSplit',
-    'Swap',
-    'ZkAsset',
-];
+const deployedContracts = ['ACE', 'AdjustSupply', 'Dividend', 'ERC20Mintable', 'JoinSplit', 'Swap', 'ZkAsset'];
 
 const rinkebyAddresses = {};
 const ropstenAddresses = {};
