@@ -3,7 +3,6 @@ const encoder = require('./encoder');
 const keccak = require('./keccak');
 const note = require('./note');
 const proof = require('./proof');
-const proofOld = require('./proof-old');
 const setup = require('./setup');
 const signer = require('./signer');
 
@@ -13,7 +12,6 @@ module.exports = {
     keccak,
     note,
     ...proof,
-    proofOld,
     setup,
     signer,
 };
