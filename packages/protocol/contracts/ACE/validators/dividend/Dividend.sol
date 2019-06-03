@@ -161,6 +161,8 @@ contract Dividend {
                         k := calldataload(noteIndex)
                     }
 
+                    // Check this commitment is well formed
+                    validateCommitment(noteIndex, k, a)
 
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
                     let x := mod(mload(0x00), gen_order) // x is the kecca hash of the input commitments
@@ -171,8 +173,7 @@ contract Dividend {
                     mstore(0x00, keccak256(0x00, 0x20)) // rehashing the kecca hash, for use in the next x
 
 
-                    // Check this commitment is well formed
-                    validateCommitment(noteIndex, k, a)
+
 
                     // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i - already has all x stuff
                     // Memory map:
