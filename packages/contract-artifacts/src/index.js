@@ -1,10 +1,11 @@
+/* eslint-disable */
 const ACE = require('../artifacts/ACE');
 const AdjustSupply = require('../artifacts/AdjustSupply');
 const AdjustSupplyABIEncoder = require('../artifacts/AdjustSupplyABIEncoder');
 const AdjustSupplyInterface = require('../artifacts/AdjustSupplyInterface');
-const DividendComputation = require('../artifacts/DividendComputation');
-const DividendComputationABIEncoder = require('../artifacts/DividendComputationABIEncoder');
-const DividendComputationInterface = require('../artifacts/DividendComputationInterface');
+const Dividend = require('../artifacts/Dividend');
+const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
+const DividendInterface = require('../artifacts/DividendInterface');
 const ERC20Mintable = require('../artifacts/ERC20Mintable');
 const GenericABIEncoder = require('../artifacts/GenericABIEncoder');
 const IACE = require('../artifacts/IACE');
@@ -37,9 +38,9 @@ module.exports = {
     AdjustSupply,
     AdjustSupplyABIEncoder,
     AdjustSupplyInterface,
-    DividendComputation,
-    DividendComputationABIEncoder,
-    DividendComputationInterface,
+    Dividend,
+    DividendABIEncoder,
+    DividendInterface,
     ERC20Mintable,
     GenericABIEncoder,
     IACE,
