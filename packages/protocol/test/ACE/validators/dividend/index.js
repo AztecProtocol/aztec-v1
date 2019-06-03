@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, it:true */
-const { DividendProof, encoder, note, proofOld } = require('aztec.js');
+const { DividendProof, note } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -222,49 +222,13 @@ contract.only('Dividend Validator', (accounts) => {
             );
         });
 
-        // TODO: investigate why this test doesn't revert
-        it.skip('should fail if scalars NOT modulo GROUP_MODULUS', async () => {
+        it('should fail if scalars NOT modulo GROUP_MODULUS', async () => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
-
-            // const inputNotes = [notionalNote];
-            // const outputNotes = [residualNote, targetNote];
-
-            // const proofConstruct = proofOld.dividend.constructProof([...inputNotes, ...outputNotes], za, zb, sender);
-
-            // const proofDataRawFormatted = [proofConstruct.proofData.slice(0, 6)].concat([
-            //     proofConstruct.proofData.slice(6, 12),
-            //     proofConstruct.proofData.slice(12, 18),
-            // ]);
-
-            // const outputOwners = [...outputNotes.map((n) => n.owner)];
-            // const inputOwners = [...inputNotes.map((n) => n.owner)];
-
-            // // Generate scalars that NOT mod r
-            // const kBarBN = new BN(proofConstruct.proofData[0][0].slice(2), 16);
-            // const notModRKBar = `0x${kBarBN.add(constants.GROUP_MODULUS).toString(16)}`;
-
-            // proofDataRawFormatted[0][0] = notModRKBar;
-
-            // const proofData = encoder.inputCoder.dividend(
-            //     proofDataRawFormatted,
-            //     proofConstruct.challenge,
-            //     za,
-            //     zb,
-            //     inputOwners,
-            //     outputOwners,
-            //     outputNotes,
-            // );
-
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
-            proof.data[0][0] = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
-            console.log(`0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`);
+            const notModRKBar = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
+            proof.data[0][0] = notModRKBar;
             const data = proof.encodeABI();
-
-            // console.log({ groupModulus: constants.GROUP_MODULUS });
-            // console.log({ proofData });
-            // console.log({ data });
-
             await truffleAssert.reverts(
                 dividendValidator.validateDividend(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
