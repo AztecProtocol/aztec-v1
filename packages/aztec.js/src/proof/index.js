@@ -4,6 +4,7 @@ const JoinSplitProof = require('./joinSplit');
 const JoinSplitProofFluid = require('./joinSplitFluid');
 const MintProof = require('./joinSplitFluid/mint');
 const { Proof, ProofType } = require('./proof');
+const ProofUtils = require('./utils');
 const SwapProof = require('./swap');
 
 module.exports = {
@@ -14,5 +15,6 @@ module.exports = {
     MintProof,
     Proof,
     ProofType,
+    ProofUtils,
     SwapProof,
 };

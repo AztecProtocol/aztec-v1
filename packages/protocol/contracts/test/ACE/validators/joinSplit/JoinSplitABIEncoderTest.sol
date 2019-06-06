@@ -9,7 +9,7 @@ contract JoinSplitABIEncoderTest {
         address,
         uint[6] calldata
     )
-        external view
+        external pure
         returns (bytes memory)
     {
         JoinSplitABIEncoder.encodeAndExit();

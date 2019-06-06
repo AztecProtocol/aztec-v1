@@ -1,11 +1,10 @@
-const { constants, proofs } = require('@aztec/dev-utils');
+const { constants } = require('@aztec/dev-utils');
 const { padLeft } = require('web3-utils');
 
 const bn128 = require('../../bn128');
 const { inputCoder, outputCoder } = require('../../encoder');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
-const signer = require('../../signer');
 
 class JoinSplitProof extends Proof {
     constructor(inputNotes, outputNotes, sender, publicValue, publicOwner, metadata = outputNotes) {
@@ -125,31 +124,15 @@ class JoinSplitProof extends Proof {
     /**
      * Encode the join-split proof as data for an Ethereum transaction
      * @param {string} validator Ethereum address of the join-split validator contract
-     * @param {Object} aztecAccounts mapping between owners and private keys
      * @returns {Object} proof data and expected output
      */
-    encodeABI(validator, aztecAccounts) {
+    encodeABI(validator) {
         if (!ProofUtils.isEthereumAddress(validator)) {
             throw new Error('validator is not an Ethereum address');
         }
 
-        const inputSignatures = this.inputNotes.map((inputNote) => {
-            const domain = signer.generateAZTECDomainParams(validator, constants.eip712.ACE_DOMAIN_PARAMS);
-            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-            const message = {
-                proof: proofs.JOIN_SPLIT_PROOF,
-                noteHash: inputNote.noteHash,
-                challenge: this.challengeHex,
-                sender: this.sender,
-            };
-            const privateKey = aztecAccounts[inputNote.owner];
-            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-            return signature;
-        });
-
         const encodedParams = [
             inputCoder.encodeProofData(this.data),
-            inputCoder.encodeInputSignatures(inputSignatures),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
             inputCoder.encodeMetadata(this.metadata),

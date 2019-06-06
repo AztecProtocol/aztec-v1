@@ -12,6 +12,7 @@ const typedData = require('@aztec/typed-data');
 const truffleAssert = require('truffle-assertions');
 const { keccak256, padLeft } = require('web3-utils');
 
+const { outputCoder } = encoder;
 const { JOIN_SPLIT_PROOF } = proofs;
 
 // ### Artifacts
