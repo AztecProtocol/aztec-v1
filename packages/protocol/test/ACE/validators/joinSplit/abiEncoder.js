@@ -30,7 +30,7 @@ const getDefaultNotes = async () => {
     return { inputNotes, outputNotes, publicValue };
 };
 
-contract('Join-Split ABI Encoder', (accounts) => {
+contract.only('Join-Split ABI Encoder', (accounts) => {
     const publicOwner = accounts[0];
     const sender = accounts[0];
 
