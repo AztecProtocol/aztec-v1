@@ -36,7 +36,7 @@ contract.skip('ACE Mint and Burn Functionality', (accounts) => {
         let aztecJoinSplitFluid;
         let aztecSwap;
         let aztecJoinSplit;
-        let aztecDividend;
+        // let aztecDividend;
         let erc20;
         const kPublic = 50;
         const tokensTransferred = new BN(1000);
