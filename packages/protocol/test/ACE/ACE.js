@@ -4,7 +4,6 @@
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
-const secp256k1 = require('@aztec/secp256k1');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */

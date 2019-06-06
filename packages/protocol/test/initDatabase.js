@@ -5,24 +5,17 @@
  * It contains 14,000 points - representing ~1.4% of the original in house trusted
  * setup.
  */
-
+const { setup } = require('aztec.js');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
-const { constants } = require('@aztec/dev-utils');
-const {
-    setup,
-    proof: { proofUtils },
-} = require('aztec.js');
 
 const partialPath = path.posix.resolve(__dirname, 'localSetupDatabase');
 
-const { TEST_K_MAX } = constants;
-
 // Redfine K_MAX in the tests to be TEST_K_MAX, lower as using smaller
 // local point database
-constants.K_MAX = TEST_K_MAX;
+constants.K_MAX = constants.TEST_K_MAX;
 
 console.log('Initialised the local trusted setup database');
 
@@ -61,16 +54,4 @@ setup.fetchPoint = async (inputValue) => {
             return resolve(setup.decompress(x));
         });
     });
-};
-
-/**
- * Override the behaviour of this method in the src folder.
- * Use the redefined constants.K_MAX value of TEST_constants.K_MAX
- *
- * Generate a random note value that is less than constants.K_MAX
- * @method generateNoteValue
- * @returns {BN} - big number instance of an AZTEC note value
- */
-proofUtils.randomNoteValue = () => {
-    return new BN(crypto.randomBytes(32), 16).umod(new BN(constants.K_MAX)).toNumber();
 };

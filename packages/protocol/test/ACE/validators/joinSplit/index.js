@@ -13,9 +13,6 @@ const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
 const aztecAccount = secp256k1.generateAccount();
-const aztecAccountMapping = {
-    [aztecAccount.address]: aztecAccount.privateKey,
-};
 let joinSplitValidator;
 
 const getNotes = async (inputNoteValues = [], outputNoteValues = []) => {
@@ -53,7 +50,7 @@ contract.only('Join-Split Validator', (accounts) => {
         it('should validate Join-Split proof with negative public value', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -64,7 +61,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const publicValue = 20;
             const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -75,7 +72,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const publicValue = 0;
             const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -86,7 +83,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const publicValue = -450;
             const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -97,7 +94,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const publicValue = 450;
             const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -108,7 +105,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const publicValue = -50;
             const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -119,7 +116,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const publicValue = 50;
             const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -130,7 +127,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const publicValue = 0;
             const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -140,7 +137,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
             proof.constructOutput();
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
         });
@@ -161,7 +158,7 @@ contract.only('Join-Split Validator', (accounts) => {
                     proof.data[i][j] = randomHex(32);
                 }
             }
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -173,7 +170,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const zeroJoinSplitProof = await mockZeroJoinSplitProof();
             proof.data = zeroJoinSplitProof.data;
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -185,7 +182,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
             proof.data[0][0] = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -204,7 +201,7 @@ contract.only('Join-Split Validator', (accounts) => {
             proof.data[2][1] = zeroScalar;
             proof.data[3][0] = zeroScalar;
             proof.data[3][1] = zeroScalar;
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -221,7 +218,7 @@ contract.only('Join-Split Validator', (accounts) => {
             proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
             proof.data[0][5] = `0x${constants.H_Y.toString(16)}`;
             proof.challenge = new BN('0a', 16);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -232,7 +229,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             proof.challenge = new BN('0');
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -245,7 +242,7 @@ contract.only('Join-Split Validator', (accounts) => {
             // First element should have been the sender
             proof.constructChallengeRecurse([proof.publicValue, proof.m, proof.publicOwner, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -258,7 +255,7 @@ contract.only('Join-Split Validator', (accounts) => {
             // Second element should have been the public value
             proof.constructChallengeRecurse([proof.sender, proof.m, proof.publicOwner, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -277,7 +274,7 @@ contract.only('Join-Split Validator', (accounts) => {
                 proof.blindingFactors,
             ]);
             proof.challenge = proof.challengeHash.redKeccak();
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -290,7 +287,7 @@ contract.only('Join-Split Validator', (accounts) => {
             // Fourth element should have been the public owner
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -303,7 +300,7 @@ contract.only('Join-Split Validator', (accounts) => {
             // Fifth element should have been the notes
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.publicOwner, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -316,7 +313,7 @@ contract.only('Join-Split Validator', (accounts) => {
             // Sixth element should have been the blinding factors
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.publicOwner, proof.notes]);
             proof.challenge = proof.challengeHash.redKeccak();
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, constants.CRS),
                 truffleAssert.ErrorType.REVERT,
@@ -326,7 +323,7 @@ contract.only('Join-Split Validator', (accounts) => {
         it('should fail if malformed H_X, H_Y in CRS', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(joinSplitValidator.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitValidator.address);
             const malformedHx = constants.H_X.add(new BN(1));
             const malformedHy = constants.H_Y.add(new BN(1));
             const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...constants.t2];

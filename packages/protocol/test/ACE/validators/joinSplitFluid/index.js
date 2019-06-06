@@ -404,16 +404,6 @@ contract.only('Burn Validator', (accounts) => {
     });
 
     describe('Failure States', () => {
-        // let validateInputsStub;
-
-        // before(() => {
-        //     validateInputsStub = sinon.stub(Proof.prototype, 'validateInputs').callsFake(() => {});
-        // });
-
-        // after(() => {
-        //     validateInputsStub.restore();
-        // });
-
         it('should fail if notes do NOT balance', async () => {
             const currentBurnCounter = 30;
             const newBurnCounter = 50;

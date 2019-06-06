@@ -26,7 +26,7 @@ const getDefaultNotes = async () => {
     return { notionalNote, residualNote, targetNote, za, zb };
 };
 
-contract('Dividend ABI Encoder', (accounts) => {
+contract.only('Dividend ABI Encoder', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
