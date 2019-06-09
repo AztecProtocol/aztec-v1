@@ -14,8 +14,7 @@ const TestRejectEther = artifacts.require('./contracts/test/TestRejectEther');
 // ### Time travel
 const timetravel = require('../timeTravel');
 
-// recreate tests for multisig
-contract.only('MultiSigWalletWithTimeLock', (accounts) => {
+contract('MultiSigWalletWithTimeLock', (accounts) => {
     const owners = accounts.slice(0, 3);
     const nonOwner = accounts[3];
     const REQUIRED_APPROVALS = new BN(2);
