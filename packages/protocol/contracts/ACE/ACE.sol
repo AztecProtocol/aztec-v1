@@ -390,7 +390,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         bool queryInvalid;
         assembly {
             // To compute the storage key for validatorAddress[epoch][category][id], we do the following:
-            // 1. get the validatorAddress slot 
+            // 1. get the validatorAddress slot
             // 2. add (epoch * 0x10000) to the slot
             // 3. add (category * 0x100) to the slot
             // 4. add (id) to the slot
@@ -407,6 +407,12 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             // (_proof & 0xffff0000) + (_proof & 0xff00) + (_proof & 0xff)
             // i.e. the storage slot offset IS the value of _proof
             validatorAddress := sload(add(_proof, validators_slot))
+
+            isValidatorDisabled :=
+                shr(
+                    shl(0x03, and(_proof, 0x1f)),
+                    sload(add(shr(5, _proof), disabledValidators_slot))
+                )
             queryInvalid := or(iszero(validatorAddress), isValidatorDisabled)
         }
 
