@@ -1,6 +1,7 @@
 /* eslint-disable prefer-destructuring */
-const { constants, errors } = require('@aztec/dev-utils');
+const { constants, errors, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
+const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../encoder');
@@ -19,7 +20,7 @@ class SwapProof extends Proof {
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
-        this.constructOutput();
+        this.constructOutputs();
     }
 
     /**
@@ -94,8 +95,10 @@ class SwapProof extends Proof {
         });
     }
 
-    constructOutput() {
-        this.output = outputCoder.encodeProofOutputs([
+    // TODO: normalise proof output encoding. In some places it's expected to use `encodeProofOutputs`
+    // while in others `encodeProofOutput`.
+    constructOutputs() {
+        this.outputs = outputCoder.encodeProofOutputs([
             {
                 inputNotes: [this.inputNotes[0]],
                 outputNotes: [this.outputNotes[0]],
@@ -111,7 +114,10 @@ class SwapProof extends Proof {
                 challenge: `0x${keccak256(this.challengeHex).slice(2)}`,
             },
         ]);
-        this.hash = outputCoder.hashProofOutput(this.output);
+        this.hash = outputCoder.hashProofOutput(this.outputs);
+        this.validatedProofHash = keccak256(
+            new AbiCoder().encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofs.SWAP_PROOF, this.sender]),
+        );
     }
 
     encodeABI() {

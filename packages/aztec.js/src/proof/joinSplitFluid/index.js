@@ -1,4 +1,5 @@
-const { constants, errors } = require('@aztec/dev-utils');
+const { constants, errors, proofs } = require('@aztec/dev-utils');
+const { AbiCoder } = require('web3-eth-abi');
 const { keccak256 } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../encoder');
@@ -38,8 +39,8 @@ class JoinSplitFluidProof extends JoinSplitProof {
         this.challenge = this.challengeHash.redKeccak();
     }
 
-    constructOutput() {
-        this.output = outputCoder.encodeProofOutputs([
+    constructOutputs() {
+        this.outputs = outputCoder.encodeProofOutputs([
             {
                 inputNotes: [
                     {
@@ -65,7 +66,11 @@ class JoinSplitFluidProof extends JoinSplitProof {
                 challenge: keccak256(this.challengeHex), // TODO: figure out why this is the challenge hex and not the note the challenge itself
             },
         ]);
-        this.hash = outputCoder.hashProofOutput(this.output);
+        this.hash = outputCoder.hashProofOutput(this.outputs);
+        const proofId = this.type === ProofType.BURN.name ? proofs.BURN_PROOF : proofs.MINT_PROOF;
+        this.validatedProofHash = keccak256(
+            new AbiCoder().encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofId, this.sender]),
+        );
     }
 
     /**

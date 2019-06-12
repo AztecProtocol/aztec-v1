@@ -4,6 +4,7 @@ const { Enum } = require('enumify');
 const { padLeft } = require('web3-utils');
 
 const bn128 = require('../bn128');
+const { outputCoder } = require('../encoder');
 const Keccak = require('../keccak');
 const ProofUtils = require('./utils');
 const types = require('./types');
@@ -55,7 +56,7 @@ class Proof {
         return {
             // Ethereum will automatically prepend a bytes array with an evm word that
             // represents the length of the bytes array
-            output: `0x${this.output.slice(0x42)}`,
+            output: `0x${this.outputs.slice(0x42)}`,
         };
     }
 

@@ -1,6 +1,7 @@
-const { constants, errors } = require('@aztec/dev-utils');
+const { constants, errors, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
+const { AbiCoder } = require('web3-eth-abi');
+const { keccak256, padLeft } = require('web3-utils');
 
 const bn128 = require('../../bn128');
 const { inputCoder, outputCoder } = require('../../encoder');
@@ -22,7 +23,7 @@ class DividendProof extends Proof {
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
-        this.constructOutput();
+        this.constructOutputs();
     }
 
     constructBlindingFactors() {
@@ -85,17 +86,22 @@ class DividendProof extends Proof {
         });
     }
 
-    constructOutput() {
-        this.output = outputCoder.encodeProofOutputs([
-            {
-                inputNotes: this.inputNotes,
-                outputNotes: this.outputNotes,
-                publicValue: this.publicValue,
-                publicOwner: this.publicOwner,
-                challenge: this.challengeHex,
-            },
-        ]);
+    // TODO: normalise proof output encoding. In some places it's expected to use `encodeProofOutputs`
+    // while in others `encodeProofOutput`.
+    constructOutputs() {
+        const proofOutput = {
+            inputNotes: this.inputNotes,
+            outputNotes: this.outputNotes,
+            publicValue: this.publicValue,
+            publicOwner: this.publicOwner,
+            challenge: this.challengeHex,
+        };
+        this.output = outputCoder.encodeProofOutput(proofOutput);
+        this.outputs = outputCoder.encodeProofOutputs([proofOutput]);
         this.hash = outputCoder.hashProofOutput(this.output);
+        this.validatedProofHash = keccak256(
+            new AbiCoder().encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofs.DIVIDEND_PROOF, this.sender]),
+        );
     }
 
     encodeABI() {
