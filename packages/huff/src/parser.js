@@ -241,7 +241,7 @@ parser.processMacro = (
             throw new Error(`expected to find ${tableInstance.label} in ${JSON.stringify(tableOffsets)}`);
         }
         const { offset } = tableInstance;
-        const placeholder = bytecode.slice((offset * 2) + 2, (offset * 2) + 6);
+        const placeholder = bytecode.slice(offset * 2 + 2, offset * 2 + 6);
         if (placeholder !== 'xxxx') {
             throw new Error(`expected ${placeholder} to be xxxx at offset ${tableInstance.offset}`);
         }
