@@ -52,7 +52,7 @@ contract.only('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
-            proof.constructOutput();
+            proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await dividendValidator.validateDividend(data, sender, constants.CRS, { from: sender });
             expect(result).to.equal(proof.eth.output);

@@ -136,7 +136,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
-            proof.constructOutput();
+            proof.constructOutputs();
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
