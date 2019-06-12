@@ -102,7 +102,7 @@ contract.only('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
-            proof.constructOutput();
+            proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);
@@ -396,7 +396,7 @@ contract.only('Burn Validator', (accounts) => {
             const { currentBurnCounterNote, newBurnCounterNote, burnedNotes } = await getDefaultBurnNotes();
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
-            proof.constructOutput();
+            proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
             expect(result).to.equal(proof.eth.output);

@@ -70,7 +70,7 @@ contract.only('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
-            proof.constructOutput();
+            proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await swapValidator.validateSwap(data, sender, constants.CRS, { from: sender });
             expect(result).to.equal(proof.eth.output);
