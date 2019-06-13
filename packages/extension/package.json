@@ -1,0 +1,17 @@
+{
+    "name": "extension",
+    "version": "0.0.1",
+    "main": "index.js",
+    "license": "MIT",
+    "dependencies": {
+        "@aztec/dev-utils": "0.0.0-semantically-released",
+        "@aztec/secp256k1": "0.0.0-semantically-released",
+        "@aztec/typed-data": "0.0.0-semantically-released",
+        "dotenv": "^8.0.0",
+        "tweetnacl": "^1.0.1",
+        "tweetnacl-util": "^0.15.0"
+    },
+    "scripts": {
+        "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings"
+    }
+}
