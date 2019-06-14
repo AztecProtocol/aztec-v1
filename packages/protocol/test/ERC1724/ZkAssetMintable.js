@@ -24,7 +24,7 @@ const ZkAssetMintable = artifacts.require('./ZkAssetMintable');
 JoinSplitFluid.abi = JoinSplitFluidInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('ZkAssetMintable', (accounts) => {
+contract.skip('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let aztecAccounts = [];

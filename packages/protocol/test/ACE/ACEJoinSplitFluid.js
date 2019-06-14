@@ -30,7 +30,7 @@ JoinSplit.abi = JoinSplitInterface.abi;
 JoinSplitFluid.abi = JoinSplitFluidInterface.abi;
 Swap.abi = SwapInterface.abi;
 
-contract('ACE Mint and Burn Functionality', (accounts) => {
+contract.skip('ACE Mint and Burn Functionality', (accounts) => {
     describe('Success States', () => {
         let ace;
         let aztecJoinSplitFluid;
@@ -50,14 +50,14 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             aztecJoinSplitFluid = await JoinSplitFluid.new();
             aztecJoinSplit = await JoinSplit.new();
             aztecSwap = await Swap.new();
-            // aztecDividend = await Dividend.new();
+            aztecDividend = await Dividend.new();
 
             await ace.setCommonReferenceString(constants.CRS);
             await ace.setProof(MINT_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(BURN_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
             await ace.setProof(SWAP_PROOF, aztecSwap.address);
-            await ace.setProof(DIVIDEND_PROOF, aztecSwap.address);
+            await ace.setProof(DIVIDEND_PROOF, aztecDividend.address);
 
             // Creating a fixed note
             zeroNote = await note.createZeroValueNote();

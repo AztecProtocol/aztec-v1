@@ -40,14 +40,14 @@ const getDefaultNotes = async () => {
     return { inputNotes, outputNotes, publicValue };
 };
 
-contract.only('ACE', (accounts) => {
+contract('ACE', (accounts) => {
     const sender = accounts[0];
 
     describe('Initialization', () => {
         let ace;
 
         beforeEach(async () => {
-            ace = await ACE.new({ from: accounts[0] });
+            ace = await ACE.new({ from: sender });
         });
 
         it('should set the owner', async () => {
@@ -62,10 +62,10 @@ contract.only('ACE', (accounts) => {
         });
 
         it('should set a proof', async () => {
-            const aztecJoinSplit = await JoinSplitValidator.new({ from: sender });
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
+            const joinSplitValidator = await JoinSplitValidator.new({ from: sender });
+            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
             const resultValidatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
-            expect(resultValidatorAddress).to.equal(aztecJoinSplit.address);
+            expect(resultValidatorAddress).to.equal(joinSplitValidator.address);
         });
     });
 
@@ -79,6 +79,7 @@ contract.only('ACE', (accounts) => {
             await ace.setCommonReferenceString(constants.CRS);
             joinSplitValidator = await JoinSplitValidator.new({ from: sender });
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
+
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
         });
@@ -109,7 +110,7 @@ contract.only('ACE', (accounts) => {
                 await aceTest.setACEAddress(ace.address);
                 const data = proof.encodeABI(joinSplitValidator.address);
                 const { receipt } = await aceTest.validateProof(JOIN_SPLIT_PROOF, sender, data);
-                expect(proof.eth.output).to.equal(receipt.logs[0].args.proofOutputs);
+                expect(proof.eth.outputs).to.equal(receipt.logs[0].args.proofOutputs);
             });
 
             it('should validate-by-hash previously set proofs', async () => {

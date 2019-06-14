@@ -26,7 +26,7 @@ const getDefaultNotes = async () => {
     return { notionalNote, residualNote, targetNote, za, zb };
 };
 
-contract.only('Dividend ABI Encoder', (accounts) => {
+contract('Dividend ABI Encoder', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -40,7 +40,7 @@ contract.only('Dividend ABI Encoder', (accounts) => {
 
         const result = await dividendAbiEncoderTest.validateDividend(data, sender, constants.CRS);
         const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-        expect(result).to.equal(proof.eth.output);
+        expect(result).to.equal(proof.eth.outputs);
 
         expect(decoded[0].inputNotes[0].gamma.eq(notionalNote.gamma)).to.equal(true);
         expect(decoded[0].inputNotes[0].sigma.eq(notionalNote.sigma)).to.equal(true);

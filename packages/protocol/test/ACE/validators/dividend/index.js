@@ -32,7 +32,7 @@ const getDefaultNotes = async () => {
     return { notionalNote, residualNote, targetNote, za, zb };
 };
 
-contract.only('Dividend Validator', (accounts) => {
+contract('Dividend Validator', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -45,7 +45,7 @@ contract.only('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
             const result = await dividendValidator.validateDividend(data, sender, constants.CRS, { from: sender });
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Dividend proof with challenge that has GROUP_MODULUS added to it', async () => {
@@ -55,7 +55,7 @@ contract.only('Dividend Validator', (accounts) => {
             proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await dividendValidator.validateDividend(data, sender, constants.CRS, { from: sender });
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
     });
 

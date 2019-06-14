@@ -30,7 +30,7 @@ const computeDomainHash = (validatorAddress) => {
     return keccak256(`0x${typedData.encodeMessageData(types, 'EIP712Domain', domain)}`);
 };
 
-contract('ZkAsset', (accounts) => {
+contract.skip('ZkAsset', (accounts) => {
     let ace;
     let aztecJoinSplit;
     const canAdjustSupply = false;

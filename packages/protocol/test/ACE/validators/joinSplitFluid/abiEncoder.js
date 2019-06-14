@@ -22,7 +22,7 @@ const getDefaultMintNotes = async () => {
     return getMintNotes(currentMintCounter, newMintCounter, mintedNoteValues);
 };
 
-contract.only('Mint ABI Encoder', (accounts) => {
+contract('Mint ABI Encoder', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -36,7 +36,7 @@ contract.only('Mint ABI Encoder', (accounts) => {
 
         const result = await joinSplitFluidABIEncoderTest.validateJoinSplitFluid(data, sender, constants.CRS);
         const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-        expect(result).to.equal(proof.eth.output);
+        expect(result).to.equal(proof.eth.outputs);
 
         expect(decoded[0].inputNotes[0].gamma.eq(currentMintCounterNote.gamma)).to.equal(true);
         expect(decoded[0].inputNotes[0].sigma.eq(currentMintCounterNote.sigma)).to.equal(true);
@@ -82,7 +82,7 @@ const getDefaultBurnNotes = async () => {
     return getBurnNotes(currentBurnCounter, newBurnCounter, burnedNoteValues);
 };
 
-contract.only('Burn ABI Encoder', (accounts) => {
+contract('Burn ABI Encoder', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -95,7 +95,7 @@ contract.only('Burn ABI Encoder', (accounts) => {
         const data = proof.encodeABI();
 
         const result = await joinSplitFluidABIEncoderTest.validateJoinSplitFluid(data, sender, constants.CRS);
-        expect(result).to.equal(proof.eth.output);
+        expect(result).to.equal(proof.eth.outputs);
 
         const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
         expect(decoded[0].inputNotes[0].gamma.eq(currentBurnCounterNote.gamma)).to.equal(true);

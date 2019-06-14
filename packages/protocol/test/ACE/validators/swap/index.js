@@ -40,7 +40,7 @@ const getDefaultNotes = async () => {
     return getNotes(asks, bids);
 };
 
-contract.only('Swap Validator', (accounts) => {
+contract('Swap Validator', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -53,7 +53,7 @@ contract.only('Swap Validator', (accounts) => {
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
             const result = await swapValidator.validateSwap(data, sender, constants.CRS, { from: sender });
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Swap proof that uses notes worth 0', async () => {
@@ -63,7 +63,7 @@ contract.only('Swap Validator', (accounts) => {
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
             const result = await swapValidator.validateSwap(data, sender, constants.CRS, { from: sender });
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Swap proof with challenge that has GROUP_MODULUS added to it', async () => {
@@ -73,7 +73,7 @@ contract.only('Swap Validator', (accounts) => {
             proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await swapValidator.validateSwap(data, sender, constants.CRS, { from: sender });
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
     });
 
