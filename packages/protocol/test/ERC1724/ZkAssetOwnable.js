@@ -23,7 +23,7 @@ const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('ZkAssetOwnable', (accounts) => {
+contract.skip('ZkAssetOwnable', (accounts) => {
     let ace;
     let aztecJoinSplit;
     let erc20;

@@ -38,7 +38,7 @@ const getDefaultNotes = async () => {
     return getNotes(asks, bids);
 };
 
-contract.only('Swap Validator ABI Encoder', (accounts) => {
+contract('Swap Validator ABI Encoder', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -53,7 +53,7 @@ contract.only('Swap Validator ABI Encoder', (accounts) => {
 
             const result = await swapAbiEncoderTest.validateSwap(data, sender, constants.CRS, { from: sender });
             const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
 
             expect(decoded[0].inputNotes[0].gamma.eq(inputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].inputNotes[0].sigma.eq(inputNotes[0].sigma)).to.equal(true);

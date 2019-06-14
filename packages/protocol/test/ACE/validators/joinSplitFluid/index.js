@@ -36,7 +36,7 @@ const getDefaultMintNotes = async () => {
     return getMintNotes(currentMintCounter, newMintCounter, mintedNoteValues);
 };
 
-contract.only('Mint Validator', (accounts) => {
+contract('Mint Validator', (accounts) => {
     let joinSplitFluidValidator;
     const sender = accounts[0];
 
@@ -50,7 +50,7 @@ contract.only('Mint Validator', (accounts) => {
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Mint proof with many input and output notes', async () => {
@@ -65,7 +65,7 @@ contract.only('Mint Validator', (accounts) => {
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Mint proof with minted notes of zero value', async () => {
@@ -80,7 +80,7 @@ contract.only('Mint Validator', (accounts) => {
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Mint proof with minimum number of notes (one input, one output)', async () => {
@@ -95,7 +95,7 @@ contract.only('Mint Validator', (accounts) => {
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Mint proof with challenge that has GROUP_MODULUS added to it', async () => {
@@ -105,7 +105,7 @@ contract.only('Mint Validator', (accounts) => {
             proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
     });
 
@@ -330,7 +330,7 @@ const getDefaultBurnNotes = async () => {
     return getBurnNotes(currentBurnCounter, newBurnCounter, burnedNoteValues);
 };
 
-contract.only('Burn Validator', (accounts) => {
+contract('Burn Validator', (accounts) => {
     let joinSplitFluidValidator;
     const sender = accounts[0];
 
@@ -344,7 +344,7 @@ contract.only('Burn Validator', (accounts) => {
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Burn proof with many input and output notes', async () => {
@@ -359,7 +359,7 @@ contract.only('Burn Validator', (accounts) => {
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Burn proof with burned notes of zero value', async () => {
@@ -374,7 +374,7 @@ contract.only('Burn Validator', (accounts) => {
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Burn proof with minimum number of notes (one input, one output)', async () => {
@@ -389,7 +389,7 @@ contract.only('Burn Validator', (accounts) => {
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Burn proof with challenge that has GROUP_MODULUS added to it', async () => {
@@ -399,7 +399,7 @@ contract.only('Burn Validator', (accounts) => {
             proof.constructOutputs();
             const data = proof.encodeABI();
             const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
     });
 

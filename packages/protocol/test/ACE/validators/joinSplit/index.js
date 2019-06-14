@@ -38,7 +38,7 @@ const getDefaultNotes = async () => {
  * exploring more edge cases on the agency side, i.`e`. when the public key, the sender or
  * the public owner have bogus values.
  */
-contract.only('Join-Split Validator', (accounts) => {
+contract('Join-Split Validator', (accounts) => {
     const publicOwner = accounts[0];
     const sender = accounts[0];
 
@@ -52,7 +52,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with positive public value', async () => {
@@ -63,7 +63,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with many input and output notes', async () => {
@@ -74,7 +74,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with no input notes', async () => {
@@ -85,7 +85,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with no output notes', async () => {
@@ -96,7 +96,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with input notes of 0 value', async () => {
@@ -107,7 +107,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with output notes of 0 value', async () => {
@@ -118,7 +118,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with the minimum number of notes possible (1 input, 1 output)', async () => {
@@ -129,7 +129,7 @@ contract.only('Join-Split Validator', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should validate Join-Split proof with challenge that has GROUP_MODULUS added to it', async () => {
@@ -139,7 +139,7 @@ contract.only('Join-Split Validator', (accounts) => {
             proof.constructOutputs();
             const data = proof.encodeABI(joinSplitValidator.address);
             const result = await joinSplitValidator.validateJoinSplit(data, sender, constants.CRS);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
         });
 
         it('should succeed for wrong input note owners', async () => {

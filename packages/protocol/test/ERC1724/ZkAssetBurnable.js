@@ -25,7 +25,7 @@ const ZkAssetBurnable = artifacts.require('./ZkAssetBurnable');
 JoinSplitFluid.abi = JoinSplitFluidInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 
-contract('ZkAssetBurnable', (accounts) => {
+contract.skip('ZkAssetBurnable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let aztecAccounts = [];

@@ -30,7 +30,7 @@ const getDefaultNotes = async () => {
     return { inputNotes, outputNotes, publicValue };
 };
 
-contract.only('Join-Split ABI Encoder', (accounts) => {
+contract('Join-Split ABI Encoder', (accounts) => {
     const publicOwner = accounts[0];
     const sender = accounts[0];
 
@@ -49,7 +49,7 @@ contract.only('Join-Split ABI Encoder', (accounts) => {
 
             const result = await joinSplitAbiEncoderTest.validateJoinSplit(data, sender, constants.CRS);
             const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
-            expect(result).to.equal(proof.eth.output);
+            expect(result).to.equal(proof.eth.outputs);
 
             expect(decoded[0].outputNotes[0].gamma.eq(outputNotes[0].gamma)).to.equal(true);
             expect(decoded[0].outputNotes[0].sigma.eq(outputNotes[0].sigma)).to.equal(true);
