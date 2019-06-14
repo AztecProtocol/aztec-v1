@@ -56,7 +56,8 @@ class Proof {
         return {
             // Ethereum will automatically prepend a bytes array with an evm word that
             // represents the length of the bytes array
-            output: `0x${this.outputs.slice(0x42)}`,
+            output: `0x${this.output.slice(0x40)}`,
+            outputs: `0x${this.outputs.slice(0x42)}`,
         };
     }
 
