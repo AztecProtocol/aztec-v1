@@ -98,6 +98,7 @@ class SwapProof extends Proof {
     // TODO: normalise proof output encoding. In some places it's expected to use `encodeProofOutputs`
     // while in others `encodeProofOutput`.
     constructOutputs() {
+        this.output = '';
         this.outputs = outputCoder.encodeProofOutputs([
             {
                 inputNotes: [this.inputNotes[0]],

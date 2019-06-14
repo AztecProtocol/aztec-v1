@@ -40,6 +40,7 @@ class JoinSplitFluidProof extends JoinSplitProof {
     }
 
     constructOutputs() {
+        this.output = '';
         this.outputs = outputCoder.encodeProofOutputs([
             {
                 inputNotes: [
