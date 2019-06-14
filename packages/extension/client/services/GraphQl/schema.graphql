@@ -1,0 +1,24 @@
+type ZkAsset @entity {
+  id: ID!
+  address: Bytes!
+  linkedTokenAddress: Bytes!
+  scalingFactor: BigInt!
+  canAdjustSupply: Boolean
+  canConvert: Boolean
+}
+
+type Note @entity {
+  id: ID!
+  asset: ZkAsset!
+  owner: Account!
+  metadata: Bytes!
+  status: String!
+}
+
+type Account @entity {
+  id: ID!
+  address: Bytes!
+  networkId: BigInt!
+  publicKey: Bytes!
+  encryptedVault: Bytes!
+}
