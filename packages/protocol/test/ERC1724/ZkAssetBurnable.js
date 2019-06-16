@@ -36,15 +36,7 @@ const constructDepositNotes = async (noteValues) => {
     };
 };
 
-const constructBurnNotes = async (newBurnCounterValue, burnedNoteValues) => {
-    const { publicKey } = secp256k1.generateAccount();
-    const zeroBurnCounterNote = await note.createZeroValueNote();
-    const newBurnCounterNote = await note.create(publicKey, newBurnCounterValue);
-    const burnedNotes = await Promise.all(burnedNoteValues.map((burnedValue) => note.create(publicKey, burnedValue)));
-    return { zeroBurnCounterNote, newBurnCounterNote, burnedNotes };
-};
-
-contract.skip('ZkAssetBurnable', (accounts) => {
+contract('ZkAssetBurnable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let joinSplitFluidValidator;
@@ -195,10 +187,7 @@ contract.skip('ZkAssetBurnable', (accounts) => {
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnedNotes, burnSender);
             const burnData = burnProof.encodeABI(zkAssetBurnable.address);
 
-            await truffleAssert.reverts(
-                zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData),
-                'this asset is not burnable',
-            );
+            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData), 'this asset is not burnable');
         });
 
         it('should fail if confidentialBurn() called from a non-owner', async () => {

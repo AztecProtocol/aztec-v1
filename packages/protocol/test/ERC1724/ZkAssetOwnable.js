@@ -1,5 +1,10 @@
-/* global artifacts, beforeEach, contract, expect,it */
-// ### External Dependencies
+/* global artifacts, expect, contract, beforeEach, it:true */
+const { JoinSplitProof, note, signer } = require('aztec.js');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 
@@ -17,16 +22,41 @@ const { outputCoder } = encoder;
 // ### Artifacts
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ACE = artifacts.require('./ACE');
-const JoinSplit = artifacts.require('./JoinSplit');
-const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ZkAssetOwnable = artifacts.require('./ZkAssetOwnable');
 const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
+const JoinSplitValidator = artifacts.require('./JoinSplit');
+const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
+JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-JoinSplit.abi = JoinSplitInterface.abi;
+const setupTwoProofTest = async (noteValues) => {
+    const numNotes = noteValues.length;
+    const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
+    const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
-contract.skip('ZkAssetOwnable', (accounts) => {
+    const depositInputNotes = [];
+    const depositOutputNotes = notes.slice(0, 2);
+    const depositInputOwnerAccounts = [];
+
+    const transferInputNotes = depositOutputNotes;
+    const transferOutputNotes = notes.slice(2, 4);
+    const transferInputNoteOwnerAccounts = aztecAccounts.slice(0, 2);
+
+    return {
+        depositInputNotes,
+        depositOutputNotes,
+        depositInputOwnerAccounts,
+        transferInputNotes,
+        transferOutputNotes,
+        transferInputNoteOwnerAccounts,
+        notes,
+        aztecAccounts,
+    };
+};
+
+contract('ZkAssetOwnable', (accounts) => {
     let ace;
-    let aztecJoinSplit;
+    let joinSplitValidator;
     let erc20;
     let zkAssetOwnable;
     let zkAssetOwnableTest;
@@ -35,6 +65,7 @@ contract.skip('ZkAssetOwnable', (accounts) => {
     const filter = 17; // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
     const scalingFactor = new BN(10);
     const tokensTransferred = new BN(100000);
+    const publicOwner = accounts[0];
 
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
         await Promise.all(
@@ -52,13 +83,13 @@ contract.skip('ZkAssetOwnable', (accounts) => {
     };
 
     beforeEach(async () => {
-        ace = await ACE.new({
-            from: accounts[0],
-        });
+        ace = await ACE.new({ from: accounts[0] });
+        erc20 = await ERC20Mintable.new({ from: accounts[0] });
+        joinSplitValidator = await JoinSplitValidator.new({ from: accounts[0] });
 
         await ace.setCommonReferenceString(bn128.CRS);
         aztecJoinSplit = await JoinSplit.new();
-        await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
+        await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
         erc20 = await ERC20Mintable.new();
         const canAdjustSupply = false;
@@ -70,22 +101,24 @@ contract.skip('ZkAssetOwnable', (accounts) => {
 
         await Promise.all(
             accounts.map((account) => {
-                const opts = {
-                    from: accounts[0],
-                    gas: 4700000,
-                };
+                const opts = { from: accounts[0], gas: 4700000 };
                 return erc20.mint(account, scalingFactor.mul(tokensTransferred), opts);
             }),
         );
         await Promise.all(
             accounts.map((account) => {
-                const opts = {
-                    from: account,
-                    gas: 4700000,
-                };
+                const opts = { from: account, gas: 4700000 };
                 return erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
             }),
         );
+
+        const canAdjustSupply = false;
+        const canConvert = true;
+        zkAssetOwnable = await ZkAssetOwnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+        await zkAssetOwnable.setProofs(epoch, filter);
+
+        zkAssetOwnableTest = await ZkAssetOwnableTest.new();
+        await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
     });
 
     describe('Success States', () => {
@@ -94,136 +127,155 @@ contract.skip('ZkAssetOwnable', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
-        it('should delegate a contract to update a note registry by consuming input notes, with kPublic negative', async () => {
+        it('should delegate an address to update a note registry by consuming input notes, with kPublic negative', async () => {
             const noteValues = [0, 10, 30, 20];
-            const numNotes = 4;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -10;
+            const sender = accounts[0];
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                notes,
+                aztecAccounts,
+            } = await setupTwoProofTest(noteValues);
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
 
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[1],
-                kPublic: -40,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
-            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
-                from: accounts[1],
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            const transferPublicValue = -40;
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                transferPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
+            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, transferPublicValue, {
+                from: accounts[0],
             });
 
             await confidentialApprove([0, 1], notes, aztecAccounts);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
-            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
-            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
-
+            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
         });
 
         it('should delegate a contract to update a note registry by consuming input notes, with kPublic positive', async () => {
             const noteValues = [60, 70, 50, 40];
-            const numNotes = 4;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -130;
+            const sender = accounts[0];
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -130,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 130, {
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                notes,
+                aztecAccounts,
+            } = await setupTwoProofTest(noteValues);
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
 
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[1],
-                kPublic: 40,
-                validatorAddress: zkAssetOwnable.address,
+            const transferPublicValue = 40;
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                transferPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
+            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, transferPublicValue, {
+                from: accounts[0],
             });
-            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
-
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
 
             await confidentialApprove([0, 1], notes, aztecAccounts);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
-            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
+            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
 
-            const spentNoteHash = notes[0].noteHash;
+            const spentNoteHash = transferInputNotes[0].noteHash;
             const result = await ace.getNote(zkAssetOwnable.address, spentNoteHash);
             expect(result.status.toNumber()).to.equal(constants.statuses.NOTE_SPENT);
         });
 
         it('should delegate a contract to update a note registry with kPublic = 0', async () => {
             const noteValues = [10, 20, 15, 15];
-            const numNotes = 4;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -30;
+            const sender = accounts[0];
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: [notes[0], notes[1]],
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -30,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, {
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                notes,
+                aztecAccounts,
+            } = await setupTwoProofTest(noteValues);
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
 
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [notes[0], notes[1]],
-                outputNotes: [notes[2], notes[3]],
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[1],
-                kPublic: 0, // perfectly balanced...
-                validatorAddress: zkAssetOwnable.address,
+            const transferPublicValue = 0;
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                transferPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
+            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, transferPublicValue, {
+                from: accounts[0],
             });
-            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
+
             await confidentialApprove([0, 1], notes, aztecAccounts);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
-
-            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
-            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput);
+            const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
         });
     });
@@ -238,25 +290,29 @@ contract.skip('ZkAssetOwnable', (accounts) => {
 
         it("should fail to approve a contract to update a note registry if note doesn't exist", async () => {
             const noteValues = [0, 10, 30];
-            const numNotes = 3;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -10;
+            const sender = accounts[0];
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                notes,
+                aztecAccounts,
+            } = await setupTwoProofTest(noteValues);
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 30, {
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
 
             const signature = signer.signNote(
                 zkAssetOwnable.address,
@@ -275,80 +331,87 @@ contract.skip('ZkAssetOwnable', (accounts) => {
             );
         });
 
-        it('should fail to approve a contract to update a note registry if note had already been spent', async () => {
+        it('should fail to perform confidentialApprove() for an already spent note', async () => {
             const noteValues = [0, 10, 30, 20];
-            const numNotes = 4;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -10;
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAssetOwnable.address,
+            const sender = accounts[0];
+
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                transferInputNoteOwnerAccounts,
+                aztecAccounts,
+            } = await setupTwoProofTest(noteValues);
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
             });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+
+            const transferPublicValue = -40;
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                transferPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
+            const transferSignatures = transferProof.constructSignatures(zkAssetOwnable.address, transferInputNoteOwnerAccounts);
+
+            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, transferPublicValue, {
                 from: accounts[0],
             });
 
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
-                publicOwner: accounts[1],
-                kPublic: -40,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
-            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
-                from: accounts[1],
-            });
-
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-            await zkAssetOwnable.confidentialTransfer(transferProof.proofData, transferProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(transferData, transferSignatures);
 
             const signature = signer.signNote(
                 zkAssetOwnable.address,
-                notes[0].noteHash,
+                transferInputNotes[0].noteHash,
                 zkAssetOwnableTest.address,
                 aztecAccounts[0].privateKey,
             );
             await truffleAssert.reverts(
-                zkAssetOwnable.confidentialApprove(notes[0].noteHash, zkAssetOwnableTest.address, true, signature),
+                zkAssetOwnable.confidentialApprove(transferInputNotes[0].noteHash, zkAssetOwnableTest.address, true, signature),
                 'only unspent notes can be approved',
             );
         });
 
         // eslint-disable-next-line max-len
-        it('should fail to approve a contract to update a note registry if no ECDSA signature is provided and the sender is not the note owner', async () => {
+        it('should fail to perform confidentialApprove() if a fake signature is provided', async () => {
             const noteValues = [0, 10];
-            const numNotes = 2;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -10;
+            const sender = accounts[0];
+            const { depositInputNotes, depositOutputNotes, depositInputOwnerAccounts, notes } = await setupTwoProofTest(
+                noteValues,
+            );
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
 
             const emptySignature = '0x';
             await truffleAssert.reverts(
@@ -359,155 +422,147 @@ contract.skip('ZkAssetOwnable', (accounts) => {
 
         it('should fail to delegate a contract to update a note registry is proof is not supported', async () => {
             const noteValues = [0, 10, 30, 20];
-            const numNotes = 4;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -10;
+            const sender = accounts[0];
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAssetOwnable.address,
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                notes,
+                aztecAccounts,
+            } = await setupTwoProofTest(noteValues);
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
             });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+
+            const transferPublicValue = -40;
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                transferPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
+            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, transferPublicValue, {
                 from: accounts[0],
             });
 
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[1],
-                kPublic: -40,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
-            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
-                from: accounts[1],
-            });
-
             await confidentialApprove([0, 1], notes, aztecAccounts);
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
             const bogusProof = `${parseInt(JOIN_SPLIT_PROOF, 10) + 1}`; // adding 1 changes the proof id from the proof object
-            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             await truffleAssert.reverts(
-                zkAssetOwnableTest.callConfidentialTransferFrom(bogusProof, formattedProofOutput),
+                zkAssetOwnableTest.callConfidentialTransferFrom(bogusProof, transferProof.eth.output),
                 'expected proof to be supported',
             );
         });
 
         it('should fail to delegate a contract to update a note registry if publicApprove has not been called', async () => {
             const noteValues = [0, 10, 30, 20];
-            const numNotes = 4;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -10;
+            const sender = accounts[0];
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                notes,
+                aztecAccounts,
+            } = await setupTwoProofTest(noteValues);
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
 
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[1],
-                kPublic: -40,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
-            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
-                from: accounts[1],
-            });
+            const transferPublicValue = -40;
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                transferPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
 
             await confidentialApprove([0, 1], notes, aztecAccounts);
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            const opts = {
-                from: accounts[1],
-            };
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 0, opts);
-
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
-
-            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             await truffleAssert.reverts(
-                zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput),
+                zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output),
                 'public owner has not validated a transfer of tokens',
             );
         });
 
         it('should fail to confidentialTransferFrom() if confidentialApprove() has not been called', async () => {
             const noteValues = [0, 10, 30, 20];
-            const numNotes = 4;
-            const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const depositPublicValue = -10;
+            const sender = accounts[0];
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+            } = await setupTwoProofTest(noteValues);
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, depositProofHash, 10, {
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            const transferPublicValue = -40;
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                transferPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
 
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[1],
-                kPublic: -40,
-                validatorAddress: zkAssetOwnable.address,
-            });
-            const transferProofOutput = outputCoder.getProofOutput(transferProof.expectedOutput, 0);
-            const transferProofHash = outputCoder.hashProofOutput(transferProofOutput);
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 40, {
-                from: accounts[1],
+            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, transferPublicValue, {
+                from: accounts[0],
             });
 
             // No confidentialApprove() call
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            const opts = {
-                from: accounts[1],
-            };
-            await ace.publicApprove(zkAssetOwnable.address, transferProofHash, 0, opts);
-
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferProof.proofData);
-
-            const formattedProofOutput = `0x${transferProofOutput.slice(0x40)}`;
             await truffleAssert.reverts(
-                zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, formattedProofOutput),
+                zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output),
                 'sender does not have approval to spend input note',
             );
         });

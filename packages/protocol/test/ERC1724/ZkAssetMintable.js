@@ -40,14 +40,14 @@ const getCustomMintNotes = async (newMintCounterValue, mintedNoteValues) => {
     return { zeroMintCounterNote, newMintCounterNote, mintedNotes };
 };
 
-contract.skip('ZkAssetMintable', (accounts) => {
+contract('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let joinSplitFluidValidator;
         let joinSplitValidator;
         let erc20;
         let scalingFactor;
-        let publicOwner;
+        const publicOwner = accounts[0];
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -64,8 +64,6 @@ contract.skip('ZkAssetMintable', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
-
-            publicOwner = accounts[0];
         });
 
         it('should complete a mint operation', async () => {
@@ -145,7 +143,6 @@ contract.skip('ZkAssetMintable', (accounts) => {
         let scalingFactor;
         let joinSplitFluidValidator;
         let joinSplitValidator;
-        let publicOwner;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
@@ -159,8 +156,6 @@ contract.skip('ZkAssetMintable', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
-
-            publicOwner = accounts[0];
         });
 
         it('should fail if msg.sender is not owner', async () => {
