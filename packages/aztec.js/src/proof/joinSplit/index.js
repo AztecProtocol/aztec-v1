@@ -128,24 +128,6 @@ class JoinSplitProof extends Proof {
         );
     }
 
-    constructOutput() {
-        this.output = outputCoder.encodeProofOutput(
-            {
-                inputNotes: this.inputNotes,
-                outputNotes: this.outputNotes,
-                publicValue: this.publicValue,
-                publicOwner: this.publicOwner,
-                challenge: this.challengeHex,
-            },
-        );
-        const hash = outputCoder.hashProofOutput(this.output);
-        this.hash = hash;
-        const abiCoder = new AbiCoder();
-        this.validatedProofHash = keccak256(
-            abiCoder.encodeParameters(['bytes32', 'uint24', 'address'], [hash, proofs.JOIN_SPLIT_PROOF, this.sender]),
-        );
-    }
-
     /**
      * Construct the EIP712 signatures, giving permission for notes to be spent
      * @param {string} validatorAddress Ethereum address of the join-split validator contract
