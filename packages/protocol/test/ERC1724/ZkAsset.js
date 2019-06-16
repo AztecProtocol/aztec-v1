@@ -29,7 +29,7 @@ const computeDomainHash = (validatorAddress) => {
 
 const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
-}
+};
 
 const setupSingleProofTest = async (noteValues) => {
     const numNotes = noteValues.length;
@@ -44,7 +44,7 @@ const setupSingleProofTest = async (noteValues) => {
         inputNotes,
         inputNoteOwnerAccounts,
         outputNotes,
-    }
+    };
 };
 
 const setupTwoProofTest = async (noteValues) => {
@@ -67,15 +67,15 @@ const setupTwoProofTest = async (noteValues) => {
         withdrawalInputNotes,
         withdrawalOutputNotes,
         withdrawalInputNoteOwnerAccounts,
-    }
-}
+    };
+};
 
 contract('ZkAsset', (accounts) => {
     let ace;
     let erc20;
 
-    let canAdjustSupply;
-    let canConvert;
+    const canAdjustSupply = false;
+    const canConvert = true;
 
     const sender = accounts[0];
     const publicOwner = accounts[0];
@@ -89,9 +89,6 @@ contract('ZkAsset', (accounts) => {
 
         await ace.setCommonReferenceString(bn128.CRS);
         await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
-
-        canAdjustSupply = false;
-        canConvert = true;
 
         await Promise.all(
             accounts.map((account) => {
@@ -138,25 +135,21 @@ contract('ZkAsset', (accounts) => {
         it('should update a note registry with output notes', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
             const noteValues = [0, 10];
-            const {
-                inputNotes,
-                inputNoteOwnerAccounts,
-                outputNotes,
-            } = await setupSingleProofTest(noteValues);
+            const { inputNotes, inputNoteOwnerAccounts, outputNotes } = await setupSingleProofTest(noteValues);
 
             const transferAmount = 10;
             const publicValue = transferAmount * -1;
 
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(zkAsset.address);
-            const signatures = proof.constructSignatures(zkAsset.address, inputNoteOwnerAccounts)
+            const signatures = proof.constructSignatures(zkAsset.address, inputNoteOwnerAccounts);
 
             const balancePreTransfer = await erc20.balanceOf(accounts[0]);
             const transferAmountBN = new BN(transferAmount);
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, transferAmount, { from: accounts[0] });
-            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0]});
+            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
 
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
@@ -309,22 +302,12 @@ contract('ZkAsset', (accounts) => {
             const noteValues = [0, 10];
             const depositPublicValue = -10;
 
-            const {
-                inputNotes,
-                inputNoteOwnerAccounts,
-                outputNotes,
-            } = await setupSingleProofTest(noteValues);
+            const { inputNotes, inputNoteOwnerAccounts, outputNotes } = await setupSingleProofTest(noteValues);
 
-            const depositProof = new JoinSplitProof(
-                inputNotes,
-                outputNotes,
-                sender,
-                depositPublicValue,
-                publicOwner,
-            );
+            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, depositPublicValue, publicOwner);
 
             const data = depositProof.encodeABI(zkAsset.address);
-            const signatures = depositProof.constructSignatures(zkAsset.address, inputNoteOwnerAccounts)
+            const signatures = depositProof.constructSignatures(zkAsset.address, inputNoteOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             const malformedProofData = `0x0123${data.slice(6)}`;
