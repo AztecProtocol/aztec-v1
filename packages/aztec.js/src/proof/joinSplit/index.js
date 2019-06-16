@@ -6,6 +6,7 @@ const { keccak256, padLeft } = require('web3-utils');
 const { inputCoder, outputCoder } = require('../../encoder');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
+const signer = require('../../signer');
 
 class JoinSplitProof extends Proof {
     constructor(inputNotes, outputNotes, sender, publicValue, publicOwner, metadata = outputNotes) {
@@ -125,6 +126,50 @@ class JoinSplitProof extends Proof {
         this.validatedProofHash = keccak256(
             new AbiCoder().encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofs.JOIN_SPLIT_PROOF, this.sender]),
         );
+    }
+
+    constructOutput() {
+        this.output = outputCoder.encodeProofOutput(
+            {
+                inputNotes: this.inputNotes,
+                outputNotes: this.outputNotes,
+                publicValue: this.publicValue,
+                publicOwner: this.publicOwner,
+                challenge: this.challengeHex,
+            },
+        );
+        const hash = outputCoder.hashProofOutput(this.output);
+        this.hash = hash;
+        const abiCoder = new AbiCoder();
+        this.validatedProofHash = keccak256(
+            abiCoder.encodeParameters(['bytes32', 'uint24', 'address'], [hash, proofs.JOIN_SPLIT_PROOF, this.sender]),
+        );
+    }
+
+    /**
+     * Construct the EIP712 signatures, giving permission for notes to be spent
+     * @param {string} validatorAddress Ethereum address of the join-split validator contract
+     * @param {string[]} aztecAccounts mapping between owners and private keys
+     * @returns {string} array of signatures
+     */
+    constructSignatures(validatorAddress, inputNoteOwners) {
+        const signaturesArray = inputNoteOwners.map((inputNoteOwner, index) => {
+            const domain = signer.generateZKAssetDomainParams(validatorAddress);
+            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
+
+            const message = {
+                proof: proofs.JOIN_SPLIT_PROOF,
+                noteHash: this.inputNotes[index].noteHash,
+                challenge: this.challengeHex,
+                sender: this.sender,
+            };
+
+            const { privateKey } = inputNoteOwner;
+            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
+            const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
+            return concatenatedSignature;
+        });
+        return `0x${signaturesArray.join('')}`;
     }
 
     /**
