@@ -4,7 +4,6 @@ const { Enum } = require('enumify');
 const { padLeft } = require('web3-utils');
 
 const bn128 = require('../bn128');
-const { outputCoder } = require('../encoder');
 const Keccak = require('../keccak');
 const ProofUtils = require('./utils');
 const types = require('./types');

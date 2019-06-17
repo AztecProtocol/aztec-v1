@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, beforeEach, it, web3:true */
-const { encoder, JoinSplitProof, note } = require('aztec.js');
+const { JoinSplitProof, note } = require('aztec.js');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -156,11 +156,7 @@ contract('NoteRegistry', (accounts) => {
 
             const confidentialProofData = confidentialProof.encodeABI(joinSplitValidator.address);
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, confidentialProofData);
-            const { receipt: regReceipt } = await ace.updateNoteRegistry(
-                JOIN_SPLIT_PROOF,
-                confidentialProof.eth.output,
-                sender,
-            );
+            const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, confidentialProof.eth.output, sender);
 
             expect(aceReceipt.status).to.equal(true);
             expect(regReceipt.status).to.equal(true);
