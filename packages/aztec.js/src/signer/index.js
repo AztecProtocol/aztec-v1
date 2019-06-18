@@ -8,7 +8,7 @@
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
-const crypto = require('crypto');
+const { randomHex } = require('web3-utils');
 
 const signer = {};
 
@@ -80,7 +80,7 @@ signer.signNoteACEDomain = (verifyingContract, spender, privateKey) => {
     const status = true;
 
     const message = {
-        noteHash: `0x${crypto.randomBytes(32).toString('hex')}`,
+        noteHash: randomHex(32),
         spender,
         status,
     };

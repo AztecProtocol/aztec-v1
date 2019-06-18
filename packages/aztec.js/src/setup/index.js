@@ -14,7 +14,8 @@ const BN = require('bn.js');
 const fetch = require('cross-fetch');
 const bn128 = require('../bn128');
 
-const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
+const { BN128_COMPRESSION_MASK } = constants;
+const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
 
 const setup = {
     POINTS_DB_URL: 'https://ds8m7zxw3jpbz.cloudfront.net/data',
@@ -64,7 +65,7 @@ setup.decompress = (compressed) => {
 setup.compress = (x, y) => {
     let compressed = x;
     if (y.testn(0)) {
-        compressed = compressed.or(compressionMask);
+        compressed = compressed.or(BN128_COMPRESSION_MASK);
     }
     return compressed;
 };
