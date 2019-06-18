@@ -6,7 +6,7 @@ const CONTRACTS_DIR = path.join(__dirname, '..', '..', 'protocol', 'build', 'con
 const ARTIFACTS_DIR = path.join(__dirname, '..', '..', 'contract-artifacts', 'artifacts');
 const ARTIFACTS_DIR_AUX = path.join(__dirname, '..', '..', 'contract-artifacts', 'artifacts-aux');
 
-const abiSwapContracts = ['AdjustSupply', 'BilateralSwap', 'DividendComputation', 'JoinSplit', 'PrivateRange'];
+const abiSwapContracts = ['AdjustSupply', 'DividendComputation', 'JoinSplit', 'Swap'];
 const excludedContracts = ['ERC20', 'IERC20', 'Migrations', 'Ownable', 'SafeMath'];
 
 const cherrypickContractJson = async (filename) => {
