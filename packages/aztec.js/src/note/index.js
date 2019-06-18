@@ -52,12 +52,12 @@ class Note {
              */
             this.k = null;
             /**
-             * AZTEC commitment point \gamma, a bn128 group element
+             * AZTEC commitment point \gamma, a bn128 group element, encrypts the note value
              * @member {Point}
              */
             this.gamma = bn128.curve.decodePoint(publicKey.slice(2, 68), 'hex');
             /**
-             * AZTEC commitment point \sigma, a bn128 group element
+             * AZTEC commitment point \sigma, a bn128 group element, encrypts the note value
              * @member {Point}
              */
             this.sigma = bn128.curve.decodePoint(publicKey.slice(68, 134), 'hex');

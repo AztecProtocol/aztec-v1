@@ -64,7 +64,7 @@ class JoinSplitFluidProof extends JoinSplitProof {
                 outputNotes: this.outputNotes.slice(1),
                 publicValue: this.publicValue,
                 publicOwner: this.publicOwner,
-                challenge: keccak256(this.challengeHex), // TODO: figure out why this is the challenge hex and not the note the challenge itself
+                challenge: keccak256(this.challengeHex),
             },
         ]);
         this.hash = outputCoder.hashProofOutput(this.outputs);

@@ -65,7 +65,7 @@ class DividendVerifier extends Verifier {
                 this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
             } else {
                 challengeResponse.appendPoint(B);
-                if (B.x.fromRed().eq(ZERO_BN_RED) && B.y.fromRed().eq(ZERO_BN)) {
+                if (B.x.fromRed().eq(ZERO_BN) && B.y.fromRed().eq(ZERO_BN)) {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }
