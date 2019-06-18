@@ -12,6 +12,19 @@ const { AztecError } = errors;
 const { BN128_GROUP_REDUCTION } = constants;
 
 class DividendProof extends Proof {
+    /**
+     * Constructs a Dividend proof. It is assumed that it is in the prover's interest for `targetNote` to be
+     * as large as possible. What we are actually checking, is that `targetNote` <= (`zb` / `za`) * `notionalNote`.
+     * If they desire, a prover can create a `targetNote` that is smaller than the note they are entitled to.
+     *
+     * @param {Object} notionalNote the note that one is computing a dividend of
+     * @param {Object} residualNote the note that represents the integer rounding error
+     * @param {Object} targetNote the note that is being produced
+     * @param {*} sender
+     * @param {*} za numerator for the ratio between notionalNote and targetNote
+     * @param {*} zb denominator for the ratio between notionalNote and targetNote
+     * @param {*} metadata
+     */
     constructor(notionalNote, residualNote, targetNote, sender, za, zb, metadata = [residualNote, targetNote]) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;

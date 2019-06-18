@@ -9,6 +9,7 @@ const ProofUtils = require('./utils');
 const types = require('./types');
 
 const { AztecError } = errors;
+const { GROUP_MODULUS } = constants;
 
 class ProofType extends Enum {}
 ProofType.initEnum(types);
@@ -39,7 +40,7 @@ class Proof {
         if (BN.isBN(publicValue)) {
             this.publicValue = publicValue;
         } else if (publicValue < 0) {
-            this.publicValue = bn128.curve.n.sub(new BN(-publicValue));
+            this.publicValue = GROUP_MODULUS.sub(new BN(-publicValue));
         } else {
             this.publicValue = new BN(publicValue);
         }
