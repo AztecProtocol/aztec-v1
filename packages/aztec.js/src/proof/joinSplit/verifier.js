@@ -1,10 +1,10 @@
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 
-const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const Verifier = require('../verifier');
 
-const { ZERO_BN, ZERO_BN_RED } = constants;
+const { ZERO_BN } = constants;
 
 class JoinSplitVerifier extends Verifier {
     extractData() {
@@ -12,7 +12,7 @@ class JoinSplitVerifier extends Verifier {
         const dataLength = this.proof.data.length;
         const inputDataLength = this.proof.m;
 
-        let kBarAux = ZERO_BN_RED.redSub(this.publicValue.redMul(this.challenge));
+        let kBarAux = bn128.zeroBnRed.redSub(this.publicValue.redMul(this.challenge));
         this.data = this.proof.data.map((item, i) => {
             let kBar;
             if (i < dataLength - 1) {
@@ -26,9 +26,9 @@ class JoinSplitVerifier extends Verifier {
                 if (inputDataLength !== dataLength) {
                     kBar = kBarAux;
                 } else {
-                    kBar = ZERO_BN_RED.redSub(kBarAux);
+                    kBar = bn128.zeroBnRed.redSub(kBarAux);
                 }
-                if (kBar.fromRed().eq(ZERO_BN_RED)) {
+                if (kBar.fromRed().eq(bn128.zeroBnRed)) {
                     this.errors.push(errors.codes.SCALAR_IS_ZERO);
                 }
             }
@@ -57,7 +57,7 @@ class JoinSplitVerifier extends Verifier {
 
         let pairingGammas;
         let pairingSigmas;
-        let reducer = ZERO_BN_RED;
+        let reducer = bn128.zeroBnRed;
         this.data.forEach((item, i) => {
             let { kBar, aBar } = item;
             let c = this.challenge;
@@ -88,7 +88,7 @@ class JoinSplitVerifier extends Verifier {
                 this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
             } else {
                 challengeResponse.appendPoint(blindingFactor);
-                if (blindingFactor.x.fromRed().eq(ZERO_BN_RED) && blindingFactor.y.fromRed().eq(ZERO_BN_RED)) {
+                if (blindingFactor.x.fromRed().eq(bn128.zeroBnRed) && blindingFactor.y.fromRed().eq(bn128.zeroBnRed)) {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }

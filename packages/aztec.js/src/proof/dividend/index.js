@@ -1,15 +1,14 @@
+const bn128 = require('@aztec/bn128');
 const { constants, errors, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
-const bn128 = require('../../bn128');
 const { inputCoder, outputCoder } = require('../../encoder');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
 
 const { AztecError } = errors;
-const { BN128_GROUP_REDUCTION } = constants;
 
 class DividendProof extends Proof {
     /**
@@ -20,10 +19,10 @@ class DividendProof extends Proof {
      * @param {Object} notionalNote the note that one is computing a dividend of
      * @param {Object} residualNote the note that represents the integer rounding error
      * @param {Object} targetNote the note that is being produced
-     * @param {*} sender
-     * @param {*} za numerator for the ratio between notionalNote and targetNote
-     * @param {*} zb denominator for the ratio between notionalNote and targetNote
-     * @param {*} metadata
+     * @param {string} sender
+     * @param {Number} za numerator for the ratio between notionalNote and targetNote
+     * @param {Number} zb denominator for the ratio between notionalNote and targetNote
+     * @param {Object} metadata
      */
     constructor(notionalNote, residualNote, targetNote, sender, za, zb, metadata = [residualNote, targetNote]) {
         const publicValue = constants.ZERO_BN;
@@ -55,8 +54,8 @@ class DividendProof extends Proof {
             const { ba } = blindingScalars[i];
 
             if (i === 2) {
-                const zaRed = this.za.toRed(BN128_GROUP_REDUCTION);
-                const zbRed = this.zb.toRed(BN128_GROUP_REDUCTION);
+                const zaRed = this.za.toRed(bn128.groupReduction);
+                const zbRed = this.zb.toRed(bn128.groupReduction);
 
                 // bk_3 = (z_b)(bk_1) - (z_a)(bk_2)
                 bk = zbRed.redMul(blindingScalars[0].bk).redSub(zaRed.redMul(blindingScalars[1].bk));

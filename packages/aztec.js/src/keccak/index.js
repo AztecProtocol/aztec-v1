@@ -1,4 +1,4 @@
-const { constants } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 
@@ -59,7 +59,7 @@ class Keccak {
      * @returns keccak-ed data
      */
     redKeccak() {
-        return this.keccak(constants.BN128_GROUP_REDUCTION);
+        return this.keccak(bn128.groupReduction);
     }
 }
 
