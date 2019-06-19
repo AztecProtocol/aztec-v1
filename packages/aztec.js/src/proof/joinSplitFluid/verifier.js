@@ -1,10 +1,10 @@
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 const JoinSplitVerifier = require('../joinSplit/verifier');
 
-const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 
-const { ZERO_BN, ZERO_BN_RED } = constants;
+const { ZERO_BN } = constants;
 
 class JoinSplitFluidVerifier extends JoinSplitVerifier {
     /**
@@ -32,7 +32,7 @@ class JoinSplitFluidVerifier extends JoinSplitVerifier {
 
         let pairingGammas;
         let pairingSigmas;
-        let reducer = ZERO_BN_RED;
+        let reducer = bn128.zeroBnRed;
         this.data.forEach((item, i) => {
             let { kBar, aBar } = item;
             let c = this.challenge;
@@ -63,7 +63,7 @@ class JoinSplitFluidVerifier extends JoinSplitVerifier {
                 this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
             } else {
                 challengeResponse.appendPoint(blindingFactor);
-                if (blindingFactor.x.fromRed().eq(ZERO_BN_RED) && blindingFactor.y.fromRed().eq(ZERO_BN_RED)) {
+                if (blindingFactor.x.fromRed().eq(bn128.zeroBnRed) && blindingFactor.y.fromRed().eq(bn128.zeroBnRed)) {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }

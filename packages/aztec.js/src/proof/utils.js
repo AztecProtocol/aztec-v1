@@ -1,6 +1,5 @@
+const bn128 = require('@aztec/bn128');
 const { isHexStrict, padLeft } = require('web3-utils');
-
-const bn128 = require('../bn128');
 
 class ProofUtils {
     /**

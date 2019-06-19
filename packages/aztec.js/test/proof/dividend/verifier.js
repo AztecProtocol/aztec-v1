@@ -1,3 +1,4 @@
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -125,7 +126,7 @@ describe('Dividend Proof Verifier', () => {
             const za = 100;
             const zb = 5;
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-            proof.challenge = new BN(1).toRed(constants.BN128_GROUP_REDUCTION);
+            proof.challenge = new BN(1).toRed(bn128.groupReduction);
 
             const verifier = new DividendVerifier(proof);
             verifier.verifyProof();
@@ -140,11 +141,11 @@ describe('Dividend Proof Verifier', () => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             proof.data[0][0] = padLeft('0x05', 64);
             proof.data[0][1] = padLeft('0x05', 64);
-            proof.data[0][2] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][3] = `0x${constants.H_Y.toString(16)}`;
-            proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][5] = `0x${constants.H_Y.toString(16)}`;
-            proof.challenge = new BN(10).toRed(constants.BN128_GROUP_REDUCTION);
+            proof.data[0][2] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][3] = `0x${bn128.H_Y.toString(16)}`;
+            proof.data[0][4] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][5] = `0x${bn128.H_Y.toString(16)}`;
+            proof.challenge = new BN(10).toRed(bn128.groupReduction);
 
             const verifier = new DividendVerifier(proof);
             verifier.verifyProof();

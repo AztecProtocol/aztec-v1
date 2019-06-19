@@ -1,10 +1,10 @@
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 
-const bn128 = require('../bn128');
 const { ProofType } = require('./proof');
 
-const { BN128_GROUP_REDUCTION, ZERO_BN, ZERO_BN_RED } = constants;
+const { ZERO_BN } = constants;
 
 /**
  * @class
@@ -28,7 +28,7 @@ class Verifier {
         if (this.proof.type === ProofType.JOIN_SPLIT.name) {
             this.publicValue = this.hexToGroupScalar(this.proof.data[this.proof.data.length - 1][0], true);
         } else {
-            this.publicValue = ZERO_BN_RED;
+            this.publicValue = bn128.zeroBnRed;
         }
         this.extractData();
     }
@@ -95,7 +95,7 @@ class Verifier {
         if (!canBeZero && hexBN.eq(ZERO_BN)) {
             this.errors.push(errors.codes.SCALAR_IS_ZERO);
         }
-        return hexBN.toRed(BN128_GROUP_REDUCTION);
+        return hexBN.toRed(bn128.groupReduction);
     }
 }
 

@@ -1,16 +1,16 @@
 /* eslint-disable prefer-destructuring */
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const { randomHex } = require('web3-utils');
 
-const bn128 = require('../../../src/bn128');
 const { JoinSplitProof } = require('../../../src/proof');
 const { mockNoteSet, randomNoteValue } = require('../../helpers/note');
 const ProofUtils = require('../../../src/proof/utils');
 const { validateElement, validateScalar } = require('../../helpers/bn128');
 
-const { BN128_GROUP_REDUCTION, FIELD_MODULUS, GROUP_MODULUS, K_MAX, ZERO_BN_RED } = constants;
+const { K_MAX } = constants;
 
 describe('Join-Split Proof', () => {
     let inputNotes;
@@ -40,7 +40,7 @@ describe('Join-Split Proof', () => {
     describe('Success States', () => {
         it('should construct a Join-Split proof with well-formed outputs', async () => {
             let publicValue = ProofUtils.getPublicValue(kIn, kOut);
-            publicValue = GROUP_MODULUS.add(new BN(publicValue)).umod(GROUP_MODULUS);
+            publicValue = bn128.groupModulus.add(new BN(publicValue)).umod(bn128.groupModulus);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
 
             expect(proof.data.length).to.equal(5);
@@ -61,7 +61,7 @@ describe('Join-Split Proof', () => {
 
     describe('Failure States', () => {
         it('should fail if malformed public value', async () => {
-            const publicValue = GROUP_MODULUS.add(new BN(100));
+            const publicValue = bn128.groupModulus.add(new BN(100));
             try {
                 const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             } catch (err) {
@@ -71,7 +71,7 @@ describe('Join-Split Proof', () => {
 
         it('should fail if public value > K_MAX', async () => {
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
-            inputNotes[0].k = new BN(K_MAX + 1).toRed(BN128_GROUP_REDUCTION);
+            inputNotes[0].k = new BN(K_MAX + 1).toRed(bn128.groupReduction);
             try {
                 const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             } catch (err) {
@@ -81,7 +81,7 @@ describe('Join-Split Proof', () => {
 
         it('should fail if points NOT on curve', async () => {
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
-            inputNotes[0].gamma.x = new BN(FIELD_MODULUS.add(new BN(100))).toRed(bn128.curve.red);
+            inputNotes[0].gamma.x = new BN(bn128.fieldModulus.add(new BN(100))).toRed(bn128.curve.red);
             try {
                 const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             } catch (err) {
@@ -101,7 +101,7 @@ describe('Join-Split Proof', () => {
 
         it('should fail if malformed viewing key', async () => {
             const publicValue = ProofUtils.getPublicValue(kIn, kOut);
-            inputNotes[0].a = ZERO_BN_RED;
+            inputNotes[0].a = bn128.zeroBnRed;
             try {
                 const _ = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             } catch (err) {
