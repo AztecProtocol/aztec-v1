@@ -1,6 +1,7 @@
 /* global artifacts, contract, expect, it: true */
 
 const { BurnProof, MintProof, note, Proof } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -49,7 +50,7 @@ contract('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
@@ -64,7 +65,7 @@ contract('Mint Validator', (accounts) => {
             );
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
@@ -79,7 +80,7 @@ contract('Mint Validator', (accounts) => {
             );
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
@@ -94,17 +95,17 @@ contract('Mint Validator', (accounts) => {
             );
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
-        it('should validate Mint proof with challenge that has GROUP_MODULUS added to it', async () => {
+        it('should validate Mint proof with challenge that has group modulus added to it', async () => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
-            proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
+            proof.challenge = proof.challenge.add(bn128.groupModulus);
             proof.constructOutputs();
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
     });
@@ -132,7 +133,7 @@ contract('Mint Validator', (accounts) => {
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -143,7 +144,7 @@ contract('Mint Validator', (accounts) => {
             proof.data = [];
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -154,7 +155,7 @@ contract('Mint Validator', (accounts) => {
             proof.data = [proof.data[0]];
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -171,7 +172,7 @@ contract('Mint Validator', (accounts) => {
             }
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -183,19 +184,19 @@ contract('Mint Validator', (accounts) => {
             proof.data = zeroMintProof.data;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
 
-        it('should fail if scalars NOT mod GROUP_MODULUS', async () => {
+        it('should fail if scalars NOT mod group modulus', async () => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
-            proof.data[0][0] = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
+            proof.data[0][0] = `0x${kBar.add(bn128.groupModulus).toString(16)}`;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -214,7 +215,7 @@ contract('Mint Validator', (accounts) => {
             proof.data[3][1] = zeroScalar;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -225,7 +226,7 @@ contract('Mint Validator', (accounts) => {
             proof.challenge = new BN('0');
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -238,7 +239,7 @@ contract('Mint Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -251,7 +252,7 @@ contract('Mint Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -270,7 +271,7 @@ contract('Mint Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -283,7 +284,7 @@ contract('Mint Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -296,7 +297,7 @@ contract('Mint Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -305,9 +306,9 @@ contract('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
-            const malformedHx = constants.H_X.add(new BN(1));
-            const malformedHy = constants.H_Y.add(new BN(1));
-            const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...constants.t2];
+            const malformedHx = bn128.H_X.add(new BN(1));
+            const malformedHy = bn128.H_Y.add(new BN(1));
+            const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(
                 joinSplitFluidValidator.validateJoinSplitFluid(data, sender, malformedCRS),
                 truffleAssert.ErrorType.REVERT,
@@ -343,7 +344,7 @@ contract('Burn Validator', (accounts) => {
             const { currentBurnCounterNote, newBurnCounterNote, burnedNotes } = await getDefaultBurnNotes();
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
@@ -358,7 +359,7 @@ contract('Burn Validator', (accounts) => {
             );
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
@@ -373,7 +374,7 @@ contract('Burn Validator', (accounts) => {
             );
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
@@ -388,17 +389,17 @@ contract('Burn Validator', (accounts) => {
             );
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
 
-        it('should validate Burn proof with challenge that has GROUP_MODULUS added to it', async () => {
+        it('should validate Burn proof with challenge that has group modulus added to it', async () => {
             const { currentBurnCounterNote, newBurnCounterNote, burnedNotes } = await getDefaultBurnNotes();
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
-            proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
+            proof.challenge = proof.challenge.add(bn128.groupModulus);
             proof.constructOutputs();
             const data = proof.encodeABI();
-            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS);
+            const result = await joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS);
             expect(result).to.equal(proof.eth.outputs);
         });
     });
@@ -416,7 +417,7 @@ contract('Burn Validator', (accounts) => {
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -427,7 +428,7 @@ contract('Burn Validator', (accounts) => {
             proof.data = [];
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -438,7 +439,7 @@ contract('Burn Validator', (accounts) => {
             proof.data = [proof.data[0]];
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -455,7 +456,7 @@ contract('Burn Validator', (accounts) => {
             }
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -467,19 +468,19 @@ contract('Burn Validator', (accounts) => {
             proof.data = zeroMintProof.data;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
 
-        it('should fail if scalars NOT mod GROUP_MODULUS', async () => {
+        it('should fail if scalars NOT mod group modulus', async () => {
             const { currentBurnCounterNote, newBurnCounterNote, burnedNotes } = await getDefaultBurnNotes();
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
-            proof.data[0][0] = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
+            proof.data[0][0] = `0x${kBar.add(bn128.groupModulus).toString(16)}`;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -498,7 +499,7 @@ contract('Burn Validator', (accounts) => {
             proof.data[3][1] = zeroScalar;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -509,7 +510,7 @@ contract('Burn Validator', (accounts) => {
             proof.challenge = new BN('0');
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -522,7 +523,7 @@ contract('Burn Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -535,7 +536,7 @@ contract('Burn Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -554,7 +555,7 @@ contract('Burn Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -567,7 +568,7 @@ contract('Burn Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -580,7 +581,7 @@ contract('Burn Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, constants.CRS),
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -589,9 +590,9 @@ contract('Burn Validator', (accounts) => {
             const { currentBurnCounterNote, newBurnCounterNote, burnedNotes } = await getDefaultBurnNotes();
             const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const data = proof.encodeABI();
-            const malformedHx = constants.H_X.add(new BN(1));
-            const malformedHy = constants.H_Y.add(new BN(1));
-            const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...constants.t2];
+            const malformedHx = bn128.H_X.add(new BN(1));
+            const malformedHy = bn128.H_Y.add(new BN(1));
+            const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(
                 joinSplitFluidValidator.validateJoinSplitFluid(data, sender, malformedCRS),
                 truffleAssert.ErrorType.REVERT,

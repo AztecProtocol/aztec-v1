@@ -1,7 +1,8 @@
 /**
  * Duplicated from aztec.js/test and delayed the creation of a test-utils package.
  */
-const { bn128, ProofType } = require('aztec.js');
+const { ProofType } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 
