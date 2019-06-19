@@ -1,6 +1,6 @@
 /* global artifacts, expect, contract, it:true */
 const { DividendProof, encoder, note } = require('aztec.js');
-const { constants } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 const { padLeft } = require('web3-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
@@ -38,7 +38,7 @@ contract('Dividend ABI Encoder', (accounts) => {
         const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
         const data = proof.encodeABI();
 
-        const result = await dividendAbiEncoderTest.validateDividend(data, sender, constants.CRS);
+        const result = await dividendAbiEncoderTest.validateDividend(data, sender, bn128.CRS);
         const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
         expect(result).to.equal(proof.eth.outputs);
 

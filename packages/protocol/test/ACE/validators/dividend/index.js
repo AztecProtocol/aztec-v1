@@ -1,5 +1,6 @@
 /* global artifacts, expect, contract, it:true */
 const { DividendProof, note } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -44,17 +45,17 @@ contract('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
-            const result = await dividendValidator.validateDividend(data, sender, constants.CRS, { from: sender });
+            const result = await dividendValidator.validateDividend(data, sender, bn128.CRS, { from: sender });
             expect(result).to.equal(proof.eth.outputs);
         });
 
-        it('should validate Dividend proof with challenge that has GROUP_MODULUS added to it', async () => {
+        it('should validate Dividend proof with challenge that has group modulus added to it', async () => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-            proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
+            proof.challenge = proof.challenge.add(bn128.groupModulus);
             proof.constructOutputs();
             const data = proof.encodeABI();
-            const result = await dividendValidator.validateDividend(data, sender, constants.CRS, { from: sender });
+            const result = await dividendValidator.validateDividend(data, sender, bn128.CRS, { from: sender });
             expect(result).to.equal(proof.eth.outputs);
         });
     });
@@ -74,7 +75,7 @@ contract('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -85,7 +86,7 @@ contract('Dividend Validator', (accounts) => {
             proof.data = [];
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -96,7 +97,7 @@ contract('Dividend Validator', (accounts) => {
             proof.data = [proof.data[0]];
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -107,7 +108,7 @@ contract('Dividend Validator', (accounts) => {
             proof.data = [proof.data[0], proof.data[1]];
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -126,7 +127,7 @@ contract('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -145,7 +146,7 @@ contract('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -164,7 +165,7 @@ contract('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -176,7 +177,7 @@ contract('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -188,7 +189,7 @@ contract('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -205,7 +206,7 @@ contract('Dividend Validator', (accounts) => {
             }
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -217,20 +218,20 @@ contract('Dividend Validator', (accounts) => {
             proof.data = zeroDividendProof.data;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
 
-        it('should fail if scalars NOT modulo GROUP_MODULUS', async () => {
+        it('should fail if scalars NOT modulo group modulus', async () => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
-            const notModRKBar = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
+            const notModRKBar = `0x${kBar.add(bn128.groupModulus).toString(16)}`;
             proof.data[0][0] = notModRKBar;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -247,7 +248,7 @@ contract('Dividend Validator', (accounts) => {
             proof.data[2][1] = zeroScalar;
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -257,14 +258,14 @@ contract('Dividend Validator', (accounts) => {
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             proof.data[0][0] = padLeft('0x05', 64);
             proof.data[0][1] = padLeft('0x05', 64);
-            proof.data[0][2] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][3] = `0x${constants.H_Y.toString(16)}`;
-            proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][5] = `0x${constants.H_Y.toString(16)}`;
+            proof.data[0][2] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][3] = `0x${bn128.H_Y.toString(16)}`;
+            proof.data[0][4] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][5] = `0x${bn128.H_Y.toString(16)}`;
             proof.challenge = new BN('0a', 16);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -275,7 +276,7 @@ contract('Dividend Validator', (accounts) => {
             proof.challenge = new BN('0');
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -288,7 +289,7 @@ contract('Dividend Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -301,7 +302,7 @@ contract('Dividend Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -314,7 +315,7 @@ contract('Dividend Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -327,7 +328,7 @@ contract('Dividend Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -340,7 +341,7 @@ contract('Dividend Validator', (accounts) => {
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, constants.CRS),
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
@@ -349,11 +350,11 @@ contract('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
-            const malformedHx = constants.H_X.add(new BN(1));
-            const malformedHy = constants.H_Y.add(new BN(1));
-            const bogusCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...constants.t2];
+            const malformedHx = bn128.H_X.add(new BN(1));
+            const malformedHy = bn128.H_Y.add(new BN(1));
+            const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(
-                dividendValidator.validateDividend(data, sender, bogusCRS),
+                dividendValidator.validateDividend(data, sender, malformedCRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
