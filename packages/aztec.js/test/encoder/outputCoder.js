@@ -1,9 +1,9 @@
+const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const { padLeft } = require('web3-utils');
 
-const bn128 = require('../../src/bn128');
 const HexString = require('./HexString');
 const note = require('../../src/note');
 const outputCoder = require('../../src/encoder/outputCoder');

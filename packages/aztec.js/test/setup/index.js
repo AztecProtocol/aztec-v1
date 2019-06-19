@@ -1,8 +1,8 @@
+const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { expect } = require('chai');
 
-const bn128 = require('../../src/bn128');
 const setup = require('../../src/setup');
 
 const { K_MAX, K_MIN } = constants;
