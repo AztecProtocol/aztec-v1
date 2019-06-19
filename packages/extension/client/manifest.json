@@ -1,29 +1,23 @@
 {
-    "manifest_version": 1,
+    "manifest_version": 2,
     "name": "AZTEC Privacy Extension",
     "version": "0.0.1",
     "description": "Chrome extension boilerplate, replace all values!",
     "icons": {
-        "16": "16x16.png",
-        "48": "48x48.png",
-        "128": "128x128.png"
+        "16": "./images/icons/icon-16.png",
+        "128": "./images/icons/icon-128.png"
     },
-    "browser_action": {
-        "default_title": "Boilerplate popup!",
-        "default_popup": "popup.html"
+    "background": {
+        "page": "./pages/background.html",
+        "persistent": true
     },
+    "permissions": ["tabs", "storage", "http://*/*", "https://*/*"],
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": ["in-content.js"]
+            "matches": ["http://*/*", "https://*/*"],
+            "all_frames": true,
+            "js": ["./scripts/contentScript.js"]
         }
     ],
-    "background": {
-        "scripts": ["background.js"],
-        "persistent": false
-    },
-    "content_security_policy":
-        "script-src 'self' 'unsafe-eval'; object-src 'self'; img-src * data: 'self' 'unsafe-eval'",
-    "offline_enabled": true,
-    "permissions": ["tabs", "<all_urls>", "activeTab"]
+    "web_accessible_resources": ["./build/*"]
 }
