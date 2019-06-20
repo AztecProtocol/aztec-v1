@@ -1,3 +1,4 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
 // We're not importing @babel/polyfill here because it's already imported by @aztec/bn128
@@ -33,6 +34,14 @@ module.exports = {
         maxAssetSize: 200000,
         maxEntrypointSize: 400000,
     },
+    plugins: [
+        new CopyWebpackPlugin([
+            {
+                from: 'src/**/*.wasm',
+                to: '[name].[ext]',
+            },
+        ]),
+    ],
     resolve: {
         extensions: ['.js'],
     },
