@@ -10,7 +10,6 @@ const bn128 = require('@aztec/bn128');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
-const { constants } = devUtils;
 const { BURN_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
 const { outputCoder } = encoder;
 
