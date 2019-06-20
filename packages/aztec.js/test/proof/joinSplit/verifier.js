@@ -1,6 +1,6 @@
 /* eslint-disable prefer-arrow-callback */
 const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
+const { errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const sinon = require('sinon');

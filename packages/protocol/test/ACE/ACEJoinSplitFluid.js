@@ -11,7 +11,6 @@ const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
 const { BURN_PROOF, DIVIDEND_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF, SWAP_PROOF } = devUtils.proofs;
-const { constants } = devUtils;
 const { outputCoder } = encoder;
 
 // ### Artifacts
