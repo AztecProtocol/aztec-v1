@@ -7,13 +7,13 @@ Barreto-Naehrig pairing friendly curve providing 128 bits of security defined as
 Install the module:
 
 ```bash
-$ yarn add @aztec/typed-data
+$ yarn add @aztec/bn128
 ```
 
 And import it in your project:
 
 ```js
-const typedData = require('@aztec/typed-data');
+const bn128 = require('@aztec/bn128');
 ```
 
 ## Example
