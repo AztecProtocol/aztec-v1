@@ -1,11 +1,11 @@
 /* eslint-disable prefer-destructuring */
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 
-const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const Verifier = require('../verifier');
 
-const { ZERO_BN, ZERO_BN_RED } = constants;
+const { ZERO_BN } = constants;
 
 class SwapVerifier extends Verifier {
     verifyProof() {
@@ -45,7 +45,7 @@ class SwapVerifier extends Verifier {
                 this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
             } else {
                 challengeResponse.appendPoint(B);
-                if (B.x.fromRed().eq(ZERO_BN_RED) && B.y.fromRed().eq(ZERO_BN_RED)) {
+                if (B.x.fromRed().eq(bn128.zeroBnRed) && B.y.fromRed().eq(bn128.zeroBnRed)) {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }

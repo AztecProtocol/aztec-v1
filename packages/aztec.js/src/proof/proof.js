@@ -1,15 +1,14 @@
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { Enum } = require('enumify');
 const { padLeft } = require('web3-utils');
 
-const bn128 = require('../bn128');
 const Keccak = require('../keccak');
 const ProofUtils = require('./utils');
 const types = require('./types');
 
 const { AztecError } = errors;
-const { GROUP_MODULUS } = constants;
 
 class ProofType extends Enum {}
 ProofType.initEnum(types);
@@ -40,7 +39,7 @@ class Proof {
         if (BN.isBN(publicValue)) {
             this.publicValue = publicValue;
         } else if (publicValue < 0) {
-            this.publicValue = GROUP_MODULUS.sub(new BN(-publicValue));
+            this.publicValue = bn128.groupModulus.sub(new BN(-publicValue));
         } else {
             this.publicValue = new BN(publicValue);
         }

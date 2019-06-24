@@ -1,14 +1,12 @@
-const { constants } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { padLeft, toHex } = require('web3-utils');
 
 const { noteCoder } = require('../encoder');
-const bn128 = require('../bn128');
 const setup = require('../setup');
 const noteUtils = require('./utils');
 
-const { BN128_GROUP_REDUCTION } = constants;
 const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
 
 /**
@@ -75,8 +73,8 @@ class Note {
             if (viewingKey.length !== 140) {
                 throw new Error(`invalid viewing key length, expected 140, got ${viewingKey.length}`);
             }
-            this.a = new BN(viewingKey.slice(2, 66), 16).toRed(BN128_GROUP_REDUCTION);
-            this.k = new BN(viewingKey.slice(66, 74), 16).toRed(BN128_GROUP_REDUCTION);
+            this.a = new BN(viewingKey.slice(2, 66), 16).toRed(bn128.groupReduction);
+            this.k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
             const { x, y } = setupPoint;
             const mu = bn128.curve.point(x, y);
             this.gamma = mu.mul(this.a);
@@ -99,9 +97,9 @@ class Note {
      */
     async derive(spendingKey) {
         const sharedSecret = getSharedSecret(this.ephemeral.getPublic(), spendingKey);
-        this.a = new BN(sharedSecret.slice(2), 16).toRed(BN128_GROUP_REDUCTION);
+        this.a = new BN(sharedSecret.slice(2), 16).toRed(bn128.groupReduction);
         const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
-        this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(BN128_GROUP_REDUCTION);
+        this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(bn128.groupReduction);
     }
 
     /**
@@ -268,7 +266,7 @@ note.fromPublicKey = (publicKey) => {
  * @returns {Promise} promise that resolves to created note instance
  */
 note.fromViewKey = async (viewingKey) => {
-    const k = new BN(viewingKey.slice(66, 74), 16).toRed(BN128_GROUP_REDUCTION);
+    const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
     const setupPoint = await setup.fetchPoint(k.toNumber());
     const newNote = new Note(null, viewingKey, undefined, setupPoint);
     return newNote;

@@ -6,10 +6,10 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 // eslint-disable-next-line object-curly-newline
 const { note, proof } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
-const { constants } = devUtils;
 const { JOIN_SPLIT_PROOF, MINT_PROOF } = devUtils.proofs;
 
 // ### Artifacts
@@ -42,7 +42,7 @@ contract.skip('ZkAssetMintable', (accounts) => {
 
             aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
 
-            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setCommonReferenceString(bn128.CRS);
             await ace.setProof(MINT_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 
@@ -136,7 +136,7 @@ contract.skip('ZkAssetMintable', (accounts) => {
             aztecJoinSplitFluid = await JoinSplitFluid.new();
             aztecJoinSplit = await JoinSplit.new();
 
-            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setCommonReferenceString(bn128.CRS);
             await ace.setProof(MINT_PROOF, aztecJoinSplitFluid.address);
             await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
 

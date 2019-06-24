@@ -3,12 +3,10 @@
  * @module outputCoder
  */
 
-const { constants } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
-
-const bn128 = require('../bn128');
 
 const outputCoder = {};
 
@@ -221,7 +219,7 @@ outputCoder.encodeProofOutput = ({ inputNotes, outputNotes, publicOwner, publicV
     const predicate = new BN('10944121435919637611123202872628637544274182200208017171849102093287904247808', 10);
     let adjustedPublicValue = publicValue;
     if (publicValue.gt(predicate)) {
-        adjustedPublicValue = publicValue.sub(constants.GROUP_MODULUS);
+        adjustedPublicValue = publicValue.sub(bn128.groupModulus);
     }
     if (adjustedPublicValue.lt(new BN(0))) {
         formattedValue = padLeft(new BN(adjustedPublicValue).toTwos(256).toString(16), 64);

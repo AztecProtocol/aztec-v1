@@ -1,11 +1,11 @@
 /* eslint-disable prefer-arrow-callback */
-const { constants, errors } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
+const { errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { padLeft, randomHex } = require('web3-utils');
 
-const bn128 = require('../../../src/bn128');
 const { balancedPublicValues, mockNoteSet, randomNoteValue } = require('../../helpers/note');
 const { JoinSplitProof, Proof } = require('../../../src/proof');
 const JoinSplitVerifier = require('../../../src/proof/joinSplit/verifier');
@@ -205,10 +205,10 @@ describe('Join-Split Proof Verifier', () => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             proof.data[0][0] = padLeft('0x05', 64);
             proof.data[0][1] = padLeft('0x05', 64);
-            proof.data[0][2] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][3] = `0x${constants.H_Y.toString(16)}`;
-            proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][5] = `0x${constants.H_Y.toString(16)}`;
+            proof.data[0][2] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][3] = `0x${bn128.H_Y.toString(16)}`;
+            proof.data[0][4] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][5] = `0x${bn128.H_Y.toString(16)}`;
             proof.challenge = new BN('0a', 16);
 
             const verifier = new JoinSplitVerifier(proof);

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const sinon = require('sinon');
 
 const BN = require('bn.js');
-const bn128 = require('../../src/bn128');
+const bn128 = require('../../src');
 
 describe('bn128', () => {
     let kMaxStub;
@@ -19,7 +19,7 @@ describe('bn128', () => {
 
     it('should export the bn128 curve', async () => {
         const testPoint = bn128.randomPoint();
-        const scalar = new BN(crypto.randomBytes(32), 16).toRed(constants.BN128_GROUP_REDUCTION);
+        const scalar = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
         const scalarInverse = scalar.redInvm();
         const result = testPoint.mul(scalar).mul(scalarInverse);
         expect(result.eq(testPoint));
@@ -36,7 +36,7 @@ describe('bn128', () => {
         const scalar = bn128.randomGroupScalar();
 
         expect(BN.isBN(scalar)).to.equal(true);
-        expect(scalar.red).to.deep.equal(constants.BN128_GROUP_REDUCTION);
+        expect(scalar.red).to.deep.equal(bn128.groupReduction);
         expect(scalar.fromRed().toString(16).length <= 64).to.equal(true);
     });
 
@@ -60,8 +60,8 @@ describe('bn128', () => {
             .redMul(h.x)
             .redAdd(bn128.curve.b);
 
-        expect(h.x.fromRed().eq(constants.H_X)).to.equal(true);
-        expect(h.y.fromRed().eq(constants.H_Y)).to.equal(true);
+        expect(h.x.fromRed().eq(bn128.H_X)).to.equal(true);
+        expect(h.y.fromRed().eq(bn128.H_Y)).to.equal(true);
         expect(lhs.fromRed().eq(rhs.fromRed())).to.equal(true);
     });
 

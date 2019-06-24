@@ -1,8 +1,8 @@
-const { constants, proofs } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
+const { proofs } = require('@aztec/dev-utils');
 const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
-const bn128 = require('../../bn128');
 const { inputCoder, outputCoder } = require('../../encoder');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
@@ -23,7 +23,7 @@ class JoinSplitProof extends Proof {
      */
     constructBlindingFactors() {
         const inputNotesLength = this.m;
-        let reducer = constants.ZERO_BN_RED; // "x" in the white paper
+        let reducer = bn128.zeroBnRed; // "x" in the white paper
         this.blindingFactors = this.notes.map((note, i) => {
             const { bk, ba } = this.blindingScalars[i];
             let B;
@@ -45,7 +45,7 @@ class JoinSplitProof extends Proof {
      */
     constructBlindingScalars() {
         const notesLength = this.notes.length;
-        let bkAux = constants.ZERO_BN_RED;
+        let bkAux = bn128.zeroBnRed;
         this.blindingScalars = Array(notesLength)
             .fill()
             .map((_, i) => {
@@ -53,7 +53,7 @@ class JoinSplitProof extends Proof {
                 const ba = bn128.randomGroupScalar();
                 if (i === notesLength - 1) {
                     if (this.m === notesLength) {
-                        bk = constants.ZERO_BN_RED.redSub(bkAux);
+                        bk = bn128.zeroBnRed.redSub(bkAux);
                     } else {
                         bk = bkAux;
                     }

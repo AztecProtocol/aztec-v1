@@ -1,3 +1,4 @@
+const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
@@ -6,7 +7,6 @@ const { expect } = require('chai');
 const ethUtil = require('ethereumjs-util');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
-const bn128 = require('../../src/bn128');
 const signer = require('../../src/signer');
 
 describe('Signer', () => {

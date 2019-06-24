@@ -1,4 +1,4 @@
-const { constants } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { expect } = require('chai');
@@ -7,12 +7,11 @@ const web3Utils = require('web3-utils');
 
 const note = require('../../src/note');
 
-const { GROUP_MODULUS } = constants;
 const { padLeft, toHex } = web3Utils;
 
 describe('Note', () => {
     it('should create well formed notes using the fromPublic and fromViewKey methods', async () => {
-        const aBn = new BN(crypto.randomBytes(32), 16).umod(GROUP_MODULUS);
+        const aBn = new BN(crypto.randomBytes(32), 16).umod(bn128.groupModulus);
         const a = padLeft(aBn.toString(16), 64);
 
         const k = padLeft(toHex('13456').slice(2), 8);
@@ -64,10 +63,10 @@ describe('Note', () => {
             note.utils.getSharedSecret(ephemeralKeys[3], accounts[1].privateKey),
         ];
 
-        expect(new BN(sharedSecrets[0].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[0].a.fromRed())).to.equal(true);
-        expect(new BN(sharedSecrets[1].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[1].a.fromRed())).to.equal(true);
-        expect(new BN(sharedSecrets[2].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[2].a.fromRed())).to.equal(true);
-        expect(new BN(sharedSecrets[3].slice(2), 16).umod(GROUP_MODULUS).eq(noteArray[3].a.fromRed())).to.equal(true);
+        expect(new BN(sharedSecrets[0].slice(2), 16).umod(bn128.groupModulus).eq(noteArray[0].a.fromRed())).to.equal(true);
+        expect(new BN(sharedSecrets[1].slice(2), 16).umod(bn128.groupModulus).eq(noteArray[1].a.fromRed())).to.equal(true);
+        expect(new BN(sharedSecrets[2].slice(2), 16).umod(bn128.groupModulus).eq(noteArray[2].a.fromRed())).to.equal(true);
+        expect(new BN(sharedSecrets[3].slice(2), 16).umod(bn128.groupModulus).eq(noteArray[3].a.fromRed())).to.equal(true);
     });
 
     it('should export k, a values of 0 for a note created from a note public key', async () => {
