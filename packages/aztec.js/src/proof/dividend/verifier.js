@@ -1,12 +1,12 @@
 /* eslint-disable prefer-destructuring */
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 
-const bn128 = require('../../bn128');
 const Keccak = require('../../keccak');
 const Verifier = require('../verifier');
 
-const { BN128_GROUP_REDUCTION, K_MAX, ZERO_BN, ZERO_BN_RED } = constants;
+const { K_MAX, ZERO_BN } = constants;
 
 class DividendVerifier extends Verifier {
     verifyProof() {
@@ -45,8 +45,8 @@ class DividendVerifier extends Verifier {
             // Notional and target notes
             if (i === 2) {
                 challengeX = this.challenge.redMul(reducer);
-                const zaRed = this.proof.za.toRed(BN128_GROUP_REDUCTION);
-                const zbRed = this.proof.zb.toRed(BN128_GROUP_REDUCTION);
+                const zaRed = this.proof.za.toRed(bn128.groupReduction);
+                const zbRed = this.proof.zb.toRed(bn128.groupReduction);
 
                 // kBar_3 = (z_b)(kBar_1) - (z_a)(kBar_2)
                 kBar = zbRed.redMul(this.data[0].kBar).redSub(zaRed.redMul(this.data[1].kBar));

@@ -3,9 +3,9 @@
  * @module noteCoder
  */
 
+const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const { padLeft } = require('web3-utils');
-const bn128 = require('../bn128');
 
 const noteCoder = {};
 

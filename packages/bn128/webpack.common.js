@@ -1,7 +1,10 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
+// We're not importing @babel/polyfill here because it's already imported by @aztec/bn128
+// @see https://github.com/babel/babel-loader/issues/401
 module.exports = {
-    entry: ['@babel/polyfill', './src/index.js'],
+    entry: ['./src/index.js'],
     module: {
         rules: [
             {
@@ -23,7 +26,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        library: 'aztec.js',
+        library: '@aztec/bn128',
         libraryTarget: 'umd',
     },
     performance: {
@@ -31,6 +34,14 @@ module.exports = {
         maxAssetSize: 200000,
         maxEntrypointSize: 400000,
     },
+    plugins: [
+        new CopyWebpackPlugin([
+            {
+                from: 'src/**/*.wasm',
+                to: '[name].[ext]',
+            },
+        ]),
+    ],
     resolve: {
         extensions: ['.js'],
     },

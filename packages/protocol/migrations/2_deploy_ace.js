@@ -1,12 +1,10 @@
 /* global artifacts */
-const {
-    constants: { CRS },
-} = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 
 const ACE = artifacts.require('./ACE.sol');
 
 module.exports = (deployer) => {
     return deployer.deploy(ACE).then(async (ace) => {
-        await ace.setCommonReferenceString(CRS);
+        await ace.setCommonReferenceString(bn128.CRS);
     });
 };

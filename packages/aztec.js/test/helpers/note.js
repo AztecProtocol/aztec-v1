@@ -1,10 +1,10 @@
+const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const { padLeft, toHex } = require('web3-utils');
 
-const bn128 = require('../../src/bn128');
 const note = require('../../src/note');
 const ProofUtils = require('../../src/proof/utils');
 
@@ -22,7 +22,7 @@ const mockLightNote = async (k) => {
  */
 const mockNote = async (k, trapdoor) => {
     const lightNote = await mockLightNote(k);
-    const kBn = new BN(k).toRed(constants.BN128_GROUP_REDUCTION);
+    const kBn = new BN(k).toRed(bn128.groupReduction);
     const mu = bn128.h.mul(trapdoor.redSub(kBn).redInvm());
     const gamma = mu.mul(lightNote.a);
     const sigma = gamma.mul(kBn).add(bn128.h.mul(lightNote.a));
@@ -65,7 +65,7 @@ const mockLightNoteSet = async (kIn, kOut) => {
  * @returns {Object} input notes, output notes and trapdoor function
  */
 const mockNoteSet = async (kIn, kOut) => {
-    const trapdoor = new BN(crypto.randomBytes(32), 16).toRed(constants.BN128_GROUP_REDUCTION);
+    const trapdoor = new BN(crypto.randomBytes(32), 16).toRed(bn128.groupReduction);
     const inputNotes = await Promise.all(
         kIn.map((k) => {
             return mockNote(k, trapdoor);

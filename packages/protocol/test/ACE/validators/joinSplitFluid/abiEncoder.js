@@ -1,6 +1,6 @@
 /* global artifacts, expect, contract, it:true */
 const { BurnProof, encoder, MintProof, note } = require('aztec.js');
-const { constants } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const { keccak256, padLeft } = require('web3-utils');
 
@@ -34,7 +34,7 @@ contract('Mint ABI Encoder', (accounts) => {
         const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
         const data = proof.encodeABI();
 
-        const result = await joinSplitFluidABIEncoderTest.validateJoinSplitFluid(data, sender, constants.CRS);
+        const result = await joinSplitFluidABIEncoderTest.validateJoinSplitFluid(data, sender, bn128.CRS);
         const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
         expect(result).to.equal(proof.eth.outputs);
 
@@ -94,7 +94,7 @@ contract('Burn ABI Encoder', (accounts) => {
         const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
         const data = proof.encodeABI();
 
-        const result = await joinSplitFluidABIEncoderTest.validateJoinSplitFluid(data, sender, constants.CRS);
+        const result = await joinSplitFluidABIEncoderTest.validateJoinSplitFluid(data, sender, bn128.CRS);
         expect(result).to.equal(proof.eth.outputs);
 
         const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);

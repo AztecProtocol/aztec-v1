@@ -1,6 +1,7 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, it:true */
 const { JoinSplitProof, note } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -56,9 +57,9 @@ contract('ACE', (accounts) => {
         });
 
         it('should set the common reference string', async () => {
-            await ace.setCommonReferenceString(constants.CRS, { from: accounts[0] });
+            await ace.setCommonReferenceString(bn128.CRS, { from: accounts[0] });
             const result = await ace.getCommonReferenceString();
-            expect(result).to.deep.equal(constants.CRS);
+            expect(result).to.deep.equal(bn128.CRS);
         });
 
         it('should set a proof', async () => {
@@ -76,7 +77,7 @@ contract('ACE', (accounts) => {
 
         beforeEach(async () => {
             ace = await ACE.new({ from: sender });
-            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setCommonReferenceString(bn128.CRS);
             joinSplitValidator = await JoinSplitValidator.new({ from: sender });
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
@@ -186,7 +187,7 @@ contract('ACE', (accounts) => {
             it('should not set the common reference string if not owner', async () => {
                 const opts = { from: accounts[1] };
                 await truffleAssert.reverts(
-                    ace.setCommonReferenceString(constants.CRS, opts),
+                    ace.setCommonReferenceString(bn128.CRS, opts),
                     'only the owner can set the common reference string',
                 );
             });

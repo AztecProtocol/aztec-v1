@@ -5328,17 +5328,15 @@ enhanced-resolve@^4.1.0:
     memory-fs "^0.4.0"
     tapable "^1.0.0"
 
-<<<<<<< HEAD
 entities@~1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.2.tgz#bdfa735299664dfafd34529ed4f8522a275fea56"
   integrity sha512-f2LZMYl1Fzu7YSBKg+RoROelpOaNrcGmE9AZubeDfrCEia483oW4MI4VyFd5VNHIgQ/7qm1I0wUHK1eJnn2y2w==
-=======
+
 enumify@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/enumify/-/enumify-1.0.4.tgz#2bb6263071dd4551e54c55755707fad24a40cd7e"
   integrity sha1-K7YmMHHdRVHlTFV1Vwf60kpAzX4=
->>>>>>> chore: update yarn.lock
 
 env-ci@^3.0.0:
   version "3.2.0"
@@ -15006,7 +15004,7 @@ web3-utils@1.0.0-beta.37:
     underscore "1.8.3"
     utf8 "2.1.1"
 
-web3-utils@1.0.0-beta.55:
+web3-utils@1.0.0-beta.55, web3-utils@^1.0.0-beta.55:
   version "1.0.0-beta.55"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.55.tgz#beb40926b7c04208b752d36a9bc959d27a04b308"
   integrity sha512-ASWqUi8gtWK02Tp8ZtcoAbHenMpQXNvHrakgzvqTNNZn26wgpv+Q4mdPi0KOR6ZgHFL8R/9b5BBoUTglS1WPpg==

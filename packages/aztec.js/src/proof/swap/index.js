@@ -1,11 +1,11 @@
 /* eslint-disable prefer-destructuring */
+const bn128 = require('@aztec/bn128');
 const { constants, errors, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../encoder');
-const bn128 = require('../../bn128');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
 

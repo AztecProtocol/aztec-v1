@@ -1,10 +1,10 @@
+const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const { randomHex } = require('web3-utils');
 
-const bn128 = require('../../../src/bn128');
 const { BurnProof, MintProof } = require('../../../src/proof');
 const note = require('../../../src/note');
 const { validateElement, validateScalar } = require('../../helpers/bn128');
@@ -52,7 +52,7 @@ describe('Mint Proof', () => {
 
     describe('Failure States', () => {
         it('should fail if value > K_MAX', async () => {
-            newMintCounterNote.k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
+            newMintCounterNote.k = new BN(constants.K_MAX + 1).toRed(bn128.groupReduction);
             try {
                 const _ = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             } catch (err) {
@@ -79,7 +79,7 @@ describe('Mint Proof', () => {
         });
 
         it('should fail if malformed viewing key', async () => {
-            newMintCounterNote.a = constants.ZERO_BN_RED;
+            newMintCounterNote.a = bn128.zeroBnRed;
             try {
                 const _ = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             } catch (err) {
@@ -123,7 +123,7 @@ describe('Burn Proof', () => {
 
     describe('Failure States', () => {
         it('should fail if value > K_MAX', async () => {
-            newBurnCounterNote.k = new BN(constants.K_MAX + 1).toRed(constants.BN128_GROUP_REDUCTION);
+            newBurnCounterNote.k = new BN(constants.K_MAX + 1).toRed(bn128.groupReduction);
             try {
                 const _ = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             } catch (err) {
@@ -150,7 +150,7 @@ describe('Burn Proof', () => {
         });
 
         it('should fail if malformed viewing key', async () => {
-            newBurnCounterNote.a = constants.ZERO_BN_RED;
+            newBurnCounterNote.a = bn128.zeroBnRed;
             try {
                 const _ = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             } catch (err) {

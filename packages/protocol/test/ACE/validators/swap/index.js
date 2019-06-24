@@ -1,6 +1,6 @@
 /* global artifacts, expect, contract, it:true */
 const { note, SwapProof } = require('aztec.js');
-const { constants } = require('@aztec/dev-utils');
+const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
@@ -52,7 +52,7 @@ contract('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
-            const result = await swapValidator.validateSwap(data, sender, constants.CRS, { from: sender });
+            const result = await swapValidator.validateSwap(data, sender, bn128.CRS, { from: sender });
             expect(result).to.equal(proof.eth.outputs);
         });
 
@@ -62,17 +62,17 @@ contract('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getNotes(asks, bids);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
-            const result = await swapValidator.validateSwap(data, sender, constants.CRS, { from: sender });
+            const result = await swapValidator.validateSwap(data, sender, bn128.CRS, { from: sender });
             expect(result).to.equal(proof.eth.outputs);
         });
 
-        it('should validate Swap proof with challenge that has GROUP_MODULUS added to it', async () => {
+        it('should validate Swap proof with challenge that has group modulus added to it', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
-            proof.challenge = proof.challenge.add(constants.GROUP_MODULUS);
+            proof.challenge = proof.challenge.add(bn128.groupModulus);
             proof.constructOutputs();
             const data = proof.encodeABI();
-            const result = await swapValidator.validateSwap(data, sender, constants.CRS, { from: sender });
+            const result = await swapValidator.validateSwap(data, sender, bn128.CRS, { from: sender });
             expect(result).to.equal(proof.eth.outputs);
         });
     });
@@ -84,7 +84,7 @@ contract('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getNotes(asks, bids);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if provided 2 notes instead of 4', async () => {
@@ -94,7 +94,7 @@ contract('Swap Validator', (accounts) => {
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.data = [proof.data[0], proof.data[1]];
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if provided 3 notes instead of 4', async () => {
@@ -104,7 +104,7 @@ contract('Swap Validator', (accounts) => {
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.data = [proof.data[0], proof.data[1], proof.data[2]];
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if malformed proof data', async () => {
@@ -118,7 +118,7 @@ contract('Swap Validator', (accounts) => {
                 }
             }
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if points NOT on curve', async () => {
@@ -127,16 +127,16 @@ contract('Swap Validator', (accounts) => {
             const zeroSwapProof = await mockZeroSwapProof();
             proof.data = zeroSwapProof.data;
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
-        it('should fail if scalars NOT modulo GROUP_MODULUS', async () => {
+        it('should fail if scalars NOT modulo group modulus', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const kBar = new BN(proof.data[0][0].slice(2), 16);
-            proof.data[0][0] = `0x${kBar.add(constants.GROUP_MODULUS).toString(16)}`;
+            proof.data[0][0] = `0x${kBar.add(bn128.groupModulus).toString(16)}`;
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if scalars are 0', async () => {
@@ -152,7 +152,7 @@ contract('Swap Validator', (accounts) => {
             proof.data[3][0] = zeroScalar;
             proof.data[3][1] = zeroScalar;
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if blinding factors resolve to point at infinity', async () => {
@@ -160,13 +160,13 @@ contract('Swap Validator', (accounts) => {
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.data[0][0] = padLeft('0x05', 64);
             proof.data[0][1] = padLeft('0x05', 64);
-            proof.data[0][2] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][3] = `0x${constants.H_Y.toString(16)}`;
-            proof.data[0][4] = `0x${constants.H_X.toString(16)}`;
-            proof.data[0][5] = `0x${constants.H_Y.toString(16)}`;
+            proof.data[0][2] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][3] = `0x${bn128.H_Y.toString(16)}`;
+            proof.data[0][4] = `0x${bn128.H_X.toString(16)}`;
+            proof.data[0][5] = `0x${bn128.H_Y.toString(16)}`;
             proof.challenge = new BN('0a', 16);
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if malformed challenge', async () => {
@@ -174,7 +174,7 @@ contract('Swap Validator', (accounts) => {
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.challenge = new BN('0');
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if sender NOT integrated into challenge variable', async () => {
@@ -184,7 +184,7 @@ contract('Swap Validator', (accounts) => {
             proof.constructChallengeRecurse([proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if notes NOT integrated into challenge variable', async () => {
@@ -194,7 +194,7 @@ contract('Swap Validator', (accounts) => {
             proof.constructChallengeRecurse([proof.sender, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if blinding factors NOT integrated into challenge variable', async () => {
@@ -204,16 +204,16 @@ contract('Swap Validator', (accounts) => {
             proof.constructChallengeRecurse([proof.sender, proof.notes]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, constants.CRS), truffleAssert.ErrorType.REVERT);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bn128.CRS), truffleAssert.ErrorType.REVERT);
         });
 
         it('should fail if malformed H_X, H_Y in CRS', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
-            const malformedHx = constants.H_X.add(new BN(1));
-            const malformedHy = constants.H_Y.add(new BN(1));
-            const bogusCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...constants.t2];
+            const malformedHx = bn128.H_X.add(new BN(1));
+            const malformedHy = bn128.H_Y.add(new BN(1));
+            const bogusCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bogusCRS), truffleAssert.ErrorType.REVERT);
         });
     });
