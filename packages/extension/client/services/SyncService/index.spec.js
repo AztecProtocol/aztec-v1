@@ -79,22 +79,27 @@ describe('SyncService', function () {
             'assetCount': 0,
             'a:1:v:50': [],
         });
+
         const firstPromise = SyncService.atomicTransaction('createNote', {
             value: 1000,
             owner: '0xe4A5Cb99EeC7a3aE8512e40A36eEa41bc1e91A1A',
             asset: 'asset1',
             noteHash: 'note1',
-        }).then(spy1);
-        // this will keep resolving until the first call has resolved even though this is called before the promise
+        })
+            .then(spy1);
+
+        // this will keep recursing until the first call has resolved even though this is called before the promise
         // resolves
         await SyncService.atomicTransaction('createNote',{
             value: 1010,
             owner: '0xe4A5Cb99EeC7a3aE8512e40A36eEa41bc1e91A1A',
             asset: 'asset1',
             noteHash: 'note2',
-        }).then(spy2);
+        })
+            .then(spy2);
 
-        await firstPromise;
+
+        // check the lock functions as expected
         assert.ok(spy1.calledBefore(spy2), 'spy1 should be called before spy2');
 
     });

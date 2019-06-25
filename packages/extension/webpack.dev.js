@@ -5,11 +5,15 @@ require("babel-register");
 const config = {
 
     // Entry
-    entry: './client/scripts/background.js',
+    entry: {
+        background: './client/scripts/background.js',
+        content: './client/scripts/contentScript.js',
+        injected: './client/scripts/injected.js',
+    },
     // Output
     output: {
         path: path.resolve(__dirname, './client/build/'),
-        filename: 'bundle.js',
+        filename: 'bundle.[name].js',
     },
     // Loaders
     module: {

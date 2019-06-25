@@ -1,24 +1,30 @@
-type ZkAsset @entity {
+type ZkAsset {
   id: ID!
-  address: Bytes!
-  linkedTokenAddress: Bytes!
-  scalingFactor: BigInt!
+  address: String!
+  linkedTokenAddress: String!
+  scalingFactor: Int!
   canAdjustSupply: Boolean
   canConvert: Boolean
 }
 
-type Note @entity {
+type Note {
   id: ID!
   asset: ZkAsset!
-  owner: Account!
-  metadata: Bytes!
+  owner: String!
+  value: Int!
+  metadata: String!
   status: String!
 }
 
-type Account @entity {
+type Account {
   id: ID!
-  address: Bytes!
-  networkId: BigInt!
-  publicKey: Bytes!
-  encryptedVault: Bytes!
+  address: String!
+  networkId: Int!
+  publicKey: String!
+  encryptedVault: String!
+}
+
+type Query {
+    getNoteById(id: Int!): Note
+    getNotesByValue(value: Int!): [Note]
 }

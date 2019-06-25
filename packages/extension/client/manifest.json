@@ -16,8 +16,8 @@
         {
             "matches": ["http://*/*", "https://*/*"],
             "all_frames": true,
-            "js": ["./scripts/contentScript.js"]
+            "js": ["./build/bundle.content.js"]
         }
     ],
-    "web_accessible_resources": ["./build/*"]
+    "web_accessible_resources": ["/build/*", "/build/bundle.injected.js"]
 }
