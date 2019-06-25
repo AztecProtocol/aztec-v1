@@ -2,8 +2,11 @@ import ApolloClient from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
-import typeDefs from './schema.graphql';
-import resolvers from './resolvers';
+
+import typeDefs from 'raw-loader!./schema.graphql';
+
+import resolvers from './resolversMessages.js';
+
 
 
 const initApollo = () => {
@@ -18,6 +21,7 @@ const initApollo = () => {
         cache: new InMemoryCache({
             addTypename: false,
         }),
+        connectToDevTools: true,
     });
     return client;
 };

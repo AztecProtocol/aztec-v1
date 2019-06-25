@@ -1,15 +1,12 @@
 import storage from '../helpers/storage.js';
+import utils from '../helpers/utils.js';
 
 // TODO we need to have a queue style service to stop multiple assets from being overidden. If either createNote or
 // destroyNote are being called by the extension this should block.
 
 
 const SyncService = {
-    notePrefix: (id) => `n:${id}`,
-    assetPrefix: (id) => `a:${id}`,
     TX_LOCK : false,
-    assetValuePrefix:  (assetId, groupId) => `a:${assetId}:v:${groupId}`,
-    getNoteGroupId: (value) => Math.floor(value / 20),
     createNote: async (data) => {
 
         let {
@@ -21,21 +18,21 @@ const SyncService = {
 
         if(!assetId) {
             const { assetCount = 0 } = await storage.get(['assetCount']);
-            assetId = SyncService.assetPrefix(assetCount + 1);
+            assetId = utils.assetPrefix(assetCount + 1);
             setObj.assetCount = assetCount + 1;
             setObj[data.asset] = assetId;
             // TODO store asset data here e.g name / image etc..
         }
         const rawAssetId = parseInt(assetId.split(':')[1]);
-        const noteGrouping = SyncService.getNoteGroupId(data.value);
-        const assetValueId = SyncService.assetValuePrefix(rawAssetId, noteGrouping);
+        const noteGrouping = utils.getNoteGroupId(data.value);
+        const assetValueId = utils.assetValuePrefix(rawAssetId, noteGrouping);
 
         const {
             noteCount = 0,
             [assetValueId]: valueIndex = [],
         } = await storage.get(['noteCount', assetValueId]);
 
-        const noteId = SyncService.notePrefix(noteCount + 1);
+        const noteId = utils.notePrefix(noteCount + 1);
         valueIndex.push(noteCount + 1);
 
         setObj[data.noteHash] = {
@@ -60,8 +57,8 @@ const SyncService = {
             },
         } = await storage.get(noteHash);
 
-        const groupId= SyncService.getNoteGroupId(value);
-        const assetValueId = SyncService.assetValuePrefix(asset, groupId);
+        const groupId= utils.getNoteGroupId(value);
+        const assetValueId = utils.assetValuePrefix(asset, groupId);
         const {
             [assetValueId] : valueIndex,
         } = await storage.get(assetValueId);
@@ -91,7 +88,6 @@ const SyncService = {
                     tick(resolve, reject);
                 }, 10);
             }
-
         }
         return new Promise(tick);
     },

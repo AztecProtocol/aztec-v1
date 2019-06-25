@@ -1,4 +1,5 @@
 import SyncService from "../services/SyncService/index.js";
+// import GraphQlServer from "../services/GraphQl/index.js";
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).
  * The value is no lower than min (or the next integer greater than min
@@ -32,7 +33,7 @@ console.log('Starting background script');
 const runScript = async () => {
     const assets = ['BFEc1yK4Yiu5nCf0wg645TuIGKHW9xs', 'BFEc1yK4Yiu5nCf0wg645TuIGKHWdxs','BFEc1yK4Yiu5nCf0wg645TdIGKHW9xs', 'BFEc1yK4Yiu5nCf0wg645TdIGKHW9ss'];
     chrome.storage.local.clear();
-    for (let index = 0; index < 10000; index++) {
+    for (let index = 0; index < 1000; index++) {
         const key = await window.crypto.subtle.generateKey(
             {
                 name: "ECDSA",
@@ -60,4 +61,7 @@ const runScript = async () => {
 
 }
 runScript();
+
+// window.__APOLLO_CLIENT__ = GraphQlServer();
+// console.log(GraphQlServer());
 
