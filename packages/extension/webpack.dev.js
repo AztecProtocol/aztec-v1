@@ -7,6 +7,7 @@ const config = {
     // Entry
     entry: {
         background: './client/scripts/background.js',
+        background2: './src/scripts/background.js',
         content: './client/scripts/contentScript.js',
         injected: './client/scripts/injected.js',
     },
@@ -28,6 +29,10 @@ const config = {
     },
     // Plugins
     plugins: [],
+    watchOptions: {
+        aggregateTimeout: 300,
+        poll: 1000,
+    },
 };
 // Exports
 module.exports = config;
