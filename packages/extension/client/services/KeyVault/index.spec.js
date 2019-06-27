@@ -116,6 +116,7 @@ describe("Keystore", function() {
                 mnemonic: fixture.mnSeed,
                 hdPathString: fixture.hdPathString,
             });
+            
             const isDerKeyCorrect = k.isDerivedKeyCorrect(derKey);
             expect(isDerKeyCorrect).to.equal(true);
             let isDerKey1Correct 
