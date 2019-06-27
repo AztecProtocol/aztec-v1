@@ -61,6 +61,4 @@ contract('Dividend ABI Encoder', (accounts) => {
         expect(decoded[0].publicValue).to.equal(proof.publicValue.toNumber());
         expect(decoded[0].challenge).to.equal(proof.challengeHex);
     });
-
-    describe('Success States', () => {});
 });
