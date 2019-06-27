@@ -12,7 +12,7 @@ const { PublicRangeProof } = require('../../../src/proof');
 const PublicRangeVerifier = require('../../../src/proof/publicRange/verifier');
 const { Proof } = require('../../../src/proof');
 
-describe.only('Public range proof verifier', () => {
+describe('Public range proof verifier', () => {
     let originalNote = {};
     const originalNoteValue = 50;
     let utilityNote = {};
