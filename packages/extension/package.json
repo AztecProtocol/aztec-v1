@@ -28,7 +28,10 @@
     "scripts": {
         "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
         "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
-        "build:dev": "webpack --config webpack.dev.js"
+        "test:src": "jest ./src",
+        "build:dev": "webpack --config webpack.dev.js",
+        "mockServer": "babel-node ./mockServer",
+        "watch": "webpack --watch --config webpack.dev.js"
     },
     "devDependencies": {
         "@babel/cli": "^7.2.3",
@@ -41,8 +44,10 @@
         "@babel/preset-env": "^7.4.4",
         "@babel/register": "^7.4.4",
         "@babel/runtime": "^7.4.2",
+        "apollo-server": "^2.6.4",
         "chai": "^4.2.0",
         "mocha": "^6.1.4",
+        "node-fetch": "^2.6.0",
         "sinon": "^7.0.0",
         "sinon-chrome": "^3.0.1",
         "webpack-cli": "^3.3.4"
