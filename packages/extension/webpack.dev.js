@@ -1,9 +1,10 @@
 // Imports: Dependencies
 const path = require('path');
-require("babel-register");
+require('@babel/register');
+
 // Webpack Configuration
 const config = {
-
+    mode: 'development',
     // Entry
     entry: {
         background: './client/scripts/background.js',
@@ -21,7 +22,7 @@ const config = {
         rules : [
             // JavaScript/JSX Files
             {
-                test: /\.jsx$/,
+                test: /\.jsx?$/,
                 exclude: /node_modules/,
                 use: ['babel-loader'],
             },
@@ -33,6 +34,7 @@ const config = {
         aggregateTimeout: 300,
         poll: 1000,
     },
+    devtool: 'cheap-module-source-map',
 };
 // Exports
 module.exports = config;

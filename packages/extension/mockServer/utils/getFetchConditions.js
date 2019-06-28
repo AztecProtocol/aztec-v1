@@ -8,5 +8,4 @@ export default function getFetchConditions(keys, args) {
     return conditions;
 }
 
-export const makeGetFetchConditions = keys =>
-    args => getFetchConditions(keys, args);
+export const makeGetFetchConditions = keys => args => getFetchConditions(keys, args);
