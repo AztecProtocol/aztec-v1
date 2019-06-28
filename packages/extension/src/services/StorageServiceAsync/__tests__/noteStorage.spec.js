@@ -2,7 +2,7 @@ import {
     spy,
 } from 'sinon';
 import * as storage from '~utils/storage';
-import noteStorage from './noteStorage';
+import noteStorage from '../noteStorage';
 
 jest.mock('~utils/storage');
 

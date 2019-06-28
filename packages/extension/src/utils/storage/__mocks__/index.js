@@ -1,3 +1,5 @@
+import lock from '../lock';
+
 let db = {};
 
 const get = (keys) => {
@@ -26,5 +28,6 @@ const reset = () => {
 export {
     get,
     set,
+    lock,
     reset,
 };
