@@ -1,8 +1,6 @@
-/* global jest, expect */
 import {
     spy,
 } from 'sinon';
-import chrome from 'sinon-chrome';
 import * as storage from '~utils/storage';
 import assetStorage from './assetStorage';
 
@@ -12,7 +10,6 @@ describe('AssetStorage', () => {
     let set;
 
     beforeEach(() => {
-        global.chrome = chrome;
         set = spy(storage, 'set');
     });
 

@@ -2,6 +2,12 @@ const path = require('path');
 
 module.exports = {
     extends: 'airbnb/base',
+    env: {
+        browser: true,
+        es6: true,
+        node: true,
+        jest: true,
+    },
     settings: {
         'import/resolver': {
             alias: {
