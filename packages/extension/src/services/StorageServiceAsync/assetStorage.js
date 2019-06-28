@@ -1,8 +1,8 @@
 import {
     get,
     set,
-} from '../../utils/storage';
-import dataToKey from '../../utils/dataToKey';
+} from '~utils/storage';
+import dataToKey from '~utils/dataToKey';
 import Storage from './Storage';
 
 const createAssetIdKeyMap = async (asset) => {

@@ -24,7 +24,6 @@ export const getAsset = (_, args) => {
     return findEntityByKey(assets, conditions);
 };
 
-export const getAssetById = assetId =>
-    getAsset(null, { id: assetId });
+export const getAssetById = assetId => getAsset(null, { id: assetId });
 
 export default assets;

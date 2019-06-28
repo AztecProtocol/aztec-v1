@@ -12,5 +12,14 @@ module.exports = {
     plugins: [
         '@babel/plugin-proposal-class-properties',
         '@babel/plugin-transform-runtime',
+        [
+            'module-resolver',
+            {
+                root: ['./src'],
+                alias: {
+                    '~utils': './src/utils',
+                },
+            },
+        ],
     ],
 };

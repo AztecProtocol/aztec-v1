@@ -25,7 +25,6 @@ export const getAccount = (_, args) => {
     return findEntityByKey(accounts, conditions);
 };
 
-export const getAccountById = accountId =>
-    getAccount(null, { id: accountId });
+export const getAccountById = accountId => getAccount(null, { id: accountId });
 
 export default accounts;
