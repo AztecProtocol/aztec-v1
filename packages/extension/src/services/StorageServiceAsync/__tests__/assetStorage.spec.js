@@ -2,7 +2,7 @@ import {
     spy,
 } from 'sinon';
 import * as storage from '~utils/storage';
-import assetStorage from './assetStorage';
+import assetStorage from '../assetStorage';
 
 jest.mock('~utils/storage');
 

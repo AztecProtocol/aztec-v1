@@ -1,14 +1,14 @@
-import Storage from './Storage';
+import LockManager from '../helpers/LockManager';
 
-describe('Storage', () => {
-    let storage;
+describe('LockManager.lock', () => {
+    let lock;
     let runStart = [];
     let runStartTimestamps = {};
     let runEnd = [];
     let runEndTimestamps = {};
 
     beforeEach(() => {
-        storage = new Storage();
+        ({ lock } = new LockManager());
         runStart = [];
         runEnd = [];
         runStartTimestamps = {};
@@ -33,8 +33,8 @@ describe('Storage', () => {
 
     it('allow to lock a function by key', async () => {
         await Promise.all([
-            storage.lock('test', run('a', 100)),
-            storage.lock('test', run('b', 10)),
+            lock('test', run('a', 100)),
+            lock('test', run('b', 10)),
         ]);
 
         expect(runStart).toEqual(['a', 'b']);
@@ -44,8 +44,8 @@ describe('Storage', () => {
 
     it('will not block function with different keys', async () => {
         await Promise.all([
-            storage.lock('test1', run('a', 200)),
-            storage.lock('test2', run('b', 10)),
+            lock('test1', run('a', 200)),
+            lock('test2', run('b', 10)),
         ]);
 
         expect(runStart).toEqual(['a', 'b']);
@@ -59,8 +59,8 @@ describe('Storage', () => {
             'run',
         ];
         await Promise.all([
-            storage.lock(keys, run('a', 100)),
-            storage.lock(keys, run('b', 10)),
+            lock(keys, run('a', 100)),
+            lock(keys, run('b', 10)),
         ]);
 
         expect(runStart).toEqual(['a', 'b']);
@@ -70,19 +70,19 @@ describe('Storage', () => {
 
     it('proceed with function that has no blocked keys', async () => {
         await Promise.all([
-            storage.lock(
+            lock(
                 'test',
                 run('a', 200),
             ),
-            storage.lock(
+            lock(
                 ['foo', 'bar'],
                 run('b', 10),
             ),
-            storage.lock(
+            lock(
                 ['test', 'foo'],
                 run('c', 0),
             ),
-            storage.lock(
+            lock(
                 ['bar'],
                 run('d', 0),
             ),
