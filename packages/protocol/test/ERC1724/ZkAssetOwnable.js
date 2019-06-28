@@ -18,7 +18,7 @@ const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-contract.only('ZkAssetOwnable', (accounts) => {
+contract('ZkAssetOwnable', (accounts) => {
     let ace;
     let joinSplitValidator;
     let erc20;
@@ -120,9 +120,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
                 publicOwner,
             );
             const transferData = transferProof.encodeABI(zkAssetOwnable.address);
-            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, withdrawalPublicValue, {
-                from: accounts[0],
-            });
 
             await confidentialApprove([0, 1], notes, ownerAccounts);
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
@@ -166,10 +163,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
                 publicOwner,
             );
             const transferData = transferProof.encodeABI(zkAssetOwnable.address);
-            // await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, withdrawalPublicValue, {
-            //     from: accounts[0],
-            // });
-
             await confidentialApprove([0, 1], notes, ownerAccounts);
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
@@ -220,9 +213,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
                 publicOwner,
             );
             const transferData = transferProof.encodeABI(zkAssetOwnable.address);
-            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, withdrawalPublicValue, {
-                from: accounts[0],
-            });
 
             await confidentialApprove([0, 1], notes, ownerAccounts);
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
@@ -319,10 +309,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
 
             const transferSignatures = transferProof.constructSignatures(zkAssetOwnable.address, transferInputOwnerAccounts);
 
-            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, withdrawalPublicValue, {
-                from: accounts[0],
-            });
-
             await zkAssetOwnable.confidentialTransfer(transferData, transferSignatures);
 
             const signature = signer.signNote(
@@ -337,7 +323,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
             );
         });
 
-        // eslint-disable-next-line max-len
         it('should fail to perform confidentialApprove() if a malformed signature is provided', async () => {
             const {
                 depositInputNotes,
@@ -408,10 +393,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
                 publicOwner,
             );
             const transferData = transferProof.encodeABI(zkAssetOwnable.address);
-            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, withdrawalPublicValue, {
-                from: accounts[0],
-            });
-
             await confidentialApprove([0, 1], notes, ownerAccounts);
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
@@ -419,53 +400,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callConfidentialTransferFrom(bogusProof, transferProof.eth.output),
                 'expected proof to be supported',
-            );
-        });
-
-        // Think more about this - was previously failing due to an incorrect balancing relationship
-        // Not sure that publicApprove() is actually required for the second transfer, as tokens are not being transferred *from* anywhere
-        it.skip('should fail to delegate a contract to update a note registry if publicApprove has not been called', async () => {
-            const {
-                depositInputNotes,
-                depositOutputNotes,
-                depositInputOwnerAccounts,
-                transferInputNotes,
-                transferOutputNotes,
-                depositPublicValue,
-                withdrawalPublicValue,
-                notes,
-                ownerAccounts,
-            } = await helpers.getDefaultDepositAndTransferNotes();
-
-            const depositProof = new JoinSplitProof(
-                depositInputNotes,
-                depositOutputNotes,
-                sender,
-                depositPublicValue,
-                publicOwner,
-            );
-            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
-            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
-                from: accounts[0],
-            });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
-
-            const transferProof = new JoinSplitProof(
-                transferInputNotes,
-                transferOutputNotes,
-                sender,
-                withdrawalPublicValue,
-                publicOwner,
-            );
-            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
-
-            await confidentialApprove([0, 1], notes, ownerAccounts);
-            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
-
-            await truffleAssert.reverts(
-                zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output),
-                'public owner has not validated a transfer of tokens',
             );
         });
 
@@ -501,10 +435,6 @@ contract.only('ZkAssetOwnable', (accounts) => {
                 publicOwner,
             );
             const transferData = transferProof.encodeABI(zkAssetOwnable.address);
-
-            await ace.publicApprove(zkAssetOwnable.address, transferProof.hash, withdrawalPublicValue, {
-                from: accounts[0],
-            });
 
             // No confidentialApprove() call
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);

@@ -33,7 +33,7 @@ const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
 };
 
-contract.only('ZkAsset', (accounts) => {
+contract('ZkAsset', (accounts) => {
     let ace;
     let erc20;
 
@@ -158,7 +158,6 @@ contract.only('ZkAsset', (accounts) => {
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
 
-            await ace.publicApprove(zkAsset.address, withdrawalProof.hash, withdrawalPublicValue, { from: accounts[0] });
             const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
         });
@@ -228,7 +227,6 @@ contract.only('ZkAsset', (accounts) => {
             const data = depositProof.encodeABI(zkAsset.address);
             const signatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
-            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             const malformedProofData = `0x0123${data.slice(6)}`;
             // no error message because it throws in assembly
             await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData, signatures));

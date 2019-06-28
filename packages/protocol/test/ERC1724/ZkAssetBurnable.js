@@ -1,5 +1,4 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-// ### External Dependencies
 const { BurnProof, JoinSplitProof, note } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const devUtils = require('@aztec/dev-utils');
@@ -46,7 +45,7 @@ const getDefaultDepositAndBurnNotes = async () => {
     };
 };
 
-contract.only('ZkAssetBurnable', (accounts) => {
+contract('ZkAssetBurnable', (accounts) => {
     const depositSender = accounts[0];
 
     describe('Success States', () => {
@@ -206,7 +205,7 @@ contract.only('ZkAssetBurnable', (accounts) => {
             );
             const depositData = depositProof.encodeABI(zkAssetBurnable.address);
             const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, -depositPublicValue, { from: accounts[0] });
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
 
             const burnSender = zkAssetBurnable.address;
@@ -254,7 +253,7 @@ contract.only('ZkAssetBurnable', (accounts) => {
             );
             const depositData = depositProof.encodeABI(zkAssetBurnable.address);
             const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, -depositPublicValue, { from: accounts[0] });
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
 
             const burnSender = zkAssetBurnable.address;
@@ -304,7 +303,7 @@ contract.only('ZkAssetBurnable', (accounts) => {
             );
             const depositData = depositProof.encodeABI(zkAssetBurnable.address);
             const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, -depositPublicValue, { from: accounts[0] });
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
 
             const burnSender = zkAssetBurnable.address;
