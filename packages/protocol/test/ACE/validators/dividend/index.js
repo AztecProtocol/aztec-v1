@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, it:true */
-const { DividendProof, note } = require('aztec.js');
+const { DividendProof, note, keccak } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -14,6 +14,7 @@ const DividendInterface = artifacts.require('./DividendInterface');
 Dividend.abi = DividendInterface.abi;
 
 let dividendValidator;
+const Keccak = keccak;
 const { publicKey } = secp256k1.generateAccount();
 
 const getNotes = async (notionalNoteValue, residualNoteValue, targetNoteValue) => {
@@ -285,6 +286,7 @@ contract('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             // First element should have been the sender
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.za, proof.zb, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -298,6 +300,7 @@ contract('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             // Second element should have been za
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.zb, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -311,6 +314,7 @@ contract('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             // Third element should have been zb
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.za, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -324,6 +328,7 @@ contract('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             // Fourth element should have been the notes
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.za, proof.zb, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -337,6 +342,7 @@ contract('Dividend Validator', (accounts) => {
             const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             // Fifth element should have been the blinding factors
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.za, proof.zb, proof.notes]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
