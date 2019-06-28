@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-const { JoinSplitProof, note, signer } = require('aztec.js');
+const { JoinSplitProof, signer } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const {
     constants,
@@ -11,6 +11,8 @@ const BN = require('bn.js');
 const crypto = require('crypto');
 const truffleAssert = require('truffle-assertions');
 const { keccak256, padLeft } = require('web3-utils');
+
+const helpers = require('../helpers/ERC1724');
 
 const ACE = artifacts.require('./ACE');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
@@ -31,46 +33,7 @@ const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
 };
 
-const setupSingleProofTest = async (noteValues) => {
-    const numNotes = noteValues.length;
-    const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-    const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-
-    const inputNotes = [];
-    const outputNotes = notes.slice(0, 2);
-    const inputNoteOwnerAccounts = [];
-
-    return {
-        inputNotes,
-        inputNoteOwnerAccounts,
-        outputNotes,
-    };
-};
-
-const setupTwoProofTest = async (noteValues) => {
-    const numNotes = noteValues.length;
-    const aztecAccounts = [...new Array(numNotes)].map(() => secp256k1.generateAccount());
-    const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
-
-    const depositInputNotes = [];
-    const depositOutputNotes = notes.slice(0, 2);
-    const depositInputOwnerAccounts = [];
-
-    const withdrawalInputNotes = depositOutputNotes;
-    const withdrawalOutputNotes = notes.slice(2, 4);
-    const withdrawalInputNoteOwnerAccounts = aztecAccounts.slice(0, 2);
-
-    return {
-        depositInputNotes,
-        depositOutputNotes,
-        depositInputOwnerAccounts,
-        withdrawalInputNotes,
-        withdrawalOutputNotes,
-        withdrawalInputNoteOwnerAccounts,
-    };
-};
-
-contract('ZkAsset', (accounts) => {
+contract.only('ZkAsset', (accounts) => {
     let ace;
     let erc20;
 
@@ -134,21 +97,23 @@ contract('ZkAsset', (accounts) => {
 
         it('should update a note registry with output notes', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const noteValues = [0, 10];
-            const { inputNotes, inputNoteOwnerAccounts, outputNotes } = await setupSingleProofTest(noteValues);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const publicValue = depositPublicValue * -1;
 
-            const transferAmount = 10;
-            const publicValue = transferAmount * -1;
-
-            const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(zkAsset.address);
-            const signatures = proof.constructSignatures(zkAsset.address, inputNoteOwnerAccounts);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
             const balancePreTransfer = await erc20.balanceOf(accounts[0]);
-            const transferAmountBN = new BN(transferAmount);
+            const transferAmountBN = new BN(depositPublicValue);
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
-            await ace.publicApprove(zkAsset.address, proof.hash, transferAmount, { from: accounts[0] });
+            await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: accounts[0] });
             const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
 
@@ -158,19 +123,16 @@ contract('ZkAsset', (accounts) => {
 
         it('should update a note registry by consuming input notes, with kPublic negative', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const depositPublicValue = -60;
-            const withdrawalPublicValue = 10;
-
-            const noteValues = [50, 10, 20, 30];
-
             const {
                 depositInputNotes,
                 depositOutputNotes,
                 depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-                withdrawalInputNoteOwnerAccounts,
-            } = await setupTwoProofTest(noteValues);
+                transferInputNotes,
+                transferOutputNotes,
+                transferInputOwnerAccounts,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
             const depositProof = new JoinSplitProof(
                 depositInputNotes,
@@ -186,89 +148,39 @@ contract('ZkAsset', (accounts) => {
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
             const withdrawalProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
+                transferInputNotes,
+                transferOutputNotes,
                 sender,
                 withdrawalPublicValue,
                 publicOwner,
             );
 
-            const withdrawalData = withdrawalProof.encodeABI(zkAsset.address);
-            const withdrawalSignatures = withdrawalProof.constructSignatures(zkAsset.address, withdrawalInputNoteOwnerAccounts);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, withdrawalProof.hash, withdrawalPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAsset.confidentialTransfer(withdrawalData, withdrawalSignatures);
-            expect(receipt.status).to.equal(true);
-        });
-
-        it('should update a note registry by consuming input notes, with kPublic positive', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const depositPublicValue = -130;
-            const withdrawalPublicValue = 40;
-
-            const noteValues = [70, 60, 50, 40];
-
-            const {
-                depositInputNotes,
-                depositOutputNotes,
-                depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-                withdrawalInputNoteOwnerAccounts,
-            } = await setupTwoProofTest(noteValues);
-
-            const depositProof = new JoinSplitProof(
-                depositInputNotes,
-                depositOutputNotes,
-                sender,
-                depositPublicValue,
-                publicOwner,
-            );
-            const depositData = depositProof.encodeABI(zkAsset.address);
-            const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
-
-            await ace.publicApprove(zkAsset.address, depositProof.hash, 130, { from: accounts[0] });
-            await zkAsset.confidentialTransfer(depositData, depositSignatures);
-
-            const withdrawalProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-                sender,
-                withdrawalPublicValue,
-                publicOwner,
-            );
-            const withdrawalData = withdrawalProof.encodeABI(zkAsset.address);
-            const withdrawalSignatures = withdrawalProof.constructSignatures(zkAsset.address, withdrawalInputNoteOwnerAccounts);
-
-            await ace.publicApprove(zkAsset.address, withdrawalProof.hash, 40, { from: accounts[0] });
-
-            const balancePreWithdrawal = await erc20.balanceOf(accounts[0]);
-            const expectedBalancePostWithdrawal = balancePreWithdrawal.add(new BN(withdrawalPublicValue).mul(scalingFactor));
-
-            const { receipt } = await zkAsset.confidentialTransfer(withdrawalData, withdrawalSignatures);
-
-            const balancePostWithdrawal = await erc20.balanceOf(accounts[0]);
-            expect(balancePostWithdrawal.toString()).to.equal(expectedBalancePostWithdrawal.toString());
-
+            const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
         });
 
         it('should update a note registry with kPublic = 0', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
 
+            // no deposit input notes
+            // deposit proof output notes are used as input notes to the transfer proof
+            const depositOutputNoteValues = [5, 25];
+            const transferOutputNoteValues = [17, 13];
             const depositPublicValue = -30;
-            const transferPublicValue = 0;
-
-            const noteValues = [5, 25, 17, 13];
+            const withdrawalPublicValue = 0;
 
             const {
                 depositInputNotes,
                 depositOutputNotes,
                 depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-                withdrawalInputNoteOwnerAccounts,
-            } = await setupTwoProofTest(noteValues);
+                transferInputNotes,
+                transferOutputNotes,
+                transferInputOwnerAccounts,
+            } = await helpers.getDepositAndTransferNotes(depositOutputNoteValues, transferOutputNoteValues);
 
             const depositProof = new JoinSplitProof(
                 depositInputNotes,
@@ -283,14 +195,14 @@ contract('ZkAsset', (accounts) => {
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
             const transferProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
+                transferInputNotes,
+                transferOutputNotes,
                 sender,
-                transferPublicValue,
+                withdrawalPublicValue,
                 publicOwner,
             );
             const transferData = transferProof.encodeABI(joinSplitValidator.address);
-            const transferSignatures = transferProof.constructSignatures(zkAsset.address, withdrawalInputNoteOwnerAccounts);
+            const transferSignatures = transferProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
             const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
         });
@@ -299,15 +211,22 @@ contract('ZkAsset', (accounts) => {
     describe('Failure States', async () => {
         it('should fail if the ace fails to validate the proof', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const noteValues = [0, 10];
-            const depositPublicValue = -10;
-
-            const { inputNotes, inputNoteOwnerAccounts, outputNotes } = await setupSingleProofTest(noteValues);
-
-            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, depositPublicValue, publicOwner);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
 
             const data = depositProof.encodeABI(zkAsset.address);
-            const signatures = depositProof.constructSignatures(zkAsset.address, inputNoteOwnerAccounts);
+            const signatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             const malformedProofData = `0x0123${data.slice(6)}`;
@@ -317,17 +236,15 @@ contract('ZkAsset', (accounts) => {
 
         it('should fail if signatures are zero', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const noteValues = [10, 20, 5, 25];
-            const depositPublicValue = -30;
-            const withdrawalPublicValue = 0;
-
             const {
                 depositInputNotes,
                 depositOutputNotes,
                 depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-            } = await setupTwoProofTest(noteValues);
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
             const depositProof = new JoinSplitProof(
                 depositInputNotes,
@@ -343,36 +260,33 @@ contract('ZkAsset', (accounts) => {
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
             const withdrawalProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
+                transferInputNotes,
+                transferOutputNotes,
                 sender,
                 withdrawalPublicValue,
                 publicOwner,
             );
 
-            const withdrawalData = withdrawalProof.encodeABI(zkAsset.address);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
 
             const length = 64;
             const zeroSignature = new Array(length).fill(0).join('');
             const zeroSignatures = `0x${zeroSignature + zeroSignature + zeroSignature}`;
 
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(withdrawalData, zeroSignatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, zeroSignatures));
         });
 
-        it('should fail if fake signatures are provided', async () => {
+        it('should fail if malformed signatures are provided', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const noteValues = [10, 20, 5, 25];
-
-            const depositPublicValue = -30;
-            const withdrawalPublicValue = 0;
-
             const {
                 depositInputNotes,
                 depositOutputNotes,
                 depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-            } = await setupTwoProofTest(noteValues);
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
             const depositProof = new JoinSplitProof(
                 depositInputNotes,
@@ -389,34 +303,32 @@ contract('ZkAsset', (accounts) => {
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
             const withdrawalProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
+                transferInputNotes,
+                transferOutputNotes,
                 sender,
                 withdrawalPublicValue,
                 publicOwner,
             );
 
-            const withdrawalData = withdrawalProof.encodeABI(zkAsset.address);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
 
-            const fakeSignature = padLeft(crypto.randomBytes(32).toString('hex'));
-            const fakeSignatures = `0x${fakeSignature + fakeSignature + fakeSignature}`;
+            const malformedSignature = padLeft(crypto.randomBytes(32).toString('hex'));
+            const malformedSignatures = `0x${malformedSignature + malformedSignature + malformedSignature}`;
 
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(withdrawalData, fakeSignatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedSignatures));
         });
 
         it('should fail if different note owner signs the transaction', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const noteValues = [10, 20, 5, 25];
-            const depositPublicValue = -30;
-            const withdrawalPublicValue = 0;
-
             const {
                 depositInputNotes,
                 depositOutputNotes,
                 depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-            } = await setupTwoProofTest(noteValues);
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
             const depositProof = new JoinSplitProof(
                 depositInputNotes,
@@ -432,35 +344,33 @@ contract('ZkAsset', (accounts) => {
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const fakeInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
+            const malformedInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
 
             const withdrawalProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
+                transferInputNotes,
+                transferOutputNotes,
                 sender,
                 withdrawalPublicValue,
                 publicOwner,
             );
 
-            const withdrawalData = withdrawalProof.encodeABI(zkAsset.address);
-            const fakeWithdrawalSignatures = withdrawalProof.constructSignatures(zkAsset.address, fakeInputNoteOwners);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(withdrawalData, fakeWithdrawalSignatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
 
-        it('should fail if validator address is fake', async () => {
+        it('should fail if validator address is malformed', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const noteValues = [10, 20, 5, 25];
-            const depositPublicValue = -30;
-            const withdrawalPublicValue = 0;
-
             const {
                 depositInputNotes,
                 depositOutputNotes,
                 depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-            } = await setupTwoProofTest(noteValues);
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
             const depositProof = new JoinSplitProof(
                 depositInputNotes,
@@ -477,35 +387,33 @@ contract('ZkAsset', (accounts) => {
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const fakeInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
+            const malformedInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
 
             const withdrawalProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
+                transferInputNotes,
+                transferOutputNotes,
                 sender,
                 withdrawalPublicValue,
                 publicOwner,
             );
 
-            const withdrawalData = withdrawalProof.encodeABI(zkAsset.address);
-            const fakeWithdrawalSignatures = withdrawalProof.constructSignatures(zkAsset.address, fakeInputNoteOwners);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(withdrawalData, fakeWithdrawalSignatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
 
         it('should fail if validator address is the joinSplit address', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const noteValues = [10, 20, 5, 25];
-            const depositPublicValue = -30;
-            const withdrawalPublicValue = 0;
-
             const {
                 depositInputNotes,
                 depositOutputNotes,
                 depositInputOwnerAccounts,
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
-            } = await setupTwoProofTest(noteValues);
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
             const depositProof = new JoinSplitProof(
                 depositInputNotes,
@@ -521,20 +429,20 @@ contract('ZkAsset', (accounts) => {
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const fakeInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
+            const malformedInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
 
             const withdrawalProof = new JoinSplitProof(
-                withdrawalInputNotes,
-                withdrawalOutputNotes,
+                transferInputNotes,
+                transferOutputNotes,
                 sender,
                 withdrawalPublicValue,
                 publicOwner,
             );
 
-            const withdrawalData = withdrawalProof.encodeABI(zkAsset.address);
-            const fakeWithdrawalSignatures = withdrawalProof.constructSignatures(zkAsset.address, fakeInputNoteOwners);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(withdrawalData, fakeWithdrawalSignatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
     });
 });

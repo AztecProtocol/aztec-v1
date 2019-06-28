@@ -1,5 +1,5 @@
 const bn128 = require('@aztec/bn128');
-const { proofs } = require('@aztec/dev-utils');
+const { proofs, constants } = require('@aztec/dev-utils');
 const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
@@ -131,7 +131,7 @@ class JoinSplitProof extends Proof {
     /**
      * Construct the EIP712 signatures, giving permission for notes to be spent
      * @param {string} validatorAddress Ethereum address of the join-split validator contract
-     * @param {string[]} aztecAccounts mapping between owners and private keys
+     * @param {string[]} inputNoteOwners Ethereum accounts of input note owners
      * @returns {string} array of signatures
      */
     constructSignatures(validatorAddress, inputNoteOwners) {

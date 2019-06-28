@@ -40,7 +40,7 @@ const getCustomMintNotes = async (newMintCounterValue, mintedNoteValues) => {
     return { zeroMintCounterNote, newMintCounterNote, mintedNotes };
 };
 
-contract('ZkAssetMintable', (accounts) => {
+contract.only('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let joinSplitFluidValidator;
@@ -58,9 +58,6 @@ contract('ZkAssetMintable', (accounts) => {
             await ace.setCommonReferenceString(bn128.CRS);
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
             await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
-
-            const canAdjustSupply = true;
-            const canConvert = true;
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
