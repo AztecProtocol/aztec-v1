@@ -1,4 +1,3 @@
-/* global expect */
 import { stub } from 'sinon';
 import dataToKey from './dataToKey';
 
