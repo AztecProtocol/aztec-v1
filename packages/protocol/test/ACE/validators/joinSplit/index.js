@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, it:true */
-const { JoinSplitProof, note } = require('aztec.js');
+const { JoinSplitProof, note, keccak } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -12,6 +12,7 @@ const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
+const Keccak = keccak;
 const aztecAccount = secp256k1.generateAccount();
 let joinSplitValidator;
 
@@ -240,6 +241,7 @@ contract('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             // First element should have been the sender
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.publicValue, proof.m, proof.publicOwner, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI(joinSplitValidator.address);
@@ -253,6 +255,7 @@ contract('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             // Second element should have been the public value
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.m, proof.publicOwner, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI(joinSplitValidator.address);
@@ -266,6 +269,7 @@ contract('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             // Third element should have been m
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([
                 proof.sender,
                 proof.publicValue,
@@ -285,6 +289,7 @@ contract('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             // Fourth element should have been the public owner
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI(joinSplitValidator.address);
@@ -298,6 +303,7 @@ contract('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             // Fifth element should have been the notes
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.publicOwner, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI(joinSplitValidator.address);
@@ -311,6 +317,7 @@ contract('Join-Split Validator', (accounts) => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             // Sixth element should have been the blinding factors
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.publicOwner, proof.notes]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI(joinSplitValidator.address);

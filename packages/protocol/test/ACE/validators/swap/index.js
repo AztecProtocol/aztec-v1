@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, it:true */
-const { note, SwapProof } = require('aztec.js');
+const { note, SwapProof, keccak } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -12,6 +12,7 @@ const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
 Swap.abi = SwapInterface.abi;
 
+const Keccak = keccak;
 const maker = secp256k1.generateAccount();
 let swapValidator;
 const taker = secp256k1.generateAccount();
@@ -181,6 +182,7 @@ contract('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             // First element should have been the sender
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -191,6 +193,7 @@ contract('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             // Second element should have been the notes
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -201,6 +204,7 @@ contract('Swap Validator', (accounts) => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             // Third element should have been the blinding factors
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.notes]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
