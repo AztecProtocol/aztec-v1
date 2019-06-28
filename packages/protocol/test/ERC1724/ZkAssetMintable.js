@@ -1,5 +1,4 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-// ### External Dependencies
 const { MintProof, JoinSplitProof, note } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const devUtils = require('@aztec/dev-utils');
@@ -40,7 +39,7 @@ const getCustomMintNotes = async (newMintCounterValue, mintedNoteValues) => {
     return { zeroMintCounterNote, newMintCounterNote, mintedNotes };
 };
 
-contract.only('ZkAssetMintable', (accounts) => {
+contract('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let joinSplitFluidValidator;
