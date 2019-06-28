@@ -10,7 +10,7 @@ export default async function fetchNoteFromServer({
     const variables = {
         numberOfNotes,
         lastId,
-    };;
+    };
     if (account) {
         query = `
             query($numberOfNotes: Int!, $lastId: ID, $account: ID) {

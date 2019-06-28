@@ -43,7 +43,6 @@ export const getNote = (_, args) => {
     return findEntityByKey(notes, conditions);
 };
 
-export const getNoteById = noteId =>
-    getNote(null, { id: noteId });
+export const getNoteById = noteId => getNote(null, { id: noteId });
 
 export default notes;

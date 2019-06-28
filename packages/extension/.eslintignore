@@ -1,0 +1,18 @@
+# ignored directories
+node_modules/*
+/client/build/*
+/contracts/*
+
+# ignored extensions
+**/*.json
+**/*.css
+**/*.scss
+**/*.md
+**/*.ico
+**/*.svg
+**/*.lock
+**/*.log
+**/*.yml
+
+# ignored file
+/src/utils/hot-reload.js

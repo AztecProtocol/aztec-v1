@@ -3,7 +3,7 @@
 export default function get(keys, {
     sync = false,
 } = {}) {
-    return new Promise((resolve)=> {
+    return new Promise((resolve) => {
         chrome.storage[sync ? 'sync' : 'local']
             .get(keys, (values) => {
                 const result = values && typeof keys === 'string'
@@ -13,4 +13,4 @@ export default function get(keys, {
                 resolve(result);
             });
     });
-};
+}

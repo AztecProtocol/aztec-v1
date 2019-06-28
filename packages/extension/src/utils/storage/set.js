@@ -10,4 +10,4 @@ export default function set(data, {
                 resolve(data);
             });
     });
-};
+}
