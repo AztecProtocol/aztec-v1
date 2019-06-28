@@ -1,29 +1,27 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-// ### External Dependencies
-const BN = require('bn.js');
-const crypto = require('crypto');
-
-// ### Internal Dependencies
-// eslint-disable-next-line object-curly-newline
-const { encoder, note, proof, signer } = require('aztec.js');
+const { JoinSplitProof, signer } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
-const { constants, proofs } = require('@aztec/dev-utils');
+const {
+    constants,
+    proofs: { JOIN_SPLIT_PROOF },
+} = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
+const BN = require('bn.js');
+const crypto = require('crypto');
 const truffleAssert = require('truffle-assertions');
 const { keccak256, padLeft } = require('web3-utils');
 
-const { outputCoder } = encoder;
-const { JOIN_SPLIT_PROOF } = proofs;
+const helpers = require('../helpers/ERC1724');
 
-// ### Artifacts
 const ACE = artifacts.require('./ACE');
-const JoinSplit = artifacts.require('./JoinSplit');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
-const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
 const ZkAsset = artifacts.require('./ZkAsset');
+const JoinSplitValidator = artifacts.require('./JoinSplit');
+const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
+JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-JoinSplit.abi = JoinSplitInterface.abi;
+let joinSplitValidator;
 
 const computeDomainHash = (validatorAddress) => {
     const types = { EIP712Domain: constants.eip712.EIP712_DOMAIN };
@@ -31,23 +29,29 @@ const computeDomainHash = (validatorAddress) => {
     return keccak256(`0x${typedData.encodeMessageData(types, 'EIP712Domain', domain)}`);
 };
 
-contract.skip('ZkAsset', (accounts) => {
+const randomAddress = () => {
+    return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
+};
+
+contract('ZkAsset', (accounts) => {
     let ace;
-    let aztecJoinSplit;
+    let erc20;
+
     const canAdjustSupply = false;
     const canConvert = true;
-    let erc20;
+
+    const sender = accounts[0];
+    const publicOwner = accounts[0];
     const scalingFactor = new BN(10);
     const tokensTransferred = new BN(100000);
 
     beforeEach(async () => {
         ace = await ACE.new({ from: accounts[0] });
+        erc20 = await ERC20Mintable.new({ from: accounts[0] });
+        joinSplitValidator = await JoinSplitValidator.new({ from: sender });
 
         await ace.setCommonReferenceString(bn128.CRS);
-        aztecJoinSplit = await JoinSplit.new();
-        await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-
-        erc20 = await ERC20Mintable.new();
+        await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
         await Promise.all(
             accounts.map((account) => {
@@ -93,32 +97,24 @@ contract.skip('ZkAsset', (accounts) => {
 
         it('should update a note registry with output notes', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const noteValues = [0, 10];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const publicValue = depositPublicValue * -1;
 
-            const transferAmount = 10;
-            const transferAmountBN = new BN(transferAmount);
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
             const balancePreTransfer = await erc20.balanceOf(accounts[0]);
+            const transferAmountBN = new BN(depositPublicValue);
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: transferAmount * -1,
-                validatorAddress: zkAsset.address,
-            });
-
-            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
-
-            await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
-
-            const { receipt } = await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: accounts[0] });
+            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
 
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
@@ -127,138 +123,86 @@ contract.skip('ZkAsset', (accounts) => {
 
         it('should update a note registry by consuming input notes, with kPublic negative', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [0, 10, 20, 30];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                transferInputOwnerAccounts,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: -10,
-                validatorAddress: zkAsset.address,
-            });
-
-            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
-
-            const tokenWithdrawalProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
-                publicOwner: accounts[1],
-                kPublic: -40,
-                validatorAddress: zkAsset.address,
-            });
-
-            const tokenWithdrawalProofOutput = encoder.outputCoder.getProofOutput(tokenWithdrawalProof.expectedOutput, 0);
-            const tokenWithdrawalProofHash = encoder.outputCoder.hashProofOutput(tokenWithdrawalProofOutput);
-
-            await ace.publicApprove(zkAsset.address, depositProofHash, 10, { from: accounts[0] });
-
-            await ace.publicApprove(zkAsset.address, tokenWithdrawalProofHash, 40, { from: accounts[1] });
-
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
-            const { receipt } = await zkAsset.confidentialTransfer(
-                tokenWithdrawalProof.proofData,
-                tokenWithdrawalProof.signatures,
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
             );
-            expect(receipt.status).to.equal(true);
-        });
+            const depositData = depositProof.encodeABI(zkAsset.address);
+            const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
-        it('should update a note registry by consuming input notes, with kPublic positive', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [70, 60, 50, 40];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[2],
-                kPublic: -130,
-                validatorAddress: zkAsset.address,
-            });
-
-            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
-
-            const withdrawalAmount = 40;
-            const withdrawalAmountBN = new BN(withdrawalAmount);
-
-            const withdrawalAndTransferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
-                publicOwner: accounts[2],
-                kPublic: withdrawalAmount,
-                validatorAddress: zkAsset.address,
-            });
-
-            const withdrawalAndTransferProofOutput = encoder.outputCoder.getProofOutput(
-                withdrawalAndTransferProof.expectedOutput,
-                0,
+            const withdrawalProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
             );
-            const withdrawalAndTransferProofHash = encoder.outputCoder.hashProofOutput(withdrawalAndTransferProofOutput);
 
-            await ace.publicApprove(zkAsset.address, depositProofHash, 130, { from: accounts[2] });
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
 
-            await ace.publicApprove(zkAsset.address, withdrawalAndTransferProofHash, 40, { from: accounts[2] });
-
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
-            const balancePreWithdrawal = await erc20.balanceOf(accounts[2]);
-            const expectedBalancePostWithdrawal = balancePreWithdrawal.add(withdrawalAmountBN.mul(scalingFactor));
-            const { receipt } = await zkAsset.confidentialTransfer(
-                withdrawalAndTransferProof.proofData,
-                withdrawalAndTransferProof.signatures,
-            );
-            const balancePostWithdrawal = await erc20.balanceOf(accounts[2]);
-            expect(balancePostWithdrawal.toString()).to.equal(expectedBalancePostWithdrawal.toString());
-
+            const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
         });
 
         it('should update a note registry with kPublic = 0', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [5, 17, 13, 25];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: [notes[0], notes[3]],
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[3],
-                kPublic: -30,
-                validatorAddress: zkAsset.address,
-            });
+            // no deposit input notes
+            // deposit proof output notes are used as input notes to the transfer proof
+            const depositOutputNoteValues = [5, 25];
+            const transferOutputNoteValues = [17, 13];
+            const depositPublicValue = -30;
+            const withdrawalPublicValue = 0;
 
-            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                transferInputOwnerAccounts,
+            } = await helpers.getDepositAndTransferNotes(depositOutputNoteValues, transferOutputNoteValues);
 
-            const transferProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [notes[0], notes[3]],
-                outputNotes: [notes[1], notes[2]],
-                senderAddress: accounts[0],
-                inputNoteOwners: [aztecAccounts[0], aztecAccounts[3]],
-                publicOwner: accounts[3],
-                kPublic: 0, // perfectly balanced...
-                validatorAddress: zkAsset.address,
-            });
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAsset.address);
+            const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            await ace.publicApprove(zkAsset.address, depositProofHash, 30, { from: accounts[3] });
-
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-            const { receipt } = await zkAsset.confidentialTransfer(transferProof.proofData, transferProof.signatures);
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(joinSplitValidator.address);
+            const transferSignatures = transferProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
+            const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
         });
     });
@@ -266,255 +210,237 @@ contract.skip('ZkAsset', (accounts) => {
     describe('Failure States', async () => {
         it('should fail if the ace fails to validate the proof', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(2)].map(() => secp256k1.generateAccount());
-            const noteValues = [0, 10];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
 
-            const transferAmount = 10;
+            const data = depositProof.encodeABI(zkAsset.address);
+            const signatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: transferAmount * -1,
-                validatorAddress: zkAsset.address,
-            });
-
-            const depositProofOutput = encoder.outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = encoder.outputCoder.hashProofOutput(depositProofOutput);
-
-            await ace.publicApprove(zkAsset.address, depositProofHash, transferAmount, { from: accounts[0] });
-            const malformedProofData = `0x0123${depositProof.proofData.slice(6)}`;
+            const malformedProofData = `0x0123${data.slice(6)}`;
             // no error message because it throws in assembly
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData, depositProof.signatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData, signatures));
         });
 
         it('should fail if signatures are zero', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [10, 20, 5, 25];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
-            const firstTransferAmount = 30;
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAsset.address);
+            const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: firstTransferAmount * -1,
-                validatorAddress: zkAsset.address,
-            });
+            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const withdrawalProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
 
-            const secondTransferAmount = 0;
-            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
-                publicOwner: accounts[1],
-                kPublic: secondTransferAmount,
-                validatorAddress: zkAsset.address,
-            });
-
-            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
-            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
-
-            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
-            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
-
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
 
             const length = 64;
             const zeroSignature = new Array(length).fill(0).join('');
             const zeroSignatures = `0x${zeroSignature + zeroSignature + zeroSignature}`;
 
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, zeroSignatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, zeroSignatures));
         });
 
-        it('should fail if fake signatures are provided', async () => {
+        it('should fail if malformed signatures are provided', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [10, 20, 5, 25];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
-            const firstTransferAmount = 30;
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: firstTransferAmount * -1,
-                validatorAddress: zkAsset.address,
-            });
+            const depositData = depositProof.encodeABI(zkAsset.address);
+            const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const secondTransferAmount = 0;
-            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(0, 2),
-                publicOwner: accounts[1],
-                kPublic: secondTransferAmount,
-                validatorAddress: zkAsset.address,
-            });
+            const withdrawalProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
 
-            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
-            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
 
-            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
-            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
+            const malformedSignature = padLeft(crypto.randomBytes(32).toString('hex'));
+            const malformedSignatures = `0x${malformedSignature + malformedSignature + malformedSignature}`;
 
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
-            const fakeSignature = padLeft(crypto.randomBytes(32).toString('hex'));
-            const fakeSignatures = `0x${fakeSignature + fakeSignature + fakeSignature}`;
-
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, fakeSignatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedSignatures));
         });
 
         it('should fail if different note owner signs the transaction', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [10, 20, 5, 25];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
-            const firstTransferAmount = 30;
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: firstTransferAmount * -1,
-                validatorAddress: zkAsset.address,
-            });
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositData = depositProof.encodeABI(zkAsset.address);
+            const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
-            const fakeInputNoteOwners = aztecAccounts.slice(2, 4);
+            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const secondTransferAmount = 0;
-            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: fakeInputNoteOwners,
-                publicOwner: accounts[1],
-                kPublic: secondTransferAmount,
-                validatorAddress: zkAsset.address,
-            });
+            const malformedInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
 
-            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
-            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
+            const withdrawalProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
 
-            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
-            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
 
-        it('should fail if validator address is fake', async () => {
+        it('should fail if validator address is malformed', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [10, 20, 5, 25];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
-            const firstTransferAmount = 30;
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: firstTransferAmount * -1,
-                validatorAddress: zkAsset.address,
-            });
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositData = depositProof.encodeABI(zkAsset.address);
+            const randomValidatorAddress = randomAddress();
+            const depositSignatures = depositProof.constructSignatures(randomValidatorAddress, depositInputOwnerAccounts);
 
-            const fakeInputNoteOwners = aztecAccounts.slice(2, 4);
+            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const randomAddress = proof.proofUtils.randomAddress();
-            const secondTransferAmount = 0;
-            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: fakeInputNoteOwners,
-                publicOwner: accounts[1],
-                kPublic: secondTransferAmount,
-                validatorAddress: randomAddress,
-            });
+            const malformedInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
 
-            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
-            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
+            const withdrawalProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
 
-            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
-            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
 
         it('should fail if validator address is the joinSplit address', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [10, 20, 5, 25];
-            const notes = await Promise.all([...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, noteValues[i]))]);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
 
-            const firstTransferAmount = 30;
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: notes.slice(0, 2),
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner: accounts[0],
-                kPublic: firstTransferAmount * -1,
-                validatorAddress: zkAsset.address,
-            });
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+            const depositData = depositProof.encodeABI(zkAsset.address);
+            const depositSignatures = depositProof.constructSignatures(joinSplitValidator.address, depositInputOwnerAccounts);
 
-            const fakeInputNoteOwners = aztecAccounts.slice(2, 4);
+            await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(depositData, depositSignatures);
 
-            const secondTransferAmount = 0;
-            const noteTransfer = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: notes.slice(0, 2),
-                outputNotes: notes.slice(2, 4),
-                senderAddress: accounts[0],
-                inputNoteOwners: fakeInputNoteOwners,
-                publicOwner: accounts[1],
-                kPublic: secondTransferAmount,
-                validatorAddress: aztecJoinSplit.address,
-            });
+            const malformedInputNoteOwners = [secp256k1.generateAccount(), secp256k1.generateAccount()];
 
-            const noteTransferProofOutput = outputCoder.getProofOutput(noteTransfer.expectedOutput, 0);
-            const noteTransferProofHash = outputCoder.hashProofOutput(noteTransferProofOutput);
+            const withdrawalProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
 
-            await ace.publicApprove(zkAsset.address, depositProofHash, firstTransferAmount, { from: accounts[0] });
-            await ace.publicApprove(zkAsset.address, noteTransferProofHash, secondTransferAmount, { from: accounts[1] });
+            const transferData = withdrawalProof.encodeABI(zkAsset.address);
+            const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await zkAsset.confidentialTransfer(depositProof.proofData, depositProof.signatures);
-
-            await truffleAssert.reverts(zkAsset.confidentialTransfer(noteTransfer.proofData, noteTransfer.signatures));
+            await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
     });
 });

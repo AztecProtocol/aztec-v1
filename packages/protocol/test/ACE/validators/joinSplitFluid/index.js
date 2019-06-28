@@ -1,6 +1,6 @@
 /* global artifacts, contract, expect, it: true */
 
-const { BurnProof, MintProof, note, Proof } = require('aztec.js');
+const { BurnProof, MintProof, note, Proof, keccak } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -14,6 +14,7 @@ const JoinSplitFluidValidator = artifacts.require('./JoinSplitFluid');
 const JoinSplitFluidValidatorInterface = artifacts.require('./JoinSplitFluidInterface');
 JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
 
+const Keccak = keccak;
 const { publicKey } = secp256k1.generateAccount();
 
 /**
@@ -234,6 +235,7 @@ contract('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             // First element should have been the sender
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.publicValue, proof.m, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -247,6 +249,7 @@ contract('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             // Second element should have been the public value
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.m, proof.publicOwner, proof.notes, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -260,6 +263,7 @@ contract('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             // Third element should have been m
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([
                 proof.sender,
                 proof.publicValue,
@@ -279,6 +283,7 @@ contract('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             // Fifth element should have been the notes
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.publicOwner, proof.blindingFactors]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
@@ -292,6 +297,7 @@ contract('Mint Validator', (accounts) => {
             const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
             // Sixth element should have been the blinding factors
+            proof.challengeHash = new Keccak();
             proof.constructChallengeRecurse([proof.sender, proof.publicValue, proof.m, proof.publicOwner, proof.notes]);
             proof.challenge = proof.challengeHash.redKeccak();
             const data = proof.encodeABI();
