@@ -12,7 +12,7 @@ describe('Public range proof', () => {
     const utilityNoteValue = 40;
     const { publicKey } = secp256k1.generateAccount();
     const sender = randomHex(20);
-    const publicInteger = 10;
+    const publicComparison = 10;
 
     const isGreaterOrEqual = true;
 
@@ -22,7 +22,7 @@ describe('Public range proof', () => {
     });
 
     it('should construct a public range proof with well-formed outputs', async () => {
-        const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+        const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
         expect(proof.data.length).to.equal(2);
         expect(proof.challengeHex.length).to.equal(66);
         expect(proof.data[0].length).to.equal(6);

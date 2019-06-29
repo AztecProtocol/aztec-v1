@@ -18,11 +18,11 @@ const getNotes = async (originalNoteValue, utilityNoteValue) => {
 const getDefaultNotes = async () => {
     const originalNoteValue = 50;
     const utilityNoteValue = 40;
-    const publicInteger = 10;
+    const publicComparison = 10;
     const isGreaterOrEqual = true;
 
     const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-    return { originalNote, utilityNote, publicInteger, isGreaterOrEqual };
+    return { originalNote, utilityNote, publicComparison, isGreaterOrEqual };
 };
 
 contract('Public range ABI Encoder', (accounts) => {
@@ -33,9 +33,9 @@ contract('Public range ABI Encoder', (accounts) => {
     });
 
     it('should encode output of public range proof', async () => {
-        const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultNotes();
+        const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultNotes();
 
-        const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+        const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
         const data = proof.encodeABI();
         const result = await publicRangeAbiEncoderTest.validatePublicRange(data, sender, bn128.CRS);
         const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
