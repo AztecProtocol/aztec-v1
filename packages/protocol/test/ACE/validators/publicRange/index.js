@@ -26,18 +26,18 @@ const getDefaultGreaterThanNotes = async () => {
     const isGreaterOrEqual = true;
     const originalNoteValue = 50;
     const utilityNoteValue = 40;
-    const publicInteger = 10;
+    const publicComparison = 10;
     const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-    return { originalNote, utilityNote, publicInteger, isGreaterOrEqual };
+    return { originalNote, utilityNote, publicComparison, isGreaterOrEqual };
 };
 
 const getDefaultLessThanNotes = async () => {
     const isGreaterOrEqual = false;
     const originalNoteValue = 10;
     const utilityNoteValue = 30;
-    const publicInteger = 20;
+    const publicComparison = 20;
     const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-    return { originalNote, utilityNote, publicInteger, isGreaterOrEqual };
+    return { originalNote, utilityNote, publicComparison, isGreaterOrEqual };
 };
 
 contract('Public range validator', (accounts) => {
@@ -50,8 +50,8 @@ contract('Public range validator', (accounts) => {
     describe('greater than tests', () => {
         describe('Success states', () => {
             it('should validate public range proof when given explicit utilityNote', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 const result = await publicRangeValidator.validatePublicRange(data, sender, bn128.CRS, { from: sender });
                 expect(result).to.equal(proof.eth.outputs);
@@ -61,17 +61,17 @@ contract('Public range validator', (accounts) => {
                 const isGreaterOrEqual = true;
                 const originalNoteValue = 10;
                 const utilityNoteValue = 0;
-                const publicInteger = 10;
+                const publicComparison = 10;
                 const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 const result = await publicRangeValidator.validatePublicRange(data, sender, bn128.CRS);
                 expect(result).to.equal(proof.eth.outputs);
             });
 
             it('should validate public range proof with challenge that has group modulus added to it', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 proof.challenge = proof.challenge.add(bn128.groupModulus);
                 proof.constructOutputs(); // why do we have to do this?
                 const data = proof.encodeABI();
@@ -85,8 +85,9 @@ contract('Public range validator', (accounts) => {
                 const isGreaterOrEqual = true;
                 const originalNoteValue = 50;
                 const utilityNoteValue = 41;
-                const { originalNote, utilityNote, publicInteger } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const publicComparison = 10;
+                const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
@@ -98,9 +99,9 @@ contract('Public range validator', (accounts) => {
                 const isGreaterOrEqual = true;
                 const originalNoteValue = 9;
                 const utilityNoteValue = 0;
-                const publicInteger = 10;
+                const publicComparison = 10;
                 const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
@@ -109,8 +110,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail for random proof data', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 proof.data = [];
                 for (let i = 0; i < 2; i += 1) {
                     proof.data[i] = [];
@@ -126,8 +127,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail for fake challenge', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 proof.challenge = new BN('0');
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
@@ -137,8 +138,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if scalars are NOT mod(GROUP_MODULUS)', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const kBar = new BN(proof.data[0][0].slice(2), 16);
                 const notModRKBar = `0x${kBar.add(bn128.groupModulus).toString(16)}`;
                 proof.data[0][0] = notModRKBar;
@@ -150,8 +151,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if blinding factor resolves to point at infinity', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 proof.data[0][0] = padLeft('0x05', 64);
                 proof.data[0][1] = padLeft('0x05', 64);
                 proof.data[0][2] = `0x${bn128.H_X.toString(16)}`;
@@ -167,8 +168,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if scalars are zero', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const zeroScalar = padLeft('0x00', 64);
                 proof.data[0][0] = zeroScalar;
                 proof.data[0][1] = zeroScalar;
@@ -182,8 +183,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail for incorrect H_X, H_Y in CRS', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const malformedHx = bn128.H_X.add(new BN(1));
                 const malformedHy = bn128.H_Y.add(new BN(1));
                 const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
@@ -195,8 +196,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if provided 0 notes', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 proof.data = [];
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
@@ -206,12 +207,12 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if sender NOT integrated into challenge variable', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 // First element should have been the sender
                 proof.challengeHash = new Keccak();
                 proof.constructChallengeRecurse([
-                    proof.publicInteger,
+                    proof.publicComparison,
                     proof.publicValue,
                     proof.publicOwner,
                     proof.notes,
@@ -225,10 +226,10 @@ contract('Public range validator', (accounts) => {
                 );
             });
 
-            it('should fail if publicInteger NOT integrated into challenge variable', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
-                // Second element should have been the publicInteger
+            it('should fail if publicComparison NOT integrated into challenge variable', async () => {
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
+                // Second element should have been the publicComparison
                 proof.challengeHash = new Keccak();
                 proof.constructChallengeRecurse([
                     proof.sender,
@@ -246,13 +247,13 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if publicValue NOT integrated into challenge variable', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 // Third element should have been the publicValue
                 proof.challengeHash = new Keccak();
                 proof.constructChallengeRecurse([
                     proof.sender,
-                    proof.publicInteger,
+                    proof.publicComparison,
                     proof.publicOwner,
                     proof.notes,
                     proof.blindingFactors,
@@ -266,13 +267,13 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if publicOwner NOT integrated into challenge variable', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 // Fourth element should have been the publicOwner
                 proof.challengeHash = new Keccak();
                 proof.constructChallengeRecurse([
                     proof.sender,
-                    proof.publicInteger,
+                    proof.publicComparison,
                     proof.publicValue,
                     proof.notes,
                     proof.blindingFactors,
@@ -286,13 +287,13 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if notes NOT integrated into challenge variable', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 // Fifth element should have been the notes
                 proof.challengeHash = new Keccak();
                 proof.constructChallengeRecurse([
                     proof.sender,
-                    proof.publicInteger,
+                    proof.publicComparison,
                     proof.publicValue,
                     proof.publicOwner,
                     proof.blindingFactors,
@@ -306,13 +307,13 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if blindingFactors NOT integrated into challenge variable', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 // Sixth element should have been the blindingFactors
                 proof.challengeHash = new Keccak();
                 proof.constructChallengeRecurse([
                     proof.sender,
-                    proof.publicInteger,
+                    proof.publicComparison,
                     proof.publicValue,
                     proof.publicOwner,
                     proof.notes,
@@ -326,8 +327,8 @@ contract('Public range validator', (accounts) => {
             });
 
             it('should fail if points are NOT on the curve', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const zeroPublicRangeProof = await mockZeroPublicRangeProof();
                 proof.data = zeroPublicRangeProof.data;
                 const data = proof.encodeABI();
@@ -342,20 +343,20 @@ contract('Public range validator', (accounts) => {
     describe('Less than tests', () => {
         describe('Success states', () => {
             it('should validate a less than proof', async () => {
-                const { originalNote, utilityNote, publicInteger, isGreaterOrEqual } = await getDefaultLessThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultLessThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 const result = await publicRangeValidator.validatePublicRange(data, sender, bn128.CRS, { from: sender });
                 expect(result).to.equal(proof.eth.outputs);
             });
 
-            it('should succeed for originalValue = publicInteger, when making a less than or equal to', async () => {
+            it('should succeed for originalValue = publicComparison, when making a less than or equal to', async () => {
                 const isGreaterOrEqual = false;
                 const originalNoteValue = 20;
                 const utilityNoteValue = 40;
-                const publicInteger = 20;
+                const publicComparison = 20;
                 const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 const result = await publicRangeValidator.validatePublicRange(data, sender, bn128.CRS, { from: sender });
                 expect(result).to.equal(proof.eth.outputs);
@@ -367,9 +368,9 @@ contract('Public range validator', (accounts) => {
                 const isGreaterOrEqual = false;
                 const originalNoteValue = 20;
                 const utilityNoteValue = 0;
-                const publicInteger = 20;
+                const publicComparison = 20;
                 const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
@@ -379,8 +380,8 @@ contract('Public range validator', (accounts) => {
 
             it('should fail for a less than proof, when a greater than proof is specified', async () => {
                 const isGreaterOrEqual = true;
-                const { originalNote, utilityNote, publicInteger } = await getDefaultLessThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+                const { originalNote, utilityNote, publicComparison } = await getDefaultLessThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),

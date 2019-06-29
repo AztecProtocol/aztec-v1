@@ -15,30 +15,31 @@ class PublicRangeProof extends Proof {
     /**
      * Constructs a public range proof that a note is greater than or equal to, or less than or
      * equal to a public integer. Control of whether a > or < proof is constructed is determined
-     * by an input boolean 'isGreaterOrEqual'
+     * by an input boolean 'isGreaterOrEqual'.
      *
-     * @param {Object} originalNote the note that a user is comparing against the publicInteger
-     * @param {Object} publicInteger publicly visible integer, which the note is being compared against
+     * The balancing relation being satisfied is:
+     * originalNoteValue = publicComparison + utilityNoteValue
+     *
+     * @param {Object} originalNote the note that a user is comparing against the publicComparison
+     * @param {Object} publicComparison publicly visible integer, which the note is being compared against
      * @param {string} sender Ethereum address of the transaction sender
      * @param {bool} isGreaterOrEqual modifier controlling whether this is a greater than, or less
-     * than proof. If true, it is a proof that originalNoteValue > publicInteger. If false, it is a
-     * proof that originalNoteValue < publicInteger
+     * than proof. If true, it is a proof that originalNoteValue > publicComparison. If false, it is a
+     * proof that originalNoteValue < publicComparison
      * @param {Note} utilityNote a helper note that is needed to satisfy a cryptographic balancing relation
-     * (to be abstracted away)
      */
-    constructor(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote) {
+    constructor(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
         super(ProofType.PUBLIC_RANGE.name, [originalNote], [utilityNote], sender, publicValue, publicOwner, [utilityNote]);
 
-        helpers.checkpublicIntegerWellFormed(publicInteger);
-        this.publicInteger = new BN(publicInteger);
+        helpers.checkPublicComparisonWellFormed(publicComparison);
+        this.publicComparison = new BN(publicComparison);
         this.utilityNote = utilityNote;
         this.originalNote = originalNote;
         this.isGreaterOrEqual = isGreaterOrEqual;
 
         this.proofRelationChoice();
-        this.prepareUtilityNote();
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
@@ -47,16 +48,7 @@ class PublicRangeProof extends Proof {
 
     proofRelationChoice() {
         if (!this.isGreaterOrEqual) {
-            this.publicInteger = this.publicInteger.neg();
-        }
-    }
-
-    async prepareUtilityNote() {
-        const isUtilityNoteProvided = this.utilityNote || 0;
-        if (!isUtilityNoteProvided) {
-            this.notes = await helpers.constructUtilityNote(this.originalNote, this.publicInteger);
-        } else {
-            this.notes = [this.originalNote, this.utilityNote];
+            this.publicComparison = this.publicComparison.neg();
         }
     }
 
@@ -92,7 +84,7 @@ class PublicRangeProof extends Proof {
     constructChallenge() {
         this.constructChallengeRecurse([
             this.sender,
-            this.publicInteger,
+            this.publicComparison,
             this.publicValue,
             this.publicOwner,
             this.notes,
@@ -157,12 +149,12 @@ class PublicRangeProof extends Proof {
         const length = 2 + encodedParams.length + 1;
         const offsets = ProofUtils.getOffsets(length, encodedParams);
 
-        // If publicInteger < 0, make it compatible with finite field arithmetic
-        if (Number(this.publicInteger) < 0) {
-            const publicIntegerCastToField = bn128.groupModulus.add(this.publicInteger);
-            this.publicInteger = publicIntegerCastToField;
+        // If publicComparison < 0, make it compatible with finite field arithmetic
+        if (Number(this.publicComparison) < 0) {
+            const publicIntegerCastToField = bn128.groupModulus.add(this.publicComparison);
+            this.publicComparison = publicIntegerCastToField;
         }
-        const abiEncodedPublicInteger = padLeft(this.publicInteger.toString(16), 64);
+        const abiEncodedPublicInteger = padLeft(this.publicComparison.toString(16), 64);
 
         const abiEncodedParams = [this.challengeHex.slice(2), abiEncodedPublicInteger, ...offsets, ...encodedParams];
         return `0x${abiEncodedParams.join('').toLowerCase()}`;

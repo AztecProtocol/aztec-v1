@@ -17,7 +17,7 @@ class PublicRangeVerifier extends Verifier {
 
         const challengeResponse = new Keccak();
         challengeResponse.appendBN(this.proof.sender.slice(2));
-        challengeResponse.appendBN(new BN(this.proof.publicInteger));
+        challengeResponse.appendBN(new BN(this.proof.publicComparison));
         challengeResponse.appendBN(new BN(this.proof.publicValue));
         challengeResponse.appendBN(new BN(this.proof.publicOwner.slice(2), 16));
 
@@ -47,7 +47,7 @@ class PublicRangeVerifier extends Verifier {
                 const reducer = rollingHash.redKeccak();
                 let kBarX;
                 const firstTerm = this.data[0].kBar;
-                const secondTerm = this.challenge.mul(this.proof.publicInteger);
+                const secondTerm = this.challenge.mul(this.proof.publicComparison);
                 kBar = firstTerm.sub(secondTerm);
 
                 // multiplication in reduction context only works for positive numbers

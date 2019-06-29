@@ -18,7 +18,7 @@ describe('Public range proof verifier', () => {
     const utilityNoteValue = 40;
     const { publicKey } = secp256k1.generateAccount();
     const sender = randomHex(20);
-    const publicInteger = 10;
+    const publicComparison = 10;
 
     const isGreaterOrEqual = true;
 
@@ -28,7 +28,7 @@ describe('Public range proof verifier', () => {
     });
     describe('Success States', () => {
         it('should verify a valid Swap proof', async () => {
-            const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
             const verifier = new PublicRangeVerifier(proof);
             verifier.verifyProof();
             expect(verifier.isValid).to.equal(true);
@@ -49,7 +49,7 @@ describe('Public range proof verifier', () => {
         it('should fail for unsatisfied proof relations', async () => {
             const bogusTargetNoteValue = 41;
             const bogusUtilityNote = await note.create(publicKey, bogusTargetNoteValue);
-            const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, bogusUtilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, bogusUtilityNote);
 
             const verifier = new PublicRangeVerifier(proof);
             verifier.verifyProof();
@@ -61,7 +61,7 @@ describe('Public range proof verifier', () => {
         it('should fail for fake challenge', async () => {
             const bogusTargetNoteValue = 41;
             const bogusUtilityNote = await note.create(publicKey, bogusTargetNoteValue);
-            const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, bogusUtilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, bogusUtilityNote);
             proof.challenge = new BN(randomHex(31), 16);
 
             const verifier = new PublicRangeVerifier(proof);
@@ -74,7 +74,7 @@ describe('Public range proof verifier', () => {
         it('should fail for fake proof data', async () => {
             const bogusTargetNoteValue = 41;
             const bogusUtilityNote = await note.create(publicKey, bogusTargetNoteValue);
-            const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, bogusUtilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, bogusUtilityNote);
             proof.data = [];
             for (let i = 0; i < 3; i += 1) {
                 proof.data[i] = [];
@@ -89,7 +89,7 @@ describe('Public range proof verifier', () => {
         });
 
         it('should fail if points NOT on curve', async () => {
-            const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
             proof.data[0][2] = padLeft('0x00', 64);
 
             const verifier = new PublicRangeVerifier(proof);
@@ -101,7 +101,7 @@ describe('Public range proof verifier', () => {
         });
 
         it('should fail if blinding factor at infinity', async () => {
-            const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
             proof.data[0][0] = padLeft('0x05', 64);
             proof.data[0][1] = padLeft('0x05', 64);
             proof.data[0][2] = `0x${bn128.H_X.toString(16)}`;
@@ -119,7 +119,7 @@ describe('Public range proof verifier', () => {
         });
 
         it('should fail if blinding factor computed from invalid point', async () => {
-            const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
             proof.data[0][0] = `0x${padLeft('', 64)}`;
             proof.data[0][1] = `0x${padLeft('', 64)}`;
             proof.data[0][2] = `0x${padLeft('', 64)}`;
