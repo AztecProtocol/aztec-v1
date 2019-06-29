@@ -6,7 +6,6 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { padLeft, randomHex } = require('web3-utils');
 
-
 const note = require('../../../src/note');
 const { PublicRangeProof } = require('../../../src/proof');
 const PublicRangeVerifier = require('../../../src/proof/publicRange/verifier');
@@ -26,7 +25,7 @@ describe('Public range proof verifier', () => {
     before(async () => {
         originalNote = await note.create(publicKey, originalNoteValue);
         utilityNote = await note.create(publicKey, utilityNoteValue);
-    })
+    });
     describe('Success States', () => {
         it('should verify a valid Swap proof', async () => {
             const proof = new PublicRangeProof(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote);

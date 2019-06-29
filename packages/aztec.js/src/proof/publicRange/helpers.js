@@ -39,7 +39,7 @@ helpers.constructUtilityNote = async (originalNote, publicInteger) => {
         }
         const utilityNote = await note.create(aztecAccount.publicKey, utilityValue);
         notes = [originalNote, utilityNote];
-    };
+    }
     return notes;
 };
 

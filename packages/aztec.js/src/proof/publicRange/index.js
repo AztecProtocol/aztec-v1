@@ -14,7 +14,7 @@ const { AztecError } = errors;
 class PublicRangeProof extends Proof {
     /**
      * Constructs a public range proof that a note is greater than or equal to, or less than or
-     * equal to a public integer. Control of whether a > or < proof is constructed is controlled
+     * equal to a public integer. Control of whether a > or < proof is constructed is determined
      * by an input boolean 'isGreaterOrEqual'
      *
      * @param {Object} originalNote the note that a user is comparing against the publicInteger
@@ -23,16 +23,15 @@ class PublicRangeProof extends Proof {
      * @param {bool} isGreaterOrEqual modifier controlling whether this is a greater than, or less
      * than proof. If true, it is a proof that originalNoteValue > publicInteger. If false, it is a
      * proof that originalNoteValue < publicInteger
-     * @param {Note} utilityNote
+     * @param {Note} utilityNote a helper note that is needed to satisfy a cryptographic balancing relation
+     * (to be abstracted away)
      */
     constructor(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
+        super(ProofType.PUBLIC_RANGE.name, [originalNote], [utilityNote], sender, publicValue, publicOwner, [utilityNote]);
 
-        super(ProofType.PUBLIC_RANGE.name, [originalNote], [utilityNote], sender, publicValue, publicOwner, [
-            utilityNote,
-        ]);
-
+        helpers.checkpublicIntegerWellFormed(publicInteger);
         this.publicInteger = new BN(publicInteger);
         this.utilityNote = utilityNote;
         this.originalNote = originalNote;
