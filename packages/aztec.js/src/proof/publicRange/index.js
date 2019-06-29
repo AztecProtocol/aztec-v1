@@ -5,6 +5,7 @@ const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../encoder');
+const helpers = require('./helpers');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
 
@@ -12,22 +13,52 @@ const { AztecError } = errors;
 
 class PublicRangeProof extends Proof {
     /**
-     * Constructs a public range proof
+     * Constructs a public range proof that a note is greater than or equal to, or less than or
+     * equal to a public integer. Control of whether a > or < proof is constructed is controlled
+     * by an input boolean 'isGreaterOrEqual'
      *
-     * @param {Object} originalNote the note that one is computing a dividend of
-     * @param {Object} publicComparison the note that represents the integer rounding error
-     * @param {string} sender
+     * @param {Object} originalNote the note that a user is comparing against the publicInteger
+     * @param {Object} publicInteger publicly visible integer, which the note is being compared against
+     * @param {string} sender Ethereum address of the transaction sender
+     * @param {bool} isGreaterOrEqual modifier controlling whether this is a greater than, or less
+     * than proof. If true, it is a proof that originalNoteValue > publicInteger. If false, it is a
+     * proof that originalNoteValue < publicInteger
+     * @param {Note} utilityNote
      */
     constructor(originalNote, publicInteger, sender, isGreaterOrEqual, utilityNote) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
-        super(ProofType.PUBLIC_RANGE.name, [originalNote], [utilityNote], sender, publicValue, publicOwner, [utilityNote]);
-        this.publicInteger = new BN(publicInteger);
 
+        super(ProofType.PUBLIC_RANGE.name, [originalNote], [utilityNote], sender, publicValue, publicOwner, [
+            utilityNote,
+        ]);
+
+        this.publicInteger = new BN(publicInteger);
+        this.utilityNote = utilityNote;
+        this.originalNote = originalNote;
+        this.isGreaterOrEqual = isGreaterOrEqual;
+
+        this.proofRelationChoice();
+        this.prepareUtilityNote();
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
         this.constructOutputs();
+    }
+
+    proofRelationChoice() {
+        if (!this.isGreaterOrEqual) {
+            this.publicInteger = this.publicInteger.neg();
+        }
+    }
+
+    async prepareUtilityNote() {
+        const isUtilityNoteProvided = this.utilityNote || 0;
+        if (!isUtilityNoteProvided) {
+            this.notes = await helpers.constructUtilityNote(this.originalNote, this.publicInteger);
+        } else {
+            this.notes = [this.originalNote, this.utilityNote];
+        }
     }
 
     constructBlindingFactors() {
@@ -117,7 +148,6 @@ class PublicRangeProof extends Proof {
     }
 
     encodeABI() {
-        // this still needs doing
         const encodedParams = [
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
@@ -125,15 +155,17 @@ class PublicRangeProof extends Proof {
             inputCoder.encodeMetadata(this.metadata),
         ];
 
-        const length = 2 + encodedParams.length + 1; // what is the +3, +1 for?
+        const length = 2 + encodedParams.length + 1;
         const offsets = ProofUtils.getOffsets(length, encodedParams);
-        const abiEncodedParams = [
-            this.challengeHex.slice(2),
-            padLeft(Number(this.publicInteger).toString(16), 64),
-            ...offsets,
-            ...encodedParams,
-        ];
-        // console.log('abiEncodedParams: ', abiEncodedParams);
+
+        // If publicInteger < 0, make it compatible with finite field arithmetic
+        if (Number(this.publicInteger) < 0) {
+            const publicIntegerCastToField = bn128.groupModulus.add(this.publicInteger);
+            this.publicInteger = publicIntegerCastToField;
+        }
+        const abiEncodedPublicInteger = padLeft(this.publicInteger.toString(16), 64);
+
+        const abiEncodedParams = [this.challengeHex.slice(2), abiEncodedPublicInteger, ...offsets, ...encodedParams];
         return `0x${abiEncodedParams.join('').toLowerCase()}`;
     }
 
