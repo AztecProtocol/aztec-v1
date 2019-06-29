@@ -21,7 +21,6 @@ class PublicRangeVerifier extends Verifier {
         challengeResponse.appendBN(new BN(this.proof.publicValue));
         challengeResponse.appendBN(new BN(this.proof.publicOwner.slice(2), 16));
 
-
         const rollingHash = new Keccak();
         this.data.forEach((item) => {
             rollingHash.appendPoint(item.gamma);
@@ -42,7 +41,7 @@ class PublicRangeVerifier extends Verifier {
                     .mul(kBar)
                     .add(bn128.h.mul(aBar))
                     .add(sigma.mul(this.challenge).neg());
-            };
+            }
 
             if (i === 1) {
                 const reducer = rollingHash.redKeccak();
@@ -83,7 +82,12 @@ class PublicRangeVerifier extends Verifier {
             }
         });
 
-        if (!challengeResponse.redKeccak().fromRed().eq(this.challenge.fromRed())) {
+        if (
+            !challengeResponse
+                .redKeccak()
+                .fromRed()
+                .eq(this.challenge.fromRed())
+        ) {
             this.errors.push(errors.codes.CHALLENGE_RESPONSE_FAIL);
         }
     }
