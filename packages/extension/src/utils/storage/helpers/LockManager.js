@@ -3,10 +3,8 @@ import asyncForEach from '~utils/asyncForEach';
 class LockManager {
     constructor() {
         this.lockedKeys = new Set();
-        this.queue = [];
+        this.queue = new Set();
         this.onFinishedListeners = [];
-
-        this.lock = this.lock.bind(this);
     }
 
     isLocked(keys) {
@@ -37,7 +35,7 @@ class LockManager {
         exec,
     }) {
         return new Promise((resolve) => {
-            this.queue.push({
+            this.queue.add({
                 keys,
                 exec,
                 resolve,
@@ -45,32 +43,23 @@ class LockManager {
         });
     }
 
-    async nextInQueue(index = 0) {
-        if (this.queue.length < index + 1) return;
+    async nextInQueue() {
+        const next = [...this.queue].find(({
+            keys,
+        }) => !this.isLocked(keys));
+
+        if (!next) return;
+
+        this.queue.delete(next);
 
         const {
             keys,
             exec,
             resolve,
-        } = this.queue[index];
-        if (
-            this.isLocked(keys)
-            || !exec // is running
-        ) {
-            this.nextInQueue(index + 1);
-            return;
-        }
-
+        } = next;
         this.doLock(keys);
 
-        this.queue[index] = {
-            ...this.queue[index],
-            exec: null,
-        };
-
         const result = await exec();
-
-        this.queue.splice(index, 1);
 
         this.unlock(keys);
 
@@ -113,7 +102,7 @@ class LockManager {
     }
 
     async idle(cb) {
-        if (!this.queue.length) {
+        if (!this.queue.size) {
             if (cb) {
                 return cb();
             }
