@@ -79,7 +79,7 @@ class LockManager {
         resolve(result);
     }
 
-    async lock(keys, exec) {
+    lock = async (keys, exec) => {
         if (this.isLocked(keys)) {
             return this.waitInQueue({
                 keys,
@@ -95,7 +95,7 @@ class LockManager {
         this.nextInQueue();
 
         return result;
-    }
+    };
 
     enterIdleMode() {
         const listeners = this.onFinishedListeners;
