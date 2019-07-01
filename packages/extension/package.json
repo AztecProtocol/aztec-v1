@@ -47,6 +47,7 @@
         "@babel/preset-env": "^7.4.4",
         "@babel/register": "^7.4.4",
         "@babel/runtime": "^7.4.2",
+        "babel-eslint": "^10.0.2",
         "babel-plugin-module-resolver": "^3.2.0",
         "chai": "^4.2.0",
         "eslint-config-airbnb": "^17.1.0",

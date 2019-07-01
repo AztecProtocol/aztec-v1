@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
     extends: 'airbnb/base',
+    parser: 'babel-eslint',
     env: {
         browser: true,
         es6: true,
