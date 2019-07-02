@@ -19,5 +19,5 @@
             "js": ["./build/bundle.content.js"]
         }
     ],
-    "web_accessible_resources": ["/build/*", "/build/bundle.injected.js"]
+    "web_accessible_resources": ["/build/*", "/build/bundle.client.js"]
 }

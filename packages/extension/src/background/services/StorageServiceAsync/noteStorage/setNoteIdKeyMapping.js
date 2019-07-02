@@ -4,7 +4,7 @@ import {
 } from '~utils/storage';
 import dataKey from '~utils/dataKey';
 
-export default async function createNoteIdKeyMap(note) {
+export default async function setNoteIdKeyMapping(note) {
     const {
         id,
     } = note;

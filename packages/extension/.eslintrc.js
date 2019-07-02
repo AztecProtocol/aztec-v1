@@ -13,6 +13,7 @@ module.exports = {
         'import/resolver': {
             alias: {
                 map: [
+                    ['~config', path.resolve(__dirname, './src/config')],
                     ['~utils', path.resolve(__dirname, './src/utils')],
                 ],
                 extensions: ['.js'],

@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import Query from '~utils/Query';
 
 export default async function fetchNoteFromServer({
     graphQLServerUrl = 'http://localhost:4000/',
@@ -44,32 +44,11 @@ export default async function fetchNoteFromServer({
         `;
     }
 
-    const response = await fetch(graphQLServerUrl, {
-        method: 'POST',
-        body: JSON.stringify({
-            query,
-            variables,
-        }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
+    const data = await Query({
+        graphQLServerUrl,
+        query,
+        variables,
     });
-
-    let data;
-    try {
-        const json = await response.json();
-        let errors;
-        ({
-            data,
-            errors,
-        } = json || {});
-        if (errors) {
-            console.log(errors);
-            throw new Error('Fetch query from GraphQL server failed');
-        }
-    } catch (error) {
-        throw new Error(error);
-    }
 
     if (account) {
         const noteAccess = (data && data.noteAccess) || [];

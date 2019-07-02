@@ -1,6 +1,6 @@
 import dataKeyConfig from '../config/dataKey';
 
-export default function dataToKey(type, data, config = dataKeyConfig) {
+export default function dataKey(type, data, config = dataKeyConfig) {
     const pattern = typeof type === 'string' && type.match(/{([^{}]+)}/)
         ? type
         : config[type];

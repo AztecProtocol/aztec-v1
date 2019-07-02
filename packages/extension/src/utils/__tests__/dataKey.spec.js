@@ -1,7 +1,7 @@
 import { stub } from 'sinon';
-import dataToKey from './dataToKey';
+import dataKey from '../dataKey';
 
-describe('dataToKey', () => {
+describe('dataKey', () => {
     let consoleStub;
     let errors = [];
 
@@ -16,14 +16,14 @@ describe('dataToKey', () => {
     });
 
     it('return a key for storage using pattern defined in config/dataKey', () => {
-        expect(dataToKey(
+        expect(dataKey(
             'asset',
             {
                 count: 123,
             },
         )).toBe('a:123');
 
-        expect(dataToKey(
+        expect(dataKey(
             'asset',
             {
                 count: 123,
@@ -35,7 +35,7 @@ describe('dataToKey', () => {
     });
 
     it('accept custom config object', () => {
-        expect(dataToKey(
+        expect(dataKey(
             'asset',
             {
                 id: '123',
@@ -45,7 +45,7 @@ describe('dataToKey', () => {
             },
         )).toBe('asset_id_123');
 
-        expect(dataToKey(
+        expect(dataKey(
             'test',
             {
                 text: 'foo',
@@ -57,7 +57,7 @@ describe('dataToKey', () => {
     });
 
     it('accept custom config string as first parameter', () => {
-        expect(dataToKey(
+        expect(dataKey(
             'item_{id}',
             {
                 id: '123',
@@ -66,7 +66,7 @@ describe('dataToKey', () => {
     });
 
     it('allow multiple variables', () => {
-        expect(dataToKey(
+        expect(dataKey(
             'item_{id}_{name}',
             {
                 id: '12',
@@ -76,7 +76,7 @@ describe('dataToKey', () => {
     });
 
     it('allow duplicated variables', () => {
-        expect(dataToKey(
+        expect(dataKey(
             'item_{id}_{name}_{id}',
             {
                 id: '12',
@@ -86,7 +86,7 @@ describe('dataToKey', () => {
     });
 
     it('keep variable if key is not defined in data', () => {
-        expect(dataToKey(
+        expect(dataKey(
             'asset',
             {
                 name: 'abc',
@@ -94,7 +94,7 @@ describe('dataToKey', () => {
         )).toBe('a:{count}');
         expect(errors.length).toBe(1);
 
-        expect(dataToKey(
+        expect(dataKey(
             'item_{id}_{name}',
             {
                 name: 'abc',
