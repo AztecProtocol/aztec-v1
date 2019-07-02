@@ -1,8 +1,8 @@
 import {
     get,
     set,
-} from '../../utils/storage';
-import dataKey from '../../utils/dataKey';
+} from '~utils/storage';
+import dataKey from '~utils/dataKey';
 import Storage from './Storage';
 
 class AssetStorage extends Storage {
