@@ -1,31 +1,33 @@
-import {
-    get,
-    lock,
-} from '~utils/storage';
-import setAssetIdKeyMapping from './setAssetIdKeyMapping';
+import assetModel from '~database/models/asset';
 
 export default {
     async createOrUpdate(asset) {
         const {
-            id: assetId,
+            id,
         } = asset;
 
-        const assetKey = await lock(
-            'assetCount',
-            async () => {
-                let key = await get(assetId);
-                if (!key) {
-                    key = await setAssetIdKeyMapping(asset);
-                }
-                return key;
+        const {
+            data,
+            modified,
+        } = await assetModel.set(
+            {
+                id,
+                balance: 0,
+            },
+            {
+                ignoreDuplicate: true,
             },
         );
 
-        // TODO - save other asset info
+        if (modified.indexOf(id) < 0) {
+            // TODO
+            // didn't create a new asset
+            // update existing data instead
+        }
 
         return {
             ...asset,
-            key: assetKey,
+            key: data[id],
         };
     },
 };

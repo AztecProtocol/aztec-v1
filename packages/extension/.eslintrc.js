@@ -15,6 +15,7 @@ module.exports = {
                 map: [
                     ['~config', path.resolve(__dirname, './src/config')],
                     ['~utils', path.resolve(__dirname, './src/utils')],
+                    ['~database', path.resolve(__dirname, './src/database')],
                 ],
                 extensions: ['.js'],
             },

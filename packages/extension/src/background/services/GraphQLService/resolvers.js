@@ -1,9 +1,7 @@
-import {
-    getAsset,
-} from './database/asset';
+import assetModel from '~database/models/asset';
 
 export default {
     Query: {
-        asset: getAsset,
+        asset: async (_, args) => assetModel.get(args),
     },
 };
