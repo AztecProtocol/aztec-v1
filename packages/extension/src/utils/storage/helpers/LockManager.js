@@ -5,6 +5,8 @@ class LockManager {
         this.lockedKeys = new Set();
         this.queue = new Set();
         this.onFinishedListeners = [];
+        this.isRunning = false;
+        this.idleReq = null;
     }
 
     isLocked(keys) {
@@ -48,7 +50,15 @@ class LockManager {
             keys,
         }) => !this.isLocked(keys));
 
-        if (!next) return;
+        if (!next) {
+            if (!this.queue.size) {
+                clearTimeout(this.idleReq);
+                this.idleReq = setTimeout(() => {
+                    this.enterIdleMode();
+                }, 500);
+            }
+            return;
+        }
 
         this.queue.delete(next);
 
@@ -69,6 +79,9 @@ class LockManager {
     }
 
     lock = async (keys, exec) => {
+        clearTimeout(this.idleReq);
+        this.isRunning = true;
+
         if (this.isLocked(keys)) {
             return this.waitInQueue({
                 keys,
@@ -87,8 +100,11 @@ class LockManager {
     };
 
     enterIdleMode() {
+        if (!this.isRunning) return;
+
+        this.isRunning = false;
         const listeners = this.onFinishedListeners;
-        this.onFinishedListeners = [];
+        this.onFinishedListeners = listeners.filter(l => l.persisting);
         asyncForEach(listeners, async ({
             cb,
             resolve,
@@ -101,21 +117,28 @@ class LockManager {
         });
     }
 
-    async idle(cb) {
-        if (!this.queue.size) {
-            if (cb) {
-                return cb();
-            }
-            return true;
+    onIdle = async (
+        cb,
+        {
+            persisting = false,
+        } = {},
+    ) => {
+        const res = cb && (!this.queue.size || !persisting)
+            ? cb()
+            : true;
+
+        if (!this.queue.size && !persisting) {
+            return res;
         }
 
         return new Promise((resolve) => {
             this.onFinishedListeners.push({
                 cb,
                 resolve,
+                persisting,
             });
         });
-    }
+    };
 }
 
 export default LockManager;

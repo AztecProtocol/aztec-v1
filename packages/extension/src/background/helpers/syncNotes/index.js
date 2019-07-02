@@ -1,4 +1,7 @@
 /* global chrome */
+import {
+    onIdle,
+} from '~utils/storage';
 import asyncForEach from '~utils/asyncForEach';
 import StorageService from '../../services/StorageService';
 import StorageServiceAsync from '../../services/StorageServiceAsync';
@@ -9,6 +12,13 @@ export default async function syncNotes({
     account = '__account_id_0',
     lastId = '',
 } = {}) {
+    onIdle(
+        () => console.log('--- database idle ---'),
+        {
+            persisting: true,
+        },
+    );
+
     const newNotes = await fetchNoteFromServer({
         numberOfNotes: notesPerRequest,
         account,
@@ -44,4 +54,5 @@ export default async function syncNotes({
     chrome.storage.local.getBytesInUse(null, (bytes) => {
         console.log('getBytesInUse after optimized async', bytes);
     });
+    chrome.storage.local.get(null, data => console.info(data));
 }

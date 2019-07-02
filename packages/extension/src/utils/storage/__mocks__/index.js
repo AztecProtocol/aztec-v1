@@ -1,4 +1,6 @@
-import lock from '../lock';
+import lock, {
+    onIdle,
+} from '../lock';
 
 let db = {};
 
@@ -29,5 +31,6 @@ export {
     get,
     set,
     lock,
+    onIdle,
     reset,
 };

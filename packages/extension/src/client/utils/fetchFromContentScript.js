@@ -9,11 +9,15 @@ export default async function fetchFromContentScript(data = {}) {
 
     return new Promise((resolve) => {
         window.addEventListener('message', (event) => {
-            if (event.data.type === contentEvent
-                && event.data.responseId === requestId
+            const {
+                type,
+                responseId,
+                response,
+            } = event.data || {};
+            if (type === contentEvent
+                && responseId === requestId
             ) {
-                console.log('client got response:', event);
-                resolve(event.data.response);
+                resolve(response);
             }
         }, false);
 
