@@ -5,6 +5,10 @@ import lock, {
 let db = {};
 
 const get = (keys) => {
+    if (keys === undefined) {
+        return db;
+    }
+
     if (typeof keys === 'string') {
         return db[keys];
     }

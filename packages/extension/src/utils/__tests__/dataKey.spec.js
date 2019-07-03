@@ -85,6 +85,17 @@ describe('dataKey', () => {
         )).toBe('item_12_abc_12');
     });
 
+    it('return empty string if pattern is not defined properly', () => {
+        expect(dataKey(
+            'whatever',
+            {
+                name: 'abc',
+                whatever: 'val',
+            },
+        )).toBe('');
+        expect(errors.length).toBe(0);
+    });
+
     it('keep variable if key is not defined in data', () => {
         expect(dataKey(
             'asset',

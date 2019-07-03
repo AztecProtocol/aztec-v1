@@ -1,9 +1,8 @@
-import getAsset from './getAsset';
-import setAsset from './setAsset';
-import updateAsset from './updateAsset';
+import Model from '~database/helpers/Model';
 
-export default {
-    get: getAsset,
-    set: setAsset,
-    update: updateAsset,
-};
+export default Model({
+    name: 'asset',
+    fields: [
+        'balance',
+    ],
+});

@@ -5,6 +5,10 @@ export default function dataKey(type, data, config = dataKeyConfig) {
         ? type
         : config[type];
 
+    if (!pattern) {
+        return '';
+    }
+
     return pattern.replace(/{([^{}]+)}/ig, (_, key) => {
         if (!(key in data)) {
             console.error(`${key} not found in type ${type}`);
