@@ -57,10 +57,10 @@ describe('createOrUpdate', () => {
         expect(dataAfter).toEqual({
             noteCount: 1,
             [notes[0].id]: 'n:0',
-            'n:0': {
+            'n:0': [
                 value,
-                asset: 'a:0',
-            },
+                'a:0',
+            ],
             [assetValueGroupKey]: ['n:0'],
         });
     });

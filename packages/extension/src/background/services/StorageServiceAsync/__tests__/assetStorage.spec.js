@@ -47,9 +47,7 @@ describe('createOrUpdate', () => {
         expect(dataAfter).toEqual({
             assetCount: 1,
             [assets[0].id]: 'a:0',
-            'a:0': {
-                balance: 0,
-            },
+            'a:0': [0],
         });
     });
 

@@ -4,6 +4,7 @@ import {
     lock,
 } from '~utils/storage';
 import errorAction from '~database/utils/errorAction';
+import transformDataForDb from '~database/utils/transformDataForDb';
 
 export default async function setData(
     data,
@@ -42,12 +43,13 @@ export default async function setData(
                 }
             }
 
-            const toSave = {};
+            let toSave = {};
             fields.forEach((field) => {
                 if (field in data) {
                     toSave[field] = data[field];
                 }
             });
+            toSave = transformDataForDb(fields, toSave);
 
             await set({
                 [key]: toSave,
