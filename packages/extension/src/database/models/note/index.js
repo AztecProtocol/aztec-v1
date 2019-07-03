@@ -1,9 +1,9 @@
-import getNote from './getNote';
-import setNote from './setNote';
-import updateNote from './updateNote';
+import Model from '~database/helpers/Model';
 
-export default {
-    get: getNote,
-    set: setNote,
-    update: updateNote,
-};
+export default Model({
+    name: 'note',
+    fields: [
+        'value',
+        'asset',
+    ],
+});

@@ -1,0 +1,95 @@
+import {
+    get,
+    set,
+    lock,
+} from '~utils/storage';
+import dataKey from '~utils/dataKey';
+import errorAction from '~database/utils/errorAction';
+
+export default async function setIdKeyMapping(
+    data,
+    {
+        name,
+        autoIncrementBy,
+        dataKeyPattern,
+        forceUpdate = false,
+        ignoreDuplicate = false,
+    } = {},
+) {
+    const {
+        id,
+    } = data;
+
+    return lock(
+        [
+            autoIncrementBy,
+            id,
+        ],
+        async () => {
+            let key = await get(id);
+            let count = await get(autoIncrementBy) || 0;
+
+            if (key) {
+                if (ignoreDuplicate) {
+                    return {
+                        data: {
+                            [id]: key,
+                        },
+                        modified: [],
+                    };
+                }
+                if (!forceUpdate) {
+                    return errorAction(`Model '${name}' with id "${id}" is already defined.`);
+                }
+            } else {
+                if (dataKeyPattern) {
+                    key = dataKey(dataKeyPattern, {
+                        ...data,
+                        count,
+                    });
+                } else {
+                    key = dataKey(name, {
+                        ...data,
+                        count,
+                    });
+                }
+                if (!key) {
+                    key = `${name}:${count}`;
+                }
+            }
+
+            const existingData = await get(key);
+            if (!existingData) {
+                count += 1;
+            } else {
+                if (ignoreDuplicate) {
+                    return {
+                        data: {
+                            [id]: key,
+                        },
+                        modified: [],
+                    };
+                }
+                if (!forceUpdate) {
+                    return errorAction(`Model '${name}' with key "${key}" is already defined.`);
+                }
+            }
+
+            await set({
+                [id]: key,
+                [autoIncrementBy]: count,
+            });
+
+            return {
+                data: {
+                    [id]: key,
+                    [autoIncrementBy]: count + 1,
+                },
+                modified: [
+                    id,
+                    autoIncrementBy,
+                ],
+            };
+        },
+    );
+}

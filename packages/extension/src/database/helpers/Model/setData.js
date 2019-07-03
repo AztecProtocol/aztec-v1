@@ -5,50 +5,57 @@ import {
 } from '~utils/storage';
 import errorAction from '~database/utils/errorAction';
 
-export default async function setAssetData(
-    asset,
+export default async function setData(
+    data,
     {
+        name,
+        fields,
         forceUpdate = false,
         ignoreDuplicate = false,
-    },
+    } = {},
 ) {
     const {
         key,
         id,
-        ...data
-    } = asset;
+    } = data;
 
     if (!key) {
-        return errorAction("'key' must be presented to save asset data");
+        return errorAction(`'key' must be presented to save '${name}' data`);
     }
 
     return lock(
         key,
         async () => {
-            const existingAsset = await get(key);
-            if (existingAsset) {
+            const existingData = await get(key);
+            if (existingData) {
                 if (ignoreDuplicate) {
                     return {
                         data: {
-                            [key]: existingAsset,
+                            [key]: existingData,
                         },
                         modified: [],
                     };
                 }
                 if (!forceUpdate) {
                     const info = id ? `id "${id}"` : `key "${key}"`;
-                    return errorAction(`Asset with ${info} already exists.`);
+                    return errorAction(`Model '${name}' with ${info} already exists.`);
                 }
             }
 
-            // TODO - validate data
+            const toSave = {};
+            fields.forEach((field) => {
+                if (field in data) {
+                    toSave[field] = data[field];
+                }
+            });
+
             await set({
-                [key]: data,
+                [key]: toSave,
             });
 
             return {
                 data: {
-                    [key]: data,
+                    [key]: toSave,
                 },
                 modified: [key],
             };

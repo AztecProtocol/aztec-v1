@@ -4,28 +4,27 @@ import {
     lock,
 } from '~utils/storage';
 import errorAction from '~database/utils/errorAction';
-import fields, {
-    readOnly,
-} from './_fields';
 
-export default async function updateNote(
-    data,
-) {
+export default async function update(data) {
     const {
         id,
     } = data;
     let {
         key,
     } = data;
+    const {
+        name,
+        fields,
+    } = this.config;
 
     if (!id && !key) {
-        return errorAction("'id' or 'key' must be presented in note.");
+        return errorAction(`'id' or 'key' must be presented to update '${name}'.`);
     }
 
     if (!key) {
         key = await get(id);
         if (!key) {
-            return errorAction(`Note with id "${id}" does not exist.`);
+            return errorAction(`Model '${name}' with id "${id}" does not exist.`);
         }
     }
 
@@ -33,26 +32,25 @@ export default async function updateNote(
         key,
         async () => {
             const prevData = await get(key) || {};
-            const note = {
+            const newData = {
                 ...prevData,
             };
             fields
-                .filter(field => readOnly.indexOf(field) < 0)
                 .filter(field => data[field] !== undefined)
                 .forEach((field) => {
                     const val = data[field];
-                    note[field] = typeof val === 'function'
+                    newData[field] = typeof val === 'function'
                         ? val(prevData[field])
                         : val;
                 });
 
             await set({
-                [key]: note,
+                [key]: newData,
             });
 
             return {
                 data: {
-                    [key]: note,
+                    [key]: newData,
                 },
                 modified: [key],
             };
