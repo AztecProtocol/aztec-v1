@@ -92,9 +92,9 @@ describe('Model', () => {
         });
 
         const dataAfter = await storage.get(expectedKey);
-        expect(dataAfter).toEqual({
-            color: 'yellow',
-        });
+        expect(dataAfter).toEqual([
+            'yellow',
+        ]);
     });
 
     it('accept custom dataKey pattern', async () => {
@@ -117,9 +117,9 @@ describe('Model', () => {
         });
 
         const dataAfter = await storage.get(expectedKey);
-        expect(dataAfter).toEqual({
-            color: 'yellow',
-        });
+        expect(dataAfter).toEqual([
+            'yellow',
+        ]);
     });
 
     it('should use {name}Count as autoIncrementBy by default', async () => {

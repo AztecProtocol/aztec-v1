@@ -2,7 +2,7 @@ import {
     lock,
 } from '~utils/storage';
 import dataKey from '~utils/dataKey';
-import noteModal from '~database/models/note';
+import noteModel from '~database/models/note';
 import assetModel from '~database/models/asset';
 import pushAssetValue from './pushAssetValue';
 
@@ -19,7 +19,7 @@ const createOrUpdate = async (note) => {
     const {
         data,
         modified,
-    } = await noteModal.set(
+    } = await noteModel.set(
         {
             id,
             value,
@@ -44,7 +44,7 @@ const createOrUpdate = async (note) => {
 
         await assetModel.update({
             key: assetKey,
-            balance: prevValue => prevValue + value,
+            balance: prevValue => (prevValue || 0) + value,
         });
 
         const assetValueKey = dataKey('assetValue', {

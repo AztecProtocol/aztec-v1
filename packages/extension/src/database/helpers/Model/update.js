@@ -4,6 +4,8 @@ import {
     lock,
 } from '~utils/storage';
 import errorAction from '~database/utils/errorAction';
+import transformDataFromDb from '~database/utils/transformDataFromDb';
+import transformDataForDb from '~database/utils/transformDataForDb';
 
 export default async function update(data) {
     const {
@@ -33,24 +35,25 @@ export default async function update(data) {
         async () => {
             const prevData = await get(key) || {};
             const newData = {
-                ...prevData,
+                ...transformDataFromDb(fields, prevData),
             };
             fields
                 .filter(field => data[field] !== undefined)
                 .forEach((field) => {
                     const val = data[field];
                     newData[field] = typeof val === 'function'
-                        ? val(prevData[field])
+                        ? val(newData[field])
                         : val;
                 });
+            const toSave = transformDataForDb(fields, newData);
 
             await set({
-                [key]: newData,
+                [key]: toSave,
             });
 
             return {
                 data: {
-                    [key]: newData,
+                    [key]: toSave,
                 },
                 modified: [key],
             };

@@ -38,7 +38,9 @@ export default function Model(config) {
     }
 
     return {
-        get,
+        get: get.bind({
+            config,
+        }),
         set: set.bind({
             config,
         }),
