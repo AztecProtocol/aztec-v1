@@ -1,7 +1,7 @@
 const grammar = {};
 
 function regex(params) {
-    const val = new RegExp(params.join('\\s*\\n*'));
+    const val = new RegExp(params.join('[\\s\\n]*') + '[\\s\\n]*');
     return val;
 }
 

@@ -33,7 +33,7 @@ inputMap.getFileLine = (charIndex, map) => {
     const charPosition = charIndex - map.startingIndices[filenameIndex];
     const sliced = data.slice(0, charPosition);
     const lines = sliced.split(RegExp('\\r\\n|\\r|\\n'));
-    const lineNumber = lines.length - 1;
+    const lineNumber = lines.length;
     const lineIndex = lines[lines.length - 1].length;// charIndex - lines[lines.length - 1].length;
     const line = data.slice(charPosition - lineIndex).match(RegExp('^(.*)'))[0];
     return {

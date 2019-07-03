@@ -31,6 +31,11 @@ const CONTEXT = {
     MACRO: 2,
 };
 
+/**
+ * Throw error if condition is not met (does not evaluate true)
+ * @param {boolean} condition 
+ * @param {string} message 
+ */
 function check(condition, message) {
     if (!condition) {
         throw new Error(message);
@@ -40,6 +45,7 @@ function check(condition, message) {
 
 const parser = {};
 
+// Generate random 5 byte (i.e. 10 character) hexadecimal number for use as id
 parser.getId = () => {
     return [...new Array(10)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 };
@@ -299,7 +305,7 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        throw new Error(`macro ${name}, unmatched jump labels ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
+        throw new Error(`macro ${name}, unmatched jump labels/opcodes/template parameters ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
     }
 
     let tableOffset = (result.data.bytecode.length / 2);
@@ -731,7 +737,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
             const type = jumptable[1];
             if (type !== 'jumptable') {
-                throw new Error(`expected ${jumptable} to define a jump table`);
+                throw new Error(`Expected ${jumptable} to define a jump table`);
             }
             const body = jumptable[3];
             jumptables = {
@@ -757,21 +763,22 @@ parser.removeComments = (string) => {
     while (!regex.endOfData(data)) {
         const multiIndex = data.indexOf('/*');
         const singleIndex = data.indexOf('//');
+        // if multi-line comment found before next single-line comment 
         if (multiIndex !== -1 && ((multiIndex < singleIndex) || singleIndex === -1)) {
             formatted += data.slice(0, multiIndex);
             const endBlock = data.indexOf('*/');
             check(endBlock !== -1, 'could not find closing comment block \\*');
-            formatted += ' '.repeat(endBlock - multiIndex + 2);
+            formatted += data.slice(multiIndex, endBlock).replace(/./g, ' '); // replace every character except newline with space (thus retaining lines for error reporting)
             data = data.slice(endBlock + 2);
         } else if (singleIndex !== -1) {
             formatted += data.slice(0, singleIndex);
             data = data.slice(singleIndex);
             const endBlock = data.indexOf('\n');
             if (!endBlock) {
-                formatted += ' '.repeat(data.length);
+                formatted += data.replace(/./g, '');  // replace every character except newline with space (thus retaining lines for error reporting)
                 data = '';
             } else {
-                formatted += ' '.repeat(endBlock + 1);
+                formatted += data.slice(0, endBlock+1).replace(/./g, ' '); // replace every character except newline with space (thus retaining lines for error reporting)
                 data = data.slice(endBlock + 1);
             }
         } else {
