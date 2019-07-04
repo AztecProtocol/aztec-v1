@@ -305,7 +305,7 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        throw new Error(`macro ${name}, unmatched jump labels/opcodes/template parameters ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
+        throw new Error(`macro ${name}, unmatched jump labels ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
     }
 
     let tableOffset = (result.data.bytecode.length / 2);
@@ -669,6 +669,7 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0) => {
     return ops;
 };
 
+// parse the whole file
 parser.parseTopLevel = (raw, startingIndex, inputMap) => {
     let input = raw.slice(startingIndex);
     let currentContext = CONTEXT.NONE;
@@ -678,6 +679,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
     let currentExpression = { templateParams: [] };
     let index = startingIndex;
     while (!regex.endOfData(input)) {
+        // if a template declaration is matched
         if ((currentContext === CONTEXT.NONE) && input.match(grammar.topLevel.TEMPLATE)) {
             const template = input.match(grammar.topLevel.TEMPLATE);
             const templateParams = regex.sliceCommas(template[1]);
@@ -687,6 +689,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 templateParams,
             };
             currentContext = CONTEXT.MACRO;
+        // if a macro declaration is matched
         } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && grammar.topLevel.MACRO.test(input)) {
             const macro = input.match(grammar.topLevel.MACRO);
             const type = macro[1];
@@ -707,6 +710,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             index += macro[0].length;
             currentContext = CONTEXT.NONE;
             currentExpression = { templateParams: [] };
+        // if a code table is matched
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.CODE_TABLE.test(input)) {
             const table = input.match(grammar.topLevel.CODE_TABLE);
             const body = table[3];
@@ -718,6 +722,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 },
             };
             index += table[0].length;
+        // if a packed jumptable is matched
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE_PACKED.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
             const type = jumptable[1];
@@ -733,11 +738,12 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 },
             };
             index += jumptable[0].length;
+        // if a jumptable is matched
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
             const type = jumptable[1];
             if (type !== 'jumptable') {
-                throw new Error(`Expected ${jumptable} to define a jump table`);
+                throw new Error(`expected ${jumptable} to define a jump table`);
             }
             const body = jumptable[3];
             jumptables = {
@@ -759,34 +765,13 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
 
 parser.removeComments = (string) => {
     let data = string;
-    let formatted = '';
-    while (!regex.endOfData(data)) {
-        const multiIndex = data.indexOf('/*');
-        const singleIndex = data.indexOf('//');
-        // if multi-line comment found before next single-line comment 
-        if (multiIndex !== -1 && ((multiIndex < singleIndex) || singleIndex === -1)) {
-            formatted += data.slice(0, multiIndex);
-            const endBlock = data.indexOf('*/');
-            check(endBlock !== -1, 'could not find closing comment block \\*');
-            formatted += data.slice(multiIndex, endBlock).replace(/./g, ' '); // replace every character except newline with space (thus retaining lines for error reporting)
-            data = data.slice(endBlock + 2);
-        } else if (singleIndex !== -1) {
-            formatted += data.slice(0, singleIndex);
-            data = data.slice(singleIndex);
-            const endBlock = data.indexOf('\n');
-            if (!endBlock) {
-                formatted += data.replace(/./g, '');  // replace every character except newline with space (thus retaining lines for error reporting)
-                data = '';
-            } else {
-                formatted += data.slice(0, endBlock+1).replace(/./g, ' '); // replace every character except newline with space (thus retaining lines for error reporting)
-                data = data.slice(endBlock + 1);
-            }
-        } else {
-            formatted += data;
-            break;
-        }
+    const commentRegex = /\/\*(.|\n)*?\*\/|\/\/.*/;
+    let match = data.match(commentRegex);
+    while (match) {
+        data = data.replace(commentRegex, data.match(commentRegex)[0].replace(/./g, ''));
+        match = data.match(commentRegex);
     }
-    return formatted;
+    return data;
 };
 
 
