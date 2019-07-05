@@ -3,11 +3,11 @@ import {
 } from './transformDataForDb';
 
 export default function transformDataFromDb(fields, rawData) {
-    const data = {};
     if (!rawData) {
-        return data;
+        return rawData;
     }
 
+    const data = {};
     fields.forEach((field, i) => {
         if (!Object.is(rawData[i], undefinedField)) {
             data[field] = rawData[i];
