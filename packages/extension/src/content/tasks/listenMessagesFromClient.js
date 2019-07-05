@@ -4,8 +4,12 @@ import {
 } from '~config/event';
 import fetchFromBackgroundScript from '../utils/fetchFromBackgroundScript';
 
-export default function delegateMessages() {
+export default function listenMessagesFromClient() {
     window.addEventListener('message', async (event) => {
+        // TODO
+        // check permission in storage
+        //   x -> return special response to for client script to request user authorization
+        //   o -> delegate the query to background script
         const {
             type,
             requestId,
