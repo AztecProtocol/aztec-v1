@@ -11,7 +11,7 @@ grammar.topLevel = {
         '\\<(.*)\\>',
     ]),
     MACRO: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '(^(?:[\\s\\n]*#[\\s\\n]*define)',
         '\\b(macro)\\b',
         '([A-Za-z0-9_]\\w*)',
         '=',
@@ -19,7 +19,7 @@ grammar.topLevel = {
         '\\((\\d+)\\)',
         'returns',
         '\\((\\d+)\\)',
-        '\\{((?:[^\\}])*)\\}',
+        '\\{)((?:[^\\}])*)\\}',
     ]),
     CODE_TABLE: regex([
         '^(?:[\\s\\n]*#[\\s\\n]*define)',

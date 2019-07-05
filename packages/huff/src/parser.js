@@ -33,8 +33,8 @@ const CONTEXT = {
 
 /**
  * Throw error if condition is not met (does not evaluate true)
- * @param {boolean} condition 
- * @param {string} message 
+ * @param {boolean} condition
+ * @param {string} message
  */
 function check(condition, message) {
     if (!condition) {
@@ -103,7 +103,9 @@ parser.processModifiedOpcode = (literal, macros) => {
             }
             throw new Error(`I don't know how to process modified template ${op}`);
         }).reduce((acc, val) => {
-            if (!acc) { return val; }
+            if (!acc) {
+                return val;
+            }
             return acc.sub(val);
         }, null));
     }
@@ -133,7 +135,9 @@ parser.processModifiedOpcode = (literal, macros) => {
             }
             throw new Error(`I don't know how to process modified template ${op}`);
         }).reduce((acc, val) => {
-            if (!acc) { return val; }
+            if (!acc) {
+                return val;
+            }
             return acc.add(val);
         }, null));
     }
@@ -157,7 +161,9 @@ parser.processTemplateLiteral = (literal, macros) => {
             }
             return parser.processMacroLiteral(op, macros);
         }).reduce((acc, val) => {
-            if (!acc) { return val; }
+            if (!acc) {
+                return val;
+            }
             return acc.sub(val);
         }, null));
     }
@@ -169,7 +175,9 @@ parser.processTemplateLiteral = (literal, macros) => {
             }
             return parser.processMacroLiteral(op, macros);
         }).reduce((acc, val) => {
-            if (!acc) { return val; }
+            if (!acc) {
+                return val;
+            }
             return acc.add(val);
         }, null));
     }
@@ -181,7 +189,9 @@ parser.processTemplateLiteral = (literal, macros) => {
             }
             return parser.processMacroLiteral(op, macros);
         }).reduce((acc, val) => {
-            if (!acc) { return val; }
+            if (!acc) {
+                return val;
+            }
             return acc.mul(val);
         }, null));
     }
@@ -305,7 +315,11 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        throw new Error(`macro ${name}, unmatched jump labels ${JSON.stringify(result.unmatchedJumps)} found, cannot compile`);
+        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile: `;
+        result.unmatchedJumps.forEach((unmatchedJump) => {
+            errorString += `\n"${unmatchedJump.label}" in "${unmatchedJump.debugFileline.filename}" at line ${unmatchedJump.debugFileline.lineNumber}`;
+        }); // NB currently not using bytecodeIndex or lineIndex but they might be useful}
+        throw new Error(errorString);
     }
 
     let tableOffset = (result.data.bytecode.length / 2);
@@ -445,7 +459,7 @@ parser.processMacroInternal = (
                 };
             }
             case TYPES.PUSH_JUMP_LABEL: {
-                jumptable[index] = [{ label: op.value, bytecodeIndex: 0 }];
+                jumptable[index] = [{ label: op.value, bytecodeIndex: 0, debugFileline: op.debugFileline }];
                 const sourcemap = inputMaps.getFileLine(op.index, map);
                 offset += 3;
                 return {
@@ -490,7 +504,7 @@ parser.processMacroInternal = (
         if (jumptable[index]) {
             const jumps = jumptable[index];
             // eslint-disable-next-line no-restricted-syntax
-            for (const { label: jumplabel, bytecodeIndex } of jumps) {
+            for (const { label: jumplabel, bytecodeIndex, debugFileline } of jumps) {
                 // eslint-disable-next-line no-prototype-builtins
                 if (jumpindices.hasOwnProperty(jumplabel)) {
                     const jumpvalue = padNBytes(toHex(jumpindices[jumplabel]), 2);
@@ -498,14 +512,14 @@ parser.processMacroInternal = (
                     const post = formattedBytecode.slice(bytecodeIndex + 6);
                     if (formattedBytecode.slice(bytecodeIndex + 2, bytecodeIndex + 6) !== 'xxxx') {
                         throw new Error(
-                            `expected indicies ${bytecodeIndex + 2} to ${bytecodeIndex + 6} to be jump location, of
+                            `expected indices ${bytecodeIndex + 2} to ${bytecodeIndex + 6} to be jump location, of
                             ${formattedBytecode}`
                         );
                     }
                     formattedBytecode = `${pre}${jumpvalue}${post}`;
                 } else {
                     const jumpOffset = (codeIndices[index] - startingBytecodeIndex) * 2;
-                    unmatchedJumps.push({ label: jumplabel, bytecodeIndex: jumpOffset + bytecodeIndex });
+                    unmatchedJumps.push({ label: jumplabel, bytecodeIndex: jumpOffset + bytecodeIndex, debugFileline });
                 }
             }
         }
@@ -552,7 +566,7 @@ parser.parseCodeTable = (body) => {
     };
 };
 
-parser.parseMacro = (body, macros, jumptables, startingIndex = 0) => {
+parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {}) => {
     let input = body;
     let index = 0;
     const ops = [];
@@ -562,31 +576,37 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0) => {
             const token = input.match(grammar.macro.MACRO_CALL);
             const macroName = token[1];
             const templateArgs = token[2] ? [token[2]] : [];
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             check(macros[macroName], `expected ${macroName} to be a macro`);
             ops.push({
                 type: TYPES.MACRO,
                 value: macroName,
                 args: templateArgs,
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TEMPLATE)) {
             const token = input.match(grammar.macro.TEMPLATE);
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.TEMPLATE,
                 value: token[1],
                 args: [],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.CODE_SIZE)) {
             const token = input.match(grammar.macro.CODE_SIZE);
             const templateParams = token[2] ? [token[2]] : [];
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.CODESIZE,
                 value: token[1],
                 args: templateParams,
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TABLE_SIZE)) {
@@ -596,68 +616,87 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0) => {
                 throw new Error(`could not find jumptable ${table} in ${jumptables}`);
             }
             const hex = formatEvenBytes(toHex(jumptables[table].table.size));
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.PUSH,
                 value: toHex(95 + (hex.length / 2)),
                 args: [hex],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TABLE_START)) {
             const token = input.match(grammar.macro.TABLE_START);
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.TABLE_START_POSITION,
                 value: token[1],
                 args: [],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.JUMP_LABEL)) {
             const token = input.match(grammar.macro.JUMP_LABEL);
             check(!jumpdests[token[1]], `jump label ${token[1]} has already been defined`);
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.JUMPDEST,
                 value: token[1],
                 args: [],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
+
             });
             jumpdests[token[1]] = true;
             index += token[0].length;
         } else if (input.match(grammar.macro.LITERAL_DECIMAL)) {
             const token = input.match(grammar.macro.LITERAL_DECIMAL);
             const hex = formatEvenBytes(toHex(token[1]));
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.PUSH,
                 value: toHex(95 + (hex.length / 2)),
                 args: [hex],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
+
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.LITERAL_HEX)) {
             const token = input.match(grammar.macro.LITERAL_HEX);
             const hex = formatEvenBytes(token[1]);
+            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.PUSH,
                 value: toHex(95 + (hex.length / 2)),
                 args: [hex],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
+                debugFileline: fileline,
+
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TOKEN)) {
             const token = input.match(grammar.macro.TOKEN);
             if (opcodes[token[1]]) {
+                const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
                 ops.push({
                     type: TYPES.OPCODE,
                     value: opcodes[token[1]],
                     args: [],
                     index: startingIndex + index + regex.countEmptyChars(token[0]),
+                    debugFileline: fileline,
+
                 });
             } else {
+                const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
                 ops.push({
                     type: TYPES.PUSH_JUMP_LABEL,
                     value: token[1],
                     args: [],
                     index: startingIndex + index + regex.countEmptyChars(token[0]),
+                    debugFileline: fileline,
+
                 });
             }
             index += token[0].length;
@@ -689,28 +728,28 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 templateParams,
             };
             currentContext = CONTEXT.MACRO;
-        // if a macro declaration is matched
+            // if a macro declaration is matched
         } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && grammar.topLevel.MACRO.test(input)) {
             const macro = input.match(grammar.topLevel.MACRO);
-            const type = macro[1];
+            const type = macro[2];
             if (type !== 'macro') {
                 throw new Error(`expected ${macro} to define a macro`);
             }
-            const body = macro[5];
+            const body = macro[6];
             macros = {
                 ...macros,
-                [macro[2]]: {
+                [macro[3]]: {
                     ...currentExpression,
-                    name: macro[2],
-                    takes: macro[3],
-                    ops: parser.parseMacro(body, macros, jumptables, index),
-                    body: macro[5],
+                    name: macro[3],
+                    takes: macro[4],
+                    ops: parser.parseMacro(body, macros, jumptables, index + macro[1].length, inputMap),
+                    body: macro[6],
                 },
             };
             index += macro[0].length;
             currentContext = CONTEXT.NONE;
             currentExpression = { templateParams: [] };
-        // if a code table is matched
+            // if a code table is matched
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.CODE_TABLE.test(input)) {
             const table = input.match(grammar.topLevel.CODE_TABLE);
             const body = table[3];
@@ -722,7 +761,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 },
             };
             index += table[0].length;
-        // if a packed jumptable is matched
+            // if a packed jumptable is matched
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE_PACKED.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
             const type = jumptable[1];
@@ -738,7 +777,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 },
             };
             index += jumptable[0].length;
-        // if a jumptable is matched
+            // if a jumptable is matched
         } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
             const type = jumptable[1];
@@ -768,7 +807,7 @@ parser.removeComments = (string) => {
     const commentRegex = /\/\*(.|\n)*?\*\/|\/\/.*/;
     let match = data.match(commentRegex);
     while (match) {
-        data = data.replace(commentRegex, data.match(commentRegex)[0].replace(/./g, ''));
+        data = data.replace(commentRegex, data.match(commentRegex)[0].replace(/./g, ' '));
         match = data.match(commentRegex);
     }
     return data;
