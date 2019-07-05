@@ -1,9 +1,12 @@
 import browser from 'webextension-polyfill';
+import {
+    errorLog,
+} from '~utils/log';
 
 export default function get(keys, {
     sync = false,
 } = {}) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         browser.storage[sync ? 'sync' : 'local']
             .get(keys)
             .then((values) => {
@@ -13,6 +16,9 @@ export default function get(keys, {
 
                 resolve(result);
             })
-            .catch(error => console.error(error));
+            .catch((error) => {
+                errorLog(error);
+                reject();
+            });
     });
 }

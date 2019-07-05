@@ -1,5 +1,8 @@
 import browser from 'webextension-polyfill';
 import gql from 'graphql-tag';
+import {
+    errorLog,
+} from '~utils/log';
 import GraphQLService from '../services/GraphQLService';
 
 export default function acceptConnection() {
@@ -14,10 +17,10 @@ export default function acceptConnection() {
                     query: gql(`{${query}}`),
                 });
             } catch (error) {
-                console.error(error);
+                errorLog('Query data from GraphQL Service failed.', error);
             }
         }
 
-        return result;
+        return result || {};
     });
 }
