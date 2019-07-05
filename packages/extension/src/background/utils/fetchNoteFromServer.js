@@ -21,6 +21,7 @@ export default async function fetchNoteFromServer({
                 noteAccess {
                     account {
                         id
+                        address
                     }
                     sharedSecret
                     note {
@@ -31,6 +32,7 @@ export default async function fetchNoteFromServer({
                         }
                         owner {
                             id
+                            address
                         }
                     }
                 }

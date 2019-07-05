@@ -3,16 +3,16 @@ import dataKey from '../dataKey';
 
 describe('dataKey', () => {
     let consoleStub;
-    let errors = [];
+    let warnings = [];
 
     beforeEach(() => {
-        consoleStub = stub(console, 'error');
-        consoleStub.callsFake(message => errors.push(message));
+        consoleStub = stub(console, 'warn');
+        consoleStub.callsFake(message => warnings.push(message));
     });
 
     afterEach(() => {
         consoleStub.restore();
-        errors = [];
+        warnings = [];
     });
 
     it('return a key for storage using pattern defined in config/dataKey', () => {
@@ -93,7 +93,7 @@ describe('dataKey', () => {
                 whatever: 'val',
             },
         )).toBe('');
-        expect(errors.length).toBe(0);
+        expect(warnings.length).toBe(0);
     });
 
     it('keep variable if key is not defined in data', () => {
@@ -103,7 +103,7 @@ describe('dataKey', () => {
                 name: 'abc',
             },
         )).toBe('a:{count}');
-        expect(errors.length).toBe(1);
+        expect(warnings.length).toBe(1);
 
         expect(dataKey(
             'item_{id}_{name}',
@@ -111,6 +111,6 @@ describe('dataKey', () => {
                 name: 'abc',
             },
         )).toBe('item_{id}_abc');
-        expect(errors.length).toBe(2);
+        expect(warnings.length).toBe(2);
     });
 });

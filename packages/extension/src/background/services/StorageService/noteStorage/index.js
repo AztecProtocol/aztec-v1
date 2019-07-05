@@ -13,6 +13,7 @@ const createOrUpdate = async (note) => {
     const {
         id,
         assetKey,
+        ownerKey,
         action,
     } = note;
 
@@ -31,6 +32,7 @@ const createOrUpdate = async (note) => {
         value,
         status,
         asset: assetKey,
+        owner: ownerKey,
     };
 
     const {
