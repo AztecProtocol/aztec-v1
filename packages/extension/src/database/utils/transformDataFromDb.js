@@ -1,3 +1,7 @@
+import {
+    undefinedField,
+} from './transformDataForDb';
+
 export default function transformDataFromDb(fields, rawData) {
     const data = {};
     if (!rawData) {
@@ -5,7 +9,7 @@ export default function transformDataFromDb(fields, rawData) {
     }
 
     fields.forEach((field, i) => {
-        if (rawData[i] !== undefined) {
+        if (!Object.is(rawData[i], undefinedField)) {
             data[field] = rawData[i];
         }
     });
