@@ -1,8 +1,8 @@
 import enableApi from './tasks/enableApi';
-import delegateMessages from './tasks/delegateMessages';
+import listenMessagesFromClient from './tasks/listenMessagesFromClient';
 
 const runScript = () => {
-    delegateMessages();
+    listenMessagesFromClient();
     enableApi();
 };
 
