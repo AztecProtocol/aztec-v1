@@ -5,6 +5,7 @@ import {
 } from '~utils/storage';
 import errorAction from '~database/utils/errorAction';
 import transformDataForDb from '~database/utils/transformDataForDb';
+import transformDataFromDb from '~database/utils/transformDataFromDb';
 
 export default async function setData(
     data,
@@ -27,39 +28,35 @@ export default async function setData(
     return lock(
         key,
         async () => {
-            const existingData = await get(key);
-            if (existingData) {
+            let storageData = await get(key);
+            let ignored = false;
+
+            if (storageData) {
                 if (ignoreDuplicate) {
-                    return {
-                        data: {
-                            [key]: existingData,
-                        },
-                        modified: [],
-                    };
-                }
-                if (!forceUpdate) {
+                    ignored = true;
+                } else if (!forceUpdate) {
                     const info = id ? `id "${id}"` : `key "${key}"`;
                     return errorAction(`Model '${name}' with ${info} already exists.`);
                 }
             }
 
-            let toSave = {};
-            fields.forEach((field) => {
-                if (field in data) {
-                    toSave[field] = data[field];
-                }
-            });
-            toSave = transformDataForDb(fields, toSave);
-
-            await set({
-                [key]: toSave,
-            });
+            let modified = [];
+            if (!ignored) {
+                storageData = transformDataForDb(fields, data);
+                await set({
+                    [key]: storageData,
+                });
+                modified = [key];
+            }
 
             return {
                 data: {
-                    [key]: toSave,
+                    [key]: transformDataFromDb(fields, storageData),
                 },
-                modified: [key],
+                storage: {
+                    [key]: storageData,
+                },
+                modified,
             };
         },
     );

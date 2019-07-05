@@ -28,17 +28,12 @@ export default async function setIdKeyMapping(
         async () => {
             let key = await get(id);
             let count = await get(autoIncrementBy) || 0;
+            let ignored = false;
 
             if (key) {
                 if (ignoreDuplicate) {
-                    return {
-                        data: {
-                            [id]: key,
-                        },
-                        modified: [],
-                    };
-                }
-                if (!forceUpdate) {
+                    ignored = true;
+                } else if (!forceUpdate) {
                     return errorAction(`Model '${name}' with id "${id}" is already defined.`);
                 }
             } else {
@@ -58,37 +53,42 @@ export default async function setIdKeyMapping(
                 }
             }
 
-            const existingData = await get(key);
-            if (!existingData) {
-                count += 1;
-            } else {
-                if (ignoreDuplicate) {
-                    return {
-                        data: {
-                            [id]: key,
-                        },
-                        modified: [],
-                    };
-                }
-                if (!forceUpdate) {
+            let existingData;
+            let modified = [];
+
+            if (!ignored) {
+                existingData = await get(key);
+
+                if (!existingData) {
+                    count += 1;
+                } else if (ignoreDuplicate) {
+                    ignored = true;
+                } else if (!forceUpdate) {
                     return errorAction(`Model '${name}' with key "${key}" is already defined.`);
                 }
             }
 
-            await set({
-                [id]: key,
-                [autoIncrementBy]: count,
-            });
+            if (!ignored) {
+                await set({
+                    [id]: key,
+                    [autoIncrementBy]: count,
+                });
+                modified = [
+                    id,
+                    autoIncrementBy,
+                ];
+            }
 
             return {
                 data: {
                     [id]: key,
-                    [autoIncrementBy]: count + 1,
+                    [autoIncrementBy]: count,
                 },
-                modified: [
-                    id,
-                    autoIncrementBy,
-                ],
+                storage: {
+                    [id]: key,
+                    [autoIncrementBy]: count,
+                },
+                modified,
             };
         },
     );
