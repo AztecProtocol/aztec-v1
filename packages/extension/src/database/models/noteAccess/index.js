@@ -1,7 +1,7 @@
 import Model from '~database/helpers/Model';
 
 export default Model({
-    name: 'note',
+    name: 'noteAccess',
     fields: [
         'sharedSecret',
         'value',

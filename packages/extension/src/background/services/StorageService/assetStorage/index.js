@@ -11,6 +11,7 @@ export default {
             modified,
         } = await assetModel.set(
             {
+                ...asset,
                 id,
                 balance: 0,
             },
