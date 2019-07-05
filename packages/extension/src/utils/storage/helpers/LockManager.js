@@ -104,7 +104,7 @@ class LockManager {
 
         this.isRunning = false;
         const listeners = this.onFinishedListeners;
-        this.onFinishedListeners = listeners.filter(l => l.persisting);
+        this.onFinishedListeners = listeners.filter(l => l.persistent);
         asyncForEach(listeners, async ({
             cb,
             resolve,
@@ -120,14 +120,14 @@ class LockManager {
     onIdle = async (
         cb,
         {
-            persisting = false,
+            persistent = false,
         } = {},
     ) => {
-        const res = cb && (!this.queue.size || !persisting)
+        const res = cb && (!this.queue.size || !persistent)
             ? cb()
             : true;
 
-        if (!this.queue.size && !persisting) {
+        if (!this.queue.size && !persistent) {
             return res;
         }
 
@@ -135,7 +135,7 @@ class LockManager {
             this.onFinishedListeners.push({
                 cb,
                 resolve,
-                persisting,
+                persistent,
             });
         });
     };

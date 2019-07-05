@@ -13,6 +13,8 @@ import {
 } from './database/note';
 import {
     getNoteAccesses,
+    getNoteAccessById,
+    getNoteChangeLog,
 } from './database/noteAccess';
 
 export const typeDefs = gql`
@@ -36,9 +38,17 @@ export const typeDefs = gql`
         account: Account!
         sharedSecret: String!
     }
+    type NoteChangeLog {
+        id: ID!
+        account: Account!
+        noteAccess: NoteAccess!
+        action: String!
+        timestamp: Int!
+    }
     type Query {
         notes(first: Int!, id_gt: ID): [Note!]
         noteAccess(first: Int!, id_gt: ID, account: ID): [NoteAccess!]
+        noteChangeLog(first: Int!, account: ID, id_gt: ID): [NoteChangeLog!]
     }
 `;
 
@@ -46,13 +56,18 @@ export const resolvers = {
     Query: {
         notes: getNotes,
         noteAccess: getNoteAccesses,
+        noteChangeLog: getNoteChangeLog,
     },
     Note: {
-        asset: note => getAssetById(note.asset),
-        owner: note => getAccountById(note.owner),
+        asset: ({ asset }) => getAssetById(asset),
+        owner: ({ owner }) => getAccountById(owner),
     },
     NoteAccess: {
-        note: noteAccess => getNoteById(noteAccess.note),
-        account: noteAccess => getAccountById(noteAccess.account),
+        note: ({ note }) => getNoteById(note),
+        account: ({ account }) => getAccountById(account),
+    },
+    NoteChangeLog: {
+        account: ({ account }) => getAccountById(account),
+        noteAccess: ({ noteAccess }) => getNoteAccessById(noteAccess),
     },
 };

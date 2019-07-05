@@ -1,6 +1,7 @@
 import {
     errorLog,
 } from '~utils/log';
+import transformDataForDb from '~database/utils/transformDataForDb';
 import get from './get';
 import set from './set';
 import update from './update';
@@ -36,6 +37,9 @@ export default function Model(config) {
     if (!validateConfig(config)) {
         return {};
     }
+    const {
+        fields,
+    } = config;
 
     return {
         get: get.bind({
@@ -47,5 +51,6 @@ export default function Model(config) {
         update: update.bind({
             config,
         }),
+        toStorageData: data => transformDataForDb(fields, data),
     };
 }

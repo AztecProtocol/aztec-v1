@@ -1,20 +1,28 @@
 import Query from '~utils/Query';
+import {
+    errorLog,
+} from '~utils/log';
 
 export default async function fetchNoteFromServer({
     graphQLServerUrl = 'http://localhost:4000/',
     numberOfNotes = 1,
-    account = '',
+    account,
     lastId = '',
 } = {}) {
-    let query;
-    const variables = {
-        numberOfNotes,
-        lastId,
-    };
-    if (account) {
-        query = `
-            query($numberOfNotes: Int!, $lastId: ID, $account: ID) {
-                noteAccess(first: $numberOfNotes, id_gt: $lastId, account: $account) {
+    if (!account) {
+        errorLog("'account' cannot be empty");
+        return [];
+    }
+
+    const query = `
+        query($numberOfNotes: Int!, $account: ID, $lastId: ID) {
+            noteChangeLog(first: $numberOfNotes, account: $account, id_gt: $lastId) {
+                id
+                noteAccess {
+                    account {
+                        id
+                    }
+                    sharedSecret
                     note {
                         id
                         hash
@@ -26,23 +34,17 @@ export default async function fetchNoteFromServer({
                         }
                     }
                 }
+                action
+                timestamp
             }
-        `;
+        }
+    `;
 
-        variables.account = account;
-    } else {
-        query = `
-            query($numberOfNotes: Int!, $lastId: ID) {
-                notes(first: $numberOfNotes, id_gt: $lastId) {
-                    id
-                    hash
-                    asset {
-                        id
-                    }
-                }
-            }
-        `;
-    }
+    const variables = {
+        numberOfNotes,
+        account,
+        lastId,
+    };
 
     const data = await Query({
         graphQLServerUrl,
@@ -50,10 +52,21 @@ export default async function fetchNoteFromServer({
         variables,
     });
 
-    if (account) {
-        const noteAccess = (data && data.noteAccess) || [];
-        return noteAccess.map(n => n.note);
-    }
+    const {
+        noteChangeLog = [],
+    } = data || {};
 
-    return (data && data.notes) || [];
+    return noteChangeLog.map(({
+        id: logId,
+        noteAccess: {
+            note,
+            ...noteAccess
+        },
+        ...rest
+    }) => ({
+        ...note,
+        ...noteAccess,
+        ...rest,
+        logId,
+    }));
 }

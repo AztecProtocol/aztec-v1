@@ -4,8 +4,6 @@ import noteStorage from './noteStorage';
 export default {
     addNote: async (note) => {
         const {
-            id,
-            hash,
             asset,
         } = note;
 
@@ -14,8 +12,7 @@ export default {
         } = await assetStorage.createOrUpdate(asset);
 
         const noteData = {
-            id,
-            hash,
+            ...note,
             assetKey,
         };
         await noteStorage.createOrUpdate(noteData);

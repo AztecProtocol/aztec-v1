@@ -5,18 +5,11 @@ import {
 import StorageService from '../services/StorageService';
 import fetchNoteFromServer from '../utils/fetchNoteFromServer';
 
-export default async function sync({
-    notesPerRequest = 15,
-    account = '__account_id_0',
+const syncNotes = async ({
+    account,
     lastId = '',
-} = {}) {
-    onIdle(
-        () => console.log('--- database idle ---'),
-        {
-            persisting: true,
-        },
-    );
-
+    notesPerRequest = 10,
+} = {}) => {
     const newNotes = await fetchNoteFromServer({
         numberOfNotes: notesPerRequest,
         account,
@@ -24,17 +17,35 @@ export default async function sync({
     });
     console.log('syncNotes', newNotes);
 
+    await Promise.all(newNotes.map(note => StorageService.addNote(note)));
+    if (newNotes.length === notesPerRequest) {
+        const lastNote = newNotes[newNotes.length - 1];
+        await syncNotes({
+            account,
+            notesPerRequest,
+            lastId: lastNote.logId,
+        });
+    }
+};
+
+export default async function sync() {
+    onIdle(
+        () => console.log('--- database idle ---'),
+        {
+            persistent: true,
+        },
+    );
+
     chrome.storage.local.clear();
-    chrome.storage.local.getBytesInUse(null, (bytes) => {
-        console.log('getBytesInUse before optimized async', bytes);
-    });
 
     const startTimeAsync = Date.now();
-    await Promise.all(newNotes.map(note => StorageService.addNote(note)));
+    await syncNotes({
+        account: '__account_id_0',
+    });
     console.log(`(Optimized Async) Done in ${Date.now() - startTimeAsync} ms`);
 
     chrome.storage.local.getBytesInUse(null, (bytes) => {
-        console.log('getBytesInUse after optimized async', bytes);
+        console.log('getBytesInUse', bytes);
     });
     chrome.storage.local.get(null, data => console.info(data));
 }
