@@ -52,9 +52,10 @@ const createOrUpdate = async (note) => {
     const {
         [noteKey]: prevNoteData,
     } = prevData;
-    let savedData = prevData;
-
     const justCreated = modified.indexOf(id) >= 0;
+
+    const promises = [];
+
     if (!justCreated) {
         const {
             [noteKey]: prevNoteStorage,
@@ -63,9 +64,7 @@ const createOrUpdate = async (note) => {
         const hasChanged = prevNoteStorage.length !== newNoteStorage.length
             || prevNoteStorage.some((v, i) => v !== newNoteStorage[i]);
         if (hasChanged) {
-            ({
-                data: savedData,
-            } = await model.update(newData));
+            promises.push(model.update(newData));
         }
     }
 
@@ -77,28 +76,33 @@ const createOrUpdate = async (note) => {
     if (isOwner
         && (justCreated || status !== prevStatus)
     ) {
-        await assetModel.update({
+        promises.push(assetModel.update({
             key: assetKey,
             balance: (prevBalance) => {
                 const ratio = isNoteDestroyed ? -1 : 1;
                 return (prevBalance || 0) + (value * ratio);
             },
-        });
+        }));
 
         const assetValueKey = dataKey('assetValue', {
             assetKey,
             value,
         });
 
+
         // TODO - don't push note that's been removed
         if (isNoteDestroyed) {
-            await removeAssetValue(assetValueKey, noteKey);
+            promises.push(removeAssetValue(assetValueKey, noteKey));
         } else {
-            await pushAssetValue(assetValueKey, noteKey);
+            promises.push(pushAssetValue(assetValueKey, noteKey));
         }
     }
 
-    return savedData;
+    await Promise.all(promises);
+
+    return {
+        key: noteKey,
+    };
 };
 
 export default {
