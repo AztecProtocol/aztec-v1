@@ -3,12 +3,12 @@ import transformDataForDb, {
 } from '../transformDataForDb';
 import transformDataFromDb from '../transformDataFromDb';
 
-describe('transformDataForDb & transformDataFromDb', () => {
-    const fields = [
-        'name',
-        'color',
-    ];
+const fields = [
+    'name',
+    'color',
+];
 
+describe('transformDataForDb', () => {
     it('transform data object to an array for db', () => {
         expect(transformDataForDb(fields, {
             name: 'guacamole',
@@ -19,6 +19,15 @@ describe('transformDataForDb & transformDataFromDb', () => {
         ]);
     });
 
+    it('always transform data to an array', () => {
+        expect(transformDataForDb(fields, null)).toEqual([
+            undefinedField,
+            undefinedField,
+        ]);
+    });
+});
+
+describe('transformDataFromDb', () => {
     it('transform data array to an object from db', () => {
         expect(transformDataFromDb(fields, [
             'pikachu',
@@ -29,6 +38,12 @@ describe('transformDataForDb & transformDataFromDb', () => {
         });
     });
 
+    it('return null if data in db does not exist', () => {
+        expect(transformDataFromDb(fields, null)).toEqual(null);
+    });
+});
+
+describe('transformDataForDb & transformDataFromDb', () => {
     it('save undefined values as {undefinedField} and ignore them when transform back', () => {
         const longFields = [
             'name',
