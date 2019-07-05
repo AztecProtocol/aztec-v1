@@ -6,6 +6,7 @@ export default Model({
         'sharedSecret',
         'value',
         'asset',
+        'owner',
         'status',
     ],
 });
