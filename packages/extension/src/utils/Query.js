@@ -1,35 +1,30 @@
 import fetch from 'node-fetch';
+import {
+    errorLog,
+} from '~utils/log';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const dataNotReady = (data) => {
-    if (data === undefined || data === null) {
-        return true;
-    }
-
-    return Object.keys(data).some(key => data[key] === null);
-};
-
 export default async function Query({
-    graphQLServerUrl = 'http://localhost:4000/',
+    graphQLServerUrl,
     query,
     variables,
     retry = 3,
     retryDelay = 500,
 }) {
-    const response = await fetch(graphQLServerUrl, {
-        method: 'POST',
-        body: JSON.stringify({
-            query,
-            variables,
-        }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
     let data;
     try {
+        const response = await fetch(graphQLServerUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+                query,
+                variables,
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
         const json = await response.json();
         let errors;
         ({
@@ -37,21 +32,20 @@ export default async function Query({
             errors,
         } = json || {});
         if (errors) {
-            console.log(errors);
-            throw new Error('Fetch query from GraphQL server failed');
+            errorLog('Error fetching data from GraphQL server.', errors);
         }
     } catch (error) {
-        throw new Error(error);
-    }
+        if (retry > 0) {
+            await sleep(retryDelay);
 
-    if (retry > 0 && dataNotReady(data)) {
-        await sleep(retryDelay);
-
-        data = await Query({
-            query,
-            variables,
-            retry: retry - 1,
-        });
+            data = await Query({
+                query,
+                variables,
+                retry: retry - 1,
+            });
+        } else {
+            errorLog('Fetch query from GraphQL server failed.', error);
+        }
     }
 
     return data;
