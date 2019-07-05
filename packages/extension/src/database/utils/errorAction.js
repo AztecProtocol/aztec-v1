@@ -7,6 +7,7 @@ export default function errorAction(message) {
 
     return {
         data: {},
+        storage: {},
         modified: [],
     };
 }
