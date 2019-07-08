@@ -45,7 +45,7 @@ function check(condition, message) {
 
 const parser = {};
 
-// Generate random 5 byte (i.e. 10 character) hexadecimal number for use as id
+// Generate random 5 byte (i.e. 10 character) hexadecimal number for use as an id
 parser.getId = () => {
     return [...new Array(10)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 };
@@ -63,6 +63,7 @@ parser.processMacroLiteral = (op, macros) => {
     if (op.match(grammar.macro.LITERAL_DECIMAL)) {
         return new BN(op.match(grammar.macro.LITERAL_DECIMAL)[1], 10);
     }
+    // TODO: is this needed? It converts opcodes weirdly
     if (macros[op]) {
         check(
             macros[op].ops.length === 1 && macros[op].ops[0].type === TYPES.PUSH,
@@ -73,90 +74,31 @@ parser.processMacroLiteral = (op, macros) => {
     throw new Error(`I don't know how to process literal ${op}`);
 };
 
-// what a godawful mess! So, this is supposed to unpick
-// a template paramter like 'dup1+4' or 'swap14-3'
+// unpicks template parameters like <dup1+3> and <swap 16-5>
 parser.processModifiedOpcode = (literal, macros) => {
-    // oh foobar
-    if (literal.includes('-')) {
-        return normalize(literal.split('-').map((rawOp) => {
-            const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperators(op)) {
-                return parser.processModifiedOpcode(op, macros);
-            }
-            if (regex.isLiteral(op)) {
-                return parser.processMacroLiteral(op, macros);
-            }
-            if (opcodes[op]) {
-                return new BN(opcodes[op], 16);
-            }
-            if (macros[op]) {
-                check(
-                    macros[op].ops.length === 1,
-                    `cannot sub ${op}, ${macros[op].ops} has more than 1 opcode`
-                );
-                const { value } = new BN(macros[op].ops, 16);
-                check(
-                    value.gt(new BN('80', 16)) && value.lt(new BN('a0', 16)),
-                    `cannot sub ${op}, this is not a dup or swap opcode`
-                );
-                return value;
-            }
-            throw new Error(`I don't know how to process modified template ${op}`);
-        }).reduce((acc, val) => {
-            if (!acc) {
-                return val;
-            }
-            return acc.sub(val);
-        }, null));
+    const arithmeticStackOpcodeRegex = new RegExp('\\s*(dup|swap)(0x[0-9a-fA-F]+|\\d+)([+\\-])(0x[0-9a-fA-F]+|\\d+)\\s*');
+    const [, stackOpcodeType, firstNumber, operation, secondNumber] = literal.match(arithmeticStackOpcodeRegex);
+
+    let finalNumber;
+    // NB currently a bit weird as if either number is an opcode it will add/sub the bytecode value of that opcode
+    if (operation === '+') {
+        finalNumber = parser.processMacroLiteral(firstNumber, macros).add(parser.processMacroLiteral(secondNumber), macros);
+    } else if (operation === '-') {
+        finalNumber = parser.processMacroLiteral(firstNumber, macros).sub(parser.processMacroLiteral(secondNumber), macros);
+    } else {
+        throw new Error(`operation is neither + nor - but "${operation}". How did I even get here? This shouldn't happen. I am confusion.`);
     }
-    if (literal.includes('+')) {
-        return normalize(literal.split('+').map((rawOp) => {
-            const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperators(op)) {
-                return parser.processModifiedOpcode(op, macros);
-            }
-            if (regex.isLiteral(op)) {
-                return parser.processMacroLiteral(op, macros);
-            }
-            if (opcodes[op]) {
-                return new BN(opcodes[op], 16);
-            }
-            if (macros[op]) {
-                check(
-                    macros[op].ops.length === 1,
-                    `cannot add ${op}, ${macros[op].ops} has more than 1 opcode`
-                );
-                const { value } = new BN(macros[op].ops, 16);
-                check(
-                    value.gt(new BN('80', 16)) && value.lt(new BN('a0', 16)),
-                    `cannot add ${op}, this is not a dup or swap opcode`
-                );
-                return value;
-            }
-            throw new Error(`I don't know how to process modified template ${op}`);
-        }).reduce((acc, val) => {
-            if (!acc) {
-                return val;
-            }
-            return acc.add(val);
-        }, null));
+    if (finalNumber < 1 || finalNumber > 16) {
+        throw new Error(`result of arithmetic operation ${firstNumber}${operation}${secondNumber} is ${finalNumber} but must be between 1 and 16 inclusive`);
     }
-    check(
-        BN.isBN(literal),
-        `Honestly, at this point I have no idea what's going on. What have you done?! ${literal}`
-    );
-    check(
-        literal.gt(new BN('80', 16)) && literal.lt(new BN('a0', 16)),
-        `opcode ${literal} is not a valid DUP or SWAP opcode`
-    );
-    return literal; // ?
+    return opcodes[stackOpcodeType + finalNumber.toString()];
 };
 
 parser.processTemplateLiteral = (literal, macros) => {
     if (literal.includes('-')) {
         return normalize(literal.split('-').map((rawOp) => {
             const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperators(op)) {
+            if (regex.containsOperatorsAndIsNotStackOp(op)) {
                 return parser.processTemplateLiteral(op, macros);
             }
             return parser.processMacroLiteral(op, macros);
@@ -170,7 +112,7 @@ parser.processTemplateLiteral = (literal, macros) => {
     if (literal.includes('+')) {
         return normalize(literal.split('+').map((rawOp) => {
             const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperators(op)) {
+            if (regex.containsOperatorsAndIsNotStackOp(op)) {
                 return parser.processTemplateLiteral(op, macros);
             }
             return parser.processMacroLiteral(op, macros);
@@ -184,7 +126,7 @@ parser.processTemplateLiteral = (literal, macros) => {
     if (literal.includes('*')) {
         return normalize(literal.split('*').map((rawOp) => {
             const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperators(op)) {
+            if (regex.containsOperatorsAndIsNotStackOp(op)) {
                 return parser.processTemplateLiteral(op, macros);
             }
             return parser.processMacroLiteral(op, macros);
@@ -315,7 +257,7 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile: `;
+        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly undefined jump labels, or you misspelled a label/opcode?:`;
         result.unmatchedJumps.forEach((unmatchedJump) => {
             errorString += `\n"${unmatchedJump.label}" in "${unmatchedJump.debugFileline.filename}" at line ${unmatchedJump.debugFileline.lineNumber}`;
         }); // NB currently not using bytecodeIndex or lineIndex but they might be useful}
@@ -415,14 +357,13 @@ parser.processMacroInternal = (
                 const macroNameIndex = templateParams.indexOf(op.value);
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
-                let templateName = templateArguments[macroNameIndex];
-
+                let templateParameterValue = templateArguments[macroNameIndex];
                 const parsedName = parser.substituteTemplateArguments([op.value], templateRegExps);
                 if (parsedName.length !== 1) {
                     throw new Error('cannot parse template invokation ', parsedName);
                 }
-                ({ macros, templateName } = parser.parseTemplate(parsedName[0], macros, index));
-                const result = parser.processMacroInternal(templateName, offset, [], macros, map, jumpindicesInitial, []);
+                ({ macros, templateName: templateParameterValue } = parser.parseTemplate(parsedName[0], macros, index));
+                const result = parser.processMacroInternal(templateParameterValue, offset, [], macros, map, jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
                 jumptable[index] = result.unmatchedJumps;
                 jumpindices = { ...jumpindices, ...result.jumpindices };

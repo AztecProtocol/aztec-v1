@@ -140,7 +140,7 @@ describe('parser tests', () => {
         start
         __codesize(FOO) 0x1234aae 123554
             `;
-            const fullOps = parser.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
+            const fullOps = parser.parseMacro(source, {FOO: 'FOO', BAR: 'BAR'}, 0);
             const ops = fullOps.map((o) => {
                 expect(typeof (o.index)).to.equal('number');
                 return { args: o.args, type: o.type, value: o.value };

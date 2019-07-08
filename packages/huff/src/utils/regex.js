@@ -36,21 +36,13 @@ regex.isolateTemplate = (val) => {
     // return match[0].includes(' ') ? null : match[0];
 };
 
-regex.containsOperators = (input) => {
+regex.containsOperatorsAndIsNotStackOp = (input) => {
     return operators.test(input) && !input.includes('dup') && !input.includes('swap'); // .test(input);
 };
 
 regex.isLiteral = (input) => {
-    if (regex.containsOperators(input)) {
-        return true;
-    }
-    if (input.match(new RegExp('^(?:\\s*\\n*)*0x([0-9a-fA-F]+)\\b'))) {
-        return true;
-    }
-    if (input.match(new RegExp('^(?:\\s*\\n*)*(\\d+)\\b'))) {
-        return true;
-    }
-    return false;
+    return regex.containsOperatorsAndIsNotStackOp(input)
+        || input.match(new RegExp('^(?:\\s*\\n*)*((0x[0-9a-fA-F]+)|(\\d+))\\b')); // dec or hex
 };
 
 regex.isModifiedOpcode = (input) => {
