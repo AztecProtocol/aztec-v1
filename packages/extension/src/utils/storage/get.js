@@ -9,7 +9,6 @@ export default function get(keys, {
                 const result = values && typeof keys === 'string'
                     ? values[keys]
                     : values;
-
                 resolve(result);
             });
     });

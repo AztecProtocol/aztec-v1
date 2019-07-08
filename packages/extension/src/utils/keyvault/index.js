@@ -9,37 +9,34 @@ nacl.util = tweetNaclUtils;
 const { Random } = bitcore.crypto;
 const { Hash } = bitcore.crypto;
 
-function strip0x (input) {
-    if (typeof(input) !== 'string') {
+function strip0x(input) {
+    if (typeof (input) !== 'string') {
         return input;
     }
-    if (input.length >= 2 && input.slice(0,2) === '0x') {
+    if (input.length >= 2 && input.slice(0, 2) === '0x') {
         return input.slice(2);
     }
 
     return input;
-
 }
-function add0x (input) {
-    if (typeof(input) !== 'string') {
+function add0x(input) {
+    if (typeof (input) !== 'string') {
         return input;
     }
-    if (input.length < 2 || input.slice(0,2) !== '0x') {
-        return '0x' + input;
+    if (input.length < 2 || input.slice(0, 2) !== '0x') {
+        return `0x${input}`;
     }
 
     return input;
-
 }
 
-function leftPadString (stringToPad, padChar, length) {
-
+function leftPadString(stringToPad, padChar, length) {
     let repreatedPadChar = '';
-    for (let i=0; i<length; i++) {
+    for (let i = 0; i < length; i++) {
         repreatedPadChar += padChar;
     }
 
-    return ( (repreatedPadChar + stringToPad).slice(-length) );
+    return ((repreatedPadChar + stringToPad).slice(-length));
 }
 
 function nacl_encodeHex(msgUInt8Arr) {
@@ -53,7 +50,7 @@ function nacl_decodeHex(msgHex) {
 }
 
 
-function generateSalt (byteCount) {
+function generateSalt(byteCount) {
     return bitcore.crypto.Random.getRandomBuffer(byteCount || 32).toString('base64');
 }
 
@@ -63,20 +60,21 @@ export const utils = {
     encryptString: (string, pwDerivedKey) => {
         const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
         const encObj = nacl.secretbox(nacl.util.decodeUTF8(string), nonce, pwDerivedKey);
-        const encString = { 'encStr': nacl.util.encodeBase64(encObj),
-            'nonce': nacl.util.encodeBase64(nonce)};
+        const encString = {
+            encStr: nacl.util.encodeBase64(encObj),
+            nonce: nacl.util.encodeBase64(nonce),
+        };
         return encString;
     },
 
     decryptString: (cipher, pwDerivedKey) => {
-
         const secretbox = nacl.util.decodeBase64(cipher.encStr);
         const nonce = nacl.util.decodeBase64(cipher.nonce);
 
         const decryptedStr = nacl.secretbox.open(secretbox, nonce, pwDerivedKey);
 
         if (!decryptedStr) {
-            throw new Error("Decryption failed!");
+            throw new Error('Decryption failed!');
         }
 
         return nacl.util.encodeUTF8(decryptedStr);
@@ -84,20 +82,17 @@ export const utils = {
 
     // This function is tested using the test vectors here:
     // http://www.di-mgt.com.au/sha_testvectors.html
-    concatAndSha256 : (entropyBuf0, entropyBuf1)=> {
-
+    concatAndSha256: (entropyBuf0, entropyBuf1) => {
         const totalEnt = Buffer.concat([entropyBuf0, entropyBuf1]);
         if (totalEnt.length !== entropyBuf0.length + entropyBuf1.length) {
-            throw new Error('generateRandomSeed: Logic error! Concatenation of entropy sources failed.')
+            throw new Error('generateRandomSeed: Logic error! Concatenation of entropy sources failed.');
         }
 
         const hashedEnt = Hash.sha256(totalEnt);
 
         return hashedEnt;
-    }
-}
-
-
+    },
+};
 
 
 export class KeyStore {
@@ -107,29 +102,28 @@ export class KeyStore {
         hdPathString,
         salt,
     }) {
-
         // Default hdPathString
         if (!hdPathString) {
             throw new Error("Keystore: Must include hdPathString in createVault inputs. Suggested alternatives are m/0'/0'/0' for previous lightwallet default, or m/44'/60'/0'/0 for BIP44 (used by Jaxx & MetaMask)");
         }
         if (!salt) {
-            throw new Error("Keystore: Must include salt in createVault inputs.");
+            throw new Error('Keystore: Must include salt in createVault inputs.');
         }
         if (!mnemonic) {
-            throw new Error("Keystore: Must include mnemonic in createVault inputs.");
+            throw new Error('Keystore: Must include mnemonic in createVault inputs.');
         }
         if (!pwDerivedKey) {
-            throw new Error("Keystore: Must include pwDerivedKey in createVault inputs.");
+            throw new Error('Keystore: Must include pwDerivedKey in createVault inputs.');
         }
 
-        this.salt = salt
-        this.hdPathString = hdPathString
+        this.salt = salt;
+        this.hdPathString = hdPathString;
         this.encSeed = undefined;
         this.encHdRootPriv = undefined;
         this.hdIndex = 0;
-        if ( (typeof pwDerivedKey !== 'undefined') && (typeof mnemonic !== 'undefined') ){
+        if ((typeof pwDerivedKey !== 'undefined') && (typeof mnemonic !== 'undefined')) {
             const words = mnemonic.split(' ');
-            if (!Mnemonic.isValid(mnemonic, Mnemonic.Words.ENGLISH) || words.length !== 12){
+            if (!Mnemonic.isValid(mnemonic, Mnemonic.Words.ENGLISH) || words.length !== 12) {
                 throw new Error('KeyStore: Invalid mnemonic');
             }
 
@@ -147,11 +141,9 @@ export class KeyStore {
             this.encHdRootPriv = utils.encryptString(hdPathKey, pwDerivedKey);
             this.privacyKeys = this.generatePrivacyKeys(pwDerivedKey);
         }
-
     }
 
-    generatePrivacyKeys(pwDerivedKey){
-
+    generatePrivacyKeys(pwDerivedKey) {
         const hdRoot = utils.decryptString(this.encHdRootPriv, pwDerivedKey);
 
         if (hdRoot.length === 0) {
@@ -166,14 +158,12 @@ export class KeyStore {
             // Way too small key, something must have gone wrong
             // Halt and catch fire
             throw new Error('Private key suspiciously small: < 16 bytes. Aborting!');
-        }
-        else if (privkeyBuf.length < 32) {
+        } else if (privkeyBuf.length < 32) {
             // Pad private key if too short
             // bitcore has a bug where it sometimes returns
             // truncated keys
             privkeyHex = leftPadString(privkeyBuf.toString('hex'), '0', 64);
-        }
-        else if (privkeyBuf.length > 32) {
+        } else if (privkeyBuf.length > 32) {
             throw new Error('Private key larger than 32 bytes. Aborting!');
         }
 
@@ -186,16 +176,15 @@ export class KeyStore {
         return {
             publicKey: pubKeyBase64,
             encPrivKey,
-        }
+        };
     }
 
     curve25519Encrypt(receiverPublicKey, msgParams) {
-
         const ephemeralKeyPair = nacl.box.keyPair();
         try {
             var pubKeyUInt8Array = nacl.util.decodeBase64(receiverPublicKey);
-        } catch (err){
-            throw new Error('Bad public key')
+        } catch (err) {
+            throw new Error('Bad public key');
         }
 
         const msgParamsUInt8Array = nacl.util.decodeUTF8(msgParams);
@@ -212,15 +201,13 @@ export class KeyStore {
         };
         // return encrypted msg data
         return output;
-
     }
 
     curve25519Decrypt(encryptedData, pwDerivedKey) {
-
         const privKey = utils.decryptString(this.privacyKeys.encPrivKey, pwDerivedKey);
         // string to buffer to UInt8Array
         const recieverPrivateKeyUint8Array = nacl_decodeHex(privKey);
-        const recieverEncryptionPrivateKey = nacl.box.keyPair.fromSecretKey(recieverPrivateKeyUint8Array).secretKey
+        const recieverEncryptionPrivateKey = nacl.box.keyPair.fromSecretKey(recieverPrivateKeyUint8Array).secretKey;
 
         const nonce = nacl.util.decodeBase64(encryptedData.nonce);
         const ciphertext = nacl.util.decodeBase64(encryptedData.ciphertext);
@@ -232,71 +219,58 @@ export class KeyStore {
         // return decrypted msg data
         try {
             var output = nacl.util.encodeUTF8(decryptedMessage);
-        }catch(err) {
-            throw new Error('Decryption failed.')
+        } catch (err) {
+            throw new Error('Decryption failed.');
         }
-        if (output){
+        if (output) {
             return output;
         }
-        throw new Error('Decryption failed.')
-
-
-
+        throw new Error('Decryption failed.');
     }
 
 
     serialize() {
         const jsonKS = {
-            'encSeed': this.encSeed,
-            'encHdRootPriv' : this.encHdRootPriv,
-            'hdPathString' : this.hdPathString,
-            'salt': this.salt,
-            'hdIndex' : this.hdIndex,
-            'privacyKeys': this.privacyKeys,
+            encSeed: this.encSeed,
+            encHdRootPriv: this.encHdRootPriv,
+            hdPathString: this.hdPathString,
+            salt: this.salt,
+            hdIndex: this.hdIndex,
+            privacyKeys: this.privacyKeys,
         };
 
         return JSON.stringify(jsonKS);
-    };
+    }
 
     exportSeed(pwDerivedKey) {
-
-        if(!this.isDerivedKeyCorrect(pwDerivedKey)) {
-            throw new Error("Incorrect derived key!");
+        if (!this.isDerivedKeyCorrect(pwDerivedKey)) {
+            throw new Error('Incorrect derived key!');
         }
 
         const paddedSeed = utils.decryptString(this.encSeed, pwDerivedKey);
         return paddedSeed.trim();
-    };
+    }
 
     exportPrivateKey(pwDerivedKey) {
-
-        if(!this.isDerivedKeyCorrect(pwDerivedKey)) {
-            throw new Error("Incorrect derived key!");
+        if (!this.isDerivedKeyCorrect(pwDerivedKey)) {
+            throw new Error('Incorrect derived key!');
         }
 
         const privKey = utils.decryptString(this.encHdRootPriv, pwDerivedKey);
 
         return privKey;
-    };
+    }
 
     isDerivedKeyCorrect(pwDerivedKey) {
-
         const paddedSeed = utils.decryptString(this.encSeed, pwDerivedKey);
-        console.log('asdf', paddedSeed);
         if (paddedSeed && paddedSeed.length > 0) {
             return true;
         }
-
-
-    };
-
+    }
 }
 
 
-
-KeyStore.generateDerivedKey = ({ password, salt}) => {
-
-
+KeyStore.generateDerivedKey = ({ password, salt }) => {
     if (!salt) {
         salt = generateSalt(32);
     }
@@ -307,13 +281,11 @@ KeyStore.generateDerivedKey = ({ password, salt}) => {
     const interruptStep = 200;
 
     return new Promise((resolve, reject) => {
-        scrypt(password, salt, logN, r, dkLen, interruptStep, (key)=> {
-            resolve({pwDerivedKey:key, salt});
-        } , 'binary');
+        scrypt(password, salt, logN, r, dkLen, interruptStep, (key) => {
+            resolve({ pwDerivedKey: key, salt });
+        }, 'binary');
     });
-}
-
-
+};
 
 
 // External static functions
@@ -329,43 +301,36 @@ KeyStore.generateDerivedKey = ({ password, salt}) => {
 // If extraEntropy is not set, the random number generator
 // is used directly.
 
-KeyStore.generateRandomSeed = function(extraEntropy) {
-
+KeyStore.generateRandomSeed = function (extraEntropy) {
     let seed = '';
     if (extraEntropy === undefined) {
         seed = new Mnemonic(Mnemonic.Words.ENGLISH);
-    }
-    else if (typeof extraEntropy === 'string') {
+    } else if (typeof extraEntropy === 'string') {
         const entBuf = new Buffer(extraEntropy);
         const randBuf = Random.getRandomBuffer(256 / 8);
         const hashedEnt = utils.concatAndSha256(randBuf, entBuf).slice(0, 128 / 8);
         seed = new Mnemonic(hashedEnt, Mnemonic.Words.ENGLISH);
-    }
-    else {
-        throw new Error('generateRandomSeed: extraEntropy is set but not a string.')
+    } else {
+        throw new Error('generateRandomSeed: extraEntropy is set but not a string.');
     }
 
     return seed.toString();
 };
 
-KeyStore.isSeedValid = function(seed) {
-    return Mnemonic.isValid(seed, Mnemonic.Words.ENGLISH)
+KeyStore.isSeedValid = function (seed) {
+    return Mnemonic.isValid(seed, Mnemonic.Words.ENGLISH);
 };
 
 
-
-
-KeyStore.deserialize = (keystore, pwDerivedKey) => {
-    const jsonKS = JSON.parse(keystore);
-    
+KeyStore.deserialize = (jsonKs, pwDerivedKey) => {
     // we have an encrypted keyStore here. We need to decrypt the functions and init
-    const mnemonic = utils.decryptString(jsonKS.encSeed, pwDerivedKey).trim();
+    const mnemonic = utils.decryptString(jsonKs.encSeed, pwDerivedKey).trim();
 
     // Create keystore
     const keystoreX = new KeyStore({
         mnemonic,
-        salt: jsonKS.salt,
-        hdPathString : jsonKS.hdPathString,
+        salt: jsonKs.salt,
+        hdPathString: jsonKs.hdPathString,
         pwDerivedKey,
     });
 
@@ -373,4 +338,3 @@ KeyStore.deserialize = (keystore, pwDerivedKey) => {
 };
 
 export default KeyStore;
-
