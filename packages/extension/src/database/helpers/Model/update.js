@@ -11,16 +11,45 @@ export default async function update(data) {
     const {
         id,
     } = data;
+    const {
+        name,
+        dataKeyPattern,
+    } = this.config;
     let {
         key,
     } = data;
-    const {
-        name,
+    let {
         fields,
     } = this.config;
 
+    if (!dataKeyPattern) {
+        key = id;
+    } else if (!key && id) {
+        key = await get(id);
+    }
+
+    let subFieldsKey;
+    if (!Array.isArray(fields)) {
+        if (!dataKeyPattern) {
+            key = name;
+        }
+        const dataKey = fields.key;
+        ({ fields } = fields);
+        subFieldsKey = data[dataKey];
+        if (!subFieldsKey) {
+            return errorAction(`'${dataKey}' must be presented to update '${name}'.`);
+        }
+    }
+
     if (!id && !key) {
-        return errorAction(`'id' or 'key' must be presented to update '${name}'.`);
+        const requiredKeys = ['id'];
+        if (dataKeyPattern) {
+            requiredKeys.push('key');
+        }
+        const requiredStr = requiredKeys
+            .map(k => `'${k}'`)
+            .join(' or ');
+        return errorAction(`${requiredStr} must be presented to update '${name}'.`);
     }
 
     if (!key) {
@@ -34,9 +63,10 @@ export default async function update(data) {
         key,
         async () => {
             const prevData = await get(key) || {};
-            const newData = {
-                ...transformDataFromDb(fields, prevData),
-            };
+            const newData = transformDataFromDb(
+                fields,
+                !subFieldsKey ? prevData : prevData[subFieldsKey],
+            ) || {};
             fields
                 .filter(field => data[field] !== undefined)
                 .forEach((field) => {
@@ -45,7 +75,12 @@ export default async function update(data) {
                         ? val(newData[field])
                         : val;
                 });
-            const toSave = transformDataForDb(fields, newData);
+            const toSave = !subFieldsKey
+                ? transformDataForDb(fields, newData)
+                : {
+                    ...prevData,
+                    [subFieldsKey]: transformDataForDb(fields, newData),
+                };
 
             await set({
                 [key]: toSave,
@@ -53,7 +88,18 @@ export default async function update(data) {
 
             return {
                 data: {
-                    [key]: toSave,
+                    [key]: !subFieldsKey
+                        ? newData
+                        : {
+                            [subFieldsKey]: newData,
+                        },
+                },
+                storage: {
+                    [key]: !subFieldsKey
+                        ? toSave
+                        : {
+                            [subFieldsKey]: toSave[subFieldsKey],
+                        },
                 },
                 modified: [key],
             };

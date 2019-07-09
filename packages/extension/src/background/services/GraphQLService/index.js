@@ -27,4 +27,12 @@ export default {
 
         return data;
     },
+    mutate: async (mutation) => {
+        const response = await apollo.mutate(mutation);
+        const {
+            data,
+        } = response || {};
+
+        return data;
+    },
 };

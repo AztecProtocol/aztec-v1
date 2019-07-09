@@ -4,7 +4,10 @@ import {
 } from '~config/event';
 import generateRandomId from '~utils/generateRandomId';
 
-export default async function fetchFromContentScript(data = {}) {
+export default async function postToContentScript({
+    query,
+    mutation,
+}) {
     const requestId = generateRandomId();
 
     return new Promise((resolve) => {
@@ -24,7 +27,8 @@ export default async function fetchFromContentScript(data = {}) {
         window.postMessage({
             type: clientEvent,
             requestId,
-            ...data,
+            query,
+            mutation,
         }, '*');
     });
 }

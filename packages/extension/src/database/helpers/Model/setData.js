@@ -11,16 +11,13 @@ export default async function setData(
     data,
     {
         name,
+        key,
+        subFieldsKey,
         fields,
         forceUpdate = false,
         ignoreDuplicate = false,
     } = {},
 ) {
-    const {
-        key,
-        id,
-    } = data;
-
     if (!key) {
         return errorAction(`'key' must be presented to save '${name}' data`);
     }
@@ -31,10 +28,15 @@ export default async function setData(
             let storageData = await get(key);
             let ignored = false;
 
-            if (storageData) {
+            if (storageData
+              && (!subFieldsKey || storageData[subFieldsKey])
+            ) {
                 if (ignoreDuplicate) {
                     ignored = true;
                 } else if (!forceUpdate) {
+                    const {
+                        id,
+                    } = data;
                     const info = id ? `id "${id}"` : `key "${key}"`;
                     return errorAction(`Model '${name}' with ${info} already exists.`);
                 }
@@ -42,7 +44,12 @@ export default async function setData(
 
             let modified = [];
             if (!ignored) {
-                storageData = transformDataForDb(fields, data);
+                storageData = !subFieldsKey
+                    ? transformDataForDb(fields, data)
+                    : {
+                        ...storageData,
+                        [subFieldsKey]: transformDataForDb(fields, data),
+                    };
                 await set({
                     [key]: storageData,
                 });
@@ -51,10 +58,18 @@ export default async function setData(
 
             return {
                 data: {
-                    [key]: transformDataFromDb(fields, storageData),
+                    [key]: !subFieldsKey
+                        ? transformDataFromDb(fields, storageData)
+                        : {
+                            [subFieldsKey]: transformDataFromDb(fields, storageData[subFieldsKey]),
+                        },
                 },
                 storage: {
-                    [key]: storageData,
+                    [key]: !subFieldsKey
+                        ? storageData
+                        : {
+                            [subFieldsKey]: storageData[subFieldsKey],
+                        },
                 },
                 modified,
             };

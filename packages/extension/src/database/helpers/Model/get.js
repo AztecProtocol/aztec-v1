@@ -1,4 +1,7 @@
 import * as storage from '~utils/storage';
+import {
+    errorLog,
+} from '~utils/log';
 import transformDataFromDb from '~database/utils/transformDataFromDb';
 
 const getById = async (id) => {
@@ -13,20 +16,46 @@ const getById = async (id) => {
     return storage.get(key);
 };
 
-export default async function get({
-    id,
-    key,
-} = {}) {
-    let data = null;
-    if (key) {
-        data = await storage.get(key);
-    } else if (id) {
-        data = await getById(id);
-    }
-
+export default async function get(params) {
     const {
+        key,
+        id,
+    } = params;
+    const {
+        name,
+        dataKeyPattern,
         fields,
     } = this.config;
+    const subFieldsDataKey = !Array.isArray(fields)
+        ? fields.key
+        : '';
+    const subFieldsKey = subFieldsDataKey
+        ? params[subFieldsDataKey]
+        : '';
 
-    return transformDataFromDb(fields, data);
+    let storageData;
+    if (subFieldsDataKey && !dataKeyPattern) {
+        storageData = await storage.get(name);
+    } else if (key) {
+        storageData = await storage.get(key);
+    } else if (id) {
+        storageData = await getById(id);
+    } else {
+        errorLog(`'key' or 'id' must be presented in the parameters of ${name}Model.get()`);
+        return {};
+    }
+
+    if (subFieldsKey) {
+        return transformDataFromDb(fields.fields, storageData[subFieldsKey]);
+    }
+
+    if (subFieldsDataKey) {
+        const allData = {};
+        Object.keys(storageData).forEach((subField) => {
+            allData[subField] = transformDataFromDb(fields.fields, storageData[subField]);
+        });
+        return allData;
+    }
+
+    return transformDataFromDb(fields, storageData);
 }

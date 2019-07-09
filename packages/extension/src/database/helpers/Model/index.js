@@ -12,25 +12,66 @@ const configType = {
         isRequired: true,
     },
     fields: {
-        type: 'array',
+        type: (val) => {
+            if (Array.isArray(val)) {
+                return true;
+            }
+
+            if (val) {
+                if (!('key' in val)) {
+                    errorLog("'key' is not defined in 'fields' object");
+                    return false;
+                }
+                if (!('fields' in val)) {
+                    errorLog("'fields' is not defined in 'fields' object");
+                    return false;
+                }
+            }
+
+            return true;
+        },
         isRequired: true,
     },
     autoIncrementBy: {
         type: 'string',
     },
-    dataKey: {
+    dataKeyPattern: {
         type: 'string',
     },
 };
 
 const validateConfig = config => Object.keys(configType)
-    .filter(field => configType[field].isRequired)
     .every((field) => {
-        const isInConfig = field in config;
-        if (!isInConfig) {
-            errorLog(`Field '${field}' must be provided in Model's config.`);
+        const {
+            isRequired,
+            type,
+        } = configType[field];
+        const val = config[field];
+
+        const errors = [];
+        if (isRequired && val === undefined) {
+            errors.push(`Field '${field}' must be provided in Model's config.`);
+        } else if (type && val !== undefined) {
+            let isWrongType;
+            if (typeof type === 'function') {
+                isWrongType = !type(val);
+            } else {
+                isWrongType = type === 'array'
+                    ? !Array.isArray(val)
+                    : typeof val !== type; // eslint-disable-line valid-typeof
+            }
+            if (isWrongType) {
+                errors.push(`Field '${field}' should be ${type}. Received ${typeof val}.`);
+            }
         }
-        return isInConfig;
+        if (errors.length) {
+            if (config.name) {
+                errors.push(`at '${config.name}' model's constructor`);
+            }
+            errorLog(...errors);
+            return false;
+        }
+        return true;
     });
 
 export default function Model(config) {
