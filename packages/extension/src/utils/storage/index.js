@@ -5,6 +5,14 @@ import lock, {
     onIdle,
 } from './lock';
 
+export {
+    get,
+    set,
+    remove,
+    lock,
+    onIdle,
+};
+
 export default {
     get,
     set,
