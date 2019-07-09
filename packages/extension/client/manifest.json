@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "AZTEC Privacy Extension",
+    "version": "0.0.1",
+    "description": "Chrome extension boilerplate, replace all values!",
+    "icons": {
+        "16": "./images/icons/icon-16.png",
+        "128": "./images/icons/icon-128.png"
+    },
+    "background": {
+        "page": "./pages/background.html",
+        "persistent": true
+    },
+    "permissions": ["tabs", "storage", "http://*/*", "https://*/*"],
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*"],
+            "all_frames": true,
+            "js": ["./build/bundle.content.js"]
+        }
+    ],
+    "web_accessible_resources": ["/build/*", "/build/bundle.client.js"]
+}
