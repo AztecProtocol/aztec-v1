@@ -10,13 +10,16 @@ export default gql`
     }
     type Asset {
         id: ID!
+        address: String!
         balance: Int!
     }
     type Note {
         id: ID!
-        value: Int!
+        hash: String!
         asset: Asset!
         owner: Account!
+        sharedSecret: String
+        value: Int
     }
     type Query {
         asset(id: ID!): Asset

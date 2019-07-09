@@ -9,8 +9,8 @@ export default {
         note: async (_, args) => noteModel.get(args),
     },
     Note: {
-        asset: ({ asset }) => assetModel.get({ id: asset }),
-        owner: ({ owner }) => accountModel.get({ id: owner }),
+        asset: ({ asset }) => assetModel.get({ key: asset }),
+        owner: ({ owner }) => accountModel.get({ key: owner }),
     },
     Mutation: {
         enableDomain,

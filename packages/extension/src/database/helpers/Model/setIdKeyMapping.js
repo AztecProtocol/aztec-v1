@@ -9,6 +9,7 @@ import errorAction from '~database/utils/errorAction';
 export default async function setIdKeyMapping(
     data,
     {
+        id,
         name,
         autoIncrementBy,
         dataKeyPattern,
@@ -16,10 +17,6 @@ export default async function setIdKeyMapping(
         ignoreDuplicate = false,
     } = {},
 ) {
-    const {
-        id,
-    } = data;
-
     return lock(
         [
             autoIncrementBy,

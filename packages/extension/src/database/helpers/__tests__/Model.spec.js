@@ -42,6 +42,7 @@ describe('Model', () => {
             id: 'cc',
         });
         expect(savedData).toEqual({
+            id: 'cc',
             color: 'yellow',
         });
 
@@ -54,6 +55,7 @@ describe('Model', () => {
             id: 'cc',
         });
         expect(updatedData).toEqual({
+            id: 'cc',
             color: 'blue',
         });
 
@@ -180,18 +182,28 @@ describe('Model', () => {
             size: '100',
             height: 60,
         });
+
         const savedData = await carModel.get({
             id: 'cc',
         });
         expect(savedData).toEqual({
+            id: 'cc',
             color: 'yellow',
             height: 60,
         });
 
+        const storageData = await storage.get('cc');
+        expect(storageData).toEqual([
+            'yellow',
+            60,
+        ]);
+
         expect(errors).toEqual([]);
     });
+});
 
-    it('allow dataKey mapping', async () => {
+describe('Model with dataKey mapping', () => {
+    it('allow dataKey mapping by setting a value to dataKeyPattern', async () => {
         const carModel = Model({
             name: 'car',
             fields: [
@@ -219,6 +231,7 @@ describe('Model', () => {
             id: 'cc',
         });
         expect(savedData).toEqual({
+            id: 'cc',
             color: 'yellow',
         });
 
@@ -274,6 +287,72 @@ describe('Model', () => {
 
         expect(errors).toEqual([]);
     });
+
+    it('can get data by key', async () => {
+        const carModel = Model({
+            name: 'car',
+            fields: [
+                'color',
+            ],
+            dataKeyPattern: 'c:{count}',
+        });
+
+        const id = 'cc';
+        const {
+            storage: {
+                [id]: key,
+            },
+        } = await carModel.set({
+            id,
+            color: 'yellow',
+        });
+
+        const data = await carModel.get({
+            key,
+        });
+        expect(data).toEqual({
+            color: 'yellow',
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('can set index to config and use it as id', async () => {
+        const carModel = Model({
+            name: 'car',
+            fields: [
+                'serial',
+                'color',
+            ],
+            index: 'serial',
+            dataKeyPattern: 'c:{count}',
+        });
+
+        await carModel.set({
+            serial: 'qw123',
+            color: 'yellow',
+        });
+
+        const data = await carModel.get({
+            key: 'c:0',
+        });
+        expect(data).toEqual({
+            id: 'qw123',
+            serial: 'qw123',
+            color: 'yellow',
+        });
+
+        const dataById = await carModel.get({
+            id: 'qw123',
+        });
+        expect(dataById).toEqual({
+            id: 'qw123',
+            serial: 'qw123',
+            color: 'yellow',
+        });
+
+        expect(errors).toEqual([]);
+    });
 });
 
 describe('Model with fields object', () => {
@@ -305,6 +384,7 @@ describe('Model with fields object', () => {
             name: 'pikachu',
         });
         expect(pikachu).toEqual({
+            name: 'pikachu',
             color: 'yellow',
             height: 60,
         });
@@ -313,6 +393,7 @@ describe('Model with fields object', () => {
             name: 'eevee',
         });
         expect(eevee).toEqual({
+            name: 'eevee',
             color: 'brown',
             height: 80,
         });
@@ -348,6 +429,7 @@ describe('Model with fields object', () => {
             name: 'pikachu',
         });
         expect(pikachu).toEqual({
+            name: 'pikachu',
             color: 'yellow',
             height: 60,
         });
@@ -361,8 +443,50 @@ describe('Model with fields object', () => {
             name: 'pikachu',
         });
         expect(grownUpPikachu).toEqual({
+            name: 'pikachu',
             color: 'yellow',
             height: 80,
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('allow to get entire data', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: {
+                key: 'name',
+                fields: [
+                    'color',
+                    'height',
+                ],
+            },
+        });
+
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+            height: 60,
+        });
+
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+            height: 80,
+        });
+
+        const pokemons = await pokemonModel.get();
+        expect(pokemons).toEqual({
+            pikachu: {
+                name: 'pikachu',
+                color: 'yellow',
+                height: 60,
+            },
+            eevee: {
+                name: 'eevee',
+                color: 'brown',
+                height: 80,
+            },
         });
 
         expect(errors).toEqual([]);
@@ -397,6 +521,8 @@ describe('Model with fields object', () => {
             name: 'pika',
         });
         expect(firstPikachu).toEqual({
+            id: 'pikachu',
+            name: 'pika',
             height: 60,
         });
 
@@ -405,6 +531,8 @@ describe('Model with fields object', () => {
             name: 'chuchu',
         });
         expect(secondPikachu).toEqual({
+            id: 'pikachu',
+            name: 'chuchu',
             height: 50,
         });
 
@@ -413,9 +541,13 @@ describe('Model with fields object', () => {
         });
         expect(pikachus).toEqual({
             pika: {
+                id: 'pikachu',
+                name: 'pika',
                 height: 60,
             },
             chuchu: {
+                id: 'pikachu',
+                name: 'chuchu',
                 height: 50,
             },
         });
@@ -432,7 +564,7 @@ describe('Model with fields object', () => {
         expect(errors).toEqual([]);
     });
 
-    it('can object data in storage with dataKey mapping', async () => {
+    it('can update object data in storage with dataKey mapping', async () => {
         const pokemonModel = Model({
             name: 'pokemon',
             dataKeyPattern: 'p:{count}',
@@ -467,9 +599,13 @@ describe('Model with fields object', () => {
         });
         expect(pikachus).toEqual({
             pika: {
+                id: 'pikachu',
+                name: 'pika',
                 height: 60,
             },
             chuchu: {
+                id: 'pikachu',
+                name: 'chuchu',
                 height: 70,
             },
         });
