@@ -55,12 +55,13 @@ grammar.jumpTable = {
 // ^(?:\s*\n*)*__codesize\(([a-zA-Z0-9_\-]+)(?:<([a-zA-Z0-9_\-\+,\s\n]+)>)?\)
 grammar.macro = {
     MACRO_CALL: regex([
+        // '^(?:[\\s\\n]*)([a-zA-Z0-9_]+)(?:<([a-zA-Z0-9_,\\+\\-\\*\\(\\)\\s\\n<>]+)>)?',
         '^(?:[\\s\\n]*)([a-zA-Z0-9_]+)(?:<([a-zA-Z0-9_,\\+\\-\\*\\(\\)\\s\\n]+)>)?',
         '(?:\\(\\))',
     ]),
     TEMPLATE: regex([
         '^(?:[\\s\\n]*)<',
-        '([a-zA-Z0-9_\\-\\+\\*\\(\\)<>]+)',
+        '([a-zA-Z0-9_\\-\\+\\*\\(\\)\\<\\>]+)',
         '>\\s*\\n*',
     ]),
     CODE_SIZE: regex([
@@ -96,6 +97,9 @@ grammar.macro = {
     TOKEN: regex([
         '\\s*\\n*([^\\s]*)\\s*\\n*',
     ]),
+    // WHITESPACE: regex([
+    //     '[\\s\\n\\r]+',
+    // ]),
 };
 
 module.exports = grammar;

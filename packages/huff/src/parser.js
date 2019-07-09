@@ -390,8 +390,7 @@ parser.processMacroInternal = (
         templateParams,
     } = macro;
     const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommas(t)], []);
-
-    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs!`);
+    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs! ` + debugLocationString(macro.ops[0].debugFileline));
     const templateRegExps = templateParams.map((label, i) => {
         const pattern = new RegExp(`\\b(${label})\\b`, 'g');
         const value = templateArguments[i];
@@ -583,7 +582,6 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
             const macroName = token[1];
             const templateArgs = token[2] ? [token[2]] : [];
             const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
-            console.log(token);
             check(macros[macroName], `expected ${macroName} to be a macro. ` + debugLocationString(debugFileline));
             ops.push({
                 type: TYPES.MACRO,
@@ -706,6 +704,10 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
                 });
             }
             index += token[0].length;
+        // } else if (input.match(grammar.macro.WHITESPACE)) {
+        //     const token = input.match(grammar.macro.WHITESPACE);
+        //     console.log(token);
+        //     index += token[0].length;
         } else {
             throw new Error(`cannot parse ${input}!`);
         }

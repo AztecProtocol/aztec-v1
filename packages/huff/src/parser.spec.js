@@ -66,6 +66,7 @@ describe('parser tests', () => {
                     value: '83',
                     args: [],
                     index: 0,
+                    debugFileline: {},
                 }],
                 templateParams: [],
             });
