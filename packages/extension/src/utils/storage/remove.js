@@ -1,14 +1,20 @@
-/* global chrome */
+import browser from 'webextension-polyfill';
+import {
+    errorLog,
+} from '~utils/log';
 
 export default function remove(keys, {
     sync = false,
 } = {}) {
     return new Promise((resolve) => {
-
-        chrome.storage[sync ? 'sync' : 'local']
-            .remove(keys, async () => {
-                // TODO - check if data has been saved successfully
-                resolve(data);
+        browser.storage[sync ? 'sync' : 'local']
+            .remove(keys)
+            .then(() => {
+                resolve();
+            })
+            .catch((error) => {
+                errorLog(error);
+                reject();
             });
     });
-};
+}
