@@ -18,6 +18,7 @@
         "commitizen": "^3.1.1",
         "dotenv": "^8.0.0",
         "global": "^4.4.0",
+        "graphql-tag": "^2.10.1",
         "graphql-tools": "^4.0.4",
         "jest": "^24.8.0",
         "node-fetch": "^2.6.0",
@@ -25,13 +26,14 @@
         "scrypt-async": "^2.0.1",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
+        "webextension-polyfill": "^0.4.0",
         "webpack-cli": "^3.3.4"
     },
     "scripts": {
         "lint": "eslint ./ --color",
-        "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+        "test": "jest ./src",
+        "test:test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
         "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
-        "test:src": "jest ./src",
         "build:dev": "webpack --config webpack.dev.js",
         "mockServer": "babel-node ./mockServer",
         "watch": "webpack --watch --config webpack.dev.js"
@@ -47,6 +49,7 @@
         "@babel/preset-env": "^7.4.4",
         "@babel/register": "^7.4.4",
         "@babel/runtime": "^7.4.2",
+        "babel-eslint": "^10.0.2",
         "babel-plugin-module-resolver": "^3.2.0",
         "chai": "^4.2.0",
         "eslint-config-airbnb": "^17.1.0",

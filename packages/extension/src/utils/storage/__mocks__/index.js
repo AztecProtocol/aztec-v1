@@ -1,6 +1,14 @@
+import lock, {
+    onIdle,
+} from '../lock';
+
 let db = {};
 
 const get = (keys) => {
+    if (keys === undefined) {
+        return db;
+    }
+
     if (typeof keys === 'string') {
         return db[keys];
     }
@@ -17,6 +25,7 @@ const set = (valueMap) => {
     Object.keys(valueMap).forEach((key) => {
         db[key] = valueMap[key];
     });
+    return valueMap;
 };
 
 const reset = () => {
@@ -26,5 +35,7 @@ const reset = () => {
 export {
     get,
     set,
+    lock,
+    onIdle,
     reset,
 };

@@ -1,13 +1,18 @@
-/* global chrome */
+import browser from 'webextension-polyfill';
+import {
+    errorLog,
+} from '~utils/log';
 
 export default function set(data, {
     sync = false,
 } = {}) {
-    return new Promise((resolve) => {
-        chrome.storage[sync ? 'sync' : 'local']
-            .set(data, async () => {
-                // TODO - check if data has been saved successfully
-                resolve(data);
+    return new Promise((resolve, reject) => {
+        browser.storage[sync ? 'sync' : 'local']
+            .set(data)
+            .then(() => resolve(data))
+            .catch((error) => {
+                errorLog(error);
+                reject();
             });
     });
 }

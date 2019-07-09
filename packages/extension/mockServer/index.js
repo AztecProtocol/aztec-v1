@@ -16,5 +16,5 @@ const server = new ApolloServer({
 server.listen({
     port: mockServerPort,
 }).then(({ url }) => {
-    console.log(`🚀 GraphQL Server is running at ${url}`);
+    console.log(`🚀 GraphQL Server is running at ${url}`); // eslint-disable-line no-console
 });

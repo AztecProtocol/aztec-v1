@@ -17,7 +17,9 @@ module.exports = {
             {
                 root: ['./src'],
                 alias: {
+                    '~config': './src/config',
                     '~utils': './src/utils',
+                    '~database': './src/database',
                 },
             },
         ],
