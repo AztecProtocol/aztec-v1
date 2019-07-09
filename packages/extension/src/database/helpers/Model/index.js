@@ -32,6 +32,9 @@ const configType = {
         },
         isRequired: true,
     },
+    index: {
+        type: 'string',
+    },
     autoIncrementBy: {
         type: 'string',
     },

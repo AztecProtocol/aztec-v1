@@ -29,6 +29,7 @@ export default async function fetchNoteFromServer({
                         hash
                         asset {
                             id
+                            address
                         }
                         owner {
                             id
