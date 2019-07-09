@@ -51,20 +51,11 @@ regex.isLiteral = (input) => {
 };
 
 regex.isModifiedOpcode = (input) => {
-    const hasOperators = input.includes('-') || input.includes('+');
-    const hasStackOpcodes = input.includes('dup') || input.includes('swap');
-    return hasOperators && hasStackOpcodes;
+    return input.match(new RegExp('\\s*(dup|swap)(0x[0-9a-fA-F]+|\\d+)([+\\-])(0x[0-9a-fA-F]+|\\d+)\\s*'));
 };
 
 regex.removeSpacesAndLines = (input) => {
     return input.replace(/(\r\n\t|\n|\r\t|\s)/gm, '');
-};
-
-regex.isPushOpcode = (input) => {
-    if (input.slice(0, 4) === 'push') {
-        return true;
-    }
-    return false;
 };
 
 module.exports = regex;

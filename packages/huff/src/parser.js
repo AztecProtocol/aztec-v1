@@ -42,6 +42,10 @@ function check(condition, message) {
     }
 }
 
+function debugLocationString(debugFileline) {
+    return `Error in Huff code was traced to line ${debugFileline.lineNumber} in file ${debugFileline.filename}.`;
+}
+
 
 const parser = {};
 
@@ -59,6 +63,32 @@ parser.substituteTemplateArguments = (newTemplateArguments, templateRegExps) => 
             .replace(pattern, value), arg), []);
 };
 
+
+/**
+ * Process a numeric or template literal. If string/int matches a number (dec or hex), in which case it returns a BN representation of that number. Otherwise error.
+ * @param literal
+ */
+parser.processMacroOrNumericOrTemplateLiteral = (literal, macros) => {
+    if (literal.match(grammar.macro.LITERAL_HEX)) {
+        return new BN(literal.match(grammar.macro.LITERAL_HEX)[1], 16);
+    }
+    if (literal.match(grammar.macro.LITERAL_DECIMAL)) {
+        return new BN(literal.match(grammar.macro.LITERAL_DECIMAL)[1], 10);
+    }
+    if (literal.match(grammar.macro.TEMPLATE)) {
+        const token = literal.match(grammar.macro.TEMPLATE);
+        return parser.processTemplateLiteral(token[1]);
+    }
+    if (macros[literal]) {
+        check(
+            macros[literal].ops.length === 1 && macros[literal].ops[0].type === TYPES.PUSH,
+            `cannot add ${literal}, ${macros[literal].ops} not a literal`
+        );
+        return new BN(macros[literal].ops[0].args[0], 16);
+    }
+    throw new Error(`I don't know how to process literal "${literal}" as a numeric or template literal`);
+}
+
 /**
  * Process a numeric literal. If string/int matches a number (dec or hex), in which case it returns a BN representation of that number. Otherwise error.
  * @param literal
@@ -70,7 +100,7 @@ parser.processNumericLiteral = (literal) => {
     if (literal.match(grammar.macro.LITERAL_DECIMAL)) {
         return new BN(literal.match(grammar.macro.LITERAL_DECIMAL)[1], 10);
     }
-    throw new Error(`I don't know how to process literal "${literal}"`);
+    throw new Error(`I don't know how to process literal "${literal}" as a number literal`);
 }
 
 /**
@@ -93,7 +123,7 @@ parser.processMacroLiteral = (op, macros) => {
         );
         return new BN(macros[op].ops[0].args[0], 16);
     }
-    throw new Error(`I don't know how to process literal ${op}`);
+    throw new Error(`I don't know how to process literal "${op}" as a macro literal`);
 };
 
 /**
@@ -138,7 +168,7 @@ parser.processTemplateLiteral = (literal, macros) => {
         if (regex.containsOperatorsAndIsNotStackOp(op)) {
             return parser.processTemplateLiteral(op, macros);
         }
-        return parser.processMacroLiteral(op, macros);
+        return parser.processMacroOrNumericOrTemplateLiteral(op, macros);
     }
 
     if (literal.includes('-')) {
@@ -236,6 +266,27 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debugFileline = {}
             templateName,
         };
     }
+    if (templateName.match(grammar.macro.TEMPLATE)) {
+        const token = templateName.match(grammar.macro.TEMPLATE);
+        return {
+            templateName: `inline-${templateName}-${macroId}`,
+            macros: {
+                ...macros,
+                [`inline-${templateName}-${macroId}`]: {
+                    name: templateName,
+                    ops: [{
+                        type: TYPES.TEMPLATE,
+                        value: token[1],
+                        args: [],
+                        index,
+                        debugFileline,
+                    }],
+                    templateParams: [],
+                },
+            },
+        };
+    }
+
     return {
         templateName: `inline-${templateName}-${macroId}`,
         macros: {
@@ -268,7 +319,7 @@ parser.processMacro = (
     if (result.unmatchedJumps.length > 0) {
         let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly undefined jump labels, or a misspelled label/opcode? (NB possibly substituted as a template parameter):`;
         result.unmatchedJumps.forEach((unmatchedJump) => {
-            errorString += `\n"${unmatchedJump.label}" in "${unmatchedJump.debugFileline.filename}" at line ${unmatchedJump.debugFileline.lineNumber}`;
+            errorString += `\n"${unmatchedJump.label}". ` + debugLocationString(unmatchedJump.debugFileline);
         }); // NB currently not using bytecodeIndex or lineIndex but they might be useful
         throw new Error(errorString);
     }
@@ -374,7 +425,7 @@ parser.processMacroInternal = (
                 }
                 ({
                     macros,
-                    templateName: templateParameterValue
+                    templateName: templateParameterValue,
                 } = parser.parseTemplate(parsedName[0], macros, index, op.debugFileline));
                 const result = parser.processMacroInternal(templateParameterValue, offset, [], macros, map, jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
@@ -437,11 +488,10 @@ parser.processMacroInternal = (
                 return {
                     bytecode: opcodes.jumpdest,
                     sourcemap: [inputMaps.getFileLine(op.index, map)],
-                    // debugFileline: op.debugFileline,
                 };
             }
             default: {
-                check(false, `could not interpret op ${JSON.stringify(op)}`);
+                check(false, `could not interpret op ${JSON.stringify(op)}. ` + debugLocationString(op.debugFileline));
                 return null;
             }
         }
@@ -532,76 +582,77 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
             const token = input.match(grammar.macro.MACRO_CALL);
             const macroName = token[1];
             const templateArgs = token[2] ? [token[2]] : [];
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
-            check(macros[macroName], `expected ${macroName} to be a macro`);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            console.log(token);
+            check(macros[macroName], `expected ${macroName} to be a macro. ` + debugLocationString(debugFileline));
             ops.push({
                 type: TYPES.MACRO,
                 value: macroName,
                 args: templateArgs,
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TEMPLATE)) {
             const token = input.match(grammar.macro.TEMPLATE);
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.TEMPLATE,
                 value: token[1],
                 args: [],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.CODE_SIZE)) {
             const token = input.match(grammar.macro.CODE_SIZE);
             const templateParams = token[2] ? [token[2]] : [];
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.CODESIZE,
                 value: token[1],
                 args: templateParams,
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TABLE_SIZE)) {
             const token = input.match(grammar.macro.TABLE_SIZE);
             const table = token[1];
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             if (!jumptables[table]) {
-                throw new Error(`could not find jumptable ${table} in ${jumptables}`);
+                throw new Error(`could not find jumptable ${table} in ${jumptables}. ` + debugLocationString(debugFileline));
             }
             const hex = formatEvenBytes(toHex(jumptables[table].table.size));
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.PUSH,
                 value: toHex(95 + (hex.length / 2)),
                 args: [hex],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TABLE_START)) {
             const token = input.match(grammar.macro.TABLE_START);
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.TABLE_START_POSITION,
                 value: token[1],
                 args: [],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.JUMP_LABEL)) {
             const token = input.match(grammar.macro.JUMP_LABEL);
-            check(!jumpdests[token[1]], `jump label ${token[1]} has already been defined`);
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            check(!jumpdests[token[1]], `jump label ${token[1]} has already been defined. ` + debugLocationString(debugFileline));
             ops.push({
                 type: TYPES.JUMPDEST,
                 value: token[1],
                 args: [],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
 
             });
             jumpdests[token[1]] = true;
@@ -609,48 +660,48 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
         } else if (input.match(grammar.macro.LITERAL_DECIMAL)) {
             const token = input.match(grammar.macro.LITERAL_DECIMAL);
             const hex = formatEvenBytes(toHex(token[1]));
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.PUSH,
                 value: toHex(95 + (hex.length / 2)),
                 args: [hex],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
 
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.LITERAL_HEX)) {
             const token = input.match(grammar.macro.LITERAL_HEX);
             const hex = formatEvenBytes(token[1]);
-            const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             ops.push({
                 type: TYPES.PUSH,
                 value: toHex(95 + (hex.length / 2)),
                 args: [hex],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debugFileline: fileline,
+                debugFileline,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TOKEN)) {
             const token = input.match(grammar.macro.TOKEN);
             if (opcodes[token[1]]) {
-                const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+                const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
                 ops.push({
                     type: TYPES.OPCODE,
                     value: opcodes[token[1]],
                     args: [],
                     index: startingIndex + index + regex.countEmptyChars(token[0]),
-                    debugFileline: fileline,
+                    debugFileline,
 
                 });
             } else {
-                const fileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
+                const debugFileline = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
                 ops.push({
                     type: TYPES.PUSH_JUMP_LABEL,
                     value: token[1],
                     args: [],
                     index: startingIndex + index + regex.countEmptyChars(token[0]),
-                    debugFileline: fileline,
+                    debugFileline,
 
                 });
             }
