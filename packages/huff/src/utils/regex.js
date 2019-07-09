@@ -40,6 +40,11 @@ regex.containsOperatorsAndIsNotStackOp = (input) => {
     return operators.test(input) && !input.includes('dup') && !input.includes('swap'); // .test(input);
 };
 
+/**
+ * Returns whether a string represents a number or not (either dec or hex)
+ * @param input string to be matched
+ * @returns {boolean} whether the string can feasibly represent a number
+ */
 regex.isLiteral = (input) => {
     return regex.containsOperatorsAndIsNotStackOp(input)
         || input.match(new RegExp('^(?:\\s*\\n*)*((0x[0-9a-fA-F]+)|(\\d+))\\b')); // dec or hex
@@ -55,7 +60,7 @@ regex.removeSpacesAndLines = (input) => {
     return input.replace(/(\r\n\t|\n|\r\t|\s)/gm, '');
 };
 
-regex.isPush = (input) => {
+regex.isPushOpcode = (input) => {
     if (input.slice(0, 4) === 'push') {
         return true;
     }

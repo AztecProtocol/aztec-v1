@@ -45,7 +45,10 @@ function check(condition, message) {
 
 const parser = {};
 
-// Generate random 5 byte (i.e. 10 character) hexadecimal number for use as an id
+/**
+ * Generate random 5 byte (i.e. 10 character) hexadecimal number for use as an id
+ * @returns {string}
+ */
 parser.getId = () => {
     return [...new Array(10)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 };
@@ -56,6 +59,11 @@ parser.substituteTemplateArguments = (newTemplateArguments, templateRegExps) => 
             .replace(pattern, value), arg), []);
 };
 
+/**
+ * Process a literal from a macro. First sees if string/int matches a number, in which case it returns a BN representation of that number, and if not sees if it is an opcode. Otherwise error.
+ * @param op
+ * @param macros
+ */
 parser.processMacroLiteral = (op, macros) => {
     if (op.match(grammar.macro.LITERAL_HEX)) {
         return new BN(op.match(grammar.macro.LITERAL_HEX)[1], 16);
@@ -74,11 +82,24 @@ parser.processMacroLiteral = (op, macros) => {
     throw new Error(`I don't know how to process literal ${op}`);
 };
 
-// unpicks template parameters like <dup1+3> and <swap 16-5>
+/**
+ * Unpicks template parameters with arithmetic like <dup1+3> and <swap16-0x05>
+ * @param literal A literal taking the form of a stack opcode (dup or swap) followed by some add/sub arithmetic on dec or hex numbers e.g. dup1+3 and swap16-0x05
+ * @param macros
+ * @returns {*} A literal with the arithmetic folded to form one constant. Errors if that opcode does not exist.
+ */
 parser.processModifiedOpcode = (literal, macros) => {
     const arithmeticStackOpcodeRegex = new RegExp('\\s*(dup|swap)(0x[0-9a-fA-F]+|\\d+)([+\\-])(0x[0-9a-fA-F]+|\\d+)\\s*');
-    const [, stackOpcodeType, firstNumber, operation, secondNumber] = literal.match(arithmeticStackOpcodeRegex);
-
+    const regexMatchForParameterArithmetic = literal.match(arithmeticStackOpcodeRegex);
+    let stackOpcodeType;
+    let firstNumber;
+    let operation;
+    let secondNumber;
+    if (regexMatchForParameterArithmetic) {
+        [, stackOpcodeType, firstNumber, operation, secondNumber] = regexMatchForParameterArithmetic;
+    } else {
+        throw new Error(`failed to process literal "${literal}" `);
+    }
     let finalNumber;
     // NB currently a bit weird as if either number is an opcode it will add/sub the bytecode value of that opcode
     if (operation === '+') {
@@ -88,6 +109,7 @@ parser.processModifiedOpcode = (literal, macros) => {
     } else {
         throw new Error(`operation is neither + nor - but "${operation}". How did I even get here? This shouldn't happen. I am confusion.`);
     }
+    // TODO: is this check neccesary? What if opcode arithmetic is nested?
     if (finalNumber < 1 || finalNumber > 16) {
         throw new Error(`result of arithmetic operation ${firstNumber}${operation}${secondNumber} is ${finalNumber} but must be between 1 and 16 inclusive`);
     }
@@ -95,14 +117,16 @@ parser.processModifiedOpcode = (literal, macros) => {
 };
 
 parser.processTemplateLiteral = (literal, macros) => {
+    function parseLiteral(rawOp) {
+        const op = regex.removeSpacesAndLines(rawOp);
+        if (regex.containsOperatorsAndIsNotStackOp(op)) {
+            return parser.processTemplateLiteral(op, macros);
+        }
+        return parser.processMacroLiteral(op, macros);
+    }
+
     if (literal.includes('-')) {
-        return normalize(literal.split('-').map((rawOp) => {
-            const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperatorsAndIsNotStackOp(op)) {
-                return parser.processTemplateLiteral(op, macros);
-            }
-            return parser.processMacroLiteral(op, macros);
-        }).reduce((acc, val) => {
+        return normalize(literal.split('-').map(parseLiteral).reduce((acc, val) => {
             if (!acc) {
                 return val;
             }
@@ -110,13 +134,7 @@ parser.processTemplateLiteral = (literal, macros) => {
         }, null));
     }
     if (literal.includes('+')) {
-        return normalize(literal.split('+').map((rawOp) => {
-            const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperatorsAndIsNotStackOp(op)) {
-                return parser.processTemplateLiteral(op, macros);
-            }
-            return parser.processMacroLiteral(op, macros);
-        }).reduce((acc, val) => {
+        return normalize(literal.split('+').map(parseLiteral).reduce((acc, val) => {
             if (!acc) {
                 return val;
             }
@@ -124,13 +142,7 @@ parser.processTemplateLiteral = (literal, macros) => {
         }, null));
     }
     if (literal.includes('*')) {
-        return normalize(literal.split('*').map((rawOp) => {
-            const op = regex.removeSpacesAndLines(rawOp);
-            if (regex.containsOperatorsAndIsNotStackOp(op)) {
-                return parser.processTemplateLiteral(op, macros);
-            }
-            return parser.processMacroLiteral(op, macros);
-        }).reduce((acc, val) => {
+        return normalize(literal.split('*').map(parseLiteral).reduce((acc, val) => {
             if (!acc) {
                 return val;
             }
@@ -140,10 +152,13 @@ parser.processTemplateLiteral = (literal, macros) => {
     return parser.processMacroLiteral(literal, macros);
 };
 
-parser.parseTemplate = (templateName, macros = {}, index = 0) => {
+parser.parseTemplate = (templateName, macros = {}, index = 0, debugFileline = {}) => {
     const macroId = parser.getId();
-    if (regex.isPush(templateName)) {
+    // TODO: wtf is this I thought huff doesn't have push
+    if (regex.isPushOpcode(templateName)) {
+        // And why does it slice this? Is this what it's supposed to be pushing? I think maybe?
         const invokedName = templateName.slice(6, -1);
+        console.log(templateName);
         const numBytes = parseInt(templateName.slice(4, 5), 10);
         const unpaddedHex = formatEvenBytes(parser.processTemplateLiteral(invokedName, macros).toString(16));
         const hex = padNBytes(unpaddedHex, numBytes);
@@ -159,6 +174,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
                         value: opcode,
                         args: [hex],
                         index,
+                        debugFileline,
                     }],
                     templateParams: [],
                 },
@@ -179,6 +195,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
                         value: opcode,
                         args: [hex],
                         index,
+                        debugFileline,
                     }],
                     templateParams: [],
                 },
@@ -198,6 +215,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
                         value: opcode,
                         args: [],
                         index,
+                        debugFileline,
                     }],
                     templateParams: [],
                 },
@@ -216,6 +234,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
                         value: opcodes[templateName],
                         args: [],
                         index,
+                        debugFileline,
                     }],
                     templateParams: [],
                 },
@@ -239,6 +258,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0) => {
                     value: templateName,
                     args: [],
                     index,
+                    debugFileline,
                 }],
                 templateParams: [],
             },
@@ -257,7 +277,7 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly undefined jump labels, or you misspelled a label/opcode?:`;
+        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly undefined jump labels, or a misspelled label/opcode? (NB possibly substituted as a template parameter):`;
         result.unmatchedJumps.forEach((unmatchedJump) => {
             errorString += `\n"${unmatchedJump.label}" in "${unmatchedJump.debugFileline.filename}" at line ${unmatchedJump.debugFileline.lineNumber}`;
         }); // NB currently not using bytecodeIndex or lineIndex but they might be useful}
@@ -351,6 +371,7 @@ parser.processMacroInternal = (
                 jumptable[index] = result.unmatchedJumps;
                 jumpindices = { ...jumpindices, ...result.jumpindices };
                 offset += (result.data.bytecode.length / 2);
+                result.data.debugFileline = op.debugFileline;
                 return result.data;
             }
             case TYPES.TEMPLATE: {
@@ -362,12 +383,16 @@ parser.processMacroInternal = (
                 if (parsedName.length !== 1) {
                     throw new Error('cannot parse template invokation ', parsedName);
                 }
-                ({ macros, templateName: templateParameterValue } = parser.parseTemplate(parsedName[0], macros, index));
+                ({
+                    macros,
+                    templateName: templateParameterValue
+                } = parser.parseTemplate(parsedName[0], macros, index, op.debugFileline));
                 const result = parser.processMacroInternal(templateParameterValue, offset, [], macros, map, jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
                 jumptable[index] = result.unmatchedJumps;
                 jumpindices = { ...jumpindices, ...result.jumpindices };
                 offset += (result.data.bytecode.length / 2);
+                result.data.debugFileline = op.debugFileline;
                 return result.data;
             }
             case TYPES.CODESIZE: {
@@ -423,6 +448,7 @@ parser.processMacroInternal = (
                 return {
                     bytecode: opcodes.jumpdest,
                     sourcemap: [inputMaps.getFileLine(op.index, map)],
+                    // debugFileline: op.debugFileline,
                 };
             }
             default: {
@@ -614,7 +640,6 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
                 args: [hex],
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
                 debugFileline: fileline,
-
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TOKEN)) {
