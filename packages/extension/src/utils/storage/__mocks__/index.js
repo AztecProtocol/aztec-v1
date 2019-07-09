@@ -25,6 +25,7 @@ const set = (valueMap) => {
     Object.keys(valueMap).forEach((key) => {
         db[key] = valueMap[key];
     });
+    return valueMap;
 };
 
 const reset = () => {

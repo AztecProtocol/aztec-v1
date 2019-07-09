@@ -20,6 +20,7 @@
         "global": "^4.4.0",
         "graphql-tag": "^2.10.1",
         "graphql-tools": "^4.0.4",
+        "jest": "^24.8.0",
         "node-fetch": "^2.6.0",
         "psl": "^1.2.0",
         "raw-loader": "^3.0.0",
