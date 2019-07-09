@@ -5,6 +5,9 @@ export default gql`
         id: ID!
         address: String!
     }
+    type Domain {
+        graphQLServer: String
+    }
     type Asset {
         id: ID!
         balance: Int!
@@ -18,5 +21,11 @@ export default gql`
     type Query {
         asset(id: ID!): Asset
         note(id: ID!): Note
+    }
+    type Mutation {
+        enableDomain(
+            domain: String!,
+            graphQLServer: String!
+        ): Domain
     }
 `;

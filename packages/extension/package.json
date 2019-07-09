@@ -21,6 +21,7 @@
         "graphql-tag": "^2.10.1",
         "graphql-tools": "^4.0.4",
         "node-fetch": "^2.6.0",
+        "psl": "^1.2.0",
         "raw-loader": "^3.0.0",
         "scrypt-async": "^2.0.1",
         "tweetnacl": "^1.0.1",

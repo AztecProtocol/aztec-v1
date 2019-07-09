@@ -8,7 +8,7 @@ export default function listenMessagesFromClient() {
     window.addEventListener('message', async (event) => {
         // TODO
         // check permission in storage
-        //   x -> return special response to for client script to request user authorization
+        //   x -> return special response to client script to request user authorization
         //   o -> delegate the query to background script
         const {
             type,

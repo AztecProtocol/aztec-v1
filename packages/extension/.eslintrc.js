@@ -23,5 +23,14 @@ module.exports = {
     },
     rules: {
         indent: ['error', 4],
+        'max-len': ['error', {
+            code: 100,
+            ignoreComments: true,
+            ignoreTrailingComments: true,
+            ignoreUrls: true,
+            ignoreStrings: true,
+            ignoreTemplateLiterals: true,
+            ignoreRegExpLiterals: true,
+        }],
     },
 };

@@ -22,38 +22,54 @@ export default async function set(
     let {
         autoIncrementBy,
     } = this.config;
+    let key = id;
+    let subFieldsKey = '';
+    let res1;
+
     if (!autoIncrementBy) {
         autoIncrementBy = `${name}Count`;
     }
 
-    if (!id) {
+    if (!Array.isArray(fields)) {
+        key = name;
+        subFieldsKey = data[fields.key];
+
+        if (!subFieldsKey) {
+            return errorAction(`'${fields.key}' must be presented in ${name} object`);
+        }
+    }
+
+    if (!id
+        && (dataKeyPattern || !subFieldsKey)
+    ) {
         return errorAction(`'id' must be presented in ${name} object`);
     }
 
-    const res1 = await setIdKeyMapping(
+    if (dataKeyPattern) {
+        res1 = await setIdKeyMapping(
+            data,
+            {
+                name,
+                autoIncrementBy,
+                dataKeyPattern,
+                ignoreDuplicate: true,
+            },
+        );
+
+        ({
+            data: {
+                [id]: key,
+            },
+        } = res1);
+    }
+
+    const res2 = await setData(
         data,
         {
             name,
-            autoIncrementBy,
-            dataKeyPattern,
-            ignoreDuplicate: true,
-        },
-    );
-
-    const {
-        data: {
-            [id]: key,
-        },
-    } = res1;
-
-    const res2 = await setData(
-        {
-            ...data,
             key,
-        },
-        {
-            name,
-            fields,
+            subFieldsKey,
+            fields: subFieldsKey ? fields.fields : fields,
             forceUpdate,
             ignoreDuplicate,
         },

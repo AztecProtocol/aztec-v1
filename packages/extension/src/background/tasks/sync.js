@@ -1,6 +1,6 @@
 /* global chrome */
 import {
-    onIdle,
+    set,
 } from '~utils/storage';
 import StorageService from '../services/StorageService';
 import fetchNoteFromServer from '../utils/fetchNoteFromServer';
@@ -29,14 +29,11 @@ const syncNotes = async ({
 };
 
 export default async function sync() {
-    onIdle(
-        () => console.log('--- database idle ---'),
-        {
-            persistent: true,
-        },
-    );
-
-    chrome.storage.local.clear();
+    // TODO
+    // implement onStart in LockManager and set _sync: 1 through it
+    await set({
+        _sync: 1,
+    });
 
     const startTimeAsync = Date.now();
     await syncNotes({
@@ -47,5 +44,4 @@ export default async function sync() {
     chrome.storage.local.getBytesInUse(null, (bytes) => {
         console.log('getBytesInUse', bytes);
     });
-    chrome.storage.local.get(null, data => console.info(data));
 }
