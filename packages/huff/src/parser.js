@@ -60,7 +60,21 @@ parser.substituteTemplateArguments = (newTemplateArguments, templateRegExps) => 
 };
 
 /**
- * Process a literal from a macro. First sees if string/int matches a number, in which case it returns a BN representation of that number, and if not sees if it is an opcode. Otherwise error.
+ * Process a numeric literal. If string/int matches a number (dec or hex), in which case it returns a BN representation of that number. Otherwise error.
+ * @param literal
+ */
+parser.processNumericLiteral = (literal) => {
+    if (literal.match(grammar.macro.LITERAL_HEX)) {
+        return new BN(literal.match(grammar.macro.LITERAL_HEX)[1], 16);
+    }
+    if (literal.match(grammar.macro.LITERAL_DECIMAL)) {
+        return new BN(literal.match(grammar.macro.LITERAL_DECIMAL)[1], 10);
+    }
+    throw new Error(`I don't know how to process literal "${literal}"`);
+}
+
+/**
+ * Process a literal from a macro. First sees if string/int matches a number (dec or hex), in which case it returns a BN representation of that number, and if not sees if it is an opcode. Otherwise error.
  * @param op
  * @param macros
  */
@@ -88,7 +102,7 @@ parser.processMacroLiteral = (op, macros) => {
  * @param macros
  * @returns {*} A literal with the arithmetic folded to form one constant. Errors if that opcode does not exist.
  */
-parser.processModifiedOpcode = (literal, macros) => {
+parser.processModifiedOpcode = (literal) => {
     const arithmeticStackOpcodeRegex = new RegExp('\\s*(dup|swap)(0x[0-9a-fA-F]+|\\d+)([+\\-])(0x[0-9a-fA-F]+|\\d+)\\s*');
     const regexMatchForParameterArithmetic = literal.match(arithmeticStackOpcodeRegex);
     let stackOpcodeType;
@@ -101,11 +115,13 @@ parser.processModifiedOpcode = (literal, macros) => {
         throw new Error(`failed to process literal "${literal}" `);
     }
     let finalNumber;
+    firstNumber = parser.processNumericLiteral(firstNumber);
+    secondNumber = parser.processNumericLiteral(secondNumber);
     // NB currently a bit weird as if either number is an opcode it will add/sub the bytecode value of that opcode
     if (operation === '+') {
-        finalNumber = parser.processMacroLiteral(firstNumber, macros).add(parser.processMacroLiteral(secondNumber), macros);
+        finalNumber = firstNumber.add(secondNumber);
     } else if (operation === '-') {
-        finalNumber = parser.processMacroLiteral(firstNumber, macros).sub(parser.processMacroLiteral(secondNumber), macros);
+        finalNumber = firstNumber.sub(secondNumber);
     } else {
         throw new Error(`operation is neither + nor - but "${operation}". How did I even get here? This shouldn't happen. I am confusion.`);
     }
@@ -154,33 +170,6 @@ parser.processTemplateLiteral = (literal, macros) => {
 
 parser.parseTemplate = (templateName, macros = {}, index = 0, debugFileline = {}) => {
     const macroId = parser.getId();
-    // TODO: wtf is this I thought huff doesn't have push
-    if (regex.isPushOpcode(templateName)) {
-        // And why does it slice this? Is this what it's supposed to be pushing? I think maybe?
-        const invokedName = templateName.slice(6, -1);
-        console.log(templateName);
-        const numBytes = parseInt(templateName.slice(4, 5), 10);
-        const unpaddedHex = formatEvenBytes(parser.processTemplateLiteral(invokedName, macros).toString(16));
-        const hex = padNBytes(unpaddedHex, numBytes);
-        const opcode = toHex(95 + (hex.length / 2));
-        return {
-            templateName: `inline-${templateName}-${macroId}`,
-            macros: {
-                ...macros,
-                [`inline-${templateName}-${macroId}`]: {
-                    name: `inline-${templateName}-${macroId}`,
-                    ops: [{
-                        type: TYPES.PUSH,
-                        value: opcode,
-                        args: [hex],
-                        index,
-                        debugFileline,
-                    }],
-                    templateParams: [],
-                },
-            },
-        };
-    }
     if (regex.isLiteral(templateName)) {
         const hex = formatEvenBytes(parser.processTemplateLiteral(templateName, macros).toString(16));
         const opcode = toHex(95 + (hex.length / 2));
@@ -280,7 +269,7 @@ parser.processMacro = (
         let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly undefined jump labels, or a misspelled label/opcode? (NB possibly substituted as a template parameter):`;
         result.unmatchedJumps.forEach((unmatchedJump) => {
             errorString += `\n"${unmatchedJump.label}" in "${unmatchedJump.debugFileline.filename}" at line ${unmatchedJump.debugFileline.lineNumber}`;
-        }); // NB currently not using bytecodeIndex or lineIndex but they might be useful}
+        }); // NB currently not using bytecodeIndex or lineIndex but they might be useful
         throw new Error(errorString);
     }
 
