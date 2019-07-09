@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    extends: 'airbnb/base',
+    extends: 'airbnb',
     parser: 'babel-eslint',
     env: {
         browser: true,
@@ -23,6 +23,8 @@ module.exports = {
     },
     rules: {
         indent: ['error', 4],
+        'react/jsx-indent': ['error', 4],
+        'react/jsx-indent-props': ['error', 4],
         'max-len': ['error', {
             code: 100,
             ignoreComments: true,
