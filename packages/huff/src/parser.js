@@ -242,7 +242,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
         opsType = TYPES.PUSH_JUMP_LABEL;
         opsValue = templateName;
     }
-    const returnTemplate = {
+    return {
         templateName: inlineTemplateName,
         macros: {
             ...macros,
@@ -259,7 +259,6 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
             },
         },
     };
-    return returnTemplate;
     // TODO templates that have templates
 };
 
