@@ -38,14 +38,21 @@ export default {
         if (!k.isDerivedKeyCorrect(new Uint8Array(session.pwDerivedKey))) {
             throw new Error('pwDerivedKey should be correct');
         }
+        
+        try {
 
-        const { assets = {} } = await domainModel.get({
-            domain,
-        });
-        // check if the user has granted the domain access to the given asset
-        const { [asset]:isApproved } = assets;
+            const { assets = {} } = await domainModel.get({
+                domain,
+            });
+            // check if the user has granted the domain access to the given asset
+            const { [asset]:isApproved } = assets;
 
-        if (!isApproved) {
+            if (!isApproved) {
+                throw new Error(`The user has not granted the domain "${domain}" access`);
+            }
+        }
+        catch(e) {
+
             throw new Error(`The user has not granted the domain "${domain}" access`);
         }
 
