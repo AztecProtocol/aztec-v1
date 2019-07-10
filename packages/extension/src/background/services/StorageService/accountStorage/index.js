@@ -3,7 +3,7 @@ import accountModel from '~database/models/account';
 export default {
     async createOrUpdate(account) {
         const {
-            data,
+            key,
             modified,
         } = await accountModel.set(
             account,
@@ -13,7 +13,7 @@ export default {
         );
 
         const {
-            id,
+            address: id,
         } = account;
         if (modified.indexOf(id) < 0) {
             // TODO
@@ -23,7 +23,7 @@ export default {
 
         return {
             ...account,
-            key: data[id],
+            key,
         };
     },
 };

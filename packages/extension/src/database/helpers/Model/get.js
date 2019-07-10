@@ -16,6 +16,11 @@ export default async function get(params = {}) {
         fields,
         index,
     } = this.config;
+    if (!id
+        && index
+    ) {
+        id = params[index];
+    }
     const subFieldsDataKey = !Array.isArray(fields)
         ? fields.key
         : '';

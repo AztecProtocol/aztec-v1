@@ -20,19 +20,15 @@ export default async function fetchNoteFromServer({
                 id
                 noteAccess {
                     account {
-                        id
                         address
                     }
                     sharedSecret
                     note {
-                        id
                         hash
                         asset {
-                            id
                             address
                         }
                         owner {
-                            id
                             address
                         }
                     }

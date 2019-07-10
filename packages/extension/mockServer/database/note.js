@@ -11,11 +11,13 @@ import findEntityByKey from '../utils/findEntityByKey';
 
 const notes = [];
 for (let i = 0; i < numberOfNotes; i += 1) {
+    const id = entityId('note', i);
     notes.push({
-        id: entityId('note', i),
-        hash: `note_hash_${i}`,
+        id,
+        hash: id,
         asset: entityId('asset', i % numberOfAssets),
         owner: entityId('account', i % numberOfAccount),
+        status: !(i % 7) || !(i % 15) ? 'DESTROYED' : 'CREATED',
     });
 }
 

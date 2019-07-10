@@ -9,12 +9,11 @@ import transformDataForDb from '~database/utils/transformDataForDb';
 
 export default async function update(data) {
     const {
-        id,
-    } = data;
-    const {
         name,
+        index,
         dataKeyPattern,
     } = this.config;
+    const id = data[index];
     let {
         key,
     } = data;
@@ -87,6 +86,7 @@ export default async function update(data) {
             });
 
             return {
+                key,
                 data: {
                     [key]: !subFieldsKey
                         ? newData
