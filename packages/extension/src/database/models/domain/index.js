@@ -5,7 +5,6 @@ export default Model({
     fields: {
         key: 'domain',
         fields: [
-            'graphQLServer',
             'assets',
         ],
     },

@@ -1,4 +1,3 @@
-import sessionModel from '~database/models/session';
 import { KeyStore } from '~utils/keyvault/index';
 import { get, set } from '~utils/storage';
 

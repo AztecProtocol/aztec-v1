@@ -14,7 +14,6 @@ export default {
         }
 
         // we check the particular host has access
-        // the extension session has a host chrome://extension/id 
         const now = Date.now();
         const session  = get('session');
 
@@ -25,7 +24,6 @@ export default {
         }
 
         // the host has not been active in two days
-        //
         if (session.lastActive < now - 60 * 60 * 24 * 7) {
             await remove('session');
             throw new Error('The session is no longer active please login');
@@ -57,8 +55,11 @@ export default {
         }
 
 
-        await domainModel.set(domain, {
-            lastActive: now,
+        await set({
+            session:{
+                ...session,
+                lastActive: now,
+            }
         });
 
         return {
@@ -70,39 +71,46 @@ export default {
     login: sessionStorage.login,
     enableAssetForDomain: async ({
         domain,
-        graphQLServer,
         asset
     }) => {
         // the session has already been validated at this point so we can freely write to the db
         // graphnode server is not needd and should be configured via config.
-
         let {
             data,
-            ...rest
-        } = await domainModel.update(
+            modified
+        } = await domainModel.set(
             {
                 domain,
-                graphQLServer,
                 assets: {
                     [asset]: true
                 }
             },
+            {
+                ignoreDuplicates: true,
+            }
         );
 
+        // if(modified.length) {
 
-        const {
-            graphQLServer: prevGraphQLServer,
-        } = data;
-        if (graphQLServer !== prevGraphQLServer) {
-            ({
-                data,
-            } = await domainModel.update({
-                domain,
-                graphQLServer,
-            }));
-        }
+        //     const {
+        //         assets: prevAssets,
+        //     } = data;
 
+
+        //        const {data: updatedData} = await domainModel.update({
+        //            domain,
+        //            assets: {
+        //                ...prevAssets,
+        //                [asset]:true
+        //            }
+        //         });
+
+        //     return updatedData.domain[domain];
+
+        // }
         return data.domain[domain];
+
+
 
             
     }
