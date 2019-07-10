@@ -42,6 +42,11 @@ function check(condition, message) {
     }
 }
 
+/**
+ * Generate a string from debug info that gives location in file of an error.
+ * @param debug
+ * @returns {string}
+ */
 function debugLocationString(debug) {
     return `Error in Huff code was traced to line ${debug.lineNumber} in file ${debug.filename}.`;
 }
@@ -129,32 +134,37 @@ parser.processMacroLiteral = (op, macros) => {
 /**
  * Unpicks template parameters with arithmetic like <dup1+3> and <swap16-0x05>
  * @param literal A literal taking the form of a stack opcode (dup or swap) followed by some add/sub arithmetic on dec or hex numbers e.g. dup1+3 and swap16-0x05
- * @param macros
  * @returns {*} A literal with the arithmetic folded to form one constant. Errors if that opcode does not exist.
  */
 parser.processModifiedOpcode = (literal) => {
+    function doArithmeticOperation(a, b, operation) {
+        switch (operation) {
+            case '+':
+                return a.add(b);
+                break;
+            case '-':
+                return a.sub(b);
+                break;
+            default:
+                throw new Error(`unrecognised arithmetic operation "${operation}". Should be either + or -.`);
+                break;
+        }
+    }
+
     const arithmeticStackOpcodeRegex = new RegExp('\\s*(dup|swap)(0x[0-9a-fA-F]+|\\d+)([+\\-])(0x[0-9a-fA-F]+|\\d+)\\s*');
     const regexMatchForParameterArithmetic = literal.match(arithmeticStackOpcodeRegex);
     let stackOpcodeType;
     let firstNumber;
     let operation;
     let secondNumber;
-    if (regexMatchForParameterArithmetic) {
+    try {
         [, stackOpcodeType, firstNumber, operation, secondNumber] = regexMatchForParameterArithmetic;
-    } else {
-        throw new Error(`failed to process literal "${literal}" `);
+    } catch (error) {
+        throw new Error(`failed to process literal "${literal}"` + error.toString());
     }
-    let finalNumber;
     firstNumber = parser.processNumericLiteral(firstNumber);
     secondNumber = parser.processNumericLiteral(secondNumber);
-    // NB currently a bit weird as if either number is an opcode it will add/sub the bytecode value of that opcode
-    if (operation === '+') {
-        finalNumber = firstNumber.add(secondNumber);
-    } else if (operation === '-') {
-        finalNumber = firstNumber.sub(secondNumber);
-    } else {
-        throw new Error(`operation is neither + nor - but "${operation}". How did I even get here? This shouldn't happen. I am confusion.`);
-    }
+    const finalNumber = doArithmeticOperation(firstNumber, secondNumber, operation);
     // TODO: is this check neccesary? What if opcode arithmetic is nested?
     if (finalNumber < 1 || finalNumber > 16) {
         throw new Error(`result of arithmetic operation ${firstNumber}${operation}${secondNumber} is ${finalNumber} but must be between 1 and 16 inclusive`);
@@ -200,102 +210,16 @@ parser.processTemplateLiteral = (literal, macros) => {
 
 parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
     const macroId = parser.getId();
-    if (regex.isLiteral(templateName)) {
-        const hex = formatEvenBytes(parser.processTemplateLiteral(templateName, macros).toString(16));
-        const opcode = toHex(95 + (hex.length / 2));
-        return {
-            templateName: `inline-${templateName}-${macroId}`,
-            macros: {
-                ...macros,
-                [`inline-${templateName}-${macroId}`]: {
-                    name: `inline-${templateName}-${macroId}`,
-                    ops: [{
-                        type: TYPES.PUSH,
-                        value: opcode,
-                        args: [hex],
-                        index,
-                        debug,
-                    }],
-                    templateParams: [],
-                },
-            },
-        };
-    }
-    if (regex.isModifiedOpcode(templateName)) {
-        const opcode = parser.processModifiedOpcode(templateName, macros).toString(16);
-        return {
-            templateName: `inline-${templateName}-${macroId}`,
-            macros: {
-                ...macros,
-                [`inline-${templateName}-${macroId}`]: {
-                    name: templateName,
-                    ops: [{
-                        type: TYPES.OPCODE,
-                        value: opcode,
-                        args: [],
-                        index,
-                        debug,
-                    }],
-                    templateParams: [],
-                },
-            },
-        };
-    }
-    if (opcodes[templateName]) {
-        return {
-            templateName: `inline-${templateName}-${macroId}`,
-            macros: {
-                ...macros,
-                [`inline-${templateName}-${macroId}`]: {
-                    name: templateName,
-                    ops: [{
-                        type: TYPES.OPCODE,
-                        value: opcodes[templateName],
-                        args: [],
-                        index,
-                        debug,
-                    }],
-                    templateParams: [],
-                },
-            },
-        };
-    }
-    if (macros[templateName]) {
-        return {
-            macros,
-            templateName,
-        };
-    }
-    if (templateName.match(grammar.macro.TEMPLATE)) {
-        const token = templateName.match(grammar.macro.TEMPLATE);
-        return {
-            templateName: `inline-${templateName}-${macroId}`,
-            macros: {
-                ...macros,
-                [`inline-${templateName}-${macroId}`]: {
-                    name: templateName,
-                    ops: [{
-                        type: TYPES.TEMPLATE,
-                        value: token[1],
-                        args: [],
-                        index,
-                        debug,
-                    }],
-                    templateParams: [],
-                },
-            },
-        };
-    }
-
-    return {
-        templateName: `inline-${templateName}-${macroId}`,
+    const inlineTemplateName = `inline-${templateName}-${macroId}`;
+    const returnTemplate = {
+        templateName: inlineTemplateName,
         macros: {
             ...macros,
-            [`inline-${templateName}-${macroId}`]: {
+            [inlineTemplateName]: {
                 name: templateName,
                 ops: [{
-                    type: TYPES.PUSH_JUMP_LABEL,
-                    value: templateName,
+                    type: '',
+                    value: '',
                     args: [],
                     index,
                     debug,
@@ -304,6 +228,34 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
             },
         },
     };
+    if (regex.isLiteral(templateName)) {
+        const hex = formatEvenBytes(parser.processTemplateLiteral(templateName, macros).toString(16));
+        const opcode = toHex(95 + (hex.length / 2));
+        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.PUSH;
+        returnTemplate.macros[inlineTemplateName].ops[0].value = opcode;
+        returnTemplate.macros[inlineTemplateName].ops[0].args = [hex];
+        returnTemplate.macros[inlineTemplateName].name = inlineTemplateName;
+    } else if (regex.isModifiedOpcode(templateName)) {
+        const opcode = parser.processModifiedOpcode(templateName, macros).toString(16);
+        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.OPCODE;
+        returnTemplate.macros[inlineTemplateName].ops[0].value = opcode;
+    } else if (opcodes[templateName]) {
+        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.OPCODE;
+        returnTemplate.macros[inlineTemplateName].ops[0].value = opcodes[templateName];
+    } else if (macros[templateName]) {
+        return {
+            macros,
+            templateName,
+        };
+    } else if (templateName.match(grammar.macro.TEMPLATE)) {
+        const token = templateName.match(grammar.macro.TEMPLATE);
+        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.TEMPLATE;
+        returnTemplate.macros[inlineTemplateName].ops[0].value = token[1];
+    } else {
+        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.PUSH_JUMP_LABEL;
+        returnTemplate.macros[inlineTemplateName].ops[0].value = templateName;
+    }
+    return returnTemplate;
     // TODO templates that have templates
 };
 
