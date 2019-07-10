@@ -6,7 +6,7 @@ import {
     fromAction,
 } from '~utils/noteStatus';
 import noteModel from '~database/models/note';
-import noteStorage from '../noteStorage';
+import createOrUpdateNote from '../addNote/createOrUpdateNote';
 
 jest.mock('~utils/storage');
 
@@ -80,7 +80,7 @@ describe('createOrUpdate', () => {
         ]);
         expect(dataBefore).toEqual({});
 
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
 
         const dataAfter = await storage.get([
             'noteCount',
@@ -108,21 +108,21 @@ describe('createOrUpdate', () => {
         const countBefore = await storage.get('noteCount');
         expect(countBefore).toBeUndefined();
 
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
         const count0 = await storage.get('noteCount');
         expect(count0).toEqual(1);
 
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
         const count1 = await storage.get('noteCount');
         expect(count1).toEqual(1);
 
-        await noteStorage.createOrUpdate(newNote(note));
+        await createOrUpdateNote(newNote(note));
         const count2 = await storage.get('noteCount');
         expect(count2).toEqual(2);
     });
 
     it('push note keys to existing assetValue array when adding notes with the same asset', async () => {
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
         const assetValueGroupKey = `${note.assetKey}v:${value}`;
         const data0 = await storage.get([
             assetValueGroupKey,
@@ -131,7 +131,7 @@ describe('createOrUpdate', () => {
             [assetValueGroupKey]: ['n:0'],
         });
 
-        await noteStorage.createOrUpdate(newNote(note));
+        await createOrUpdateNote(newNote(note));
         const data1 = await storage.get([
             assetValueGroupKey,
         ]);
@@ -142,7 +142,7 @@ describe('createOrUpdate', () => {
 
     it('push note keys to different assetValue array when adding notes with different assets', async () => {
         const note0 = newNote(withAsset(0));
-        await noteStorage.createOrUpdate(note0);
+        await createOrUpdateNote(note0);
         const assetValueGroupKey0 = `${note0.assetKey}v:${value}`;
         const data0 = await storage.get([
             assetValueGroupKey0,
@@ -152,7 +152,7 @@ describe('createOrUpdate', () => {
         });
 
         const note1 = newNote(withAsset(1));
-        await noteStorage.createOrUpdate(note1);
+        await createOrUpdateNote(note1);
         const assetValueGroupKey1 = `${note1.assetKey}v:${value}`;
         const data1 = await storage.get([
             assetValueGroupKey0,
@@ -165,21 +165,21 @@ describe('createOrUpdate', () => {
     });
 
     it('will not call set when adding existing note to storage', async () => {
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
 
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
         const numberOfSet1 = set.callCount;
         expect(numberOfSet1 === numberOfSet0).toBe(true);
 
-        await noteStorage.createOrUpdate(newNote(note));
+        await createOrUpdateNote(newNote(note));
         const numberOfSet2 = set.callCount;
         expect(numberOfSet2 === 2 * numberOfSet1).toBe(true);
     });
 
     it('will update storage if some data is changed in existing note', async () => {
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
         const savedNote = await noteModel.get({
@@ -195,7 +195,7 @@ describe('createOrUpdate', () => {
             ...note,
             action: 'DESTROY',
         };
-        await noteStorage.createOrUpdate(updatedNote);
+        await createOrUpdateNote(updatedNote);
         const numberOfSet1 = set.callCount;
         expect(numberOfSet1 > numberOfSet0).toBe(true);
 
@@ -209,11 +209,11 @@ describe('createOrUpdate', () => {
     });
 
     it('will not call set if changed data is not stored in model', async () => {
-        await noteStorage.createOrUpdate(note);
+        await createOrUpdateNote(note);
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
 
-        await noteStorage.createOrUpdate({
+        await createOrUpdateNote({
             ...note,
             whaever: '',
         });

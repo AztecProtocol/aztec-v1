@@ -9,7 +9,7 @@ import assetModel from '~database/models/asset';
 import pushAssetValue from './pushAssetValue';
 import removeAssetValue from './removeAssetValue';
 
-const createOrUpdate = async (note) => {
+export default async function createOrUpdateNote(note) {
     const {
         assetKey,
         ownerKey,
@@ -65,6 +65,7 @@ const createOrUpdate = async (note) => {
         }
     }
 
+
     const {
         status: prevStatus,
     } = prevNoteData;
@@ -85,6 +86,7 @@ const createOrUpdate = async (note) => {
             value,
         });
 
+
         // TODO - don't push note that's been removed
         if (isNoteDestroyed) {
             promises.push(removeAssetValue(assetValueKey, noteKey));
@@ -98,8 +100,4 @@ const createOrUpdate = async (note) => {
     return {
         key: noteKey,
     };
-};
-
-export default {
-    createOrUpdate,
-};
+}

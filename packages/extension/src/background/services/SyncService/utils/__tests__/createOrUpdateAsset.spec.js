@@ -2,7 +2,7 @@ import {
     spy,
 } from 'sinon';
 import * as storage from '~utils/storage';
-import assetStorage from '../assetStorage';
+import createOrUpdateAsset from '../addNote/createOrUpdateAsset';
 
 jest.mock('~utils/storage');
 
@@ -37,7 +37,7 @@ describe('createOrUpdate', () => {
         ]);
         expect(dataBefore).toEqual({});
 
-        await assetStorage.createOrUpdate(asset);
+        await createOrUpdateAsset(asset);
 
         const dataAfter = await storage.get([
             'assetCount',
@@ -52,19 +52,19 @@ describe('createOrUpdate', () => {
     });
 
     it('increase count only when adding different assets to storage', async () => {
-        await assetStorage.createOrUpdate(assets[0]);
+        await createOrUpdateAsset(assets[0]);
         const data0 = await storage.get(['assetCount']);
         expect(data0).toEqual({
             assetCount: 1,
         });
 
-        await assetStorage.createOrUpdate(assets[0]);
+        await createOrUpdateAsset(assets[0]);
         const data1 = await storage.get(['assetCount']);
         expect(data1).toEqual({
             assetCount: 1,
         });
 
-        await assetStorage.createOrUpdate(assets[1]);
+        await createOrUpdateAsset(assets[1]);
         const data2 = await storage.get(['assetCount']);
         expect(data2).toEqual({
             assetCount: 2,
@@ -72,15 +72,15 @@ describe('createOrUpdate', () => {
     });
 
     it('will not call set when adding existing asset to storage', async () => {
-        await assetStorage.createOrUpdate(assets[0]);
+        await createOrUpdateAsset(assets[0]);
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
 
-        await assetStorage.createOrUpdate(assets[0]);
+        await createOrUpdateAsset(assets[0]);
         const numberOfSet1 = set.callCount;
         expect(numberOfSet1 === numberOfSet0).toBe(true);
 
-        await assetStorage.createOrUpdate(assets[1]);
+        await createOrUpdateAsset(assets[1]);
         const numberOfSet2 = set.callCount;
         expect(numberOfSet2 === 2 * numberOfSet1).toBe(true);
     });
