@@ -6,7 +6,7 @@ import {
 export default function remove(keys, {
     sync = false,
 } = {}) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         browser.storage[sync ? 'sync' : 'local']
             .remove(keys)
             .then(() => {
