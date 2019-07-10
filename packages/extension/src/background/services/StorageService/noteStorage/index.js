@@ -11,13 +11,12 @@ import removeAssetValue from './removeAssetValue';
 
 const createOrUpdate = async (note) => {
     const {
-        id,
         assetKey,
         ownerKey,
         action,
     } = note;
 
-    const isOwner = note.account.id === note.owner.id;
+    const isOwner = note.account.address === note.owner.address;
 
     const model = isOwner
         ? noteModel
@@ -36,6 +35,7 @@ const createOrUpdate = async (note) => {
     };
 
     const {
+        key: noteKey,
         data: prevData,
         storage: prevStorage,
         modified,
@@ -47,12 +47,9 @@ const createOrUpdate = async (note) => {
     );
 
     const {
-        [id]: noteKey,
-    } = prevData;
-    const {
         [noteKey]: prevNoteData,
     } = prevData;
-    const justCreated = modified.indexOf(id) >= 0;
+    const justCreated = modified.length > 0;
 
     const promises = [];
 
@@ -67,7 +64,6 @@ const createOrUpdate = async (note) => {
             promises.push(model.update(newData));
         }
     }
-
 
     const {
         status: prevStatus,
@@ -88,7 +84,6 @@ const createOrUpdate = async (note) => {
             assetKey,
             value,
         });
-
 
         // TODO - don't push note that's been removed
         if (isNoteDestroyed) {

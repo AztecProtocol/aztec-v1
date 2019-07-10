@@ -31,6 +31,7 @@ export const typeDefs = gql`
         hash: String!
         asset: Asset!
         owner: Account!
+        status: String!
     }
     type NoteAccess {
         id: ID!

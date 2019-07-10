@@ -16,26 +16,26 @@ describe('createOrUpdate', () => {
 
     const assets = [
         {
-            id: 'asset_0',
             key: 'a:0',
+            address: '0xabc',
         },
         {
-            id: 'asset_1',
             key: 'a:1',
+            address: '0xdef',
         },
     ];
 
     const users = [
         {
-            id: 'user_0',
+            address: '0x0',
         },
         {
-            id: 'user_1',
+            address: '0x1',
         },
     ];
 
     const note = {
-        id: '123',
+        hash: '0x123',
         assetKey: 'a:0',
         asset: assets[0],
         account: users[0],
@@ -53,7 +53,7 @@ describe('createOrUpdate', () => {
         numberOfNotes += 1;
         return {
             ...prevNote,
-            id: `${prevNote.id}${numberOfNotes}`,
+            hash: `${prevNote.hash}${numberOfNotes}`,
         };
     };
 
@@ -74,7 +74,7 @@ describe('createOrUpdate', () => {
 
         const dataBefore = await storage.get([
             'noteCount',
-            note.id,
+            note.hash,
             'n:0',
             assetValueGroupKey,
         ]);
@@ -84,21 +84,22 @@ describe('createOrUpdate', () => {
 
         const dataAfter = await storage.get([
             'noteCount',
-            note.id,
+            note.hash,
             assetValueGroupKey,
         ]);
         expect(dataAfter).toEqual({
             noteCount: 1,
-            [note.id]: 'n:0',
+            [note.hash]: 'n:0',
             [assetValueGroupKey]: ['n:0'],
         });
 
         const savedNote = await noteModel.get({
-            id: note.id,
+            hash: note.hash,
         });
-        expect(savedNote).toEqual({
+        expect(savedNote).toMatchObject({
             value,
             asset: note.assetKey,
+            owner: note.ownerKey,
             status: fromAction(note.action),
         });
     });
@@ -182,9 +183,9 @@ describe('createOrUpdate', () => {
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
         const savedNote = await noteModel.get({
-            id: note.id,
+            hash: note.hash,
         });
-        expect(savedNote).toEqual({
+        expect(savedNote).toMatchObject({
             value,
             asset: note.assetKey,
             status: fromAction(note.action),
@@ -199,7 +200,7 @@ describe('createOrUpdate', () => {
         expect(numberOfSet1 > numberOfSet0).toBe(true);
 
         const updatedSavedNote = await noteModel.get({
-            id: note.id,
+            hash: note.hash,
         });
         expect(updatedSavedNote).toEqual({
             ...savedNote,

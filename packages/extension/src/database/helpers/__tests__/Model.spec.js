@@ -217,12 +217,14 @@ describe('Model with dataKey mapping', () => {
         const dataBefore = await storage.get(expectedKey);
         expect(dataBefore).toBeUndefined();
 
-        await carModel.set({
+        const {
+            key,
+        } = await carModel.set({
             id: 'cc',
             color: 'yellow',
         });
-
-        const dataAfter = await storage.get(expectedKey);
+        expect(key).toBe(expectedKey);
+        const dataAfter = await storage.get(key);
         expect(dataAfter).toEqual([
             'yellow',
         ]);
@@ -299,9 +301,7 @@ describe('Model with dataKey mapping', () => {
 
         const id = 'cc';
         const {
-            storage: {
-                [id]: key,
-            },
+            key,
         } = await carModel.set({
             id,
             color: 'yellow',
@@ -346,6 +346,15 @@ describe('Model with dataKey mapping', () => {
             id: 'qw123',
         });
         expect(dataById).toEqual({
+            id: 'qw123',
+            serial: 'qw123',
+            color: 'yellow',
+        });
+
+        const dataBySerial = await carModel.get({
+            serial: 'qw123',
+        });
+        expect(dataBySerial).toEqual({
             id: 'qw123',
             serial: 'qw123',
             color: 'yellow',

@@ -12,6 +12,7 @@ export default async function setData(
     {
         name,
         key,
+        id,
         subFieldsKey,
         fields,
         forceUpdate = false,
@@ -34,9 +35,6 @@ export default async function setData(
                 if (ignoreDuplicate) {
                     ignored = true;
                 } else if (!forceUpdate) {
-                    const {
-                        id,
-                    } = data;
                     const info = id ? `id "${id}"` : `key "${key}"`;
                     return errorAction(`Model '${name}' with ${info} already exists.`);
                 }
@@ -57,6 +55,7 @@ export default async function setData(
             }
 
             return {
+                key,
                 data: {
                     [key]: !subFieldsKey
                         ? transformDataFromDb(fields, storageData)

@@ -3,16 +3,11 @@ import assetModel from '~database/models/asset';
 export default {
     async createOrUpdate(asset) {
         const {
-            id,
-        } = asset;
-
-        const {
-            data,
+            key,
             modified,
         } = await assetModel.set(
             {
                 ...asset,
-                id,
                 balance: 0,
             },
             {
@@ -20,7 +15,7 @@ export default {
             },
         );
 
-        if (modified.indexOf(id) < 0) {
+        if (modified.length === 0) {
             // TODO
             // didn't create a new asset
             // update existing data instead
@@ -28,7 +23,7 @@ export default {
 
         return {
             ...asset,
-            key: data[id],
+            key,
         };
     },
 };

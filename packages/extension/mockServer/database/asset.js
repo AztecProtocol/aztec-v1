@@ -9,9 +9,10 @@ import findEntityByKey from '../utils/findEntityByKey';
 
 const assets = [];
 for (let i = 0; i < numberOfAssets; i += 1) {
+    const id = entityId('asset', i);
     assets.push({
-        id: entityId('asset', i),
-        address: `asset_address_${i}`,
+        id,
+        address: id,
     });
 }
 

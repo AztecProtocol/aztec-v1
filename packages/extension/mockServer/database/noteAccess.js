@@ -4,21 +4,27 @@ import {
     numberOfAccount,
     entityId,
 } from '../config';
+import randomInt from '../utils/randomInt';
 import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
+import notes from './note';
 
 const noteAccess = [];
 const noteChangeLog = [];
-let prevDestroyedId = -1;
+const toBeDestroyed = [];
+let prevTimestamp = Date.now();
 for (let i = 0; i < numberOfNoteAccess; i += 1) {
     const accessId = entityId('note_access', i);
     const accountId = entityId('account', i % numberOfAccount);
+    const noteIndex = i % numberOfNotes;
+    const note = notes[noteIndex];
+    prevTimestamp += randomInt(0, 2000);
 
     noteAccess.push({
         id: accessId,
-        note: entityId('note', i % numberOfNotes),
+        note: entityId('note', noteIndex),
         account: accountId,
         sharedSecret: `secret_${i}`,
     });
@@ -28,21 +34,25 @@ for (let i = 0; i < numberOfNoteAccess; i += 1) {
         account: accountId,
         noteAccess: accessId,
         action: 'CREATE',
-        timestamp: Math.ceil(Date.now() / 1000),
+        timestamp: Math.ceil(prevTimestamp / 1000),
     });
 
-    if (!(i % 7) || !(i % 15)) {
-        prevDestroyedId += 1;
-        const noteToDestroy = noteAccess[prevDestroyedId];
-        noteChangeLog.push({
-            id: entityId('log', noteChangeLog.length),
-            account: noteToDestroy.account,
-            noteAccess: noteToDestroy.id,
-            action: 'DESTROY',
-            timestamp: Math.ceil(Date.now() / 1000),
-        });
+    if (note.status === 'DESTROYED') {
+        toBeDestroyed.push(i);
     }
 }
+
+toBeDestroyed.forEach((accessIndex) => {
+    const access = noteAccess[accessIndex];
+    prevTimestamp += randomInt(0, 2000);
+    noteChangeLog.push({
+        id: entityId('log', noteChangeLog.length),
+        account: access.account,
+        noteAccess: access.id,
+        action: 'DESTROY',
+        timestamp: Math.ceil(prevTimestamp / 1000),
+    });
+});
 
 export const getNoteAccesses = (_, args) => {
     const {

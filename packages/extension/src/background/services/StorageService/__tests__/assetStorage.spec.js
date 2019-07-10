@@ -20,56 +20,54 @@ describe('createOrUpdate', () => {
 
     const assets = [
         {
-            id: '123',
             address: '0xabc',
         },
         {
-            id: '456',
             address: '0xdef',
         },
     ];
 
     it('set asset to storage', async () => {
+        const asset = assets[0];
+
         const dataBefore = await storage.get([
             'assetCount',
-            assets[0].id,
+            asset.address,
             'a:0',
         ]);
         expect(dataBefore).toEqual({});
 
-        await assetStorage.createOrUpdate(assets[0]);
+        await assetStorage.createOrUpdate(asset);
 
         const dataAfter = await storage.get([
             'assetCount',
-            assets[0].id,
+            asset.address,
             'a:0',
         ]);
         expect(dataAfter).toEqual({
             assetCount: 1,
-            [assets[0].id]: 'a:0',
-            'a:0': [0],
+            [asset.address]: 'a:0',
+            'a:0': [asset.address, 0],
         });
     });
 
-    it('increase count when adding different assets to storage', async () => {
+    it('increase count only when adding different assets to storage', async () => {
         await assetStorage.createOrUpdate(assets[0]);
-        const data0 = await storage.get([
-            'assetCount',
-            assets[0].id,
-        ]);
+        const data0 = await storage.get(['assetCount']);
         expect(data0).toEqual({
             assetCount: 1,
-            [assets[0].id]: 'a:0',
+        });
+
+        await assetStorage.createOrUpdate(assets[0]);
+        const data1 = await storage.get(['assetCount']);
+        expect(data1).toEqual({
+            assetCount: 1,
         });
 
         await assetStorage.createOrUpdate(assets[1]);
-        const data1 = await storage.get([
-            'assetCount',
-            assets[1].id,
-        ]);
-        expect(data1).toEqual({
+        const data2 = await storage.get(['assetCount']);
+        expect(data2).toEqual({
             assetCount: 2,
-            [assets[1].id]: 'a:1',
         });
     });
 

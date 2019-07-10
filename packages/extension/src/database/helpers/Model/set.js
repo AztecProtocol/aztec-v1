@@ -16,14 +16,7 @@ export default async function set(
         index,
         dataKeyPattern,
     } = this.config;
-    let {
-        id,
-    } = data;
-    if (!id
-        && data[index]
-    ) {
-        id = data[index];
-    }
+    const id = data[index];
     let key = id;
     let subFieldsKey = '';
     let res1;
@@ -82,6 +75,7 @@ export default async function set(
         data,
         {
             name,
+            id,
             key,
             subFieldsKey,
             fields: subFieldsKey ? fields.fields : fields,
@@ -90,8 +84,17 @@ export default async function set(
         },
     );
 
-    return mergeActions(
+    const actions = mergeActions(
         res1,
         res2,
     );
+
+    if (!dataKeyPattern) {
+        return actions;
+    }
+
+    return {
+        key,
+        ...actions,
+    };
 }
