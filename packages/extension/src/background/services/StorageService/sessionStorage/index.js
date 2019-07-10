@@ -3,7 +3,7 @@ import { KeyStore } from '~utils/keyvault/index';
 import { get, set } from '~utils/storage';
 
 export default {
-    login: async ({ password, host }) => {
+    login: async ({ password }) => {
         const { keyStore } = await get(['keyStore']);
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
@@ -16,14 +16,14 @@ export default {
             throw new Error('pwDerivedKey should be correct');
         }
 
-        await set({
+        const { session } = await set({
             session: {
-                lastLogin: Date.now(),
+                lastActive: Date.now(),
                 createdAt: Date.now(),
                 pwDerivedKey,
             },
         });
-        const session = await get('session');
+
 
         return session;
     },
