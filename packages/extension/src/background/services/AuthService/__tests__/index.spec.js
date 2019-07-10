@@ -30,15 +30,18 @@ const encryptedKeyStore = {
 describe.only('Auth Service Tests', () => {
     let set;
     let get;
+    let remove;
     beforeEach(() => {
         set = spy(storage, 'set');
         get = spy(storage, 'get');
+        remove = spy(storage, 'remove');
         set({ keyStore: encryptedKeyStore });
     });
 
     afterEach(() => {
         set.restore();
         get.restore();
+        remove.restore();
         storage.reset();
     });
 
@@ -57,7 +60,6 @@ describe.only('Auth Service Tests', () => {
             domain: 'https://google.com',
             asset: '__asset_id_0',
         });
-
         expect(session.assets.__asset_id_0).toEqual(true);
     });
 
@@ -96,6 +98,7 @@ describe.only('Auth Service Tests', () => {
             domain: 'https://google.com',
             asset: '__asset_id_0',
         })).rejects.toThrow('The session is no longer active please login');
+        expect(remove.called);
     });
 
     it('Should not validate the session if the session age is 21 days ago', async () => {
@@ -114,6 +117,7 @@ describe.only('Auth Service Tests', () => {
             domain: 'https://google.com',
             asset: '__asset_id_0',
         })).rejects.toThrow('The session is > 21 days old please login');
+        expect(remove.called);
     });
 
     it('Should not validate the session if the user has not granted the domain access to the asset ', async () => {
