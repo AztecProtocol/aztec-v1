@@ -373,7 +373,7 @@ describe('bn128 main loop', function describe() {
         expect(result.y.fromRed().eq(expected.y.fromRed())).to.equal(true);
     });
 
-    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of TWLEVE points', async () => {
+    it('macro MAIN__WEIERSTRUDEL calculates scalar multiplication of TWELVE points', async () => {
         const numPoints = 12;
         const points = [...new Array(numPoints)].map(() => bn128Reference.randomPoint());
         const scalars = [...new Array(numPoints)].map(() => bn128Reference.randomScalar());
