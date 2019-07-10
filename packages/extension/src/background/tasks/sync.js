@@ -1,47 +1,30 @@
-/* global chrome */
 import {
+    get,
     set,
 } from '~utils/storage';
-import StorageService from '../services/StorageService';
-import fetchNoteFromServer from '../utils/fetchNoteFromServer';
-
-const syncNotes = async ({
-    account,
-    lastId = '',
-    notesPerRequest = 10,
-} = {}) => {
-    const newNotes = await fetchNoteFromServer({
-        numberOfNotes: notesPerRequest,
-        account,
-        lastId,
-    });
-    console.log('syncNotes', newNotes);
-
-    await Promise.all(newNotes.map(note => StorageService.addNote(note)));
-    if (newNotes.length === notesPerRequest) {
-        const lastNote = newNotes[newNotes.length - 1];
-        await syncNotes({
-            account,
-            notesPerRequest,
-            lastId: lastNote.logId,
-        });
-    }
-};
+import userModel from '~database/models/user';
+import SyncService from '../services/SyncService';
 
 export default async function sync() {
     // TODO
-    // implement onStart in LockManager and set _sync: 1 through it
+    // implement onStart in storage and set _sync: 1 through it
     await set({
-        _sync: 1,
+        __sync: 1,
     });
 
-    const startTimeAsync = Date.now();
-    await syncNotes({
-        account: '__account_id_0',
+    const graphNodeServerUrl = await get('__graphNode');
+    SyncService.set({
+        graphNodeServerUrl,
     });
-    console.log(`(Optimized Async) Done in ${Date.now() - startTimeAsync} ms`);
+    const users = await userModel.get();
 
-    chrome.storage.local.getBytesInUse(null, (bytes) => {
-        console.log('getBytesInUse', bytes);
-    });
+    if (users) {
+        const startTimeAsync = Date.now();
+
+        const syncPromises = Object.keys(users)
+            .map(address => SyncService.syncAccount(address));
+
+        await Promise.all(syncPromises);
+        console.log(`(Optimized Async) Done in ${Date.now() - startTimeAsync} ms`);
+    }
 }
