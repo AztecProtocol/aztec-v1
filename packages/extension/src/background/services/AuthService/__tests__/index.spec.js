@@ -1,10 +1,8 @@
 import {
     spy,
-    stub,
 } from 'sinon';
 import * as storage from '~utils/storage';
 import AuthService from '..';
-import fixtures from '~utils/keyvault/keystore.json';
 
 jest.mock('~utils/storage');
 
@@ -46,7 +44,6 @@ describe.only('Auth Service Tests', () => {
 
 
     it('Should create a session if the supplied password can decrypt the stored keystore', async () => {
-        const fixture = fixtures.valid[0];
         const session = await AuthService.login({
             password: 'password',
             domain: 'https://google.com',
@@ -84,14 +81,49 @@ describe.only('Auth Service Tests', () => {
     });
 
     it('Should not validate the session if the last session activity is > 7 days ago', async () => {
+        await AuthService.login({
+            password: 'password',
+            domain: 'https://google.com',
+        });
 
+        await set({
+            session: {
+                lastActive: Date.now() - (8 * 24 * 60 * 60),
+                createdAt: Date.now(),
+            },
+        });
+        await expect(AuthService.validate({
+            domain: 'https://google.com',
+            asset: '__asset_id_0',
+        })).rejects.toThrow('The session is no longer active please login');
     });
 
     it('Should not validate the session if the session age is 21 days ago', async () => {
+        await AuthService.login({
+            password: 'password',
+            domain: 'https://google.com',
+        });
 
+        await set({
+            session: {
+                createdAt: Date.now() - (22 * 24 * 60 * 60),
+                lastActive: Date.now(),
+            },
+        });
+        await expect(AuthService.validate({
+            domain: 'https://google.com',
+            asset: '__asset_id_0',
+        })).rejects.toThrow('The session is > 21 days old please login');
     });
 
     it('Should not validate the session if the user has not granted the domain access to the asset ', async () => {
-
+        await AuthService.login({
+            password: 'password',
+            domain: 'https://google.com',
+        });
+        await expect(AuthService.validate({
+            domain: 'https://google.com',
+            asset: '__asset_id_0',
+        })).rejects.toThrow('The user has not granted the domain "https://google.com" access');
     });
 });

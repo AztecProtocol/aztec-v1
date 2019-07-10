@@ -21,6 +21,22 @@ const get = (keys) => {
     return result;
 };
 
+const remove = (keys) => {
+    if (keys === undefined) {
+        return db;
+    }
+
+    if (typeof keys === 'string') {
+        return delete db[keys];
+    }
+
+    keys.forEach((key) => {
+        delete db[key];
+    });
+
+    return db;
+};
+
 const set = (valueMap) => {
     Object.keys(valueMap).forEach((key) => {
         db[key] = valueMap[key];
@@ -36,6 +52,7 @@ export {
     get,
     set,
     lock,
+    remove,
     onIdle,
     reset,
 };

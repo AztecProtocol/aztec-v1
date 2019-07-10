@@ -18,15 +18,15 @@ export default {
         const now = Date.now();
         const session  = get('session');
 
-        if (session.createdAt < now - 60 * 60 * 24 * 7) {
+        if (session.createdAt < now - 60 * 60 * 24 * 21) {
             // remove session not pwkey
             await remove('session');
-            throw new Error('The session is no longer active please login');
+            throw new Error('The session is > 21 days old please login');
         }
 
         // the host has not been active in two days
         //
-        if (session.lastActive < now - 60 * 60 * 24 * 2) {
+        if (session.lastActive < now - 60 * 60 * 24 * 7) {
             await remove('session');
             throw new Error('The session is no longer active please login');
         }
@@ -39,7 +39,7 @@ export default {
             throw new Error('pwDerivedKey should be correct');
         }
 
-        const { assets } = await domainModel.get({
+        const { assets = {} } = await domainModel.get({
             domain,
         });
         // check if the user has granted the domain access to the given asset
