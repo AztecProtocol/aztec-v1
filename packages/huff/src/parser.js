@@ -211,37 +211,24 @@ parser.processTemplateLiteral = (literal, macros) => {
 parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
     const macroId = parser.getId();
     const inlineTemplateName = `inline-${templateName}-${macroId}`;
-    const returnTemplate = {
-        templateName: inlineTemplateName,
-        macros: {
-            ...macros,
-            [inlineTemplateName]: {
-                name: templateName,
-                ops: [{
-                    type: '',
-                    value: '',
-                    args: [],
-                    index,
-                    debug,
-                }],
-                templateParams: [],
-            },
-        },
-    };
+    let opsType = '';
+    let opsValue = '';
+    let opsArgs = [];
+    let name = templateName;
     if (regex.isLiteral(templateName)) {
         const hex = formatEvenBytes(parser.processTemplateLiteral(templateName, macros).toString(16));
         const opcode = toHex(95 + (hex.length / 2));
-        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.PUSH;
-        returnTemplate.macros[inlineTemplateName].ops[0].value = opcode;
-        returnTemplate.macros[inlineTemplateName].ops[0].args = [hex];
-        returnTemplate.macros[inlineTemplateName].name = inlineTemplateName;
+        opsType = TYPES.PUSH;
+        opsValue = opcode;
+        opsArgs = [hex];
+        name = inlineTemplateName;
     } else if (regex.isModifiedOpcode(templateName)) {
         const opcode = parser.processModifiedOpcode(templateName, macros).toString(16);
-        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.OPCODE;
-        returnTemplate.macros[inlineTemplateName].ops[0].value = opcode;
+        opsType = TYPES.OPCODE;
+        opsValue = opcode;
     } else if (opcodes[templateName]) {
-        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.OPCODE;
-        returnTemplate.macros[inlineTemplateName].ops[0].value = opcodes[templateName];
+        opsType = TYPES.OPCODE;
+        opsValue = opcodes[templateName];
     } else if (macros[templateName]) {
         return {
             macros,
@@ -249,12 +236,29 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
         };
     } else if (templateName.match(grammar.macro.TEMPLATE)) {
         const token = templateName.match(grammar.macro.TEMPLATE);
-        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.TEMPLATE;
-        returnTemplate.macros[inlineTemplateName].ops[0].value = token[1];
+        opsType = TYPES.TEMPLATE;
+        opsValue = token[1];
     } else {
-        returnTemplate.macros[inlineTemplateName].ops[0].type = TYPES.PUSH_JUMP_LABEL;
-        returnTemplate.macros[inlineTemplateName].ops[0].value = templateName;
+        opsType = TYPES.PUSH_JUMP_LABEL;
+        opsValue = templateName;
     }
+    const returnTemplate = {
+        templateName: inlineTemplateName,
+        macros: {
+            ...macros,
+            [inlineTemplateName]: {
+                name: name,
+                ops: [{
+                    type: opsType,
+                    value: opsValue,
+                    args: opsArgs,
+                    index,
+                    debug,
+                }],
+                templateParams: [],
+            },
+        },
+    };
     return returnTemplate;
     // TODO templates that have templates
 };
