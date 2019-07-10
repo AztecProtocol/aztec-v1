@@ -47,20 +47,37 @@ describe.only('Auth Service Tests', () => {
 
     it('Should create a session if the supplied password can decrypt the stored keystore', async () => {
         const fixture = fixtures.valid[0];
-        const session = await AuthService.login('password');
+        const session = await AuthService.login({
+            password: 'password',
+            domain: 'https://google.com',
+        });
         expect(session).toBeDefined();
     });
 
     it('should add the domain to the list of domains that can decrypt an assets balance', async () => {
+        const session = await AuthService.enableAssetForDomain({
+            password: 'password',
+            domain: 'https://google.com',
+            asset: '__asset_id_0',
+        });
 
-        const session = await AuthService.login('password');
+        expect(session.assets.__asset_id_0).toEqual(true);
     });
 
 
     it('Should validate the session is currently active and the user has granted the domain access to the asset', async () => {
-        const session = await AuthService.validate(null, {
-            domain: 'http://localhost:8000',
-            asset: 'a:1',
+        await AuthService.login({
+            password: 'password',
+            domain: 'https://google.com',
+        });
+        await AuthService.enableAssetForDomain({
+            password: 'password',
+            domain: 'https://google.com',
+            asset: '__asset_id_0',
+        });
+        const session = await AuthService.validate({
+            domain: 'https://google.com',
+            asset: '__asset_id_0',
         });
 
         expect(session).toBeDefined();
