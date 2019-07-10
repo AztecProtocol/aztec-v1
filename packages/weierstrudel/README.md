@@ -80,6 +80,6 @@ Gas estimates can be obtained by running `yarn benchmark`. For reference, the sc
 ### **Usage**
 
 1.  Run weierstrudel tests via `yarn test`
-2.  Run reference javascript methods via `yarn jstest`
+2.  Run reference javascript methods via `yarn test:js`
 3.  Run weierstrudel benchmarks via `yarn benchmark`
 4.  Compile the weierstrudel smart contract via `yarn compile`
