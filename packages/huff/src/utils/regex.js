@@ -46,8 +46,11 @@ regex.containsOperatorsAndIsNotStackOp = (input) => {
  * @returns {boolean} whether the string can feasibly represent a number
  */
 regex.isLiteral = (input) => {
-    return regex.containsOperatorsAndIsNotStackOp(input)
-        || input.match(new RegExp('^(?:\\s*\\n*)*((0x[0-9a-fA-F]+)|(\\d+))\\b')); // dec or hex
+    if (regex.containsOperatorsAndIsNotStackOp(input)
+        || input.match(new RegExp('^(?:\\s*\\n*)*((0x[0-9a-fA-F]+)|(\\d+))\\b'))) {
+        return true;
+    }
+    return false;
 };
 
 regex.isModifiedOpcode = (input) => {

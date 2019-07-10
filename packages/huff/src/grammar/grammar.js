@@ -1,17 +1,17 @@
 const grammar = {};
 
 function regex(params) {
-    const val = new RegExp(params.join('[\\s\\n]*') + '[\\s\\n]*');
+    const val = new RegExp(params.join('[\\s\\n]*'));
     return val;
 }
 
 grammar.topLevel = {
     TEMPLATE: regex([
-        '^(?:[\\s\\n]*)template',
+        '^template',
         '\\<(.*)\\>',
     ]),
     MACRO: regex([
-        '(^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '(^(?:#[\\s\\n]*define)',
         '\\b(macro)\\b',
         '([A-Za-z0-9_]\\w*)',
         '=',
@@ -22,29 +22,34 @@ grammar.topLevel = {
         '\\{)((?:[^\\}])*)\\}',
     ]),
     CODE_TABLE: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '^(?:#[\\s\\n]*define)',
         '\\b(table)\\b',
         '([A-Za-z0-9_]\\w*)',
         '\\{((?:[^\\}])*)\\}',
     ]),
     JUMP_TABLE: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '^(?:#[\\s\\n]*define)',
         '\\b(jumptable)\\b',
         '([A-Za-z0-9_]\\w*)',
         '\\{((?:[^\\}])*)\\}',
     ]),
     JUMP_TABLE_PACKED: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '^(?:#[\\s\\n]*define)',
         '\\b(jumptable__packed)\\b',
         '([A-Za-z0-9_]\\w*)',
         '\\{((?:[^\\}])*)\\}',
     ]),
+    // TODO: fix this
     IMPORT: regex([
+        // '^#',
         '^(?:[\\s\\n]*)#',
         '(?:include)',
         '(?:\\"|\\\')',
         '(.*)',
         '(?:\\"|\\\')',
+    ]),
+    WHITESPACE: regex([
+        '([\\s\\n\\r]+)',
     ]),
 };
 
@@ -56,50 +61,50 @@ grammar.jumpTable = {
 grammar.macro = {
     MACRO_CALL: regex([
         // '^(?:[\\s\\n]*)([a-zA-Z0-9_]+)(?:<([a-zA-Z0-9_,\\+\\-\\*\\(\\)\\s\\n<>]+)>)?',
-        '^(?:[\\s\\n]*)([a-zA-Z0-9_]+)(?:<([a-zA-Z0-9_,\\+\\-\\*\\(\\)\\s\\n]+)>)?',
+        '^([a-zA-Z0-9_]+)(?:<([a-zA-Z0-9_,\\+\\-\\*\\(\\)\\s\\n]+)>)?',
         '(?:\\(\\))',
     ]),
     TEMPLATE: regex([
-        '^(?:[\\s\\n]*)<',
+        '^<',
         '([a-zA-Z0-9_\\-\\+\\*\\(\\)\\<\\>]+)',
-        '>\\s*\\n*',
+        '>',
     ]),
     CODE_SIZE: regex([
-        '^(?:[\\s\\n]*)__codesize',
+        '^__codesize',
         '\\(',
         '([a-zA-Z0-9_\\-]+)',
         '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
-        '\\)\\s*\\n*',
+        '\\)',
     ]),
     TABLE_SIZE: regex([
-        '^(?:[\\s\\n]*)__tablesize',
+        '^__tablesize',
         '\\(',
         '([a-zA-Z0-9_\\-]+)',
         '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
-        '\\)\\s*\\n*',
+        '\\)',
     ]),
     TABLE_START: regex([
-        '^(?:[\\s\\n]*)__tablestart',
+        '^__tablestart',
         '\\(',
         '([a-zA-Z0-9_\\-]+)',
         '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
-        '\\)\\s*\\n*',
+        '\\)',
     ]),
     JUMP_LABEL: regex([
-        '^(?:[\\s\\n]*)([a-zA-Z0-9_\\-]+):\\s*\\n*',
+        '^([a-zA-Z0-9_\\-]+):',
     ]),
     LITERAL_DECIMAL: regex([
-        '^(?:[\\s\\n]*)(\\d+)\\b',
+        '^(\\d+)\\b',
     ]),
     LITERAL_HEX: regex([
-        '^(?:[\\s\\n]*)0x([0-9a-fA-F]+)\\b',
+        '^0x([0-9a-fA-F]+)\\b',
     ]),
     TOKEN: regex([
-        '\\s*\\n*([^\\s]*)\\s*\\n*',
+        '([^\\s\\n\\r]+)',
     ]),
-    // WHITESPACE: regex([
-    //     '[\\s\\n\\r]+',
-    // ]),
+    WHITESPACE: regex([
+        '([\\s\\n\\r]+)',
+    ]),
 };
 
 module.exports = grammar;

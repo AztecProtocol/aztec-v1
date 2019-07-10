@@ -7,8 +7,7 @@ const { expect } = chai;
 describe('grammar tests', () => {
     describe('top level tests', () => {
         it('can find template definition', () => {
-            const template = `
-            template <first, second,third >`;
+            const template = 'template <first, second,third >';
             const source = `${template}
             #define macro TEST = takes(3) returns(2) {
                 <first> <second>
@@ -26,16 +25,14 @@ describe('grammar tests', () => {
                 <third>
                 mulmod
             `;
-            const macro = `
-            #define macro TEST = takes(3) returns(2) {${macroBody}}`;
-            let source = `
-            template <first, second,third >${macro}
-            `;
+            const macro = `#define macro TEST = takes(3) returns(2) {${macroBody}}`;
+            let source = `template <first, second,third >${macro}`;
             const template = source.match(grammar.topLevel.TEMPLATE);
             source = source.slice(template.index + template[0].length);
             const result = source.match(grammar.topLevel.MACRO);
             expect(result).to.deep.equal([
                 macro,
+                macro.slice(0, macro.indexOf('\n')),
                 'macro',
                 'TEST',
                 '3',
@@ -69,32 +66,28 @@ describe('grammar tests', () => {
 
     describe('macro grammar tests', () => {
         it('can find a hex string', () => {
-            const source = `
-              0x14fe33ac hello
+            const source = `0x14fe33ac hello
             world`;
             const result = source.match(grammar.macro.LITERAL_HEX);
             expect(result[1]).to.equal('14fe33ac');
         });
 
         it('can find a decimal string', () => {
-            const source = `
-              123456789 0x3a hello
+            const source = `123456789 0x3a hello
             world`;
             const result = source.match(grammar.macro.LITERAL_DECIMAL);
             expect(result[1]).to.equal('123456789');
         });
 
         it('can find a jump label', () => {
-            const source = `
-                label_test: 0x1234 22
+            const source = `label_test: 0x1234 22
             foo`;
             const result = source.match(grammar.macro.JUMP_LABEL);
             expect(result[1]).to.equal('label_test');
         });
 
         it('can identify __codesize() pattern, calling a template', () => {
-            const source = `
-              __codesize(FOO_BAR<1,3,543>) foo bar
+            const source = `__codesize(FOO_BAR<1,3,543>) foo bar
               xx`;
             const result = source.match(grammar.macro.CODE_SIZE);
             expect(result[1]).to.equal('FOO_BAR');
@@ -102,8 +95,7 @@ describe('grammar tests', () => {
         });
 
         it('can identify __codesize() pattern, without template', () => {
-            const source = `
-              __codesize(FOO_BAR) foo bar
+            const source = `__codesize(FOO_BAR) foo bar
               xx`;
             const result = source.match(grammar.macro.CODE_SIZE);
             expect(result[1]).to.equal('FOO_BAR');
@@ -111,16 +103,14 @@ describe('grammar tests', () => {
         });
 
         it('can identify template invocation', () => {
-            const source = `
-                    < abcde132 >
+            const source = `< abcde132 >
                 xabcde`;
             const result = source.match(grammar.macro.TEMPLATE);
             expect(result[1]).to.equal('abcde132');
         });
 
         it('can identify a macro call with no templates', () => {
-            const source = `
-                FOO_CALL() awoer 23 
+            const source = `FOO_CALL() awoer 23 
                 ddds
             `;
             const result = source.match(grammar.macro.MACRO_CALL);
@@ -129,8 +119,7 @@ describe('grammar tests', () => {
         });
 
         it('can identify a templated macro call', () => {
-            const source = `
-                FOO_CALL<a,b , defg>() awoer 23 
+            const source = `FOO_CALL<a,b , defg>() awoer 23 
                 ddds
             `;
             const result = source.match(grammar.macro.MACRO_CALL);
@@ -139,8 +128,7 @@ describe('grammar tests', () => {
         });
 
         it('will not think token without parentheses is a macro call', () => {
-            const source = `
-                FOO_CALL awoer 23 
+            const source = `FOO_CALL awoer 23 
                 ddds
             `;
             const result = source.match(grammar.macro.MACRO_CALL);
@@ -148,8 +136,7 @@ describe('grammar tests', () => {
         });
 
         it('can identify a generic token', () => {
-            const source = `
-                mulmod awoer 23 
+            const source = `mulmod awoer 23 
                 ddds
             `;
             const result = source.match(grammar.macro.TOKEN);

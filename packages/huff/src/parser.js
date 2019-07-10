@@ -390,7 +390,11 @@ parser.processMacroInternal = (
         templateParams,
     } = macro;
     const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommas(t)], []);
-    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs! ` + debugLocationString(macro.ops[0].debugFileline));
+    let extraErrorString = '';
+    if (macro.ops[0] && macro.ops[0].debugFileline) {
+        extraErrorString = ' ' + debugLocationString(macro.ops[0].debugFileline);
+    }
+    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs!` + extraErrorString);
     const templateRegExps = templateParams.map((label, i) => {
         const pattern = new RegExp(`\\b(${label})\\b`, 'g');
         const value = templateArguments[i];
@@ -680,6 +684,9 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
                 debugFileline,
             });
             index += token[0].length;
+        } else if (input[0].match(grammar.macro.WHITESPACE)) {
+            const token = input[0].match(grammar.macro.WHITESPACE);
+            index += token[0].length;
         } else if (input.match(grammar.macro.TOKEN)) {
             const token = input.match(grammar.macro.TOKEN);
             if (opcodes[token[1]]) {
@@ -704,12 +711,9 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
                 });
             }
             index += token[0].length;
-        // } else if (input.match(grammar.macro.WHITESPACE)) {
-        //     const token = input.match(grammar.macro.WHITESPACE);
-        //     console.log(token);
-        //     index += token[0].length;
         } else {
-            throw new Error(`cannot parse ${input}!`);
+            const debugFileline = inputMaps.getFileLine(startingIndex + index, inputMap);
+            throw new Error(`cannot parse ${input}! ` + debugLocationString(debugFileline));
         }
         input = body.slice(index);
     }
@@ -801,6 +805,9 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 },
             };
             index += jumptable[0].length;
+        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && input[0].match(grammar.topLevel.WHITESPACE)) {
+            const whitespace = input[0].match(grammar.topLevel.WHITESPACE);
+            index += whitespace[0].length;
         } else {
             const { filename, lineNumber, line } = inputMaps.getFileLine(index, inputMap);
             throw new Error(`could not process line ${lineNumber} in ${filename}: ${line}`);
@@ -822,6 +829,8 @@ parser.removeComments = (string) => {
 };
 
 
+
+// TODO: clean up this function
 parser.getFileContents = (originalFilename, partialPath) => {
     const included = {};
     const recurse = (filename) => {

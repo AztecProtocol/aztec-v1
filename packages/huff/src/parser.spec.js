@@ -89,6 +89,7 @@ describe('parser tests', () => {
                     value: '7f',
                     args: [numericResult.toString(16)],
                     index: 0,
+                    debugFileline: {},
                 }],
                 templateParams: [],
             });
@@ -101,7 +102,11 @@ describe('parser tests', () => {
         start:
          dup4 mulmod
          0x1234 swap2 start jumpi`;
-            const ops = parser.parseMacro(foo, {}, 0);
+            const files = [
+                { filename: 'FOO', data: foo },
+            ];
+            const map = inputMap.createInputMap(files);
+            const ops = parser.parseMacro(foo, {}, 0, 0, map);
             const macros = {
                 FOO: {
                     name: 'FOO',
@@ -109,10 +114,6 @@ describe('parser tests', () => {
                     templateParams: [],
                 },
             };
-            const files = [
-                { filename: 'FOO', data: foo },
-            ];
-            const map = inputMap.createInputMap(files);
             const output = parser.processMacro('FOO', 0, [], macros, map);
             const expected = [
                 opcodes.jumpdest,
@@ -141,7 +142,11 @@ describe('parser tests', () => {
         start
         __codesize(FOO) 0x1234aae 123554
             `;
-            const fullOps = parser.parseMacro(source, {FOO: 'FOO', BAR: 'BAR'}, 0);
+            const files = [
+                { filename: 'SOURCE', data: source },
+            ];
+            const map = inputMap.createInputMap(files);
+            const fullOps = parser.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0, 0, map);
             const ops = fullOps.map((o) => {
                 expect(typeof (o.index)).to.equal('number');
                 return { args: o.args, type: o.type, value: o.value };
