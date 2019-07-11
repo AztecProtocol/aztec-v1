@@ -638,8 +638,8 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
                 debug,
             });
             index += token[0].length;
-        } else if (input[0].match(grammar.macro.WHITESPACE)) {
-            const token = input[0].match(grammar.macro.WHITESPACE);
+        } else if (input.match(grammar.macro.WHITESPACE)) {
+            const token = input.match(grammar.macro.WHITESPACE);
             index += token[0].length;
         } else if (input.match(grammar.macro.TOKEN)) {
             const token = input.match(grammar.macro.TOKEN);
@@ -765,8 +765,8 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const token = input.match(grammar.topLevel.IMPORT);
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(token[0]), inputMap);
             throw new Error('#include statements must come before any other declarations or operations in the file. ' + debugLocationString(debug));
-        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && input[0].match(grammar.topLevel.WHITESPACE)) {
-            const whitespace = input[0].match(grammar.topLevel.WHITESPACE);
+        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && input.match(grammar.topLevel.WHITESPACE)) {
+            const whitespace = input.match(grammar.topLevel.WHITESPACE);
             index += whitespace[0].length;
         } else {
             const { filename, lineNumber, line } = inputMaps.getFileLine(index, inputMap);

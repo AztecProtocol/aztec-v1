@@ -49,7 +49,7 @@ grammar.topLevel = {
         '(?:\\"|\\\')',
     ]),
     WHITESPACE: regex([
-        '([\\s\\n\\r]+)',
+        '^([\\s\\n\\r]+)',
     ]),
 };
 
@@ -103,7 +103,7 @@ grammar.macro = {
         '([^\\s\\n\\r]+)',
     ]),
     WHITESPACE: regex([
-        '([\\s\\n\\r]+)',
+        '^([\\s\\n\\r]+)',
     ]),
 };
 
