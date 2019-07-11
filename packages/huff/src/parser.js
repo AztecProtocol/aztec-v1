@@ -570,7 +570,7 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
                 value: token[1],
                 args: templateParams,
                 index: startingIndex + index + regex.countEmptyChars(token[0]),
-                debug: debug,
+                debug,
             });
             index += token[0].length;
         } else if (input.match(grammar.macro.TABLE_SIZE)) {
@@ -698,7 +698,8 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const macro = input.match(grammar.topLevel.MACRO);
             const type = macro[2];
             if (type !== 'macro') {
-                throw new Error(`expected ${macro} to define a macro`);
+                const debug = inputMaps.getFileLine(index + regex.countEmptyChars(macro[0]), inputMap);
+                throw new Error(`expected ${macro} to define a macro ` + debugLocationString(debug));
             }
             const body = macro[6];
             macros = {
@@ -731,7 +732,8 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
             const type = jumptable[1];
             if (type !== 'jumptable__packed') {
-                throw new Error(`expected ${jumptable} to define a packed jump table`);
+                const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
+                throw new Error(`expected ${jumptable} to define a packed jump table ` + debugLocationString(debug));
             }
             const body = jumptable[3];
             jumptables = {
@@ -747,7 +749,8 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
             const type = jumptable[1];
             if (type !== 'jumptable') {
-                throw new Error(`expected ${jumptable} to define a jump table`);
+                const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
+                throw new Error(`expected ${jumptable} to define a jump table. ` + debugLocationString(debug));
             }
             const body = jumptable[3];
             jumptables = {
@@ -758,6 +761,10 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 },
             };
             index += jumptable[0].length;
+        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && input.match(grammar.topLevel.IMPORT)) {
+            const token = input.match(grammar.topLevel.IMPORT);
+            const debug = inputMaps.getFileLine(index + regex.countEmptyChars(token[0]), inputMap);
+            throw new Error('#include statements must come before any other declarations or operations in the file. ' + debugLocationString(debug));
         } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && input[0].match(grammar.topLevel.WHITESPACE)) {
             const whitespace = input[0].match(grammar.topLevel.WHITESPACE);
             index += whitespace[0].length;
