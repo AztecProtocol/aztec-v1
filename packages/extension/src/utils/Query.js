@@ -7,17 +7,23 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export default async function Query({
     graphQLServerUrl,
-    query,
+    query = '',
     variables,
-    retry = 3,
-    retryDelay = 500,
+    retry = 1,
+    retryDelay = 1000,
 }) {
     let data;
+
+    let queryStr = query.trim();
+    if (queryStr && !queryStr.match('^({|query|mutation)')) {
+        queryStr = `{${queryStr}}`;
+    }
+
     try {
         const response = await fetch(graphQLServerUrl, {
             method: 'POST',
             body: JSON.stringify({
-                query,
+                query: queryStr,
                 variables,
             }),
             headers: {

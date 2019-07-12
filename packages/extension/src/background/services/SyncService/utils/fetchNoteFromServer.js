@@ -1,10 +1,9 @@
-import Query from '~utils/Query';
 import {
     errorLog,
 } from '~utils/log';
+import GraphNodeService from '~backgroundServices/GraphNodeService';
 
 export default async function fetchNoteFromServer({
-    graphNodeServerUrl,
     numberOfNotes = 1,
     account,
     lastId = '',
@@ -45,8 +44,7 @@ export default async function fetchNoteFromServer({
         lastId,
     };
 
-    const data = await Query({
-        graphQLServerUrl: graphNodeServerUrl,
+    const data = await GraphNodeService.query({
         query,
         variables,
     });
