@@ -6,6 +6,8 @@ import scrypt from 'scrypt-async';
 
 nacl.util = tweetNaclUtils;
 
+Object.defineProperty(global, '_bitcore', { get() { return undefined; }, set() {} });
+
 const { Random } = bitcore.crypto;
 const { Hash } = bitcore.crypto;
 
