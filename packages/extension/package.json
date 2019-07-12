@@ -8,6 +8,7 @@
         "@aztec/secp256k1": "^1.0.1",
         "@aztec/typed-data": "0.0.0-semantically-released",
         "@msgpack/msgpack": "^1.4.0",
+        "@trust/webcrypto": "^0.9.2",
         "apollo-cache-inmemory": "^1.6.2",
         "apollo-client": "^2.6.2",
         "apollo-link": "^1.2.12",
@@ -34,6 +35,8 @@
         "scrypt-async": "^2.0.1",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
+        "web3": "^1.0.0-beta.55",
+        "web3-core": "^1.0.0-beta.55",
         "webextension-polyfill": "^0.4.0",
         "webpack-cli": "^3.3.4"
     },

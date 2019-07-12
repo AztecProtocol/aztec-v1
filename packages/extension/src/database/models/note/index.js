@@ -7,7 +7,7 @@ export default Model({
     index: 'hash',
     fields: [
         'hash',
-        'sharedSecret',
+        'viewingKey',
         'value',
         'asset',
         'owner',

@@ -21,7 +21,7 @@ export default async function fetchNoteFromServer({
                     account {
                         address
                     }
-                    sharedSecret
+                    viewingKey
                     note {
                         hash
                         asset {

@@ -4,15 +4,14 @@ window.aztec = new Aztec();
 
 const enableSite = async () => {
     const { aztec } = window;
-    const enabledSite = await aztec.auth.site.enable({
-        graphQLServer: 'http://localhost:4000/',
-    });
-    console.log(enabledSite);
+    await aztec.enable();
+
+    const note = await window.aztec.note('__note_id_0');
+    await note.grantAccess('0x_account_00000000000000000000_address__5');
 };
 
 // TODO
 // should be called with selected config through extension's UI
 if (window.location.hostname.match(/aztecprotocol/)) {
-    window.aztec.enable();
     enableSite();
 }
