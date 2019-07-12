@@ -50,15 +50,13 @@ describe('grammar tests', () => {
         });
 
         it('can find include statement (double quotes)', () => {
-            const source = ` 
-            # include "foofahblah"`;
+            const source = `# include "foofahblah"`;
             const result = source.match(grammar.topLevel.IMPORT);
             expect(result[1]).to.equal('foofahblah');
         });
 
         it('can find include statement (single quotes)', () => {
-            const source = ` 
-            # include 'foofahblah'`;
+            const source = `# include 'foofahblah'`;
             const result = source.match(grammar.topLevel.IMPORT);
             expect(result[1]).to.equal('foofahblah');
         });

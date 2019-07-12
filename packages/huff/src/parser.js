@@ -797,7 +797,8 @@ parser.removeComments = (string) => {
 // TODO: clean up this function
 parser.getFileContents = (originalFilename, partialPath) => {
     const included = {};
-    const recurse = (filename) => {
+    // process a file, recursively processing any files which are included
+    const processFile = (filename) => {
         let fileString;
         if (filename.includes('#')) {
             fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
@@ -807,25 +808,41 @@ parser.getFileContents = (originalFilename, partialPath) => {
         }
         let formatted = parser.removeComments(fileString);
         let imported = [];
-        let test = formatted.match(grammar.topLevel.IMPORT);
-        while (test !== null) {
-            const importStatement = formatted.match(grammar.topLevel.IMPORT);
-            const empty = ' '.repeat(importStatement[0].length);
-            formatted = empty + formatted.slice(importStatement[0].length);
-            if (!included[importStatement[1]]) {
-                imported = [...imported, ...recurse(importStatement[1])];
-                included[importStatement[1]] = true;
+        let index = 0;
+        let whitespace;
+
+        function skipWhitespace() {
+            whitespace = formatted.slice(index).match(grammar.topLevel.WHITESPACE);
+            if (whitespace) {
+                index += whitespace[0].length;
             }
-            test = formatted.match(grammar.topLevel.IMPORT);
         }
 
+        function replaceWithWhitespace(needle, haystack) {
+            return haystack.replace(needle, needle.replace(/./g, ' '));
+        }
+
+        skipWhitespace();
+        let importStatement = formatted.slice(index).match(grammar.topLevel.IMPORT);
+
+        while (importStatement !== null) {
+            formatted = replaceWithWhitespace(importStatement[0], formatted);
+            index += importStatement[0].length;
+            // if a file is included in the huff code, process that file first using this function
+            if (!included[importStatement[1]]) {
+                imported = [...imported, ...processFile(importStatement[1])];
+                included[importStatement[1]] = true;
+            }
+            skipWhitespace();
+            importStatement = formatted.slice(index).match(grammar.topLevel.IMPORT);
+        }
         const result = [...imported, {
             filename,
             data: formatted,
         }];
         return result;
     };
-    const filedata = recurse(originalFilename);
+    const filedata = processFile(originalFilename);
     const raw = filedata.reduce((acc, { data }) => {
         return acc + data;
     }, '');

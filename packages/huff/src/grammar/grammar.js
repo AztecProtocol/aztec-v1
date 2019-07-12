@@ -41,8 +41,8 @@ grammar.topLevel = {
     ]),
     // TODO: fix this
     IMPORT: regex([
-        // '^#',
-        '^(?:[\\s\\n]*)#',
+        '^#',
+        // '^(?:[\\s\\n]*)#',
         '(?:include)',
         '(?:\\"|\\\')',
         '(.*)',
