@@ -2,7 +2,6 @@ import domainModel from '~database/models/domain';
 import { get, set, remove } from '~utils/storage';
 import { KeyStore, } from '~utils/keyvault/index.js';
 import generateRandomId from '~utils/generateRandomId';
-import sessionStorage from '../StorageService/sessionStorage';
 
 
 export default {
@@ -44,7 +43,11 @@ export default {
 
         // we check the particular host has access
         const now = Date.now();
-        const session = await get('session');
+        const {session, keyStore } = await get(['session', 'keyStore']);
+        if(!keyStore) {
+            throw new Error('AZTEC extension not setup please create account');
+            return;
+        }
 
         if(!session) {
             throw new Error('No session please login');
@@ -67,7 +70,6 @@ export default {
 
 
         // we can now fetch the pwDerivedKey
-        const { keyStore } = await get(['keyStore']);
         const decodedKey = new Uint8Array(Object.values(JSON.parse(session.pwDerivedKey)));
         const k = KeyStore.deserialize(keyStore, decodedKey);
 
@@ -85,7 +87,30 @@ export default {
 
         return session;
     },
-    login: sessionStorage.login,
+
+    login: async ({ password }) => {
+        const { keyStore } = await get(['keyStore']);
+        const { pwDerivedKey } = await KeyStore.generateDerivedKey({
+            password,
+            salt: keyStore.salt,
+        });
+
+        const k = KeyStore.deserialize(keyStore, pwDerivedKey);
+
+        if (!k.isDerivedKeyCorrect(pwDerivedKey)) {
+            throw new Error('pwDerivedKey should be correct');
+        }
+
+        const { session } = await set({
+            session: {
+                lastActive: Date.now(),
+                createdAt: Date.now(),
+                pwDerivedKey: JSON.stringify(pwDerivedKey),
+            },
+        });
+
+        return session;
+    },
     enableAssetForDomain: async ({
         domain,
         asset

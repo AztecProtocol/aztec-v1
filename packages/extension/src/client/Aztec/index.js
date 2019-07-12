@@ -23,6 +23,7 @@ class Aztec {
         };
         const aceAddress = '0xec85f3d1fc95ca5e02a9e4b08998bd4bf92ef914';
 
+        // this needs to do a session check.
         this.enabled = true;
 
         Web3Service.init({
