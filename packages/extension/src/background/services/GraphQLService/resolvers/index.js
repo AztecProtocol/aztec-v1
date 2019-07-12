@@ -14,6 +14,9 @@ export default {
         asset: ({ asset }) => assetModel.get({ key: asset }),
         owner: ({ owner }) => accountModel.get({ key: owner }),
     },
+    RequestGrantAccess: {
+        asset: ({ asset }) => asset && assetModel.get({ id: asset }),
+    },
     Mutation: {
         enableDomain,
     },

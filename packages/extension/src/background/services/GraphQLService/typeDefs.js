@@ -1,6 +1,15 @@
 import gql from 'graphql-tag';
 
 export default gql`
+    enum ErrorType {
+        PERMISSION
+        ARGUMENTS
+    }
+    type Error {
+        type: ErrorType!
+        key: String!
+        message: String!
+    }
     type Account {
         id: ID!
         address: String!
@@ -22,13 +31,19 @@ export default gql`
         metadata: String
         value: Int
     }
+    type RequestGrantAccess {
+        error: Error
+        prevMetadata: String
+        metadata: String
+        asset: Asset
+    }
     type Query {
         asset(id: ID!): Asset
         note(id: ID!): Note
         requestGrantAccess(
             noteId: ID!
             address: String!
-        ): Note
+        ): RequestGrantAccess
     }
     type Mutation {
         enableDomain(
