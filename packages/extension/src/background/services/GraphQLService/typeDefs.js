@@ -18,12 +18,17 @@ export default gql`
         hash: String!
         asset: Asset!
         owner: Account!
-        sharedSecret: String
+        viewingKey: String
+        metadata: String
         value: Int
     }
     type Query {
         asset(id: ID!): Asset
         note(id: ID!): Note
+        requestGrantAccess(
+            noteId: ID!
+            address: String!
+        ): Note
     }
     type Mutation {
         enableDomain(

@@ -11,7 +11,12 @@
         "page": "./pages/background.html",
         "persistent": true
     },
-    "permissions": ["tabs", "storage", "http://*/*", "https://*/*"],
+    "permissions": [
+        "tabs",
+        "storage",
+        "http://*/*",
+        "https://*/*"
+    ],
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],

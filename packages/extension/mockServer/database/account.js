@@ -1,18 +1,21 @@
 import {
     numberOfAccount,
-    entityId,
+    enitityAddress,
+    publicKeyLength,
 } from '../config';
 import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
+import generateRandomId from '../utils/generateRandomId';
 
 const accounts = [];
 for (let i = 0; i < numberOfAccount; i += 1) {
-    const id = entityId('account', i);
+    const address = enitityAddress('account', i);
     accounts.push({
-        id,
-        address: id,
+        id: address,
+        address,
+        publicKey: generateRandomId(publicKeyLength),
     });
 }
 

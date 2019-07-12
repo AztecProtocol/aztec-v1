@@ -1,6 +1,6 @@
 import {
     numberOfAssets,
-    entityId,
+    enitityAddress,
 } from '../config';
 import {
     makeGetFetchConditions,
@@ -9,10 +9,10 @@ import findEntityByKey from '../utils/findEntityByKey';
 
 const assets = [];
 for (let i = 0; i < numberOfAssets; i += 1) {
-    const id = entityId('asset', i);
+    const address = enitityAddress('asset', i);
     assets.push({
-        id,
-        address: id,
+        id: address,
+        address,
     });
 }
 

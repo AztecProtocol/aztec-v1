@@ -1,7 +1,4 @@
 import {
-    numberOfNoteAccess,
-    numberOfNotes,
-    numberOfAccount,
     entityId,
 } from '../config';
 import randomInt from '../utils/randomInt';
@@ -9,38 +6,59 @@ import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
-import notes from './note';
+import notes, {
+    getNoteById,
+    updateNote,
+} from './note';
+import accounts from './account';
+import metadata from '../../src/utils/metadata';
 
 const noteAccess = [];
 const noteChangeLog = [];
 const toBeDestroyed = [];
-let prevTimestamp = Date.now();
-for (let i = 0; i < numberOfNoteAccess; i += 1) {
-    const accessId = entityId('note_access', i);
-    const accountId = entityId('account', i % numberOfAccount);
-    const noteIndex = i % numberOfNotes;
-    const note = notes[noteIndex];
-    prevTimestamp += randomInt(0, 2000);
+let prevTimestamp = Date.now() - 86400;
+
+const createAccessForAccount = (note, accountAddress, viewingKey) => {
+    const accessIndex = noteAccess.length;
+    const accessId = entityId('access', accessIndex);
+    prevTimestamp += randomInt(0, 60000);
+    const account = accounts.find(({
+        address,
+    }) => address === accountAddress);
 
     noteAccess.push({
         id: accessId,
-        note: entityId('note', noteIndex),
-        account: accountId,
-        sharedSecret: `secret_${i}`,
+        note: note.id,
+        account: account.id,
+        viewingKey,
     });
 
     noteChangeLog.push({
         id: entityId('log', noteChangeLog.length),
-        account: accountId,
+        account: account.id,
         noteAccess: accessId,
         action: 'CREATE',
         timestamp: Math.ceil(prevTimestamp / 1000),
     });
 
     if (note.status === 'DESTROYED') {
-        toBeDestroyed.push(i);
+        toBeDestroyed.push(accessIndex);
     }
-}
+};
+
+notes.forEach((note) => {
+    const {
+        metadata: metadataStr,
+    } = note;
+    const {
+        addresses,
+        viewingKeys,
+    } = metadata(metadataStr);
+    addresses.forEach((address, i) => {
+        const viewingKey = viewingKeys[i];
+        createAccessForAccount(note, address, viewingKey);
+    });
+});
 
 toBeDestroyed.forEach((accessIndex) => {
     const access = noteAccess[accessIndex];
@@ -76,10 +94,17 @@ export const getNoteAccesses = (_, args) => {
 
 const getFetchConditions = makeGetFetchConditions([
     'id',
-    'account',
 ]);
 
 export const getNoteAccess = (_, args) => {
+    const {
+        noteId,
+        account,
+    } = args;
+    if (noteId && account) {
+        return noteAccess.find(n => n.note === noteId && n.account === account);
+    }
+
     const conditions = getFetchConditions(args);
     return findEntityByKey(noteAccess, conditions);
 };
@@ -104,6 +129,30 @@ export const getNoteChangeLog = (_, args) => {
     }
 
     return filteredLog.slice(startAt, startAt + first);
+};
+
+export const grantAccess = (noteId, metadataStr) => {
+    const note = getNoteById(noteId);
+    if (!note) {
+        return false;
+    }
+
+    const {
+        metadata: prevMetadataStr,
+    } = note;
+    const {
+        addresses: prevAddresses,
+    } = metadata(prevMetadataStr);
+    const {
+        addresses,
+        viewingKeys,
+    } = metadata(metadataStr);
+
+    for (let i = prevAddresses.length; i < addresses.length; i += 1) {
+        createAccessForAccount(note, addresses[i], viewingKeys[i]);
+    }
+
+    return !!updateNote(noteId, { metadata: metadataStr });
 };
 
 export default noteAccess;
