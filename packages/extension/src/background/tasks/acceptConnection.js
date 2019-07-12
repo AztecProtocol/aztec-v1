@@ -41,7 +41,6 @@ export default function acceptConnection() {
                 [type]: gql(`${type} {${graphQuery}}`),
                 variables,
             });
-            console.log(result);
             return result || {};
         } catch (error) {
             errorLog('Error in GraphQL Service.', error);

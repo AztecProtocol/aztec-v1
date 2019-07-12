@@ -1,4 +1,5 @@
 import query from '../utils/query';
+// import notePicker from '../utils/notePicker';
 
 export default class Asset {
     constructor({
@@ -7,6 +8,7 @@ export default class Asset {
         this.id = id;
         this.staticProperty = [
             'balance',
+            'balance',
         ];
     }
 
@@ -14,8 +16,12 @@ export default class Asset {
         const response = await query(`
             asset(id: "${this.id}") {
                 balance
+                owner
+                publicKey
+                hash
+                viewingKey
             }
-        `);
+        `
         const data = (response && response.asset) || {};
         this.staticProperty.forEach((key) => {
             this[key] = data[key];
@@ -23,8 +29,18 @@ export default class Asset {
     };
 
     deposit = () => {
-        console.log('deposit');
+
     };
+
+    createNoteFromBalance = ({value, access}) => {
+
+        // to pick a note we need to do the following
+        // 1. split the expected note value into a normally distributed array of buckets that sum to > than the note
+        // value
+        // minimise the notes used
+        // itterate until we have 5 solutions
+        // score each solution
+    }
 }
 
 export const assetFactory = async (assetId) => {

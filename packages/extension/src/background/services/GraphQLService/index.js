@@ -25,10 +25,8 @@ export default {
             const {
                 data,
             } = response || {};
-            console.log('resp', response);
             return data;
         } catch (e) {
-            console.log(e);
             return {
                 error: true,
                 errorMessage: e,
