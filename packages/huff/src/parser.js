@@ -817,12 +817,11 @@ parser.getFileContents = (originalFilename, partialPath) => {
             } else if (importStatement) {
                 formatted = formatted.replace(importStatement[0], importStatement[0].replace(/./g, ' '));
                 index += importStatement[0].length;
-                // if a file is included in the huff code, process that file first using this function
                 if (!included.includes(importStatement[1])) {
-                    if (importStatement[1] === filename) {
-                        throw new Error('file attempting to import itself');
-                    }
                     imported = [...imported, ...processFile(importStatement[1])];
+                } else {
+                    const upToNow = formatted.slice(0, index).split('\n').length;
+                    console.warn(`Note: file "${importStatement[1]}" is called/imported multiple times, the further import in ${filename} on line ${upToNow} was not carried out.`);
                 }
             } else {
                 break;
