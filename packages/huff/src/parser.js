@@ -793,12 +793,12 @@ parser.removeComments = (string) => {
     return data;
 };
 
-
 // TODO: clean up this function
 parser.getFileContents = (originalFilename, partialPath) => {
-    const included = {};
+    const included = [];
     // process a file, recursively processing any files which are included
     const processFile = (filename) => {
+        included.push(filename);
         let fileString;
         if (filename.includes('#')) {
             fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
@@ -809,32 +809,24 @@ parser.getFileContents = (originalFilename, partialPath) => {
         let formatted = parser.removeComments(fileString);
         let imported = [];
         let index = 0;
-        let whitespace;
-
-        function skipWhitespace() {
-            whitespace = formatted.slice(index).match(grammar.topLevel.WHITESPACE);
+        while (true) {
+            const whitespace = formatted.slice(index).match(grammar.topLevel.WHITESPACE);
+            const importStatement = formatted.slice(index).match(grammar.topLevel.IMPORT);
             if (whitespace) {
                 index += whitespace[0].length;
+            } else if (importStatement) {
+                formatted = formatted.replace(importStatement[0], importStatement[0].replace(/./g, ' '));
+                index += importStatement[0].length;
+                // if a file is included in the huff code, process that file first using this function
+                if (!included.includes(importStatement[1])) {
+                    if (importStatement[1] === filename) {
+                        throw new Error('file attempting to import itself');
+                    }
+                    imported = [...imported, ...processFile(importStatement[1])];
+                }
+            } else {
+                break;
             }
-        }
-
-        function replaceWithWhitespace(needle, haystack) {
-            return haystack.replace(needle, needle.replace(/./g, ' '));
-        }
-
-        skipWhitespace();
-        let importStatement = formatted.slice(index).match(grammar.topLevel.IMPORT);
-
-        while (importStatement !== null) {
-            formatted = replaceWithWhitespace(importStatement[0], formatted);
-            index += importStatement[0].length;
-            // if a file is included in the huff code, process that file first using this function
-            if (!included[importStatement[1]]) {
-                imported = [...imported, ...processFile(importStatement[1])];
-                included[importStatement[1]] = true;
-            }
-            skipWhitespace();
-            importStatement = formatted.slice(index).match(grammar.topLevel.IMPORT);
         }
         const result = [...imported, {
             filename,
