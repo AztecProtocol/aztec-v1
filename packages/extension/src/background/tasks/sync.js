@@ -1,5 +1,4 @@
 import {
-    get,
     set,
 } from '~utils/storage';
 import userModel from '~database/models/user';
@@ -12,10 +11,6 @@ export default async function sync() {
         __sync: 1,
     });
 
-    const graphNodeServerUrl = await get('__graphNode');
-    SyncService.set({
-        graphNodeServerUrl,
-    });
     const users = await userModel.get();
 
     if (users) {

@@ -1,12 +1,13 @@
 /* global chrome */
-import '~utils/hot-reload';
 import {
+    get,
     set,
     onIdle,
 } from '~utils/storage';
 import userModel from '~database/models/user';
+import GraphNodeService from '../services/GraphNodeService';
 
-export default async function initDb() {
+export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
         chrome.storage.local.clear();
 
@@ -14,7 +15,7 @@ export default async function initDb() {
             __graphNode: 'http://localhost:4000/',
         });
         await userModel.set({
-            address: '__account_id_0',
+            address: '0x_account_00000000000000000000_address__0',
         });
 
         onIdle(
@@ -33,4 +34,9 @@ export default async function initDb() {
             },
         );
     }
+
+    const graphNodeServerUrl = await get('__graphNode');
+    GraphNodeService.set({
+        graphNodeServerUrl,
+    });
 }

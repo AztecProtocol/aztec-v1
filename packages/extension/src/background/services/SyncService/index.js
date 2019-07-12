@@ -9,7 +9,6 @@ class SyncService {
     constructor() {
         this.accounts = new Map();
         this.config = {
-            graphNodeServerUrl: '',
             notesPerRequest: 10,
         };
     }
@@ -31,7 +30,6 @@ class SyncService {
         if (!account) return;
 
         const {
-            graphNodeServerUrl,
             notesPerRequest,
         } = this.config;
         this.accounts.set(address, {
@@ -42,7 +40,6 @@ class SyncService {
         const newNotes = await fetchNoteFromServer({
             account: address,
             lastId,
-            graphNodeServerUrl,
             numberOfNotes: notesPerRequest,
         });
         console.log('syncNotes', newNotes);
@@ -61,10 +58,13 @@ class SyncService {
             ...account,
             syncing: false,
         });
-        await userModel.update({
-            address,
-            lastSyncedLogId: lastNote.logId,
-        });
+
+        if (lastNote) {
+            await userModel.update({
+                address,
+                lastSyncedLogId: lastNote.logId,
+            });
+        }
     }
 
     async syncAccount(address) {
@@ -77,7 +77,7 @@ class SyncService {
             address,
         });
         if (!user) {
-            errorLog(`Account '${address}' has no permission to sync notes from ${this.graphNodeServerUrl}`);
+            errorLog(`Account '${address}' has no permission to sync notes from graph node server`);
             return;
         }
 

@@ -16,6 +16,7 @@ module.exports = {
                     ['~config', path.resolve(__dirname, './src/config')],
                     ['~utils', path.resolve(__dirname, './src/utils')],
                     ['~database', path.resolve(__dirname, './src/database')],
+                    ['~backgroundServices', path.resolve(__dirname, './src/background/services')],
                 ],
                 extensions: ['.js'],
             },
