@@ -684,7 +684,10 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
     let index = startingIndex;
     while (!regex.endOfData(input)) {
         // if a template declaration is matched
-        if ((currentContext === CONTEXT.NONE) && input.match(grammar.topLevel.TEMPLATE)) {
+        if (input.match(grammar.topLevel.WHITESPACE)) {
+            const whitespace = input.match(grammar.topLevel.WHITESPACE);
+            index += whitespace[0].length;
+        } else if ((currentContext === CONTEXT.NONE) && input.match(grammar.topLevel.TEMPLATE)) {
             const template = input.match(grammar.topLevel.TEMPLATE);
             const templateParams = regex.sliceCommas(template[1]);
             index += template[0].length;
@@ -765,9 +768,6 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const token = input.match(grammar.topLevel.IMPORT);
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(token[0]), inputMap);
             throw new Error('#include statements must come before any other declarations or operations in the file. ' + debugLocationString(debug));
-        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && input.match(grammar.topLevel.WHITESPACE)) {
-            const whitespace = input.match(grammar.topLevel.WHITESPACE);
-            index += whitespace[0].length;
         } else {
             const { filename, lineNumber, line } = inputMaps.getFileLine(index, inputMap);
             throw new Error(`could not process line ${lineNumber} in ${filename}: ${line}`);
