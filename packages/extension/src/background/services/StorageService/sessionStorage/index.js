@@ -1,6 +1,7 @@
 import { KeyStore } from '~utils/keyvault/index';
 import { get, set } from '~utils/storage';
 
+
 export default {
     login: async ({ password }) => {
         const { keyStore } = await get(['keyStore']);
@@ -9,9 +10,9 @@ export default {
             salt: keyStore.salt,
         });
 
-        const k = KeyStore.deserialize(keyStore, new Uint8Array(pwDerivedKey));
+        const k = KeyStore.deserialize(keyStore, pwDerivedKey);
 
-        if (!k.isDerivedKeyCorrect(new Uint8Array(pwDerivedKey))) {
+        if (!k.isDerivedKeyCorrect(pwDerivedKey)) {
             throw new Error('pwDerivedKey should be correct');
         }
 
@@ -19,10 +20,9 @@ export default {
             session: {
                 lastActive: Date.now(),
                 createdAt: Date.now(),
-                pwDerivedKey,
+                pwDerivedKey: JSON.stringify(pwDerivedKey),
             },
         });
-
 
         return session;
     },

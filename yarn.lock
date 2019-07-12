@@ -5135,6 +5135,13 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
+cast-array@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/cast-array/-/cast-array-1.0.1.tgz#264ef1129e5888bc48cac40fe914e9f69b8d189d"
+  integrity sha1-Jk7xEp5YiLxIysQP6RTp9puNGJ0=
+  dependencies:
+    isarray "0.0.1"
+
 catharsis@^0.8.10:
   version "0.8.10"
   resolved "https://registry.yarnpkg.com/catharsis/-/catharsis-0.8.10.tgz#364198c1fbf084ae17028ee33ec7db53ca942ee6"
@@ -5998,6 +6005,11 @@ crypto-random-string@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
   integrity sha1-ojD2T1aDEOFJgAmUB5DsmVRbyn4=
+
+crypto@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/crypto/-/crypto-1.0.1.tgz#2af1b7cad8175d24c8a1b0778255794a21803037"
+  integrity sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==
 
 css-loader@^3.0.0:
   version "3.0.0"
@@ -8824,6 +8836,13 @@ graphql-language-service-utils@^1.2.2:
   dependencies:
     graphql-config "2.0.1"
     graphql-language-service-types "^1.2.2"
+
+graphql-parse-fields@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/graphql-parse-fields/-/graphql-parse-fields-1.2.0.tgz#c97119a91951b98dcbe656c46a203e966a720f28"
+  integrity sha1-yXEZqRlRuY3L5lbEaiA+lmpyDyg=
+  dependencies:
+    cast-array "^1.0.1"
 
 graphql-request@^1.5.0:
   version "1.8.2"
@@ -11839,6 +11858,11 @@ lodash@=4.17.4:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
   integrity sha1-eCA6TRwyiuHYbcpkYONptX9AVa4=
+
+lodash@^4.17.14:
+  version "4.17.14"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.14.tgz#9ce487ae66c96254fe20b599f21b6816028078ba"
+  integrity sha512-mmKYbW3GLuJeX+iGP+Y7Gp1AiGHGbXHCOh/jZmrawMmsE7MS4znI3RL2FsjbqOyMayHInjOeykW7PEajUk1/xw==
 
 log-driver@^1.2.7:
   version "1.2.7"
