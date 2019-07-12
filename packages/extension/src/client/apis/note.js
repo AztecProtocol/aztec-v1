@@ -20,6 +20,9 @@ export default class Note {
                 owner {
                     address
                 }
+                asset {
+                    balance
+                }
             }
         `);
         const data = (response && response.note) || {};

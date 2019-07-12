@@ -1,10 +1,13 @@
 import domainModel from '~database/models/domain';
 import { get, set, remove } from '~utils/storage';
-import { KeyStore } from '~utils/keyvault/index.js';
+import { KeyStore, } from '~utils/keyvault/index.js';
+import generateRandomId from '~utils/generateRandomId';
 import sessionStorage from '../StorageService/sessionStorage';
 
+
 export default {
-    validate: async ({ domain, asset }) => {
+    validateDomainAccess: async ({ domain, asset }) => {
+
         if (!domain) {
             throw new Error('Domain is not present for the query ');
         }
@@ -12,31 +15,7 @@ export default {
         if (!asset) {
             throw new Error('Asset id is not present for the query ');
         }
-
-        // we check the particular host has access
-        const now = Date.now();
-        const session  = get('session');
-
-        if (session.createdAt < now - 60 * 60 * 24 * 21) {
-            // remove session not pwkey
-            await remove('session');
-            throw new Error('The session is > 21 days old please login');
-        }
-
-        // the host has not been active in two days
-        if (session.lastActive < now - 60 * 60 * 24 * 7) {
-            await remove('session');
-            throw new Error('The session is no longer active please login');
-        }
-
-        // we can now fetch the pwDerivedKey
-        const { keyStore } = await get(['keyStore', 'pwDerivedKey']);
-        const k = KeyStore.deserialize(keyStore, new Uint8Array(session.pwDerivedKey));
-
-        if (!k.isDerivedKeyCorrect(new Uint8Array(session.pwDerivedKey))) {
-            throw new Error('pwDerivedKey should be correct');
-        }
-        
+ 
         try {
 
             const { assets = {} } = await domainModel.get({
@@ -44,16 +23,58 @@ export default {
             });
             // check if the user has granted the domain access to the given asset
             const { [asset]:isApproved } = assets;
-
             if (!isApproved) {
                 throw new Error(`The user has not granted the domain "${domain}" access`);
+                return;
             }
+
+            return {
+                domain,
+                assets
+            };
         }
         catch(e) {
 
             throw new Error(`The user has not granted the domain "${domain}" access`);
+            return;
+        }
+         
+    },
+    validateSession: async () => {
+
+        // we check the particular host has access
+        const now = Date.now();
+        const session = await get('session');
+
+        if(!session) {
+            throw new Error('No session please login');
+            return;
         }
 
+        if (session.createdAt < now - 60 * 60 * 24 * 21) {
+            // remove session not pwkey
+            await remove('session');
+            throw new Error('The session is > 21 days old please login');
+            return;
+        }
+
+        // the host has not been active in two days
+        if (session.lastActive < now - 60 * 60 * 24 * 7) {
+            await remove('session');
+            throw new Error('The session is no longer active please login');
+            return;
+        }
+
+
+        // we can now fetch the pwDerivedKey
+        const { keyStore } = await get(['keyStore']);
+        const decodedKey = new Uint8Array(Object.values(JSON.parse(session.pwDerivedKey)));
+        const k = KeyStore.deserialize(keyStore, decodedKey);
+
+        if (!k.isDerivedKeyCorrect(decodedKey)) {
+            throw new Error('pwDerivedKey should be correct');
+            return;
+        }
 
         await set({
             session:{
@@ -62,11 +83,7 @@ export default {
             }
         });
 
-        return {
-            session,
-            KeyStore: k,
-        };
-         
+        return session;
     },
     login: sessionStorage.login,
     enableAssetForDomain: async ({
@@ -77,7 +94,8 @@ export default {
         // graphnode server is not needd and should be configured via config.
         let {
             data,
-            modified
+            modified,
+            storage,
         } = await domainModel.set(
             {
                 domain,
@@ -86,32 +104,59 @@ export default {
                 }
             },
             {
-                ignoreDuplicates: true,
+                ignoreDuplicate: true,
             }
         );
 
-        // if(modified.length) {
+        if(!modified.length) {
+            const {
+                domain: {
+                    [domain]: {
+                        assets: prevAssets
+                    }
+                },
+            } = data;
 
-        //     const {
-        //         assets: prevAssets,
-        //     } = data;
+            const {data: updatedData} = await domainModel.update({
+                domain,
+                assets: {
+                    ...prevAssets,
+                    [asset]:true
+                }
+            });
 
+            return updatedData.domain[domain];
 
-        //        const {data: updatedData} = await domainModel.update({
-        //            domain,
-        //            assets: {
-        //                ...prevAssets,
-        //                [asset]:true
-        //            }
-        //         });
-
-        //     return updatedData.domain[domain];
-
-        // }
+    }
         return data.domain[domain];
 
+    },
+    registerExtension: async(_, {password, salt},) => {
+        
+        const { pwDerivedKey } = await KeyStore.generateDerivedKey({
+            password,
+            salt: salt,
+        });
+        const mnemonic = KeyStore.generateRandomSeed(generateRandomId());
 
+        const keyStore = new KeyStore({
+            pwDerivedKey,
+            salt,
+            mnemonic,
+            hdPathString: "m/44'/60'/0'/0"
+        });
 
-            
+        await set({
+            keyStore,
+            session: {
+                pwDerivedKey: JSON.stringify(pwDerivedKey),
+                lastActive: Date.now(),
+                createdAt: Date.now(),
+            }
+        });
+        return {
+            publicKey: keyStore.privacyKeys.publicKey,
+        };
+
     }
 };

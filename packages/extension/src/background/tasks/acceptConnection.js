@@ -5,6 +5,7 @@ import {
     errorLog,
 } from '~utils/log';
 import GraphQLService from '../services/GraphQLService';
+
 import insertVariablesToGql from '../utils/insertVariablesToGql';
 
 export default function acceptConnection() {
@@ -15,37 +16,36 @@ export default function acceptConnection() {
             variables,
         } = data || {};
         let result;
-        if (query) {
-            try {
-                result = await GraphQLService.query({
-                    query: gql(`{${query}}`),
-                    variables,
-                });
-            } catch (error) {
-                errorLog('Query data from GraphQL Service failed.', error);
-            }
-        } else if (mutation) {
-            const {
-                url,
-            } = sender;
-            const {
-                domain,
-            } = psl.parse(url.replace(/^https?:\/\//, '').split('/')[0]);
-            const mutationWithDomain = insertVariablesToGql(
-                mutation,
-                {
-                    domain,
-                },
-            );
 
-            try {
-                result = await GraphQLService.mutate({
-                    mutation: gql(`mutation {${mutationWithDomain}}`),
-                    variables,
-                });
-            } catch (error) {
-                errorLog('Mutate data in GraphQL Service failed.', error);
-            }
+        const {
+            url,
+        } = sender;
+        const {
+            domain,
+        } = psl.parse(url.replace(/^https?:\/\//, '').split('/')[0]);
+
+        let type = 'query';
+        if (mutation) {
+            type = 'mutation';
+        }
+        // we always want the domain to be from the sender so the user can't fake this
+        const graphQuery = insertVariablesToGql(
+            mutation || query,
+            {
+                domain,
+            },
+        );
+
+        try {
+            result = await GraphQLService[type]({
+                [type]: gql(`${type} {${graphQuery}}`),
+                variables,
+            });
+            console.log(result);
+            return result || {};
+        } catch (error) {
+            errorLog('Error in GraphQL Service.', error);
+            return error;
         }
 
         return result || {};

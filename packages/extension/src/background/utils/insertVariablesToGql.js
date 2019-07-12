@@ -8,12 +8,12 @@ const toValueStr = (val) => {
 };
 
 export default function insertVariablesToGql(queryStr, variables) {
-    const firstPara = queryStr.indexOf('(');
+    const firstPara = queryStr.indexOf(')');
     const firstBrace = queryStr.indexOf('{');
     const hasQuery = firstPara > 0;
     let insertTo;
     if (hasQuery) {
-        insertTo = firstPara + 1;
+        insertTo = firstPara;
     } else {
         insertTo = firstBrace;
         do {
@@ -27,9 +27,9 @@ export default function insertVariablesToGql(queryStr, variables) {
 
     return [
         queryStr.substr(0, insertTo),
-        hasQuery ? '' : '(',
+        hasQuery ? ', ' : '(',
         variableStr,
-        firstPara > 0 ? ', ' : ')',
+        firstPara > 0 ? '' : ')',
         queryStr.substr(insertTo),
     ].join('');
 }

@@ -4,19 +4,27 @@ export default gql`
     enum ErrorType {
         PERMISSION
         ARGUMENTS
-    }
-    type Error {
+    } type Error {
         type: ErrorType!
         key: String!
         message: String!
     }
     type Account {
-        id: ID!
-        address: String!
+        id: ID
+        address: String
+        publicKey: String!
     }
+
     type Domain {
-        graphQLServer: String
+        assets: [Asset!]
     }
+
+    type Session {
+        createdAt: Int!
+        lastLogin: Int!
+        pwDerivedKey: String!
+    }
+
     type Asset {
         id: ID!
         address: String!
@@ -38,17 +46,26 @@ export default gql`
         asset: Asset
     }
     type Query {
-        asset(id: ID!): Asset
-        note(id: ID!): Note
         requestGrantAccess(
             noteId: ID!
             address: String!
         ): RequestGrantAccess
+        asset(id: ID! domain: String!): Asset
+        note(id: ID! domain: String!): Note
     }
     type Mutation {
-        enableDomain(
+        enableAssetForDomain(
             domain: String!,
-            graphQLServer: String!
+            asset: String!
         ): Domain
+        login(
+            password: String!,
+            domain: String!
+        ):Session
+        registerExtension(
+            password: String!
+            salt: String!
+            domain: String!
+        ): Account
     }
 `;

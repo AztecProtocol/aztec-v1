@@ -20,19 +20,33 @@ const apollo = new ApolloClient({
 
 export default {
     query: async (query) => {
-        const response = await apollo.query(query);
-        const {
-            data,
-        } = response || {};
-
-        return data;
+        try {
+            const response = await apollo.query(query);
+            const {
+                data,
+            } = response || {};
+            console.log('resp', response);
+            return data;
+        } catch (e) {
+            console.log(e);
+            return {
+                error: true,
+                errorMessage: e,
+            };
+        }
     },
-    mutate: async (mutation) => {
-        const response = await apollo.mutate(mutation);
-        const {
-            data,
-        } = response || {};
-
-        return data;
+    mutation: async (mutation) => {
+        try {
+            const response = await apollo.mutate(mutation);
+            const {
+                data,
+            } = response || {};
+            return data;
+        } catch (e) {
+            return {
+                error: true,
+                errorMessage: e,
+            };
+        }
     },
 };

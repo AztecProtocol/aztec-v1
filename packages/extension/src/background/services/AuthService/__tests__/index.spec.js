@@ -1,10 +1,17 @@
 import {
     spy,
 } from 'sinon';
+import crypto from 'crypto';
 import * as storage from '~utils/storage';
 import AuthService from '..';
 
 jest.mock('~utils/storage');
+
+Object.defineProperty(global.self, 'crypto', {
+    value: {
+        getRandomValues: arr => crypto.randomBytes(arr.length),
+    },
+});
 
 const encryptedKeyStore = {
     encSeed: {
@@ -74,7 +81,8 @@ describe.only('Auth Service Tests', () => {
             domain: 'https://google.com',
             asset: '__asset_id_0',
         });
-        const session = await AuthService.validate({
+        const session = await AuthService.validateSession();
+        await AuthService.validateDomainAccess({
             domain: 'https://google.com',
             asset: '__asset_id_0',
         });
@@ -94,10 +102,7 @@ describe.only('Auth Service Tests', () => {
                 createdAt: Date.now(),
             },
         });
-        await expect(AuthService.validate({
-            domain: 'https://google.com',
-            asset: '__asset_id_0',
-        })).rejects.toThrow('The session is no longer active please login');
+        await expect(AuthService.validateSession()).rejects.toThrow('The session is no longer active please login');
         expect(remove.called);
     });
 
@@ -106,17 +111,13 @@ describe.only('Auth Service Tests', () => {
             password: 'password',
             domain: 'https://google.com',
         });
-
         await set({
             session: {
                 createdAt: Date.now() - (22 * 24 * 60 * 60),
                 lastActive: Date.now(),
             },
         });
-        await expect(AuthService.validate({
-            domain: 'https://google.com',
-            asset: '__asset_id_0',
-        })).rejects.toThrow('The session is > 21 days old please login');
+        await expect(AuthService.validateSession()).rejects.toThrow('The session is > 21 days old please login');
         expect(remove.called);
     });
 
@@ -125,9 +126,19 @@ describe.only('Auth Service Tests', () => {
             password: 'password',
             domain: 'https://google.com',
         });
-        await expect(AuthService.validate({
+        await expect(AuthService.validateDomainAccess({
             domain: 'https://google.com',
             asset: '__asset_id_0',
         })).rejects.toThrow('The user has not granted the domain "https://google.com" access');
+    });
+
+
+    it('should create the keystore if supplied a password and a salt', async () => {
+        const { publicKey } = await AuthService.registerExtension({
+            password: 'password',
+            salt: 'saltypretzel',
+        });
+        expect(publicKey);
+        expect(set.called);
     });
 });
