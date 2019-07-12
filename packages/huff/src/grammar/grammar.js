@@ -42,11 +42,10 @@ grammar.topLevel = {
     // TODO: fix this
     IMPORT: regex([
         '^#',
-        // '^(?:[\\s\\n]*)#',
         '(?:include)',
-        '(?:\\"|\\\')',
-        '(.*)',
-        '(?:\\"|\\\')',
+        '(\\"|\\\')',
+        '(.+?)',
+        '\\1',
     ]),
     WHITESPACE: regex([
         '^([\\s\\n\\r]+)',

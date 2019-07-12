@@ -764,7 +764,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
                 },
             };
             index += jumptable[0].length;
-        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && input.match(grammar.topLevel.IMPORT)) {
+        } else if (input.match(grammar.topLevel.IMPORT)) {
             const token = input.match(grammar.topLevel.IMPORT);
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(token[0]), inputMap);
             throw new Error('#include statements must come before any other declarations or operations in the file. ' + debugLocationString(debug));
@@ -817,11 +817,11 @@ parser.getFileContents = (originalFilename, partialPath) => {
             } else if (importStatement) {
                 formatted = formatted.replace(importStatement[0], importStatement[0].replace(/./g, ' '));
                 index += importStatement[0].length;
-                if (!included.includes(importStatement[1])) {
-                    imported = [...imported, ...processFile(importStatement[1])];
+                if (!included.includes(importStatement[2])) {
+                    imported = [...imported, ...processFile(importStatement[2])];
                 } else {
                     const upToNow = formatted.slice(0, index).split('\n').length;
-                    console.warn(`Note: file "${importStatement[1]}" is called/imported multiple times, the further import in ${filename} on line ${upToNow} was not carried out.`);
+                    console.warn(`Note: file "${importStatement[2]}" is called/imported multiple times, the further import in ${filename} on line ${upToNow} was not carried out.`);
                 }
             } else {
                 break;
