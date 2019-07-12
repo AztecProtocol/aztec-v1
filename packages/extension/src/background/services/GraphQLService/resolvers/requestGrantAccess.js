@@ -1,12 +1,13 @@
 import GraphNodeService from '~backgroundServices/GraphNodeService';
-import noteModel from '~database/models/note';
-import noteAccessModel from '~database/models/noteAccess';
 import metadata, {
     toString,
 } from '~utils/metadata';
 import {
     encryptMessage,
 } from '~utils/crypto';
+import {
+    argsError,
+} from '~utils/error';
 
 export default async function requestGrantAccess(_, args) {
     const {
@@ -26,11 +27,11 @@ export default async function requestGrantAccess(_, args) {
         sharedAccount,
     } = await GraphNodeService.query(`
         userAccess: noteAccess(noteId: "${noteId}", account: "${currentUser.address}") {
-            account {
-                address
-            }
             note {
                 metadata
+                asset {
+                    id
+                }
             }
             viewingKey
         }
@@ -42,31 +43,37 @@ export default async function requestGrantAccess(_, args) {
         }
     `);
 
-    if (!userAccess
-        || !sharedAccount
-        || !sharedAccount.publicKey
-    ) {
-        return null;
+    let error;
+    if (!userAccess) {
+        error = argsError('account.noteAccess', {
+            noteId,
+            account: currentUser.address,
+        });
+    } else if (!sharedAccount) {
+        error = argsError('account.notFound', args);
+    } else if (!sharedAccount.publicKey) {
+        error = argsError('account.notFound.publicKey', args);
+    }
+
+    if (error) {
+        return {
+            error,
+        };
     }
 
     const {
         note: {
             metadata: prevMetadataStr,
+            asset: {
+                id: assetId,
+            },
         },
-        account: owner,
         viewingKey: userViewingKey,
     } = userAccess;
 
-    const isOwner = address === owner.address;
-
-    const note = isOwner
-        ? await noteModel.get({ id: noteId })
-        : await noteAccessModel.get({ id: noteId });
-
     if (existingAccess) {
         return {
-            ...note,
-            metadata: prevMetadataStr,
+            prevMetadataStr,
         };
     }
 
@@ -93,7 +100,8 @@ export default async function requestGrantAccess(_, args) {
     });
 
     return {
-        ...note,
+        prevMetadataStr,
         metadata: newMetadataStr,
+        asset: assetId,
     };
 }

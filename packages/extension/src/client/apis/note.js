@@ -29,42 +29,55 @@ export default class Note {
     };
 
     async grantAccess(address) {
+        let granted = false;
+        let errorMessage;
+
         const {
             requestGrantAccess: {
                 metadata,
-                asset: {
-                    address: zkAssetAddress,
-                } = {},
+                prevMetadata,
+                asset,
+                error,
             } = {},
         } = await query(`
             requestGrantAccess(noteId: "${this.id}", address: "${address}") {
+                metadata
+                prevMetadata
                 asset {
                     address
                 }
-                metadata
+                error {
+                    message
+                }
             }
         `) || {};
 
-        let granted = false;
-        if (metadata) {
-            if (metadata.indexOf(address) > 0) {
-                console.log(`Address '${address}' already has access to note '${this.id}'.`);
-                return;
+        if (error) {
+            errorMessage = error.message;
+        } else if (metadata && metadata !== prevMetadata) {
+            const {
+                address: zkAssetAddress,
+            } = asset;
+            try {
+                granted = await Web3Service
+                    .useContract('ZkAsset')
+                    .at(zkAssetAddress)
+                    .method('updateNoteMetaData')
+                    .send(
+                        this.id,
+                        metadata,
+                    );
+            } catch (e) {
+                errorMessage = e;
             }
-            granted = await Web3Service
-                .useContract('ZkAsset')
-                .at(zkAssetAddress)
-                .method('updateNoteMetaData')
-                .send(
-                    this.id,
-                    metadata,
-                );
         }
 
-        if (granted) {
-            console.log(`Successfully granted note access to ${address}`);
+        if (errorMessage) {
+            console.log(errorMessage);
+        } else if (granted) {
+            console.log(`Successfully granted access of note '${this.id}' to address '${address}'`);
         } else {
-            console.log(`Unable to grant permission of note '${this.id}' to '${address}'`);
+            console.log(`Address '${address}' already has access to note '${this.id}'.`);
         }
     }
 }
