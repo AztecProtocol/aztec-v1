@@ -816,7 +816,7 @@ parser.removeComments = (string) => {
  */
 parser.getFileContents = (originalFilename, partialPath) => {
     const included = [];
-    console.log('filename: """' + originalFilename + '"""');
+    // console.log('filename: """' + originalFilename + '"""');
 
     /**
      * Get either the contents of the file parameter, or use the parameter directly if it's Huff code and not a filename
