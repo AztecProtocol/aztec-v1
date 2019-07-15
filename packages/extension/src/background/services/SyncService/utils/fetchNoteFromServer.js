@@ -14,8 +14,8 @@ export default async function fetchNoteFromServer({
     }
 
     const query = `
-        query($numberOfNotes: Int!, $account: ID, $lastId: ID) {
-            noteChangeLog(first: $numberOfNotes, account: $account, id_gt: $lastId) {
+        query($first: Int!, $where: NoteChangeLogsWhere) {
+            noteChangeLogs(first: $first, where: $where) {
                 id
                 noteAccess {
                     account {
@@ -33,15 +33,16 @@ export default async function fetchNoteFromServer({
                     }
                 }
                 action
-                timestamp
             }
         }
     `;
 
     const variables = {
-        numberOfNotes,
-        account,
-        lastId,
+        first: numberOfNotes,
+        where: {
+            id_gt: lastId,
+            account,
+        },
     };
 
     const data = await GraphNodeService.query({
@@ -50,10 +51,10 @@ export default async function fetchNoteFromServer({
     });
 
     const {
-        noteChangeLog = [],
+        noteChangeLogs = [],
     } = data || {};
 
-    return noteChangeLog.map(({
+    return noteChangeLogs.map(({
         id: logId,
         noteAccess: {
             note,

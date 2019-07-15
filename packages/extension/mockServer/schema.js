@@ -17,7 +17,7 @@ import {
     getNoteAccess,
     getNoteAccesses,
     getNoteAccessById,
-    getNoteChangeLog,
+    getNoteChangeLogs,
     grantAccess,
 } from './database/noteAccess';
 
@@ -68,6 +68,12 @@ export const typeDefs = gql`
         account: ID
         account_in: [ID!]
     }
+    input NoteChangeLogsWhere {
+        id: ID
+        id_lt: ID
+        id_gt: ID
+        account: ID
+    }
     type Query {
         account(id: ID!): Account
         accounts(first: Int!, where: AccountsWhere): [Account!]
@@ -75,7 +81,7 @@ export const typeDefs = gql`
         notes(first: Int!, id_gt: ID): [Note!]
         noteAccess(id: ID, noteId: ID, account: ID): NoteAccess
         noteAccesses(first: Int!, where: NoteAccessesWhere): [NoteAccess!]
-        noteChangeLog(first: Int!, account: ID, id_gt: ID): [NoteChangeLog!]
+        noteChangeLogs(first: Int!, where: NoteChangeLogsWhere): [NoteChangeLog!]
     }
     type Mutation {
         updateNoteMetaData(_noteHash: String!, _metadata: String!): Boolean
@@ -90,7 +96,7 @@ export const resolvers = {
         notes: getNotes,
         noteAccess: getNoteAccess,
         noteAccesses: getNoteAccesses,
-        noteChangeLog: getNoteChangeLog,
+        noteChangeLogs: getNoteChangeLogs,
     },
     Note: {
         asset: ({ asset }) => getAssetById(asset),

@@ -15,7 +15,7 @@ import accounts from './account';
 import metadata from '../../src/utils/metadata';
 
 const noteAccess = [];
-const noteChangeLog = [];
+const noteChangeLogs = [];
 const toBeDestroyed = [];
 let prevTimestamp = Date.now() - 86400;
 
@@ -34,8 +34,8 @@ const createAccessForAccount = (note, accountAddress, viewingKey) => {
         viewingKey,
     });
 
-    noteChangeLog.push({
-        id: entityId('log', noteChangeLog.length),
+    noteChangeLogs.push({
+        id: entityId('log', `${noteChangeLogs.length}`.padStart(3, '0')),
         account: account.id,
         noteAccess: accessId,
         action: 'CREATE',
@@ -64,8 +64,8 @@ notes.forEach((note) => {
 toBeDestroyed.forEach((accessIndex) => {
     const access = noteAccess[accessIndex];
     prevTimestamp += randomInt(0, 2000);
-    noteChangeLog.push({
-        id: entityId('log', noteChangeLog.length),
+    noteChangeLogs.push({
+        id: entityId('log', `${noteChangeLogs.length}`.padStart(3, '0')),
         account: access.account,
         noteAccess: access.id,
         action: 'DESTROY',
@@ -112,24 +112,24 @@ export const getNoteAccesses = (_, args) => {
     return filteredAccess.slice(0, first);
 };
 
-export const getNoteChangeLog = (_, args) => {
+const noteChangeLogsWherePrefixes = [
+    'id',
+    'account',
+];
+
+export const getNoteChangeLogs = (_, args) => {
     const {
         first,
-        account,
-        id_gt: idGt,
+        where,
     } = args;
 
-    let filteredLog = noteChangeLog;
-    if (account) {
-        filteredLog = filteredLog.filter(n => n.account === account);
-    }
+    const filteredAccess = filterByWhere(
+        where,
+        noteChangeLogsWherePrefixes,
+        noteChangeLogs,
+    );
 
-    let startAt = 0;
-    if (idGt) {
-        startAt = filteredLog.findIndex(({ id }) => id === idGt) + 1;
-    }
-
-    return filteredLog.slice(startAt, startAt + first);
+    return filteredAccess.slice(0, first);
 };
 
 export const grantAccess = (noteId, metadataStr) => {
