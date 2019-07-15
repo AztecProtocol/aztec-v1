@@ -32,6 +32,10 @@ export default class Note {
     };
 
     async grantAccess(address) {
+        const addressList = typeof address === 'string'
+            ? [address]
+            : address;
+
         let granted = false;
         let errorMessage;
 
@@ -43,7 +47,7 @@ export default class Note {
                 error,
             } = {},
         } = await query(`
-            requestGrantAccess(noteId: "${this.id}", address: "${address}") {
+            requestGrantAccess(noteId: "${this.id}", address: "${addressList.join('')}") {
                 metadata
                 prevMetadata
                 asset {
@@ -78,9 +82,15 @@ export default class Note {
         if (errorMessage) {
             console.log(errorMessage);
         } else if (granted) {
-            console.log(`Successfully granted access of note '${this.id}' to address '${address}'`);
+            console.log(
+                `Successfully granted access of note '${this.id}' to address:`,
+                addressList,
+            );
         } else {
-            console.log(`Address '${address}' already has access to note '${this.id}'.`);
+            console.log(
+                `Address already has access to note '${this.id}':`,
+                addressList,
+            );
         }
     }
 }

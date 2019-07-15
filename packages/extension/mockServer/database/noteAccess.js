@@ -6,6 +6,7 @@ import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
+import filterByWhere from '../utils/filterByWhere';
 import notes, {
     getNoteById,
     updateNote,
@@ -72,26 +73,6 @@ toBeDestroyed.forEach((accessIndex) => {
     });
 });
 
-export const getNoteAccesses = (_, args) => {
-    const {
-        first,
-        account,
-        id_gt: idGt,
-    } = args;
-
-    let filteredAccess = noteAccess;
-    if (account) {
-        filteredAccess = noteAccess.filter(n => n.account === account);
-    }
-
-    let startAt = 0;
-    if (idGt) {
-        startAt = filteredAccess.findIndex(({ id }) => id === idGt) + 1;
-    }
-
-    return filteredAccess.slice(startAt, first);
-};
-
 const getFetchConditions = makeGetFetchConditions([
     'id',
 ]);
@@ -110,6 +91,26 @@ export const getNoteAccess = (_, args) => {
 };
 
 export const getNoteAccessById = noteAccessId => getNoteAccess(null, { id: noteAccessId });
+
+const noteAccessesWherePrefixes = [
+    'note',
+    'account',
+];
+
+export const getNoteAccesses = (_, args) => {
+    const {
+        first,
+        where,
+    } = args;
+
+    const filteredAccess = filterByWhere(
+        where,
+        noteAccessesWherePrefixes,
+        noteAccess,
+    );
+
+    return filteredAccess.slice(0, first);
+};
 
 export const getNoteChangeLog = (_, args) => {
     const {

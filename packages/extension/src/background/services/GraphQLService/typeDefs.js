@@ -4,7 +4,8 @@ export default gql`
     enum ErrorType {
         PERMISSION
         ARGUMENTS
-    } type Error {
+    }
+    type Error {
         type: ErrorType!
         key: String!
         message: String!
@@ -14,17 +15,14 @@ export default gql`
         address: String
         publicKey: String!
     }
-
     type Domain {
         assets: [Asset!]
     }
-
     type Session {
         createdAt: Int!
         lastLogin: Int!
         pwDerivedKey: String!
     }
-
     type Asset {
         id: ID!
         address: String!
