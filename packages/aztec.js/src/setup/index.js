@@ -17,7 +17,13 @@ const bn128 = require('../bn128');
 const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
 
 const setup = {
+<<<<<<< Updated upstream
     POINTS_DB_URL: 'https://ds8m7zxw3jpbz.cloudfront.net/data',
+=======
+
+    POINTS_DB_URL : 'https://ds8m7zxw3jpbz.cloudfront.net/data',
+
+>>>>>>> Stashed changes
 };
 
 /**
@@ -81,7 +87,12 @@ setup.fetchPoint = async (inputValue) => {
     const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
 
     try {
+<<<<<<< Updated upstream
         const res = await fetch(`${setup.POINTS_DB_URL}${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
+=======
+        const res = await fetch(`${POINTS_DB_URL}${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`,
+        );
+>>>>>>> Stashed changes
         if (res.status === 404) {
             throw new Error('point not found');
         }

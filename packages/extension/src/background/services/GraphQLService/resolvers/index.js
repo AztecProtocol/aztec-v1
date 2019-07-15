@@ -2,6 +2,7 @@ import assetModel from '~database/models/asset';
 import accountModel from '~database/models/account';
 import noteModel from '~database/models/note';
 import requestGrantAccess from './requestGrantAccess';
+import { sessionDecorator, assetAccessDecorator } from '../../../utils/decorators';
 
 import AuthService from '../../AuthService';
 
@@ -11,39 +12,6 @@ const pipe = funcs => async (_, args, ctx = {}, info) => {
         result = await funcs[i](_, args, { ...ctx, ...result }, info); // eslint-disable-line no-await-in-loop
     }
     return result;
-};
-
-
-const sessionDecorator = async (_, args, ctx, info) => AuthService.validateSession();
-
-const assetAccessDecorator = async (_, args, ctx, info) => {
-    const validation = {};
-    switch (info.fieldName.toUpperCase()) {
-    case 'ASSET': {
-        validation.asset = args.id;
-        validation.domain = args.domain;
-        break;
-    }
-    case 'NOTE': {
-        // we need to fetch the note to get the asset
-        const note = await noteModel.get({
-            id: args.id,
-        });
-
-        validation.asset = note.asset;
-        validation.domain = args.domain;
-        break;
-    }
-
-    default: {
-        break;
-    }
-    }
-
-    return AuthService.validateDomainAccess({
-        asset: args.id,
-        domain: args.domain,
-    });
 };
 
 export default {

@@ -1,3 +1,5 @@
+import AuthService from '../services/AuthService';
+
 export const sessionDecorator = async () => AuthService.validateSession();
 
 export const assetAccessDecorator = async (_, args, ctx, info) => {
