@@ -32,14 +32,14 @@ export default class Asset {
 
     };
 
-    createNoteFromBalance = ({value, access}) => {
-
+    createNoteFromBalance = ({ value, access }) => {
         // to pick a note we need to do the following
         // 1. split the expected note value into a normally distributed array of buckets that sum to > than the note
         // value
         // minimise the notes used
         // itterate until we have 5 solutions
         // score each solution
+        getDistribution(value);
     }
 }
 
