@@ -7,6 +7,7 @@ import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
+import filterByWhere from '../utils/filterByWhere';
 import generateRandomId from '../utils/generateRandomId';
 
 const accounts = [];
@@ -30,5 +31,25 @@ export const getAccount = (_, args) => {
 };
 
 export const getAccountById = accountId => getAccount(null, { id: accountId });
+
+const accountsWherePrefixes = [
+    'id',
+    'address',
+];
+
+export const getAccounts = (_, args) => {
+    const {
+        first,
+        where,
+    } = args;
+
+    const filteredAccounts = filterByWhere(
+        where,
+        accountsWherePrefixes,
+        accounts,
+    );
+
+    return filteredAccounts.slice(0, first);
+};
 
 export default accounts;

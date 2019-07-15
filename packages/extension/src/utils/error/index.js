@@ -9,18 +9,21 @@ import {
 const errorI18n = new I18n();
 errorI18n.register(errorConfig);
 
-const makeError = type => (key, data) => {
+const makeError = type => (key, errorInfo, response) => {
     let message;
     if (!errorI18n.has(key)) {
         warnLog(`Error '${key}' is not defined.`);
         message = key;
     } else {
-        message = errorI18n.t(key, data);
+        message = errorI18n.t(key, errorInfo);
     }
     return {
-        type,
-        key,
-        message,
+        error: {
+            type,
+            key,
+            message,
+        },
+        response,
     };
 };
 

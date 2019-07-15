@@ -21,7 +21,7 @@ export default class Asset {
                 hash
                 viewingKey
             }
-        `
+        `);
         const data = (response && response.asset) || {};
         this.staticProperty.forEach((key) => {
             this[key] = data[key];

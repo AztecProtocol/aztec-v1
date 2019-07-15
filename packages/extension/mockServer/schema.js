@@ -7,6 +7,7 @@ import {
 import {
     getAccount,
     getAccountById,
+    getAccounts,
 } from './database/account';
 import {
     getNotes,
@@ -52,12 +53,28 @@ export const typeDefs = gql`
         action: String!
         timestamp: Int!
     }
+    input AccountsWhere {
+        id: ID
+        id_in: [ID!]
+        address: String
+        address_in: [String!]
+    }
+    input NoteAccessesWhere {
+        id: ID
+        id_lt: ID
+        id_gt: ID
+        note: ID
+        note_in: [ID!]
+        account: ID
+        account_in: [ID!]
+    }
     type Query {
         account(id: ID!): Account
+        accounts(first: Int!, where: AccountsWhere): [Account!]
         note(id: ID!): Note
         notes(first: Int!, id_gt: ID): [Note!]
         noteAccess(id: ID, noteId: ID, account: ID): NoteAccess
-        noteAccesses(first: Int!, id: ID, id_gt: ID, account: ID): [NoteAccess!]
+        noteAccesses(first: Int!, where: NoteAccessesWhere): [NoteAccess!]
         noteChangeLog(first: Int!, account: ID, id_gt: ID): [NoteChangeLog!]
     }
     type Mutation {
@@ -68,6 +85,7 @@ export const typeDefs = gql`
 export const resolvers = {
     Query: {
         account: getAccount,
+        accounts: getAccounts,
         note: (_, { id }) => getNoteById(id),
         notes: getNotes,
         noteAccess: getNoteAccess,
