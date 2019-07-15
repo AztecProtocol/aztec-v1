@@ -530,6 +530,15 @@ parser.parseCodeTable = (body) => {
     };
 };
 
+/**
+ * Parse an individual macro
+ * @param body
+ * @param macros
+ * @param jumptables
+ * @param startingIndex
+ * @param inputMap
+ * @returns {Array}
+ */
 parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {}) => {
     let input = body;
     let index = 0;
@@ -673,7 +682,13 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
     return ops;
 };
 
-// parse the whole file
+/**
+ * Parse the whole file
+ * @param raw
+ * @param startingIndex
+ * @param inputMap
+ * @returns {{macros, jumptables}}
+ */
 parser.parseTopLevel = (raw, startingIndex, inputMap) => {
     let input = raw.slice(startingIndex);
     let currentContext = CONTEXT.NONE;
@@ -793,12 +808,22 @@ parser.removeComments = (string) => {
     return data;
 };
 
-// TODO: clean up this function
+/**
+ * Process contents of file (including dealing with comments and includes) and return processed file contents and a list of other files to include
+ * @param originalFilename Also works if you input raw huff code
+ * @param partialPath
+ * @returns {{filedata: *[], raw: *}}
+ */
 parser.getFileContents = (originalFilename, partialPath) => {
     const included = [];
-    // process a file, recursively processing any files which are included
-    const processFile = (filename) => {
-        included.push(filename);
+    console.log('filename: """' + originalFilename + '"""');
+
+    /**
+     * Get either the contents of the file parameter, or use the parameter directly if it's Huff code and not a filename
+     * @param filename
+     * @returns {string}
+     */
+    function huffCodeFileContents(filename) {
         let fileString;
         if (filename.includes('#')) {
             fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
@@ -806,27 +831,50 @@ parser.getFileContents = (originalFilename, partialPath) => {
             const filepath = path.posix.resolve(partialPath, filename);
             fileString = fs.readFileSync(filepath, 'utf8');
         }
-        let formatted = parser.removeComments(fileString);
+        return fileString;
+    }
+
+    /**
+     * Take comment-free input huff code, and process any include statements recursively, returning a list of the neccesary files, and the original huff code with the include statements removed
+     * @param formatted
+     * @param filename
+     * @returns {{formatted: *, imported: Array}}
+     */
+    function processIncludes(formatted, filename) {
+        let huffToProcess = formatted;
         let imported = [];
         let index = 0;
         while (true) {
-            const whitespace = formatted.slice(index).match(grammar.topLevel.WHITESPACE);
-            const importStatement = formatted.slice(index).match(grammar.topLevel.IMPORT);
+            const whitespace = huffToProcess.slice(index).match(grammar.topLevel.WHITESPACE);
+            const importStatement = huffToProcess.slice(index).match(grammar.topLevel.IMPORT);
             if (whitespace) {
                 index += whitespace[0].length;
             } else if (importStatement) {
-                formatted = formatted.replace(importStatement[0], importStatement[0].replace(/./g, ' '));
+                huffToProcess = huffToProcess.replace(importStatement[0], importStatement[0].replace(/./g, ' '));
                 index += importStatement[0].length;
                 if (!included.includes(importStatement[2])) {
                     imported = [...imported, ...processFile(importStatement[2])];
                 } else {
-                    const upToNow = formatted.slice(0, index).split('\n').length;
+                    const upToNow = huffToProcess.slice(0, index).split('\n').length;
                     console.warn(`Note: file "${importStatement[2]}" is called/imported multiple times, the further import in ${filename} on line ${upToNow} was not carried out.`);
                 }
             } else {
                 break;
             }
         }
+        return { imported, formatted: huffToProcess };
+    }
+
+    /**
+     * Process a file, recursively processing any files which are included
+     * @param filename
+     * @returns {*[]}
+     */
+    const processFile = (filename) => {
+        included.push(filename);
+        const fileString = huffCodeFileContents(filename);
+        const fileStringWithoutComments = parser.removeComments(fileString);
+        const { imported, formatted } = processIncludes(fileStringWithoutComments, filename);
         const result = [...imported, {
             filename,
             data: formatted,
