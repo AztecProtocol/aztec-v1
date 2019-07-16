@@ -1,0 +1,9 @@
+
+#define macro SET = takes(0) returns(0) {
+	0x00 calldataload 0x00 sstore
+}
+
+#define macro GET = takes(0) returns(0) {
+	0x00 sload 0x00 mstore
+	0x20 0x00 return
+}

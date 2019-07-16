@@ -1,0 +1,258 @@
+#define macro BALANCE_LOCATION = takes(0) returns(1) {
+	0x00 // do not change!
+}
+
+#define macro OWNER_LOCATION = takes(0) returns(1) {
+	0x01
+}
+
+#define macro SUPPLY_LOCATION = takes(0) returns(1) {
+	0x02
+}
+
+#define macro ALLOWANCE_LOCATION = takes(0) returns(1) {
+	0x03
+}
+
+#define macro ADDRESS_MASK = takes(1) returns(1) {
+	0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffff
+	and
+}
+
+#define macro TRANSFER_EVENT_SIGNATURE = takes(0) returns(1) {
+	0xDDF252AD1BE2C89B69C2B068FC378DAA952BA7F163C4A11628F55A4DF523B3EF
+}
+
+#define macro APPROVAL_EVENT_SIGNATURE = takes(0) returns(1) {
+	0x8C5BE1E5EBEC7D5BD14F71427D1E84F3DD0314C0F7B2291E5B200AC8C7C3B925
+}
+
+template <error_location>
+#define macro UTILS__NOT_PAYABLE = takes(0) returns(0) {
+	callvalue <error_location> jumpi
+}
+
+#define macro ERC20 = takes(0) returns(0) {
+	// 1. store the total_supply value
+	0x00 calldataload dup1 SUPPLY_LOCATION() sstore
+	// 2. store the owner's address
+	caller dup1 OWNER_LOCATION() sstore
+	// stack: caller total_supply
+	// 3. give the owner a balance with value total_supply
+	0x00 mstore
+	0x40 0x00 sha3 // key(caller_balance) total_supply
+	sstore
+}
+
+template <transfer, transfer_from, balance_of, allowance, approve, total_supply>
+#define macro ERC20__FUNCTION_SIGNATURE = takes(0) returns(1) {
+	0x00 calldataload 224 shr // function signature
+	dup1 0xa9059cbb eq <transfer> jumpi
+    dup1 0x23b872dd eq <transfer_from> jumpi
+    dup1 0x70a08231 eq <balance_of> jumpi 
+    dup1 0xdd62ed3e eq <allowance> jumpi
+    dup1 0x095ea7b3 eq <approve> jumpi
+    dup1 0x18160ddd eq <total_supply> jumpi
+    0x00 0x00 return
+}
+
+#define macro ERC20__TRANSFER_INIT = takes(0) returns(6) {
+	0x04 calldataload ADDRESS_MASK()
+	caller
+	TRANSFER_EVENT_SIGNATURE()
+	0x20
+	0x00
+	0x24 calldataload
+	// value 0x00 0x20 signature from to
+}
+
+#define macro ERC20__TRANSFER_GIVE_TO = takes(6) returns(7) {
+	// value 0x00 0x20 signature from to
+	dup6 0x00 mstore
+	// BALANCE_LOCATION() 0x20 mstore [not needed - memory@0x20 is already 0x00]
+	0x40 0x00 sha3 // key(balances[to]) value 0x00 0x20 signature from to
+	dup1 sload // balances[to] key value 0x00 0x20 signature from to
+	dup3   // v b k v 0x00 0x20 sig f t
+	add    // v+b k v 0x00 0x20 sig f t
+	dup1   // v+b v+b k v 0x00 0x20 sig f t
+	dup4   // v v+b v+b k v 0x00 0x20 sig f t
+	gt     // v>v+b v+b k v 0x00 0x20 sig f t
+	swap2  // k v+b v>v+b v 0x00 0x20 sig f t
+	sstore // v>v+b v 0x00 0x20 sig f t
+}
+
+#define macro ERC20__TRANSFER_TAKE_FROM = takes(7) returns(8) {
+	// error_code value 0x00 0x20 signature from to
+	caller 0x00 mstore
+	0x40 0x00 sha3
+	// key(balances[from]) error_code value 0x00 0x20 signature from to
+	dup1 sload // balances[from] key error value 0x00 0x20 sig f t
+	          // b k e1 v 0 2 s f t
+	dup4 dup2 // b v b k e1 v 0 2 s f t
+	sub dup5  // v (b-v) b k e1 v 0 2 s f t
+	swap3     // k (b-v) b v e1 v 0 2 s f t
+	sstore    // b v e1 v 0 2 s f t
+	lt        // error2 error1 value 0x00 0x20 signature from to
+}
+
+template <error_location>
+#define macro ERC20__TRANSFER = takes(1) returns(0) {
+	pop // remove function signature from stack
+	ERC20__TRANSFER_INIT()
+	ERC20__TRANSFER_GIVE_TO()
+	ERC20__TRANSFER_TAKE_FROM()
+	// error2 error1 value 0x00 0x20 signature from to
+	or <error_location> jumpi
+	// value 0x00 0x20 signature from to
+	0x00 mstore log3 // value must be stored at 0x00
+	0x01 0x00 mstore
+	0x20 0x00 return
+}
+
+#define macro ERC20__TRANSFER_FROM_INIT = takes(0) returns(6) {
+	0x24 calldataload ADDRESS_MASK() // to
+	0x04 calldataload ADDRESS_MASK() // from to
+	TRANSFER_EVENT_SIGNATURE()
+	0x20
+	0x00
+	0x44 calldataload
+	// value 0x00 0x20 signature from to
+}
+
+#define macro ERC20__TRANSFER_FROM_TAKE_FROM = takes(7) returns(8) {
+	// error_code value 0x00 0x20 signature from to
+	dup6 0x00 mstore
+	0x40 0x00 sha3
+	// key(balances[from]) error_code value 0x00 0x20 signature from to
+	dup1 sload // balances[from] key error value 0x00 0x20 sig f t
+	          // b k e1 v 0 2 s f t
+	dup4 dup2 // b v b k e1 v 0 2 s f t
+	sub dup5  // v (b-v) b k e1 v 0 2 s f t
+	swap3     // k (b-v) b v e1 v 0 2 s f t
+	sstore    // b v e1 v 0 2 s f t
+	lt        // error2 error1 value 0x00 0x20 signature from to
+}
+
+#define macro ERC20__TRANSFER_FROM_SUB_ALLOWANCE = takes(8) returns (9) {
+	// error2 error1 value 0x00 0x20 signature from to
+	dup7 0x00 mstore
+	ALLOWANCE_LOCATION() 0x20 mstore
+	0x40 0x00 sha3
+	0x20 mstore
+	caller 0x00 mstore
+	0x40 0x00 sha3
+	// key(allowance) error2 error1 value 0x00 0x20 signature from to
+	dup1 sload // allowance key e2 e1 v 0x00 0x20 s f t
+	dup5 dup2  // a v a k e2 e1 v 0 2 s f t
+	sub dup6   // v a-v a k e2 e1 v 0 2 s f t
+	swap3 sstore // a v e2 e1 v 0 2 s f t
+	lt // error3 error2 error1 value 0x00 0x20 signature from to
+}
+
+template <error_location>
+#define macro ERC20__TRANSFER_FROM = takes(1) returns(0) {
+	pop // remove function signature from stack
+	ERC20__TRANSFER_FROM_INIT()
+	// value 0x00 0x20 signature from to
+	ERC20__TRANSFER_GIVE_TO()
+	// error1 value 0x00 0x20 signature from to
+	ERC20__TRANSFER_FROM_TAKE_FROM()
+	// error2 error1 value 0x00 0x20 signature from to
+	ERC20__TRANSFER_FROM_SUB_ALLOWANCE()
+	// error3 error2 error1 value 0x00 0x20 signature from to
+	or or <error_location> jumpi
+	// value 0x00 0x20 signature from to
+	0x00 mstore log3
+	0x01 0x00 mstore
+	0x20 0x00 return
+}
+
+#define macro ERC20__BALANCE_OF = takes(0) returns(0) {
+	pop // remove function signature from stack
+	0x04 calldataload ADDRESS_MASK() // address
+	0x00 mstore
+	// BALANCE_LOCATION() 0x20 mstore [not needed - memory@0x20 is already 0x00]
+	0x40 0x00 sha3 // key(balances[address])
+	sload // balances[address]
+	0x00 mstore
+	0x20 0x00 return
+}
+
+#define macro ERC20__ALLOWANCE = takes(0) returns(0) {
+	pop // remove function signature from stack
+	0x04 calldataload ADDRESS_MASK() // owner_address
+	0x00 mstore
+	ALLOWANCE_LOCATION() 0x20 mstore
+	0x40 0x00 sha3
+	0x20 mstore
+	0x24 calldataload ADDRESS_MASK() // spender_address
+	0x00 mstore
+	0x40 0x00 sha3
+	sload
+	0x00 mstore
+	0x20 0x00 return
+}
+
+#define macro ERC20__APPROVE = takes(0) returns(0) {
+	pop // remove function signature from stack
+	0x04 calldataload ADDRESS_MASK() // spender
+	caller
+	APPROVAL_EVENT_SIGNATURE()
+	0x20
+	0x00
+	// stack: 0x00 0x20 signature caller spender
+	0x24 calldataload // get value
+	dup1
+	// stack: value value 0x00 0x20 signature caller spender
+	caller 0x00 mstore
+	ALLOWANCE_LOCATION() 0x20 mstore
+	0x40 0x00 sha3
+	0x20 mstore
+	dup7 0x00 mstore
+	0x40 0x00 sha3
+	// key value value 0x00 0x20 signature caller spender
+	sstore
+	0x00 mstore
+	// should be: 0x00 0x20 signature caller spender
+	// (with value stored at 0x00)
+	log3
+	0x01 0x00 mstore
+	0x20 0x00 return
+}
+
+#define macro ERC20__TOTAL_SUPPLY = takes(0) returns(0) {
+	pop // remove function signature from stack
+	SUPPLY_LOCATION() sload
+	0x00 mstore
+	0x20 0x00 return
+}
+
+#define macro ERC20__MAIN = takes(0) returns(0) {
+	UTILS__NOT_PAYABLE<throw_error>() // throw error if callvalue>0
+
+	ERC20__FUNCTION_SIGNATURE<
+		transfer,
+		transfer_from,
+		balance_of,
+		allowance,
+		approve,
+		total_supply
+	>()
+
+	transfer:
+		ERC20__TRANSFER<throw_error>()
+	transfer_from:
+		ERC20__TRANSFER_FROM<throw_error>()
+	balance_of:
+		ERC20__BALANCE_OF()
+	allowance:
+		ERC20__ALLOWANCE()
+	approve:
+		ERC20__APPROVE()
+	total_supply:
+		ERC20__TOTAL_SUPPLY()
+
+	throw_error:
+		0x00 0x00 revert
+
+}
