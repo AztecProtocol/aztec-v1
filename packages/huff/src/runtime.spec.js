@@ -1,8 +1,9 @@
 const chai = require('chai');
 const BN = require('bn.js');
 const path = require('path');
-const { Runtime }  = require('./runtime.js');
+const { Runtime, getNewVM }  = require('./runtime.js');
 
+const vm = getNewVM();
 const { expect } = chai;
 
 const pathToTestData = path.posix.resolve(__dirname, '../testData');
@@ -37,7 +38,7 @@ describe('runtime tests using double algorithm', () => {
         ];
     });
     it('macro DOUBLE correctly calculates point doubling', async () => {
-        const { stack } = await double('DOUBLE', inputStack);
+        const { stack } = await double(vm, 'DOUBLE', inputStack);
         expected = [
             new BN('30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47', 16),
             new BN('55f8cabad8ae94c14c1482e3e20f7ce889e3143949181f404b04da8df02029ba', 16),
@@ -51,7 +52,7 @@ describe('runtime tests using double algorithm', () => {
     });
 
     it('macro DOUBLE__MAIN correctly calculates point doubling (inverted y)', async () => {
-        const { stack } = await double('DOUBLE__MAIN_IMPL', inputStack.slice(1));
+        const { stack } = await double(vm, 'DOUBLE__MAIN_IMPL', inputStack.slice(1));
         expected = [
             new BN('55f8cabad8ae94c14c1482e3e20f7ce889e3143949181f404b04da8df02029ba', 16),
             new BN('4dc6bb6ed2a4e4b4a6eb59d2e90fb4745f2c0f99ea678a14ce43360f0a27b16e', 16),
