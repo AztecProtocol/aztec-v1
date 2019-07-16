@@ -2,8 +2,10 @@ const chai = require('chai');
 const BN = require('bn.js');
 const path = require('path');
 
-const { Runtime } = require('../../huff');
+const { Runtime, getNewVM } = require('../../huff/src/runtime.js');
 const bn128Reference = require('../js_snippets/bn128_reference');
+
+const vm = getNewVM();
 
 const { p } = bn128Reference;
 const { expect } = chai;
@@ -44,7 +46,7 @@ describe('bn128 double', () => {
     it('macro DOUBLE__PRECOMPUTE_TABLE correctly calculates point doubling', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();
         const reference = bn128Reference.double(x, y, z);
-        const { stack, memory } = await double('DOUBLE__PRECOMPUTE_TABLE_IMPL', [z, x, y], [], [], 1);
+        const { stack, memory } = await double(vm, 'DOUBLE__PRECOMPUTE_TABLE_IMPL', [z, x, y], [], [], 1);
         const slicedMemory = sliceMemory(memory);
         expect(slicedMemory.length).to.equal(3);
         expect(stack.length).to.equal(4);
@@ -63,7 +65,7 @@ describe('bn128 double', () => {
     it('macro DOUBLE__MAIN correctly calculates point doubling (inverted y)', async () => {
         const { x, y, z } = bn128Reference.randomPointJacobian();
         const yNeg = bn128Reference.p.sub(y);
-        const { stack } = await double('DOUBLE__MAIN_IMPL', [x, yNeg, z], [], [], 1);
+        const { stack } = await double(vm, 'DOUBLE__MAIN_IMPL', [x, yNeg, z], [], [], 1);
         const reference = bn128Reference.double(x, y, z);
         const [xOut, yOut, zOut] = stack;
 
@@ -75,7 +77,7 @@ describe('bn128 double', () => {
 
     it('macro DOUBLE__AFFINE_SHORT correctly calculates point doubling', async () => {
         const { x, y } = bn128Reference.randomPoint();
-        const { stack, memory } = await double('DOUBLE__AFFINE_IMPL', [x, y], [], [], 1);
+        const { stack, memory } = await double(vm, 'DOUBLE__AFFINE_IMPL', [x, y], [], [], 1);
         const reference = bn128Reference.double(x, y, new BN(1));
         const slicedMemory = sliceMemory(memory);
         expect(slicedMemory.length).to.equal(3);

@@ -155,13 +155,16 @@ Please, by all means. Huff is open-source and licensed under LGPL-3.0.
 ### **Usage**
 
 ```js
-const { Runtime } = require('huff');
+const { Runtime, getNewVM } = require('huff/src/runtime.js');
+const BN = require('bn.js');
 
 const main = new Runtime('main_loop.huff', 'path_to_macros');
+const vm = getNewVM();
+
 const calldata = [
     // calldata for macro
-    { index: 0, value: new BN(1) },
-    { index: 32, value: new BN(2) },
+    { index: 0, value: new BN(1), len: 32 },
+    { index: 32, value: new BN(2), len: 32 },
 ];
 const initialMemory = [
     // intial memory state expected by macro
@@ -170,11 +173,11 @@ const initialMemory = [
 ];
 const inputStack = [new BN(1), new BN(6)]; // initial stack state expected by macro
 const callvalue = 1; // amount of wei in transaction
-const { stack, memory, gas, bytecode, returnData } = await main('MACRO_NAME', initialStack, initialMemory, calldata, callvalue);
+const { stack, memory, gas, bytecode, returnValue } = await main('MACRO_NAME', initialStack, initialMemory, calldata, callvalue);
 
 console.log('gas cost when executing macro = ', gas);
 console.log('macro bytecode = ', bytecode);
-console.log('macro return data = ', returnData);
+console.log('macro return data = ', returnValue);
 console.log('output stack state = ', stack);
 console.log('output memory state = ', memory);
 ```

@@ -2,8 +2,10 @@ const chai = require('chai');
 const path = require('path');
 const BN = require('bn.js');
 
-const { Runtime } = require('../../huff');
+const { Runtime, getNewVM } = require('../../huff/src/runtime.js');
 const bn128Reference = require('../js_snippets/bn128_reference');
+
+const vm = getNewVM();
 
 const { expect } = chai;
 const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
@@ -52,7 +54,7 @@ describe('bn128 add', () => {
             },
         ];
         const reference = bn128Reference.mixedAdd(x2, y2, x1, y1, z1);
-        const { stack } = await add('ADD__PRECOMPUTE_TABLE_IMPL', [x1, bn128Reference.p.sub(y1), z1], initialMemory, [], 1);
+        const { stack } = await add(vm, 'ADD__PRECOMPUTE_TABLE_IMPL', [x1, bn128Reference.p.sub(y1), z1], initialMemory, [], 1);
         expect(stack.length).to.equal(11);
         const [x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
         expect(pA.eq(bn128Reference.p)).to.equal(true);
@@ -84,7 +86,7 @@ describe('bn128 add', () => {
                 value: y2,
             },
         ];
-        const { stack } = await add('ADD__MAIN_IMPL', [x1, y1Neg, z1], initialMemory, [], 1);
+        const { stack } = await add(vm, 'ADD__MAIN_IMPL', [x1, y1Neg, z1], initialMemory, [], 1);
 
         expect(stack.length).to.equal(3);
         const [x3, y3, z3] = stack;
@@ -111,7 +113,7 @@ describe('bn128 add', () => {
                 value: y2,
             },
         ];
-        const { stack } = await add('ADD__AFFINE_IMPL', [x1, p.sub(y1)], initialMemory, [], 1);
+        const { stack } = await add(vm, 'ADD__AFFINE_IMPL', [x1, p.sub(y1)], initialMemory, [], 1);
         const [x1Out, y1Out, pA, zzzOut, pB, pC, zzOut, pD, x3, y3, z3] = stack;
 
         expect(stack.length).to.equal(11);

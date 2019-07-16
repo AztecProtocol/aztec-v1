@@ -5,8 +5,10 @@ const path = require('path');
 
 const endomorphism = require('../js_snippets/endomorphism');
 const referenceWnaf = require('../js_snippets/wnaf');
-const { Runtime } = require('../../huff');
+const { Runtime, getNewVM } = require('../../huff/src/runtime.js');
 const bn128Reference = require('../js_snippets/bn128_reference');
+
+const vm = getNewVM();
 
 const { expect } = chai;
 
@@ -60,16 +62,16 @@ describe('wnaf', function describe() {
             { index: 32 * 11, value: scalars[3] },
         ];
 
-        let { stack } = await wnaf('WNAF_START_LOCATION', [], [], calldata, 1);
+        let { stack } = await wnaf(vm, 'WNAF_START_LOCATION', [], [], calldata, 1);
         const wnafStartLocation = stack[0].toNumber();
 
-        ({ stack } = await wnaf('POINT_TABLE_START_LOCATION', [], [], calldata, 1));
+        ({ stack } = await wnaf(vm, 'POINT_TABLE_START_LOCATION', [], [], calldata, 1));
         const pointTableStartLocation = stack[0].toNumber();
 
-        ({ stack } = await wnaf('WNAF_GREEDY__SIZE_OF_ENTRY', [], [], calldata, 1));
+        ({ stack } = await wnaf(vm, 'WNAF_GREEDY__SIZE_OF_ENTRY', [], [], calldata, 1));
         const wnafSizeOfEntry = stack[0].toNumber();
 
-        const { memory } = await wnaf('WNAF_GREEDY__COMPUTE_IMPL', [], [], calldata, 1);
+        const { memory } = await wnaf(vm, 'WNAF_GREEDY__COMPUTE_IMPL', [], [], calldata, 1);
         const endoScalars = scalars.reduce((acc, s) => {
             const { k1, k2 } = endomorphism.endoSplit(s);
             return [...acc, k2, k1];

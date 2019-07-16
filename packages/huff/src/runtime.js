@@ -6,13 +6,17 @@ const newParser = require('./parser');
 const utils = require('./utils');
 const { opcodes } = require('./opcodes/opcodes');
 
-function toBytes32(input, padding = 'left') {
+function getNewVM() {
+    return new VM({ hardfork: 'constantinople' });
+}
+
+function toBytesN(input, len, padding = 'left') {
     // assumes hex format
     let s = input;
-    if (s.length > 64) {
-        throw new Error(`string ${input} is more than 32 bytes long!`);
+    if (s.length > len * 2) {
+        throw new Error(`string ${input} is too long!`);
     }
-    while (s.length < 64) {
+    while (s.length < len * 2) {
         if (padding === 'left') {
             // left pad to hash a number. Right pad to hash a string
             s = `0${s}`;
@@ -24,9 +28,15 @@ function toBytes32(input, padding = 'left') {
 }
 
 function processMemory(bnArray) {
-    const buffer = [];
-    for (const { index, value } of bnArray) {
-        const hex = toBytes32(value.toString(16));
+    var calldatalength = 0;
+    for (const {index, value, len} of bnArray) {
+        if (index + len > calldatalength) {
+            calldatalength = index + len;
+        }
+    }
+    const buffer = new Array(calldatalength).fill(0);
+    for (const { index, value, len } of bnArray) {
+        const hex = toBytesN(value.toString(16), len);
         for (let i = 0; i < hex.length; i += 2) {
             buffer[i / 2 + index] = parseInt(`${hex[i]}${hex[i + 1]}`, 16);
         }
@@ -55,7 +65,14 @@ function encodeStack(stack) {
     }, '');
 }
 
-function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = [], callvalue = 0) {
+function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = [], callvalue = 0, callerAddr = 0) {
+    if (calldata) {
+        for (x of calldata) {
+            if (x.len === undefined) {
+                x.len = 32; // set len to 32 if undefined (for sake of backward compatibility)
+            }
+        }
+    }
     return new Promise((resolve, reject) => {
         vm.runCode(
             {
@@ -63,6 +80,7 @@ function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = [], ca
                 gasLimit: Buffer.from('ffffffff', 'hex'),
                 data: calldata ? processMemory(calldata) : null,
                 value: new BN(callvalue),
+                caller: callerAddr,
             },
             (err, results) => {
                 if (err) {
@@ -78,7 +96,7 @@ function runCode(vm, bytecode, calldata, sourcemapOffset = 0, sourcemap = [], ca
 
 function Runtime(filename, path, debug = false) {
     const { inputMap, macros, jumptables } = newParser.parseFile(filename, path);
-    return async function runMacro(macroName, stack = [], memory = [], calldata = null, callvalue = 0) {
+    return async function runMacro(vm, macroName, stack = [], memory = [], calldata = null, callvalue = 0, callerAddr = 0) {
         const memoryCode = encodeMemory(memory);
         const stackCode = encodeStack(stack);
         const initCode = `${memoryCode}${stackCode}`;
@@ -88,8 +106,7 @@ function Runtime(filename, path, debug = false) {
             data: { bytecode: macroCode, sourcemap },
         } = newParser.processMacro(macroName, offset, [], macros, inputMap, jumptables); // prettier-ignore
         const bytecode = `${initCode}${macroCode}`;
-        const vm = new VM({ hardfork: 'constantinople' });
-        const results = await runCode(vm, bytecode, calldata, offset, sourcemap, callvalue);
+        const results = await runCode(vm, bytecode, calldata, offset, sourcemap, callvalue, callerAddr);
         const gasSpent = results.runState.gasLimit
             .sub(results.runState.gasLeft)
             .sub(new BN(initGasEstimate))
@@ -108,4 +125,5 @@ function Runtime(filename, path, debug = false) {
     };
 }
 
-module.exports = Runtime;
+module.exports.Runtime = Runtime;
+module.exports.getNewVM = getNewVM;

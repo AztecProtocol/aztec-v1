@@ -1,7 +1,9 @@
 const chai = require('chai');
 const path = require('path');
 
-const { Runtime } = require('../../huff');
+const { Runtime, getNewVM } = require('../../huff/src/runtime.js');
+
+const vm = getNewVM();
 
 const { expect } = chai;
 const pathToTestData = path.posix.resolve(__dirname, '../huff_modules');
@@ -36,7 +38,7 @@ describe('template tests', () => {
         test = new Runtime(testHelper, pathToTestData);
     });
     it('template addition works as expected', async () => {
-        const { stack } = await test('COMPILER_ADD_TEST_ENTRY', [], [], []);
+        const { stack } = await test(vm, 'COMPILER_ADD_TEST_ENTRY', [], [], []);
         expect(stack.length).to.equal(7);
         expect(stack[0].toString(10)).to.equal('1');
         expect(stack[1].toString(10)).to.equal('3');

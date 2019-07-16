@@ -4,7 +4,9 @@ const BN = require('bn.js');
 const EC = require('elliptic');
 const path = require('path');
 
-const { Runtime } = require('../../huff');
+const { Runtime, getNewVM } = require('../../huff/src/runtime.js');
+
+const vm = getNewVM();
 const bn128Reference = require('../js_snippets/bn128_reference');
 
 const { expect } = chai;
@@ -61,7 +63,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -91,7 +93,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -121,7 +123,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -151,7 +153,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -181,7 +183,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -211,7 +213,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -241,7 +243,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -271,7 +273,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -301,7 +303,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -331,7 +333,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -361,7 +363,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -391,7 +393,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -421,7 +423,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -451,7 +453,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
@@ -481,7 +483,7 @@ describe('bn128 main loop', function describe() {
             }
             return acc.add(referenceCurve.point(x, y).mul(scalars[i]));
         }, null);
-        const { stack, returnValue } = await main('MAIN__WEIERSTRUDEL', [], [], calldata, 1);
+        const { stack, returnValue } = await main(vm, 'MAIN__WEIERSTRUDEL', [], [], calldata, 1);
         const returnWords = sliceMemory(returnValue);
         const x = returnWords[0].toRed(pRed);
         const y = returnWords[1].toRed(pRed);
