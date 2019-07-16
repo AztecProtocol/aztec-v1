@@ -712,13 +712,13 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             };
             currentContext = CONTEXT.MACRO;
             // if a macro declaration is matched
-        } else if ((currentContext & (CONTEXT.MACRO | CONTEXT.NONE)) && grammar.topLevel.MACRO.test(input)) {
+        } else if ((currentContext === CONTEXT.MACRO | currentContext === CONTEXT.NONE) && grammar.topLevel.MACRO.test(input)) {
             const macro = input.match(grammar.topLevel.MACRO);
             const type = macro[2];
-            if (type !== 'macro') {
-                const debug = inputMaps.getFileLine(index + regex.countEmptyChars(macro[0]), inputMap);
-                throw new Error(`expected ${macro} to define a macro ` + debugLocationString(debug));
-            }
+            const macroName = macro[3];
+            const debug = inputMaps.getFileLine(index + regex.countEmptyChars(macro[0]), inputMap);
+            check(regex.conformsToNameRules(macro[3]), `macro '${macroName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
+            check(type === 'macro', `expected '${macro[3]}' to define a macro ` + debugLocationString(debug));
             const body = macro[6];
             macros = {
                 ...macros,
@@ -734,8 +734,13 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             currentContext = CONTEXT.NONE;
             currentExpression = { templateParams: [] };
             // if a code table is matched
-        } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.CODE_TABLE.test(input)) {
+        } else if ((currentContext === CONTEXT.NONE) && grammar.topLevel.CODE_TABLE.test(input)) {
             const table = input.match(grammar.topLevel.CODE_TABLE);
+            const type = table[1];
+            const codeTableName = table[2];
+            const debug = inputMaps.getFileLine(index + regex.countEmptyChars(table[0]), inputMap);
+            check(regex.conformsToNameRules(codeTableName), `bytecode table '${codeTableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
+            check(type === 'table', `expected ${codeTableName} to define a packed jump table ` + debugLocationString(debug));
             const body = table[3];
             jumptables = {
                 ...jumptables,
@@ -746,13 +751,13 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             };
             index += table[0].length;
             // if a packed jumptable is matched
-        } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE_PACKED.test(input)) {
+        } else if ((currentContext === CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE_PACKED.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
             const type = jumptable[1];
-            if (type !== 'jumptable__packed') {
-                const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
-                throw new Error(`expected ${jumptable} to define a packed jump table ` + debugLocationString(debug));
-            }
+            const packedJumptableName = jumptable[2];
+            const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
+            check(regex.conformsToNameRules(packedJumptableName), `packed jumptable '${packedJumptableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
+            check(type === 'jumptable__packed', `expected '${packedJumptableName}' to define a packed jump table ` + debugLocationString(debug));
             const body = jumptable[3];
             jumptables = {
                 ...jumptables,
@@ -763,13 +768,13 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             };
             index += jumptable[0].length;
             // if a jumptable is matched
-        } else if ((currentContext & CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE.test(input)) {
+        } else if ((currentContext === CONTEXT.NONE) && grammar.topLevel.JUMP_TABLE.test(input)) {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
             const type = jumptable[1];
-            if (type !== 'jumptable') {
-                const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
-                throw new Error(`expected ${jumptable} to define a jump table. ` + debugLocationString(debug));
-            }
+            const jumptableName = jumptable[2];
+            const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
+            check(regex.conformsToNameRules(jumptableName), `jumptable '${jumptableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
+            check(type === 'jumptable', `expected ${jumptable} to define a jump table. ` + debugLocationString(debug));
             const body = jumptable[3];
             jumptables = {
                 ...jumptables,
@@ -816,7 +821,6 @@ parser.removeComments = (string) => {
  */
 parser.getFileContents = (originalFilename, partialPath) => {
     const included = [];
-    // console.log('filename: """' + originalFilename + '"""');
 
     /**
      * Get either the contents of the file parameter, or use the parameter directly if it's Huff code and not a filename

@@ -61,4 +61,12 @@ regex.removeSpacesAndLines = (input) => {
     return input.replace(/(\r\n\t|\n|\r\t|\s)/gm, '');
 };
 
+/**
+ * Check that input conforms to name rules (must contain at least one alphabetical character and cannot begin with "0x")
+ * @param input
+ */
+regex.conformsToNameRules = (input) => {
+    return !!input.match(new RegExp('^(?!0x.*$)\\w*[A-Za-z]\\w*'));
+}
+
 module.exports = regex;
