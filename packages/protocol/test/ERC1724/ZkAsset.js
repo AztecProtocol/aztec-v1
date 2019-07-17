@@ -22,8 +22,6 @@ const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-let joinSplitValidator;
-
 const computeDomainHash = (validatorAddress) => {
     const types = { EIP712Domain: constants.eip712.EIP712_DOMAIN };
     const domain = signer.generateZKAssetDomainParams(validatorAddress);
@@ -43,12 +41,8 @@ contract('ZkAsset', (accounts) => {
     const tokensTransferred = new BN(100000);
 
     beforeEach(async () => {
-        ace = await ACE.new({ from: accounts[0] });
+        ace = await ACE.at(ACE.address);
         erc20 = await ERC20Mintable.new({ from: accounts[0] });
-        joinSplitValidator = await JoinSplitValidator.new({ from: sender });
-
-        await ace.setCommonReferenceString(bn128.CRS);
-        await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
         await Promise.all(
             accounts.map((account) => {
@@ -393,7 +387,8 @@ contract('ZkAsset', (accounts) => {
                 withdrawalPublicValue,
                 publicOwner,
             );
-            const transferData = transferProof.encodeABI(joinSplitValidator.address);
+
+            const transferData = transferProof.encodeABI(JoinSplitValidator.address);
             const transferSignatures = transferProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
             const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
@@ -615,7 +610,7 @@ contract('ZkAsset', (accounts) => {
             );
 
             const depositData = depositProof.encodeABI(zkAsset.address);
-            const depositSignatures = depositProof.constructSignatures(joinSplitValidator.address, depositInputOwnerAccounts);
+            const depositSignatures = depositProof.constructSignatures(JoinSplitValidator.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures);

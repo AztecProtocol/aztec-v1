@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, beforeEach, it, web3:true */
-const { JoinSplitProof, note } = require('aztec.js');
+const { JoinSplitProof } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -11,21 +11,14 @@ const ACE = artifacts.require('./ACE');
 const ERC20BrokenTransferTest = artifacts.require('./ERC20BrokenTransferTest');
 const ERC20BrokenTransferFromTest = artifacts.require('./ERC20BrokenTransferFromTest');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
-const JoinSplit = artifacts.require('./JoinSplit');
+const JoinSplitValidator = artifacts.require('./JoinSplit');
+const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+
+const { getNotesForAccount } = require('../helpers/note');
 
 let ace;
 const aztecAccount = secp256k1.generateAccount();
 const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = proofs;
-
-const getNotes = async (inputNoteValues = [], outputNoteValues = []) => {
-    const inputNotes = await Promise.all(
-        inputNoteValues.map((inputNoteValue) => note.create(aztecAccount.publicKey, inputNoteValue)),
-    );
-    const outputNotes = await Promise.all(
-        outputNoteValues.map((outputNoteValue) => note.create(aztecAccount.publicKey, outputNoteValue)),
-    );
-    return { inputNotes, outputNotes };
-};
 
 contract('NoteRegistry', (accounts) => {
     let confidentialProof;
@@ -48,17 +41,24 @@ contract('NoteRegistry', (accounts) => {
     beforeEach(async () => {
         ace = await ACE.new({ from: sender });
         await ace.setCommonReferenceString(bn128.CRS);
-        joinSplitValidator = await JoinSplit.new();
-        await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
+        ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: sender });
+        joinSplitValidator = JoinSplitValidator;
+
+        const convertibleFactory = await ConvertibleFactory.new();
+        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 0 * 256**(0), convertibleFactory.address);
+        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 1 * 256**(0), convertibleFactory.address);
+        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 2 * 256**(0), convertibleFactory.address);
+        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 3 * 256**(0), convertibleFactory.address);
 
         erc20 = await ERC20Mintable.new();
         await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert);
+
         await erc20.mint(sender, scalingFactor.mul(tokensTransferred));
         await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
-        const { outputNotes: depositOutputNotes } = await getNotes([], depositNoteValues);
+        const depositOutputNotes = await getNotesForAccount(aztecAccount, depositNoteValues);
         depositProof = new JoinSplitProof([], depositOutputNotes, sender, depositPublicValue, publicOwner);
-        const { outputNotes: confidentialOutputNotes } = await getNotes([], withdrawNoteValues);
+        const confidentialOutputNotes = await getNotesForAccount(aztecAccount, withdrawNoteValues);
         confidentialProof = new JoinSplitProof(depositOutputNotes, confidentialOutputNotes, sender, 0, publicOwner);
         withdrawProof = new JoinSplitProof(depositOutputNotes, [], sender, withdrawPublicValue, publicOwner);
     });
@@ -74,19 +74,17 @@ contract('NoteRegistry', (accounts) => {
             const opts = { from: accounts[1] };
             const result = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
             const registryOwner = accounts[1];
-            const registryAddress = ace.address;
             const linkedTokenAddress = erc20.address;
 
-            truffleAssert.eventEmitted(result, 'CreateNoteRegistry', (event) => {
-                return (
-                    event.registryOwner === registryOwner &&
-                    event.registryAddress === registryAddress &&
-                    event.scalingFactor.toNumber() === scalingFactor.toNumber() &&
-                    event.linkedTokenAddress === linkedTokenAddress &&
-                    event.canAdjustSupply === canAdjustSupply &&
-                    event.canConvert === canConvert
-                );
-            });
+            const createEvent = result.logs.find(l => l.event === 'CreateNoteRegistry');
+            expect(createEvent).to.not.equal(undefined);
+
+            const { args } = createEvent;
+            expect(args.registryOwner).to.equal(registryOwner)
+            expect(args.scalingFactor.toNumber()).to.equal(scalingFactor.toNumber())
+            expect(args.linkedTokenAddress).to.equal(linkedTokenAddress)
+            expect(args.canAdjustSupply).to.equal(canAdjustSupply)
+            expect(args.canConvert).to.equal(canConvert)
         });
 
         it('should be able to read a registry from storage', async () => {
@@ -107,7 +105,6 @@ contract('NoteRegistry', (accounts) => {
             });
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
             await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, sender);
-
             const result = await ace.getNote(sender, depositProof.outputNotes[0].noteHash);
             const block = await web3.eth.getBlock('latest');
             expect(result.status.toNumber()).to.equal(1);
@@ -154,7 +151,7 @@ contract('NoteRegistry', (accounts) => {
 
             const previousTokenBalance = await erc20.balanceOf(publicOwner);
 
-            const withdrawProofData = withdrawProof.encodeABI(joinSplitValidator.address);
+            const withdrawProofData = withdrawProof.encodeABI(JoinSplitValidator.address);
             await ace.publicApprove(publicOwner, withdrawProof.hash, withdrawPublicValue, { from: publicOwner });
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawProofData);
             await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, withdrawProof.eth.output, sender);
@@ -187,7 +184,7 @@ contract('NoteRegistry', (accounts) => {
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, depositProofData);
             await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, sender);
 
-            const confidentialProofData = confidentialProof.encodeABI(joinSplitValidator.address);
+            const confidentialProofData = confidentialProof.encodeABI(JoinSplitValidator.address);
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, confidentialProofData);
             const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, confidentialProof.eth.output, sender);
 
@@ -203,7 +200,7 @@ contract('NoteRegistry', (accounts) => {
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, depositProofData);
             await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, sender);
 
-            const confidentialProofData = confidentialProof.encodeABI(joinSplitValidator.address);
+            const confidentialProofData = confidentialProof.encodeABI(JoinSplitValidator.address);
             const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, confidentialProofData);
             const { receipt: regReceipt } = await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, confidentialProof.eth.output, sender);
 
@@ -214,22 +211,20 @@ contract('NoteRegistry', (accounts) => {
 
     describe('Failure States', async () => {
         it('should fail to read a non-existent note', async () => {
-            await truffleAssert.reverts(ace.getNote(accounts[1], depositProof.outputNotes[0].noteHash), 'expected note to exist');
+            await truffleAssert.reverts(ace.getNote(accounts[1], depositProof.outputNotes[0].noteHash));
         });
 
         it('should fail to read a non-existent registry', async () => {
-            await truffleAssert.reverts(ace.getRegistry(accounts[1]), 'expected registry to be created');
+            await truffleAssert.reverts(ace.getRegistry(accounts[2]));
         });
 
         it('should fail to create a note registry if sender already owns one', async () => {
             await truffleAssert.reverts(
-                ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert),
-                'address already has a linked note registry',
-            );
+                ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert));
         });
 
         it('should fail to create a note registry if linked token address is 0x0', async () => {
-            const opts = { from: accounts[1] };
+            const opts = { from: accounts[2] };
             await truffleAssert.reverts(
                 ace.createNoteRegistry(constants.addresses.ZERO_ADDRESS, scalingFactor, canAdjustSupply, canConvert, opts),
                 'expected the linked token address to exist',
@@ -238,16 +233,16 @@ contract('NoteRegistry', (accounts) => {
 
         it('should fail to public approve tokens if no registry exists for the given address', async () => {
             await truffleAssert.reverts(
-                ace.publicApprove(accounts[1], depositProof.hash, Math.abs(depositPublicValue)),
+                ace.publicApprove(accounts[4], depositProof.hash, Math.abs(depositPublicValue)),
                 'note registry does not exist',
             );
         });
 
         it('should fail to update a note registry if no registry exists for the given address', async () => {
-            const opts = { from: accounts[1] };
+            const opts = { from: accounts[4] };
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, sender, opts),
-                'note registry does not exist for the given address',
+                'note registry does not exist',
             );
         });
 
@@ -290,8 +285,8 @@ contract('NoteRegistry', (accounts) => {
 
         it('should fail to update a note registry is public value is non-zero and conversion is deactivated', async () => {
             const canConvertFlag = false;
-            const data = depositProof.encodeABI(joinSplitValidator.address);
-            const opts = { from: accounts[1] };
+            const data = depositProof.encodeABI(JoinSplitValidator.address);
+            const opts = { from: accounts[3] };
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvertFlag, opts);
             await ace.publicApprove(publicOwner, depositProof.hash, Math.abs(depositPublicValue), {
                 from: publicOwner,
@@ -327,7 +322,7 @@ contract('NoteRegistry', (accounts) => {
             await erc20BrokenTransferFromTest.approve(ace.address, scalingFactor.mul(tokensTransferred));
             await ace.createNoteRegistry(erc20BrokenTransferFromTest.address, scalingFactor, canAdjustSupply, canConvert, opts);
 
-            const data = depositProof.encodeABI(joinSplitValidator.address);
+            const data = depositProof.encodeABI(JoinSplitValidator.address);
             await ace.publicApprove(accounts[1], depositProof.hash, Math.abs(depositPublicValue));
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, data, opts);
             await truffleAssert.reverts(
@@ -360,12 +355,12 @@ contract('NoteRegistry', (accounts) => {
                 accounts[1],
             );
 
-            const depositProofData = testDepositProof.encodeABI(joinSplitValidator.address);
+            const depositProofData = testDepositProof.encodeABI(JoinSplitValidator.address);
             await ace.publicApprove(accounts[1], testDepositProof.hash, Math.abs(depositPublicValue), opts);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[1], depositProofData, opts);
             await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, testDepositProof.eth.output, accounts[1], opts);
 
-            const withdrawProofData = testWithdrawProof.encodeABI(joinSplitValidator.address);
+            const withdrawProofData = testWithdrawProof.encodeABI(JoinSplitValidator.address);
             await ace.publicApprove(accounts[1], testWithdrawProof.hash, withdrawPublicValue, opts);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[1], withdrawProofData, opts);
             await truffleAssert.reverts(
@@ -375,7 +370,7 @@ contract('NoteRegistry', (accounts) => {
         });
 
         it('should fail to update a note registry if input notes do not exist in the registry', async () => {
-            const confidentialProofData = confidentialProof.encodeABI(joinSplitValidator.address);
+            const confidentialProofData = confidentialProof.encodeABI(JoinSplitValidator.address);
             await ace.publicApprove(sender, confidentialProof.hash, Math.abs(depositPublicValue));
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, confidentialProofData);
             await truffleAssert.reverts(
@@ -385,13 +380,13 @@ contract('NoteRegistry', (accounts) => {
         });
 
         it('should fail to update a note registry if output notes already exist in the registry', async () => {
-            const depositProofData = depositProof.encodeABI(joinSplitValidator.address);
+            const depositProofData = depositProof.encodeABI(JoinSplitValidator.address);
             await ace.publicApprove(sender, depositProof.hash, Math.abs(depositPublicValue));
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, depositProofData);
             await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, sender);
 
             const testDepositProof = new JoinSplitProof([], depositProof.outputNotes, sender, depositPublicValue, sender);
-            const testDepositProofData = testDepositProof.encodeABI(joinSplitValidator.address);
+            const testDepositProofData = testDepositProof.encodeABI(JoinSplitValidator.address);
             await ace.publicApprove(sender, testDepositProof.hash, Math.abs(depositPublicValue));
             await ace.validateProof(JOIN_SPLIT_PROOF, sender, testDepositProofData);
             await truffleAssert.reverts(
