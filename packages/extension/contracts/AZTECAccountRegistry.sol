@@ -13,81 +13,95 @@ contract AZTECAccountRegistry is LibEIP712 {
     mapping(address => bytes) public accountMapping;
 
     // EIP712 Domain Name value
-    string constant internal EIP712_DOMAIN_NAME = "AZTEC_ACCOUNT_REGISTRY"; 
+    string constant internal EIP712_DOMAIN_NAME = "AZTEC_ACCOUNT_REGISTRY";
+
     // EIP712 Domain Version value
     string constant internal EIP712_DOMAIN_VERSION = "1";
 
-    bytes32 constant internal REGISTER_EXTENSION_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
-        "RegisterExtensionSignature(",
-            "address account,",
-            "bytes linkedPublicKey",
-        ")"
-    ));
+    struct AZTECAccount {
+        address account;
+        bytes linkedPublicKey;
+    }
+
+    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
+    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,string linkedPublicKey)";
+
+    bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
+    bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
+
 
     constructor ()
-        public
+    public
     {
-        EIP712_DOMAIN_HASH = keccak256(abi.encode(
-            EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
-            keccak256(bytes(EIP712_DOMAIN_NAME)),
-            keccak256(bytes(EIP712_DOMAIN_VERSION)),
-            address(this)
+    }
+     
+    function hashAZTECAccount(AZTECAccount memory _AZTECAccount) internal view returns (bytes32){
+        
+        bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
+            EIP712_DOMAIN_TYPEHASH,
+            keccak256("AZTECAccountRegistry"),
+            keccak256("2"),
+            1563200229577,
+            address(this),
+            0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558
         ));
+            return keccak256(abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR,
+                keccak256(abi.encode(
+                    SIGNATURE_TYPEHASH,
+                    _AZTECAccount.account,
+                    keccak256(bytes(_AZTECAccount.linkedPublicKey)
+            )))));
     }
 
     event RegisterExtension(
         address account,
         bytes linkedPublicKey
     );
+
+    event LogAddress(
+        address account
+    );
+    event LogString(
+        string message 
+    );
+
+    event LogBytes(
+        bytes32 sig 
+    );
+
     /**
-    * @dev function to validate the user is either the sender or has submitted an EIP712 signature from the account they
-    * are registering in the AZTEC extension.
+        * @dev function to validate the user is either the sender or has submitted an EIP712 signature from the account they
+        * are registering in the AZTEC extension.
     **/
 
-    modifier _onlyUser (
-        address _account,
-        address _sender,
-        bytes memory _linkedPublicKey,
-        bytes memory _signature
-    ) {
-        address signer = _sender;
-        if(_signature.length != 0) {
-            // validate EIP712 signature
-
-            bytes32 _hashStruct = keccak256(abi.encode(
-                    REGISTER_EXTENSION_SIGNATURE_TYPEHASH,
-                    _account,
-                    _linkedPublicKey
-            ));
-            bytes32 msgHash = hashEIP712Message(_hashStruct);
-            signer = recoverSignature(
-                msgHash,
-                _signature
-            );
-        }
-        require(_account == signer, 'sender must be the account');
-        _;
-    }
-
 
     /**
-        * @dev Registers a specific public key pair to an ethereum address if a valid signature is provided or the
-        * sender is the ethereum address in question        * 
-        * @param _account - address the address to which a public key is being         registered 
-        * @param _linkedPublicKey - the public key the sender wishes to link to the _account
-    */
+     * @dev Registers a specific public key pair to an ethereum address if a valid signature is provided or the
+     * sender is the ethereum address in question        * 
+     * @param _account - address the address to which a public key is being         registered 
+     * @param _linkedPublicKey - the public key the sender wishes to link to the _account
+     */
 
     function registerAZTECExtension(
         address _account,
         bytes memory _linkedPublicKey,
-        bytes memory _signature
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+        // bytes memory _signature
     )
-    _onlyUser(
-        _account,
-        msg.sender,
-        _linkedPublicKey,
-        _signature
-    ) public {
+
+    public {
+        emit LogAddress(address(this));
+            // valid EIP712 signature
+        address signer = ecrecover(
+            hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey)),
+            v,r,s
+        );
+        emit LogAddress(signer);
+        require(_account == signer, 'signer must be the account');
         accountMapping[_account] = _linkedPublicKey;
         // emit event for the graph
         emit RegisterExtension(_account, _linkedPublicKey);
