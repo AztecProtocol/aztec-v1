@@ -15,7 +15,7 @@ export default function constructor(metadataStr) {
     }) => {
         const len = typeof length === 'number'
             ? length
-            : parseInt(metadata[length], 10);
+            : parseInt(metadata[length], 16);
         metadata[name] = metadataStr.substr(start, len);
         start += len;
     });
