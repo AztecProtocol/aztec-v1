@@ -34,6 +34,7 @@
     "deploy:contracts": "babel-node scripts/run deployContracts",
     "graph": "babel-node scripts/run graph",
     "rebuild": "yarn deploy:contracts && yarn copy && yarn graph",
+    "start": "babel-node scripts/run start",
     "test": "NODE_ENV=test babel-node scripts/run test",
     "test:run": "jest ./tests"
   }
