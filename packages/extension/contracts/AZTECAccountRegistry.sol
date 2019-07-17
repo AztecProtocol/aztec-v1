@@ -10,7 +10,7 @@ import "../../protocol/contracts/libs/LibEIP712.sol";
 
 contract AZTECAccountRegistry is LibEIP712 {
 
-    mapping(address => bytes) public accountMapping;
+    mapping(address => string) public accountMapping;
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "AZTEC_ACCOUNT_REGISTRY";
@@ -20,7 +20,7 @@ contract AZTECAccountRegistry is LibEIP712 {
 
     struct AZTECAccount {
         address account;
-        bytes linkedPublicKey;
+        string linkedPublicKey;
     }
 
     string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
@@ -57,7 +57,7 @@ contract AZTECAccountRegistry is LibEIP712 {
 
     event RegisterExtension(
         address account,
-        bytes linkedPublicKey
+        string linkedPublicKey
     );
 
     event LogAddress(
@@ -86,7 +86,7 @@ contract AZTECAccountRegistry is LibEIP712 {
 
     function registerAZTECExtension(
         address _account,
-        bytes memory _linkedPublicKey,
+        string memory _linkedPublicKey,
         uint8 v,
         bytes32 r,
         bytes32 s

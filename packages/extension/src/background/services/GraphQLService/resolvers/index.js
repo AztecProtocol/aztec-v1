@@ -2,7 +2,7 @@ import assetModel from '~database/models/asset';
 import accountModel from '~database/models/account';
 import noteModel from '~database/models/note';
 import requestGrantAccess from './requestGrantAccess';
-import { sessionDecorator, assetAccessDecorator } from '../../../utils/decorators';
+import { sessionDecorator, assetAccessDecorator, accountDecorator } from '../../../utils/decorators';
 
 import AuthService from '../../AuthService';
 
@@ -31,6 +31,6 @@ export default {
         enableAssetForDomain: pipe([sessionDecorator, async (_, args) => AuthService.enableAssetForDomain(args)]),
         login: AuthService.login,
         // logout: sessionDecorator(AuthService.logout),
-        registerExtension: AuthService.registerExtension,
+        registerExtension: [accountDecorator, async (_, args) => AuthService.registerExtension(args)],
     },
 };

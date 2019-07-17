@@ -1,12 +1,11 @@
 import domainModel from '~database/models/domain';
 import { get, set, remove } from '~utils/storage';
-import { KeyStore, } from '~utils/keyvault/index.js';
+import { KeyStore } from '~utils/keyvault/index.js';
 import generateRandomId from '~utils/generateRandomId';
 
 
 export default {
     validateDomainAccess: async ({ domain, asset }) => {
-
         if (!domain) {
             throw new Error('Domain is not present for the query ');
         }
@@ -14,14 +13,13 @@ export default {
         if (!asset) {
             throw new Error('Asset id is not present for the query ');
         }
- 
-        try {
 
+        try {
             const { assets = {} } = await domainModel.get({
                 domain,
             });
             // check if the user has granted the domain access to the given asset
-            const { [asset]:isApproved } = assets;
+            const { [asset]: isApproved } = assets;
             if (!isApproved) {
                 throw new Error(`The user has not granted the domain "${domain}" access`);
                 return;
@@ -29,27 +27,23 @@ export default {
 
             return {
                 domain,
-                assets
+                assets,
             };
-        }
-        catch(e) {
-
+        } catch (e) {
             throw new Error(`The user has not granted the domain "${domain}" access`);
             return;
         }
-         
     },
     validateSession: async () => {
-
         // we check the particular host has access
         const now = Date.now();
-        const {session, keyStore } = await get(['session', 'keyStore']);
-        if(!keyStore) {
+        const { session, keyStore } = await get(['session', 'keyStore']);
+        if (!keyStore) {
             throw new Error('AZTEC extension not setup please create account');
             return;
         }
 
-        if(!session) {
+        if (!session) {
             throw new Error('No session please login');
             return;
         }
@@ -79,13 +73,21 @@ export default {
         }
 
         await set({
-            session:{
+            session: {
                 ...session,
                 lastActive: now,
-            }
+            },
         });
 
         return session;
+    },
+
+    requiresRegistration: async () => {
+        const { keyStore } = await get(['keyStore']);
+        if (!keyStore) {
+            return true;
+        }
+        throw new Error('User already has an account');
     },
 
     login: async ({ password }) => {
@@ -113,11 +115,11 @@ export default {
     },
     enableAssetForDomain: async ({
         domain,
-        asset
+        asset,
     }) => {
         // the session has already been validated at this point so we can freely write to the db
         // graphnode server is not needd and should be configured via config.
-        let {
+        const {
             data,
             modified,
             storage,
@@ -125,42 +127,39 @@ export default {
             {
                 domain,
                 assets: {
-                    [asset]: true
-                }
+                    [asset]: true,
+                },
             },
             {
                 ignoreDuplicate: true,
-            }
+            },
         );
 
-        if(!modified.length) {
+        if (!modified.length) {
             const {
                 domain: {
                     [domain]: {
-                        assets: prevAssets
-                    }
+                        assets: prevAssets,
+                    },
                 },
             } = data;
 
-            const {data: updatedData} = await domainModel.update({
+            const { data: updatedData } = await domainModel.update({
                 domain,
                 assets: {
                     ...prevAssets,
-                    [asset]:true
-                }
+                    [asset]: true,
+                },
             });
 
             return updatedData.domain[domain];
-
-    }
+        }
         return data.domain[domain];
-
     },
-    registerExtension: async(_, {password, salt},) => {
-        
+    registerExtension: async ({ password, salt }) => {
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
-            salt: salt,
+            salt,
         });
         const mnemonic = KeyStore.generateRandomSeed(generateRandomId());
 
@@ -168,7 +167,7 @@ export default {
             pwDerivedKey,
             salt,
             mnemonic,
-            hdPathString: "m/44'/60'/0'/0"
+            hdPathString: "m/44'/60'/0'/0",
         });
 
         await set({
@@ -177,11 +176,10 @@ export default {
                 pwDerivedKey: JSON.stringify(pwDerivedKey),
                 lastActive: Date.now(),
                 createdAt: Date.now(),
-            }
+            },
         });
         return {
             publicKey: keyStore.privacyKeys.publicKey,
         };
-
-    }
+    },
 };

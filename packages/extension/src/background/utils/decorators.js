@@ -2,6 +2,8 @@ import AuthService from '../services/AuthService';
 
 export const sessionDecorator = async () => AuthService.validateSession();
 
+export const accountDecorator = async () => AuthService.requiresRegistration();
+
 export const assetAccessDecorator = async (_, args, ctx, info) => {
     const validation = {};
     switch (info.fieldName.toUpperCase()) {
