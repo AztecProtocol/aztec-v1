@@ -1,12 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-
-import "../interfaces/IAZTEC.sol";
-import "../libs/NoteUtils.sol";
-import "../libs/ProofUtils.sol";
+import "../../interfaces/Data.sol";
 
 /**
  * @title NoteRegistryData contract which contains the storage variables that define the set of valid
@@ -14,54 +8,7 @@ import "../libs/ProofUtils.sol";
  * @author AZTEC
  * @dev TODO
  **/
-contract NoteRegistryData is Ownable, IAZTEC {
-    using NoteUtils for bytes;
-    using SafeMath for uint256;
-    using ProofUtils for uint24;
-
-    /**
-    * Note struct. This is the data that we store when we log AZTEC notes inside a NoteRegistry
-    *
-    * Data structured so that the entire struct fits in 1 storage word.
-    *
-    * @notice Yul is used to pack and unpack Note structs in storage for efficiency reasons,
-    *   see `NoteRegistry.updateInputNotes` and `NoteRegistry.updateOutputNotes` for more details
-    **/
-    struct Note {
-        // `status` uses the IAZTEC.NoteStatus enum to track the lifecycle of a note.
-        uint8 status;
-
-        // `createdOn` logs the timestamp of the block that created this note. There are a few
-        // use cases that require measuring the age of a note, (e.g. interest rate computations).
-        // These lifetime are relevant on timescales of days/months, the 900-ish seconds that a miner
-        // can manipulate a timestamp has little effect, but should be considered when utilizing this parameter.
-        // We store `createdOn` in 5 bytes of data - just in case this contract is still around in 2038 :)
-        // This kicks the 'year 2038' problem down the road by about 400 years
-        uint40 createdOn;
-
-        // `destroyedOn` logs the timestamp of the block that destroys this note in a transaction.
-        // Default value is 0x0000000000 for notes that have not been spent.
-        uint40 destroyedOn;
-
-        // The owner of the note
-        address owner;
-    }
-
-    struct Registry {
-        bool active;
-        address linkedToken;
-        uint256 scalingFactor;
-        uint256 totalSupply;
-        bytes32 confidentialTotalMinted;
-        bytes32 confidentialTotalBurned;
-        uint256 supplementTotal;
-        bool canAdjustSupply;
-        bool canConvert;
-        mapping(bytes32 => Note) notes;
-        mapping(address => mapping(bytes32 => uint256)) publicApprovals;
-    }
-
-    Registry public registry;
+contract Data201907 is NoteRegistryData {
 
     constructor(
         address _linkedTokenAddress,
@@ -82,13 +29,12 @@ contract NoteRegistryData is Ownable, IAZTEC {
         });
     }
 
-    function createNote(bytes memory note) public onlyOwner {
+    function createNote(bytes32 _noteHash, address _noteOwner) public onlyOwner {
         // set up some temporary variables we'll need
         uint256 noteStatusNew = uint256(NoteStatus.UNSPENT);
         uint256 noteStatusOld;
 
-        (address noteOwner, bytes32 noteHash,) = note.extractNote();
-        Note storage notePtr = registry.notes[noteHash];
+        Note storage notePtr = registry.notes[_noteHash];
         // We manually pack our note struct in Yul, because Solidity can be a bit liberal with gas when doing this
         assembly {
             // Load the status flag for this note - we check this equals DOES_NOT_EXIST outside asm block
@@ -106,20 +52,24 @@ contract NoteRegistryData is Ownable, IAZTEC {
                         shl(8, and(timestamp, 0xffffffffff)) // mask timestamp to 40 bits
                     ),
                     // `owner` occupies byte positions 11-31 => shift by 88 bits
-                    shl(88, noteOwner) // noteOwner already of address type, no need to mask
+                    shl(88, _noteOwner) // _noteOwner already of address type, no need to mask
                 )
             )
         }
         require(noteStatusOld == uint256(NoteStatus.DOES_NOT_EXIST), "output note exists");
     }
 
-    function getNote(bytes32 noteHash) public view returns (
+    function getNote(bytes32 _noteHash) public view returns (
         uint8 status,
         uint40 createdOn,
         uint40 destroyedOn,
         address noteOwner
     ) {
-        Note storage notePtr = registry.notes[noteHash];
+        require(
+            registry.notes[_noteHash].status != uint8(NoteStatus.DOES_NOT_EXIST),
+            "expected note to exist"
+        );
+        Note storage notePtr = registry.notes[_noteHash];
         assembly {
             let note := sload(notePtr_slot)
             status := and(note, 0xff)
@@ -129,15 +79,26 @@ contract NoteRegistryData is Ownable, IAZTEC {
         }
     }
 
-    function deleteNote(bytes memory note) public onlyOwner {
+    function deleteNote(bytes32 _noteHash, address _noteOwner) public onlyOwner {
+        // set up some temporary variables we'll need
+        // N.B. the status flags are NoteStatus enums, but written as uint8's.
+        // We represent them as uint256 vars because it is the enum values that enforce type safety.
+        // i.e. if we include enums that range beyond 256,
+        // casting to uint8 won't help because we'll still be writing/reading the wrong note status
+        // To summarise the summary - validate enum bounds in tests, use uint256 to save some gas vs uint8
         // set up some temporary variables we'll need
         uint256 noteStatusNew = uint256(NoteStatus.SPENT);
         uint256 noteStatusOld;
         address storedNoteOwner;
 
-        (address noteOwner, bytes32 noteHash,) = note.extractNote();
-        Note storage notePtr = registry.notes[noteHash];
+        Note storage notePtr = registry.notes[_noteHash];
         // We manually pack our note struct in Yul, because Solidity can be a bit liberal with gas when doing this
+        // Update the status of each `note`:
+        // 1. set the note status to SPENT
+        // 2. update the `destroyedOn` timestamp to the current timestamp
+        // We also must check the following:
+        // 1. the note has an existing status of UNSPENT
+        // 2. the note owner matches the provided input
         assembly {
                 // load up our note from storage
                 let storedNote := sload(notePtr_slot)
@@ -174,6 +135,44 @@ contract NoteRegistryData is Ownable, IAZTEC {
             // Check that the note status is UNSPENT
             require(noteStatusOld == uint256(NoteStatus.UNSPENT), "input note status is not UNSPENT");
             // Check that the note owner is the expected owner
-            require(storedNoteOwner == noteOwner, "input note owner does not match");
+            require(storedNoteOwner == _noteOwner, "input note owner does not match");
+    }
+
+    function createPublicApproval(address _publicOwner, bytes32 _proofHash, uint256 _value)
+        public
+        onlyOwner
+    {
+        require(registry.active == true, "note registry does not exist");
+        registry.publicApprovals[_publicOwner][_proofHash] = _value;
+    }
+
+    function getPublicApproval(address _publicOwner, bytes32 _proofHash) public view returns (
+        uint256 value
+    ) {
+        value = registry.publicApprovals[_publicOwner][_proofHash];
+    }
+
+    function incrementTotalSupply(uint256 _adjustment) public onlyOwner returns (
+        uint256 newTotalSupply
+    ) {
+        newTotalSupply = registry.totalSupply.add(_adjustment);
+        registry.totalSupply = newTotalSupply;
+    }
+
+    function decrementTotalSupply(uint256 _adjustment) public onlyOwner returns (
+        uint256 newTotalSupply
+    ) {
+        newTotalSupply = registry.totalSupply.sub(_adjustment);
+        registry.totalSupply = newTotalSupply;
+    }
+
+    function setConfidentialTotalMinted(bytes32 newTotalNoteHash) public onlyOwner returns (bytes32) {
+        registry.confidentialTotalMinted = newTotalNoteHash;
+        return newTotalNoteHash;
+    }
+
+    function setConfidentialTotalBurned(bytes32 newTotalNoteHash) public onlyOwner returns (bytes32) {
+        registry.confidentialTotalBurned = newTotalNoteHash;
+        return newTotalNoteHash;
     }
 }
