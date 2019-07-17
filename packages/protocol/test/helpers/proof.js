@@ -3,6 +3,7 @@
  */
 const { ProofType } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
+const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { keccak256, padLeft } = require('web3-utils');
 
@@ -72,6 +73,20 @@ const mockZeroJoinSplitFluidProof = () => {
     return zeroProof;
 };
 
+const mockZeroPrivateRangeProof = () => {
+    const zeroProof = mockZeroProof();
+    const publicValue = constants.ZERO_BN;
+    const publicOwner = constants.addresses.ZERO_ADDRESS;
+    const challengeArray = [zeroProof.sender, publicValue, publicOwner, ...zeroNote.slice(2), ...zeroBlindingFactors];
+    const challengeHash = keccak256(`0x${challengeArray.join('')}`);
+
+    zeroProof.challenge = new BN(challengeHash.slice(2), 16).umod(bn128.curve.n);
+    zeroProof.challengeHex = `0x${zeroProof.challenge.toString(16)}`;
+    zeroProof.data = Array(3).fill(zeroNote.map((element) => `0x${element}`));
+    zeroProof.type = ProofType.PRIVATE_RANGE.name;
+    return zeroProof;
+};
+
 const mockZeroSwapProof = () => {
     const zeroProof = mockZeroProof();
     const challengeArray = [zeroProof.sender, ...zeroNote.slice(2), ...zeroBlindingFactors];
@@ -85,9 +100,10 @@ const mockZeroSwapProof = () => {
 };
 
 module.exports = {
-    mockZeroProof,
     mockZeroDividendProof,
     mockZeroJoinSplitProof,
     mockZeroJoinSplitFluidProof,
+    mockZeroPrivateRangeProof,
+    mockZeroProof,
     mockZeroSwapProof,
 };
