@@ -1,6 +1,7 @@
 import config from '~config/metadata';
 
 export default function toString(metadataObj) {
+    const lenVars = [];
     const metadata = {};
     config.forEach(({
         name,
@@ -12,9 +13,8 @@ export default function toString(metadataObj) {
                 ? metadataObj[name].join('')
                 : `${metadataObj[name]}`;
         }
-        if (typeof length === 'string'
-            && !metadataObj[length]
-        ) {
+        if (typeof length === 'string') {
+            lenVars.push(length);
             metadata[length] = data.length;
         }
         metadata[name] = data;
@@ -25,7 +25,9 @@ export default function toString(metadataObj) {
             name,
             length,
         }) => {
-            const data = metadata[name];
+            const data = lenVars.indexOf(name) >= 0
+                ? metadata[name].toString(16)
+                : metadata[name];
             const len = typeof length === 'number'
                 ? length
                 : metadata[length];

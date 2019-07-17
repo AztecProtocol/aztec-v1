@@ -9,6 +9,7 @@ import metadata, {
 } from '../metadata';
 
 const pad = (val, len, padWith = '0') => `${val}`.padStart(len, padWith);
+const base16 = num => num.toString(16);
 
 const aztecData = ''.padStart(METADATA_AZTEC_DATA_LENGTH, 'a');
 const appData = ''.padStart(10, 'p');
@@ -26,9 +27,9 @@ describe('metadata toString', () => {
         const expectedStr = [
             '0x',
             pad(aztecData, METADATA_AZTEC_DATA_LENGTH),
-            pad(addressesStr.length, METADATA_VAR_LEN_LENGTH),
-            pad(viewingKeysStr.length, METADATA_VAR_LEN_LENGTH),
-            pad(appData.length, METADATA_VAR_LEN_LENGTH),
+            pad(base16(addressesStr.length), METADATA_VAR_LEN_LENGTH),
+            pad(base16(viewingKeysStr.length), METADATA_VAR_LEN_LENGTH),
+            pad(base16(appData.length), METADATA_VAR_LEN_LENGTH),
             addressesStr,
             viewingKeysStr,
             appData,
@@ -48,7 +49,7 @@ describe('metadata toString', () => {
             pad(aztecData, METADATA_AZTEC_DATA_LENGTH),
             pad('0', METADATA_VAR_LEN_LENGTH),
             pad('0', METADATA_VAR_LEN_LENGTH),
-            pad(appData.length, METADATA_VAR_LEN_LENGTH),
+            pad(base16(appData.length), METADATA_VAR_LEN_LENGTH),
             appData,
         ].join('');
 
