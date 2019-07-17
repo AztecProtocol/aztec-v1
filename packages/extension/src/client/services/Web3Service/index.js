@@ -100,6 +100,18 @@ class Web3Service {
         return contract;
     }
 
+    async sendAsync(args) {
+        return new Promise((resolve, reject) => {
+            this.web3.givenProvider.sendAsync(args, (err, result) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(result);
+            });
+        });
+    }
+
     async deploy(config, constructorArguments = []) {
         const contractObj = new this.web3.eth.Contract(config.abi);
         const { bytecode } = config;
@@ -142,6 +154,7 @@ class Web3Service {
         return {
             method: (methodName) => {
                 const contract = this.deployed(contractName, contractAddress);
+                console.log(contract);
                 if (!contract) {
                     throw new Error(`Cannot call method '${methodName}' of undefined.`);
                 }
@@ -158,8 +171,11 @@ class Web3Service {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }
                 return {
-                    where: (options = {}) => contract.getPastEvents('CreateNoteRegistry', {
+                    where: (options = {}) => contract.getPastEvents(eventName, {
                         filter: options,
+                    }),
+                    all: () => contract.getPastEvents('allEvents', {
+                        fromBlock: 0,
                     }),
                 };
             },

@@ -11,6 +11,7 @@ const devUtils = require('@aztec/dev-utils');
 const aztec = require('aztec.js');
 const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
+const sigUtil = require('eth-sig-util');
 const { keccak256 } = require('web3-utils');
 
 // ### Artifacts
@@ -24,7 +25,7 @@ const signatureSchema = {
     types: {
         RegisterExtensionSignature: [
             { name: 'account', type: 'address' },
-            { name: 'linkedPublicKey', type: 'bytes32' },
+            { name: 'linkedPublicKey', type: 'bytes' },
         ],
         EIP712Domain: EIP712_DOMAIN,
     },
@@ -41,7 +42,7 @@ contract('AZTECAccountRegistry', (accounts) => {
             domain = {
                 name: 'AZTEC_ACCOUNT_REGISTRY',
                 version: '1',
-                verifyingContract: registryContract.address,
+                verifyingContract: '0xbe091542F3502952Ce0a4c26Fb94d70a8C99670F'
             };
         });
 
@@ -60,13 +61,26 @@ contract('AZTECAccountRegistry', (accounts) => {
 
         });
 
-        it('be able to register the extension with a valid signature', async () => {
+        it.only('be able to register the extension with a valid signature', async () => {
 
-            const { privateKey, publicKey, address } = secp256k1.generateAccount();
+            // const { privateKey, publicKey, address } = secp256k1.generateAccount();
+            const privateKey = '0xd243839fc3ca0efa30ab5a7c7cfc1f5ef8e8f1c6a5e7046def0b741f8098491c';
+            const address = '0x5c1976FF7696913e62e42b4a46B787aF0F68E973';
             const message = {
                 account: address,
                 linkedPublicKey: keccak256('0x01'),
             };
+
+            const  pkBuf= Buffer.from(privateKey.slice(2), 'hex');
+            const sig2 = sigUtil.signTypedData(pkBuf, {
+                data: {
+                    domain,
+                    ...signatureSchema,
+                    message,
+
+                }
+            });
+            console.log(sig2);
             const encodedTypedData = typedData.encodeTypedData({
                 domain,
                 ...signatureSchema,
@@ -78,11 +92,18 @@ contract('AZTECAccountRegistry', (accounts) => {
 
             const sig=  signature[0] + signature[1].slice(2) + signature[2].slice(2);
 
+            const r = "" + sig2.substring(0, 64);
+            const s = "0x" + sig2.substring(64, 128);
+            const v = parseInt(sig2.substring(128, 130), 16);
+
+            console.log(r,s,v);
             const { receipt: registerExtensionReceipt } = await registryContract.registerAZTECExtension(
-                address,
-                keccak256('0x01'),
-                sig
+                '0x5c1976FF7696913e62e42b4a46B787aF0F68E973',
+                '0x5fe7f977e71dba2ea1a68e21057beebb9be2ac30c6410aa38d4f3fbe41dcffd2',
+                v,r,s,
+                {from: accounts[2]}
             );
+            expect(false).to.equal(true);
             expect(registerExtensionReceipt.status).to.equal(true);
         });
 
