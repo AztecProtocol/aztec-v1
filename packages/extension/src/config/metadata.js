@@ -1,21 +1,24 @@
-const aztecDataLength = 33;
+import {
+    METADATA_AZTEC_DATA_LENGTH,
+    METADATA_VAR_LEN_LENGTH,
+} from './constants';
 
 export default [
     {
         name: 'aztecData',
-        length: aztecDataLength,
+        length: METADATA_AZTEC_DATA_LENGTH,
     },
     {
         name: 'addressesLength',
-        length: 32,
+        length: METADATA_VAR_LEN_LENGTH,
     },
     {
         name: 'viewingKeysLength',
-        length: 32,
+        length: METADATA_VAR_LEN_LENGTH,
     },
     {
         name: 'appDataLength',
-        length: 32,
+        length: METADATA_VAR_LEN_LENGTH,
     },
     {
         name: 'addresses',
