@@ -1,19 +1,18 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, beforeEach, it, web3:true */
 // ### External Dependencies
-const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { encoder, note, proof } = require('aztec.js');
+const { note } = require('aztec.js');
 const sepc256k1 = require('@aztec/secp256k1');
 const { constants: { addresses } } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const NoteRegistryData = artifacts.require('./NoteRegistryData');
+const NoteRegistryData = artifacts.require('./noteRegistry/epochs/201907/Data201907');
 
-contract.only('NoteRegistryData', (accounts) => {
+contract('NoteRegistryData', (accounts) => {
     let NoteRegistryDataContract;
     const [owner, notOwner] = accounts;
     const noteOwner = sepc256k1.generateAccount();
@@ -40,8 +39,7 @@ contract.only('NoteRegistryData', (accounts) => {
 
         it('should create a Note in the registry', async () => {
             const newNote = await note.create(noteOwner.publicKey, 10, noteOwner.address);
-            const encodedNote = encoder.outputCoder.encodeInputNote(newNote);
-            await NoteRegistryDataContract.createNote(`0x${encodedNote.slice(0x40)}`, { from: owner });
+            await NoteRegistryDataContract.createNote(newNote.noteHash, noteOwner.address, { from: owner });
             const noteData = await NoteRegistryDataContract.getNote(newNote.noteHash, { from: owner });
             expect(noteData).to.not.equal(undefined);
             expect(noteData.noteOwner).to.equal(noteOwner.address);
@@ -49,11 +47,10 @@ contract.only('NoteRegistryData', (accounts) => {
 
         it('should delete a Note in the registry', async () => {
             const newNote = await note.create(noteOwner.publicKey, 10, noteOwner.address);
-            const encodedNote = encoder.outputCoder.encodeInputNote(newNote);
-            await NoteRegistryDataContract.createNote(`0x${encodedNote.slice(0x40)}`, { from: owner });
+            await NoteRegistryDataContract.createNote(newNote.noteHash, noteOwner.address, { from: owner });
             let noteData = await NoteRegistryDataContract.getNote(newNote.noteHash, { from: owner });
             expect(noteData.status.toNumber()).to.equal(1);
-            await NoteRegistryDataContract.deleteNote(`0x${encodedNote.slice(0x40)}`, { from: owner });
+            await NoteRegistryDataContract.deleteNote(newNote.noteHash, noteOwner.address, { from: owner });
             noteData = await NoteRegistryDataContract.getNote(newNote.noteHash, { from: owner });
             expect(noteData.status.toNumber()).to.equal(2);
         });
@@ -62,16 +59,14 @@ contract.only('NoteRegistryData', (accounts) => {
     describe('Failure States', async () => {
         it('should fail if transaction not from owner', async () => {
             const newNote = await note.create(noteOwner.publicKey, 10, noteOwner.address);
-            const encodedNote = encoder.outputCoder.encodeInputNote(newNote);
-            await truffleAssert.reverts(NoteRegistryDataContract.createNote(`0x${encodedNote.slice(0x40)}`, { from: notOwner }));
+            await truffleAssert.reverts(NoteRegistryDataContract.createNote(newNote.noteHash, noteOwner.address, { from: notOwner }));
         });
 
         it('should fail to delete a note if the note is not UNSPENT', async () => {
             const newNote = await note.create(noteOwner.publicKey, 10, noteOwner.address);
-            const encodedNote = encoder.outputCoder.encodeInputNote(newNote);
-            await NoteRegistryDataContract.createNote(`0x${encodedNote.slice(0x40)}`, { from: owner });
-            await NoteRegistryDataContract.deleteNote(`0x${encodedNote.slice(0x40)}`, { from: owner });
-            await truffleAssert.reverts(NoteRegistryDataContract.deleteNote(`0x${encodedNote.slice(0x40)}`, { from: owner }));
+            await NoteRegistryDataContract.createNote(newNote.noteHash, noteOwner.address, { from: owner });
+            await NoteRegistryDataContract.deleteNote(newNote.noteHash, noteOwner.address, { from: owner });
+            await truffleAssert.reverts(NoteRegistryDataContract.deleteNote(newNote.noteHash, noteOwner.address, { from: owner }));
 
         });
 
@@ -79,12 +74,10 @@ contract.only('NoteRegistryData', (accounts) => {
             const invalidOwner = sepc256k1.generateAccount();
 
             const newNote = await note.create(noteOwner.publicKey, 10, noteOwner.address);
-            const encodedNote = encoder.outputCoder.encodeInputNote(newNote);
-            await NoteRegistryDataContract.createNote(`0x${encodedNote.slice(0x40)}`, { from: owner });
+            await NoteRegistryDataContract.createNote(newNote.noteHash, noteOwner.address, { from: owner });
 
             const invalidNote = await note.create(noteOwner.publicKey, 10, invalidOwner.address);
-            const invalidEncodedNote = encoder.outputCoder.encodeInputNote(invalidNote);
-            await truffleAssert.reverts(NoteRegistryDataContract.deleteNote(`0x${invalidEncodedNote.slice(0x40)}`, { from: owner }),
+            await truffleAssert.reverts(NoteRegistryDataContract.deleteNote(invalidNote.noteHash, invalidOwner.address, { from: owner }),
                 'input note status is not UNSPENT');
         });
     });

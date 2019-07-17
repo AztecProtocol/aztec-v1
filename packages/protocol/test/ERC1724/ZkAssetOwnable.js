@@ -20,7 +20,6 @@ JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
 contract('ZkAssetOwnable', (accounts) => {
     let ace;
-    let joinSplitValidator;
     let erc20;
     let zkAssetOwnable;
     let zkAssetOwnableTest;
@@ -48,12 +47,8 @@ contract('ZkAssetOwnable', (accounts) => {
     };
 
     beforeEach(async () => {
-        ace = await ACE.new({ from: accounts[0] });
+        ace = await ACE.at(ACE.address);
         erc20 = await ERC20Mintable.new({ from: accounts[0] });
-        joinSplitValidator = await JoinSplitValidator.new({ from: accounts[0] });
-
-        await ace.setCommonReferenceString(bn128.CRS);
-        await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
         erc20 = await ERC20Mintable.new();
 

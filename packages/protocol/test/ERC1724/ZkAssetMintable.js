@@ -59,21 +59,13 @@ const confidentialApprove = async (zkAssetMintable, delegateAddress, indexes, no
 contract('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
         let ace;
-        let joinSplitFluidValidator;
-        let joinSplitValidator;
         let erc20;
         let scalingFactor;
         const publicOwner = accounts[0];
 
         beforeEach(async () => {
-            ace = await ACE.new({ from: accounts[0] });
+            ace = await ACE.at(ACE.address);
             erc20 = await ERC20Mintable.new({ from: accounts[0] });
-            joinSplitValidator = await JoinSplitValidator.new({ from: accounts[0] });
-            joinSplitFluidValidator = await JoinSplitFluidValidator.new({ from: accounts[0] });
-
-            await ace.setCommonReferenceString(bn128.CRS);
-            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
-            await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
@@ -271,18 +263,10 @@ contract('ZkAssetMintable', (accounts) => {
         let ace;
         let erc20;
         let scalingFactor;
-        let joinSplitFluidValidator;
-        let joinSplitValidator;
 
         beforeEach(async () => {
-            ace = await ACE.new({ from: accounts[0] });
+            ace = await ACE.at(ACE.address);
             erc20 = await ERC20Mintable.new({ from: accounts[0] });
-            joinSplitValidator = await JoinSplitValidator.new({ from: accounts[0] });
-            joinSplitFluidValidator = await JoinSplitFluidValidator.new({ from: accounts[0] });
-
-            await ace.setCommonReferenceString(bn128.CRS);
-            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
-            await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
