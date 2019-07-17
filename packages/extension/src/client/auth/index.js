@@ -1,8 +1,6 @@
 import mutate from '../utils/mutate';
 import Web3Service from '../services/Web3Service';
 
-const { keccak256 } = require('web3-utils');
-const typedData = require('@aztec/typed-data');
 const devUtils = require('@aztec/dev-utils');
 
 const { EIP712_DOMAIN } = devUtils.constants.eip712;
@@ -41,13 +39,6 @@ const AZTECAccount = [
         type: 'string',
     },
 ];
-const domainData = {
-    name: 'AZTECAccountRegistry',
-    version: '2',
-    chainId: 1563200229577,
-    verifyingContract: '0x817214844A06973B1f0d3F7b78fCE79773b970aD',
-    salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
-};
 
 
 export default {
@@ -65,10 +56,17 @@ export default {
                 publicKey
             }
         `);
+        const domainData = {
+            name: 'AZTECAccountRegistry',
+            version: '2',
+            chainId: 1563200229577,
+            verifyingContract: '0xb903FAb78F621D99218e8AD222080903E747671E',
+            salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
+        };
 
         const message = {
             account: Web3Service.account.address,
-            linkedPublicKey: '0x01',
+            linkedPublicKey: publicKey,
         };
 
         const data = JSON.stringify({
@@ -94,21 +92,9 @@ export default {
         const v = parseInt(signature.substring(128, 130), 16);
 
 
-        // console.log(encodedTypedData, signature);
-
-        // TODO longterm we need to process this on behalf of the user to abstract gas
-
-        console.log(r, s, v);
-        const receipt = Web3Service
+        await Web3Service
             .useContract('AZTECAccountRegistry', Web3Service.deployed('AZTECAccountRegistry').address)
             .method('registerAZTECExtension')
-            .send(Web3Service.account.address, '0x01', v, r, s);
-
-
-        const events = await Web3Service
-            .useContract('AZTECAccountRegistry', Web3Service.deployed('AZTECAccountRegistry').address)
-            .events()
-            .all();
-        console.log(events);
+            .send(Web3Service.account.address, publicKey, v, r, s);
     },
 };
