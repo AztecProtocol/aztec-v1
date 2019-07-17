@@ -1,7 +1,7 @@
 import {
     numberOfAccount,
     enitityAddress,
-    publicKeyLength,
+    USER_PUBLIC_KEY_LENGTH,
 } from '../config';
 import {
     makeGetFetchConditions,
@@ -16,7 +16,7 @@ for (let i = 0; i < numberOfAccount; i += 1) {
     accounts.push({
         id: address,
         address,
-        publicKey: generateRandomId(publicKeyLength),
+        publicKey: generateRandomId(USER_PUBLIC_KEY_LENGTH),
     });
 }
 

@@ -3,7 +3,8 @@ import {
     numberOfAssets,
     numberOfAccount,
     entityId,
-    viewingKeyLength,
+    VIEWING_KEY_LENGTH,
+    METADATA_AZTEC_DATA_LENGTH,
 } from '../config';
 import {
     makeGetFetchConditions,
@@ -28,10 +29,10 @@ const generateRandomMetadata = (noteIndex, ownerIndex) => {
     }
 
     return toString({
-        aztecData: generateRandomId(33),
+        aztecData: generateRandomId(METADATA_AZTEC_DATA_LENGTH),
         addresses: shareAccessWith.join(''),
         viewingKeys: shareAccessWith
-            .map(() => generateRandomId(viewingKeyLength))
+            .map(() => generateRandomId(VIEWING_KEY_LENGTH))
             .join(''),
     });
 };

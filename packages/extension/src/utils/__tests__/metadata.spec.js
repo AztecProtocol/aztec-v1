@@ -1,6 +1,8 @@
 import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
+    METADATA_AZTEC_DATA_LENGTH,
+    METADATA_VAR_LEN_LENGTH,
 } from '~config/constants';
 import metadata, {
     toString,
@@ -8,7 +10,7 @@ import metadata, {
 
 const pad = (val, len, padWith = '0') => `${val}`.padStart(len, padWith);
 
-const aztecData = ''.padStart(33, 'a');
+const aztecData = ''.padStart(METADATA_AZTEC_DATA_LENGTH, 'a');
 const appData = ''.padStart(10, 'p');
 const addresses = [];
 const viewingKeys = [];
@@ -23,10 +25,10 @@ describe('metadata toString', () => {
     it('generate a metadata string from data object', () => {
         const expectedStr = [
             '0x',
-            pad(aztecData, 33),
-            pad(addressesStr.length, 32),
-            pad(viewingKeysStr.length, 32),
-            pad(appData.length, 32),
+            pad(aztecData, METADATA_AZTEC_DATA_LENGTH),
+            pad(addressesStr.length, METADATA_VAR_LEN_LENGTH),
+            pad(viewingKeysStr.length, METADATA_VAR_LEN_LENGTH),
+            pad(appData.length, METADATA_VAR_LEN_LENGTH),
             addressesStr,
             viewingKeysStr,
             appData,
@@ -43,10 +45,10 @@ describe('metadata toString', () => {
     it('allow undefined data in object', () => {
         const expectedStr = [
             '0x',
-            pad(aztecData, 33),
-            pad('0', 32),
-            pad('0', 32),
-            pad(appData.length, 32),
+            pad(aztecData, METADATA_AZTEC_DATA_LENGTH),
+            pad('0', METADATA_VAR_LEN_LENGTH),
+            pad('0', METADATA_VAR_LEN_LENGTH),
+            pad(appData.length, METADATA_VAR_LEN_LENGTH),
             appData,
         ].join('');
 
