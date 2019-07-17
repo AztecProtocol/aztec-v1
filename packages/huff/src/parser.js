@@ -344,12 +344,13 @@ parser.processMacroInternal = (
         ops,
         templateParams,
     } = macro;
-    const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommas(t)], []);
+
+    const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommasIgnoringTemplates(t)], []);
     let extraErrorString = '';
     if (macro.ops[0] && macro.ops[0].debug) {
         extraErrorString = ' ' + debugLocationString(macro.ops[0].debug);
     }
-    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs!` + extraErrorString);
+    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs! This likely means you have supplied the wrong number of parameters to the macro call.` + extraErrorString);
     const templateRegExps = templateParams.map((label, i) => {
         const pattern = new RegExp(`\\b(${label})\\b`, 'g');
         const value = templateArguments[i];
@@ -377,15 +378,24 @@ parser.processMacroInternal = (
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
                 let templateParameterValue = templateArguments[macroNameIndex];
+                // Get the value of the template parameter to replace with. op.value is the name of the template parameter, and parsedName the value
                 const parsedName = parser.substituteTemplateArguments([op.value], templateRegExps);
+                // If multiple parameters match, which really shouldn't happen
                 if (parsedName.length !== 1) {
                     throw new Error('cannot parse template invokation ', parsedName);
+                }
+                let nameToUse = parsedName[0];
+                let templateArgs = [];
+                const token = (nameToUse + '()').match(grammar.macro.MACRO_CALL);
+                if (token) {
+                    nameToUse = token[1];
+                    templateArgs = token[2] ? [token[2]] : [];
                 }
                 ({
                     macros,
                     templateName: templateParameterValue,
-                } = parser.parseTemplate(parsedName[0], macros, index, op.debug));
-                const result = parser.processMacroInternal(templateParameterValue, offset, [], macros, map, jumpindicesInitial, []);
+                } = parser.parseTemplate(nameToUse, macros, index, op.debug));
+                const result = parser.processMacroInternal(templateParameterValue, offset, templateArgs, macros, map, jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
                 jumptable[index] = result.unmatchedJumps;
                 jumpindices = { ...jumpindices, ...result.jumpindices };

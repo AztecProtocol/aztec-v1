@@ -11,6 +11,39 @@ regex.sliceCommas = (input) => {
     return (input.match(commas) || []).filter(r => r !== '');
 };
 
+
+regex.sliceCommasIgnoringTemplates = (input1) => {
+    let regex = new RegExp('[,<>]');
+    let input = input1;
+    let results = [];
+    let netIndex = 0;
+    while (input.match(regex)) {
+        let token = input.match(regex);
+        netIndex += token.index + 1;
+        results.push([token[0], netIndex]);
+        input = input.slice(token.index + 1);
+    }
+    let depth = 0;
+    let newResults = [];
+    for (result of results) {
+        if (result[0] === '<') {
+            depth += 1;
+        } else if (result[0] === '>') {
+            depth -= 1;
+        } else if (result[0] === ',' && depth == 0) {
+            newResults.push(result[1]);
+        }
+    }
+    newResults = [0].concat(newResults);
+    let finalResults = [];
+    for (let i = newResults.length - 1; i >= 0; i--) {
+        finalResults.push(input1.slice(newResults[i]).replace(' ', ''));
+        input1 = input1.slice(0, newResults[i] - 1);
+    }
+    return(finalResults.reverse());
+};
+
+
 regex.endOfData = (input) => {
     return !RegExp('\\S').test(input);
 };
