@@ -1,16 +1,14 @@
-import findLastIndex from 'lodash/findLastIndex';
 import {
     errorLog,
 } from '~utils/log';
 import userModel from '~database/models/user';
-import fetchNoteFromServer from './utils/fetchNoteFromServer';
-import addNote from './utils/addNote';
+import SyncManager from './helpers/SyncManager';
 
 class SyncService {
     constructor() {
-        this.accounts = new Map();
         this.config = {
             notesPerRequest: 10,
+            syncInterval: 2000, // ms
         };
     }
 
@@ -21,70 +19,6 @@ class SyncService {
                     this.config[key] = config[key];
                 }
             });
-    }
-
-    async syncNotes({
-        address,
-        excludes = [],
-        lastSynced = '',
-    } = {}) {
-        const account = this.accounts.get(address);
-        if (!account) return;
-
-        const {
-            notesPerRequest,
-        } = this.config;
-        this.accounts.set(address, {
-            ...account,
-            syncing: true,
-        });
-
-        const newNotes = await fetchNoteFromServer({
-            lastSynced,
-            excludes,
-            account: address,
-            numberOfNotes: notesPerRequest,
-        });
-        console.log('syncNotes', newNotes);
-
-        await Promise.all(newNotes.map(note => addNote(note)));
-
-        const lastNote = newNotes[newNotes.length - 1];
-        if (newNotes.length === notesPerRequest) {
-            const nextSynced = lastNote.timestamp;
-            let nextExcludes = [];
-            if (nextSynced === lastSynced) {
-                nextExcludes = [
-                    ...excludes,
-                ];
-            }
-            findLastIndex(newNotes, ({
-                hash,
-                timestamp,
-            }) => {
-                const isSameTime = timestamp === nextSynced;
-                if (isSameTime) {
-                    nextExcludes.push(hash);
-                }
-                return !isSameTime;
-            });
-            console.log('nextExcludes', nextExcludes);
-            await this.syncNotes({
-                address,
-                excludes: nextExcludes,
-                lastSynced: nextSynced,
-            });
-        }
-
-        await userModel.update({
-            address,
-            lastSynced: Date.now(),
-        });
-
-        this.accounts.set(address, {
-            ...account,
-            syncing: false,
-        });
     }
 
     async syncAccount(address) {
@@ -101,20 +35,15 @@ class SyncService {
             return;
         }
 
-        let account = this.accounts.get(address);
-        if (!account) {
-            account = {
-                syncing: false,
-            };
-            this.accounts.set(address, account);
-        }
+        const {
+            lastSynced,
+        } = user;
 
-        if (!account.syncing) {
-            await this.syncNotes({
-                address,
-                lastSynced: (user.lastSynced || 0) + 1,
-            });
-        }
+        SyncManager.sync({
+            config: this.config,
+            address,
+            lastSynced: (lastSynced || 0) + 1,
+        });
     }
 }
 

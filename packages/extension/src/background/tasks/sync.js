@@ -1,4 +1,8 @@
 import {
+    NOTES_PER_SYNC_REQUEST,
+    SYNC_INTERVAL,
+} from '~config/settings';
+import {
     set,
 } from '~utils/storage';
 import userModel from '~database/models/user';
@@ -15,6 +19,11 @@ export default async function sync() {
 
     if (users) {
         const startTimeAsync = Date.now();
+
+        SyncService.set({
+            notesPerRequest: NOTES_PER_SYNC_REQUEST,
+            syncInterval: SYNC_INTERVAL,
+        });
 
         const syncPromises = Object.keys(users)
             .map(address => SyncService.syncAccount(address));
