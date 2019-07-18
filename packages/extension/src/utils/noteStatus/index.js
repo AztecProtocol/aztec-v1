@@ -1,5 +1,7 @@
+import toCode from './toCode';
+import fromCode from './fromCode';
 import fromAction from './fromAction';
-import {
+import isEqual, {
     makeIsEqual,
 } from './isEqual';
 import {
@@ -13,7 +15,10 @@ const isCreateAction = makeIsEqualToAction('CREATE');
 const isDestroyAction = makeIsEqualToAction('DESTROY');
 
 export {
+    toCode,
+    fromCode,
     fromAction,
+    isEqual,
     isCreated,
     isDestroyed,
     isCreateAction,
