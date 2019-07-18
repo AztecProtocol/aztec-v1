@@ -7,7 +7,7 @@ import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
-import filterByWhere from '../utils/filterByWhere';
+import fetchFromData from '../utils/fetchFromData';
 import generateRandomId from '../utils/generateRandomId';
 
 const accounts = [];
@@ -37,19 +37,10 @@ const accountsWherePrefixes = [
     'address',
 ];
 
-export const getAccounts = (_, args) => {
-    const {
-        first,
-        where,
-    } = args;
-
-    const filteredAccounts = filterByWhere(
-        where,
-        accountsWherePrefixes,
-        accounts,
-    );
-
-    return filteredAccounts.slice(0, first);
-};
+export const getAccounts = (_, args) => fetchFromData(
+    accountsWherePrefixes,
+    accounts,
+    args,
+);
 
 export default accounts;

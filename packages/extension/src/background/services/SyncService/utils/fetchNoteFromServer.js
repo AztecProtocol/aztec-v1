@@ -7,6 +7,7 @@ export default async function fetchNoteFromServer({
     account,
     lastSynced = 0,
     numberOfNotes = 1,
+    excludes = [],
 } = {}) {
     if (!account) {
         errorLog("'account' cannot be empty");
@@ -14,8 +15,8 @@ export default async function fetchNoteFromServer({
     }
 
     const query = `
-        query($first: Int!, $where: NoteAccess_filter) {
-            noteAccesses(first: $first, where: $where) {
+        query($first: Int!, $where: NoteAccess_filter, $orderBy: String) {
+            noteAccesses(first: $first, where: $where, orderBy: $orderBy) {
                 account {
                     address
                 }
@@ -39,8 +40,10 @@ export default async function fetchNoteFromServer({
         first: numberOfNotes,
         where: {
             account,
+            note_not_in: excludes,
             timestamp_gte: lastSynced,
         },
+        orderBy: 'timestamp',
     };
 
     const data = await GraphNodeService.query({
