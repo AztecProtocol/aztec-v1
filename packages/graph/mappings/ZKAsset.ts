@@ -61,6 +61,7 @@ function createNoteAccess(
   newAccess.note = noteHash.toHex();
   newAccess.account = account.toHex();
   newAccess.viewingKey = viewingKey;
+  newAccess.timestamp = timestamp;
   newAccess.save();
 
   return accessId;
@@ -154,6 +155,7 @@ export function createNote(event: CreateNote): void {
   let metadata = event.params.metadata;
   let noteId = noteHash.toHex();
   let note = new Note(noteId);
+  note.hash = noteHash;
   note.asset = event.address.toHex();
   note.owner = ownerId;
   note.metadata = metadata;
