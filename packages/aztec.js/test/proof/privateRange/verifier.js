@@ -7,7 +7,6 @@ const sinon = require('sinon');
 
 const { PrivateRangeProof } = require('../../../src/proof');
 const PrivateRangeVerifier = require('../../../src/proof/privateRange/verifier');
-// const oldPrivateRange = require('../../../src/oldPrivateRange');
 const note = require('../../../src/note');
 const { Proof } = require('../../../src/proof');
 

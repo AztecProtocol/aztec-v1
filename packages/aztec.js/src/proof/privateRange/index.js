@@ -20,7 +20,7 @@ class PrivateRangeProof extends Proof {
     @param {Note} utilityNote helper note used to construct a balancing relationship in the proof. The value of this note must
                               be chosen to satisfy the equation: originalNoteValue = comparisonNoteValue + utilityNoteValue
     @param {string} sender Ethereum address of the transaction sender
-    * */
+    */
     constructor(originalNote, comparisonNote, utilityNote, sender) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
