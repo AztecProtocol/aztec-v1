@@ -1,4 +1,5 @@
 /* global jest, expect, beforeAll */
+import dotenv from 'dotenv';
 import devUtils from '@aztec/dev-utils';
 import secp256k1 from '@aztec/secp256k1';
 import aztec from 'aztec.js';
@@ -12,6 +13,7 @@ import Query from './helpers/Query';
 import asyncMap from './utils/asyncMap';
 import generateRandomId from './utils/generateRandomId';
 
+dotenv.config();
 jest.setTimeout(50000);
 
 const { constants } = devUtils;
@@ -36,17 +38,19 @@ describe('ZkAsset', () => {
     const category = 1;
     const proofId = 1;
     const filter = 17;
-    const scalingFactor = 2;
+    const scalingFactor = 1;
     const canAdjustSupply = true;
     const canConvert = true;
-
     const depositAmount = 10;
+    let erc20Address;
     let zkAssetAddress;
-    let sender;
     let notes;
     let depositProof;
     let depositProofOutput;
     let depositProofHash;
+
+    const sender = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_0);
+    sender.address = sender.address.toLowerCase();
 
     const generateNotes = async (noteValues) =>
         // throw an error from web3-providers
@@ -55,7 +59,7 @@ describe('ZkAsset', () => {
         asyncMap(noteValues, async (val) => {
             const {
                 publicKey,
-            } = await secp256k1.generateAccount();
+            } = sender;
             return note.create(publicKey, val);
         });
 
@@ -77,10 +81,6 @@ describe('ZkAsset', () => {
 
     beforeAll(async () => {
         Web3Service.init();
-
-        const accounts = await Web3Service.getAccounts();
-        sender = accounts[0].toLowerCase();
-
         Web3Service.registerContract(ACE);
         Web3Service.registerInterface(ERC20Mintable);
         Web3Service.registerInterface(ZkAssetOwnable);
@@ -110,25 +110,34 @@ describe('ZkAsset', () => {
                     joinSplitAddress,
                 );
         }
-
-        notes = await generateNotes([0, 10]);
     });
 
     beforeEach(async () => {
         const {
-            contractAddress: erc20Address,
+            contractAddress: erc20ContractAddress,
         } = await Web3Service.deploy(ERC20Mintable);
+        erc20Address = erc20ContractAddress;
 
         await Web3Service
             .useContract('ERC20Mintable')
             .at(erc20Address)
             .method('mint')
             .send(
-                sender,
+                sender.address,
                 depositAmount,
             );
 
         const aceAddress = Web3Service.contract('ACE').address;
+
+        await Web3Service
+            .useContract('ERC20Mintable')
+            .at(erc20Address)
+            .method('approve')
+            .send(
+                aceAddress,
+                depositAmount,
+            );
+
         const {
             contractAddress: zkAssetContractAddress,
         } = await Web3Service.deploy(ZkAssetOwnable, [
@@ -149,13 +158,18 @@ describe('ZkAsset', () => {
                 filter,
             );
 
+        notes = await generateNotes([
+            0,
+            depositAmount,
+        ]);
+
         depositProof = proof.joinSplit.encodeJoinSplitTransaction({
             inputNotes: [],
             outputNotes: notes,
-            senderAddress: sender,
+            senderAddress: sender.address,
             inputNoteOwners: [],
-            publicOwner: sender,
-            kPublic: -10,
+            publicOwner: sender.address,
+            kPublic: -(depositAmount),
             validatorAddress: zkAssetAddress,
         });
         depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
@@ -181,12 +195,15 @@ describe('ZkAsset', () => {
     });
 
     it('create Note entity from CreateNote event', async () => {
+        const accounts = await Web3Service.getAccounts();
+        expect(accounts[0].toLowerCase()).toBe(sender.address);
+
         const pastEvents = await Web3Service
             .useContract('ZkAssetOwnable')
             .at(zkAssetAddress)
             .events('CreateNote')
             .where({
-                id: sender,
+                id: sender.address,
             });
 
         const {
@@ -256,11 +273,10 @@ describe('ZkAsset', () => {
             `${METADATA_ADDRESS_LENGTH.toString(16)}`.padStart(METADATA_VAR_LEN_LENGTH, '0'),
             `${METADATA_VIEWING_KEY_LENGTH.toString(16)}`.padStart(METADATA_VAR_LEN_LENGTH, '0'),
             '0'.padStart(METADATA_VAR_LEN_LENGTH, '0'),
-            sender.slice(2),
+            sender.address.slice(2),
             viewingKey,
         ].join('').toLowerCase();
 
-        console.log(newMetadata);
         expect(newMetadata.length).toBe(
             2
             + METADATA_AZTEC_DATA_LENGTH
@@ -334,7 +350,7 @@ describe('ZkAsset', () => {
                         id: noteHash,
                     },
                     account: {
-                        address: sender,
+                        address: sender.address,
                     },
                     viewingKey: `0x${viewingKey}`,
                 },
