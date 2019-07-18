@@ -1,8 +1,8 @@
 /* global artifacts, expect, contract, it:true */
 const { DividendProof, encoder, note } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
-const { padLeft } = require('web3-utils');
 const secp256k1 = require('@aztec/secp256k1');
+const { padLeft } = require('web3-utils');
 
 const DividendABIEncoderTest = artifacts.require('./DividendABIEncoderTest');
 

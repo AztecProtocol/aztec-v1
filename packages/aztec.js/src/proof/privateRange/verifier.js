@@ -5,7 +5,7 @@ const { constants, errors } = require('@aztec/dev-utils');
 const Keccak = require('../../keccak');
 const Verifier = require('../verifier');
 
-const { BN128_GROUP_REDUCTION, K_MAX, ZERO_BN, ZERO_BN_RED } = constants;
+const { ZERO_BN } = constants;
 
 class PrivateRangeVerifier extends Verifier {
     verifyProof() {

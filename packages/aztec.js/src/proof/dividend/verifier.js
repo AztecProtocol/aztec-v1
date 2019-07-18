@@ -72,7 +72,6 @@ class DividendVerifier extends Verifier {
             reducer = rollingHash.redKeccak();
         });
 
-        console.log('dividend challenge: ', challengeResponse.redKeccak().fromRed());
         if (
             !challengeResponse
                 .redKeccak()

@@ -1,1 +1,1 @@
-module.exports = ['BURN', 'DIVIDEND', 'JOIN_SPLIT', 'MINT', 'SWAP', 'PRIVATE_RANGE'];
+module.exports = ['BURN', 'DIVIDEND', 'JOIN_SPLIT', 'MINT', 'PRIVATE_RANGE', 'SWAP'];

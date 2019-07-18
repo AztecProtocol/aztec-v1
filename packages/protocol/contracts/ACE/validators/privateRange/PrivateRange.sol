@@ -69,10 +69,6 @@ contract PrivateRange {
                 hashCommitments(notes, n)
                 let b := add(0x300, mul(n, 0x80))
 
-                // mstore(0x00, calldataload(0x24))
-                // mstore(0x20, challenge)
-                // return(0x00, 0x80)
-
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
                 //  which adds some minor alterations
@@ -197,13 +193,6 @@ contract PrivateRange {
                                 staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40)
                             )
                         )
-                        /* result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
-
-                        // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
-                        result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
-
-                        // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
-                        result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40)) */
                     }
 
                     // throw transaction if any calls to precompiled contracts failed
@@ -226,7 +215,7 @@ contract PrivateRange {
                 }
 
                 // Great! All done. This is a valid proof, so fall through out of the assembly block
-                // so that we can call `ABIEncoder.encodeAndExit`
+                // so that we can call `PrivateRangeABIEncoder.encodeAndExit`
             }
 
             /**        
