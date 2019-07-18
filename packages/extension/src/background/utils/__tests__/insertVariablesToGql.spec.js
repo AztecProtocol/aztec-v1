@@ -7,7 +7,7 @@ describe('insertVariablesToGql', () => {
             {
                 age: 12,
             },
-        )).toBe('data(age: 12, id: 123) { name }');
+        )).toBe('data(id: 123, age: 12) { name }');
 
         expect(insertVariablesToGql(
             'data(id: 123) { name }',
@@ -15,7 +15,7 @@ describe('insertVariablesToGql', () => {
                 title: 'ms',
                 isMember: true,
             },
-        )).toBe('data(title: "ms", isMember: true, id: 123) { name }');
+        )).toBe('data(id: 123, title: "ms", isMember: true) { name }');
     });
 
     it('can insert variable string to query string without variables', () => {
