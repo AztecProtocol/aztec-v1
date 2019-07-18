@@ -4,9 +4,9 @@ import {
 import GraphNodeService from '~backgroundServices/GraphNodeService';
 
 export default async function fetchNoteFromServer({
-    numberOfNotes = 1,
     account,
-    lastId = '',
+    lastSynced = 0,
+    numberOfNotes = 1,
 } = {}) {
     if (!account) {
         errorLog("'account' cannot be empty");
@@ -14,25 +14,23 @@ export default async function fetchNoteFromServer({
     }
 
     const query = `
-        query($first: Int!, $where: NoteChangeLogsWhere) {
-            noteChangeLogs(first: $first, where: $where) {
-                id
-                noteAccess {
-                    account {
+        query($first: Int!, $where: NoteAccess_filter) {
+            noteAccesses(first: $first, where: $where) {
+                account {
+                    address
+                }
+                viewingKey
+                note {
+                    hash
+                    asset {
                         address
                     }
-                    viewingKey
-                    note {
-                        hash
-                        asset {
-                            address
-                        }
-                        owner {
-                            address
-                        }
+                    owner {
+                        address
                     }
+                    status
                 }
-                action
+                timestamp
             }
         }
     `;
@@ -40,8 +38,8 @@ export default async function fetchNoteFromServer({
     const variables = {
         first: numberOfNotes,
         where: {
-            id_gt: lastId,
             account,
+            timestamp_gte: lastSynced,
         },
     };
 
@@ -51,20 +49,14 @@ export default async function fetchNoteFromServer({
     });
 
     const {
-        noteChangeLogs = [],
+        noteAccesses = [],
     } = data || {};
 
-    return noteChangeLogs.map(({
-        id: logId,
-        noteAccess: {
-            note,
-            ...noteAccess
-        },
+    return noteAccesses.map(({
+        note,
         ...rest
     }) => ({
         ...note,
-        ...noteAccess,
         ...rest,
-        logId,
     }));
 }

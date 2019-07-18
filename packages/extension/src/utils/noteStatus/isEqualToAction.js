@@ -1,8 +1,10 @@
-import noteStatus from '~config/noteStatus';
+import {
+    actions,
+} from '~config/noteStatus';
 
 const statusActionMapping = {};
-Object.keys(noteStatus).forEach((action) => {
-    statusActionMapping[noteStatus[action]] = action;
+Object.keys(actions).forEach((action) => {
+    statusActionMapping[actions[action]] = action;
 });
 
 const isEqualToAction = (status, action) => statusActionMapping[status] === action;

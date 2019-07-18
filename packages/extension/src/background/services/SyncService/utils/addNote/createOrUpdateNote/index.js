@@ -1,6 +1,5 @@
 import dataKey from '~utils/dataKey';
 import {
-    fromAction,
     isDestroyed,
 } from '~utils/noteStatus';
 import noteModel from '~database/models/note';
@@ -13,7 +12,7 @@ export default async function createOrUpdateNote(note) {
     const {
         assetKey,
         ownerKey,
-        action,
+        status,
     } = note;
 
     const isOwner = note.account.address === note.owner.address;
@@ -24,12 +23,10 @@ export default async function createOrUpdateNote(note) {
 
     // TODO - decrypt value from note hash
     const value = 100;
-    const status = fromAction(action);
 
     const newData = {
         ...note,
         value,
-        status,
         asset: assetKey,
         owner: ownerKey,
     };
@@ -65,13 +62,15 @@ export default async function createOrUpdateNote(note) {
         }
     }
 
-
     const {
         status: prevStatus,
     } = prevNoteData;
     const isNoteDestroyed = isDestroyed(status);
+    const shouldUpdateAssetBalance = justCreated
+        ? !isNoteDestroyed
+        : status !== prevStatus;
     if (isOwner
-        && (justCreated || status !== prevStatus)
+        && shouldUpdateAssetBalance
     ) {
         promises.push(assetModel.update({
             key: assetKey,
@@ -86,8 +85,6 @@ export default async function createOrUpdateNote(note) {
             value,
         });
 
-
-        // TODO - don't push note that's been removed
         if (isNoteDestroyed) {
             promises.push(removeAssetValue(assetValueKey, noteKey));
         } else {
