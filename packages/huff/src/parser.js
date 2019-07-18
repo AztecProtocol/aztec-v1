@@ -11,6 +11,7 @@ const {
     toHex,
     padNBytes,
     normalize,
+    sliceCommasIgnoringTemplates,
 } = require('./utils');
 
 const { opcodes } = require('./opcodes/opcodes');
@@ -345,7 +346,7 @@ parser.processMacroInternal = (
         templateParams,
     } = macro;
 
-    const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...regex.sliceCommasIgnoringTemplates(t)], []);
+    const templateArguments = templateArgumentsRaw.reduce((a, t) => [...a, ...sliceCommasIgnoringTemplates(t)], []);
     let extraErrorString = '';
     if (macro.ops[0] && macro.ops[0].debug) {
         extraErrorString = ' ' + debugLocationString(macro.ops[0].debug);
