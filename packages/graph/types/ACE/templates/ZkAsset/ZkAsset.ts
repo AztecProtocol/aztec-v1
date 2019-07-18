@@ -14,6 +14,28 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class LogBytes extends EthereumEvent {
+  get params(): LogBytes__Params {
+    return new LogBytes__Params(this);
+  }
+}
+
+export class LogBytes__Params {
+  _event: LogBytes;
+
+  constructor(event: LogBytes) {
+    this._event = event;
+  }
+
+  get message(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get b(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+}
+
 export class CreateNoteRegistry extends EthereumEvent {
   get params(): CreateNoteRegistry__Params {
     return new CreateNoteRegistry__Params(this);
@@ -82,6 +104,24 @@ export class CreateZkAsset__Params {
   }
 }
 
+export class CreateNoteRegistry1 extends EthereumEvent {
+  get params(): CreateNoteRegistry1__Params {
+    return new CreateNoteRegistry1__Params(this);
+  }
+}
+
+export class CreateNoteRegistry1__Params {
+  _event: CreateNoteRegistry1;
+
+  constructor(event: CreateNoteRegistry1) {
+    this._event = event;
+  }
+
+  get noteRegistryId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+}
+
 export class CreateNote extends EthereumEvent {
   get params(): CreateNote__Params {
     return new CreateNote__Params(this);
@@ -131,6 +171,28 @@ export class DestroyNote__Params {
 
   get metadata(): Bytes {
     return this._event.parameters[2].value.toBytes();
+  }
+}
+
+export class UpdateNoteMetaData extends EthereumEvent {
+  get params(): UpdateNoteMetaData__Params {
+    return new UpdateNoteMetaData__Params(this);
+  }
+}
+
+export class UpdateNoteMetaData__Params {
+  _event: UpdateNoteMetaData;
+
+  constructor(event: UpdateNoteMetaData) {
+    this._event = event;
+  }
+
+  get noteHash(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get metadata(): Bytes {
+    return this._event.parameters[1].value.toBytes();
   }
 }
 
@@ -423,6 +485,40 @@ export class ConfidentialApproveCall__Outputs {
   _call: ConfidentialApproveCall;
 
   constructor(call: ConfidentialApproveCall) {
+    this._call = call;
+  }
+}
+
+export class UpdateNoteMetaDataCall extends EthereumCall {
+  get inputs(): UpdateNoteMetaDataCall__Inputs {
+    return new UpdateNoteMetaDataCall__Inputs(this);
+  }
+
+  get outputs(): UpdateNoteMetaDataCall__Outputs {
+    return new UpdateNoteMetaDataCall__Outputs(this);
+  }
+}
+
+export class UpdateNoteMetaDataCall__Inputs {
+  _call: UpdateNoteMetaDataCall;
+
+  constructor(call: UpdateNoteMetaDataCall) {
+    this._call = call;
+  }
+
+  get _noteHash(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get _metaData(): Bytes {
+    return this._call.inputValues[1].value.toBytes();
+  }
+}
+
+export class UpdateNoteMetaDataCall__Outputs {
+  _call: UpdateNoteMetaDataCall;
+
+  constructor(call: UpdateNoteMetaDataCall) {
     this._call = call;
   }
 }

@@ -106,8 +106,24 @@ class Web3Event {
     toHaveBeenCalledWith(expected) {
         if (!this.lastEvent) {
             expect(() => 'toHaveBeenCalledWith()').toThrow();
-        } else if (!deepEqual(this.argsMapping, expected)) {
-            expect(expected).toEqual(this.argsMapping);
+        } else if (!Array.isArray(expected)) {
+            if (!deepEqual(this.argsMapping, expected)) {
+                expect(this.argsMapping).toEqual(expected);
+            }
+        } else {
+            const invalid = this.events.findIndex((event, i) => {
+                const {
+                    argsMapping,
+                } = event || {};
+                return !deepEqual(argsMapping, expected[i]);
+            });
+
+            if (invalid >= 0) {
+                const {
+                    argsMapping,
+                } = this.events[invalid];
+                expect(argsMapping).toEqual(expected[invalid]);
+            }
         }
 
         return this;

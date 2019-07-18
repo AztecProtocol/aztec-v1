@@ -51,7 +51,7 @@ describe('ACE', () => {
             });
 
         const query = `
-            zkAsset(id:"${zkAssetAddress}") {
+            asset(id:"${zkAssetAddress}") {
                 id
             }
         `;
@@ -60,7 +60,7 @@ describe('ACE', () => {
         });
 
         expect(data).toEqual({
-            zkAsset: {
+            asset: {
                 id: zkAssetAddress,
             },
         });

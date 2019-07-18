@@ -21,7 +21,7 @@ export default async function Query({
     retry = 3,
 }) {
     let queryStr = query.trim();
-    if (!queryStr.startsWith('{')) {
+    if (queryStr && !queryStr.match('^({|query|mutation)')) {
         queryStr = `{${queryStr}}`;
     }
 

@@ -16,7 +16,7 @@ dataSources:
       language: wasm/assemblyscript
       file: ./mappings/ACE.ts
       entities:
-        - ZkAsset
+        - Asset
       abis:
         - name: ACE
           file: ./build/abis/ACE.json
@@ -35,13 +35,16 @@ dataSources:
           language: wasm/assemblyscript
           file: ./mappings/ZkAsset.ts
           entities:
-            - Note
-              Account
+            - Account
+              Note
+              NoteAccess
           abis:
             - name: ZkAsset
-              file: ./build/abis/ZkAsset.json
+              file: ./build/abis/ZkAssetOwnable.json
           eventHandlers:
             - event: CreateNote(address,bytes32,bytes)
               handler: createNote
             - event: DestroyNote(address,bytes32,bytes)
               handler: destroyNote
+            - event: UpdateNoteMetaData(bytes32,bytes)
+              handler: updateNoteMetaData
