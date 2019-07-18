@@ -17,12 +17,12 @@ import metadata from '../../src/utils/metadata';
 const noteAccess = [];
 const noteChangeLogs = [];
 const toBeDestroyed = [];
-let prevTimestamp = Date.now() - 86400;
+let timestamp = Date.now();
 
 const createAccessForAccount = (note, accountAddress, viewingKey) => {
     const accessIndex = noteAccess.length;
-    const accessId = entityId('access', accessIndex);
-    prevTimestamp += randomInt(0, 60000);
+    const accessId = entityId('access', timestamp);
+    timestamp += randomInt(0, 60000);
     const account = accounts.find(({
         address,
     }) => address === accountAddress);
@@ -32,6 +32,7 @@ const createAccessForAccount = (note, accountAddress, viewingKey) => {
         note: note.id,
         account: account.id,
         viewingKey,
+        timestamp,
     });
 
     noteChangeLogs.push({
@@ -39,7 +40,7 @@ const createAccessForAccount = (note, accountAddress, viewingKey) => {
         account: account.id,
         noteAccess: accessId,
         action: 'CREATE',
-        timestamp: Math.ceil(prevTimestamp / 1000),
+        timestamp,
     });
 
     if (note.status === 'DESTROYED') {
@@ -63,13 +64,15 @@ notes.forEach((note) => {
 
 toBeDestroyed.forEach((accessIndex) => {
     const access = noteAccess[accessIndex];
-    prevTimestamp += randomInt(0, 2000);
+    timestamp += randomInt(0, 2000);
+    access.timestamp = timestamp;
+
     noteChangeLogs.push({
         id: entityId('log', `${noteChangeLogs.length}`.padStart(3, '0')),
         account: access.account,
         noteAccess: access.id,
         action: 'DESTROY',
-        timestamp: Math.ceil(prevTimestamp / 1000),
+        timestamp,
     });
 });
 
@@ -95,6 +98,7 @@ export const getNoteAccessById = noteAccessId => getNoteAccess(null, { id: noteA
 const noteAccessesWherePrefixes = [
     'note',
     'account',
+    'timestamp',
 ];
 
 export const getNoteAccesses = (_, args) => {

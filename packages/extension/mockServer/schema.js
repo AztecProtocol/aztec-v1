@@ -1,6 +1,7 @@
 import {
     gql,
 } from 'apollo-server';
+import BigInt from 'apollo-type-bigint';
 import {
     getAssetById,
 } from './database/asset';
@@ -22,6 +23,7 @@ import {
 } from './database/noteAccess';
 
 export const typeDefs = gql`
+    scalar BigInt
     type Account {
         id: ID!
         address: String!
@@ -45,21 +47,22 @@ export const typeDefs = gql`
         note: Note!
         account: Account!
         viewingKey: String!
+        timestamp: BigInt!
     }
     type NoteChangeLog {
         id: ID!
         account: Account!
         noteAccess: NoteAccess!
         action: String!
-        timestamp: Int!
+        timestamp: BigInt!
     }
-    input AccountsWhere {
+    input Account_filter {
         id: ID
         id_in: [ID!]
         address: String
         address_in: [String!]
     }
-    input NoteAccessesWhere {
+    input NoteAccess_filter {
         id: ID
         id_lt: ID
         id_gt: ID
@@ -67,8 +70,12 @@ export const typeDefs = gql`
         note_in: [ID!]
         account: ID
         account_in: [ID!]
+        timestamp: BigInt
+        timestamp_lt: BigInt
+        timestamp_lte: BigInt
+        timestamp_gte: BigInt
     }
-    input NoteChangeLogsWhere {
+    input NoteChangeLog_filter {
         id: ID
         id_lt: ID
         id_gt: ID
@@ -76,12 +83,12 @@ export const typeDefs = gql`
     }
     type Query {
         account(id: ID!): Account
-        accounts(first: Int!, where: AccountsWhere): [Account!]
+        accounts(first: Int!, where: Account_filter): [Account!]
         note(id: ID!): Note
         notes(first: Int!, id_gt: ID): [Note!]
         noteAccess(id: ID, noteId: ID, account: ID): NoteAccess
-        noteAccesses(first: Int!, where: NoteAccessesWhere): [NoteAccess!]
-        noteChangeLogs(first: Int!, where: NoteChangeLogsWhere): [NoteChangeLog!]
+        noteAccesses(first: Int!, where: NoteAccess_filter): [NoteAccess!]
+        noteChangeLogs(first: Int!, where: NoteChangeLog_filter): [NoteChangeLog!]
     }
     type Mutation {
         updateNoteMetaData(_noteHash: String!, _metadata: String!): Boolean
@@ -89,6 +96,7 @@ export const typeDefs = gql`
 `;
 
 export const resolvers = {
+    BigInt: new BigInt('safe'),
     Query: {
         account: getAccount,
         accounts: getAccounts,
