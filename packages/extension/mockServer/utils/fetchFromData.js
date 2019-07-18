@@ -1,5 +1,24 @@
-export default function filterByWhere(where, prefixes, items) {
-    let filteredItems = items;
+import sort from 'lodash/orderBy';
+
+export default function fetchFromData(
+    prefixes,
+    items,
+    {
+        first,
+        where,
+        orderBy,
+        orderDirection = 'ASC',
+    },
+) {
+    let filteredItems = !orderBy
+        ? items
+        : sort(items, orderBy, orderDirection);
+
+    if ('timestamp' in filteredItems[0]) {
+        const now = Date.now();
+        filteredItems = filteredItems.filter(({ timestamp }) => timestamp <= now);
+    }
+
     prefixes.forEach((prefix) => {
         const toMatch = where[prefix]
             ? [where[prefix]]
@@ -14,6 +33,9 @@ export default function filterByWhere(where, prefixes, items) {
         }
         if (where[`${prefix}_not`]) {
             toNotMatch.push(where[`${prefix}_not`]);
+        }
+        if (toNotMatch.length > 0) {
+            filteredItems = filteredItems.filter(item => toNotMatch.indexOf(item[prefix]) < 0);
         }
 
         const gt = where[`${prefix}_gt`];
@@ -34,5 +56,5 @@ export default function filterByWhere(where, prefixes, items) {
         }
     });
 
-    return filteredItems;
+    return filteredItems.slice(0, first);
 }

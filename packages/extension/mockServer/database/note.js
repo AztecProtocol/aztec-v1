@@ -10,6 +10,7 @@ import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
+import fetchFromData from '../utils/fetchFromData';
 import {
     toString,
 } from '../../src/utils/metadata';
@@ -53,19 +54,15 @@ for (let i = 0; i < numberOfNotes; i += 1) {
     });
 }
 
-export const getNotes = (_, args) => {
-    const {
-        first,
-        id_gt: idGt,
-    } = args;
+const noteWherePrefixes = [
+    'id',
+];
 
-    let startAt = 0;
-    if (idGt) {
-        startAt = notes.findIndex(({ id }) => id === idGt) + 1;
-    }
-
-    return notes.slice(startAt, first);
-};
+export const getNotes = (_, args) => fetchFromData(
+    noteWherePrefixes,
+    notes,
+    args,
+);
 
 const getFetchConditions = makeGetFetchConditions([
     'id',

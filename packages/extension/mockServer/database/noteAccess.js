@@ -6,7 +6,7 @@ import {
     makeGetFetchConditions,
 } from '../utils/getFetchConditions';
 import findEntityByKey from '../utils/findEntityByKey';
-import filterByWhere from '../utils/filterByWhere';
+import fetchFromData from '../utils/fetchFromData';
 import notes, {
     getNoteById,
     updateNote,
@@ -101,40 +101,22 @@ const noteAccessesWherePrefixes = [
     'timestamp',
 ];
 
-export const getNoteAccesses = (_, args) => {
-    const {
-        first,
-        where,
-    } = args;
-
-    const filteredAccess = filterByWhere(
-        where,
-        noteAccessesWherePrefixes,
-        noteAccess,
-    );
-
-    return filteredAccess.slice(0, first);
-};
+export const getNoteAccesses = (_, args) => fetchFromData(
+    noteAccessesWherePrefixes,
+    noteAccess,
+    args,
+);
 
 const noteChangeLogsWherePrefixes = [
     'id',
     'account',
 ];
 
-export const getNoteChangeLogs = (_, args) => {
-    const {
-        first,
-        where,
-    } = args;
-
-    const filteredAccess = filterByWhere(
-        where,
-        noteChangeLogsWherePrefixes,
-        noteChangeLogs,
-    );
-
-    return filteredAccess.slice(0, first);
-};
+export const getNoteChangeLogs = (_, args) => fetchFromData(
+    noteChangeLogsWherePrefixes,
+    noteChangeLogs,
+    args,
+);
 
 export const grantAccess = (noteId, metadataStr) => {
     const note = getNoteById(noteId);

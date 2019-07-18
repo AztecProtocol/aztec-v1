@@ -1,3 +1,4 @@
+import findLastIndex from 'lodash/findLastIndex';
 import {
     errorLog,
 } from '~utils/log';
@@ -24,6 +25,7 @@ class SyncService {
 
     async syncNotes({
         address,
+        excludes = [],
         lastSynced = '',
     } = {}) {
         const account = this.accounts.get(address);
@@ -38,8 +40,9 @@ class SyncService {
         });
 
         const newNotes = await fetchNoteFromServer({
-            account: address,
             lastSynced,
+            excludes,
+            account: address,
             numberOfNotes: notesPerRequest,
         });
         console.log('syncNotes', newNotes);
@@ -48,9 +51,28 @@ class SyncService {
 
         const lastNote = newNotes[newNotes.length - 1];
         if (newNotes.length === notesPerRequest) {
+            const nextSynced = lastNote.timestamp;
+            let nextExcludes = [];
+            if (nextSynced === lastSynced) {
+                nextExcludes = [
+                    ...excludes,
+                ];
+            }
+            findLastIndex(newNotes, ({
+                hash,
+                timestamp,
+            }) => {
+                const isSameTime = timestamp === nextSynced;
+                if (isSameTime) {
+                    nextExcludes.push(hash);
+                }
+                return !isSameTime;
+            });
+            console.log('nextExcludes', nextExcludes);
             await this.syncNotes({
                 address,
-                lastSynced: lastNote.timestamp,
+                excludes: nextExcludes,
+                lastSynced: nextSynced,
             });
         }
 

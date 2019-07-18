@@ -59,8 +59,15 @@ export const typeDefs = gql`
     input Account_filter {
         id: ID
         id_in: [ID!]
+        id_not_in: [ID!]
         address: String
         address_in: [String!]
+        address_not_in: [String!]
+    }
+    input Note_filter {
+        id: ID
+        id_in: [ID!]
+        id_not_in: [ID!]
     }
     input NoteAccess_filter {
         id: ID
@@ -68,8 +75,10 @@ export const typeDefs = gql`
         id_gt: ID
         note: ID
         note_in: [ID!]
+        note_not_in: [ID!]
         account: ID
         account_in: [ID!]
+        account_not_in: [ID!]
         timestamp: BigInt
         timestamp_lt: BigInt
         timestamp_lte: BigInt
@@ -83,12 +92,12 @@ export const typeDefs = gql`
     }
     type Query {
         account(id: ID!): Account
-        accounts(first: Int!, where: Account_filter): [Account!]
+        accounts(first: Int!, where: Account_filter, orderBy: String): [Account!]
         note(id: ID!): Note
-        notes(first: Int!, id_gt: ID): [Note!]
+        notes(first: Int!, where: Note_filter, orderBy: String): [Note!]
         noteAccess(id: ID, noteId: ID, account: ID): NoteAccess
-        noteAccesses(first: Int!, where: NoteAccess_filter): [NoteAccess!]
-        noteChangeLogs(first: Int!, where: NoteChangeLog_filter): [NoteChangeLog!]
+        noteAccesses(first: Int!, where: NoteAccess_filter, orderBy: String): [NoteAccess!]
+        noteChangeLogs(first: Int!, where: NoteChangeLog_filter, orderBy: String): [NoteChangeLog!]
     }
     type Mutation {
         updateNoteMetaData(_noteHash: String!, _metadata: String!): Boolean
