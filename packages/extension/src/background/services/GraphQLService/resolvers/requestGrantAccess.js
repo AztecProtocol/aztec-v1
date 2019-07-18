@@ -32,8 +32,8 @@ export default async function requestGrantAccess(args) {
     const queryStr = `
         query (
             $noteId: ID
-            $noteAccessesWhere: NoteAccessesWhere
-            $accountsWhere: AccountsWhere
+            $noteAccessesWhere: NoteAccess_filter
+            $accountsWhere: Account_filter
         ) {
             userAccess: noteAccess(noteId: $noteId, account: "${currentUser.address}") {
                 note {
