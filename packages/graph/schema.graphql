@@ -9,6 +9,7 @@ type Asset @entity {
 
 type Note @entity {
   id: ID!
+  hash: Bytes!
   asset: Asset!
   owner: Account!
   metadata: Bytes!
@@ -21,6 +22,7 @@ type NoteAccess @entity {
   note: Note!
   account: Account!
   viewingKey: Bytes!
+  timestamp: BigInt!
 }
 
 type Account @entity {

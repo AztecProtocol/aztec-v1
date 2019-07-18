@@ -118,6 +118,15 @@ export class Note extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get hash(): Bytes {
+    let value = this.get("hash");
+    return value.toBytes();
+  }
+
+  set hash(value: Bytes) {
+    this.set("hash", Value.fromBytes(value));
+  }
+
   get asset(): string {
     let value = this.get("asset");
     return value.toString();
@@ -227,6 +236,15 @@ export class NoteAccess extends Entity {
 
   set viewingKey(value: Bytes) {
     this.set("viewingKey", Value.fromBytes(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
   }
 }
 

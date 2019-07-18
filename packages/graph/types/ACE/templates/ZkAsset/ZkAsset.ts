@@ -14,28 +14,6 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
-export class LogBytes extends EthereumEvent {
-  get params(): LogBytes__Params {
-    return new LogBytes__Params(this);
-  }
-}
-
-export class LogBytes__Params {
-  _event: LogBytes;
-
-  constructor(event: LogBytes) {
-    this._event = event;
-  }
-
-  get message(): Bytes {
-    return this._event.parameters[0].value.toBytes();
-  }
-
-  get b(): Bytes {
-    return this._event.parameters[1].value.toBytes();
-  }
-}
-
 export class CreateNoteRegistry extends EthereumEvent {
   get params(): CreateNoteRegistry__Params {
     return new CreateNoteRegistry__Params(this);
