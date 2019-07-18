@@ -18,11 +18,12 @@ const noteAccess = [];
 const noteChangeLogs = [];
 const toBeDestroyed = [];
 let timestamp = Date.now();
+const processTime = 1000;
 
 const createAccessForAccount = (note, accountAddress, viewingKey) => {
     const accessIndex = noteAccess.length;
     const accessId = entityId('access', timestamp);
-    timestamp += randomInt(0, 60000);
+    timestamp += randomInt(0, processTime);
     const account = accounts.find(({
         address,
     }) => address === accountAddress);
@@ -64,7 +65,7 @@ notes.forEach((note) => {
 
 toBeDestroyed.forEach((accessIndex) => {
     const access = noteAccess[accessIndex];
-    timestamp += randomInt(0, 2000);
+    timestamp += randomInt(0, processTime);
     access.timestamp = timestamp;
 
     noteChangeLogs.push({
