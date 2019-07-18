@@ -8,6 +8,7 @@ const triggerMethod = async (type, method, ...args) => {
     const { address } = AuthService.getAccount();
     const methodSetting = (args.length
         && typeof args[args.length - 1] === 'object'
+        && !Array.isArray(args[args.length - 1])
         && args[args.length - 1])
         || null;
     const methodArgs = methodSetting
@@ -41,11 +42,8 @@ const triggerMethod = async (type, method, ...args) => {
 class Web3Service {
     constructor() {
         this.web3 = null;
-        this.web3_ws = null;
         this.contracts = {};
         this.abis = {};
-        this.currentAddress = null;
-        this.accountIntervalReq = null;
     }
 
     init() {
@@ -68,6 +66,7 @@ class Web3Service {
         config,
         {
             contractName = '',
+            contractAddress = '',
         } = {},
     ) {
         if (!this.web3) return;
@@ -79,9 +78,12 @@ class Web3Service {
             return;
         }
 
-        const lastNetworkId = Object.keys(config.networks).pop();
-        const network = config.networks[lastNetworkId];
-        const address = network && network.address;
+        let address = contractAddress;
+        if (!address) {
+            const lastNetworkId = Object.keys(config.networks).pop();
+            const network = config.networks[lastNetworkId];
+            address = network && network.address;
+        }
         if (!address) {
             console.log(`Contract object "${name}" doesn't have an address. Please set an address first.`);
         }
@@ -163,6 +165,10 @@ class Web3Service {
                 }
 
                 const method = contract.methods[methodName];
+                if (!method) {
+                    throw new Error(`Method '${methodName}' is not defined in contract '${contractName}'.`);
+                }
+
                 return {
                     call: async (...args) => triggerMethod('call', method, ...args),
                     send: async (...args) => triggerMethod('send', method, ...args),
@@ -171,10 +177,14 @@ class Web3Service {
             events: (eventName) => {
                 const contract = this.deployed(contractName, contractAddress);
                 if (!contract) {
-                    throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
+                    throw new Error(`Cannot call events('${eventName}') of undefined.`);
                 }
+
                 return {
-                    where: (options = {}) => contract.getPastEvents('CreateNoteRegistry', {
+                    all: () => contract.getPastEvents('allEvents', {
+                        fromBlock: 0,
+                    }),
+                    where: (options = {}) => contract.getPastEvents(eventName, {
                         filter: options,
                     }),
                 };

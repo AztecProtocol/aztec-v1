@@ -5,7 +5,7 @@ import {
   ZkAsset as ZkAssetTemplate,
 } from '../types/ACE/templates';
 import {
-  ZkAsset,
+  Asset,
 } from '../types/schema';
 
 export function createNoteRegistry(event: CreateNoteRegistry): void {
@@ -13,11 +13,11 @@ export function createNoteRegistry(event: CreateNoteRegistry): void {
   ZkAssetTemplate.create(zkAssetAddress);
 
   let id = zkAssetAddress.toHex();
-  let zkAsset = new ZkAsset(id);
-  zkAsset.address = zkAssetAddress;
-  zkAsset.linkedTokenAddress = event.params.linkedTokenAddress;
-  zkAsset.scalingFactor = event.params.scalingFactor;
-  zkAsset.canAdjustSupply = event.params.canAdjustSupply;
-  zkAsset.canConvert = event.params.canConvert;
-  zkAsset.save();
+  let asset = new Asset(id);
+  asset.address = zkAssetAddress;
+  asset.linkedTokenAddress = event.params.linkedTokenAddress;
+  asset.scalingFactor = event.params.scalingFactor;
+  asset.canAdjustSupply = event.params.canAdjustSupply;
+  asset.canConvert = event.params.canConvert;
+  asset.save();
 }

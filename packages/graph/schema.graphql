@@ -1,4 +1,4 @@
-type ZkAsset @entity {
+type Asset @entity {
   id: ID!
   address: Bytes!
   linkedTokenAddress: Bytes!
@@ -9,7 +9,7 @@ type ZkAsset @entity {
 
 type Note @entity {
   id: ID!
-  zkAsset: ZkAsset!
+  asset: Asset!
   owner: Account!
   metadata: Bytes!
   access: [NoteAccess!] @derivedFrom(field:"note")
@@ -20,7 +20,7 @@ type NoteAccess @entity {
   id: ID!
   note: Note!
   account: Account!
-  sharedSecret: String!
+  viewingKey: Bytes!
 }
 
 type Account @entity {

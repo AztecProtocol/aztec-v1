@@ -12,7 +12,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class ZkAsset extends Entity {
+export class Asset extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -20,17 +20,17 @@ export class ZkAsset extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save ZkAsset entity without an ID");
+    assert(id !== null, "Cannot save Asset entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save ZkAsset entity with non-string ID. " +
+      "Cannot save Asset entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("ZkAsset", id.toString(), this);
+    store.set("Asset", id.toString(), this);
   }
 
-  static load(id: string): ZkAsset | null {
-    return store.get("ZkAsset", id) as ZkAsset | null;
+  static load(id: string): Asset | null {
+    return store.get("Asset", id) as Asset | null;
   }
 
   get id(): string {
@@ -118,13 +118,13 @@ export class Note extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get zkAsset(): string {
-    let value = this.get("zkAsset");
+  get asset(): string {
+    let value = this.get("asset");
     return value.toString();
   }
 
-  set zkAsset(value: string) {
-    this.set("zkAsset", Value.fromString(value));
+  set asset(value: string) {
+    this.set("asset", Value.fromString(value));
   }
 
   get owner(): string {
@@ -220,13 +220,13 @@ export class NoteAccess extends Entity {
     this.set("account", Value.fromString(value));
   }
 
-  get sharedSecret(): string {
-    let value = this.get("sharedSecret");
-    return value.toString();
+  get viewingKey(): Bytes {
+    let value = this.get("viewingKey");
+    return value.toBytes();
   }
 
-  set sharedSecret(value: string) {
-    this.set("sharedSecret", Value.fromString(value));
+  set viewingKey(value: Bytes) {
+    this.set("viewingKey", Value.fromBytes(value));
   }
 }
 
