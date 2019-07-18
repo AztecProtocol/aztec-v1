@@ -24,7 +24,7 @@ class SyncService {
 
     async syncNotes({
         address,
-        lastId = '',
+        lastSynced = '',
     } = {}) {
         const account = this.accounts.get(address);
         if (!account) return;
@@ -39,7 +39,7 @@ class SyncService {
 
         const newNotes = await fetchNoteFromServer({
             account: address,
-            lastId,
+            lastSynced,
             numberOfNotes: notesPerRequest,
         });
         console.log('syncNotes', newNotes);
@@ -50,21 +50,19 @@ class SyncService {
         if (newNotes.length === notesPerRequest) {
             await this.syncNotes({
                 address,
-                lastId: lastNote.logId,
+                lastSynced: lastNote.timestamp,
             });
         }
+
+        await userModel.update({
+            address,
+            lastSynced: Date.now(),
+        });
 
         this.accounts.set(address, {
             ...account,
             syncing: false,
         });
-
-        if (lastNote) {
-            await userModel.update({
-                address,
-                lastSyncedLogId: lastNote.logId,
-            });
-        }
     }
 
     async syncAccount(address) {
@@ -92,7 +90,7 @@ class SyncService {
         if (!account.syncing) {
             await this.syncNotes({
                 address,
-                lastId: user.lastSyncedLogId,
+                lastSynced: (user.lastSynced || 0) + 1,
             });
         }
     }

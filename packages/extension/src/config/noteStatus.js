@@ -1,6 +1,10 @@
-// { ACTION_FROM_NOTE_ACCESS_LOG: CODE }
+// { NOTE_ACTION: NOTE_STATUS }
+export const actions = {
+    DESTROY: 'DESTROYED',
+};
 
+// { NOTE_STATUS: CODE_IN_STORAGE }
 export default {
-    DESTROY: 0,
-    CREATE: 1,
+    DESTROYED: 0,
+    CREATED: 1,
 };
