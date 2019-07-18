@@ -1,6 +1,8 @@
 import dataKey from '~utils/dataKey';
 import {
+    toCode,
     isDestroyed,
+    isEqual,
 } from '~utils/noteStatus';
 import noteModel from '~database/models/note';
 import noteAccessModel from '~database/models/noteAccess';
@@ -29,6 +31,7 @@ export default async function createOrUpdateNote(note) {
         value,
         asset: assetKey,
         owner: ownerKey,
+        status: toCode(status),
     };
 
     const {
@@ -68,7 +71,7 @@ export default async function createOrUpdateNote(note) {
     const isNoteDestroyed = isDestroyed(status);
     const shouldUpdateAssetBalance = justCreated
         ? !isNoteDestroyed
-        : status !== prevStatus;
+        : !isEqual(status, prevStatus);
     if (isOwner
         && shouldUpdateAssetBalance
     ) {

@@ -3,7 +3,7 @@ import {
 } from 'sinon';
 import * as storage from '~utils/storage';
 import {
-    fromAction,
+    toCode,
 } from '~utils/noteStatus';
 import noteModel from '~database/models/note';
 import createOrUpdateNote from '../addNote/createOrUpdateNote';
@@ -40,7 +40,7 @@ describe('createOrUpdate', () => {
         asset: assets[0],
         account: users[0],
         owner: users[0],
-        action: 'CREATE',
+        status: 'CREATED',
     };
 
     const withAsset = (assetIndex, prevNote = note) => ({
@@ -100,7 +100,7 @@ describe('createOrUpdate', () => {
             value,
             asset: note.assetKey,
             owner: note.ownerKey,
-            status: fromAction(note.action),
+            status: toCode(note.status),
         });
     });
 
@@ -188,12 +188,12 @@ describe('createOrUpdate', () => {
         expect(savedNote).toMatchObject({
             value,
             asset: note.assetKey,
-            status: fromAction(note.action),
+            status: toCode(note.status),
         });
 
         const updatedNote = {
             ...note,
-            action: 'DESTROY',
+            status: 'DESTROYED',
         };
         await createOrUpdateNote(updatedNote);
         const numberOfSet1 = set.callCount;
@@ -204,7 +204,7 @@ describe('createOrUpdate', () => {
         });
         expect(updatedSavedNote).toEqual({
             ...savedNote,
-            status: fromAction(updatedNote.action),
+            status: toCode(updatedNote.status),
         });
     });
 
