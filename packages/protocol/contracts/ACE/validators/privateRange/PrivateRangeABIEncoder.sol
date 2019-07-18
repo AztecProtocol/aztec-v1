@@ -40,8 +40,6 @@ library PrivateRangeABIEncoder {
             let outputOwners := add(0x124, calldataload(0x184)) // one word after outputOwners = 1st
             let metadata := add(0x144, calldataload(0x1a4)) // two words after metadata = 1st
 
-            // return(0x00, 0x60)
-
             // `returndata` starts at 0x160
             // `proofOutputs` starts at 0x180
             // 0x160 - 0x180 = relative offset in returndata to first bytes argument (0x20)
