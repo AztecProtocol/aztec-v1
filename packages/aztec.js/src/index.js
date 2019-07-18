@@ -4,7 +4,6 @@ const note = require('./note');
 const proof = require('./proof');
 const setup = require('./setup');
 const signer = require('./signer');
-const oldPrivateRange = require('./oldPrivateRange');
 
 module.exports = {
     encoder,
@@ -13,5 +12,4 @@ module.exports = {
     ...proof,
     setup,
     signer,
-    oldPrivateRange,
 };
