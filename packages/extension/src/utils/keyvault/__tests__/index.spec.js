@@ -18,8 +18,9 @@ describe('Keystore', () => {
                 password: fixture.password,
                 salt: fixture.salt,
             });
-            expect(key.pwDerivedKey).to.exist;
-            expect(key.salt).to.exist;
+            // .to.exist is not recommended
+            expect(key.pwDerivedKey).to.exist; // eslint-disable-line no-unused-expressions
+            expect(key.salt).to.exist; // eslint-disable-line no-unused-expressions
             expect(key.pwDerivedKey.constructor).to.equal(Uint8Array);
             expect(key.pwDerivedKey).to.eql(new Uint8Array(fixture.pwDerivedKey));
         });
@@ -38,8 +39,8 @@ describe('Keystore', () => {
                 mnemonic: fixture.mnSeed,
                 hdPathString: fixture.hdPathString,
             });
-            expect(k).to.exist;
-            expect(k.privacyKeys).to.exist;
+            expect(k).to.exist; // eslint-disable-line no-unused-expressions
+            expect(k.privacyKeys).to.exist; // eslint-disable-line no-unused-expressions
             // check it returns an error if missing params
             // check it creates the keys
             // check it encrypts
@@ -48,29 +49,35 @@ describe('Keystore', () => {
 
 
     describe('IES encryption', () => {
-        test('should be able to decrypt a cipher with the public key of the private key', async () => {
-            const fixture = fixtures.valid[0];
-            const key = await KeyStore.generateDerivedKey({
-                password: 'password',
-                salt: fixture.salt,
-            });
-            const k = new KeyStore({
-                pwDerivedKey: key.pwDerivedKey,
-                salt: fixture.salt,
-                mnemonic: fixture.mnSeed,
-                hdPathString: fixture.hdPathString,
-            });
-            const output = k.curve25519Encrypt(
-                k.privacyKeys.publicKey, 'Hello Word',
-            );
-            const decrypted = k.curve25519Decrypt(output, new Uint8Array(fixture.pwDerivedKey));
-        });
+        // test('should be able to decrypt a cipher with the public key of the private key', async () => {
+        //     const fixture = fixtures.valid[0];
+        //     const key = await KeyStore.generateDerivedKey({
+        //         password: 'password',
+        //         salt: fixture.salt,
+        //     });
+        //     const k = new KeyStore({
+        //         pwDerivedKey: key.pwDerivedKey,
+        //         salt: fixture.salt,
+        //         mnemonic: fixture.mnSeed,
+        //         hdPathString: fixture.hdPathString,
+        //     });
+        //     const output = k.curve25519Encrypt(
+        //         k.privacyKeys.publicKey, 'Hello Word',
+        //     );
+        //     const decrypted = k.curve25519Decrypt(output, new Uint8Array(fixture.pwDerivedKey));
+        // });
         // Can't directly test the encrypt/decrypt functions
         // since salt and iv is used.
         fixtures.valid.forEach((f) => {
-            test(`${'encrypts the seed then returns same seed decrypted ' + '"'}${f.mnSeed.substring(0, 25)}..."`, (done) => {
-                const encryptedString = utils.encryptString(f.mnSeed, Uint8Array.from(f.pwDerivedKey));
-                const decryptedString = utils.decryptString(encryptedString, Uint8Array.from(f.pwDerivedKey));
+            test(`'encrypts the seed then returns same seed decrypted "${f.mnSeed.substring(0, 25)}..."`, (done) => {
+                const encryptedString = utils.encryptString(
+                    f.mnSeed,
+                    Uint8Array.from(f.pwDerivedKey),
+                );
+                const decryptedString = utils.decryptString(
+                    encryptedString,
+                    Uint8Array.from(f.pwDerivedKey),
+                );
 
                 expect(decryptedString).to.equal(f.mnSeed);
                 done();
@@ -161,9 +168,9 @@ describe('Keystore', () => {
 
         test('concatenates and hashes entropy sources', async () => {
             const N = fixtures.sha256Test.length;
-            for (let i = 0; i < N; i++) {
-                const ent0 = new Buffer(fixtures.sha256Test[i].ent0);
-                const ent1 = new Buffer(fixtures.sha256Test[i].ent1);
+            for (let i = 0; i < N; i += 1) {
+                const ent0 = Buffer.from(fixtures.sha256Test[i].ent0);
+                const ent1 = Buffer.from(fixtures.sha256Test[i].ent1);
                 const outputString = utils.concatAndSha256(ent0, ent1).toString('hex');
                 expect(outputString).to.equal(fixtures.sha256Test[i].targetHash);
             }

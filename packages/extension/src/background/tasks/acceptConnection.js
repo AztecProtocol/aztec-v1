@@ -46,7 +46,5 @@ export default function acceptConnection() {
             errorLog('Error in GraphQL Service.', error);
             return error;
         }
-
-        return result || {};
     });
 }

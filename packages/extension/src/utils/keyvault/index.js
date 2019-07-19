@@ -11,43 +11,17 @@ Object.defineProperty(global, '_bitcore', { get() { return undefined; }, set() {
 const { Random } = bitcore.crypto;
 const { Hash } = bitcore.crypto;
 
-function strip0x(input) {
-    if (typeof (input) !== 'string') {
-        return input;
-    }
-    if (input.length >= 2 && input.slice(0, 2) === '0x') {
-        return input.slice(2);
-    }
-
-    return input;
-}
-function add0x(input) {
-    if (typeof (input) !== 'string') {
-        return input;
-    }
-    if (input.length < 2 || input.slice(0, 2) !== '0x') {
-        return `0x${input}`;
-    }
-
-    return input;
-}
-
 function leftPadString(stringToPad, padChar, length) {
     let repreatedPadChar = '';
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < length; i += 1) {
         repreatedPadChar += padChar;
     }
 
     return ((repreatedPadChar + stringToPad).slice(-length));
 }
 
-function nacl_encodeHex(msgUInt8Arr) {
-    const msgBase64 = nacl.util.encodeBase64(msgUInt8Arr);
-    return (new Buffer(msgBase64, 'base64')).toString('hex');
-}
-
-function nacl_decodeHex(msgHex) {
-    const msgBase64 = (new Buffer(msgHex, 'hex')).toString('base64');
+function naclDecodeHex(msgHex) {
+    const msgBase64 = Buffer.from(msgHex, 'hex').toString('base64');
     return nacl.util.decodeBase64(msgBase64);
 }
 
@@ -152,7 +126,8 @@ export class KeyStore {
             throw new Error('Provided password derived key is wrong');
         }
 
-        const hdprivkey = new bitcore.HDPrivateKey(hdRoot).derive(this.hdIndex++);
+        const hdprivkey = new bitcore.HDPrivateKey(hdRoot).derive(this.hdIndex);
+        this.hdIndex += 1;
         const privkeyBuf = hdprivkey.privateKey.toBuffer();
 
         let privkeyHex = privkeyBuf.toString('hex');
@@ -181,10 +156,11 @@ export class KeyStore {
         };
     }
 
-    curve25519Encrypt(receiverPublicKey, msgParams) {
+    curve25519Encrypt(receiverPublicKey, msgParams) { // eslint-disable-line class-methods-use-this
         const ephemeralKeyPair = nacl.box.keyPair();
+        let pubKeyUInt8Array;
         try {
-            var pubKeyUInt8Array = nacl.util.decodeBase64(receiverPublicKey);
+            pubKeyUInt8Array = nacl.util.decodeBase64(receiverPublicKey);
         } catch (err) {
             throw new Error('Bad public key');
         }
@@ -193,7 +169,12 @@ export class KeyStore {
         const nonce = nacl.randomBytes(nacl.box.nonceLength);
 
         // encrypt
-        const encryptedMessage = nacl.box(msgParamsUInt8Array, nonce, pubKeyUInt8Array, ephemeralKeyPair.secretKey);
+        const encryptedMessage = nacl.box(
+            msgParamsUInt8Array,
+            nonce,
+            pubKeyUInt8Array,
+            ephemeralKeyPair.secretKey,
+        );
 
         // handle encrypted data
         const output = {
@@ -208,19 +189,29 @@ export class KeyStore {
     curve25519Decrypt(encryptedData, pwDerivedKey) {
         const privKey = utils.decryptString(this.privacyKeys.encPrivKey, pwDerivedKey);
         // string to buffer to UInt8Array
-        const recieverPrivateKeyUint8Array = nacl_decodeHex(privKey);
-        const recieverEncryptionPrivateKey = nacl.box.keyPair.fromSecretKey(recieverPrivateKeyUint8Array).secretKey;
+        const recieverPrivateKeyUint8Array = naclDecodeHex(privKey);
+        const recieverEncryptionPrivateKey = nacl
+            .box
+            .keyPair
+            .fromSecretKey(recieverPrivateKeyUint8Array)
+            .secretKey;
 
         const nonce = nacl.util.decodeBase64(encryptedData.nonce);
         const ciphertext = nacl.util.decodeBase64(encryptedData.ciphertext);
         const ephemPublicKey = nacl.util.decodeBase64(encryptedData.ephemPublicKey);
 
         // decrypt
-        const decryptedMessage = nacl.box.open(ciphertext, nonce, ephemPublicKey, recieverEncryptionPrivateKey);
+        const decryptedMessage = nacl.box.open(
+            ciphertext,
+            nonce,
+            ephemPublicKey,
+            recieverEncryptionPrivateKey,
+        );
 
         // return decrypted msg data
+        let output;
         try {
-            var output = nacl.util.encodeUTF8(decryptedMessage);
+            output = nacl.util.encodeUTF8(decryptedMessage);
         } catch (err) {
             throw new Error('Decryption failed.');
         }
@@ -265,24 +256,19 @@ export class KeyStore {
 
     isDerivedKeyCorrect(pwDerivedKey) {
         const paddedSeed = utils.decryptString(this.encSeed, pwDerivedKey);
-        if (paddedSeed && paddedSeed.length > 0) {
-            return true;
-        }
+        return paddedSeed && paddedSeed.length > 0;
     }
 }
 
 
-KeyStore.generateDerivedKey = ({ password, salt }) => {
-    if (!salt) {
-        salt = generateSalt(32);
-    }
-
+KeyStore.generateDerivedKey = ({ password, salt: customSalt }) => {
+    const salt = customSalt || generateSalt(32);
     const logN = 14;
     const r = 8;
     const dkLen = 32;
     const interruptStep = 200;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         scrypt(password, salt, logN, r, dkLen, interruptStep, (key) => {
             resolve({ pwDerivedKey: key, salt });
         }, 'binary');
@@ -303,12 +289,12 @@ KeyStore.generateDerivedKey = ({ password, salt }) => {
 // If extraEntropy is not set, the random number generator
 // is used directly.
 
-KeyStore.generateRandomSeed = function (extraEntropy) {
+KeyStore.generateRandomSeed = (extraEntropy) => {
     let seed = '';
     if (extraEntropy === undefined) {
         seed = new Mnemonic(Mnemonic.Words.ENGLISH);
     } else if (typeof extraEntropy === 'string') {
-        const entBuf = new Buffer(extraEntropy);
+        const entBuf = Buffer.from(extraEntropy);
         const randBuf = Random.getRandomBuffer(256 / 8);
         const hashedEnt = utils.concatAndSha256(randBuf, entBuf).slice(0, 128 / 8);
         seed = new Mnemonic(hashedEnt, Mnemonic.Words.ENGLISH);
@@ -319,9 +305,7 @@ KeyStore.generateRandomSeed = function (extraEntropy) {
     return seed.toString();
 };
 
-KeyStore.isSeedValid = function (seed) {
-    return Mnemonic.isValid(seed, Mnemonic.Words.ENGLISH);
-};
+KeyStore.isSeedValid = seed => Mnemonic.isValid(seed, Mnemonic.Words.ENGLISH);
 
 
 KeyStore.deserialize = (jsonKs, pwDerivedKey) => {

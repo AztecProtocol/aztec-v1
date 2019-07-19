@@ -1,3 +1,4 @@
+import noteModel from '~database/models/note';
 import AuthService from '../services/AuthService';
 
 export const sessionDecorator = async () => AuthService.validateSession();

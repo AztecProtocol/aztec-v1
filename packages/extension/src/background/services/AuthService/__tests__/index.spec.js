@@ -62,12 +62,13 @@ describe.only('Auth Service Tests', () => {
     });
 
     it('should add the domain to the list of domains that can decrypt an assets balance', async () => {
-        const session = await AuthService.enableAssetForDomain({
+        const domain = {
             password: 'password',
             domain: 'https://google.com',
             asset: '__asset_id_0',
-        });
-        expect(session.assets.__asset_id_0).toEqual(true);
+        };
+        const session = await AuthService.enableAssetForDomain(domain);
+        expect(session.assets[domain.asset]).toEqual(true);
     });
 
 
