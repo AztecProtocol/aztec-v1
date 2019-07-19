@@ -11,7 +11,7 @@ export default async function postToContentScript({
     const requestId = generateRandomId();
 
     return new Promise((resolve) => {
-        window.addEventListener('message', (event) => {
+        const responseHandler = (event) => {
             const {
                 type,
                 responseId,
@@ -20,9 +20,12 @@ export default async function postToContentScript({
             if (type === contentEvent
                 && responseId === requestId
             ) {
+                window.removeEventListener('message', responseHandler, false);
                 resolve(response);
             }
-        }, false);
+        };
+
+        window.addEventListener('message', responseHandler, false);
 
         window.postMessage({
             type: clientEvent,
