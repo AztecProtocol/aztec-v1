@@ -137,6 +137,7 @@ class Web3Service {
         const { address } = this.account;
         const methodSetting = (args.length
             && typeof args[args.length - 1] === 'object'
+            && !Array.isArray(args[args.length - 1])
             && args[args.length - 1])
             || null;
         const methodArgs = methodSetting
@@ -154,12 +155,15 @@ class Web3Service {
         return {
             method: (methodName) => {
                 const contract = this.deployed(contractName, contractAddress);
-                console.log(contract);
                 if (!contract) {
                     throw new Error(`Cannot call method '${methodName}' of undefined.`);
                 }
 
                 const method = contract.methods[methodName];
+                if (!method) {
+                    throw new Error(`Method '${methodName}' is not defined in contract '${contractName}'.`);
+                }
+
                 return {
                     call: async (...args) => this.triggerMethod('call', method, ...args),
                     send: async (...args) => this.triggerMethod('send', method, ...args),
