@@ -283,6 +283,9 @@ parser.processMacro = (
     let { bytecode } = result.data;
     const jumpkeys = Object.keys(jumptables);
     const tableOffsets = {};
+    if (jumpkeys.length > 0) {
+        bytecode += '00';
+    }
     jumpkeys.forEach((jumpkey) => {
         const jumptable = jumptables[jumpkey];
         let tablecode;
@@ -531,7 +534,28 @@ parser.parseJumpTable = (body, compressed = false) => {
 };
 
 parser.parseCodeTable = (body) => {
-    const table = body.match(grammar.jumpTable.JUMPS).map(j => regex.removeSpacesAndLines(j)).join('');
+    let index = 0;
+    let table = '';
+    while (true) {
+        const whitespace = body.slice(index).match(grammar.topLevel.WHITESPACE);
+        const decLiteral = body.slice(index).match(grammar.macro.LITERAL_DECIMAL);
+        const hexLiteral = body.slice(index).match(grammar.macro.LITERAL_HEX);
+        if (whitespace) {
+            index += whitespace[0].length;
+        } else if (decLiteral) {
+            table += new BN(decLiteral[1], 10).toString(16);
+            index += decLiteral[0].length;
+        } else if (hexLiteral) {
+            table += hexLiteral[1];
+            index += hexLiteral[0].length;
+        } else if (regex.endOfData(body.slice(index))) {
+            break;
+        } else {
+            const tokenThatFailed = body.slice(index).match('.+?\\b');
+            throw { index, tokenThatFailed };
+        }
+    }
+    // const table = body.match(grammar.jumpTable.JUMPS).map(j => regex.removeSpacesAndLines(j)).join('');
     const size = table.length / 2;
     return {
         jumps: null,
@@ -540,6 +564,9 @@ parser.parseCodeTable = (body) => {
     };
 };
 
+
+// TODO: redo errors in this so inputMap doesn't have to be passed
+// TODO: are countEmptyChars needed now whitespace is parsed seperately?
 /**
  * Parse an individual macro
  * @param body
@@ -597,7 +624,7 @@ parser.parseMacro = (body, macros, jumptables, startingIndex = 0, inputMap = {})
             const table = token[1];
             const debug = inputMaps.getFileLine(startingIndex + index + regex.countEmptyChars(token[0]), inputMap);
             if (!jumptables[table]) {
-                throw new Error(`could not find jumptable ${table} in ${jumptables}. ` + debugLocationString(debug));
+                throw new Error(`could not find jumptable/table ${table} in ${jumptables}. ` + debugLocationString(debug));
             }
             const hex = formatEvenBytes(toHex(jumptables[table].table.size));
             ops.push({
@@ -726,6 +753,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const macro = input.match(grammar.topLevel.MACRO);
             const type = macro[2];
             const macroName = macro[3];
+            // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(macro[0]), inputMap);
             check(regex.conformsToNameRules(macro[3]), `macro '${macroName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
             check(type === 'macro', `expected '${macro[3]}' to define a macro ` + debugLocationString(debug));
@@ -746,17 +774,29 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             // if a code table is matched
         } else if ((currentContext === CONTEXT.NONE) && grammar.topLevel.CODE_TABLE.test(input)) {
             const table = input.match(grammar.topLevel.CODE_TABLE);
-            const type = table[1];
-            const codeTableName = table[2];
+            const type = table[2];
+            const codeTableName = table[3];
+            // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(table[0]), inputMap);
             check(regex.conformsToNameRules(codeTableName), `bytecode table '${codeTableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
             check(type === 'table', `expected ${codeTableName} to define a packed jump table ` + debugLocationString(debug));
-            const body = table[3];
+            const body = table[4];
+            let finalTable;
+            try {
+                finalTable = parser.parseCodeTable(body);
+            } catch ({ bodyIndex, tokenThatFailed }) {
+                const tableDebug = inputMaps.getFileLine(index + table[1].length + bodyIndex, inputMap);
+                if (tokenThatFailed) {
+                    throw new Error(`unexpected token '${tokenThatFailed[0]}' in bytecode table '${codeTableName}'. All tokens in bytecode tables must be decimal and/or hexadecimal literals. ` + debugLocationString(debug));
+                } else {
+                    throw new Error(`unexpected error around '${table[0].slice(bodyIndex, table[0].slice(bodyIndex).indexOf('\n'))}' in bytecode table '${codeTableName}'. ` + debugLocationString(tableDebug));
+                }
+            }
             jumptables = {
                 ...jumptables,
-                [table[2]]: {
-                    name: table[2],
-                    table: parser.parseCodeTable(body),
+                [table[3]]: {
+                    name: table[3],
+                    table: finalTable,
                 },
             };
             index += table[0].length;
@@ -765,6 +805,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE_PACKED);
             const type = jumptable[1];
             const packedJumptableName = jumptable[2];
+            // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
             check(regex.conformsToNameRules(packedJumptableName), `packed jumptable '${packedJumptableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
             check(type === 'jumptable__packed', `expected '${packedJumptableName}' to define a packed jump table ` + debugLocationString(debug));
@@ -782,6 +823,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const jumptable = input.match(grammar.topLevel.JUMP_TABLE);
             const type = jumptable[1];
             const jumptableName = jumptable[2];
+            // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
             check(regex.conformsToNameRules(jumptableName), `jumptable '${jumptableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
             check(type === 'jumptable', `expected ${jumptable} to define a jump table. ` + debugLocationString(debug));
@@ -796,6 +838,7 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             index += jumptable[0].length;
         } else if (input.match(grammar.topLevel.IMPORT)) {
             const token = input.match(grammar.topLevel.IMPORT);
+            // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(token[0]), inputMap);
             throw new Error('#include statements must come before any other declarations or operations in the file. ' + debugLocationString(debug));
         } else {
