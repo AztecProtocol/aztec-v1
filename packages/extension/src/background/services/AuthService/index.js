@@ -157,6 +157,12 @@ export default {
         return data.domain[domain];
     },
     registerExtension: async ({ password, salt }) => {
+        const { keyStore: currentKeyStore } = await get(['keyStore']);
+        if (currentKeyStore) {
+            return {
+                publicKey: currentKeyStore.privacyKeys.publicKey,
+            };
+        }
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
             salt,

@@ -51,11 +51,14 @@ export default {
         login(password: "${password}") 
     `),
     registerExtension: async ({ password, salt }) => {
-        const { registerExtension: { publicKey } } = await mutate(` 
+        const response = await mutate(` 
             registerExtension(password: "${password}", salt: "${salt}") {
                 publicKey
             }
         `);
+        const {
+            registerExtension: { publicKey },
+        } = response;
         const domainData = {
             name: 'AZTECAccountRegistry',
             version: '2',
