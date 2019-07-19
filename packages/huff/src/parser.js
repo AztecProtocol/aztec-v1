@@ -260,7 +260,6 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
             },
         },
     };
-    // TODO templates that have templates
 };
 
 parser.processMacro = (
@@ -273,7 +272,7 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly undefined jump labels, or a misspelled label/opcode? (NB possibly substituted as a template parameter):`;
+        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly forgot parantheses in macro call, undefined jump labels, or a misspelled label/opcode? (NB possibly substituted as a template parameter):`;
         result.unmatchedJumps.forEach((unmatchedJump) => {
             errorString += `\n"${unmatchedJump.label}". ` + debugLocationString(unmatchedJump.debug);
         }); // NB currently not using bytecodeIndex or lineIndex but they might be useful
