@@ -6,7 +6,7 @@ import setData from './setData';
 export default async function set(
     data,
     {
-        forceUpdate = false,
+        forceReplace = false,
         ignoreDuplicate = false,
     } = {},
 ) {
@@ -60,6 +60,7 @@ export default async function set(
                 name,
                 autoIncrementBy,
                 dataKeyPattern,
+                forceReplace,
                 ignoreDuplicate: true,
             },
         );
@@ -79,7 +80,7 @@ export default async function set(
             key,
             subFieldsKey,
             fields: subFieldsKey ? fields.fields : fields,
-            forceUpdate,
+            forceReplace,
             ignoreDuplicate,
         },
     );
