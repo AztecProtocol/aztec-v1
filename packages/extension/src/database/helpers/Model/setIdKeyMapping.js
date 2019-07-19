@@ -13,7 +13,7 @@ export default async function setIdKeyMapping(
         name,
         autoIncrementBy,
         dataKeyPattern,
-        forceUpdate = false,
+        forceReplace = false,
         ignoreDuplicate = false,
     } = {},
 ) {
@@ -30,7 +30,7 @@ export default async function setIdKeyMapping(
             if (key) {
                 if (ignoreDuplicate) {
                     ignored = true;
-                } else if (!forceUpdate) {
+                } else if (!forceReplace) {
                     return errorAction(`Model '${name}' with id "${id}" is already defined.`);
                 }
             } else {
@@ -60,7 +60,7 @@ export default async function setIdKeyMapping(
                     count += 1;
                 } else if (ignoreDuplicate) {
                     ignored = true;
-                } else if (!forceUpdate) {
+                } else if (!forceReplace) {
                     return errorAction(`Model '${name}' with key "${key}" is already defined.`);
                 }
             }

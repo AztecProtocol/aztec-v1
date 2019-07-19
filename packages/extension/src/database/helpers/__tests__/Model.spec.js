@@ -168,6 +168,61 @@ describe('Model', () => {
         expect(errors).toEqual([]);
     });
 
+    it('can replace existing values in storage', async () => {
+        const carModel = Model({
+            name: 'car',
+            fields: [
+                'color',
+                'height',
+            ],
+        });
+
+        const originalData = await carModel.set({
+            id: 'cc',
+            color: 'yellow',
+            height: 120,
+        });
+        const firstCallCount = set.callCount;
+        expect(firstCallCount > 0).toBe(true);
+        expect(originalData).toEqual({
+            data: {
+                cc: {
+                    color: 'yellow',
+                    height: 120,
+                },
+            },
+            storage: {
+                cc: ['yellow', 120],
+            },
+            modified: ['cc'],
+        });
+
+        const duplicatedInfo = await carModel.set(
+            {
+                id: 'cc',
+                color: 'red',
+            },
+            {
+                forceReplace: true,
+            },
+        );
+        expect(duplicatedInfo).toEqual({
+            data: {
+                cc: {
+                    color: 'red',
+                },
+            },
+            storage: {
+                cc: ['red', -0],
+            },
+            modified: ['cc'],
+        });
+        const secondCallCount = set.callCount;
+        expect(secondCallCount > firstCallCount).toBe(true);
+
+        expect(errors).toEqual([]);
+    });
+
     it('only save data specified in fields', async () => {
         const carModel = Model({
             name: 'car',
