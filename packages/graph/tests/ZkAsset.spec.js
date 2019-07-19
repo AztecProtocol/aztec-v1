@@ -3,10 +3,12 @@ import dotenv from 'dotenv';
 import devUtils from '@aztec/dev-utils';
 import secp256k1 from '@aztec/secp256k1';
 import aztec from 'aztec.js';
+/* eslint-disable import/no-unresolved */
 import ACE from '../build/contracts/ACE';
 import ERC20Mintable from '../build/contracts/ERC20Mintable';
 import ZkAssetOwnable from '../build/contracts/ZkAssetOwnable';
 import JoinSplit from '../build/contracts/JoinSplit';
+/* eslint-enable */
 import Web3Service from './helpers/Web3Service';
 import Web3Events from './helpers/Web3Events';
 import Query from './helpers/Query';

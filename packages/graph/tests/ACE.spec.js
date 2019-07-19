@@ -1,7 +1,9 @@
 /* global expect, beforeAll */
+/* eslint-disable import/no-unresolved */
 import ACE from '../build/contracts/ACE';
 import ERC20Mintable from '../build/contracts/ERC20Mintable';
 import ZkAsset from '../build/contracts/ZkAsset';
+/* eslint-enable */
 import Web3Service from './helpers/Web3Service';
 import Web3Events from './helpers/Web3Events';
 import Query from './helpers/Query';
