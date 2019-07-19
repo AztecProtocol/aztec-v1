@@ -31,6 +31,6 @@ export default {
         enableAssetForDomain: pipe([sessionDecorator, async (_, args) => AuthService.enableAssetForDomain(args)]),
         login: AuthService.login,
         // logout: sessionDecorator(AuthService.logout),
-        registerExtension: [accountDecorator, async (_, args) => AuthService.registerExtension(args)],
+        registerExtension: pipe([async (_, args) => AuthService.registerExtension(args)]),
     },
 };
