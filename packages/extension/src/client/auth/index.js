@@ -1,32 +1,41 @@
 import mutate from '../utils/mutate';
 import Web3Service from '../services/Web3Service';
 
-const devUtils = require('@aztec/dev-utils');
+// const devUtils = require('@aztec/dev-utils');
 
-const { EIP712_DOMAIN } = devUtils.constants.eip712;
+// const { EIP712_DOMAIN } = devUtils.constants.eip712;
 
-const signatureSchema = {
-    types: {
-        RegisterExtensionSignature: [
-            { name: 'account', type: 'address' },
-        ],
-        EIP712Domain: EIP712_DOMAIN,
-    },
-    primaryType: 'RegisterExtensionSignature',
-};
+// const signatureSchema = {
+//     types: {
+//         RegisterExtensionSignature: [
+//             { name: 'account', type: 'address' },
+//         ],
+//         EIP712Domain: EIP712_DOMAIN,
+//     },
+//     primaryType: 'RegisterExtensionSignature',
+// };
 
-const domain = [
+const domainParams = [
     {
-        name: 'name', type: 'string',
+        name: 'name',
+        type: 'string',
     },
     {
-        name: 'version', type: 'string',
+        name: 'version',
+        type: 'string',
     },
-    { name: 'chainId', type: 'uint256' },
     {
-        name: 'verifyingContract', type: 'address',
+        name: 'chainId',
+        type: 'uint256',
     },
-    { name: 'salt', type: 'bytes32' },
+    {
+        name: 'verifyingContract',
+        type: 'address',
+    },
+    {
+        name: 'salt',
+        type: 'bytes32',
+    },
 ];
 
 const AZTECAccount = [
@@ -42,16 +51,19 @@ const AZTECAccount = [
 
 
 export default {
-    enableAsset: async ({ domain, asset }) => await mutate(`
-            enableAssetForDomain(domain: "${domain}", asset: "${asset}") 
-        `),
+    enableAsset: async ({
+        domain,
+        asset,
+    }) => mutate(`
+        enableAssetForDomain(domain: "${domain}", asset: "${asset}")
+    `),
     login: ({
         password,
     }) => mutate(`
-        login(password: "${password}") 
+        login(password: "${password}")
     `),
     registerExtension: async ({ password, salt }) => {
-        const response = await mutate(` 
+        const response = await mutate(`
             registerExtension(password: "${password}", salt: "${salt}") {
                 publicKey
             }
@@ -74,7 +86,7 @@ export default {
 
         const data = JSON.stringify({
             types: {
-                EIP712Domain: domain,
+                EIP712Domain: domainParams,
                 AZTECAccount,
             },
             domain: domainData,

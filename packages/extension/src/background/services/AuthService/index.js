@@ -1,6 +1,6 @@
 import domainModel from '~database/models/domain';
 import { get, set, remove } from '~utils/storage';
-import { KeyStore } from '~utils/keyvault/index.js';
+import { KeyStore } from '~utils/keyvault';
 import generateRandomId from '~utils/generateRandomId';
 
 
@@ -19,10 +19,12 @@ export default {
                 domain,
             });
             // check if the user has granted the domain access to the given asset
-            const { [asset]: isApproved } = assets;
+            const {
+                [asset]: isApproved,
+            } = assets;
+
             if (!isApproved) {
                 throw new Error(`The user has not granted the domain "${domain}" access`);
-                return;
             }
 
             return {
@@ -31,37 +33,34 @@ export default {
             };
         } catch (e) {
             throw new Error(`The user has not granted the domain "${domain}" access`);
-            return;
         }
     },
     validateSession: async () => {
         // we check the particular host has access
         const now = Date.now();
-        const { session, keyStore } = await get(['session', 'keyStore']);
+        const {
+            session,
+            keyStore,
+        } = await get(['session', 'keyStore']);
         if (!keyStore) {
             throw new Error('AZTEC extension not setup please create account');
-            return;
         }
 
         if (!session) {
             throw new Error('No session please login');
-            return;
         }
 
         if (session.createdAt < now - 60 * 60 * 24 * 21) {
             // remove session not pwkey
             await remove('session');
             throw new Error('The session is > 21 days old please login');
-            return;
         }
 
         // the host has not been active in two days
         if (session.lastActive < now - 60 * 60 * 24 * 7) {
             await remove('session');
             throw new Error('The session is no longer active please login');
-            return;
         }
-
 
         // we can now fetch the pwDerivedKey
         const decodedKey = new Uint8Array(Object.values(JSON.parse(session.pwDerivedKey)));
@@ -69,7 +68,6 @@ export default {
 
         if (!k.isDerivedKeyCorrect(decodedKey)) {
             throw new Error('pwDerivedKey should be correct');
-            return;
         }
 
         await set({
@@ -81,15 +79,6 @@ export default {
 
         return session;
     },
-
-    requiresRegistration: async () => {
-        const { keyStore } = await get(['keyStore']);
-        if (!keyStore) {
-            return true;
-        }
-        throw new Error('User already has an account');
-    },
-
     login: async ({ password }) => {
         const { keyStore } = await get(['keyStore']);
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
@@ -122,7 +111,6 @@ export default {
         const {
             data,
             modified,
-            storage,
         } = await domainModel.set(
             {
                 domain,
@@ -134,7 +122,6 @@ export default {
                 ignoreDuplicate: true,
             },
         );
-
         if (!modified.length) {
             const {
                 domain: {
@@ -144,7 +131,9 @@ export default {
                 },
             } = data;
 
-            const { data: updatedData } = await domainModel.update({
+            const {
+                data: updatedData,
+            } = await domainModel.update({
                 domain,
                 assets: {
                     ...prevAssets,
@@ -154,15 +143,10 @@ export default {
 
             return updatedData.domain[domain];
         }
+
         return data.domain[domain];
     },
     registerExtension: async ({ password, salt }) => {
-        const { keyStore: currentKeyStore } = await get(['keyStore']);
-        if (currentKeyStore) {
-            return {
-                publicKey: currentKeyStore.privacyKeys.publicKey,
-            };
-        }
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
             salt,
@@ -184,6 +168,7 @@ export default {
                 createdAt: Date.now(),
             },
         });
+
         return {
             publicKey: keyStore.privacyKeys.publicKey,
         };
