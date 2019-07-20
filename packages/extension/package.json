@@ -45,12 +45,12 @@
         "webpack-cli": "^3.3.4"
     },
     "scripts": {
-        "lint": "eslint ./ --color",
-        "test": "jest ./src",
-        "test:test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
-        "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
         "build:dev": "webpack --config webpack.dev.js",
+        "lint": "eslint ./ --color",
         "mockServer": "babel-node ./mockServer",
+        "test": "jest ./src",
+        "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
+        "test:test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
         "watch": "webpack --watch --config webpack.dev.js"
     },
     "devDependencies": {
