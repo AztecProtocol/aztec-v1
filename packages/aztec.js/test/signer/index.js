@@ -105,29 +105,39 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
-        it('signNote() should produce a well formed `v` ECDSA parameter', async () => {
-            const {publicKey, privateKey} = secp256k1.generateAccount();
+        it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
             const testNoteValue = 10;
             const testNote = await note.create(publicKey, testNoteValue);
 
-            const signature = signer.signNote(verifyingContract, testNote.noteHash, spender, privateKey);
+            const signature = signer.signNoteForConfidentialApprove(
+                verifyingContract,
+                testNote.noteHash,
+                spender,
+                privateKey,
+            );
             const v = parseInt(signature.slice(130, 132), 16);
             expect(v).to.be.oneOf([27, 28]);
         });
 
         it('should recover publicKey from signature params', async () => {
-            const {publicKey, privateKey} = secp256k1.generateAccount();
+            const { publicKey, privateKey } = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
             const testNoteValue = 10;
             const testNote = await note.create(publicKey, testNoteValue);
 
-            const signature = signer.signNote(verifyingContract, testNote.noteHash, spender, privateKey);
+            const signature = signer.signNoteForConfidentialApprove(
+                verifyingContract,
+                testNote.noteHash,
+                spender,
+                privateKey,
+            );
 
             const r = Buffer.from(signature.slice(2, 66), 'hex');
-            const s = Buffer.from(signature.slice(66, 130), 'hex')
+            const s = Buffer.from(signature.slice(66, 130), 'hex');
             const v = parseInt(signature.slice(130, 132), 16);
 
             const domain = signer.generateZKAssetDomainParams(verifyingContract);
@@ -144,7 +154,7 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
-        it('signNote() should produce same signature as MetaMask signing function', async () => {
+        it('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
@@ -155,7 +165,8 @@ describe('Signer', () => {
                 domain: {
                     name: 'ZK_ASSET',
                     version: '1',
-                    verifyingContract },
+                    verifyingContract,
+                },
                 types: {
                     NoteSignature: [
                         { name: 'noteHash', type: 'bytes32' },
@@ -176,7 +187,12 @@ describe('Signer', () => {
                 },
             };
 
-            const aztecSignature = signer.signNote(verifyingContract, testNote.noteHash, spender, aztecAccount.privateKey);
+            const aztecSignature = signer.signNoteForConfidentialApprove(
+                verifyingContract,
+                testNote.noteHash,
+                spender,
+                aztecAccount.privateKey,
+            );
             const metaMaskSignature = ethSigUtil.signTypedData(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
                 data: metaMaskTypedData,
             });

@@ -1,5 +1,5 @@
 const bn128 = require('@aztec/bn128');
-const { proofs, constants } = require('@aztec/dev-utils');
+const { proofs } = require('@aztec/dev-utils');
 const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
@@ -143,27 +143,21 @@ class JoinSplitProof extends Proof {
     }
 
     /**
-     * Construct the EIP712 signatures, giving permission for notes to be spent
-     * @param {string} validatorAddress Ethereum address of the join-split validator contract
-     * @param {Object[]} inputNoteOwners Ethereum accounts of input note owners
+     * Construct EIP712 signatures, giving permission for the input notes to be spent
+     * @param {string} verifyingContract Ethereum address of the ZkAsset contract, from which confidentialTransfer() is
+     * called 
+     * @param {string[]} inputNoteOwners Ethereum accounts of input note owners
      * @returns {string} array of signatures
      */
-    constructSignatures(validatorAddress, inputNoteOwners) {
+    constructSignatures(verifyingContract, inputNoteOwners) {
         const signaturesArray = inputNoteOwners.map((inputNoteOwner, index) => {
-            const domain = signer.generateZKAssetDomainParams(validatorAddress);
-            const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
-
-            const message = {
-                proof: proofs.JOIN_SPLIT_PROOF,
-                noteHash: this.inputNotes[index].noteHash,
-                challenge: this.challengeHex,
-                sender: this.sender,
-            };
-
-            const { privateKey } = inputNoteOwner;
-            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-            const concatenatedSignature = signature[0].slice(2) + signature[1].slice(2) + signature[2].slice(2);
-            return concatenatedSignature;
+            return signer.signNotesForConfidentialTransfer(
+                verifyingContract,
+                inputNoteOwner,
+                this.inputNotes[index].noteHash,
+                this.challengeHex,
+                this.sender,
+            );
         });
         return `0x${signaturesArray.join('')}`;
     }
