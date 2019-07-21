@@ -112,12 +112,7 @@ describe('Signer', () => {
             const testNoteValue = 10;
             const testNote = await note.create(publicKey, testNoteValue);
 
-            const signature = signer.signNoteForConfidentialApprove(
-                verifyingContract,
-                testNote.noteHash,
-                spender,
-                privateKey,
-            );
+            const signature = signer.signNoteForConfidentialApprove(verifyingContract, testNote.noteHash, spender, privateKey);
             const v = parseInt(signature.slice(130, 132), 16);
             expect(v).to.be.oneOf([27, 28]);
         });
@@ -129,12 +124,7 @@ describe('Signer', () => {
             const testNoteValue = 10;
             const testNote = await note.create(publicKey, testNoteValue);
 
-            const signature = signer.signNoteForConfidentialApprove(
-                verifyingContract,
-                testNote.noteHash,
-                spender,
-                privateKey,
-            );
+            const signature = signer.signNoteForConfidentialApprove(verifyingContract, testNote.noteHash, spender, privateKey);
 
             const r = Buffer.from(signature.slice(2, 66), 'hex');
             const s = Buffer.from(signature.slice(66, 130), 'hex');
@@ -193,6 +183,8 @@ describe('Signer', () => {
                 spender,
                 aztecAccount.privateKey,
             );
+
+            // eth-sig-util is the MetaMask signing package
             const metaMaskSignature = ethSigUtil.signTypedData(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
                 data: metaMaskTypedData,
             });

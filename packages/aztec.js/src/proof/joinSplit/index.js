@@ -131,7 +131,7 @@ class JoinSplitProof extends Proof {
     /**
      * Construct EIP712 signatures, giving permission for the input notes to be spent
      * @param {string} verifyingContract Ethereum address of the ZkAsset contract, from which confidentialTransfer() is
-     * called 
+     * called
      * @param {string[]} inputNoteOwners Ethereum accounts of input note owners
      * @returns {string} array of signatures
      */
