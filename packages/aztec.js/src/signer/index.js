@@ -40,7 +40,7 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
 };
 
 /**
- * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a 
+ * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a
  * ZkAsset. The ZkAsset.confidentialApprove() method must be called when granting note spending permission
  * to a third party and is required in order for ZkAsset.confidentialTransferFrom() to be successful.
  *
@@ -81,7 +81,7 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, p
  * @param {string} noteHash hash of the note being signed
  * @param {string} challenge hexadecimal representation of the challenge variable
  * @param {string} sender address of the transaction sender
- * @returns {string} ECDSA signature parameters [r, s, v] 
+ * @returns {string} ECDSA signature parameters [r, s, v]
  */
 signer.signNotesForConfidentialTransfer = (verifyingContract, noteOwnerAccount, noteHash, challenge, sender) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
