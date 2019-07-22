@@ -52,10 +52,9 @@ const AZTECAccount = [
 
 export default {
     enableAsset: async ({
-        domain,
         asset,
     }) => mutate(`
-        enableAssetForDomain(domain: "${domain}", asset: "${asset}")
+        enableAssetForDomain(asset: "${asset}")
     `),
     login: ({
         password,

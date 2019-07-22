@@ -3,6 +3,9 @@ import {
 } from 'sinon';
 import crypto from 'crypto';
 import * as storage from '~utils/storage';
+import {
+    permissionError,
+} from '~utils/error';
 import AuthService from '..';
 
 jest.mock('~utils/storage');
@@ -127,10 +130,16 @@ describe.only('Auth Service Tests', () => {
             password: 'password',
             domain: 'https://google.com',
         });
-        await expect(AuthService.validateDomainAccess({
+        const resp = await AuthService.validateDomainAccess({
             domain: 'https://google.com',
             asset: '__asset_id_0',
-        })).rejects.toThrow('The user has not granted the domain "https://google.com" access');
+        });
+        expect(resp).toEqual(permissionError('domain.not.grantedAccess.asset', {
+            messageOptions: {
+                domain: 'https://google.com',
+                asset: '__asset_id_0',
+            },
+        }));
     });
 
 

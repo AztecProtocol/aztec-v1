@@ -1,72 +1,94 @@
-import query from '../utils/query';
 import Web3Service from '../services/Web3Service';
+import query from './utils/query';
+import ApiError from './utils/ApiError';
+
+const dataProperties = [
+    'value',
+    'owner',
+];
 
 export default class Note {
     constructor({
         id,
     } = {}) {
         this.id = id;
-
-        this.staticProperty = [
-            'value',
-            'owner',
-        ];
     }
 
     refresh = async () => {
-        const response = await query(`
-            note(id: "${this.id}") {
-                value
-                owner {
-                    address
-                }
-                asset {
-                    balance
-                }
-            }
-        `);
-        const data = (response && response.note) || {};
-        this.staticProperty.forEach((key) => {
-            this[key] = data[key];
-        });
-    };
-
-    async grantAccess(address) {
-        const addressList = typeof address === 'string'
-            ? [address]
-            : address;
-
-        let granted = false;
-        let errorMessage;
-
         const {
-            requestGrantAccess: {
-                metadata,
-                prevMetadata,
-                asset,
-                error,
-            } = {},
+            noteResponse,
         } = await query(`
-            requestGrantAccess(noteId: "${this.id}", address: "${addressList.join('')}") {
-                metadata
-                prevMetadata
-                asset {
-                    address
+            noteResponse: note(id: "${this.id}") {
+                note {
+                    value
+                    owner {
+                        address
+                    }
+                    asset {
+                        balance
+                    }
                 }
                 error {
+                    type
+                    key
                     message
+                    response
                 }
             }
         `) || {};
 
-        if (error) {
-            errorMessage = error.message;
-        } else if (metadata && metadata !== prevMetadata) {
+        const {
+            note,
+        } = noteResponse || {};
+        if (note) {
+            dataProperties.forEach((key) => {
+                this[key] = note[key];
+            });
+        }
+    };
+
+    async grantAccess(addresses) {
+        const addressList = typeof addresses === 'string'
+            ? [addresses]
+            : addresses;
+
+        const {
+            response,
+        } = await query(`
+            response: grantNoteAccessPermission(noteId: "${this.id}", address: "${addressList.join('')}") {
+                permission {
+                    metadata
+                    prevMetadata
+                    asset {
+                        address
+                    }
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `);
+
+        const {
+            permission,
+        } = response;
+        const {
+            metadata,
+            prevMetadata,
+            asset,
+        } = permission || {};
+        let updated = false;
+        if (metadata
+            && metadata !== prevMetadata
+        ) {
             const {
                 address: zkAssetAddress,
             } = asset;
             try {
-                granted = await Web3Service
+                await Web3Service
                     .useContract('ZkAsset')
                     .at(zkAssetAddress)
                     .method('updateNoteMetaData')
@@ -75,23 +97,12 @@ export default class Note {
                         metadata,
                     );
             } catch (e) {
-                errorMessage = e;
+                throw new ApiError(e);
             }
+            updated = true;
         }
 
-        if (errorMessage) {
-            console.log(errorMessage);
-        } else if (granted) {
-            console.log(
-                `Successfully granted access of note '${this.id}' to address:`,
-                addressList,
-            );
-        } else {
-            console.log(
-                `Address already has access to note '${this.id}':`,
-                addressList,
-            );
-        }
+        return updated;
     }
 }
 

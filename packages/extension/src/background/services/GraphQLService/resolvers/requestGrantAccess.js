@@ -12,30 +12,27 @@ import {
     argsError,
 } from '~utils/error';
 
-export default async function requestGrantAccess(args) {
+export default async function requestGrantAccess(args, ctx) {
     const {
         noteId,
         address,
     } = args;
+    const {
+        user: currentUser,
+    } = ctx;
 
     const addressList = [];
     for (let i = 0; i < address.length; i += ADDRESS_LENGTH) {
         addressList.push(address.substr(i, ADDRESS_LENGTH));
     }
 
-    // TODO
-    // get currentUser from AuthService
-    const currentUser = {
-        address: '0x_account_00000000000000000000_address__0',
-    };
-
     const queryStr = `
         query (
-            $noteId: ID
+            $userAccessesWhere: NoteAccess_filter
             $noteAccessesWhere: NoteAccess_filter
             $accountsWhere: Account_filter
         ) {
-            userAccess: noteAccess(noteId: $noteId, account: "${currentUser.address}") {
+            userAccess: noteAccesses(first: 1, where: $userAccessesWhere) {
                 note {
                     metadata
                     asset {
@@ -56,7 +53,9 @@ export default async function requestGrantAccess(args) {
         }
     `;
     const variables = {
-        noteId,
+        userAccessesWhere: {
+            account: currentUser.address,
+        },
         noteAccessesWhere: {
             note: noteId,
             account_in: addressList,
@@ -72,12 +71,14 @@ export default async function requestGrantAccess(args) {
     } = await GraphNodeService.query({
         query: queryStr,
         variables,
-    });
+    }) || {};
 
-    if (!userAccess) {
+    if (!userAccess || !userAccess.length) {
         return argsError('account.noteAccess', {
-            noteId,
-            account: currentUser.address,
+            messageOptions: {
+                noteId,
+                account: currentUser.address,
+            },
         });
     }
 
@@ -86,28 +87,36 @@ export default async function requestGrantAccess(args) {
     ) {
         if (addressList.length === 1) {
             return argsError('account.notFound', {
-                account: addressList[0],
+                messageOptions: {
+                    account: addressList[0],
+                },
             });
         }
 
         const notFound = addressList
             .filter(addr => !sharedAccounts.find(a => a.address !== addr));
         return argsError('account.notFound.count', {
-            count: notFound.length,
-            accounts: notFound,
+            messageOptions: {
+                count: notFound.length,
+                accounts: notFound,
+            },
         });
     }
 
     const invalidAccounts = sharedAccounts.filter(a => !a.publicKey);
     if (invalidAccounts.length === 1) {
         return argsError('account.notFound.publicKey', {
-            account: invalidAccounts[0],
+            messageOptions: {
+                account: invalidAccounts[0],
+            },
         });
     }
     if (invalidAccounts.length > 1) {
         return argsError('account.notFound.publicKeys', {
-            count: invalidAccounts.length,
-            accounts: invalidAccounts,
+            messageOptions: {
+                count: invalidAccounts.length,
+                accounts: invalidAccounts,
+            },
         });
     }
 
@@ -119,7 +128,7 @@ export default async function requestGrantAccess(args) {
             },
         },
         viewingKey: userViewingKey,
-    } = userAccess;
+    } = userAccess[0];
 
     if (existingAccesses
         && existingAccesses.length === addressList.length

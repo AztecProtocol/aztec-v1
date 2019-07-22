@@ -9,14 +9,21 @@ import GraphNodeService from '../services/GraphNodeService';
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
-        chrome.storage.local.clear();
+        // chrome.storage.local.clear();
 
         await set({
-            __graphNode: 'http://localhost:4000/',
+            // __graphNode: 'http://localhost:4000/',
+            __graphNode: 'http://127.0.0.1:8000/subgraphs/name/aztec/note-management',
         });
-        await userModel.set({
-            address: '0x_account_00000000000000000000_address__0',
-        });
+        await userModel.set(
+            {
+                // address: '0x_account_00000000000000000000_address__0',
+                address: '0x3339c3c842732f4daacf12aed335661cf4eab66b',
+            },
+            {
+                ignoreDuplicate: true,
+            },
+        );
 
         onIdle(
             async () => {

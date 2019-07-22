@@ -11,7 +11,7 @@ class Web3Service {
         this.abis = {};
     }
 
-    init({
+    async init({
         providerUrl = 'http://localhost:8545',
         account,
     } = {}) {
@@ -26,7 +26,16 @@ class Web3Service {
             this.web3 = new Web3(provider);
         }
 
-        this.account = account;
+        if (account) {
+            this.account = account;
+        } else {
+            const [address] = await this.web3.eth.getAccounts();
+            if (address) {
+                this.account = {
+                    address,
+                };
+            }
+        }
     }
 
     registerContract(
