@@ -99,7 +99,7 @@ describe.only('Auth Service Tests', () => {
 
         await set({
             session: {
-                lastActive: Date.now() - (8 * 24 * 60 * 60),
+                lastActive: Date.now() - (8 * 24 * 60 * 60 * 1000),
                 createdAt: Date.now(),
             },
         });
@@ -114,7 +114,7 @@ describe.only('Auth Service Tests', () => {
         });
         await set({
             session: {
-                createdAt: Date.now() - (22 * 24 * 60 * 60),
+                createdAt: Date.now() - (22 * 24 * 60 * 60 * 1000),
                 lastActive: Date.now(),
             },
         });

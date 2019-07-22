@@ -50,14 +50,14 @@ export default {
             throw new Error('No session please login');
         }
 
-        if (session.createdAt < now - 60 * 60 * 24 * 21) {
+        if (session.createdAt < now - 60 * 60 * 24 * 21 * 1000) {
             // remove session not pwkey
             await remove('session');
             throw new Error('The session is > 21 days old please login');
         }
 
         // the host has not been active in two days
-        if (session.lastActive < now - 60 * 60 * 24 * 7) {
+        if (session.lastActive < now - 60 * 60 * 24 * 7 * 1000) {
             await remove('session');
             throw new Error('The session is no longer active please login');
         }
