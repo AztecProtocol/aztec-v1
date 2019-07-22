@@ -29,7 +29,7 @@ export default async function get(params = {}) {
         : '';
 
     if (!dataKeyPattern && key) {
-        warnLog(`Use id instead of key ("${key}") to get data from model.`);
+        warnLog(`Use id instead of key ("${key}") to get data from model '${name}.`);
         key = '';
     }
 
@@ -45,7 +45,7 @@ export default async function get(params = {}) {
             key = await storage.get(id);
 
             if (typeof key === 'object') {
-                warnLog(`id "${id}" doesn't map to a key in storage.`);
+                warnLog(`id "${id}" doesn't map to a key in ${name} model.`);
                 storageData = key;
                 key = '';
             } else if (key) {
@@ -53,24 +53,30 @@ export default async function get(params = {}) {
             }
         }
     } else {
-        errorLog(`'key' or 'id' must be presented in the parameters of ${name}Model.get()`);
-        return {};
+        errorLog(`'key' or 'id' must be presented in the parameters of get() for ${name} model`);
+        return null;
     }
 
     if (subFieldsDataKey && !subFieldsKey) {
-        let allData = storageData;
-        if (storageData) {
-            allData = {};
-            Object.keys(storageData).forEach((subField) => {
-                const readableData = transformDataFromDb(fields.fields, storageData[subField]);
-                allData[subField] = {
-                    id,
-                    [subFieldsDataKey]: subField,
-                    ...readableData,
-                };
-            });
+        if (!storageData) {
+            return null;
         }
+
+        const allData = {};
+        Object.keys(storageData).forEach((subField) => {
+            const readableData = transformDataFromDb(fields.fields, storageData[subField]);
+            allData[subField] = {
+                id,
+                [subFieldsDataKey]: subField,
+                ...readableData,
+            };
+        });
         return allData;
+    }
+
+    if (subFieldsKey && !storageData) {
+        warnLog(`Try to get data for '${subFieldsKey}' from undefined ${name} storage.`);
+        return null;
     }
 
     const readableData = subFieldsKey
@@ -92,5 +98,5 @@ export default async function get(params = {}) {
         }
     }
 
-    return readableData;
+    return readableData || null;
 }

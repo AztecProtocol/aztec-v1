@@ -417,6 +417,21 @@ describe('Model with dataKey mapping', () => {
 
         expect(errors).toEqual([]);
     });
+
+    it('return null if try to get data that is undefined in storage', async () => {
+        const carModel = Model({
+            name: 'car',
+            fields: [
+                'serial',
+                'color',
+            ],
+            dataKeyPattern: 'c:{count}',
+        });
+        const car = await carModel.get({
+            key: 'car',
+        });
+        expect(car).toEqual(null);
+    });
 });
 
 describe('Model with fields object', () => {
@@ -679,24 +694,24 @@ describe('Model with fields object', () => {
 });
 
 describe('invalid constructor parameters', () => {
-    it('should return an empty object if config has missing required fields', async () => {
+    it('should return null if config has missing required fields', async () => {
         const withoutName = Model({
         });
-        expect(withoutName).toEqual({});
+        expect(withoutName).toBe(null);
         expect(errors.pop()).toMatch(/name/);
 
         const withoutFields = Model({
             name: 'car',
         });
-        expect(withoutFields).toEqual({});
+        expect(withoutFields).toBe(null);
         expect(errors.pop()).toMatch(/fields/);
     });
 
-    it('should return an empty object if config is of wrong type', async () => {
+    it('should return null if config is of wrong type', async () => {
         const wrongRequiredTypeModel = Model({
             name: 123,
         });
-        expect(wrongRequiredTypeModel).toEqual({});
+        expect(wrongRequiredTypeModel).toBe(null);
         expect(errors.pop()).toMatch(/name/);
 
         const wrongTypeModel = Model({
@@ -704,7 +719,7 @@ describe('invalid constructor parameters', () => {
             fields: [],
             autoIncrementBy: null,
         });
-        expect(wrongTypeModel).toEqual({});
+        expect(wrongTypeModel).toBe(null);
         expect(errors.pop()).toMatch(/autoIncrementBy/);
     });
 });
