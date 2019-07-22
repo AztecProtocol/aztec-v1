@@ -4,9 +4,8 @@ import psl from 'psl';
 import {
     errorLog,
 } from '~utils/log';
+import insertVariablesToGql from '~utils/insertVariablesToGql';
 import GraphQLService from '../services/GraphQLService';
-
-import insertVariablesToGql from '../utils/insertVariablesToGql';
 
 export default function acceptConnection() {
     browser.runtime.onMessage.addListener(async (data, sender) => {
