@@ -7,7 +7,8 @@ const { expect } = chai;
 describe('grammar tests', () => {
     describe('top level tests', () => {
         it('can find template definition', () => {
-            const template = 'template <first, second,third >';
+            const templateParameters = 'first, second,third ';
+            const template = `template <${templateParameters}>`;
             const source = `${template}
             #define macro TEST = takes(3) returns(2) {
                 <first> <second>
@@ -16,7 +17,7 @@ describe('grammar tests', () => {
             }
             `;
             const result = source.match(grammar.topLevel.TEMPLATE);
-            expect(result).to.deep.equal([`${template}`, 'first, second,third ']);
+            expect(result).to.deep.equal([template, templateParameters]);
         });
 
         it('can find macro definition', () => {
@@ -42,87 +43,106 @@ describe('grammar tests', () => {
         });
 
         it('can strip a line', () => {
-            const source = `first second
+            const firstLine = 'first second';
+            const source = `${firstLine}
             third
             fourth`;
-            const result = source.match(RegExp('^.*')) || [];
-            expect(result[0]).to.equal('first second');
+            const result = (source.match(RegExp('^.*')) || [])[0];
+            expect(result).to.equal(firstLine);
         });
 
         it('can find include statement (double quotes)', () => {
-            const source = `# include "foofahblah"`;
-            const result = source.match(grammar.topLevel.IMPORT);
-            expect(result[2]).to.equal('foofahblah');
+            const filenameOfIncludedFile = 'includedFile.huff';
+            const source = `# include "${filenameOfIncludedFile}"`;
+            const result = source.match(grammar.topLevel.IMPORT)[2];
+            expect(result).to.equal(filenameOfIncludedFile);
         });
 
         it('can find include statement (single quotes)', () => {
-            const source = `# include 'foofahblah'`;
-            const result = source.match(grammar.topLevel.IMPORT);
-            expect(result[2]).to.equal('foofahblah');
+            const filenameOfIncludedFile = 'includedFile.huff';
+            const source = `# include '${filenameOfIncludedFile}'`;
+            const result = source.match(grammar.topLevel.IMPORT)[2];
+            expect(result).to.equal(filenameOfIncludedFile);
         });
     });
 
     describe('macro grammar tests', () => {
         it('can find a hex string', () => {
-            const source = `0x14fe33ac hello
+            const hexValue = '14fe33ac';
+            const source = `0x${hexValue} hello
             world`;
-            const result = source.match(grammar.macro.LITERAL_HEX);
-            expect(result[1]).to.equal('14fe33ac');
+            const result = source.match(grammar.macro.LITERAL_HEX)[1];
+            expect(result).to.equal(hexValue);
         });
 
         it('can find a decimal string', () => {
-            const source = `123456789 0x3a hello
+            const decValue = '123456789';
+            const source = `${decValue} 0x3a hello
             world`;
-            const result = source.match(grammar.macro.LITERAL_DECIMAL);
-            expect(result[1]).to.equal('123456789');
+            const result = source.match(grammar.macro.LITERAL_DECIMAL)[1];
+            expect(result).to.equal(decValue);
         });
 
         it('can find a jump label', () => {
-            const source = `label_test: 0x1234 22
+            const label = 'label_test';
+            const source = `${label}: 0x1234 22
             foo`;
-            const result = source.match(grammar.macro.JUMP_LABEL);
-            expect(result[1]).to.equal('label_test');
+            const result = source.match(grammar.macro.JUMP_LABEL)[1];
+            expect(result).to.equal(label);
         });
 
         it('can identify __codesize() pattern, calling a template', () => {
-            const source = `__codesize(FOO_BAR<1,3,543>) foo bar
+            const macroName = 'FOO_BAR';
+            const templateParameters = '1,3,543';
+            const source = `__codesize(${macroName}<${templateParameters}>) foo bar
               xx`;
             const result = source.match(grammar.macro.CODE_SIZE);
-            expect(result[1]).to.equal('FOO_BAR');
-            expect(result[2]).to.equal('1,3,543');
+            const resultMacroName = result[1];
+            const resultTemplateParameters = result[2];
+            expect(resultMacroName).to.equal(macroName);
+            expect(resultTemplateParameters).to.equal(templateParameters);
         });
 
         it('can identify __codesize() pattern, without template', () => {
-            const source = `__codesize(FOO_BAR) foo bar
+            const macroName = 'FOO_BAR';
+            const source = `__codesize(${macroName}) foo bar
               xx`;
             const result = source.match(grammar.macro.CODE_SIZE);
-            expect(result[1]).to.equal('FOO_BAR');
+            const resultMacroName = result[1];
+            expect(resultMacroName).to.equal(macroName);
             expect(result[2]).to.equal(undefined);
         });
 
         it('can identify template invocation', () => {
-            const source = `< abcde132 >
+            const templateName = 'abcde132';
+            const source = `< ${templateName} >
                 xabcde`;
-            const result = source.match(grammar.macro.TEMPLATE);
-            expect(result[1]).to.equal('abcde132');
+            const result = source.match(grammar.macro.TEMPLATE)[1];
+            expect(result).to.equal(templateName);
         });
 
         it('can identify a macro call with no templates', () => {
-            const source = `FOO_CALL() awoer 23 
+            const macroName = 'FOO_CALL';
+            const source = `${macroName}() awoer 23 
                 ddds
             `;
             const result = source.match(grammar.macro.MACRO_CALL);
-            expect(result[1]).to.equal('FOO_CALL');
+            const resultMacroName = result[1];
+            expect(resultMacroName).to.equal(macroName);
             expect(result[2]).to.equal(undefined);
         });
 
         it('can identify a templated macro call', () => {
-            const source = `FOO_CALL<a,b , defg>() awoer 23 
+            const macroName = 'FOO_CALL';
+            const templateParameters = 'a,b , defg';
+            const source = `${macroName}<${templateParameters}>() awoer 23 
                 ddds
             `;
             const result = source.match(grammar.macro.MACRO_CALL);
-            expect(result[1]).to.equal('FOO_CALL');
-            expect(result[2]).to.equal('a,b , defg');
+            const resultMacroName = result[1];
+            const resultTemplateParameters = result[2];
+            expect(resultMacroName).to.equal(macroName);
+            expect(resultTemplateParameters).to.equal(templateParameters);
         });
 
         it('will not think token without parentheses is a macro call', () => {
@@ -134,11 +154,12 @@ describe('grammar tests', () => {
         });
 
         it('can identify a generic token', () => {
-            const source = `mulmod awoer 23 
+            const genericOpcode = 'mulmod';
+            const source = `${genericOpcode} awoer 23 
                 ddds
             `;
-            const result = source.match(grammar.macro.TOKEN);
-            expect(result[1]).to.equal('mulmod');
+            const result = source.match(grammar.macro.TOKEN)[1];
+            expect(result).to.equal(genericOpcode);
         });
     });
 });
