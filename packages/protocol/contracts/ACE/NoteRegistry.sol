@@ -20,6 +20,16 @@ contract NoteRegistry is IAZTEC {
     using SafeMath for uint256;
     using ProofUtils for uint24;
 
+    // registry address is same as ACE address
+    event CreateNoteRegistry(
+        address registryOwner,
+        address registryAddress,
+        uint256 scalingFactor,
+        address linkedTokenAddress,
+        bool canAdjustSupply,
+        bool canConvert
+    );
+
     /**
     * Note struct. This is the data that we store when we log AZTEC notes inside a NoteRegistry
     *
@@ -126,6 +136,15 @@ contract NoteRegistry is IAZTEC {
             })
         });
         registries[msg.sender] = registry;
+
+        emit CreateNoteRegistry(
+            msg.sender,
+            address(this),
+            _scalingFactor,
+            _linkedTokenAddress,
+            _canAdjustSupply,
+            _canConvert
+        );
     }
 
     /**
