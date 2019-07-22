@@ -1,31 +1,42 @@
-import query from '../utils/query';
+import query from './utils/query';
 // import notePicker from '../utils/notePicker';
+
+const dataProperties = [
+    'balance',
+];
 
 export default class Asset {
     constructor({
         id,
     } = {}) {
         this.id = id;
-        this.staticProperty = [
-            'balance',
-            'balance',
-        ];
     }
 
     refresh = async () => {
-        const response = await query(`
-            asset(id: "${this.id}") {
-                balance
-                owner
-                publicKey
-                hash
-                viewingKey
+        const {
+            assetResponse,
+        } = await query(`
+            assetResponse: asset(id: "${this.id}") {
+                asset {
+                    balance
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
             }
-        `);
-        const data = (response && response.asset) || {};
-        this.staticProperty.forEach((key) => {
-            this[key] = data[key];
-        });
+        `) || {};
+
+        const {
+            asset,
+        } = assetResponse || {};
+        if (asset) {
+            dataProperties.forEach((key) => {
+                this[key] = asset[key];
+            });
+        }
     };
 
     deposit = () => {

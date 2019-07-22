@@ -4,16 +4,18 @@ export default gql`
     enum ErrorType {
         PERMISSION
         ARGUMENTS
+        UNKNOWN
     }
     type Error {
         type: ErrorType!
         key: String!
         message: String!
+        response: String
     }
     type Account {
         id: ID
         address: String
-        publicKey: String!
+        publicKey: String
     }
     type Domain {
         assets: [Asset!]
@@ -26,7 +28,7 @@ export default gql`
     type Asset {
         id: ID!
         address: String!
-        balance: Int!
+        balance: Int
     }
     type Note {
         id: ID!
@@ -37,29 +39,50 @@ export default gql`
         metadata: String
         value: Int
     }
-    type RequestGrantAccess {
-        error: Error
+    type GrantNoteAccessPermission {
         prevMetadata: String
         metadata: String
         asset: Asset
     }
+    type AssetApiResponse {
+        asset: Asset
+        error: Error
+    }
+    type NoteApiResponse {
+        note: Note
+        error: Error
+    }
+    type GrantAccessApiResponse {
+        permission: GrantNoteAccessPermission
+        error: Error
+    }
     type Query {
-        requestGrantAccess(
+        asset(
+            id: ID!
+            currentAddress: String!
+            domain: String!
+        ): AssetApiResponse
+        note(
+            id: ID!
+            currentAddress: String!
+            domain: String!
+        ): NoteApiResponse
+        grantNoteAccessPermission(
             noteId: ID!
             address: String!
-        ): RequestGrantAccess
-        asset(id: ID! domain: String!): Asset
-        note(id: ID! domain: String!): Note
+            currentAddress: String!
+            domain: String!
+        ): GrantAccessApiResponse
     }
     type Mutation {
         enableAssetForDomain(
-            domain: String!,
+            domain: String!
             asset: String!
         ): Domain
         login(
-            password: String!,
+            password: String!
             domain: String!
-        ):Session
+        ): Session
         registerExtension(
             password: String!
             salt: String!

@@ -1,39 +1,69 @@
 import domainModel from '~database/models/domain';
+import userModel from '~database/models/user';
 import { get, set, remove } from '~utils/storage';
 import { KeyStore } from '~utils/keyvault';
 import generateRandomId from '~utils/generateRandomId';
-
+import {
+    permissionError,
+} from '~utils/error';
 
 export default {
-    validateDomainAccess: async ({ domain, asset }) => {
-        if (!domain) {
-            throw new Error('Domain is not present for the query ');
-        }
-
-        if (!asset) {
-            throw new Error('Asset id is not present for the query ');
-        }
-
-        try {
-            const { assets = {} } = await domainModel.get({
-                domain,
+    validateUserAddress: async (address) => {
+        const user = await userModel.get({
+            address: address.toLowerCase(),
+        });
+        if (!user) {
+            return permissionError('account.not.register', {
+                messageOptions: {
+                    account: address,
+                },
             });
-            // check if the user has granted the domain access to the given asset
-            const {
-                [asset]: isApproved,
-            } = assets;
-
-            if (!isApproved) {
-                throw new Error(`The user has not granted the domain "${domain}" access`);
-            }
-
-            return {
-                domain,
-                assets,
-            };
-        } catch (e) {
-            throw new Error(`The user has not granted the domain "${domain}" access`);
         }
+
+        return {
+            user,
+        };
+    },
+    validateDomain: async (domain) => {
+        const registeredDomain = await domainModel.get({
+            domain,
+        });
+        if (!registeredDomain) {
+            return permissionError('domain.not.register', {
+                messageOptions: {
+                    domain,
+                },
+            });
+        }
+
+        return {
+            domain: registeredDomain,
+        };
+    },
+    validateDomainAccess: async ({
+        domain,
+        asset,
+    }) => {
+        const {
+            assets: {
+                [asset]: isApproved,
+            } = {},
+        } = await domainModel.get({
+            domain,
+        }) || {};
+
+        if (!isApproved) {
+            return permissionError('domain.not.grantedAccess.asset', {
+                messageOptions: {
+                    domain,
+                    asset,
+                },
+            });
+        }
+
+        return {
+            domain,
+        };
     },
     validateSession: async () => {
         // we check the particular host has access
@@ -77,7 +107,10 @@ export default {
             },
         });
 
-        return session;
+        return {
+            session,
+            keyStore: k,
+        };
     },
     login: async ({ password }) => {
         const { keyStore } = await get(['keyStore']);

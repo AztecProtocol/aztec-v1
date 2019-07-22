@@ -4,50 +4,38 @@ import noteModel from '~database/models/note';
 import requestGrantAccess from './requestGrantAccess';
 import {
     sessionDecorator,
-    assetAccessDecorator,
 } from '../../../utils/decorators';
-
 import AuthService from '../../AuthService';
-
-const pipe = funcs => async (_, args, ctx = {}, info) => {
-    let result;
-    for (let i = 0; i < funcs.length; i += 1) {
-        result = await funcs[i](_, args, { ...ctx, ...result }, info); // eslint-disable-line no-await-in-loop
-    }
-    return result;
-};
+import {
+    ensureEntityPermission,
+} from '../decorators';
+import pipe from '../utils/pipe';
 
 export default {
-    Query: {
-        asset: pipe([
-            sessionDecorator,
-            assetAccessDecorator,
-            async (_, args) => assetModel.get(args),
-        ]),
-        note: pipe([
-            sessionDecorator,
-            assetAccessDecorator,
-            async (_, args) => noteModel.get(args),
-        ]),
-        requestGrantAccess: pipe([
-            sessionDecorator,
-            assetAccessDecorator,
-            async (_, args) => requestGrantAccess(args),
-        ]),
-    },
     Note: {
-        asset: ({ asset }) => assetModel.get({ id: asset }),
-        owner: ({ owner }) => accountModel.get({ id: owner }),
+        asset: async ({ asset }) => assetModel.get({ key: asset }),
+        owner: async ({ owner }) => accountModel.get({ key: owner }),
     },
-    RequestGrantAccess: {
+    GrantNoteAccessPermission: {
         asset: ({ asset }) => asset && assetModel.get({ id: asset }),
+    },
+    Query: {
+        asset: ensureEntityPermission(async (_, args) => ({
+            asset: await assetModel.get(args),
+        })),
+        note: ensureEntityPermission(async (_, args) => ({
+            note: await noteModel.get(args),
+        })),
+        grantNoteAccessPermission: ensureEntityPermission(async (_, args, ctx) => ({
+            permission: await requestGrantAccess(args, ctx),
+        })),
     },
     Mutation: {
         enableAssetForDomain: pipe([
             sessionDecorator,
             async (_, args) => AuthService.enableAssetForDomain(args),
         ]),
-        login: AuthService.login,
+        login: (_, args) => AuthService.login(args),
         // logout: sessionDecorator(AuthService.logout),
         registerExtension: pipe([
             async (_, args) => AuthService.registerExtension(args),

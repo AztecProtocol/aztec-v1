@@ -2,6 +2,10 @@ import ApolloClient from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
+import {
+    dataError,
+} from '~utils/error';
+import errorResponse from './utils/errorResponse';
 import typeDefs from './typeDefs';
 import resolvers from './resolvers';
 
@@ -18,6 +22,15 @@ const apollo = new ApolloClient({
     connectToDevTools: true,
 });
 
+const formatError = (error) => {
+    if (error.graphQLErrors) {
+        return errorResponse(dataError('data.graphql', {
+            graphQLErrors: error.graphQLErrors,
+        }));
+    }
+    return error;
+};
+
 export default {
     query: async (query) => {
         try {
@@ -27,10 +40,7 @@ export default {
             } = response || {};
             return data;
         } catch (e) {
-            return {
-                error: true,
-                errorMessage: e,
-            };
+            return formatError(e);
         }
     },
     mutation: async (mutation) => {
@@ -41,10 +51,7 @@ export default {
             } = response || {};
             return data;
         } catch (e) {
-            return {
-                error: true,
-                errorMessage: e,
-            };
+            return formatError(e);
         }
     },
 };

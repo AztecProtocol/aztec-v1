@@ -9,13 +9,17 @@ import {
 const errorI18n = new I18n();
 errorI18n.register(errorConfig);
 
-const makeError = type => (key, errorInfo, response) => {
+const makeError = type => (key, data) => {
+    const {
+        messageOptions,
+        ...response
+    } = data || {};
     let message;
     if (!errorI18n.has(key)) {
         warnLog(`Error '${key}' is not defined.`);
         message = key;
     } else {
-        message = errorI18n.t(key, errorInfo);
+        message = errorI18n.t(key, messageOptions);
     }
     return {
         error: {
@@ -32,10 +36,16 @@ errorTypes.forEach((type) => {
     errorHandlers[type] = makeError(type);
 });
 
-const permissionError = errorHandlers.PERMISSION;
-const argsError = errorHandlers.ARGUMENTS;
+export const permissionError = errorHandlers.PERMISSION;
+export const argsError = errorHandlers.ARGUMENTS;
+export const dataError = errorHandlers.DATA;
 
-export {
-    permissionError,
-    argsError,
-};
+// should prevent using this
+export const unknownError = (message, response) => ({
+    error: {
+        type: 'UNKNOWN',
+        key: message,
+        message,
+    },
+    response,
+});

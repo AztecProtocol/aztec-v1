@@ -15,7 +15,7 @@ export default async function fetchNoteFromServer({
     }
 
     const query = `
-        query($first: Int!, $where: NoteAccess_filter, $orderBy: String) {
+        query($first: Int!, $where: NoteAccess_filter, $orderBy: NoteAccess_orderBy) {
             noteAccesses(first: $first, where: $where, orderBy: $orderBy) {
                 account {
                     address

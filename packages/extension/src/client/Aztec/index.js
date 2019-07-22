@@ -17,21 +17,14 @@ class Aztec {
     }
 
     enable = async () => {
-        // get the following data from background
-        const account = {
-            address: '0x0563a36603911daaB46A3367d59253BaDF500bF9',
-        };
-        const aceAddress = '0xec85f3d1fc95ca5e02a9e4b08998bd4bf92ef914';
         // TODO get deployed address somehow
+        const aceAddress = '0xec85f3d1fc95ca5e02a9e4b08998bd4bf92ef914';
         const aztecAccountRegistryAddress = '0xec85f3d1fc95ca5e02a9e4b08998bd4bf92ef914';
 
         // this needs to do a session check.
-        this.enabled = true;
+        await Web3Service.init();
 
-        Web3Service.init({
-            account,
-            providerUrl: 'graphql',
-        });
+        this.enabled = true;
         Web3Service.registerContract(ACE, {
             contractAddress: aceAddress,
         });
