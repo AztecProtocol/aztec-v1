@@ -3,20 +3,19 @@ import gql from 'graphql-tag';
 import psl from 'psl';
 import errorModel from '~database/models/error';
 import { errorLog } from '~utils/log';
+import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     of,
     from,
     Subject,
+    forkJoin,
     race,
     empty,
 } from 'rxjs';
-import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     mergeMap,
     take,
     map,
-    switchMap,
-    catchError,
     filter,
     timeout,
 } from 'rxjs/operators';
@@ -31,7 +30,6 @@ import GraphQLService from '../services/GraphQLService';
 const updateErrorState = async (error) => {
     const errorTimeStamp = Date.now();
     return errorModel.set({
-
         timestamp: errorTimeStamp,
         error,
     });
@@ -46,8 +44,7 @@ export default function acceptConnection() {
     ui$.pipe(
         mergeMap((message) => {
             // set some local state so the react app can show correct page
-            const w = window.open('popup.html', 'extension_popup', 'width=300,height=400,status=no,scrollbars=yes,resizable=no');
-            w.aztecError = message;
+            window.open('popup.html', 'extension_popup', 'width=300,height=400,status=no,scrollbars=yes,resizable=no');
             return of(message);
         }),
     ).subscribe();
@@ -59,16 +56,19 @@ export default function acceptConnection() {
         const uiConfirms$ = uiConfirms.asObservable()
             .pipe(
                 filter(({ requestId }) => requestId === error.requestId),
-                mergeMap(() => {
+                take(1),
+                mergeMap((d) => {
                     // retry the flow
                     original$.next(msg);
                     return empty();
                 }),
-            );
+            ).subscribe();
+
         const uiErrors$ = uiErrors.asObservable().pipe(
-            filter(({ requestId }) => requestId === error.requestId),
+            filter(({ requestId }) => requestId !== error.requestId),
+            take(1),
             mergeMap(() => empty()),
-        );
+        ).subscribe();
 
         return race(
             uiConfirms$,
@@ -109,26 +109,38 @@ export default function acceptConnection() {
                     },
                 );
 
-                return from(
-                    GraphQLService[type]({
-                        [type]: gql(`${type} {${graphQuery}}`),
-                        variables,
-                        requestId,
-                    }),
-                );
+                return forkJoin({
+                    response: from(
+                        GraphQLService[type]({
+                            [type]: gql(`${type} {${graphQuery}}`),
+                            variables,
+                            requestId,
+                        }),
+                    ),
+                    request: of(requestId),
+                });
             }),
-            switchMap((response) => {
-                if (response.error) {
+            mergeMap(({ response: { requestId, ...rest } }) => {
+                const queryName = Object.keys(rest)
+                    .find(queryName => !!rest[queryName].error);
+                const errorData = queryName ? rest[queryName].error : false;
+
+                if (errorData) {
                     // trigger the UI flow
-                    ui.next(response);
-                    return handleError(response, messageSubject, {
+                    ui.next({
+                        errorData,
+                        requestId,
+                    });
+                    return handleError({
+                        errorData,
+                        requestId,
+                    }, messageSubject, {
                         data: msg,
                         sender: senderDetails,
                     });
                 }
-                return of(response);
+                return of({ requestId, ...rest });
             }),
-            filter(value => !!value),
             take(1),
         );
         message$.subscribe(resolve, reject);
