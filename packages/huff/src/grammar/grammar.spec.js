@@ -26,7 +26,10 @@ describe('grammar tests', () => {
                 <third>
                 mulmod
             `;
-            const macro = `#define macro TEST = takes(3) returns(2) {${macroBody}}`;
+            const macroName = 'TEST';
+            const takes = '3';
+            const returns = '2';
+            const macro = `#define macro ${macroName} = takes(${takes}) returns(${returns}) {${macroBody}}`;
             let source = `template <first, second,third >${macro}`;
             const template = source.match(grammar.topLevel.TEMPLATE);
             source = source.slice(template.index + template[0].length);
@@ -35,9 +38,9 @@ describe('grammar tests', () => {
                 macro,
                 macro.slice(0, macro.indexOf('\n')),
                 'macro',
-                'TEST',
-                '3',
-                '2',
+                macroName,
+                takes,
+                returns,
                 macroBody,
             ]);
         });
