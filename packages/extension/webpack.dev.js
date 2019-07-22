@@ -9,6 +9,7 @@ module.exports = {
         'graphql-inspector': './src/background/services/GraphQLService/inspector/index.jsx',
         content: './src/content',
         client: './src/client',
+        ui: './src/ui',
     },
     output: {
         path: path.resolve(__dirname, './client/build/'),
@@ -25,6 +26,9 @@ module.exports = {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
                 use: ['babel-loader'],
+                // options: {
+                //     presets: ['@babel/env'],
+                // },
             },
             {
                 test: /\.css$/,

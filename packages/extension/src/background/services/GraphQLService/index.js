@@ -22,10 +22,11 @@ const apollo = new ApolloClient({
     connectToDevTools: true,
 });
 
-const formatError = (error) => {
+const formatError = (error, request) => {
     if (error.graphQLErrors) {
         return errorResponse(dataError('data.graphql', {
             graphQLErrors: error.graphQLErrors,
+            ...request,
         }));
     }
     return error;
@@ -38,9 +39,13 @@ export default {
             const {
                 data,
             } = response || {};
-            return data;
+            return {
+                ...data,
+                requestId: query.requestId,
+
+            };
         } catch (e) {
-            return formatError(e);
+            return formatError(e, query);
         }
     },
     mutation: async (mutation) => {
@@ -49,9 +54,12 @@ export default {
             const {
                 data,
             } = response || {};
-            return data;
+            return {
+                ...data,
+                requestId: mutation.requestId,
+            };
         } catch (e) {
-            return formatError(e);
+            return formatError(e, mutation);
         }
     },
 };
