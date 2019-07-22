@@ -94,7 +94,7 @@ const validateConfig = (config) => {
 export default function Model(config) {
     const validatedConfig = validateConfig(config);
     if (!validatedConfig) {
-        return {};
+        return null;
     }
     const {
         fields,
