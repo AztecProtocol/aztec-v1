@@ -16,12 +16,6 @@ const JoinSplit = artifacts.require('./JoinSplit');
 let ace;
 const aztecAccount = secp256k1.generateAccount();
 const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = proofs;
-const canAdjustSupply = false;
-const canConvert = true;
-let erc20;
-let joinSplitValidator;
-const scalingFactor = new BN(10);
-const tokensTransferred = new BN(100000);
 
 const getNotes = async (inputNoteValues = [], outputNoteValues = []) => {
     const inputNotes = await Promise.all(
@@ -43,6 +37,13 @@ contract('NoteRegistry', (accounts) => {
     let withdrawProof;
     const withdrawNoteValues = [10, 30];
     const withdrawPublicValue = 40;
+
+    const canAdjustSupply = false;
+    const canConvert = true;
+    let erc20;
+    let joinSplitValidator;
+    const scalingFactor = new BN(10);
+    const tokensTransferred = new BN(100000);
 
     beforeEach(async () => {
         ace = await ACE.new({ from: sender });
@@ -67,6 +68,25 @@ contract('NoteRegistry', (accounts) => {
             const opts = { from: accounts[1] };
             const { receipt } = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
             expect(receipt.status).to.equal(true);
+        });
+
+        it('should emit correct noteRegistry creation event', async () => {
+            const opts = { from: accounts[1] };
+            const result = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
+            const registryOwner = accounts[1];
+            const registryAddress = ace.address;
+            const linkedTokenAddress = erc20.address;
+
+            truffleAssert.eventEmitted(result, 'CreateNoteRegistry', (event) => {
+                return (
+                    event.registryOwner === registryOwner &&
+                    event.registryAddress === registryAddress &&
+                    event.scalingFactor.toNumber() === scalingFactor.toNumber() &&
+                    event.linkedTokenAddress === linkedTokenAddress &&
+                    event.canAdjustSupply === canAdjustSupply &&
+                    event.canConvert === canConvert
+                );
+            });
         });
 
         it('should be able to read a registry from storage', async () => {
