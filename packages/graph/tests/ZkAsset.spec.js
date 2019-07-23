@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 import devUtils from '@aztec/dev-utils';
 import secp256k1 from '@aztec/secp256k1';
+import bn128 from '@aztec/bn128';
 import aztec from 'aztec.js';
 /* eslint-disable import/no-unresolved */
 import ACE from '../build/contracts/ACE';
@@ -18,16 +19,16 @@ import generateRandomId from './utils/generateRandomId';
 dotenv.config();
 jest.setTimeout(50000);
 
-const { constants } = devUtils;
 const { JOIN_SPLIT_PROOF } = devUtils.proofs;
 const {
     note,
-    proof,
-    abiEncoder,
+    encoder,
+    JoinSplitProof,
+    ProofUtils,
 } = aztec;
 const {
     outputCoder,
-} = abiEncoder;
+} = encoder;
 
 const ADDRESS_LENGTH = 42;
 const METADATA_AZTEC_DATA_LENGTH = 194;
@@ -48,8 +49,6 @@ describe('ZkAsset', () => {
     let zkAssetAddress;
     let notes;
     let depositProof;
-    let depositProofOutput;
-    let depositProofHash;
 
     const sender = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_0);
     sender.address = sender.address.toLowerCase();
@@ -69,7 +68,7 @@ describe('ZkAsset', () => {
         const {
             noteHash,
         } = notes[noteIndex].exportNote();
-        const outputNotes = outputCoder.getOutputNotes(depositProofOutput);
+        const outputNotes = outputCoder.getOutputNotes(depositProof.output);
         const outputNote = outputCoder.getNote(outputNotes, noteIndex);
         const metadata = outputCoder.getMetadata(outputNote);
 
@@ -90,7 +89,7 @@ describe('ZkAsset', () => {
         await Web3Service
             .useContract('ACE')
             .method('setCommonReferenceString')
-            .send(constants.CRS);
+            .send(bn128.CRS);
 
         const existingProof = await Web3Service
             .useContract('ACE')
@@ -160,39 +159,44 @@ describe('ZkAsset', () => {
                 filter,
             );
 
-        notes = await generateNotes([
+        const inputNotes = [];
+        const depositInputOwnerAccounts = [];
+        const noteValues = [
             0,
             depositAmount,
-        ]);
-
-        depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-            inputNotes: [],
-            outputNotes: notes,
-            senderAddress: sender.address,
-            inputNoteOwners: [],
-            publicOwner: sender.address,
-            kPublic: -(depositAmount),
-            validatorAddress: zkAssetAddress,
-        });
-        depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-        depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
+        ];
+        notes = await generateNotes(noteValues);
+        const publicValue = ProofUtils.getPublicValue(
+            [],
+            noteValues,
+        );
+        depositProof = new JoinSplitProof(
+            inputNotes,
+            notes,
+            sender.address,
+            publicValue,
+            sender.address,
+        );
 
         await Web3Service
             .useContract('ACE')
             .method('publicApprove')
             .send(
                 zkAssetAddress,
-                depositProofHash,
+                depositProof.hash,
                 depositAmount,
             );
+
+        const depositData = depositProof.encodeABI(zkAssetAddress);
+        const depositSignatures = depositProof.constructSignatures(zkAssetAddress, depositInputOwnerAccounts);
 
         await Web3Service
             .useContract('ZkAssetOwnable')
             .at(zkAssetAddress)
             .method('confidentialTransfer')
             .send(
-                depositProof.proofData,
-                depositProof.signatures,
+                depositData,
+                depositSignatures,
             );
     });
 
