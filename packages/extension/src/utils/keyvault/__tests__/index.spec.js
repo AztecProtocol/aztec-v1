@@ -49,23 +49,24 @@ describe('Keystore', () => {
 
 
     describe('IES encryption', () => {
-        // test('should be able to decrypt a cipher with the public key of the private key', async () => {
-        //     const fixture = fixtures.valid[0];
-        //     const key = await KeyStore.generateDerivedKey({
-        //         password: 'password',
-        //         salt: fixture.salt,
-        //     });
-        //     const k = new KeyStore({
-        //         pwDerivedKey: key.pwDerivedKey,
-        //         salt: fixture.salt,
-        //         mnemonic: fixture.mnSeed,
-        //         hdPathString: fixture.hdPathString,
-        //     });
-        //     const output = k.curve25519Encrypt(
-        //         k.privacyKeys.publicKey, 'Hello Word',
-        //     );
-        //     const decrypted = k.curve25519Decrypt(output, new Uint8Array(fixture.pwDerivedKey));
-        // });
+        test('should be able to decrypt a cipher with the public key of the private key', async () => {
+            const fixture = fixtures.valid[0];
+            const key = await KeyStore.generateDerivedKey({
+                password: 'password',
+                salt: fixture.salt,
+            });
+            const k = new KeyStore({
+                pwDerivedKey: key.pwDerivedKey,
+                salt: fixture.salt,
+                mnemonic: fixture.mnSeed,
+                hdPathString: fixture.hdPathString,
+            });
+            const output = k.curve25519Encrypt(
+                k.privacyKeys.publicKey, 'Hello World',
+            );
+            const decrypted = k.curve25519Decrypt(output, new Uint8Array(fixture.pwDerivedKey));
+            expect(decrypted).to.equal('Hello World');
+        });
         // Can't directly test the encrypt/decrypt functions
         // since salt and iv is used.
         fixtures.valid.forEach((f) => {
