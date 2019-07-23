@@ -29,19 +29,24 @@ contract AZTECAccountRegistry is LibEIP712 {
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
 
+    uint chainId;
+    address owner = msg.sender;
 
-    constructor ()
-    public
-    {
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    constructor (uint _chainId) public {
+        chainId = _chainId;
     }
 
     function hashAZTECAccount(AZTECAccount memory _AZTECAccount) internal view returns (bytes32){
-
         bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
             EIP712_DOMAIN_TYPEHASH,
             keccak256("AZTECAccountRegistry"),
             keccak256("2"),
-            1563886150337,
+            chainId,
             address(this),
             0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558
         ));
@@ -53,6 +58,10 @@ contract AZTECAccountRegistry is LibEIP712 {
                     _AZTECAccount.account,
                     keccak256(bytes(_AZTECAccount.linkedPublicKey)
             )))));
+    }
+
+    function updateChainId(uint _chainId) external onlyOwner {
+        chainId = _chainId;
     }
 
     event RegisterExtension(
