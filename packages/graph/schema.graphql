@@ -28,4 +28,5 @@ type NoteAccess @entity {
 type Account @entity {
   id: ID!
   address: Bytes!
+  linkedPublicKey: Bytes
 }

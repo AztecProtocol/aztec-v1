@@ -286,4 +286,21 @@ export class Account extends Entity {
   set address(value: Bytes) {
     this.set("address", Value.fromBytes(value));
   }
+
+  get linkedPublicKey(): Bytes | null {
+    let value = this.get("linkedPublicKey");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set linkedPublicKey(value: Bytes | null) {
+    if (value === null) {
+      this.unset("linkedPublicKey");
+    } else {
+      this.set("linkedPublicKey", Value.fromBytes(value as Bytes));
+    }
+  }
 }
