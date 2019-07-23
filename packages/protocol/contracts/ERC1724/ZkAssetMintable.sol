@@ -63,14 +63,14 @@ contract ZkAssetMintable is ZkAssetOwnableBase {
     *
     * Will submit _proofData to the validateProof() function of the Cryptography Engine. 
     *
-    *
     * If public value is being transferred out of the ACE, and the minted value is greater than 
     * ACE's token balance, then tokens will be minted from the linked ERC20 token using supplementTokens()
     *
     * Upon successfull verification, it will update note registry state - creating output notes and 
     * destroying input notes. 
     * 
-    * @param _proofData - bytes variable outputted from proof construction
+    * @param _proofData bytes variable outputted from proof construction
+    * @param _signatures ECDSA signatures over all input notes involved in the confidentialTransfer()
     */
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);

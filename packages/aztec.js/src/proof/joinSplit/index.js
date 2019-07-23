@@ -131,7 +131,7 @@ class JoinSplitProof extends Proof {
     /**
      * Construct the EIP712 signatures, giving permission for notes to be spent
      * @param {string} validatorAddress Ethereum address of the join-split validator contract
-     * @param {string[]} inputNoteOwners Ethereum accounts of input note owners
+     * @param {Object[]} inputNoteOwners Ethereum accounts of input note owners
      * @returns {string} array of signatures
      */
     constructSignatures(validatorAddress, inputNoteOwners) {
