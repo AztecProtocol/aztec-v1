@@ -9,7 +9,7 @@ export default async function Query({
     graphQLServerUrl,
     query = '',
     variables,
-    retry = 1,
+    retry = 0,
     retryDelay = 1000,
 }) {
     let data;
