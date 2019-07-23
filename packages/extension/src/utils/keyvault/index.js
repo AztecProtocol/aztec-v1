@@ -8,6 +8,18 @@ nacl.util = tweetNaclUtils;
 
 Object.defineProperty(global, '_bitcore', { get() { return undefined; }, set() {} });
 
+function toHexString(byteArray) {
+    let s = '0x';
+    byteArray.forEach((byte) => {
+        s += (`0${(byte & 0xFF).toString(16)}`).slice(-2);
+    });
+    return s;
+}
+
+function fromHexString(hexString) {
+    return new Uint8Array(hexString.substr(2).match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+}
+
 const { Random } = bitcore.crypto;
 const { Hash } = bitcore.crypto;
 
@@ -148,10 +160,9 @@ export class KeyStore {
 
         const privKeyUInt8Array = new Uint8Array(privkeyBuf);
         const pubKey = nacl.box.keyPair.fromSecretKey(privKeyUInt8Array).publicKey;
-        const pubKeyBase64 = nacl.util.encodeBase64(pubKey);
 
         return {
-            publicKey: pubKeyBase64,
+            publicKey: toHexString(pubKey),
             encPrivKey,
         };
     }
@@ -159,12 +170,12 @@ export class KeyStore {
     curve25519Encrypt(receiverPublicKey, msgParams) { // eslint-disable-line class-methods-use-this
         const ephemeralKeyPair = nacl.box.keyPair();
         let pubKeyUInt8Array;
+
         try {
-            pubKeyUInt8Array = nacl.util.decodeBase64(receiverPublicKey);
+            pubKeyUInt8Array = fromHexString(receiverPublicKey);
         } catch (err) {
             throw new Error('Bad public key');
         }
-
         const msgParamsUInt8Array = nacl.util.decodeUTF8(msgParams);
         const nonce = nacl.randomBytes(nacl.box.nonceLength);
 
@@ -178,9 +189,9 @@ export class KeyStore {
 
         // handle encrypted data
         const output = {
-            nonce: nacl.util.encodeBase64(nonce),
-            ephemPublicKey: nacl.util.encodeBase64(ephemeralKeyPair.publicKey),
-            ciphertext: nacl.util.encodeBase64(encryptedMessage),
+            nonce: toHexString(nonce),
+            ephemPublicKey: toHexString(ephemeralKeyPair.publicKey),
+            ciphertext: toHexString(encryptedMessage),
         };
         // return encrypted msg data
         return output;
@@ -196,9 +207,9 @@ export class KeyStore {
             .fromSecretKey(recieverPrivateKeyUint8Array)
             .secretKey;
 
-        const nonce = nacl.util.decodeBase64(encryptedData.nonce);
-        const ciphertext = nacl.util.decodeBase64(encryptedData.ciphertext);
-        const ephemPublicKey = nacl.util.decodeBase64(encryptedData.ephemPublicKey);
+        const nonce = fromHexString(encryptedData.nonce);
+        const ciphertext = fromHexString(encryptedData.ciphertext);
+        const ephemPublicKey = fromHexString(encryptedData.ephemPublicKey);
 
         // decrypt
         const decryptedMessage = nacl.box.open(
