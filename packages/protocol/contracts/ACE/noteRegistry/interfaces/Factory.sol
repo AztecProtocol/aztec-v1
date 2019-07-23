@@ -1,11 +1,11 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "../../../interfaces/IAZTEC.sol";
-import "../../../libs/NoteUtils.sol";
-import "../../../libs/ProofUtils.sol";
+import "./ProxyAdmin.sol";
 
 /**
  * @title NoteRegistryFactory contract which contains the storage variables that define the set of valid
@@ -13,17 +13,14 @@ import "../../../libs/ProofUtils.sol";
  * @author AZTEC
  * @dev todo
  **/
-contract NoteRegistryFactory is IAZTEC {
+contract NoteRegistryFactory is IAZTEC, Ownable  {
     event NoteRegistryDeployed(address behaviourContract);
 
-    function deployNewNoteRegistry(
-        address _linkedTokenAddress,
-        uint256 _scalingFactor,
-        bool _canAdjustSupply,
-        bool _canConvert
-    ) public returns (address);
+    constructor(address _aceAddress) public Ownable() {
+        transferOwnership(_aceAddress);
+    }
 
-    function deployNewBehaviourInstance(
-        address _dataContractAddress
-    ) public returns (address);
+    function deployNewBehaviourInstance() public returns (address);
+
+    function upgradeBehaviour(address _oldImplementation, address _newImplementation) public;
 }

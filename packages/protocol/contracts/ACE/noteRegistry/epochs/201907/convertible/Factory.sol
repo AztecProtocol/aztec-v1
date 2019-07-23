@@ -2,7 +2,6 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "../../../interfaces/Factory.sol";
 import "./Behaviour.sol";
-import "../Data.sol";
 
 /**
  * @title NoteRegistryFactory contract which contains the storage variables that define the set of valid
@@ -13,35 +12,19 @@ import "../Data.sol";
 contract FactoryConvertible201907 is NoteRegistryFactory {
     event NoteRegistryDeployed(address behaviourContract);
 
-    function deployNewNoteRegistry(
-        address _linkedTokenAddress,
-        uint256 _scalingFactor,
-        bool _canAdjustSupply,
-        bool _canConvert
-    ) public
+    constructor(address _aceAddress) public NoteRegistryFactory(_aceAddress) {}
+
+    function deployNewBehaviourInstance() public
+      onlyOwner
       returns (address)
     {
-        Data201907 dataContract = new Data201907(
-            _linkedTokenAddress,
-            _scalingFactor,
-            _canAdjustSupply,
-            _canConvert
-        );
-        BehaviourConvert201907 behaviourContract = new BehaviourConvert201907(address(dataContract));
-        dataContract.transferOwnership(address(behaviourContract));
-        behaviourContract.transferOwnership(msg.sender);
+        BehaviourConvert201907 behaviourContract = new BehaviourConvert201907();
         emit NoteRegistryDeployed(address(behaviourContract));
         return address(behaviourContract);
     }
 
-    function deployNewBehaviourInstance(
-        address _dataContractAddress
-    ) public
-      returns (address)
-    {
-        BehaviourConvert201907 behaviourContract = new BehaviourConvert201907(_dataContractAddress);
-        behaviourContract.transferOwnership(msg.sender);
-        emit NoteRegistryDeployed(address(behaviourContract));
-        return address(behaviourContract);
+    function upgradeBehaviour(address _oldImplementation, address _newImplementation) public onlyOwner {
+        require(ProxyAdmin(_oldImplementation).admin() == address(this), "this is not the admin of the proxy");
+        ProxyAdmin(_oldImplementation).upgradeTo(_newImplementation);
     }
 }
