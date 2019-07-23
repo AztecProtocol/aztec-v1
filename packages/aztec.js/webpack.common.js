@@ -1,4 +1,3 @@
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -24,7 +23,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        library: 'aztec',
+        library: 'aztec.js',
         libraryTarget: 'umd',
     },
     performance: {
@@ -32,14 +31,6 @@ module.exports = {
         maxAssetSize: 200000,
         maxEntrypointSize: 400000,
     },
-    plugins: [
-        new CopyWebpackPlugin([
-            {
-                from: 'src/**/*.wasm',
-                to: '[name].[ext]',
-            },
-        ]),
-    ],
     resolve: {
         extensions: ['.js'],
     },

@@ -16,11 +16,11 @@ const setup = require('../src/setup');
 
 const partialPath = path.posix.resolve(__dirname, 'localSetupDatabase');
 
-const { TEST_K_MAX } = constants;
+const { K_MAX_TEST } = constants;
 
-// Redfine K_MAX in the tests to be TEST_K_MAX, lower as using smaller
+// Redfine K_MAX in the tests to be K_MAX_TEST, lower as using smaller
 // local point database
-constants.K_MAX = TEST_K_MAX;
+constants.K_MAX = K_MAX_TEST;
 
 console.log('Initialised the local trusted setup database');
 
