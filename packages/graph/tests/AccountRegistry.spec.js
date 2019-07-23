@@ -48,7 +48,7 @@ const AZTECAccount = [
 describe('AZTECAccountRegistry', () => {
     let domainData;
 
-    beforeAll(() => {
+    beforeAll(async () => {
         Web3Service.init();
         Web3Service.registerContract(AZTECAccountRegistry);
 
@@ -56,18 +56,23 @@ describe('AZTECAccountRegistry', () => {
             networks,
         } = AZTECAccountRegistry;
         const networkIds = Object.keys(networks);
-        const lastestNetwork = networkIds[networkIds.length - 1];
+        const latestNetworkId = networkIds[networkIds.length - 1];
         const {
             address: verifyingContract,
-        } = networks[lastestNetwork];
+        } = networks[latestNetworkId];
 
         domainData = {
             name: 'AZTECAccountRegistry',
             version: '2',
-            chainId: lastestNetwork,
+            chainId: latestNetworkId,
             verifyingContract,
             salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
         };
+
+        await Web3Service
+            .useContract('AZTECAccountRegistry')
+            .method('updateChainId')
+            .send(latestNetworkId);
     });
 
     it('trigger RegisterExtension event', async () => {
