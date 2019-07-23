@@ -4,7 +4,18 @@ export default gql`
     enum ErrorType {
         PERMISSION
         ARGUMENTS
+        TIMEOUT
         UNKNOWN
+    }
+    enum ActionType {
+        AUTH 
+        ASSET
+        PROOF
+        UNKNOWN
+    }
+    type Action {
+        type: ActionType!
+        key: String!
     }
     type Error {
         type: ErrorType!
@@ -47,14 +58,17 @@ export default gql`
     type AssetApiResponse {
         asset: Asset
         error: Error
+        action: Action
     }
     type NoteApiResponse {
         note: Note
         error: Error
+        action: Action
     }
     type GrantAccessApiResponse {
         permission: GrantNoteAccessPermission
         error: Error
+        action: Action
     }
     type AccountApiResponse {
         account: Account

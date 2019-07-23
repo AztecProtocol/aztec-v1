@@ -1,19 +1,6 @@
 import mutate from '../utils/mutate';
 import Web3Service from '../services/Web3Service';
 
-// const devUtils = require('@aztec/dev-utils');
-
-// const { EIP712_DOMAIN } = devUtils.constants.eip712;
-
-// const signatureSchema = {
-//     types: {
-//         RegisterExtensionSignature: [
-//             { name: 'account', type: 'address' },
-//         ],
-//         EIP712Domain: EIP712_DOMAIN,
-//     },
-//     primaryType: 'RegisterExtensionSignature',
-// };
 
 const domainParams = [
     {
@@ -51,16 +38,10 @@ const AZTECAccount = [
 
 
 export default {
-    enableAsset: async ({
-        asset,
-    }) => mutate(`
-        enableAssetForDomain(asset: "${asset}")
-    `),
     login: ({
         password,
     }) => mutate(`
-        login(password: "${password}")
-    `),
+        login(password: "${password}") `),
     registerExtension: async ({ password, salt }) => {
         const { address } = Web3Service.account;
         const response = await mutate(`
