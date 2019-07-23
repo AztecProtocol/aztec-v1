@@ -110,7 +110,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
     ) external returns (bytes memory) {
         NoteRegistryBehaviour registry = registries[msg.sender];
         require(address(registry) != address(0x0), "note registry does not exist for the given address");
-        
+
         // Check that it's a burnable proof
         (, uint8 category, ) = _proof.getProofComponents();
 

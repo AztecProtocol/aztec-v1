@@ -15,7 +15,7 @@ module.exports = (deployer) => {
 
     /* eslint-disable no-new */
     new Promise(() => {
-        return deployer.deploy(NoteRegistryFactory).then(async ({ address }) => {
+        return deployer.deploy(NoteRegistryFactory, ACE.address).then(async ({ address }) => {
             const ace = await ACE.at(ACE.address);
             await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 0 * 256**(0), address);
             await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 1 * 256**(0), address);
