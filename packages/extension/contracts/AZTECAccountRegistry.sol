@@ -3,14 +3,14 @@ pragma solidity >=0.5.0 <0.6.0;
 import "../../protocol/contracts/libs/LibEIP712.sol";
 
 /**
- * @title AZTECAccountRegistry implementation 
- * @author AZTEC 
+ * @title AZTECAccountRegistry implementation
+ * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 
 contract AZTECAccountRegistry is LibEIP712 {
 
-    mapping(address => string) public accountMapping;
+    mapping(address => bytes) public accountMapping;
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "AZTEC_ACCOUNT_REGISTRY";
@@ -20,11 +20,11 @@ contract AZTECAccountRegistry is LibEIP712 {
 
     struct AZTECAccount {
         address account;
-        string linkedPublicKey;
+        bytes linkedPublicKey;
     }
 
     string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
-    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,string linkedPublicKey)";
+    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey)";
 
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
@@ -34,14 +34,14 @@ contract AZTECAccountRegistry is LibEIP712 {
     public
     {
     }
-     
+
     function hashAZTECAccount(AZTECAccount memory _AZTECAccount) internal view returns (bytes32){
-        
+
         bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
             EIP712_DOMAIN_TYPEHASH,
             keccak256("AZTECAccountRegistry"),
             keccak256("2"),
-            1563200229577,
+            1563886150337,
             address(this),
             0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558
         ));
@@ -56,19 +56,19 @@ contract AZTECAccountRegistry is LibEIP712 {
     }
 
     event RegisterExtension(
-        address account,
-        string linkedPublicKey
+        address indexed account,
+        bytes linkedPublicKey
     );
 
     event LogAddress(
         address account
     );
     event LogString(
-        string message 
+        string message
     );
 
     event LogBytes(
-        bytes32 sig 
+        bytes32 sig
     );
 
     /**
@@ -79,21 +79,19 @@ contract AZTECAccountRegistry is LibEIP712 {
 
     /**
      * @dev Registers a specific public key pair to an ethereum address if a valid signature is provided or the
-     * sender is the ethereum address in question        * 
-     * @param _account - address the address to which a public key is being         registered 
+     * sender is the ethereum address in question        *
+     * @param _account - address the address to which a public key is being         registered
      * @param _linkedPublicKey - the public key the sender wishes to link to the _account
      */
 
     function registerAZTECExtension(
         address _account,
-        string memory _linkedPublicKey,
+        bytes memory _linkedPublicKey,
         uint8 v,
         bytes32 r,
         bytes32 s
         // bytes memory _signature
-    )
-
-    public {
+    ) public {
         emit LogAddress(address(this));
             // valid EIP712 signature
         address signer = ecrecover(
