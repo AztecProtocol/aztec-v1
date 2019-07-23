@@ -124,12 +124,46 @@ export class ConstructorCall__Inputs {
   constructor(call: ConstructorCall) {
     this._call = call;
   }
+
+  get _chainId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
 }
 
 export class ConstructorCall__Outputs {
   _call: ConstructorCall;
 
   constructor(call: ConstructorCall) {
+    this._call = call;
+  }
+}
+
+export class UpdateChainIdCall extends EthereumCall {
+  get inputs(): UpdateChainIdCall__Inputs {
+    return new UpdateChainIdCall__Inputs(this);
+  }
+
+  get outputs(): UpdateChainIdCall__Outputs {
+    return new UpdateChainIdCall__Outputs(this);
+  }
+}
+
+export class UpdateChainIdCall__Inputs {
+  _call: UpdateChainIdCall;
+
+  constructor(call: UpdateChainIdCall) {
+    this._call = call;
+  }
+
+  get _chainId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class UpdateChainIdCall__Outputs {
+  _call: UpdateChainIdCall;
+
+  constructor(call: UpdateChainIdCall) {
     this._call = call;
   }
 }
