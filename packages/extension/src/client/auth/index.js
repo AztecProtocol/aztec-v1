@@ -62,25 +62,32 @@ export default {
         login(password: "${password}")
     `),
     registerExtension: async ({ password, salt }) => {
+        const { address } = Web3Service.account;
         const response = await mutate(`
-            registerExtension(password: "${password}", salt: "${salt}") {
-                publicKey
+            registerExtension(password: "${password}", salt: "${salt}", address: "${address}") {
+                account {
+                    linkedPublicKey
+                }
             }
         `);
         const {
-            registerExtension: { publicKey },
+            registerExtension: {
+                account: {
+                    linkedPublicKey,
+                } = {},
+            },
         } = response;
         const domainData = {
             name: 'AZTECAccountRegistry',
             version: '2',
-            chainId: 1563200229577,
+            chainId: 1563469630469,
             verifyingContract: '0xb903FAb78F621D99218e8AD222080903E747671E',
             salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
         };
 
         const message = {
-            account: Web3Service.account.address,
-            linkedPublicKey: publicKey,
+            account: address,
+            linkedPublicKey,
         };
 
         const data = JSON.stringify({
@@ -96,8 +103,8 @@ export default {
 
         const { result } = await Web3Service.sendAsync({
             method: 'eth_signTypedData_v3',
-            params: [Web3Service.account.address, data],
-            from: Web3Service.account.address,
+            params: [address, data],
+            from: address,
         });
 
         const signature = result.substring(2);
@@ -109,7 +116,7 @@ export default {
         await Web3Service
             .useContract('AZTECAccountRegistry', Web3Service.deployed('AZTECAccountRegistry').address)
             .method('registerAZTECExtension')
-            .send(Web3Service.account.address, publicKey, v, r, s);
+            .send(address, linkedPublicKey, v, r, s);
     },
     registerAddress: async address => mutate(`
         registerAddress(address: "${address}")

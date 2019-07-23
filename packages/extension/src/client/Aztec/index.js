@@ -32,12 +32,6 @@ class Aztec {
     }) => {
         await Web3Service.init();
 
-        // this should be done through extension's ui
-        const {
-            address,
-        } = Web3Service.account;
-        await this.auth.registerAddress(address);
-
         this.enabled = true;
 
         // we should enable the extension API under the following conditions

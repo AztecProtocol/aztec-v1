@@ -15,7 +15,7 @@ export default gql`
     type Account {
         id: ID
         address: String
-        publicKey: String
+        linkedPublicKey: String
     }
     type Domain {
         assets: [Asset!]
@@ -56,8 +56,8 @@ export default gql`
         permission: GrantNoteAccessPermission
         error: Error
     }
-    type MutationResponse {
-        success: Boolean
+    type AccountApiResponse {
+        account: Account
         error: Error
     }
     type Query {
@@ -88,13 +88,14 @@ export default gql`
             domain: String!
         ): Session
         registerExtension(
+            address: String!
             password: String!
             salt: String!
             domain: String!
-        ): Account
+        ): AccountApiResponse
         registerAddress(
             address: String!
             domain: String!
-        ): MutationResponse
+        ): AccountApiResponse
     }
 `;
