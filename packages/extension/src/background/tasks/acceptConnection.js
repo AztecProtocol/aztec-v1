@@ -1,8 +1,11 @@
 import browser from 'webextension-polyfill';
 import gql from 'graphql-tag';
 import psl from 'psl';
-import errorModel from '~database/models/error';
+import actionModel from '~database/models/action';
 import { errorLog } from '~utils/log';
+import {
+    dataError,
+} from '~utils/error';
 import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     of,
@@ -10,12 +13,15 @@ import {
     Subject,
     forkJoin,
     race,
+    timer,
     empty,
 } from 'rxjs';
 import {
     mergeMap,
     take,
     map,
+    mapTo,
+    tap,
     filter,
     timeout,
 } from 'rxjs/operators';
@@ -23,15 +29,22 @@ import {
 import {
     clientEvent,
 } from '~config/event';
+import {
+    errorToActionMap,
+} from '~config/action';
 
 import GraphQLService from '../services/GraphQLService';
 
 
-const updateErrorState = async (error) => {
-    const errorTimeStamp = Date.now();
-    return errorModel.set({
-        timestamp: errorTimeStamp,
-        error,
+const updateActionState = async (action) => {
+    const actionTimeStamp = Date.now();
+    // lookup action
+    return actionModel.set({
+        timestamp: actionTimeStamp,
+        type: action.key,
+        data: {
+            ...action,
+        },
     });
 };
 
@@ -42,16 +55,15 @@ export default function acceptConnection() {
 
     const ui$ = ui.asObservable();
     ui$.pipe(
-        mergeMap((message) => {
-            // set some local state so the react app can show correct page
+        mapTo((message) => {
             window.open('popup.html', 'extension_popup', 'width=300,height=400,status=no,scrollbars=yes,resizable=no');
-            return of(message);
         }),
     ).subscribe();
 
-    const handleError = async (error, original$, msg) => {
+    const handleAction = async (error, original$, msg) => {
         // we need to mutate the db here to pass the error to the popup
-        await updateErrorState(error);
+        await updateActionState(error);
+        ui.next();
         // we have to return an observable to original$
         const uiConfirms$ = uiConfirms.asObservable()
             .pipe(
@@ -65,14 +77,20 @@ export default function acceptConnection() {
             ).subscribe();
 
         const uiErrors$ = uiErrors.asObservable().pipe(
-            filter(({ requestId }) => requestId !== error.requestId),
             take(1),
             mergeMap(() => empty()),
         ).subscribe();
+        const uiTimeout$ = timer(15000).pipe(
+            map(() => {
+                console.log('here');
+                return dataError('extension.timeout');
+            }),
+        );
 
         return race(
             uiConfirms$,
-            timeout(150000),
+            uiTimeout$,
+            // timeout(150000),
             uiErrors$,
         );
     };
@@ -97,6 +115,7 @@ export default function acceptConnection() {
             mergeMap(({
                 mutation, query, domain, variables, requestId,
             }) => {
+                console.log(requestId, domain);
                 let type = 'query';
                 if (mutation) {
                     type = 'mutation';
@@ -124,23 +143,33 @@ export default function acceptConnection() {
                 const queryName = Object.keys(rest)
                     .find(queryName => !!rest[queryName].error);
                 const errorData = queryName ? rest[queryName].error : false;
+                // check the action mapping
+                console.log(errorData.key, errorToActionMap[errorData.key]);
 
-                if (errorData) {
+                if (errorToActionMap[errorData.key]) {
                     // trigger the UI flow
-                    ui.next({
-                        errorData,
-                        requestId,
-                    });
-                    return handleError({
-                        errorData,
-                        requestId,
+                    return handleAction({
+                        type: errorToActionMap[errorData.key],
+                        data: {
+                            requestId,
+                        },
                     }, messageSubject, {
                         data: msg,
                         sender: senderDetails,
                     });
                 }
-                return of({ requestId, ...rest });
+                if (errorData.key && !errorToActionMap[errorData.key]) {
+                    messageSubject.error({ requestId, ...errorData });
+                    return empty();
+                }
+                if (!errorData) {
+                    return of({ requestId, ...rest });
+                }
             }),
+            map((d)=> {
+                console.log('asdfas',d);
+                return d;
+            })
             take(1),
         );
         message$.subscribe(resolve, reject);

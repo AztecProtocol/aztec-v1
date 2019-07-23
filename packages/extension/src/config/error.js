@@ -6,6 +6,12 @@ export const errorTypes = [
 ];
 
 export default {
+    extension: {
+        not: {
+            registered: 'The user has not setup the AZTEC extension.',
+        },
+        timeout: 'The request timed out because the user did not respond to the notification.',
+    },
     account: {
         not: {
             register: 'Account %{account} is not registered.',
@@ -18,6 +24,9 @@ export default {
             publicKeys: '%{count} accounts do not have public keys.',
         },
         noteAccess: "Account '%{account}' does not have access to note '%{noteId}'",
+        incorrect: {
+            password: 'Could not decrypt key vault with password.',
+        },
     },
     domain: {
         not: {
@@ -30,4 +39,5 @@ export default {
     data: {
         graphql: 'Something went wrong fetching graphQL data',
     },
+
 };

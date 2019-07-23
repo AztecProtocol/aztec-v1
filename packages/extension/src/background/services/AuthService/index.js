@@ -96,23 +96,33 @@ export default {
             keyStore,
         } = await get(['session', 'keyStore']);
         if (!keyStore) {
-            throw new Error('AZTEC extension not setup please create account');
+            return permissionError('extension.not.registered', {
+                messageOptions: {},
+            });
         }
 
         if (!session) {
-            throw new Error('No session please login');
+            return permissionError('account.not.login', {
+                messageOptions: {},
+            });
         }
 
         if (session.createdAt < now - 60 * 60 * 24 * 21 * 1000) {
             // remove session not pwkey
             await remove('session');
-            throw new Error('The session is > 21 days old please login');
+
+            return permissionError('account.not.login', {
+                messageOptions: {},
+            });
+            // throw new Error('The session is > 21 days old please login');
         }
 
         // the host has not been active in two days
         if (session.lastActive < now - 60 * 60 * 24 * 7 * 1000) {
             await remove('session');
-            throw new Error('The session is no longer active please login');
+            return permissionError('account.not.login', {
+                messageOptions: {},
+            });
         }
 
         // we can now fetch the pwDerivedKey
@@ -120,7 +130,9 @@ export default {
         const k = KeyStore.deserialize(keyStore, decodedKey);
 
         if (!k.isDerivedKeyCorrect(decodedKey)) {
-            throw new Error('pwDerivedKey should be correct');
+            return permissionError('account.incorrect.password', {
+                messageOptions: {},
+            });
         }
 
         await set({
@@ -145,7 +157,9 @@ export default {
         const k = KeyStore.deserialize(keyStore, pwDerivedKey);
 
         if (!k.isDerivedKeyCorrect(pwDerivedKey)) {
-            throw new Error('pwDerivedKey should be correct');
+            return permissionError('account.incorrect.password', {
+                messageOptions: {},
+            });
         }
 
         const { session } = await set({
