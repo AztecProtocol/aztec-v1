@@ -6,11 +6,10 @@
  * 65793 = 1 * 256**(2) + 1 * 256**(1) + 1 * 256**(0)
  */
 module.exports = {
-    BILATERAL_SWAP_PROOF: '65794',
     BOGUS_PROOF: '65538',
     BURN_PROOF: '66305',
     DIVIDEND_PROOF: '66561',
     JOIN_SPLIT_PROOF: '65793',
     MINT_PROOF: '66049',
-    PRIVATE_RANGE_PROOF: '66562',
+    SWAP_PROOF: '65794',
 };

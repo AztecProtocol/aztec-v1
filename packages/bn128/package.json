@@ -1,0 +1,60 @@
+{
+  "name": "@aztec/bn128",
+  "description": "Barreto-Naehrig pairing friendly curve providing 128 bits of security",
+  "version": "0.0.0-semantically-released",
+  "author": "AZTEC",
+  "browser": "./dist/bundle.web.js",
+  "bugs": {
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
+  },
+  "dependencies": {
+    "@aztec/dev-utils": "0.0.0-semantically-released",
+    "bn.js": "^4.11.8",
+    "elliptic": "^6.4.1",
+    "web3-utils": "^1.0.0-beta.55"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "chai": "^4.2.0",
+    "copy-webpack-plugin": "^5.0.3",
+    "eslint": "^5.15.3",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "fixpack": "^2.3.1",
+    "mocha": "^6.0.2",
+    "shx": "^0.3.2"
+  },
+  "engines": {
+    "node": ">=8.3"
+  },
+  "files": [
+    "/lib"
+  ],
+  "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/bn128#readme",
+  "keywords": [
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol"
+  ],
+  "license": "LGPL-3.0",
+  "main": "./dist/bundle.node.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
+  "scripts": {
+    "build": "webpack --config ./webpack.dev.js",
+    "build:prod": "webpack --config ./webpack.prod.js",
+    "clean": "shx rm -rf ./lib",
+    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+    "watch": "yarn build --watch"
+  }
+}

@@ -9,12 +9,12 @@
  * @module setup
  */
 
+const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const fetch = require('cross-fetch');
-const bn128 = require('../bn128');
 
-const compressionMask = new BN('8000000000000000000000000000000000000000000000000000000000000000', 16);
+const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
 
 const setup = {
     POINTS_DB_URL: 'https://ds8m7zxw3jpbz.cloudfront.net/data',
@@ -64,7 +64,7 @@ setup.decompress = (compressed) => {
 setup.compress = (x, y) => {
     let compressed = x;
     if (y.testn(0)) {
-        compressed = compressed.or(compressionMask);
+        compressed = compressed.or(bn128.compressionMask);
     }
     return compressed;
 };

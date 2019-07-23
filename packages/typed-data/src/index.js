@@ -6,14 +6,14 @@
  */
 
 const { AbiCoder } = require('web3-eth-abi');
-const { keccak256, padLeft } = require('web3-utils');
+const { keccak256 } = require('web3-utils');
 
 const abiCoder = new AbiCoder();
 
 const signer = {};
 
-function padKeccak256(data) {
-    return padLeft(keccak256(data).slice(2), 64);
+function sliceKeccak256(data) {
+    return keccak256(data).slice(2);
 }
 
 /**
@@ -30,16 +30,16 @@ function padKeccak256(data) {
 signer.encodeMessageData = function encodeMessageData(types, primaryType, message) {
     return types[primaryType].reduce((acc, { name, type }) => {
         if (types[type]) {
-            return `${acc}${padKeccak256(`0x${encodeMessageData(types, type, message[name])}`)}`;
+            return `${acc}${sliceKeccak256(`0x${encodeMessageData(types, type, message[name])}`)}`;
         }
         if (type === 'string' || type === 'bytes') {
-            return `${acc}${padKeccak256(message[name])}`;
+            return `${acc}${sliceKeccak256(message[name])}`;
         }
         if (type.includes('[')) {
-            return `${acc}${padKeccak256(abiCoder.encodeParameter(type, message[name]))}`;
+            return `${acc}${sliceKeccak256(abiCoder.encodeParameter(type, message[name]))}`;
         }
         return `${acc}${abiCoder.encodeParameters([type], [message[name]]).slice(2)}`;
-    }, padKeccak256(signer.encodeStruct(primaryType, types)));
+    }, sliceKeccak256(signer.encodeStruct(primaryType, types)));
 };
 
 /**
@@ -84,9 +84,9 @@ signer.encodeStruct = (primaryType, types) => {
  * @returns {string} encoded message string
  */
 signer.encodeTypedData = (typedData) => {
-    const domainHash = padKeccak256(`0x${signer.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain)}`);
-    const structHash = padKeccak256(`0x${signer.encodeMessageData(typedData.types, typedData.primaryType, typedData.message)}`);
-    return `0x${padKeccak256(`0x1901${domainHash}${structHash}`)}`;
+    const domainHash = sliceKeccak256(`0x${signer.encodeMessageData(typedData.types, 'EIP712Domain', typedData.domain)}`);
+    const structHash = sliceKeccak256(`0x${signer.encodeMessageData(typedData.types, typedData.primaryType, typedData.message)}`);
+    return keccak256(`0x1901${domainHash}${structHash}`);
 };
 
 module.exports = signer;

@@ -1,43 +1,54 @@
 /* eslint-disable prefer-destructuring */
-/* global artifacts, expect, contract, beforeEach, it:true */
-// ### External Dependencies
-const BN = require('bn.js');
-const { keccak256, padLeft } = require('web3-utils');
-const truffleAssert = require('truffle-assertions');
+/* global artifacts, expect, contract, it:true */
+const { JoinSplitProof, note } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
+const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
+const BN = require('bn.js');
+const { padLeft } = require('web3-utils');
+const truffleAssert = require('truffle-assertions');
 
-// ### Internal Dependencies
-/* eslint-disable-next-line object-curly-newline */
-const { abiEncoder, note, proof } = require('aztec.js');
-const {
-    constants,
-    proofs: { BOGUS_PROOF, JOIN_SPLIT_PROOF, PRIVATE_RANGE_PROOF },
-} = require('@aztec/dev-utils');
-
-const { outputCoder } = abiEncoder;
-
-// ### Artifacts
 const ACE = artifacts.require('./ACE');
 const ACETest = artifacts.require('./ACETest');
-const JoinSplit = artifacts.require('./JoinSplit');
-const JoinSplitInterface = artifacts.require('./JoinSplitInterface');
-const PrivateRange = artifacts.require('./PrivateRange');
-const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
-const AdjustSupply = artifacts.require('./validators/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
 
-JoinSplit.abi = JoinSplitInterface.abi;
-AdjustSupply.abi = AdjustSupplyInterface.abi;
-PrivateRange.abi = PrivateRangeInterface.abi;
+const JoinSplitValidator = artifacts.require('./JoinSplit');
+const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
+JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
+
+const JoinSplitFluidValidator = artifacts.require('./JoinSplitFluid');
+const JoinSplitFluidValidatorInterface = artifacts.require('./JoinSplitFluidInterface');
+JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
+
+const aztecAccount = secp256k1.generateAccount();
+const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = proofs;
+const publicOwner = aztecAccount.address;
+
+const getNotes = async (inputNoteValues = [], outputNoteValues = []) => {
+    const inputNotes = await Promise.all(
+        inputNoteValues.map((inputNoteValue) => note.create(aztecAccount.publicKey, inputNoteValue)),
+    );
+    const outputNotes = await Promise.all(
+        outputNoteValues.map((outputNoteValue) => note.create(aztecAccount.publicKey, outputNoteValue)),
+    );
+    return { inputNotes, outputNotes };
+};
+
+const getDefaultNotes = async () => {
+    const inputNoteValues = [10, 10];
+    const outputNoteValues = [20, 20];
+    const publicValue = -20;
+    const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
+    return { inputNotes, outputNotes, publicValue };
+};
 
 contract('ACE', (accounts) => {
+    const sender = accounts[0];
+
     describe('Initialization', () => {
         let ace;
 
         beforeEach(async () => {
-            ace = await ACE.new({
-                from: accounts[0],
-            });
+            ace = await ACE.new({ from: sender });
         });
 
         it('should set the owner', async () => {
@@ -46,70 +57,38 @@ contract('ACE', (accounts) => {
         });
 
         it('should set the common reference string', async () => {
-            await ace.setCommonReferenceString(constants.CRS, { from: accounts[0] });
+            await ace.setCommonReferenceString(bn128.CRS, { from: accounts[0] });
             const result = await ace.getCommonReferenceString();
-            expect(result).to.deep.equal(constants.CRS);
+            expect(result).to.deep.equal(bn128.CRS);
         });
 
         it('should set a proof', async () => {
-            const aztecJoinSplit = await JoinSplit.new();
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
+            const joinSplitValidator = await JoinSplitValidator.new({ from: sender });
+            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
             const resultValidatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
-            expect(resultValidatorAddress).to.equal(aztecJoinSplit.address);
+            expect(resultValidatorAddress).to.equal(joinSplitValidator.address);
         });
     });
 
     describe('Runtime', () => {
-        let aztecAccounts = [];
         let ace;
-        let aztecJoinSplit;
-        let aztecPrivateRange;
-        let notes = [];
-        let proofData;
-        let proofOutput;
-        let proofHash;
-        let expectedOutput;
-        let validatedProofHash;
+        let joinSplitValidator;
+        let proof;
 
         beforeEach(async () => {
-            ace = await ACE.new({
-                from: accounts[0],
-            });
-            aztecAccounts = [...new Array(10)].map(() => secp256k1.generateAccount());
-            notes = await Promise.all([
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-                ...aztecAccounts.map(({ publicKey }, i) => note.create(publicKey, i * 10)),
-            ]);
-            await ace.setCommonReferenceString(constants.CRS);
-            aztecJoinSplit = await JoinSplit.new();
-            aztecPrivateRange = await PrivateRange.new();
+            ace = await ACE.new({ from: sender });
+            await ace.setCommonReferenceString(bn128.CRS);
+            joinSplitValidator = await JoinSplitValidator.new({ from: sender });
+            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-            await ace.setProof(PRIVATE_RANGE_PROOF, aztecPrivateRange.address);
-
-            const inputNotes = notes.slice(2, 4);
-            const outputNotes = notes.slice(0, 2);
-            const kPublic = 40;
-            ({ proofData, expectedOutput } = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes,
-                outputNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners: aztecAccounts.slice(2, 4),
-                publicOwner: aztecAccounts[0].address,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            }));
-            proofOutput = outputCoder.getProofOutput(expectedOutput, 0);
-            proofHash = outputCoder.hashProofOutput(proofOutput);
-            const hex = parseInt(JOIN_SPLIT_PROOF, 10).toString(16);
-            const hashData = [padLeft(proofHash.slice(2), 64), padLeft(hex, 64), padLeft(accounts[0].slice(2), 64)].join('');
-            validatedProofHash = keccak256(`0x${hashData}`);
+            const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+            proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
         });
 
         describe('Success States', () => {
             it('should read the validator address', async () => {
                 const validatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
-                expect(validatorAddress).to.equal(aztecJoinSplit.address);
+                expect(validatorAddress).to.equal(joinSplitValidator.address);
             });
 
             it('should increment the latest epoch', async () => {
@@ -120,72 +99,46 @@ contract('ACE', (accounts) => {
             });
 
             it('should validate a join-split proof', async () => {
-                const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
                 expect(receipt.status).to.equal(true);
-
-                const result = await ace.validatedProofs(validatedProofHash);
+                const result = await ace.validatedProofs(proof.validatedProofHash);
                 expect(result).to.equal(true);
-            });
-
-            it('should validate a private range proof', async () => {
-                const originalNote = notes[3]; // 30
-                const comparisonNote = notes[1]; // 10
-
-                const senderAddress = accounts[0];
-
-                const privateRangeProof = await proof.privateRange.encodePrivateRangeTransaction({
-                    originalNote,
-                    comparisonNote,
-                    senderAddress,
-                });
-
-                const privateRangeProofOutput = outputCoder.getProofOutput(privateRangeProof.expectedOutput, 0);
-                const privateRangeProofHash = outputCoder.hashProofOutput(privateRangeProofOutput);
-                const hex = parseInt(PRIVATE_RANGE_PROOF, 10).toString(16);
-                const hashData = [
-                    padLeft(privateRangeProofHash.slice(2), 64),
-                    padLeft(hex, 64),
-                    padLeft(accounts[0].slice(2), 64),
-                ].join('');
-                const privateRangeValidatedProofHash = keccak256(`0x${hashData}`);
-
-                const { receipt } = await ace.validateProof(PRIVATE_RANGE_PROOF, accounts[0], privateRangeProof.proofData);
-                expect(receipt.status).to.equal(true);
-
-                const result = await ace.validatedProofs(privateRangeValidatedProofHash);
-                expect(result).to.equal(false); // privateRange is a utility proof, so hash should not be stored
             });
 
             it('should have a wrapper contract validate a join-split transaction', async () => {
                 const aceTest = await ACETest.new();
                 await aceTest.setACEAddress(ace.address);
-                const { receipt } = await aceTest.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-                expect(proofOutput).to.equal(receipt.logs[0].args.proofOutputs.slice(0x82));
+                const data = proof.encodeABI(joinSplitValidator.address);
+                const { receipt } = await aceTest.validateProof(JOIN_SPLIT_PROOF, sender, data);
+                expect(proof.eth.outputs).to.equal(receipt.logs[0].args.proofOutputs);
             });
 
             it('should validate-by-hash previously set proofs', async () => {
-                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-                const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
+                const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.hash, sender);
                 expect(result).to.equal(true);
             });
 
             it('should not validate-by-hash not previously set proofs', async () => {
-                const result = await ace.validateProofByHash(BOGUS_PROOF, proofHash, accounts[0]);
+                const result = await ace.validateProofByHash(proofs.BOGUS_PROOF, proof.hash, sender);
                 expect(result).to.equal(false);
             });
 
             it('should not validate an invalid proof hash', async () => {
                 const bogusProofHash = '0x0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff';
-                const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, bogusProofHash, accounts[0]);
+                const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, bogusProofHash, sender);
                 expect(result).to.equal(false);
             });
 
             it('should clear previously set proofs', async () => {
-                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-                const firstResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
+                const firstResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.hash, sender);
                 expect(firstResult).to.equal(true);
-                await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]);
-                const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proofHash, accounts[0]);
+                await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proof.hash]);
+                const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.hash, sender);
                 expect(secondResult).to.equal(false);
             });
         });
@@ -204,7 +157,7 @@ contract('ACE', (accounts) => {
             it('should not set a proof if not owner', async () => {
                 const opts = { from: accounts[1] };
                 await truffleAssert.reverts(
-                    ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address, opts),
+                    ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address, opts),
                     'only the owner can set a proof',
                 );
             });
@@ -212,14 +165,14 @@ contract('ACE', (accounts) => {
             it("should not set a proof if the proof's epoch is higher than the contract latest epoch", async () => {
                 const JOIN_SPLIT_PROOF_V2 = `${parseInt(JOIN_SPLIT_PROOF, 10) + 65536}`; // epoch is 2 instead of 1
                 await truffleAssert.reverts(
-                    ace.setProof(JOIN_SPLIT_PROOF_V2, aztecJoinSplit.address),
+                    ace.setProof(JOIN_SPLIT_PROOF_V2, joinSplitValidator.address),
                     'the proof epoch cannot be bigger than the latest epoch',
                 );
             });
 
             it('should not set a proof if it had been set already', async () => {
                 await truffleAssert.reverts(
-                    ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address),
+                    ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address),
                     'existing proofs cannot be modified',
                 );
             });
@@ -234,28 +187,33 @@ contract('ACE', (accounts) => {
             it('should not set the common reference string if not owner', async () => {
                 const opts = { from: accounts[1] };
                 await truffleAssert.reverts(
-                    ace.setCommonReferenceString(constants.CRS, opts),
+                    ace.setCommonReferenceString(bn128.CRS, opts),
                     'only the owner can set the common reference string',
                 );
             });
 
             it('should not validate malformed proof data', async () => {
-                const malformedProofData = `0x0123${proofData.slice(6)}`;
+                const data = proof.encodeABI(joinSplitValidator.address);
+                const malformedProofData = `0x0123${data.slice(6)}`;
                 // no error message because it throws in assembly
-                await truffleAssert.reverts(ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], malformedProofData));
+                await truffleAssert.reverts(
+                    ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], malformedProofData),
+                    truffleAssert.ErrorType.REVERT,
+                );
             });
 
             it('should not validate a malformed uint24 proof', async () => {
+                const data = proof.encodeABI(joinSplitValidator.address);
                 const MALFORMED_PROOF = '0';
                 await truffleAssert.reverts(
-                    ace.validateProof(MALFORMED_PROOF, accounts[0], proofData),
+                    ace.validateProof(MALFORMED_PROOF, accounts[0], data),
                     'expected the proof to be valid',
                 );
             });
 
             it('should not invalidate proof if not owner', async () => {
-                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
-
+                const data = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], data);
                 const opts = { from: accounts[1] };
                 await truffleAssert.reverts(ace.invalidateProof(JOIN_SPLIT_PROOF, opts), 'only the owner can invalidate a proof');
             });
@@ -268,18 +226,18 @@ contract('ACE', (accounts) => {
             });
 
             it('should not validate a previously validated join-split proof', async () => {
-                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofData);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], data);
                 await ace.invalidateProof(JOIN_SPLIT_PROOF);
-
                 await truffleAssert.reverts(
-                    ace.validateProofByHash(JOIN_SPLIT_PROOF, validatedProofHash, accounts[0]),
+                    ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.validatedProofHash, accounts[0]),
                     'proof id has been invalidated',
                 );
             });
 
             it('should not clear not previously validated proof hashes', async () => {
                 await truffleAssert.reverts(
-                    ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proofHash]),
+                    ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proof.validatedProofHash]),
                     'can only clear previously validated proofs',
                 );
             });

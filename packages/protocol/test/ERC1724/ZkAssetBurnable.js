@@ -1,345 +1,322 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-// ### External Dependencies
+const { BurnProof, JoinSplitProof, note } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
+const devUtils = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 
-// ### Internal Dependencies
-// eslint-disable-next-line object-curly-newline
-const { abiEncoder, note, proof } = require('aztec.js');
-const devUtils = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
+const helpers = require('../helpers/ERC1724');
 
-const { constants } = devUtils;
-const { BURN_PROOF, JOIN_SPLIT_PROOF } = devUtils.proofs;
-const { outputCoder } = abiEncoder;
+const { JOIN_SPLIT_PROOF, BURN_PROOF } = devUtils.proofs;
 
-// ### Artifacts
-const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ACE = artifacts.require('./ACE');
-const AdjustSupply = artifacts.require('./AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./AdjustSupplyInterface');
-const JoinSplit = artifacts.require('./JoinSplit');
-const JoinSplitInterface = artifacts.require('./JoinSplit');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const JoinSplitValidator = artifacts.require('./JoinSplit');
+const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
+const JoinSplitFluidValidator = artifacts.require('./JoinSplitFluid');
+const JoinSplitFluidValidatorInterface = artifacts.require('./JoinSplitFluidInterface');
 const ZkAssetBurnable = artifacts.require('./ZkAssetBurnable');
 
-AdjustSupply.abi = AdjustSupplyInterface.abi;
-JoinSplit.abi = JoinSplitInterface.abi;
+JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
+JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
+
+const userA = secp256k1.generateAccount();
+
+const getDefaultDepositAndBurnNotes = async () => {
+    // There is no input note, as value is being deposited into ACE with an output
+    // note being created
+    const depositOutputNoteValues = [30, 20];
+    const depositPublicValue = -50;
+
+    const depositNotes = await helpers.getDepositNotes(depositOutputNoteValues);
+
+    const newBurnCounterValue = 50;
+    const newBurnCounterNote = await note.create(userA.publicKey, newBurnCounterValue);
+    const zeroBurnCounterNote = await note.createZeroValueNote();
+    const burnNotes = depositNotes.depositOutputNotes;
+
+    return {
+        ...depositNotes,
+        depositPublicValue,
+        newBurnCounterNote,
+        zeroBurnCounterNote,
+        burnNotes,
+    };
+};
 
 contract('ZkAssetBurnable', (accounts) => {
+    const depositSender = accounts[0];
+
     describe('Success States', () => {
         let ace;
-        let aztecAccounts = [];
-        let aztecAdjustSupply;
-        let aztecJoinSplit;
+        let joinSplitFluidValidator;
+        let joinSplitValidator;
         let erc20;
-        const kPublic = -50;
-        let notes = [];
-        const proofs = [];
         let scalingFactor;
-        let zkAssetBurnable;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
-            aztecAdjustSupply = await AdjustSupply.new();
-            aztecJoinSplit = await JoinSplit.new();
+            erc20 = await ERC20Mintable.new({ from: accounts[0] });
+            joinSplitValidator = await JoinSplitValidator.new({ from: accounts[0] });
+            joinSplitFluidValidator = await JoinSplitFluidValidator.new({ from: accounts[0] });
 
-            aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            await ace.setCommonReferenceString(constants.CRS);
-            await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = await note.createZeroValueNote();
-            const adjustedNotes = notes.slice(2, 4);
-
-            const canBurnAndBurn = true;
-            const canConvert = true;
+            await ace.setCommonReferenceString(bn128.CRS);
+            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
+            await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
 
             erc20 = await ERC20Mintable.new();
-            scalingFactor = new BN(1);
-            const tokensTransferred = new BN(50);
-
-            zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, canBurnAndBurn, canConvert, {
-                from: accounts[0],
-            });
-
-            erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
-            erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
-
-            const publicOwner = accounts[0];
-
-            proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: adjustedNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
-                publicOwner,
-                kPublic,
-                validatorAddress: zkAssetBurnable.address,
-            });
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned, // 50
-                oldTotalBurned, // 0
-                adjustedNotes, // 30 + 20
-                senderAddress: zkAssetBurnable.address,
-            });
-
-            const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-            const proofHash = outputCoder.hashProofOutput(proofOutput);
-
-            await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
+            scalingFactor = new BN(10);
         });
 
         it('should transfer public value in, then burn it', async () => {
+            const canAdjustSupply = true;
+            const canConvert = true;
+            const zkAssetBurnable = await ZkAssetBurnable.new(
+                ace.address,
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                {
+                    from: accounts[0],
+                },
+            );
+
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                depositPublicValue,
+                newBurnCounterNote,
+                zeroBurnCounterNote,
+                burnNotes,
+            } = await getDefaultDepositAndBurnNotes();
+
+            const publicOwner = accounts[0];
+            const tokensTransferred = new BN(1000);
+            erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
+            erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
+
             const linkedTokenInitialBalance = (await erc20.balanceOf(accounts[0])).toNumber();
             const aceInitialBalance = (await erc20.balanceOf(ace.address)).toNumber();
-
-            expect(linkedTokenInitialBalance).to.equal(-kPublic);
+            expect(linkedTokenInitialBalance).to.equal(scalingFactor.mul(tokensTransferred).toNumber());
             expect(aceInitialBalance).to.equal(0);
 
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(
-                proofs[0].proofData,
-                proofs[0].signatures,
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                depositSender,
+                depositPublicValue,
+                publicOwner,
             );
+            const depositData = depositProof.encodeABI(zkAssetBurnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
             expect(joinSplitReceipt.status).to.equal(true);
 
             const linkedTokenIntermediatateBalance = (await erc20.balanceOf(accounts[0])).toNumber();
-            expect(linkedTokenIntermediatateBalance).to.equal(0);
+            const expectedLinkedTokenIntermediateBalance = tokensTransferred
+                .mul(scalingFactor)
+                .sub(new BN(-depositPublicValue).mul(scalingFactor))
+                .toNumber();
+            expect(linkedTokenIntermediatateBalance).to.equal(expectedLinkedTokenIntermediateBalance);
             const aceIntermediateBalance = (await erc20.balanceOf(ace.address)).toNumber();
-            expect(aceIntermediateBalance).to.equal(-kPublic);
+            const expectedAceIntermediateBalance = new BN(-depositPublicValue).mul(scalingFactor).toNumber();
+            expect(aceIntermediateBalance).to.equal(expectedAceIntermediateBalance);
 
-            const { receipt: burnReceipt } = await zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData);
+            const burnSender = zkAssetBurnable.address;
+            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
+            const burnData = burnProof.encodeABI(zkAssetBurnable.address);
+
+            const { receipt: burnReceipt } = await zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData);
             expect(burnReceipt.status).to.equal(true);
 
             const aceBalanceFinal = (await erc20.balanceOf(ace.address)).toNumber();
             const linkedTokenFinalBalance = (await erc20.balanceOf(accounts[0])).toNumber();
 
-            expect(aceBalanceFinal).to.equal(-kPublic);
-            expect(linkedTokenFinalBalance).to.equal(0);
+            const expectedAceBalanceFinal = new BN(-depositPublicValue).mul(scalingFactor).toNumber();
+            expect(aceBalanceFinal).to.equal(expectedAceBalanceFinal);
+            const expectedLinkedTokenFinalBalance = tokensTransferred
+                .mul(scalingFactor)
+                .sub(new BN(-depositPublicValue).mul(scalingFactor))
+                .toNumber();
+            expect(linkedTokenFinalBalance).to.equal(expectedLinkedTokenFinalBalance);
         });
     });
 
     describe('Failure States', () => {
         let ace;
-        let aztecAdjustSupply;
-        let aztecJoinSplit;
+        let joinSplitFluidValidator;
+        let joinSplitValidator;
         let erc20;
-        const proofs = [];
         let scalingFactor;
-        let zkAssetBurnable;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: accounts[0] });
-            aztecAdjustSupply = await AdjustSupply.new();
-            aztecJoinSplit = await JoinSplit.new();
+            erc20 = await ERC20Mintable.new({ from: accounts[0] });
+            joinSplitValidator = await JoinSplitValidator.new({ from: accounts[0] });
+            joinSplitFluidValidator = await JoinSplitFluidValidator.new({ from: accounts[0] });
 
-            await ace.setCommonReferenceString(constants.CRS);
-            await ace.setProof(BURN_PROOF, aztecAdjustSupply.address);
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
+            await ace.setCommonReferenceString(bn128.CRS);
+            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
+            await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(1);
         });
 
-        it('should fail if flag set to FALSE', async () => {
+        it('should fail if canAdjustSupply flag set to FALSE', async () => {
             const canAdjustSupply = false;
             const canConvert = true;
-
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
+            const zkAssetBurnable = await ZkAssetBurnable.new(
+                ace.address,
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                {
+                    from: accounts[0],
+                },
             );
 
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = await note.createZeroValueNote();
-            const adjustedNotes = notes.slice(2, 4);
-
-            zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                from: accounts[0],
-            });
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                depositPublicValue,
+                newBurnCounterNote,
+                zeroBurnCounterNote,
+                burnNotes,
+            } = await getDefaultDepositAndBurnNotes();
 
             const publicOwner = accounts[0];
-            const kPublic = -50;
             const tokensTransferred = new BN(1000);
-
             erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
-            proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: adjustedNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                depositSender,
+                depositPublicValue,
                 publicOwner,
-                kPublic,
-                validatorAddress: zkAssetBurnable.address,
-            });
-            const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-            const proofHash = outputCoder.hashProofOutput(proofOutput);
-
-            // Burning two AZTEC notes, worth 30 and 20
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: zkAssetBurnable.address,
-            });
-
-            await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
-
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(
-                proofs[0].proofData,
-                proofs[0].signatures,
             );
-            expect(joinSplitReceipt.status).to.equal(true);
-            await truffleAssert.reverts(
-                zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData),
-                'this asset is not burnable',
-            );
+            const depositData = depositProof.encodeABI(zkAssetBurnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
+
+            const burnSender = zkAssetBurnable.address;
+            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
+            const burnData = burnProof.encodeABI(zkAssetBurnable.address);
+
+            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData), 'this asset is not burnable');
         });
 
-        it('should fail if msg.sender is not owner', async () => {
-            const canAdjustSupply = true;
+        it('should fail if confidentialBurn() called from a non-owner', async () => {
+            const canAdjustSupply = false;
             const canConvert = true;
-
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
+            const zkAssetBurnable = await ZkAssetBurnable.new(
+                ace.address,
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                {
+                    from: accounts[0],
+                },
             );
 
-            zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                from: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = await note.createZeroValueNote();
-            const adjustedNotes = notes.slice(2, 4);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                depositPublicValue,
+                newBurnCounterNote,
+                zeroBurnCounterNote,
+                burnNotes,
+            } = await getDefaultDepositAndBurnNotes();
 
             const publicOwner = accounts[0];
-            const kPublic = -50;
             const tokensTransferred = new BN(1000);
-
             erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
-            proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes: adjustedNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                depositSender,
+                depositPublicValue,
                 publicOwner,
-                kPublic,
-                validatorAddress: zkAssetBurnable.address,
-            });
-
-            const senderAddress = proof.proofUtils.randomAddress();
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress,
-            });
-
-            const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-            const proofHash = outputCoder.hashProofOutput(proofOutput);
-
-            await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
-
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(
-                proofs[0].proofData,
-                proofs[0].signatures,
             );
-            expect(joinSplitReceipt.status).to.equal(true);
+            const depositData = depositProof.encodeABI(zkAssetBurnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
+
+            const burnSender = zkAssetBurnable.address;
+            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
+            const burnData = burnProof.encodeABI(zkAssetBurnable.address);
+
             await truffleAssert.reverts(
-                zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData, { from: accounts[1] }),
+                zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData, { from: accounts[1] }),
                 'only the owner can call the confidentialBurn() method',
             );
         });
 
-        it('should fail if ace.burn fails', async () => {
-            const canAdjustSupply = true;
+        it('should fail if balancing relationship in burn proof not satisfied', async () => {
+            const canAdjustSupply = false;
             const canConvert = true;
-
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const joinSplitNoteValues = [50, 0, 30, 20];
-
-            // total inputs != total outputs
-            const burnNoteValues = [50, 0, 30, 21];
-
-            const joinSplitNotes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, joinSplitNoteValues[i]);
-                }),
+            const zkAssetBurnable = await ZkAssetBurnable.new(
+                ace.address,
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                {
+                    from: accounts[0],
+                },
             );
-
-            const burnNotes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, burnNoteValues[i]);
-                }),
-            );
-
-            zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                from: accounts[0],
-            });
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                depositPublicValue,
+                newBurnCounterNote,
+                zeroBurnCounterNote,
+                burnNotes,
+            } = await getDefaultDepositAndBurnNotes();
 
             const publicOwner = accounts[0];
-            const kPublic = -50;
             const tokensTransferred = new BN(1000);
-
             erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
             erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
-            const outputNotes = joinSplitNotes.slice(2, 4);
-
-            proofs[0] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes,
-                senderAddress: accounts[0],
-                inputNoteOwners: [],
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                depositSender,
+                depositPublicValue,
                 publicOwner,
-                kPublic,
-                validatorAddress: zkAssetBurnable.address,
-            });
-
-            const senderAddress = proof.proofUtils.randomAddress();
-
-            const newTotalBurned = burnNotes[0];
-            const oldTotalBurned = await note.createZeroValueNote();
-            const adjustedNotes = burnNotes.slice(2, 4);
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress,
-            });
-
-            const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-            const proofHash = outputCoder.hashProofOutput(proofOutput);
-
-            await ace.publicApprove(zkAssetBurnable.address, proofHash, 50, { from: accounts[0] });
-
-            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(
-                proofs[0].proofData,
-                proofs[0].signatures,
             );
-            expect(joinSplitReceipt.status).to.equal(true);
-            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, proofs[1].proofData));
+            const depositData = depositProof.encodeABI(zkAssetBurnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
+
+            const burnSender = zkAssetBurnable.address;
+
+            // Change a value of the burnedNote such that it doesn't satisfy a balancing relationship
+            burnNotes[0] = await note.create(secp256k1.generateAccount().publicKey, 31);
+            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
+            const burnData = burnProof.encodeABI(zkAssetBurnable.address);
+
+            await truffleAssert.reverts(
+                zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData, { from: accounts[1] }),
+                'only the owner can call the confidentialBurn() method',
+            );
         });
     });
 });

@@ -6753,6 +6753,11 @@ entities@~1.1.1:
   resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.2.tgz#bdfa735299664dfafd34529ed4f8522a275fea56"
   integrity sha512-f2LZMYl1Fzu7YSBKg+RoROelpOaNrcGmE9AZubeDfrCEia483oW4MI4VyFd5VNHIgQ/7qm1I0wUHK1eJnn2y2w==
 
+enumify@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/enumify/-/enumify-1.0.4.tgz#2bb6263071dd4551e54c55755707fad24a40cd7e"
+  integrity sha1-K7YmMHHdRVHlTFV1Vwf60kpAzX4=
+
 env-ci@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/env-ci/-/env-ci-3.2.0.tgz#982f02a0501ca8c43bf0765c5bd3d83ffb28b23a"
@@ -15423,11 +15428,6 @@ request@^2.67.0, request@^2.74.0, request@^2.79.0, request@^2.85.0, request@^2.8
     tunnel-agent "^0.6.0"
     uuid "^3.3.2"
 
-require-dir@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/require-dir/-/require-dir-1.2.0.tgz#0d443b75e96012d3ca749cf19f529a789ae74817"
-  integrity sha512-LY85DTSu+heYgDqq/mK+7zFHWkttVNRXC9NKcKGyuGLdlsfbjEPrIEYdCVrx6hqnJb+xSu3Lzaoo8VnmOhhjNA==
-
 require-directory@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
@@ -18592,7 +18592,7 @@ web3-utils@1.0.0-beta.37:
     underscore "1.8.3"
     utf8 "2.1.1"
 
-web3-utils@1.0.0-beta.55:
+web3-utils@1.0.0-beta.55, web3-utils@^1.0.0-beta.55:
   version "1.0.0-beta.55"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.55.tgz#beb40926b7c04208b752d36a9bc959d27a04b308"
   integrity sha512-ASWqUi8gtWK02Tp8ZtcoAbHenMpQXNvHrakgzvqTNNZn26wgpv+Q4mdPi0KOR6ZgHFL8R/9b5BBoUTglS1WPpg==
