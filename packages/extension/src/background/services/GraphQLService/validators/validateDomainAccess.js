@@ -23,18 +23,20 @@ export default async function validateDomainAccess(_, args, ctx, info) {
         const note = await noteModel.get({
             id: noteId,
         });
-        if (!note) {
-            return null;
+        if (note) {
+            const {
+                asset: assetKey,
+            } = note;
+            ({
+                id: asset,
+            } = await assetModel.get({
+                key: assetKey,
+            }));
         }
+    }
 
-        const {
-            asset: assetKey,
-        } = note;
-        ({
-            id: asset,
-        } = await assetModel.get({
-            key: assetKey,
-        }));
+    if (!asset) {
+        return null;
     }
 
     return AuthService.validateDomainAccess({
