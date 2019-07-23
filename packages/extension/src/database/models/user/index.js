@@ -6,6 +6,7 @@ export default Model({
         key: 'address',
         fields: [
             'address',
+            'linkedPublicKey',
             'lastSynced',
         ],
     },

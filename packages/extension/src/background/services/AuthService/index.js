@@ -7,6 +7,28 @@ import {
     permissionError,
 } from '~utils/error';
 import SyncService from '../SyncService';
+import { addErrorLoggingToSchema } from 'graphql-tools';
+
+const registerAddress = async ({
+    address: accountAddress,
+    linkedPublicKey,
+}) => {
+    const address = accountAddress.toLowerCase();
+    let user = await userModel.get({
+        address,
+    });
+    if (!user) {
+        user = {
+            address,
+            linkedPublicKey,
+        };
+
+        await userModel.set(user);
+        SyncService.syncAccount(address);
+    }
+
+    return user;
+};
 
 export default {
     validateUserAddress: async (address) => {
@@ -180,7 +202,11 @@ export default {
 
         return data.domain[domain];
     },
-    registerExtension: async ({ password, salt }) => {
+    registerExtension: async ({
+        address,
+        password,
+        salt,
+    }) => {
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
             salt,
@@ -203,23 +229,14 @@ export default {
             },
         });
 
-        return {
-            publicKey: keyStore.privacyKeys.publicKey,
-        };
-    },
-    registerAddress: async (accountAddress) => {
-        console.log('registerAddress', accountAddress);
-        const address = accountAddress.toLowerCase();
-        const user = await userModel.get({
-            address,
-        });
-        if (!user) {
-            await userModel.set({
-                address,
-            });
-            SyncService.syncAccount(address);
-        }
+        const {
+            publicKey: linkedPublicKey,
+        } = keyStore.privacyKeys;
 
-        return true;
+        return registerAddress({
+            address,
+            linkedPublicKey,
+        });
     },
+    registerAddress,
 };

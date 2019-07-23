@@ -39,11 +39,15 @@ export default {
         login: (_, args) => AuthService.login(args),
         // logout: sessionDecorator(AuthService.logout),
         registerExtension: pipe([
-            async (_, args) => AuthService.registerExtension(args),
+            async (_, args) => ({
+                account: await AuthService.registerExtension(args),
+            }),
         ]),
         registerAddress: pipe([
             validateSession,
-            async (_, args) => AuthService.registerAddress(args.address),
+            async (_, args) => ({
+                account: await AuthService.registerAddress(args.address),
+            }),
         ]),
     },
 };
