@@ -111,4 +111,7 @@ export default {
             .method('registerAZTECExtension')
             .send(Web3Service.account.address, publicKey, v, r, s);
     },
+    registerAddress: async address => mutate(`
+        registerAddress(address: "${address}")
+    `),
 };

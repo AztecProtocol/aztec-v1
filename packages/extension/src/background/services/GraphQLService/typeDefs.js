@@ -56,6 +56,10 @@ export default gql`
         permission: GrantNoteAccessPermission
         error: Error
     }
+    type MutationResponse {
+        success: Boolean
+        error: Error
+    }
     type Query {
         asset(
             id: ID!
@@ -88,5 +92,9 @@ export default gql`
             salt: String!
             domain: String!
         ): Account
+        registerAddress(
+            address: String!
+            domain: String!
+        ): MutationResponse
     }
 `;

@@ -6,6 +6,7 @@ import generateRandomId from '~utils/generateRandomId';
 import {
     permissionError,
 } from '~utils/error';
+import SyncService from '../SyncService';
 
 export default {
     validateUserAddress: async (address) => {
@@ -205,5 +206,20 @@ export default {
         return {
             publicKey: keyStore.privacyKeys.publicKey,
         };
+    },
+    registerAddress: async (accountAddress) => {
+        console.log('registerAddress', accountAddress);
+        const address = accountAddress.toLowerCase();
+        const user = await userModel.get({
+            address,
+        });
+        if (!user) {
+            await userModel.set({
+                address,
+            });
+            SyncService.syncAccount(address);
+        }
+
+        return true;
     },
 };
