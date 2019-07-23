@@ -9,6 +9,7 @@ import "../../libs/NoteUtils.sol";
 import "../../libs/VersioningUtils.sol";
 import "./interfaces/Behaviour.sol";
 import "./interfaces/Factory.sol";
+import "./proxies/AdminUpgradeabilityProxy.sol";
 
 /**
  * @title NoteRegistryManager contract which contains the storage variables that define the set of valid
@@ -41,8 +42,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
     // Every user has their own note registry
     mapping(address => NoteRegistryBehaviour) public registries;
-    mapping(address => IERC20) public publicTokens;
-    mapping(address => uint24) public registryFactories;
+    mapping(address => IERC20) internal publicTokens;
+    mapping(address => uint24) internal registryFactories;
     address[0x100][0x100][0x10000] factories;
     address[0x100][0x100][0x10000] disabledFactories;
 
@@ -50,6 +51,11 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     uint8 public defaultCryptoSystem = 1;
 
     mapping(bytes32 => bool) public validatedProofs;
+
+    modifier onlyRegistry() {
+        require(registryFactories[msg.sender] != uint24(0), "method can only be called from a noteRegistry");
+        _;
+    }
 
     /**
     * @dev Register a new Factory
@@ -174,17 +180,26 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
         address factory = getFactoryAddress(_factoryId);
 
-        address registry = NoteRegistryFactory(factory).deployNewNoteRegistry(
+        address behaviourAddress = NoteRegistryFactory(factory).deployNewBehaviourInstance();
+
+        bytes memory behaviourInitialisation = abi.encodeWithSignature(
+            "initialise(address,address,uint256,bool,bool)",
+            address(this),
             _linkedTokenAddress,
             _scalingFactor,
             _canAdjustSupply,
             _canConvert
         );
+        address proxy = address(new AdminUpgradeabilityProxy(
+            behaviourAddress,
+            factory,
+            behaviourInitialisation
+        ));
 
-        registries[msg.sender] = NoteRegistryBehaviour(registry);
+        registries[msg.sender] = NoteRegistryBehaviour(proxy);
         if (_canConvert) {
             require(_linkedTokenAddress != address(0x0), "expected the linked token address to exist");
-            publicTokens[registry] = IERC20(_linkedTokenAddress);
+            publicTokens[proxy] = IERC20(_linkedTokenAddress);
         }
         registryFactories[registry] = _factoryId;
         emit CreateNoteRegistry(
@@ -202,6 +217,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     ) public {
         NoteRegistryBehaviour registry = registries[msg.sender];
         require(address(registry) != address(0x0), "note registry for sender doesn't exist");
+    
         (uint8 epoch,, uint8 assetType) = _factoryId.getVersionComponents();
         uint24 oldFactoryId = registryFactories[address(registry)];
         (uint8 oldEpoch,, uint8 oldAssetType) = oldFactoryId.getVersionComponents();
@@ -209,16 +225,18 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         require(assetType == oldAssetType, "expected assetType to be the same for old and new registry");
 
         address factory = getFactoryAddress(_factoryId);
-        address dataContractAddress = address(registry.noteRegistryData);
-        address newRegistry = NoteRegistryFactory(factory).deployNewBehaviourInstance(
-            dataContractAddress
-        );
-        registry.transferDataContract(newRegistry);
-        registries[msg.sender] = NoteRegistryBehaviour(newRegistry);
+        address newBehaviour = NoteRegistryFactory(factory).deployNewBehaviourInstance();
+
+        address oldFactory = getFactoryAddress(oldFactoryId);
+        NoteRegistryFactory(oldFactory).upgradeBehaviour(address(registry), newBehaviour);
+        registries[msg.sender] = NoteRegistryBehaviour(newBehaviour);
+        registryFactories[address(registry)] = _factoryId;
     }
 
-    // This needs to be safeguarded more
-    function transferFrom(address from, address to, uint256 value) public {
+    function transferFrom(address from, address to, uint256 value)
+        public
+        onlyRegistry
+    {
         if (from == address(this)) {
             publicTokens[msg.sender].transfer(to, value);
         } else {
@@ -246,9 +264,9 @@ contract NoteRegistryManager is IAZTEC, Ownable {
             validateProofByHash(_proof, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
         );
+        // clear record of valid proof - stops re-entrancy attacks and saves some gas
         validatedProofs[proofHash] = false;
 
-        // clear record of valid proof - stops re-entrancy attacks and saves some gas
         registry.updateNoteRegistry(_proof, _proofOutput, _proofSender);
     }
 

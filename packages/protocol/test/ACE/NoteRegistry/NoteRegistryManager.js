@@ -10,7 +10,8 @@ const { proofs } = require('@aztec/dev-utils');
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
-const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/001_july_2019/convertible/FactoryConvertible201907');
+const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201908/convertible/FactoryConvertible201907');
+const Behaviour = artifacts.require('./noteRegistry/interfaces/NoteRegistryBehaviour');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 
 const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = proofs;
@@ -29,7 +30,7 @@ contract('NoteRegistryManager', (accounts) => {
 
     beforeEach(async () => {
         ace = await ACE.new();
-        factoryContract = await NoteRegistryFactory.new();
+        factoryContract = await NoteRegistryFactory.new(ace.address);
         const epoch = 1;
         const cryptoSystem = 1;
         const assetType = 0b01; // (adjust, canConvert) in binary;
@@ -68,6 +69,8 @@ contract('NoteRegistryManager', (accounts) => {
             expect(logs.length).to.not.equal(0);
             const behaviourAddress = await ace.registries(zkAssetOwner);
             expect(behaviourAddress).to.not.equal(undefined);
+            const contract = await Behaviour.at(behaviourAddress);
+            expect(await contract.initialised()).to.equal(true);
         });
 
         it('should upgrade to a new Note Registry behaviour contract', async () => {
@@ -92,6 +95,17 @@ contract('NoteRegistryManager', (accounts) => {
             expect(logs.length).to.equal(1);
             const newBehaviourAddress = await ace.registries(zkAssetOwner);
             expect(newBehaviourAddress).to.not.equal(behaviourAddress);
+
+            const upgradeTopic = web3.utils.keccak256('Upgraded(address)')
+            const upgradeLogs = await new Promise((resolve) => {
+                web3.eth.getPastLogs({
+                    address: behaviourAddress, // Actually the address of the proxy
+                    topics: [upgradeTopic],
+                })
+                    .then(resolve);
+            });
+            expect(upgradeLogs.length).to.equal(1);
+            expect(parseInt(upgradeLogs[0].topics[1], 16)).to.be.equal(parseInt(newBehaviourAddress, 16));
         });
     });
 
