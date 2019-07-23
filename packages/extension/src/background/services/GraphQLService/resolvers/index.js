@@ -10,6 +10,7 @@ import {
     ensureEntityPermission,
 } from '../decorators';
 import pipe from '../utils/pipe';
+import validateSession from '../validators/validateSession';
 
 export default {
     Note: {
@@ -39,6 +40,10 @@ export default {
         // logout: sessionDecorator(AuthService.logout),
         registerExtension: pipe([
             async (_, args) => AuthService.registerExtension(args),
+        ]),
+        registerAddress: pipe([
+            validateSession,
+            async (_, args) => AuthService.registerAddress(args.address),
         ]),
     },
 };

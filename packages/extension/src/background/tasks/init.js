@@ -1,11 +1,15 @@
 /* global chrome */
 import {
+    NOTES_PER_SYNC_REQUEST,
+    SYNC_INTERVAL,
+} from '~config/settings';
+import {
     get,
     set,
     onIdle,
 } from '~utils/storage';
-import userModel from '~database/models/user';
-import GraphNodeService from '../services/GraphNodeService';
+import SyncService from '~backgroundServices/SyncService';
+import GraphNodeService from '~backgroundServices/GraphNodeService';
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
@@ -15,15 +19,6 @@ export default async function init() {
             // __graphNode: 'http://localhost:4000/',
             __graphNode: 'http://127.0.0.1:8000/subgraphs/name/aztec/note-management',
         });
-        await userModel.set(
-            {
-                // address: '0x_account_00000000000000000000_address__0',
-                address: '0x3339c3c842732f4daacf12aed335661cf4eab66b',
-            },
-            {
-                ignoreDuplicate: true,
-            },
-        );
 
         onIdle(
             async () => {
@@ -41,6 +36,11 @@ export default async function init() {
             },
         );
     }
+
+    SyncService.set({
+        notesPerRequest: NOTES_PER_SYNC_REQUEST,
+        syncInterval: SYNC_INTERVAL,
+    });
 
     const graphNodeServerUrl = await get('__graphNode');
     GraphNodeService.set({
