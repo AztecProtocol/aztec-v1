@@ -3,12 +3,12 @@ import noteModel from '~database/models/note';
 import assetModel from '~database/models/asset';
 
 export default async function validateDomainAccess(_, args, ctx, info) {
-    let { asset } = args;
+    let { assetId } = args;
     let noteId;
     const entityType = info.fieldName;
     switch (entityType) {
     case 'asset':
-        asset = args.id;
+        assetId = args.id;
         break;
     case 'note':
         noteId = args.id;
@@ -28,19 +28,20 @@ export default async function validateDomainAccess(_, args, ctx, info) {
                 asset: assetKey,
             } = note;
             ({
-                id: asset,
+                id: assetId,
             } = await assetModel.get({
                 key: assetKey,
             }));
         }
     }
 
-    if (!asset) {
+    if (!assetId) {
         return null;
     }
 
     return AuthService.validateDomainAccess({
-        asset,
+        assetId,
+        noteId,
         domain: args.domain,
     });
 }
