@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./ACE.sol";
+// import "./ACE.sol";
 import "../MultiSig/MultiSigWalletWithTimeLock.sol";
 
 /**
@@ -10,8 +10,6 @@ import "../MultiSig/MultiSigWalletWithTimeLock.sol";
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ACEOwner is MultiSigWalletWithTimeLock {
-    address public ace;
-
     constructor(
         address[] memory _owners,
         uint256 _required,
@@ -21,7 +19,6 @@ contract ACEOwner is MultiSigWalletWithTimeLock {
         _required,
         _secondsTimeLocked
     ) {
-        ace = address(new ACE());
     }
 
     function emergencyExecuteInvalidateProof(uint256 transactionId)

@@ -2,7 +2,6 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "../../ACE/NoteRegistry.sol";
 import "../../ACE/ACE.sol";
 import "../../interfaces/IAZTEC.sol";
 import "../../interfaces/IZkAsset.sol";
@@ -19,7 +18,6 @@ import "../../libs/ProofUtils.sol";
 contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
-
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
