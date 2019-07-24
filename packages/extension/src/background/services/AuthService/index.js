@@ -6,9 +6,17 @@ import generateRandomId from '~utils/generateRandomId';
 import {
     permissionError,
 } from '~utils/error';
+import {
+    errorLog,
+} from '~utils/log';
 
 export default {
     validateUserAddress: async (address) => {
+        if (!address) { // this shouldn't happend in production
+            errorLog('Address cannot be empty in AuthService.validateUserAddress()');
+            return null;
+        }
+
         const user = await userModel.get({
             address: address.toLowerCase(),
         });
