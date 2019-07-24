@@ -5,7 +5,7 @@ const {
 const { isUndefined } = require('lodash');
 
 const ACE = artifacts.require('./ACE.sol');
-const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201907/Factory201907');
 
 module.exports = (deployer) => {
     if (isUndefined(ACE) || isUndefined(ACE.address)) {
