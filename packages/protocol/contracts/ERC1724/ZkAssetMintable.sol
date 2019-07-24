@@ -4,38 +4,32 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "./ZkAsset.sol";
 import "../ACE/ACE.sol";
 import "../ERC20/ERC20Mintable.sol";
 import "../libs/LibEIP712.sol";
 import "../libs/ProofUtils.sol";
-import "./ZkAssetOwnable.sol";
+import "./base/ZkAssetOwnableBase.sol";
 
 /**
  * @title ZkAssetMintable
  * @author AZTEC
- * @dev A contract defining the standard interface and behaviours of a confidential mintable asset. 
+ * @dev A contract defining the standard interface and behaviours of a mintable confidential asset.
+ * The ownership values and transfer values are encrypted.
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
 **/
-
-contract ZkAssetMintable is ZkAssetOwnable {
+contract ZkAssetMintable is ZkAssetOwnableBase {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
-    address public owner;
 
     constructor(
         address _aceAddress,
         address _linkedTokenAddress,
-        uint256 _scalingFactor,
-        bool _canAdjustSupply,
-        bool _canConvert
-    ) public ZkAssetOwnable(
+        uint256 _scalingFactor
+    ) public ZkAssetOwnableBase(
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor,
-        _canAdjustSupply,
-        _canConvert
+        true // canAdjustSupply
     ) {
-        owner = msg.sender;
     }
 
     /**
@@ -47,8 +41,7 @@ contract ZkAssetMintable is ZkAssetOwnable {
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofData - bytes array of proof data, outputted from a proof construction
     */
-    function confidentialMint(uint24 _proof, bytes calldata _proofData) external {
-        require(msg.sender == owner, "only the owner can call the confidentialMint() method");
+    function confidentialMint(uint24 _proof, bytes calldata _proofData) external onlyOwner {
         require(_proofData.length != 0, "proof invalid");
 
         (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, address(this));
