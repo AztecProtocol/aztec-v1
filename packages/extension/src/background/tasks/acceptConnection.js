@@ -43,46 +43,45 @@ const updateActionState = async (action) => {
     });
 };
 
-export default function acceptConnection() {
-    const ui = new Subject();
-    const uiConfirms = new Subject();
-    const uiErrors = new Subject();
 
-    const ui$ = ui.asObservable();
-    ui$.pipe(
-        map(() => {
-            window.open('popup.html', 'extension_popup', 'width=300,height=400,status=no,scrollbars=yes,resizable=no');
-        }),
-    ).subscribe();
+class Connection {
+    constructor() {
+        this.UiSubject = new Subject();
+        this.UiConfirmationSubject = new Subject();
+        this.UiRejectionSubject = new Subject();
+        this.ui$ = this.UiSubject.asObservable();
+        this.uiConfirmation$ = this.UiConfirmationSubject.asObservable();
+        this.uiRejection$ = this.UiRejectionSubject.asObservable();
 
-    const handleAction = (action) => {
-        // we need to mutate the db here to pass the error to the popup
-        // await updateActionState(action);
-        ui.next(action);
-        // we have to return an observable to original$
-        const uiConfirms$ = uiConfirms.asObservable()
-            .pipe(
-                filter(({ requestId }) => requestId === action.data.requestId),
-                take(1),
-            );
+        this.ui$.pipe(
+            map(() => window.open('popup.html', 'extension_popup', 'width=300,height=400,status=no,scrollbars=yes,resizable=no')),
+            // we can extend this to automatically close the window after a timeout
+        ).subscribe();
+    }
 
-        const uiErrors$ = uiErrors.asObservable().pipe(
-            take(1),
-        );
-        const uiTimeout$ = timer(10000).pipe(
-            map(() => dataError('extension.timeout')),
-        );
+    handleAction(action) {
         return from(updateActionState(action)).pipe(
-            mergeMap(() => race(
-                uiConfirms$,
-                uiTimeout$,
-                uiErrors$,
-            )),
+            mergeMap(() => {
+                this.UiSubject.next(action);
+                return race(
+                    this.uiConfirmation$.pipe(
+                        filter(({ requestId }) => requestId === action.data.requestId),
+                        take(1),
+                    ),
+                    this.uiRejection$.pipe(
+                        filter(({ requestId }) => requestId === action.data.requestId),
+                        take(1),
+                    ),
+                    timer(3000).pipe(
+                        map(() => dataError('extension.timeout')),
+                    ),
+                );
+            }),
             take(1),
         );
-    };
+    }
 
-    const handleMessage = (msg, senderDetails) => new Promise((resolve, reject) => {
+    handleMessage(msg, senderDetails) {
         const messageSubject = new Subject();
 
         const message$ = messageSubject.asObservable().pipe(
@@ -133,7 +132,7 @@ export default function acceptConnection() {
 
                 if (errorToActionMap[errorData.key]) {
                     // trigger the UI flow
-                    const action$ = handleAction({
+                    const action$ = this.handleAction({
                         type: errorToActionMap[errorData.key],
                         data: {
                             requestId,
@@ -141,7 +140,10 @@ export default function acceptConnection() {
                     });
                     action$.subscribe((actionResponse) => {
                         if (actionResponse.error) {
-                            messageSubject.error(actionResponse);
+                            messageSubject.error({
+                                requestId,
+                                ...actionResponse,
+                            });
                         } else {
                             messageSubject.next({
                                 data: msg,
@@ -166,24 +168,31 @@ export default function acceptConnection() {
             filter(result => !!result),
             take(1),
         );
+        return new Promise((resolve, reject) => {
+            message$.subscribe(resolve, (error) => {
+                resolve(error);
+            });
+            messageSubject.next({ data: msg, sender: senderDetails });
+        });
+    }
+}
 
-        message$.subscribe(resolve, reject);
-
-        messageSubject.next({ data: msg, sender: senderDetails });
-    });
-
+export default function acceptConnection() {
+    const connection = new Connection();
 
     browser.runtime.onMessage.addListener((msg, sender) => {
         switch (msg.type) {
         case clientEvent: {
-            return handleMessage(msg, sender);
+            const response = connection.handleMessage(msg, sender);
+            console.log(response);
+            return response;
         }
         case 'UI_CONFIRM': {
-            uiConfirms.next(msg, sender);
+            connection.UiConfirmationSubject.next(msg, sender);
             break;
         }
         case 'UI_REJECTION': {
-            uiErrors.next(msg, sender);
+            connection.UiRejectionSubject.next(msg, sender);
             break;
         }
         default:
