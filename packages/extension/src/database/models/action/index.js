@@ -6,7 +6,7 @@ export default Model({
         key: 'timestamp',
         fields: [
             'type',
-            'data'
+            'data',
         ],
     },
 });
