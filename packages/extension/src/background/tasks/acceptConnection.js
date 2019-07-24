@@ -11,20 +11,25 @@ import {
     of,
     from,
     Subject,
+    Observable,
     forkJoin,
-    race,
     timer,
+    merge,
+    race,
     empty,
 } from 'rxjs';
 import {
     mergeMap,
+    switchMap,
     take,
+    takeUntil,
     map,
-    mapTo,
-    tap,
+    flatMap,
+    first,
     filter,
     timeout,
 } from 'rxjs/operators';
+
 
 import {
     clientEvent,
@@ -55,43 +60,38 @@ export default function acceptConnection() {
 
     const ui$ = ui.asObservable();
     ui$.pipe(
-        mapTo((message) => {
+        map(() => {
             window.open('popup.html', 'extension_popup', 'width=300,height=400,status=no,scrollbars=yes,resizable=no');
         }),
     ).subscribe();
 
-    const handleAction = async (error, original$, msg) => {
+    const handleAction = (action) => {
         // we need to mutate the db here to pass the error to the popup
-        await updateActionState(error);
-        ui.next();
+        // await updateActionState(action);
+        ui.next(action);
         // we have to return an observable to original$
         const uiConfirms$ = uiConfirms.asObservable()
             .pipe(
-                filter(({ requestId }) => requestId === error.requestId),
+                filter(({ requestId }) => requestId === action.data.requestId),
                 take(1),
-                mergeMap((d) => {
-                    // retry the flow
-                    original$.next(msg);
-                    return empty();
-                }),
-            ).subscribe();
+            );
 
         const uiErrors$ = uiErrors.asObservable().pipe(
             take(1),
-            mergeMap(() => empty()),
-        ).subscribe();
-        const uiTimeout$ = timer(15000).pipe(
-            map(() => {
-                console.log('here');
-                return dataError('extension.timeout');
+            map(({ key }) => {
+                original$.error(dataError(key));
             }),
         );
-
-        return race(
-            uiConfirms$,
-            uiTimeout$,
-            // timeout(150000),
-            uiErrors$,
+        const uiTimeout$ = timer(10000).pipe(
+            map(() => dataError('extension.timeout')),
+        );
+        return from(updateActionState(action)).pipe(
+            mergeMap(() => race(
+                uiConfirms$,
+                uiTimeout$,
+                uiErrors$,
+            )),
+            take(1),
         );
     };
 
@@ -115,7 +115,6 @@ export default function acceptConnection() {
             mergeMap(({
                 mutation, query, domain, variables, requestId,
             }) => {
-                console.log(requestId, domain);
                 let type = 'query';
                 if (mutation) {
                     type = 'mutation';
@@ -137,39 +136,44 @@ export default function acceptConnection() {
                         }),
                     ),
                     request: of(requestId),
-                });
-            }),
-            mergeMap(({ response: { requestId, ...rest } }) => {
+                }); }),
+            switchMap(({ response: { requestId, ...rest } }) => {
                 const queryName = Object.keys(rest)
                     .find(queryName => !!rest[queryName].error);
                 const errorData = queryName ? rest[queryName].error : false;
                 // check the action mapping
-                console.log(errorData.key, errorToActionMap[errorData.key]);
+                const s = new Subject();
+
 
                 if (errorToActionMap[errorData.key]) {
                     // trigger the UI flow
-                    return handleAction({
+                    const action$ = handleAction({
                         type: errorToActionMap[errorData.key],
                         data: {
                             requestId,
                         },
-                    }, messageSubject, {
-                        data: msg,
-                        sender: senderDetails,
+                    });
+                    action$.subscribe((actionResponse) => {
+                        if (actionResponse.error) {
+                            messageSubject.error(actionResponse);
+                        } else {
+                            messageSubject.next({
+                                data: msg,
+                                sender: senderDetails,
+                            });
+                        }
                     });
                 }
                 if (errorData.key && !errorToActionMap[errorData.key]) {
                     messageSubject.error({ requestId, ...errorData });
-                    return empty();
+                    // s.next();
                 }
                 if (!errorData) {
-                    return of({ requestId, ...rest });
+                    s.next({ requestId, ...rest });
                 }
+                return s.asObservable().pipe(take(1));
             }),
-            map((d)=> {
-                console.log('asdfas',d);
-                return d;
-            })
+            filter(result => !!result),
             take(1),
         );
         message$.subscribe(resolve, reject);

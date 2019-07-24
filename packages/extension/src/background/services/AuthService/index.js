@@ -6,29 +6,6 @@ import generateRandomId from '~utils/generateRandomId';
 import {
     permissionError,
 } from '~utils/error';
-import SyncService from '../SyncService';
-import { addErrorLoggingToSchema } from 'graphql-tools';
-
-const registerAddress = async ({
-    address: accountAddress,
-    linkedPublicKey,
-}) => {
-    const address = accountAddress.toLowerCase();
-    let user = await userModel.get({
-        address,
-    });
-    if (!user) {
-        user = {
-            address,
-            linkedPublicKey,
-        };
-
-        await userModel.set(user);
-        SyncService.syncAccount(address);
-    }
-
-    return user;
-};
 
 export default {
     validateUserAddress: async (address) => {
@@ -46,6 +23,15 @@ export default {
         return {
             user,
         };
+    },
+    validateExtension: async () => {
+        const keyStore = await get('keyStore');
+        if (!keyStore) {
+            return permissionError('extension.not.registered', {
+                messageOptions: {},
+            });
+        }
+        return {};
     },
     validateDomain: async (domain) => {
         const registeredDomain = await domainModel.get({
@@ -216,11 +202,7 @@ export default {
 
         return data.domain[domain];
     },
-    registerExtension: async ({
-        address,
-        password,
-        salt,
-    }) => {
+    registerExtension: async ({ password, salt }) => {
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
             salt,
@@ -243,14 +225,8 @@ export default {
             },
         });
 
-        const {
-            publicKey: linkedPublicKey,
-        } = keyStore.privacyKeys;
-
-        return registerAddress({
-            address,
-            linkedPublicKey,
-        });
+        return {
+            publicKey: keyStore.privacyKeys.publicKey,
+        };
     },
-    registerAddress,
 };

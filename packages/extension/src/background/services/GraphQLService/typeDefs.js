@@ -102,7 +102,6 @@ export default gql`
             domain: String!
         ): Session
         registerExtension(
-            address: String!
             password: String!
             salt: String!
             domain: String!

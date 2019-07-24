@@ -12,11 +12,6 @@ contract AZTECAccountRegistry is LibEIP712 {
 
     mapping(address => bytes) public accountMapping;
 
-    // EIP712 Domain Name value
-    string constant internal EIP712_DOMAIN_NAME = "AZTEC_ACCOUNT_REGISTRY";
-
-    // EIP712 Domain Version value
-    string constant internal EIP712_DOMAIN_VERSION = "1";
 
     struct AZTECAccount {
         address account;
