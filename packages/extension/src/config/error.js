@@ -33,6 +33,7 @@ export default {
             register: 'Domain %{domain} is not registered.',
             grantedAccess: {
                 asset: "The user has not granted the domain '%{domain}' access to asset '%{asset}'.",
+                note: "The user has not granted the domain '%{domain}' access to note with asset '%{asset}'.",
             },
         },
     },

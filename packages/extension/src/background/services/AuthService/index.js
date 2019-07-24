@@ -51,21 +51,31 @@ export default {
     },
     validateDomainAccess: async ({
         domain,
-        asset,
+        assetId,
+        noteId,
     }) => {
         const {
             assets: {
-                [asset]: isApproved,
+                [assetId]: isApproved,
             } = {},
         } = await domainModel.get({
             domain,
         }) || {};
 
         if (!isApproved) {
+            if (noteId) {
+                return permissionError('domain.not.grantedAccess.note', {
+                    messageOptions: {
+                        domain,
+                        note: noteId,
+                        asset: assetId,
+                    },
+                });
+            }
             return permissionError('domain.not.grantedAccess.asset', {
                 messageOptions: {
                     domain,
-                    asset,
+                    asset: assetId,
                 },
             });
         }
