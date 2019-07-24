@@ -27,10 +27,10 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
 
     function initialise(
         address _newOwner,
-        address _linkedTokenAddress,
-        uint256 _scalingFactor,
-        bool _canAdjustSupply,
-        bool _canConvert
+        address /* _linkedTokenAddress */,
+        uint256 /* _scalingFactor */,
+        bool /* _canAdjustSupply */,
+        bool /* _canConvert */
     ) public {
         require(initialised != true, "registry already initialised");
         _transferOwnership(_newOwner);
@@ -57,8 +57,7 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
 
     function updateNoteRegistry(
         uint24 _proof,
-        bytes memory _proofOutput,
-        address _proofSender
+        bytes memory _proofOutput
     ) public;
 
     function publicApprove(address _publicOwner, bytes32 _proofHash, uint256 _value) public;

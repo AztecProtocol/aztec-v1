@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../Factory.sol";
+import "../../../interfaces/Factory.sol";
 import "./Behaviour.sol";
 
 /**
@@ -9,8 +9,8 @@ import "./Behaviour.sol";
  * @author AZTEC
  * @dev todo
  **/
-contract FactoryConvertible201907 is Factory201907 {
-    constructor(address _aceAddress) public Factory201907(_aceAddress) {}
+contract FactoryConvertible201907 is NoteRegistryFactory {
+    constructor(address _aceAddress) public NoteRegistryFactory(_aceAddress) {}
 
     function deployNewBehaviourInstance() public
       onlyOwner

@@ -71,15 +71,11 @@ contract('ZkAsset', (accounts) => {
             expect(result).to.equal(erc20.address);
         });
 
-        it('should set canConvert flag to false if 0x0 is linked token address', async () => {
-            const nonConvertibleZkAsset = await ZkAsset.new(ace.address, constants.addresses.ZERO_ADDRESS, scalingFactor);
-
-            const registry = await ace.getRegistry(nonConvertibleZkAsset.address);
-
-            expect(registry.canConvert).to.equal(false);
+        it('should set the flags', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const registry = await ace.getRegistry(zkAsset.address);
             expect(registry.canAdjustSupply).to.equal(false);
-            const result = await nonConvertibleZkAsset.linkedToken();
-            expect(result).to.equal(constants.addresses.ZERO_ADDRESS);
+            expect(registry.canConvert).to.equal(true);
         });
 
         it('should set canConvert flag to true if linked token address is provided', async () => {
@@ -417,6 +413,11 @@ contract('ZkAsset', (accounts) => {
             const malformedProofData = `0x0123${data.slice(6)}`;
             // no error message because it throws in assembly
             await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData, signatures));
+        });
+
+        it('should should fail to create zkAsset if 0x0 is linked token address', async () => {
+            await truffleAssert.reverts(ZkAsset.new(ace.address, constants.addresses.ZERO_ADDRESS, scalingFactor),
+                "can not create asset with convert and adjust flags set to false");
         });
 
         it('should fail if signatures are zero', async () => {
