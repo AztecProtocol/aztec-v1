@@ -75,7 +75,6 @@ export default async function get(params = {}) {
     }
 
     if (subFieldsKey && !storageData) {
-        warnLog(`Try to get data for '${subFieldsKey}' from undefined ${name} storage.`);
         return null;
     }
 
