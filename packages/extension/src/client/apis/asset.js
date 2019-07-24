@@ -2,6 +2,7 @@ import query from './utils/query';
 // import notePicker from '../utils/notePicker';
 
 const dataProperties = [
+    'address',
     'balance',
 ];
 
@@ -12,12 +13,17 @@ export default class Asset {
         this.id = id;
     }
 
+    isValid() {
+        return !!this.address;
+    }
+
     refresh = async () => {
         const {
             assetResponse,
         } = await query(`
             assetResponse: asset(id: "${this.id}") {
                 asset {
+                    address
                     balance
                 }
                 error {
@@ -58,7 +64,6 @@ export default class Asset {
 
 export const assetFactory = async (assetId) => {
     const asset = new Asset({
-        query,
         id: assetId,
     });
     await asset.refresh();

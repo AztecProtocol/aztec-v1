@@ -41,7 +41,8 @@ export default {
     login: ({
         password,
     }) => mutate(`
-        login(password: "${password}") `),
+        login(password: "${password}")
+    `),
     registerExtension: async ({ password, salt }) => {
         const { address } = Web3Service.account;
         const response = await mutate(`
@@ -93,7 +94,6 @@ export default {
         const s = `0x${signature.substring(64, 128)}`;
         const v = parseInt(signature.substring(128, 130), 16);
 
-
         await Web3Service
             .useContract('AZTECAccountRegistry', Web3Service.deployed('AZTECAccountRegistry').address)
             .method('registerAZTECExtension')
@@ -101,5 +101,8 @@ export default {
     },
     registerAddress: async address => mutate(`
         registerAddress(address: "${address}")
+    `),
+    enableAsset: async asset => mutate(`
+        enableAssetForDomain(asset: "${asset}")
     `),
 };

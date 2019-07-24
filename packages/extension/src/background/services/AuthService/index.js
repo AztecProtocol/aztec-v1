@@ -9,6 +9,7 @@ import {
 import {
     errorLog,
 } from '~utils/log';
+import SyncService from '../SyncService';
 
 export default {
     validateUserAddress: async (address) => {
@@ -246,5 +247,30 @@ export default {
         return {
             publicKey: keyStore.privacyKeys.publicKey,
         };
+    },
+    registerAddress: async ({
+        address: accountAddress,
+        linkedPublicKey,
+    }) => {
+        if (!accountAddress) { // this shouldn't happend in production
+            errorLog('Address cannot be empty in AuthService.registerAddress()');
+            return null;
+        }
+
+        const address = accountAddress.toLowerCase();
+        let user = await userModel.get({
+            address,
+        });
+        if (!user) {
+            user = {
+                address,
+                linkedPublicKey,
+            };
+
+            await userModel.set(user);
+            SyncService.syncAccount(address);
+        }
+
+        return user;
     },
 };
