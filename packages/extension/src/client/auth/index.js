@@ -32,7 +32,7 @@ const AZTECAccount = [
     },
     {
         name: 'linkedPublicKey',
-        type: 'string',
+        type: 'bytes',
     },
 ];
 
@@ -59,11 +59,13 @@ export default {
                 } = {},
             },
         } = response;
+
+        const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
         const domainData = {
             name: 'AZTECAccountRegistry',
             version: '2',
-            chainId: 1563469630469,
-            verifyingContract: '0xb903FAb78F621D99218e8AD222080903E747671E',
+            chainId: 1563905255267,
+            verifyingContract: accountRegistryContract.address,
             salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
         };
 
