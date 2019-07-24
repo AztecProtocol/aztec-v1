@@ -1,20 +1,12 @@
 import browser from 'webextension-polyfill';
 import gql from 'graphql-tag';
 import psl from 'psl';
-import actionModel from '~database/models/action';
-import { errorLog } from '~utils/log';
-import {
-    dataError,
-} from '~utils/error';
-import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     of,
     from,
     Subject,
-    Observable,
     forkJoin,
     timer,
-    merge,
     race,
     empty,
 } from 'rxjs';
@@ -22,22 +14,20 @@ import {
     mergeMap,
     switchMap,
     take,
-    takeUntil,
     map,
-    flatMap,
-    first,
     filter,
-    timeout,
 } from 'rxjs/operators';
-
-
+import actionModel from '~database/models/action';
+import {
+    dataError,
+} from '~utils/error';
+import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     clientEvent,
 } from '~config/event';
 import {
     errorToActionMap,
 } from '~config/action';
-
 import GraphQLService from '../services/GraphQLService';
 
 
@@ -78,9 +68,6 @@ export default function acceptConnection() {
 
         const uiErrors$ = uiErrors.asObservable().pipe(
             take(1),
-            map(({ key }) => {
-                original$.error(dataError(key));
-            }),
         );
         const uiTimeout$ = timer(10000).pipe(
             map(() => dataError('extension.timeout')),
@@ -136,14 +123,13 @@ export default function acceptConnection() {
                         }),
                     ),
                     request: of(requestId),
-                }); }),
+                });
+            }),
             switchMap(({ response: { requestId, ...rest } }) => {
                 const queryName = Object.keys(rest)
-                    .find(queryName => !!rest[queryName].error);
+                    .find(name => !!rest[name].error);
                 const errorData = queryName ? rest[queryName].error : false;
                 // check the action mapping
-                const s = new Subject();
-
 
                 if (errorToActionMap[errorData.key]) {
                     // trigger the UI flow
@@ -164,18 +150,23 @@ export default function acceptConnection() {
                         }
                     });
                 }
+
                 if (errorData.key && !errorToActionMap[errorData.key]) {
                     messageSubject.error({ requestId, ...errorData });
-                    // s.next();
                 }
+
                 if (!errorData) {
-                    s.next({ requestId, ...rest });
+                    return of({
+                        requestId,
+                        data: rest,
+                    });
                 }
-                return s.asObservable().pipe(take(1));
+                return empty();
             }),
             filter(result => !!result),
             take(1),
         );
+
         message$.subscribe(resolve, reject);
 
         messageSubject.next({ data: msg, sender: senderDetails });
@@ -195,9 +186,8 @@ export default function acceptConnection() {
             uiErrors.next(msg, sender);
             break;
         }
-        default: {
-            break;
+        default:
         }
-        }
+        return null;
     });
 }
