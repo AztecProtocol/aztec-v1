@@ -132,18 +132,9 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should perform mint when using confidentialTransferFrom()', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-            const zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
 
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const delegateAddress = accounts[2];
@@ -200,18 +191,9 @@ contract('ZkAssetMintable', (accounts) => {
             const recipient1 = accounts[1];
             const delegateAddress = accounts[2];
 
-            const canAdjustSupply = true;
-            const canConvert = true;
-            const zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: sender,
-                },
-            );
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+                from: sender,
+            });
             const depositOutputNoteValues = [20, 30];
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, depositOutputNoteValues);
 
