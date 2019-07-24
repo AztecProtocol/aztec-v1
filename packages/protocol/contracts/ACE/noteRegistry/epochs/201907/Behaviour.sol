@@ -135,7 +135,7 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         * @dev Burn AZTEC notes
         * TODO
     */
-    function burn(bytes calldata _proofOutputs) external onlyOwner {
+    function burn(bytes calldata /* _proofOutputs */) external onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not burnable");
     }
 
@@ -143,7 +143,7 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         * @dev Mint AZTEC notes
         * TODO
     */
-    function mint(bytes calldata _proofOutputs) external onlyOwner {
+    function mint(bytes calldata  /* _proofOutputs */) external onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not mintable");
     }
 
@@ -153,12 +153,10 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         *
         * @param _proof - unique identifier for a proof
         * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
-        * @param _proofSender - address of the entity sending the proof
     */
     function updateNoteRegistry(
         uint24 _proof,
-        bytes memory _proofOutput,
-        address _proofSender
+        bytes memory _proofOutput
     ) public onlyOwner {
         require(registry.active == true, "note registry does not exist for the given address");
 
@@ -181,16 +179,16 @@ contract Behaviour201907 is NoteRegistryBehaviour {
     /**
     * @dev This should be called from an asset contract.
     */
-    function publicApprove(address _publicOwner, bytes32 _proofHash, uint256 _value) public onlyOwner {
+    function publicApprove(address /* _publicOwner */, bytes32 /* _proofHash */, uint256 /* _value */) public onlyOwner {
         require(registry.canConvert == true, "this asset is not convertible");
     }
 
-    function setConfidentialTotalMinted(bytes32 newTotalNoteHash) internal onlyOwner returns (bytes32) {
+    function setConfidentialTotalMinted(bytes32 /* newTotalNoteHash */) internal onlyOwner returns (bytes32) {
         require(registry.canAdjustSupply == true, "this asset is not mintable");
 
     }
 
-    function setConfidentialTotalBurned(bytes32 newTotalNoteHash) internal onlyOwner returns (bytes32) {
+    function setConfidentialTotalBurned(bytes32 /* newTotalNoteHash */) internal onlyOwner returns (bytes32) {
         require(registry.canAdjustSupply == true, "this asset is not burnable");
     }
 
