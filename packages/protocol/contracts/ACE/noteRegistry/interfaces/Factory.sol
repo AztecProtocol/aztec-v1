@@ -22,5 +22,8 @@ contract NoteRegistryFactory is IAZTEC, Ownable  {
 
     function deployNewBehaviourInstance() public returns (address);
 
-    function upgradeBehaviour(address _oldImplementation, address _newImplementation) public;
+    function upgradeBehaviour(address _oldImplementation, address _newImplementation) public onlyOwner {
+        require(ProxyAdmin(_oldImplementation).admin() == address(this), "this is not the admin of the proxy");
+        ProxyAdmin(_oldImplementation).upgradeTo(_newImplementation);
+    }
 }
