@@ -63,18 +63,9 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should complete a mint operation', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-            const zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
 
             const sender = zkAssetMintable.address;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
@@ -85,18 +76,9 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should transfer minted value out of the note registry', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-            const zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
 
             const withdrawalPublicValue = 50;
             const erc20TotalSupply = (await erc20.totalSupply()).toNumber();
@@ -155,42 +137,21 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should fail if msg.sender is not owner', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-            const zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
 
             const sender = zkAssetMintable.address;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
-            await truffleAssert.reverts(
-                zkAssetMintable.confidentialMint(MINT_PROOF, data, { from: accounts[1] }),
-                'only the owner can call the confidentialMint() method',
-            );
+            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, data, { from: accounts[1] }));
         });
 
         it('should fail for unbalanced proof relation, totalInputs !== totalOutputs', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-            const zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
             const sender = zkAssetMintable.address;
             const newMintCounterValue = 50;
             const mintedNoteValues = [30, 30];
@@ -201,27 +162,6 @@ contract('ZkAssetMintable', (accounts) => {
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, data));
-        });
-
-        it('should fail to mint if canAdjustSupply flag set to FALSE', async () => {
-            const canAdjustSupply = false;
-            const canConvert = true;
-            const zkAssetMintable = await ZkAssetMintable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
-            const sender = zkAssetMintable.address;
-            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
-            const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
-            const data = proof.encodeABI();
-
-            await truffleAssert.reverts(zkAssetMintable.confidentialMint(MINT_PROOF, data), 'this asset is not mintable');
         });
     });
 });
