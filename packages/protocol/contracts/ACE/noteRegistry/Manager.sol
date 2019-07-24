@@ -57,6 +57,14 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         _;
     }
 
+    function incrementLatestRegistryEpoch() public onlyOwner {
+        latestRegistryEpoch = latestRegistryEpoch + 1;
+    }
+
+    function setDefaultCryptoSystem(uint8 _defaultCryptoSystem) public onlyOwner {
+        defaultCryptoSystem = _defaultCryptoSystem;
+    }
+
     /**
     * @dev Register a new Factory
     */
@@ -170,12 +178,13 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         require(address(registries[msg.sender]) == address(0x0), "address already has a linked note registry");
         (,, uint8 assetType) = _factoryId.getVersionComponents();
         // assetType is 0b00 where the bits represent (canAdjust, canConvert),
-        // so assetType can be one of 0, 1, 2, 3 where
-        // 0 == no convert/no adjust
+        // so assetType can be one of 1, 2, 3 where
+        // 0 == no convert/no adjust (invalid)
         // 1 == can convert/no adjust
         // 2 == no convert/can adjust
         // 3 == can convert/can adjust
         uint8 flagAssetType = getAssetTypeFromFlags(_canConvert, _canAdjustSupply);
+        require (flagAssetType != uint8(0), "can not create asset with convert and adjust flags set to false");
         require (flagAssetType == assetType, "expected note registry to match flags");
 
         address factory = getFactoryAddress(_factoryId);
