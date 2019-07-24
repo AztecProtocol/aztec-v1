@@ -44,7 +44,7 @@ contract('NoteRegistry', (accounts) => {
         ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: sender });
         joinSplitValidator = JoinSplitValidator;
 
-        const convertibleFactory = await ConvertibleFactory.new();
+        const convertibleFactory = await ConvertibleFactory.new(ace.address);
         await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 0 * 256**(0), convertibleFactory.address);
         await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 1 * 256**(0), convertibleFactory.address);
         await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 2 * 256**(0), convertibleFactory.address);
@@ -283,11 +283,12 @@ contract('NoteRegistry', (accounts) => {
             );
         });
 
-        it('should fail to update a note registry is public value is non-zero and conversion is deactivated', async () => {
+        it('should fail to update a note registry if public value is non-zero and conversion is deactivated', async () => {
+            const canAdjustSupplyFlag = true;
             const canConvertFlag = false;
             const data = depositProof.encodeABI(JoinSplitValidator.address);
             const opts = { from: accounts[3] };
-            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvertFlag, opts);
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupplyFlag, canConvertFlag, opts);
             await ace.publicApprove(publicOwner, depositProof.hash, Math.abs(depositPublicValue), {
                 from: publicOwner,
             });

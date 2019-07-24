@@ -71,12 +71,10 @@ contract BehaviourAdjustable201907 is Behaviour201907 {
         *
         * @param _proof - unique identifier for a proof
         * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
-        * @param _proofSender - address of the entity sending the proof
     */
     function updateNoteRegistry(
         uint24 _proof,
-        bytes memory _proofOutput,
-        address _proofSender
+        bytes memory _proofOutput
     ) public onlyOwner {
         require(registry.active == true, "note registry does not exist for the given address");
 

@@ -20,7 +20,6 @@ import "./proxies/AdminUpgradeabilityProxy.sol";
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 contract NoteRegistryManager is IAZTEC, Ownable {
-    using NoteUtils for bytes;
     using SafeMath for uint256;
     using VersioningUtils for uint24;
 
@@ -210,10 +209,10 @@ contract NoteRegistryManager is IAZTEC, Ownable {
             require(_linkedTokenAddress != address(0x0), "expected the linked token address to exist");
             publicTokens[proxy] = IERC20(_linkedTokenAddress);
         }
-        registryFactories[registry] = _factoryId;
+        registryFactories[proxy] = _factoryId;
         emit CreateNoteRegistry(
             msg.sender,
-            registry,
+            proxy,
             _scalingFactor,
             _linkedTokenAddress,
             _canAdjustSupply,
@@ -276,7 +275,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         // clear record of valid proof - stops re-entrancy attacks and saves some gas
         validatedProofs[proofHash] = false;
 
-        registry.updateNoteRegistry(_proof, _proofOutput, _proofSender);
+        registry.updateNoteRegistry(_proof, _proofOutput);
     }
 
     /**
