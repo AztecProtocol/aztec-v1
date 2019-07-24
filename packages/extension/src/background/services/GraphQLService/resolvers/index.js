@@ -1,16 +1,13 @@
 import assetModel from '~database/models/asset';
 import accountModel from '~database/models/account';
 import noteModel from '~database/models/note';
-import requestGrantAccess from './requestGrantAccess';
-import {
-    sessionDecorator,
-} from '../../../utils/decorators';
 import AuthService from '../../AuthService';
 import {
     ensureEntityPermission,
 } from '../decorators';
 import pipe from '../utils/pipe';
 import validateSession from '../validators/validateSession';
+import requestGrantAccess from './requestGrantAccess';
 
 export default {
     Note: {
@@ -32,10 +29,6 @@ export default {
         })),
     },
     Mutation: {
-        enableAssetForDomain: pipe([
-            sessionDecorator,
-            async (_, args) => AuthService.enableAssetForDomain(args),
-        ]),
         login: (_, args) => AuthService.login(args),
         // logout: sessionDecorator(AuthService.logout),
         registerExtension: pipe([
@@ -48,6 +41,10 @@ export default {
             async (_, args) => ({
                 account: await AuthService.registerAddress(args.address),
             }),
+        ]),
+        enableAssetForDomain: pipe([
+            validateSession,
+            async (_, args) => AuthService.enableAssetForDomain(args),
         ]),
     },
 };

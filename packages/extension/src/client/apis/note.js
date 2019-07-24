@@ -3,6 +3,7 @@ import query from './utils/query';
 import ApiError from './utils/ApiError';
 
 const dataProperties = [
+    'hash',
     'value',
     'owner',
 ];
@@ -14,12 +15,17 @@ export default class Note {
         this.id = id;
     }
 
+    isValid() {
+        return !!this.hash;
+    }
+
     refresh = async () => {
         const {
             noteResponse,
         } = await query(`
             noteResponse: note(id: "${this.id}") {
                 note {
+                    hash
                     value
                     owner {
                         address
@@ -108,7 +114,6 @@ export default class Note {
 
 export const noteFactory = async (noteId) => {
     const note = new Note({
-        query,
         id: noteId,
     });
     await note.refresh();

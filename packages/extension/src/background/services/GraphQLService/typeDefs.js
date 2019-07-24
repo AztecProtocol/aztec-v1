@@ -8,7 +8,7 @@ export default gql`
         UNKNOWN
     }
     enum ActionType {
-        AUTH 
+        AUTH
         ASSET
         PROOF
         UNKNOWN
@@ -24,9 +24,14 @@ export default gql`
         response: String
     }
     type Account {
-        id: ID
-        address: String
+        id: ID!
+        address: String!
+    }
+    type User {
+        id: ID!
+        address: String!
         linkedPublicKey: String
+        lastSynced: Int
     }
     type Domain {
         assets: [Asset!]
@@ -70,8 +75,8 @@ export default gql`
         error: Error
         action: Action
     }
-    type AccountApiResponse {
-        account: Account
+    type UserAccountApiResponse {
+        account: User
         error: Error
     }
     type Query {
@@ -93,10 +98,6 @@ export default gql`
         ): GrantAccessApiResponse
     }
     type Mutation {
-        enableAssetForDomain(
-            domain: String!
-            asset: String!
-        ): Domain
         login(
             password: String!
             domain: String!
@@ -105,10 +106,14 @@ export default gql`
             password: String!
             salt: String!
             domain: String!
-        ): AccountApiResponse
+        ): UserAccountApiResponse
         registerAddress(
             address: String!
             domain: String!
-        ): AccountApiResponse
+        ): UserAccountApiResponse
+        enableAssetForDomain(
+            domain: String!
+            asset: String!
+        ): Domain
     }
 `;
