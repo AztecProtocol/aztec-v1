@@ -1,6 +1,6 @@
+import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
 import ACE from '../contracts/ACE';
 import ZkAsset from '../contracts/ZkAsset';
-import AZTECAccountRegistry from '../contracts/AZTECAccountRegistry';
 import auth from '../auth';
 import {
     assetFactory,
@@ -17,17 +17,12 @@ class Aztec {
     }
 
     enable = async ({
-        networkId,
-        contractAddresses: {
-            ace,
-            aztecAccountRegistry,
-        },
-
+        // networkId,
+        contractAddresses,
     } = {
         contractAddresses: {
-
             ace: '0xec85f3d1fc95ca5e02a9e4b08998bd4bf92ef914',
-            aztecAccountRegistry: '0x2DC7d67896DB3D58d029a747e149F68165cE863E',
+            // aztecAccountRegistry: '0x2DC7d67896DB3D58d029a747e149F68165cE863E',
         },
     }) => {
         await Web3Service.init();
@@ -37,7 +32,10 @@ class Aztec {
         // we should enable the extension API under the following conditions
         // if the user has an account and the site has a valid session we should return the API
         // if the user does not have an account
-
+        const {
+            ace,
+            aztecAccountRegistry,
+        } = contractAddresses;
 
         Web3Service.registerContract(ACE, {
             contractAddress: ace,
@@ -48,6 +46,7 @@ class Aztec {
         });
 
         Web3Service.registerInterface(ZkAsset);
+
         this.asset = assetFactory;
         this.note = noteFactory;
     };
