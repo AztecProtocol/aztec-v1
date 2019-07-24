@@ -36,10 +36,6 @@ const randomAddress = () => {
 contract('ZkAsset', (accounts) => {
     let ace;
     let erc20;
-
-    const canAdjustSupply = false;
-    const canConvert = true;
-
     const sender = accounts[0];
     const publicOwner = accounts[0];
     const scalingFactor = new BN(10);
@@ -69,34 +65,47 @@ contract('ZkAsset', (accounts) => {
 
     describe('Success States', async () => {
         it('should compute the correct domain hash', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const domainHash = computeDomainHash(zkAsset.address);
             const result = await zkAsset.EIP712_DOMAIN_HASH();
             expect(result).to.equal(domainHash);
         });
 
-        it('should set the flags', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
-            const result = await zkAsset.flags();
-            expect(result.active).to.equal(true);
-            expect(result.canAdjustSupply).to.equal(false);
-            expect(result.canConvert).to.equal(true);
+        it('should set the linked token', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const result = await zkAsset.linkedToken();
+            expect(result).to.equal(erc20.address);
         });
 
-        it('should set the linked token', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+        it('should set canConvert flag to false if 0x0 is linked token address', async () => {
+            const nonConvertibleZkAsset = await ZkAsset.new(ace.address, constants.addresses.ZERO_ADDRESS, scalingFactor);
+
+            const registry = await ace.getRegistry(nonConvertibleZkAsset.address);
+
+            expect(registry.canConvert).to.equal(false);
+            expect(registry.canAdjustSupply).to.equal(false);
+            const result = await nonConvertibleZkAsset.linkedToken();
+            expect(result).to.equal(constants.addresses.ZERO_ADDRESS);
+        });
+
+        it('should set canConvert flag to true if linked token address is provided', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const registry = await ace.getRegistry(zkAsset.address);
+
+            expect(registry.canConvert).to.equal(true);
+            expect(registry.canAdjustSupply).to.equal(false);
             const result = await zkAsset.linkedToken();
             expect(result).to.equal(erc20.address);
         });
 
         it('should set the scaling factor', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const result = await zkAsset.scalingFactor();
             expect(result.toNumber()).to.equal(scalingFactor.toNumber());
         });
 
         it('should update a note registry with output notes', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -122,7 +131,7 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should update a note registry by consuming input notes, with kPublic negative', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -163,7 +172,7 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should update a note registry with kPublic = 0', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
 
             // no deposit input notes
             // deposit proof output notes are used as input notes to the transfer proof
@@ -209,7 +218,7 @@ contract('ZkAsset', (accounts) => {
 
     describe('Failure States', async () => {
         it('should fail if the ace fails to validate the proof', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -233,7 +242,7 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should fail if signatures are zero', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -275,7 +284,7 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should fail if malformed signatures are provided', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -317,7 +326,7 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should fail if different note owner signs the transaction', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -359,7 +368,7 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should fail if validator address is malformed', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -402,7 +411,7 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should fail if validator address is the joinSplit address', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
                 depositOutputNotes,
