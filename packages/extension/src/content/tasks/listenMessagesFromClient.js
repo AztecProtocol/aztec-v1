@@ -2,12 +2,10 @@ import {
     clientEvent,
     contentEvent,
 } from '~config/event';
-
 import {
     mergeMap,
     map,
     filter,
-    catchError,
 } from 'rxjs/operators';
 import {
     from,
@@ -28,7 +26,7 @@ export default function listenMessagesFromClient() {
             } = event.data || {};
             return from(fetchFromBackgroundScript({ type, ...data, requestId }));
         }),
-        map(({data, requestId}) => {
+        map(({ data, requestId }) => {
             window.postMessage({
                 type: contentEvent,
                 responseId: requestId,
