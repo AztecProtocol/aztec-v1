@@ -124,10 +124,13 @@ class Connection {
                     request: of(requestId),
                 });
             }),
-            switchMap(({ response: { requestId, ...rest } }) => {
-                const queryName = Object.keys(rest)
-                    .find(name => !!rest[name].error);
-                const errorData = queryName ? rest[queryName].error : false;
+            switchMap(({
+                response,
+                request: requestId,
+            }) => {
+                const queryName = Object.keys(response)
+                    .find(name => !!response[name].error);
+                const errorData = queryName ? response[queryName].error : false;
                 // check the action mapping
 
                 if (errorToActionMap[errorData.key]) {
@@ -160,7 +163,7 @@ class Connection {
                 if (!errorData) {
                     return of({
                         requestId,
-                        data: rest,
+                        data: response,
                     });
                 }
                 return empty();
@@ -168,10 +171,8 @@ class Connection {
             filter(result => !!result),
             take(1),
         );
-        return new Promise((resolve, reject) => {
-            message$.subscribe(resolve, (error) => {
-                resolve(error);
-            });
+        return new Promise((resolve) => {
+            message$.subscribe(resolve, resolve);
             messageSubject.next({ data: msg, sender: senderDetails });
         });
     }
@@ -183,9 +184,7 @@ export default function acceptConnection() {
     browser.runtime.onMessage.addListener((msg, sender) => {
         switch (msg.type) {
         case clientEvent: {
-            const response = connection.handleMessage(msg, sender);
-            console.log(response);
-            return response;
+            return connection.handleMessage(msg, sender);
         }
         case 'UI_CONFIRM': {
             connection.UiConfirmationSubject.next(msg, sender);
