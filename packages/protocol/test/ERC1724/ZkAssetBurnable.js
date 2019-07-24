@@ -70,18 +70,9 @@ contract('ZkAssetBurnable', (accounts) => {
         });
 
         it('should transfer public value in, then burn it', async () => {
-            const canAdjustSupply = true;
-            const canConvert = true;
-            const zkAssetBurnable = await ZkAssetBurnable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
 
             const {
                 depositInputNotes,
@@ -167,67 +158,10 @@ contract('ZkAssetBurnable', (accounts) => {
             scalingFactor = new BN(1);
         });
 
-        it('should fail if canAdjustSupply flag set to FALSE', async () => {
-            const canAdjustSupply = false;
-            const canConvert = true;
-            const zkAssetBurnable = await ZkAssetBurnable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
-
-            const {
-                depositInputNotes,
-                depositOutputNotes,
-                depositInputOwnerAccounts,
-                depositPublicValue,
-                newBurnCounterNote,
-                zeroBurnCounterNote,
-                burnNotes,
-            } = await getDefaultDepositAndBurnNotes();
-
-            const publicOwner = accounts[0];
-            const tokensTransferred = new BN(1000);
-            erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
-            erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
-
-            const depositProof = new JoinSplitProof(
-                depositInputNotes,
-                depositOutputNotes,
-                depositSender,
-                depositPublicValue,
-                publicOwner,
-            );
-            const depositData = depositProof.encodeABI(zkAssetBurnable.address);
-            const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
-            await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
-
-            const burnSender = zkAssetBurnable.address;
-            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
-            const burnData = burnProof.encodeABI(zkAssetBurnable.address);
-
-            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData), 'this asset is not burnable');
-        });
-
         it('should fail if confidentialBurn() called from a non-owner', async () => {
-            const canAdjustSupply = false;
-            const canConvert = true;
-            const zkAssetBurnable = await ZkAssetBurnable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
 
             const {
                 depositInputNotes,
@@ -260,25 +194,13 @@ contract('ZkAssetBurnable', (accounts) => {
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
             const burnData = burnProof.encodeABI(zkAssetBurnable.address);
 
-            await truffleAssert.reverts(
-                zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData, { from: accounts[1] }),
-                'only the owner can call the confidentialBurn() method',
-            );
+            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData, { from: accounts[1] }));
         });
 
         it('should fail if balancing relationship in burn proof not satisfied', async () => {
-            const canAdjustSupply = false;
-            const canConvert = true;
-            const zkAssetBurnable = await ZkAssetBurnable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                canAdjustSupply,
-                canConvert,
-                {
-                    from: accounts[0],
-                },
-            );
+            const zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
             const {
                 depositInputNotes,
                 depositOutputNotes,
@@ -313,10 +235,7 @@ contract('ZkAssetBurnable', (accounts) => {
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
             const burnData = burnProof.encodeABI(zkAssetBurnable.address);
 
-            await truffleAssert.reverts(
-                zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData, { from: accounts[1] }),
-                'only the owner can call the confidentialBurn() method',
-            );
+            await truffleAssert.reverts(zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData, { from: accounts[1] }));
         });
     });
 });

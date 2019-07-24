@@ -56,10 +56,8 @@ contract('ZkAssetOwnable', (accounts) => {
         await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
         erc20 = await ERC20Mintable.new();
-        const canAdjustSupply = false;
-        const canConvert = true;
 
-        zkAssetOwnable = await ZkAssetOwnable.new(ace.address, erc20.address, scalingFactor, canAdjustSupply, canConvert);
+        zkAssetOwnable = await ZkAssetOwnable.new(ace.address, erc20.address, scalingFactor);
         await zkAssetOwnable.setProofs(epoch, filter);
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
         await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
@@ -227,7 +225,7 @@ contract('ZkAssetOwnable', (accounts) => {
             const opts = {
                 from: accounts[1],
             };
-            await truffleAssert.reverts(zkAssetOwnable.setProofs(epoch, filter, opts), 'only the owner can set the epoch proofs');
+            await truffleAssert.reverts(zkAssetOwnable.setProofs(epoch, filter, opts));
         });
 
         it("should fail to approve a contract to update a note registry if note doesn't exist", async () => {
