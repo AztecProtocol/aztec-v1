@@ -103,7 +103,9 @@ contract('ZkAssetBurnable', (accounts) => {
             );
             const depositData = depositProof.encodeABI(zkAssetBurnable.address);
             const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
+            });
             const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
             expect(joinSplitReceipt.status).to.equal(true);
 
@@ -187,7 +189,9 @@ contract('ZkAssetBurnable', (accounts) => {
             );
             const depositData = depositProof.encodeABI(zkAssetBurnable.address);
             const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
+            });
             await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
 
             const burnSender = zkAssetBurnable.address;
@@ -225,7 +229,9 @@ contract('ZkAssetBurnable', (accounts) => {
             );
             const depositData = depositProof.encodeABI(zkAssetBurnable.address);
             const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
-            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
+            });
             await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
 
             const burnSender = zkAssetBurnable.address;
