@@ -325,7 +325,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             // the byte index of the storage word that we require, is equal to (_proof & 0x1f)
             // to convert to a bit index, we multiply by 8
             // i.e. bit index = shl(3, and(_proof & 0x1f))
-            // => result = shr(shl(3, and_proof & 0x1f), value)
+            // => result = shr(shl(3, and(_proof & 0x1f), value))
             isValidatorDisabled := 
                 shr(
                     shl(
@@ -399,7 +399,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
 
             // Conveniently, the multiplications we have to perform on epoch, category and id correspond
             // to their byte positions in _proof.
-            // i.e. (epoch * 0x10000) = and(_proof, 0xffff0000)
+            // i.e. (epoch * 0x10000) = and(_proof, 0xff0000)
             // and  (category * 0x100) = and(_proof, 0xff00)
             // and  (id) = and(_proof, 0xff)
 

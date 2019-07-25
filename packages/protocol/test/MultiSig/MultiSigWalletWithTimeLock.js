@@ -23,14 +23,9 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
     describe('external_call', async () => {
         it('should be internal', async () => {
             const secondsTimeLocked = new BN(0);
-            const multiSig = await MultiSigWalletWithTimeLock.new(
-                owners,
-                REQUIRED_APPROVALS,
-                secondsTimeLocked,
-                {
-                    from: accounts[0],
-                }
-            );
+            const multiSig = await MultiSigWalletWithTimeLock.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+                from: accounts[0],
+            });
             expect(multiSig.external_call === undefined).to.equal(true);
         });
     });
@@ -40,14 +35,9 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
         let txId;
         beforeEach(async () => {
             const secondsTimeLocked = new BN(0);
-            multiSig = await MultiSigWalletWithTimeLock.new(
-                owners,
-                REQUIRED_APPROVALS,
-                secondsTimeLocked,
-                {
-                    from: accounts[0],
-                }
-            );
+            multiSig = await MultiSigWalletWithTimeLock.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+                from: accounts[0],
+            });
             const txData = '0x';
             const tx = await multiSig.submitTransaction(nonOwner, 0, txData, { from: owners[0] });
             const txLog = tx.logs[0];
@@ -93,14 +83,9 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
         let multiSig;
         let txId;
         beforeEach(async () => {
-            multiSig = await MultiSigWalletWithTimeLock.new(
-                owners,
-                REQUIRED_APPROVALS,
-                SECONDS_TIME_LOCKED,
-                {
-                    from: accounts[0],
-                }
-            );
+            multiSig = await MultiSigWalletWithTimeLock.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
+                from: accounts[0],
+            });
             const txData = '0x';
             const tx = await multiSig.submitTransaction(nonOwner, 0, txData, { from: owners[0] });
             const txLog = tx.logs[0];
@@ -149,7 +134,7 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
             await truffleAssert.reverts(multiSig.executeTransaction(txId, { from: owners[0] }));
         });
 
-        it('should log an ExecutionFailure event and not update the transaction\'s execution state if unsuccessful', async () => {
+        it("should log an ExecutionFailure event and not update the transaction's execution state if unsuccessful", async () => {
             const contractWithoutFallback = await TestRejectEther.new({ from: owners[0] });
             const submissionTx = await multiSig.submitTransaction(contractWithoutFallback.address, 10, '0x', { from: owners[0] });
             const submissionLog = submissionTx.logs[0];
@@ -169,14 +154,9 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
             let multiSig;
             beforeEach(async () => {
                 const secondsTimeLocked = new BN(0);
-                multiSig = await MultiSigWalletWithTimeLock.new(
-                    owners,
-                    REQUIRED_APPROVALS,
-                    secondsTimeLocked,
-                    {
-                        from: accounts[0],
-                    }
-                );
+                multiSig = await MultiSigWalletWithTimeLock.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+                    from: accounts[0],
+                });
             });
 
             it('should throw when not called by wallet', async () => {
@@ -188,7 +168,10 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
                 const submissionTx = await multiSig.submitTransaction(multiSig.address, 0, txData, { from: accounts[0] });
                 const submissionTxLog = submissionTx.logs[0];
                 const submissionTxId = new BN(submissionTxLog.args.transactionId);
-                await truffleAssert.reverts(multiSig.executeTransaction(submissionTxId, { from: accounts[0] }), 'TX_NOT_FULLY_CONFIRMED');
+                await truffleAssert.reverts(
+                    multiSig.executeTransaction(submissionTxId, { from: accounts[0] }),
+                    'TX_NOT_FULLY_CONFIRMED',
+                );
             });
 
             it('should set confirmation time with enough confirmations', async () => {
@@ -224,14 +207,9 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
             let multiSig;
             const newSecondsTimeLocked = new BN(0);
             beforeEach(async () => {
-                multiSig = await MultiSigWalletWithTimeLock.new(
-                    owners,
-                    REQUIRED_APPROVALS,
-                    SECONDS_TIME_LOCKED,
-                    {
-                        from: accounts[0],
-                    }
-                );
+                multiSig = await MultiSigWalletWithTimeLock.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
+                    from: accounts[0],
+                });
             });
 
             it('should throw if it has enough confirmations but is not past the time lock', async () => {
@@ -240,7 +218,10 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
                 const submissionTxLog = submissionTx.logs[0];
                 const submissionTxId = new BN(submissionTxLog.args.transactionId);
                 await multiSig.confirmTransaction(submissionTxId, { from: owners[1] });
-                await truffleAssert.reverts(multiSig.executeTransaction(submissionTxId, { from: accounts[0] }), 'TIME_LOCK_INCOMPLETE');
+                await truffleAssert.reverts(
+                    multiSig.executeTransaction(submissionTxId, { from: accounts[0] }),
+                    'TIME_LOCK_INCOMPLETE',
+                );
             });
 
             it('should execute if it has enough confirmations and is past the time lock', async () => {
