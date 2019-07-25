@@ -21,7 +21,8 @@ pragma solidity ^0.5.7;
 import "./MultiSigWallet.sol";
 
 
-/// @title Multisignature wallet with time lock- Allows multiple parties to execute a transaction after a time lock has passed.
+/// @title Multisignature wallet with time lock- Allows multiple parties to execute 
+/// a transaction after a time lock has passed.
 /// @author Amir Bandeali - <amir@0xProject.com>
 // solhint-disable not-rely-on-time
 contract MultiSigWalletWithTimeLock is
@@ -61,7 +62,8 @@ contract MultiSigWalletWithTimeLock is
     /// @dev Contract constructor sets initial owners, required number of confirmations, and time lock.
     /// @param _owners List of initial owners.
     /// @param _required Number of required confirmations.
-    /// @param _secondsTimeLocked Duration needed after a transaction is confirmed and before it becomes executable, in seconds.
+    /// @param _secondsTimeLocked Duration needed after a transaction is confirmed and 
+    /// before it becomes executable, in seconds.
     constructor (
         address[] memory _owners,
         uint256 _required,
@@ -74,7 +76,8 @@ contract MultiSigWalletWithTimeLock is
     }
 
     /// @dev Changes the duration of the time lock for transactions.
-    /// @param _secondsTimeLocked Duration needed after a transaction is confirmed and before it becomes executable, in seconds.
+    /// @param _secondsTimeLocked Duration needed after a transaction is confirmed and 
+    /// before it becomes executable, in seconds.
     function changeTimeLock(uint256 _secondsTimeLocked)
         public
         onlyWallet
