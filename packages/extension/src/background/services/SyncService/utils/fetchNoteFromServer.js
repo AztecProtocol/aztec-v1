@@ -8,6 +8,7 @@ export default async function fetchNoteFromServer({
     lastSynced = 0,
     numberOfNotes = 1,
     excludes = [],
+    onError,
 } = {}) {
     if (!account) {
         errorLog("'account' cannot be empty");
@@ -49,6 +50,7 @@ export default async function fetchNoteFromServer({
     const data = await GraphNodeService.query({
         query,
         variables,
+        onError,
     });
 
     const {
