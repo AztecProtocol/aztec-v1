@@ -38,8 +38,11 @@ export default {
         ]),
         registerAddress: pipe([
             validateSession,
-            async (_, args) => ({
-                account: await AuthService.registerAddress(args.address),
+            async (_, args, ctx) => ({
+                account: await AuthService.registerAddress({
+                    userAddress: args.address,
+                    linkedPublicKey: ctx.keyStore.privacyKey.publicKey,
+                }),
             }),
         ]),
         enableAssetForDomain: pipe([

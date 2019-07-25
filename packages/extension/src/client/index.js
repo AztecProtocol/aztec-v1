@@ -9,6 +9,7 @@ const demoApis = async () => {
         await aztec.enable();
         // await aztec.auth.registerExtension({ password: 'test', salt: 'aaa' });
         // await aztec.auth.login({ password: 'test' });
+        await aztec.auth.registerAddress('0x3339C3c842732F4DAaCf12aed335661cf4eab66b');
 
         await aztec.auth.enableAsset('0xe4edf908d85b0dd7954ac7fc4ac5fce42f8cbcd8');
 

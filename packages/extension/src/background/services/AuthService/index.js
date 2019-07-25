@@ -249,18 +249,23 @@ export default {
         };
     },
     registerAddress: async ({
-        address: accountAddress,
+        userAddress,
         linkedPublicKey,
     }) => {
-        if (!accountAddress) { // this shouldn't happend in production
+        if (!userAddress) { // this shouldn't happend in production
             errorLog('Address cannot be empty in AuthService.registerAddress()');
             return null;
         }
+        if (!linkedPublicKey) { // this shouldn't happend in production
+            errorLog('linkedPublicKey cannot be empty in AuthService.registerAddress()');
+            return null;
+        }
 
-        const address = accountAddress.toLowerCase();
+        const address = userAddress.toLowerCase();
         let user = await userModel.get({
             address,
         });
+
         if (!user) {
             user = {
                 address,
