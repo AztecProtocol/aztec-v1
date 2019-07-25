@@ -1,5 +1,6 @@
 // { NOTE_ACTION: NOTE_STATUS }
 export const actions = {
+    CREATE: 'CREATED',
     DESTROY: 'DESTROYED',
 };
 

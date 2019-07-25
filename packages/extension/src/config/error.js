@@ -37,6 +37,12 @@ export default {
             },
         },
     },
+    asset: {
+        notFound: "Asset '%{asset}' is not found.",
+        balance: {
+            notEnough: 'Asset balance is not enough.',
+        },
+    },
     data: {
         graphql: 'Something went wrong fetching graphQL data',
     },

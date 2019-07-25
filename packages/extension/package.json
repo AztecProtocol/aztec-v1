@@ -15,6 +15,7 @@
         "apollo-link-schema": "^1.2.2",
         "apollo-server": "^2.6.7",
         "apollo-type-bigint": "^0.1.0",
+        "aztec.js": "^0.9.1",
         "bitcore-lib": "^8.3.4",
         "bitcore-mnemonic": "^8.3.4",
         "bluebird": "^3.5.5",
