@@ -49,17 +49,42 @@ export default class Asset {
 
     };
 
-    createNoteFromBalance = (
-        // { value, access }
-    ) => {
-        // to pick a note we need to do the following
-        // 1. split the expected note value into a normally distributed array of buckets that sum to > than the note
-        // value
-        // minimise the notes used
-        // itterate until we have 5 solutions
-        // score each solution
-        // getDistribution(value);
-    }
+    createNoteFromBalance = async ({
+        amount,
+        userAccess = [],
+        owner = '',
+    }) => {
+        const {
+            newNote,
+        } = await query(`
+            newNote: createNoteFromBalance(
+                assetId: "${this.id}",
+                amount: ${amount},
+                owner: "${owner}",
+                userAccess: "${userAccess.join('')}"
+            ) {
+                note {
+                    hash
+                    value
+                    viewingKey
+                    owner {
+                        address
+                    }
+                    asset {
+                        balance
+                    }
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `) || {};
+
+        return newNote;
+    };
 }
 
 export const assetFactory = async (assetId) => {

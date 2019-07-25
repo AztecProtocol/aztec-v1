@@ -65,7 +65,6 @@ class SyncManager {
         });
 
         if (newNotes.length) {
-            console.log('syncNotes', newNotes);
             await Promise.all(newNotes.map(note => addNote(note)));
 
             if (newNotes.length === notesPerRequest) {

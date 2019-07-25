@@ -50,10 +50,11 @@ export default gql`
         id: ID!
         hash: String!
         asset: Asset!
-        owner: Account!
+        owner: Account
         viewingKey: String
         metadata: String
         value: Int
+        status: String
     }
     type GrantNoteAccessPermission {
         prevMetadata: String
@@ -96,6 +97,14 @@ export default gql`
             currentAddress: String!
             domain: String!
         ): GrantAccessApiResponse
+        createNoteFromBalance(
+            assetId: ID!
+            amount: Int!
+            owner: String
+            userAccess: String
+            currentAddress: String!
+            domain: String!
+        ): NoteApiResponse
     }
     type Mutation {
         login(

@@ -148,7 +148,10 @@ export default {
         });
 
         return {
-            session,
+            session: {
+                ...session,
+                pwDerivedKey: decodedKey,
+            },
             keyStore: k,
         };
     },

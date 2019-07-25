@@ -8,6 +8,7 @@ import {
 import pipe from '../utils/pipe';
 import validateSession from '../validators/validateSession';
 import requestGrantAccess from './requestGrantAccess';
+import createNoteFromBalance from './createNoteFromBalance';
 
 export default {
     Note: {
@@ -26,6 +27,9 @@ export default {
         })),
         grantNoteAccessPermission: ensureEntityPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),
+        })),
+        createNoteFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
+            note: await createNoteFromBalance(args, ctx),
         })),
     },
     Mutation: {
