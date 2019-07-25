@@ -1,4 +1,7 @@
 import browser from 'webextension-polyfill';
+import {
+    errorLog,
+} from '~utils/log';
 
 export default function fetchFromBackgroundScript(data = {}) {
     return new Promise((resolve, reject) => {
@@ -7,6 +10,7 @@ export default function fetchFromBackgroundScript(data = {}) {
                 resolve(result);
             })
             .catch((error) => {
+                errorLog(error);
                 reject(error);
             });
     });

@@ -110,7 +110,11 @@ class Connection {
                 };
             }),
             mergeMap(({
-                mutation, query, domain, variables, requestId,
+                mutation,
+                query,
+                domain,
+                variables,
+                requestId,
             }) => {
                 console.log(domain, requestId);
                 let type = 'query';
@@ -166,19 +170,14 @@ class Connection {
                             });
                         }
                     });
+
+                    return empty();
                 }
 
-                if (errorData.key && !errorToActionMap[errorData.key]) {
-                    messageSubject.error({ requestId, ...errorData });
-                }
-
-                if (!errorData) {
-                    return of({
-                        requestId,
-                        data: response,
-                    });
-                }
-                return empty();
+                return of({
+                    requestId,
+                    data: response,
+                });
             }),
             filter(result => !!result),
             take(1),
