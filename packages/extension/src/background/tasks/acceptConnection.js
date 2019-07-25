@@ -149,7 +149,7 @@ class Connection {
                 const errorData = queryName ? response[queryName].error : false;
                 // check the action mapping
 
-                if (errorToActionMap[errorData.key]) {
+                if (errorData && errorToActionMap[errorData.key]) {
                     // trigger the UI flow
                     const action$ = this.handleAction({
                         type: errorToActionMap[errorData.key],
