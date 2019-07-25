@@ -9,9 +9,12 @@ export default function toString(metadataObj) {
     }) => {
         let data = '';
         if (metadataObj[name] !== undefined) {
-            data = Array.isArray(metadataObj[name])
-                ? metadataObj[name].join('')
-                : `${metadataObj[name]}`;
+            const dataArr = Array.isArray(metadataObj[name])
+                ? metadataObj[name]
+                : [metadataObj[name]];
+            data = dataArr
+                .map(v => `${v}`.replace(/^0x/, ''))
+                .join('');
         }
         if (typeof length === 'string') {
             lenVars.push(length);
