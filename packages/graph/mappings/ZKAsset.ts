@@ -21,7 +21,7 @@ var ID_SUFFIX_LEN = 4;
 var METADATA_PREFIX_LEN = 196;
 var METADATA_VAR_LEN = 32;
 var METADATA_ADDRESS_LEN = 40;
-var METADATA_VIEWING_KEY_LEN = 6;
+var METADATA_VIEWING_KEY_LEN = 426;
 
 function ensureAccount(address: Address): void {
   let id = address.toHexString();
