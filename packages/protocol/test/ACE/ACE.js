@@ -241,7 +241,7 @@ contract('ACE', (accounts) => {
 
                 await truffleAssert.reverts(
                     ace.getValidatorAddress(JOIN_SPLIT_PROOF, { from: accounts[0] }),
-                    'expected the validator address to not be disabled'
+                    'expected the validator address to not be disabled',
                 );
             });
 
