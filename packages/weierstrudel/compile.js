@@ -29,6 +29,6 @@ fs.writeFileSync(
     JSON.stringify(contract)
 );
 
-compiler('weierstrudel_project.json', pathToData);
+compiler('huff_projects/weierstrudel_project.json', pathToData);
 
 console.log('written bytecode to weierstrudel.json');
