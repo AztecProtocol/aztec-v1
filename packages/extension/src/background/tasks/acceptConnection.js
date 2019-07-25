@@ -54,7 +54,18 @@ class Connection {
         this.uiRejection$ = this.UiRejectionSubject.asObservable();
 
         this.ui$.pipe(
-            map(() => window.open('popup.html', 'extension_popup', 'width=300,height=400,status=no,scrollbars=yes,resizable=no')),
+
+            map(() => {
+                const popupURL = browser.extension.getURL('pages/popup.html');
+                browser.windows.create({
+                    url: popupURL,
+                    width: 300,
+                    height: 400,
+                    type: 'panel',
+                    focused: true,
+                });
+                // window.open('popup.html', 'AZTEC Extension', 'width=300,height=400,resizable=no,alwaysRaised=yes,alwaysOnTop=yes,z-lock=yes')
+            }),
             // we can extend this to automatically close the window after a timeout
         ).subscribe();
     }
@@ -72,7 +83,7 @@ class Connection {
                         filter(({ requestId }) => requestId === action.data.requestId),
                         take(1),
                     ),
-                    timer(3000).pipe(
+                    timer(15000).pipe(
                         map(() => dataError('extension.timeout')),
                     ),
                 );
@@ -101,6 +112,7 @@ class Connection {
             mergeMap(({
                 mutation, query, domain, variables, requestId,
             }) => {
+                console.log(domain, requestId);
                 let type = 'query';
                 if (mutation) {
                     type = 'mutation';
