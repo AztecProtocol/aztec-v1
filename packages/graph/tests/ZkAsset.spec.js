@@ -30,11 +30,10 @@ const {
     outputCoder,
 } = encoder;
 
-const ADDRESS_LENGTH = 42;
 const METADATA_AZTEC_DATA_LENGTH = 194;
 const METADATA_VAR_LEN_LENGTH = 32;
-const METADATA_ADDRESS_LENGTH = ADDRESS_LENGTH - 2;
-const METADATA_VIEWING_KEY_LENGTH = 6;
+const METADATA_ADDRESS_LENGTH = 40;
+const METADATA_VIEWING_KEY_LENGTH = 424;
 
 describe('ZkAsset', () => {
     const epoch = 1;
@@ -274,11 +273,12 @@ describe('ZkAsset', () => {
         expect(metadata.length).toBe(2 + METADATA_AZTEC_DATA_LENGTH);
 
         const viewingKey = generateRandomId(METADATA_VIEWING_KEY_LENGTH);
+
         const newMetadata = [
             metadata,
             `${METADATA_ADDRESS_LENGTH.toString(16)}`.padStart(METADATA_VAR_LEN_LENGTH, '0'),
             `${METADATA_VIEWING_KEY_LENGTH.toString(16)}`.padStart(METADATA_VAR_LEN_LENGTH, '0'),
-            '0'.padStart(METADATA_VAR_LEN_LENGTH, '0'),
+            ''.padStart(METADATA_VAR_LEN_LENGTH, '0'),
             sender.address.slice(2),
             viewingKey,
         ].join('').toLowerCase();
