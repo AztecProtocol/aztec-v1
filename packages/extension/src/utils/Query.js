@@ -11,6 +11,7 @@ export default async function Query({
     variables,
     retry = 0,
     retryDelay = 1000,
+    onError,
 }) {
     let data;
 
@@ -38,7 +39,11 @@ export default async function Query({
             errors,
         } = json || {});
         if (errors) {
-            errorLog('Error fetching data from GraphQL server.', errors);
+            if (onError) {
+                onError(errors);
+            } else {
+                errorLog('Error fetching data from GraphQL server.', errors);
+            }
         }
     } catch (error) {
         if (retry > 0) {
@@ -49,6 +54,8 @@ export default async function Query({
                 variables,
                 retry: retry - 1,
             });
+        } else if (onError) {
+            onError(error);
         } else {
             errorLog('Fetch query from GraphQL server failed.', error);
         }
