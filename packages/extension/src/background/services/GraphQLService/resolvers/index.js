@@ -45,7 +45,7 @@ export default {
             async (_, args, ctx) => ({
                 account: await AuthService.registerAddress({
                     userAddress: args.address,
-                    linkedPublicKey: ctx.keyStore.privacyKey.publicKey,
+                    linkedPublicKey: ctx.keyStore.privacyKeys.publicKey,
                 }),
             }),
         ]),
