@@ -1,27 +1,25 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, beforeEach, it:true */
 // ### External Dependencies
+const bn128 = require('@aztec/bn128');
+const {
+    proofs: { JOIN_SPLIT_PROOF, BOGUS_PROOF },
+} = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 
-// ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { constants, proofs: { JOIN_SPLIT_PROOF, BOGUS_PROOF } } = require('@aztec/dev-utils');
-
 
 // ### Artifacts
 const ACE = artifacts.require('./contracts/ACE/ACE');
 const ACEOwner = artifacts.require('./contracts/ACE/ACEOwner');
 const JoinSplit = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplit');
 const JoinSplitInterface = artifacts.require('./contracts/ACE/validators/joinSplit/JoinSplitInterface');
-const AdjustSupply = artifacts.require('./contracts/ACE/validators/AdjustSupply');
-const AdjustSupplyInterface = artifacts.require('./contracts/ACE/validators/adjustSupply/AdjustSupplyInterface');
 
 // ### Time travel
 const timetravel = require('../timeTravel');
 
 JoinSplit.abi = JoinSplitInterface.abi;
-AdjustSupply.abi = AdjustSupplyInterface.abi;
 
 contract('ACEOwner', (accounts) => {
     const owners = accounts.slice(0, 3);
@@ -35,14 +33,9 @@ contract('ACEOwner', (accounts) => {
         let aceOwner;
 
         beforeEach(async () => {
-            aceOwner = await ACEOwner.new(
-                owners,
-                REQUIRED_APPROVALS,
-                secondsTimeLocked,
-                {
-                    from: owners[0],
-                }
-            );
+            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+                from: owners[0],
+            });
             const aceAddres = await aceOwner.ace();
             ace = await ACE.at(aceAddres);
         });
@@ -59,20 +52,15 @@ contract('ACEOwner', (accounts) => {
         let aceOwner;
 
         beforeEach(async () => {
-            aceOwner = await ACEOwner.new(
-                owners,
-                REQUIRED_APPROVALS,
-                secondsTimeLocked,
-                {
-                    from: owners[0],
-                }
-            );
+            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+                from: owners[0],
+            });
             const aceAddres = await aceOwner.ace();
             ace = await ACE.at(aceAddres);
         });
 
         it('should set the common reference string through ACEOwner', async () => {
-            const txData = ace.contract.methods.setCommonReferenceString(constants.CRS).encodeABI();
+            const txData = ace.contract.methods.setCommonReferenceString(bn128.CRS).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
             const txLog = tx.logs[0];
             const txId = new BN(txLog.args.transactionId);
@@ -80,7 +68,7 @@ contract('ACEOwner', (accounts) => {
             await aceOwner.executeTransaction(txId, { from: owners[0] });
 
             const result = await ace.getCommonReferenceString();
-            expect(result).to.deep.equal(constants.CRS);
+            expect(result).to.deep.equal(bn128.CRS);
         });
 
         it('should set a proof through ACEOwner', async () => {
@@ -101,14 +89,9 @@ contract('ACEOwner', (accounts) => {
         let aceOwner;
 
         beforeEach(async () => {
-            aceOwner = await ACEOwner.new(
-                owners,
-                REQUIRED_APPROVALS,
-                SECONDS_TIME_LOCKED,
-                {
-                    from: owners[0],
-                }
-            );
+            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
+                from: owners[0],
+            });
             const aceAddres = await aceOwner.ace();
             ace = await ACE.at(aceAddres);
             const aztecJoinSplit = await JoinSplit.new();
@@ -128,8 +111,10 @@ contract('ACEOwner', (accounts) => {
             const txId = new BN(txLog.args.transactionId);
             await aceOwner.confirmTransaction(txId, { from: accounts[1] });
             await aceOwner.emergencyExecuteInvalidateProof(txId, { from: accounts[0] });
-            await truffleAssert.reverts(ace.getValidatorAddress(JOIN_SPLIT_PROOF),
-                'expected the validator address to not be disabled');
+            await truffleAssert.reverts(
+                ace.getValidatorAddress(JOIN_SPLIT_PROOF),
+                'expected the validator address to not be disabled',
+            );
         });
 
         it('should not execute any other tx through emergencyExecuteInvalidateProof', async () => {
