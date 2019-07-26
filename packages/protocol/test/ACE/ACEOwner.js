@@ -1,5 +1,5 @@
 /* eslint-disable prefer-destructuring */
-/* global artifacts, expect, contract, beforeEach, it:true */
+/* global artifacts, expect, contract, it:true */
 // ### External Dependencies
 const bn128 = require('@aztec/bn128');
 const {
@@ -29,18 +29,14 @@ contract('ACEOwner', (accounts) => {
 
     describe('initialization', () => {
         const secondsTimeLocked = new BN(0);
-        let ace;
-        let aceOwner;
 
-        beforeEach(async () => {
-            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+        it('should create an ACE with ACEOwner as owner', async () => {
+            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
             });
             const aceAddres = await aceOwner.ace();
-            ace = await ACE.at(aceAddres);
-        });
+            const ace = await ACE.at(aceAddres);
 
-        it('should create an ACE with ACEOwner as owner', async () => {
             const owner = await ace.owner();
             expect(owner).to.equal(aceOwner.address);
         });
@@ -48,18 +44,14 @@ contract('ACEOwner', (accounts) => {
 
     describe('initially non-time-locked', () => {
         const secondsTimeLocked = new BN(0);
-        let ace;
-        let aceOwner;
 
-        beforeEach(async () => {
-            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+        it('should set the common reference string through ACEOwner', async () => {
+            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
             });
             const aceAddres = await aceOwner.ace();
-            ace = await ACE.at(aceAddres);
-        });
+            const ace = await ACE.at(aceAddres);
 
-        it('should set the common reference string through ACEOwner', async () => {
             const txData = ace.contract.methods.setCommonReferenceString(bn128.CRS).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
             const txLog = tx.logs[0];
@@ -72,6 +64,12 @@ contract('ACEOwner', (accounts) => {
         });
 
         it('should set a proof through ACEOwner', async () => {
+            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+                from: owners[0],
+            });
+            const aceAddres = await aceOwner.ace();
+            const ace = await ACE.at(aceAddres);
+
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
@@ -85,15 +83,13 @@ contract('ACEOwner', (accounts) => {
     });
 
     describe('initially time-locked', () => {
-        let ace;
-        let aceOwner;
-
-        beforeEach(async () => {
-            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
+        it('should invalidate a proof through ACEOwner independent of timelock', async () => {
+            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
                 from: owners[0],
             });
             const aceAddres = await aceOwner.ace();
-            ace = await ACE.at(aceAddres);
+            const ace = await ACE.at(aceAddres);
+
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
@@ -102,15 +98,15 @@ contract('ACEOwner', (accounts) => {
             await aceOwner.confirmTransaction(txId, { from: owners[1] });
             await timetravel.advanceTimeAndBlock(SECONDS_TIME_LOCKED.toNumber());
             await aceOwner.executeTransaction(txId, { from: owners[0] });
-        });
 
-        it('should invalidate a proof through ACEOwner independent of timelock', async () => {
-            const txData = await ace.contract.methods.invalidateProof(JOIN_SPLIT_PROOF).encodeABI();
-            const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: accounts[0] });
-            const txLog = tx.logs[0];
-            const txId = new BN(txLog.args.transactionId);
-            await aceOwner.confirmTransaction(txId, { from: accounts[1] });
-            await aceOwner.emergencyExecuteInvalidateProof(txId, { from: accounts[0] });
+            const txDataInvalidateProof = await ace.contract.methods.invalidateProof(JOIN_SPLIT_PROOF).encodeABI();
+            const txInvalidaProof = await aceOwner.submitTransaction(ace.address, 0, txDataInvalidateProof, {
+                from: accounts[0],
+            });
+            const txLogInvalidateProof = txInvalidaProof.logs[0];
+            const txIdInvalidateProof = new BN(txLogInvalidateProof.args.transactionId);
+            await aceOwner.confirmTransaction(txIdInvalidateProof, { from: accounts[1] });
+            await aceOwner.emergencyExecuteInvalidateProof(txIdInvalidateProof, { from: accounts[0] });
             await truffleAssert.reverts(
                 ace.getValidatorAddress(JOIN_SPLIT_PROOF),
                 'expected the validator address to not be disabled',
@@ -118,12 +114,27 @@ contract('ACEOwner', (accounts) => {
         });
 
         it('should not execute any other tx through emergencyExecuteInvalidateProof', async () => {
-            const txData = await ace.contract.methods.setProof(BOGUS_PROOF, nonOwner).encodeABI();
-            const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: accounts[0] });
+            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
+                from: owners[0],
+            });
+            const aceAddres = await aceOwner.ace();
+            const ace = await ACE.at(aceAddres);
+
+            const aztecJoinSplit = await JoinSplit.new();
+            const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
+            const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
             const txLog = tx.logs[0];
             const txId = new BN(txLog.args.transactionId);
-            await aceOwner.confirmTransaction(txId, { from: accounts[1] });
-            await truffleAssert.reverts(aceOwner.emergencyExecuteInvalidateProof(txId, { from: accounts[0] }));
+            await aceOwner.confirmTransaction(txId, { from: owners[1] });
+            await timetravel.advanceTimeAndBlock(SECONDS_TIME_LOCKED.toNumber());
+            await aceOwner.executeTransaction(txId, { from: owners[0] });
+
+            const txDataSetBogusProof = await ace.contract.methods.setProof(BOGUS_PROOF, nonOwner).encodeABI();
+            const txSetBogusProof = await aceOwner.submitTransaction(ace.address, 0, txDataSetBogusProof, { from: accounts[0] });
+            const txLogSetBogusProof = txSetBogusProof.logs[0];
+            const txIdSetBogusProof = new BN(txLogSetBogusProof.args.transactionId);
+            await aceOwner.confirmTransaction(txIdSetBogusProof, { from: accounts[1] });
+            await truffleAssert.reverts(aceOwner.emergencyExecuteInvalidateProof(txIdSetBogusProof, { from: accounts[0] }));
         });
     });
 });
