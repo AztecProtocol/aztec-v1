@@ -15,7 +15,7 @@ import "./base/ZkAssetOwnableBase.sol";
  * @author AZTEC
  * @dev A contract defining the standard interface and behaviours of a mintable confidential asset.
  * The ownership values and transfer values are encrypted.
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 contract ZkAssetMintable is ZkAssetOwnableBase {
     event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
@@ -35,9 +35,9 @@ contract ZkAssetMintable is ZkAssetOwnableBase {
     /**
     * @dev Executes a confidential minting procedure, dependent on the provided proofData
     * being succesfully validated by the zero-knowledge validator
-    * 
+    *
     * @param _proof - uint24 variable which acts as a unique identifier for the proof which
-    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables: 
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofData - bytes array of proof data, outputted from a proof construction
     */
@@ -58,17 +58,17 @@ contract ZkAssetMintable is ZkAssetOwnableBase {
         emit UpdateTotalMinted(noteHash, metadata);
     }
     /**
-    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes adapted for use with 
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes adapted for use with
     * a mintable ZkAsset.
     *
-    * Will submit _proofData to the validateProof() function of the Cryptography Engine. 
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine.
     *
-    * If public value is being transferred out of the ACE, and the minted value is greater than 
+    * If public value is being transferred out of the ACE, and the minted value is greater than
     * ACE's token balance, then tokens will be minted from the linked ERC20 token using supplementTokens()
     *
-    * Upon successfull verification, it will update note registry state - creating output notes and 
-    * destroying input notes. 
-    * 
+    * Upon successfull verification, it will update note registry state - creating output notes and
+    * destroying input notes.
+    *
     * @param _proofData bytes variable outputted from proof construction
     * @param _signatures ECDSA signatures over all input notes involved in the confidentialTransfer()
     */
@@ -109,11 +109,11 @@ contract ZkAssetMintable is ZkAssetOwnableBase {
     * transfer instructions represented by a bytes _proofOutput argument that was outputted
     * from a proof verification contract. Adapted for use with a mintable ZkAsset.
 
-    * If public value is being transferred out of the ACE, and the minted value is greater than 
+    * If public value is being transferred out of the ACE, and the minted value is greater than
     * ACE's token balance, then tokens will be minted from the linked ERC20 token using supplementTokens()
     * 
     * @param _proof - uint24 variable which acts as a unique identifier for the proof which
-    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables: 
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
     * transfer instructions for the ACE

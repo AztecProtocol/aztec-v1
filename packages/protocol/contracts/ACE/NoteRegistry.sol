@@ -13,7 +13,7 @@ import "../libs/ProofUtils.sol";
  * @author AZTEC
  * @dev The NoteRegistry defines the state of valid AZTEC notes. It enacts instructions to update the 
  * state, given to it by the ACE and only the note registry owner can enact a state update.  
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract NoteRegistry is IAZTEC {
     using NoteUtils for bytes;

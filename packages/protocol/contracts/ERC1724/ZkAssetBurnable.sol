@@ -13,7 +13,7 @@ import "./base/ZkAssetOwnableBase.sol";
  * @title ZkAssetBurnable
  * @author AZTEC
  * @dev A contract defining the standard interface and behaviours of a confidential burnable asset. 
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 contract ZkAssetBurnable is ZkAssetOwnableBase {
     event UpdateTotalBurned(bytes32 noteHash, bytes noteData);

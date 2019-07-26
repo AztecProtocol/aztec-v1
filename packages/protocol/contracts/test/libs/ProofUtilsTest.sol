@@ -5,7 +5,7 @@ import "../../libs/ProofUtils.sol";
 /**
  * @title Library of proof utility functions
  * @author AZTEC
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ProofUtilsTest {
     using ProofUtils for uint24;

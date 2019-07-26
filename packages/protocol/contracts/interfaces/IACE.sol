@@ -14,7 +14,7 @@ import "../libs/SafeMath8.sol";
  * @title IACE
  * @author AZTEC
  * @dev Standard defining the interface for ACE.sol
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 interface IACE {
 

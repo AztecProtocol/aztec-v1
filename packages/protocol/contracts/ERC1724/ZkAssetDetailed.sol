@@ -5,7 +5,7 @@ import "./base/ZkAssetBase.sol";
 /**
  * @title ZkAssetDetailed implementation that inherits from ZkAsset
  * @author AZTEC 
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ZkAssetDetailed is ZkAssetBase {
 
