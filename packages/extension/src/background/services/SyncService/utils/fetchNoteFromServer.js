@@ -26,6 +26,7 @@ export default async function fetchNoteFromServer({
                     hash
                     asset {
                         address
+                        linkedTokenAddress
                     }
                     owner {
                         address
