@@ -30,13 +30,14 @@ const targetPackages = [
     'protocol',
     'extension',
 ];
-// const protocolModule = '@aztec/protocol';
-// const extensionModule = '@aztec/protocol';
+
 const graphProtocolModule = '@graphprotocol';
 
 const destBuildFolder = 'build';
 const destAbisFolder = 'abis';
 const destContractsFolder = 'contracts';
+
+const extensionContractsFolder = 'build/protocol';
 
 const srcContractsFolder = 'build/contracts';
 
@@ -93,6 +94,7 @@ const copyAbi = (contractName, srcContractsPaths, destFilePath) =>
         if (!requirePath) {
             errorLog(`Cannot find contract '${contractName}'.`);
             reject();
+            return;
         }
         try {
             const contract = require(requirePath); // eslint-disable-line
@@ -100,6 +102,7 @@ const copyAbi = (contractName, srcContractsPaths, destFilePath) =>
         } catch (error) {
             errorLog('Cannot require contract', `path: ${requirePath}`);
             reject();
+            return;
         }
         if (!abi) {
             errorLog(`Abi is not defined in contract '${contractName}'`);
@@ -169,7 +172,11 @@ export default async function copy({
     onError,
     onClose,
 } = {}) {
-    const packagePaths = targetPackages.map(name => locatePackage(name));
+    const packagePathsMap = {};
+    targetPackages.forEach((name) => {
+        packagePathsMap[name] = locatePackage(name);
+    });
+    const packagePaths = Object.values(packagePathsMap);
 
     if (packagePaths.some(p => !p)) {
         packagePaths.forEach((p, i) => {
@@ -239,6 +246,10 @@ export default async function copy({
             path.join(projectRoot, destBuildFolder, destContractsFolder),
         ));
     });
+    promises.push(copyFolder(
+        path.join(packagePathsMap.protocol, srcContractsFolder),
+        path.join(packagePathsMap.extension, extensionContractsFolder),
+    ));
 
     /*
      * graph-cli (v) doesn't work with yarn workspaces
