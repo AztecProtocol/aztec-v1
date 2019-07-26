@@ -74,7 +74,7 @@ export default async function requestGrantAccess(args, ctx) {
     }) || {};
 
     if (!userAccess || !userAccess.length) {
-        return argsError('account.noteAccess', {
+        throw argsError('account.noteAccess', {
             messageOptions: {
                 noteId,
                 account: currentUser.address,
@@ -86,37 +86,41 @@ export default async function requestGrantAccess(args, ctx) {
         || sharedAccounts.length !== addressList.length
     ) {
         if (addressList.length === 1) {
-            return argsError('account.notFound', {
+            throw argsError('account.notFound', {
                 messageOptions: {
                     account: addressList[0],
                 },
+                invalidAccounts: addressList,
             });
         }
 
         const notFound = addressList
             .filter(addr => !sharedAccounts.find(a => a.address !== addr));
-        return argsError('account.notFound.count', {
+        throw argsError('account.notFound.count', {
             messageOptions: {
                 count: notFound.length,
                 accounts: notFound,
             },
+            invalidAccounts: notFound,
         });
     }
 
     const invalidAccounts = sharedAccounts.filter(a => !a.publicKey);
     if (invalidAccounts.length === 1) {
-        return argsError('account.notFound.publicKey', {
+        throw argsError('account.notFound.publicKey', {
             messageOptions: {
                 account: invalidAccounts[0],
             },
+            invalidAccounts,
         });
     }
     if (invalidAccounts.length > 1) {
-        return argsError('account.notFound.publicKeys', {
+        throw argsError('account.notFound.publicKeys', {
             messageOptions: {
                 count: invalidAccounts.length,
                 accounts: invalidAccounts,
             },
+            invalidAccounts,
         });
     }
 

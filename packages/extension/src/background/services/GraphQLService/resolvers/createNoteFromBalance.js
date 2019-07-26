@@ -8,7 +8,9 @@ import {
 import {
     fromAction,
 } from '~utils/noteStatus';
-import viewingKey from '~utils/viewingKey';
+import {
+    toString,
+} from '~utils/viewingKey';
 import {
     argsError,
 } from '~utils/error';
@@ -36,7 +38,7 @@ export default async function createNoteFromBalance(args, ctx) {
     });
 
     if (!asset) {
-        return argsError('asset.notFound', {
+        throw argsError('asset.notFound', {
             messageOptions: {
                 asset: assetId,
             },
@@ -47,7 +49,7 @@ export default async function createNoteFromBalance(args, ctx) {
         balance,
     } = asset;
     if (balance < amount) {
-        return argsError('asset.balance.notEnough');
+        throw argsError('asset.balance.notEnough');
     }
 
     // TODO
@@ -90,7 +92,7 @@ export default async function createNoteFromBalance(args, ctx) {
 
     return {
         hash: noteHash,
-        viewingKey: viewingKey.toString(encryptedViewingKey),
+        viewingKey: toString(encryptedViewingKey),
         value: amount,
         asset: assetKey,
         owner: ownerKey,
