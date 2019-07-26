@@ -16,17 +16,21 @@ export default async function get(params = {}) {
         fields,
         index,
     } = this.config;
+    const subFieldsDataKey = !Array.isArray(fields)
+        ? fields.key
+        : '';
     if (!id
         && index
     ) {
         id = params[index];
     }
-    const subFieldsDataKey = !Array.isArray(fields)
-        ? fields.key
-        : '';
-    const subFieldsKey = subFieldsDataKey
-        ? params[subFieldsDataKey]
-        : '';
+    let subFieldsKey = '';
+    if (subFieldsDataKey) {
+        subFieldsKey = params[subFieldsDataKey];
+        if (!subFieldsKey && !dataKeyPattern) {
+            subFieldsKey = id;
+        }
+    }
 
     if (!dataKeyPattern && key) {
         warnLog(`Use id instead of key ("${key}") to get data from model '${name}.`);
