@@ -13,7 +13,7 @@ import GraphNodeService from '~backgroundServices/GraphNodeService';
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
-        chrome.storage.local.clear();
+        // chrome.storage.local.clear();
 
         await set({
             // __graphNode: 'http://localhost:4000/',

@@ -38,7 +38,10 @@ export default {
         },
     },
     asset: {
-        notFound: "Asset '%{asset}' is not found.",
+        notFound: {
+            _: "Asset '%{asset}' is not found.",
+            onChain: "Asset '%{asset}' does not exist on blockchain.",
+        },
         balance: {
             notEnough: 'Asset balance is not enough.',
         },
