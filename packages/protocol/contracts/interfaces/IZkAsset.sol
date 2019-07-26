@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <0.6.0;
  * @title ZkAsset Interface
  * @author AZTEC
  * @dev An interface defining the ZkAsset standard 
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 
 contract IZkAsset {

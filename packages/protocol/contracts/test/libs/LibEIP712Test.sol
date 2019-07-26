@@ -5,7 +5,7 @@ import "../../libs/LibEIP712.sol";
 /**
  * @title Library of EIP712 utility constants and functions
  * @author AZTEC
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract LibEIP712Test is LibEIP712 {
 

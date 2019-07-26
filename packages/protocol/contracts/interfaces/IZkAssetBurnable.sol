@@ -14,7 +14,7 @@ import "../ERC1724/ZkAssetOwnable.sol";
  * @title IZkAssetBurnable
  * @author AZTEC
  * @dev A standard defining the ZkAssetBurnable interfac e
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 
 interface IZkAssetBurnable {
