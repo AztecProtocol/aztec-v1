@@ -44,5 +44,16 @@ describe('Private range proof', () => {
                 expect(err.message).to.equal(errors.codes.INCORRECT_NOTE_NUMBER);
             }
         });
+
+        it('should fail if supplied notes do not satisfy balancing relationship', async () => {
+            const bogusUtilityNoteValue = 5;
+            const bogusUtilityNote = await note.create(publicKey, bogusUtilityNoteValue);
+
+            try {
+                const _ = new PrivateRangeProof(originalNote, comparisonNote, bogusUtilityNote, sender);
+            } catch (err) {
+                expect(err.message).to.equal(errors.codes.BALANCING_RELATION_NOT_SATISFIED);
+            }
+        });
     });
 });
