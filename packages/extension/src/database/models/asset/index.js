@@ -8,5 +8,6 @@ export default Model({
     fields: [
         'address',
         'balance',
+        'linkedTokenAddress',
     ],
 });
