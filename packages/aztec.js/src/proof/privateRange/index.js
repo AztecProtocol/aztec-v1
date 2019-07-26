@@ -1,5 +1,5 @@
 const bn128 = require('@aztec/bn128');
-const { constants, proofs } = require('@aztec/dev-utils');
+const { constants, errors, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const { AbiCoder } = require('web3-eth-abi');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
@@ -7,6 +7,9 @@ const { keccak256, padLeft, randomHex } = require('web3-utils');
 const { inputCoder, outputCoder } = require('../../encoder');
 const { Proof, ProofType } = require('../proof');
 const ProofUtils = require('../utils');
+
+const { AztecError } = errors;
+
 
 class PrivateRangeProof extends Proof {
     /**
@@ -28,11 +31,32 @@ class PrivateRangeProof extends Proof {
             utilityNote,
         ]);
 
+        this.checkBalancingRelationShipSatisfied();
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
         this.constructOutputs();
     }
+
+    /**
+     * Check that notes have been supplied which satisfy the privateRange balancing relationship
+     * 
+     * Balancing relationship: originalNoteValue = comparisonNoteValue + utilityNoteValue
+     */
+    checkBalancingRelationShipSatisfied() {
+        const originalNoteValue = this.notes[0].k.toNumber();
+        const comparisonNoteValue = this.notes[1].k.toNumber();
+        const utilityNoteValue = this.notes[2].k.toNumber();
+
+        if(!originalNoteValue === comparisonNoteValue + utilityNoteValue) {
+            throw new AztecError(errors.codes.BALANCING_RELATION_NOT_SATISFIED, {
+                message: 'The supplied note values do not satisfy the privateRange balancing relationship',
+                originalNoteValue,
+                comparisonNoteValue,
+                utilityNoteValue,
+            });
+        }
+    };
 
     /**
      * Generate blinding factors based on the previous blinding scalars
