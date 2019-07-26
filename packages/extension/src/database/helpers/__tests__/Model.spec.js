@@ -434,7 +434,7 @@ describe('Model with dataKey mapping', () => {
     });
 });
 
-describe('Model with fields object', () => {
+describe('Model with nested fields config', () => {
     it('allow to set data as an object', async () => {
         const pokemonModel = Model({
             name: 'pokemon',
@@ -468,6 +468,14 @@ describe('Model with fields object', () => {
             height: 60,
         });
 
+        const pikachuById = await pokemonModel.get({
+            id: 'pikachu',
+        });
+        expect(pikachuById).toEqual({
+            ...pikachu,
+            id: 'pikachu',
+        });
+
         const eevee = await pokemonModel.get({
             name: 'eevee',
         });
@@ -475,6 +483,13 @@ describe('Model with fields object', () => {
             name: 'eevee',
             color: 'brown',
             height: 80,
+        });
+        const eeveeById = await pokemonModel.get({
+            id: 'eevee',
+        });
+        expect(eeveeById).toEqual({
+            ...eevee,
+            id: 'eevee',
         });
 
         const storageData = await storage.get('pokemon');
