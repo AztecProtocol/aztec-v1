@@ -59,12 +59,11 @@ export default {
             user,
         };
     },
-    validateExtension: async () => {
+    validateExtension: async (_, args) => {
         const keyStore = await get('keyStore');
         if (!keyStore) {
-            return permissionError('extension.not.registered', {
-                messageOptions: {},
-            });
+
+            return permissionError('extension.not.registered', args);
         }
         return {};
     },
@@ -207,7 +206,7 @@ export default {
         return session;
     },
     enableAssetForDomain,
-    registerExtension: async ({ password, salt }) => {
+    registerExtension: async ({ password, salt, address }) => {
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
             salt,
@@ -229,9 +228,13 @@ export default {
                 createdAt: Date.now(),
             },
         });
+        const user = {
+            address,
+            linkedPublicKey: keyStore.privacyKeys.publicKey,
+        }; await userModel.set(user);
 
         return {
-            publicKey: keyStore.privacyKeys.publicKey,
+            linkedPublicKey: keyStore.privacyKeys.publicKey,
         };
     },
     registerAddress: async ({

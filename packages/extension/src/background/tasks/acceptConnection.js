@@ -3,9 +3,7 @@ import gql from 'graphql-tag';
 import psl from 'psl';
 import {
     of,
-    from,
-    Subject,
-    forkJoin,
+    from, Subject, forkJoin,
     timer,
     race,
     empty,
@@ -32,14 +30,9 @@ import GraphQLService from '../services/GraphQLService';
 
 
 const updateActionState = async (action) => {
-    const actionTimeStamp = Date.now();
     // lookup action
     return actionModel.set({
-        timestamp: actionTimeStamp,
-        type: action.key,
-        data: {
-            ...action,
-        },
+        ...action,
     });
 };
 
@@ -55,10 +48,10 @@ class Connection {
 
         this.ui$.pipe(
 
-            map(() => {
+            map(({timestamp}) => {
                 const popupURL = browser.extension.getURL('pages/popup.html');
                 browser.windows.create({
-                    url: popupURL,
+                    url: popupURL + `?id=${timestamp}`,
                     width: 300,
                     height: 400,
                     type: 'panel',
@@ -129,6 +122,8 @@ class Connection {
                     },
                 );
 
+
+
                 return forkJoin({
                     response: from(
                         GraphQLService[type]({
@@ -140,21 +135,20 @@ class Connection {
                     request: of(requestId),
                 });
             }),
-            switchMap(({
-                response,
-                request: requestId,
-            }) => {
+            switchMap(({response, request: requestId}) => {
+                console.log(response);
                 const queryName = Object.keys(response)
                     .find(name => !!response[name].error);
                 const errorData = queryName ? response[queryName].error : false;
                 // check the action mapping
-
                 if (errorData && errorToActionMap[errorData.key]) {
                     // trigger the UI flow
                     const action$ = this.handleAction({
                         type: errorToActionMap[errorData.key],
+                        timestamp: Date.now(),
                         data: {
                             requestId,
+                            response: JSON.parse(errorData.response)
                         },
                     });
                     action$.subscribe((actionResponse) => {
@@ -170,10 +164,8 @@ class Connection {
                             });
                         }
                     });
-
                     return empty();
                 }
-
                 return of({
                     requestId,
                     data: response,

@@ -4,14 +4,15 @@ import postToContentScript from './postToContentScript';
 import ApiError from './ApiError';
 
 const handleResponse = (response) => {
-    if (response.error) {
-        throw new ApiError(response);
-    }
-    const failedQuery = Object.keys(response)
-        .find(queryName => !!response[queryName].error);
-    if (failedQuery) {
-        throw new ApiError(response[failedQuery]);
-    }
+    // if (response.error) {
+    //     throw new ApiError(response);
+    // }
+    // const failedQuery = Object.keys(response)
+    //     .find(queryName => !!response[queryName].error);
+    // if (failedQuery) {
+    //     console.log(new ApiError(response[failedQuery]));
+    //     throw new ApiError(response[failedQuery]);
+    // }
 
     return response;
 };

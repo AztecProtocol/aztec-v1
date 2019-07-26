@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import browser from 'webextension-polyfill';
 import { Mutation } from 'react-apollo';
+import actionModel from '~database/models/action';
 import RegisterExtension from './mutations/RegisterExtension';
 import Login from './mutations/Login';
 import ApproveAssetForDomain from './mutations/ApproveDomain';
@@ -19,18 +20,21 @@ class App extends Component {
                     {(registerExtension, { data }) => (
                         <div>
                             <button onClick={async () => {
-                                console.log(registerExtension);
-                                const reqId = prompt('Req Id');
-                                await registerExtension({
+                                const search = new URLSearchParams(window.location.search);
+                                const action =  await actionModel.get({timestamp: search.get('id')});
+                                const data = await registerExtension({
                                     variables: {
                                         password: 'password',
                                         salt: 'salt',
                                         domain: 'test',
+                                        address: action.data.response.currentAddress
                                     },
                                 });
+                                console.log(data);
                                 browser.runtime.sendMessage({
                                     type: 'UI_CONFIRM',
-                                    requestId: reqId,
+                                    requestId: action.data.requestId,
+                                    data
                                 });
                             }}
                             >
