@@ -4,6 +4,7 @@ const path = require('path');
 
 const { Runtime } = require('../../huff');
 const bn128Reference = require('../js_snippets/bn128_reference');
+// eslint-disable-next-line no-unused-vars
 const golangVectors = require('./test_vectors');
 
 const { p } = bn128Reference;
