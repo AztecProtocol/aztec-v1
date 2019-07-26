@@ -10,7 +10,6 @@ const ProofUtils = require('../utils');
 
 const { AztecError } = errors;
 
-
 class PrivateRangeProof extends Proof {
     /**
     Constructs a private range proof - proving that the value of one AZTEC note, the originalNote, is greater than 
@@ -40,7 +39,7 @@ class PrivateRangeProof extends Proof {
 
     /**
      * Check that notes have been supplied which satisfy the privateRange balancing relationship
-     * 
+     *
      * Balancing relationship: originalNoteValue = comparisonNoteValue + utilityNoteValue
      */
     checkBalancingRelationShipSatisfied() {
@@ -48,7 +47,7 @@ class PrivateRangeProof extends Proof {
         const comparisonNoteValue = this.notes[1].k.toNumber();
         const utilityNoteValue = this.notes[2].k.toNumber();
 
-        if(!originalNoteValue === comparisonNoteValue + utilityNoteValue) {
+        if (!originalNoteValue === comparisonNoteValue + utilityNoteValue) {
             throw new AztecError(errors.codes.BALANCING_RELATION_NOT_SATISFIED, {
                 message: 'The supplied note values do not satisfy the privateRange balancing relationship',
                 originalNoteValue,
@@ -56,7 +55,7 @@ class PrivateRangeProof extends Proof {
                 utilityNoteValue,
             });
         }
-    };
+    }
 
     /**
      * Generate blinding factors based on the previous blinding scalars
