@@ -8,12 +8,16 @@ import {
 import {
     noteFactory,
 } from '../apis/note';
+
+import ensureExtensionEnabled from '../auth';
+
 import Web3Service from '../services/Web3Service';
 
 class Aztec {
     constructor() {
         this.enabled = false;
         this.auth = auth;
+
     }
 
     enable = async ({
@@ -25,31 +29,37 @@ class Aztec {
             // aztecAccountRegistry: '0x2DC7d67896DB3D58d029a747e149F68165cE863E',
         },
     }) => {
+
         await Web3Service.init();
+        Web3Service.registerContract(ACE);
 
-        this.enabled = true;
-
-        // we should enable the extension API under the following conditions
-        // if the user has an account and the site has a valid session we should return the API
-        // if the user does not have an account
-        const {
-            ace,
-            aztecAccountRegistry,
-        } = contractAddresses;
-
-        Web3Service.registerContract(ACE, {
-            contractAddress: ace,
-        });
-
-        Web3Service.registerContract(AZTECAccountRegistry, {
-            contractAddress: aztecAccountRegistry,
-        });
+        Web3Service.registerContract(AZTECAccountRegistry);
 
         Web3Service.registerInterface(ZkAsset);
+        const {
+            address,
+        } = Web3Service.account;
 
-        this.asset = assetFactory;
-        this.note = noteFactory;
-    };
+        const {
+            error,
+            account: user
+        } = await ensureExtensionEnabled();
+
+        if(error) {
+            
+            console.log(error);
+            this.error = new Error(error);
+            return
+        }
+        else {
+
+            this.enabled = true;
+
+            this.asset = assetFactory;
+            this.note = noteFactory;
+        }
+         
+        };
 }
 
 export default Aztec;

@@ -34,6 +34,7 @@ export default gql`
         linkedPublicKey: String
         lastSynced: Int
     }
+
     type Domain {
         assets: [Asset!]
     }
@@ -68,6 +69,11 @@ export default gql`
         error: Error
         action: Action
     }
+    type AccountApiResponse {
+        account: User 
+        error: Error
+        action: Action
+    }
     type NoteApiResponse {
         note: Note
         error: Error
@@ -90,9 +96,12 @@ export default gql`
         ): UserAccountApiResponse
         asset(
             id: ID!
+            currentAddress: String!  domain: String!
+        ): AssetApiResponse
+        account(
             currentAddress: String!
             domain: String!
-        ): AssetApiResponse
+        ): AccountApiResponse 
         note(
             id: ID!
             currentAddress: String!
@@ -122,6 +131,7 @@ export default gql`
             password: String!
             salt: String!
             domain: String!
+            address: String!
         ): UserAccountApiResponse
         registerAddress(
             address: String!
