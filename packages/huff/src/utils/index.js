@@ -80,7 +80,8 @@ utils.sliceCommasIgnoringTemplates = (argumentsString) => {
     }
 
     const indexesOfCommasAndAngleBrackets = matchesForCommasAndAngleBrackets(argumentsString);
-    const topLevelArguments = splitStringByIndexes(argumentsString, getIndexesOfCommasThatSplitTopLevelElements(indexesOfCommasAndAngleBrackets));
+    const topLevelArguments = splitStringByIndexes(argumentsString,
+        getIndexesOfCommasThatSplitTopLevelElements(indexesOfCommasAndAngleBrackets));
     return (topLevelArguments.reverse());
 };
 

@@ -286,18 +286,19 @@ describe('parser tests', () => {
 
 
         it('can process codesize macro', () => {
+            const macroName = 'BAR';
             const source = `
             template <p, q>
             #define macro FOO = takes(0) returns (4) {
                 dup4 0x1234aae <p> <q> swap5
             }
             
-            #define macro BAR = takes(0) returns (1) {
+            #define macro ${macroName} = takes(0) returns (1) {
                 __codesize(FOO<1,2>)
             }`;
-
-            const { bytecode } = parser.compileMacro('BAR', source, '');
-            expect(bytecode).to.equal('600b');
+            const pushEleven = '600b';
+            const { bytecode } = parser.compileMacro(macroName, source, '');
+            expect(bytecode).to.equal(pushEleven);
         });
     });
 });

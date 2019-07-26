@@ -6,6 +6,7 @@ const newParser = require('./parser');
 const utils = require('./utils');
 const { opcodes } = require('./opcodes/opcodes');
 
+// eslint-disable-next-line no-unused-vars
 function toBytes32(input, padding = 'left') { // assumes hex format
     let s = input;
     if (s.length > 64) {

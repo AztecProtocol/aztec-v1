@@ -71,7 +71,8 @@ parser.substituteTemplateArguments = (newTemplateArguments, templateRegExps) => 
 
 
 /**
- * Process a numeric or template literal. If string/int matches a number (dec or hex), in which case it returns a BN representation of that number. Otherwise error.
+ * Process a numeric or template literal. If string/int matches a number (dec or hex), in which case it returns a BN
+ * representation of that number. Otherwise error.
  * @param literal
  */
 parser.processMacroOrNumericOrTemplateLiteral = (literal, macros) => {
@@ -93,10 +94,11 @@ parser.processMacroOrNumericOrTemplateLiteral = (literal, macros) => {
         return new BN(macros[literal].ops[0].args[0], 16);
     }
     throw new Error(`I don't know how to process literal "${literal}" as a numeric or template literal`);
-}
+};
 
 /**
- * Process a numeric literal. If string/int matches a number (dec or hex), in which case it returns a BN representation of that number. Otherwise error.
+ * Process a numeric literal. If string/int matches a number (dec or hex), in which case it returns a BN representation
+ * of that number. Otherwise error.
  * @param literal
  */
 parser.processNumericLiteral = (literal) => {
@@ -107,10 +109,11 @@ parser.processNumericLiteral = (literal) => {
         return new BN(literal.match(grammar.macro.LITERAL_DECIMAL)[1], 10);
     }
     throw new Error(`I don't know how to process literal "${literal}" as a number literal`);
-}
+};
 
 /**
- * Process a literal from a macro. First sees if string/int matches a number (dec or hex), in which case it returns a BN representation of that number, and if not sees if it is an opcode. Otherwise error.
+ * Process a literal from a macro. First sees if string/int matches a number (dec or hex), in which case it returns a
+ * BN representation of that number, and if not sees if it is an opcode. Otherwise error.
  * @param op
  * @param macros
  */
@@ -134,22 +137,24 @@ parser.processMacroLiteral = (op, macros) => {
 
 /**
  * Unpicks template parameters with arithmetic like <dup1+3> and <swap16-0x05>
- * @param literal A literal taking the form of a stack opcode (dup or swap) followed by some add/sub arithmetic on dec or hex numbers e.g. dup1+3 and swap16-0x05
+ * @param literal A literal taking the form of a stack opcode (dup or swap) followed by some add/sub arithmetic on dec
+ *     or hex numbers e.g. dup1+3 and swap16-0x05
  * @returns {*} A literal with the arithmetic folded to form one constant. Errors if that opcode does not exist.
  */
 parser.processModifiedOpcode = (literal) => {
     function doArithmeticOperation(a, b, operation) {
+        let result;
         switch (operation) {
             case '+':
-                return a.add(b);
+                result = a.add(b);
                 break;
             case '-':
-                return a.sub(b);
+                result = a.sub(b);
                 break;
             default:
                 throw new Error(`unrecognised arithmetic operation "${operation}". Should be either + or -.`);
-                break;
         }
+        return result;
     }
 
     const arithmeticStackOpcodeRegex = new RegExp('\\s*(dup|swap)(0x[0-9a-fA-F]+|\\d+)([+\\-])(0x[0-9a-fA-F]+|\\d+)\\s*');
@@ -168,7 +173,8 @@ parser.processModifiedOpcode = (literal) => {
     const finalNumber = doArithmeticOperation(firstNumber, secondNumber, operation);
     // TODO: is this check neccesary? What if opcode arithmetic is nested?
     if (finalNumber < 1 || finalNumber > 16) {
-        throw new Error(`result of arithmetic operation ${firstNumber}${operation}${secondNumber} is ${finalNumber} but must be between 1 and 16 inclusive`);
+        throw new Error(`result of arithmetic operation ${firstNumber}${operation}${secondNumber} is ${finalNumber} `
+            + 'but must be between 1 and 16 inclusive');
     }
     return opcodes[stackOpcodeType + finalNumber.toString()];
 };
@@ -238,6 +244,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
     } else if (templateName.match(grammar.macro.TEMPLATE)) {
         const token = templateName.match(grammar.macro.TEMPLATE);
         opsType = TYPES.TEMPLATE;
+        // eslint-disable-next-line prefer-destructuring
         opsValue = token[1];
     } else {
         opsType = TYPES.PUSH_JUMP_LABEL;
@@ -248,7 +255,7 @@ parser.parseTemplate = (templateName, macros = {}, index = 0, debug = {}) => {
         macros: {
             ...macros,
             [inlineTemplateName]: {
-                name: name,
+                name,
                 ops: [{
                     type: opsType,
                     value: opsValue,
@@ -272,7 +279,9 @@ parser.processMacro = (
 ) => {
     const result = parser.processMacroInternal(name, startingBytecodeIndex, templateArgumentsRaw, startingMacros, map);
     if (result.unmatchedJumps.length > 0) {
-        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. Possibly forgot parantheses in macro call, undefined jump labels, or a misspelled label/opcode? (NB possibly substituted as a template parameter):`;
+        let errorString = `originating macro ${name}, unknown jump labels/opcodes/template parameters, cannot compile. `
+        + 'Possibly forgot parentheses in macro call, undefined jump labels, or a misspelled label/opcode? '
+            + '(NB possibly substituted as a template parameter):';
         result.unmatchedJumps.forEach((unmatchedJump) => {
             errorString += `\n"${unmatchedJump.label}". ` + debugLocationString(unmatchedJump.debug);
         }); // NB currently not using bytecodeIndex or lineIndex but they might be useful
@@ -353,7 +362,9 @@ parser.processMacroInternal = (
     if (macro.ops[0] && macro.ops[0].debug) {
         extraErrorString = ' ' + debugLocationString(macro.ops[0].debug);
     }
-    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs! This likely means you have supplied the wrong number of parameters to the macro call.` + extraErrorString);
+    check(templateParams.length === templateArguments.length, `macro ${name} has invalid templated inputs! `
+        + 'This likely means you have supplied the wrong number of parameters to the macro call.'
+        + extraErrorString);
     const templateRegExps = templateParams.map((label, i) => {
         const pattern = new RegExp(`\\b(${label})\\b`, 'g');
         const value = templateArguments[i];
@@ -381,7 +392,8 @@ parser.processMacroInternal = (
                 check(index !== -1, `cannot find template ${op.value}`);
                 // what is this template? It's either a macro or a template argument;
                 let templateParameterValue = templateArguments[macroNameIndex];
-                // Get the value of the template parameter to replace with. op.value is the name of the template parameter, and parsedName the value
+                // Get the value of the template parameter to replace with. op.value is the name of the template
+                // parameter, and parsedName the value
                 const parsedName = parser.substituteTemplateArguments([op.value], templateRegExps);
                 // If multiple parameters match, which really shouldn't happen
                 if (parsedName.length !== 1) {
@@ -391,6 +403,7 @@ parser.processMacroInternal = (
                 let templateArgs = [];
                 const token = (nameToUse + '()').match(grammar.macro.MACRO_CALL);
                 if (token) {
+                    // eslint-disable-next-line prefer-destructuring
                     nameToUse = token[1];
                     templateArgs = token[2] ? [token[2]] : [];
                 }
@@ -398,7 +411,8 @@ parser.processMacroInternal = (
                     macros,
                     templateName: templateParameterValue,
                 } = parser.parseTemplate(nameToUse, macros, index, op.debug));
-                const result = parser.processMacroInternal(templateParameterValue, offset, templateArgs, macros, map, jumpindicesInitial, []);
+                const result = parser.processMacroInternal(templateParameterValue, offset, templateArgs, macros, map,
+                    jumpindicesInitial, []);
                 tableInstances = [...tableInstances, ...result.tableInstances];
                 jumptable[index] = result.unmatchedJumps;
                 jumpindices = { ...jumpindices, ...result.jumpindices };
@@ -536,10 +550,13 @@ parser.parseJumpTable = (body, compressed = false) => {
 parser.parseCodeTable = (body) => {
     let index = 0;
     let table = '';
-    while (true) {
-        const whitespace = body.slice(index).match(grammar.topLevel.WHITESPACE);
-        const decLiteral = body.slice(index).match(grammar.macro.LITERAL_DECIMAL);
-        const hexLiteral = body.slice(index).match(grammar.macro.LITERAL_HEX);
+    let whitespace = true;
+    let decLiteral = true;
+    let hexLiteral = true;
+    while (whitespace || decLiteral || hexLiteral) {
+        whitespace = body.slice(index).match(grammar.topLevel.WHITESPACE);
+        decLiteral = body.slice(index).match(grammar.macro.LITERAL_DECIMAL);
+        hexLiteral = body.slice(index).match(grammar.macro.LITERAL_HEX);
         if (whitespace) {
             index += whitespace[0].length;
         } else if (decLiteral) {
@@ -548,10 +565,9 @@ parser.parseCodeTable = (body) => {
         } else if (hexLiteral) {
             table += hexLiteral[1];
             index += hexLiteral[0].length;
-        } else if (regex.endOfData(body.slice(index))) {
-            break;
-        } else {
+        } else if (!regex.endOfData(body.slice(index))) {
             const tokenThatFailed = body.slice(index).match('.+?\\b');
+            // eslint-disable-next-line no-throw-literal
             throw { index, tokenThatFailed };
         }
     }
@@ -755,7 +771,9 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const macroName = macro[3];
             // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(macro[0]), inputMap);
-            check(regex.conformsToNameRules(macro[3]), `macro '${macroName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
+            check(regex.conformsToNameRules(macro[3]), `macro '${macroName}' does not conform to naming rules. `
+                + 'Macro names must contain at least one alphabetical character (A to Z, either case) and must not start'
+                + ' with \'0x\'. ' + debugLocationString(debug));
             check(type === 'macro', `expected '${macro[3]}' to define a macro ` + debugLocationString(debug));
             const body = macro[6];
             macros = {
@@ -778,8 +796,12 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const codeTableName = table[3];
             // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(table[0]), inputMap);
-            check(regex.conformsToNameRules(codeTableName), `bytecode table '${codeTableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
-            check(type === 'table', `expected ${codeTableName} to define a packed jump table ` + debugLocationString(debug));
+            check(regex.conformsToNameRules(codeTableName), `bytecode table '${codeTableName}' does not `
+                + 'conform to naming rules. Macro names must contain at least one alphabetical character '
+                + '(A to Z, either case) and must not start with \'0x\'. '
+                + debugLocationString(debug));
+            check(type === 'table', `expected ${codeTableName} to define a packed jump table `
+                + debugLocationString(debug));
             const body = table[4];
             let finalTable;
             try {
@@ -787,9 +809,13 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             } catch ({ bodyIndex, tokenThatFailed }) {
                 const tableDebug = inputMaps.getFileLine(index + table[1].length + bodyIndex, inputMap);
                 if (tokenThatFailed) {
-                    throw new Error(`unexpected token '${tokenThatFailed[0]}' in bytecode table '${codeTableName}'. All tokens in bytecode tables must be decimal and/or hexadecimal literals. ` + debugLocationString(debug));
+                    throw new Error(`unexpected token '${tokenThatFailed[0]}' in bytecode table '${codeTableName}'. `
+                        + 'All tokens in bytecode tables must be decimal and/or hexadecimal literals. '
+                        + debugLocationString(debug));
                 } else {
-                    throw new Error(`unexpected error around '${table[0].slice(bodyIndex, table[0].slice(bodyIndex).indexOf('\n'))}' in bytecode table '${codeTableName}'. ` + debugLocationString(tableDebug));
+                    throw new Error('unexpected error around \''
+                        + table[0].slice(bodyIndex, table[0].slice(bodyIndex).indexOf('\n'))
+                        + `' in bytecode table '${codeTableName}'. ` + debugLocationString(tableDebug));
                 }
             }
             jumptables = {
@@ -807,8 +833,11 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const packedJumptableName = jumptable[2];
             // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
-            check(regex.conformsToNameRules(packedJumptableName), `packed jumptable '${packedJumptableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
-            check(type === 'jumptable__packed', `expected '${packedJumptableName}' to define a packed jump table ` + debugLocationString(debug));
+            check(regex.conformsToNameRules(packedJumptableName), `packed jumptable '${packedJumptableName}' `
+                + 'does not conform to naming rules. Macro names must contain at least one alphabetical character '
+                + '(A to Z, either case) and must not start with \'0x\'. ' + debugLocationString(debug));
+            check(type === 'jumptable__packed', `expected '${packedJumptableName}' to define a packed jump table `
+                + debugLocationString(debug));
             const body = jumptable[3];
             jumptables = {
                 ...jumptables,
@@ -825,8 +854,12 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const jumptableName = jumptable[2];
             // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(jumptable[0]), inputMap);
-            check(regex.conformsToNameRules(jumptableName), `jumptable '${jumptableName}' does not conform to naming rules. Macro names must contain at least one alphabetical character (A to Z, either case) and must not start with '0x'. ` + debugLocationString(debug));
-            check(type === 'jumptable', `expected ${jumptable} to define a jump table. ` + debugLocationString(debug));
+            check(regex.conformsToNameRules(jumptableName),
+                `jumptable '${jumptableName}' does not conform to naming rules. Macro names must contain at `
+                + 'least one alphabetical character (A to Z, either case) and must not start with \'0x\'. '
+                + debugLocationString(debug));
+            check(type === 'jumptable', `expected ${jumptable} to define a jump table. `
+                + debugLocationString(debug));
             const body = jumptable[3];
             jumptables = {
                 ...jumptables,
@@ -840,7 +873,8 @@ parser.parseTopLevel = (raw, startingIndex, inputMap) => {
             const token = input.match(grammar.topLevel.IMPORT);
             // TODO: is countEmptyChars required now I've fixed whitespace?
             const debug = inputMaps.getFileLine(index + regex.countEmptyChars(token[0]), inputMap);
-            throw new Error('#include statements must come before any other declarations or operations in the file. ' + debugLocationString(debug));
+            throw new Error('#include statements must come before any other declarations or operations in the file. '
+                + debugLocationString(debug));
         } else {
             const { filename, lineNumber, line } = inputMaps.getFileLine(index, inputMap);
             throw new Error(`could not process line ${lineNumber} in ${filename}: ${line}`);
@@ -867,7 +901,8 @@ parser.removeComments = (string) => {
 };
 
 /**
- * Process contents of file (including dealing with comments and includes) and return processed file contents and a list of other files to include
+ * Process contents of file (including dealing with comments and includes) and return processed file contents and a
+ * list of other files to include
  * @param originalFilename Also works if you input raw huff code
  * @param partialPath
  * @returns {{filedata: *[], raw: *}}
@@ -880,7 +915,7 @@ parser.getFileContents = (originalFilename, partialPath) => {
      * @param filename
      * @returns {string}
      */
-    function huffCodeFileContents(filename) {
+    const huffCodeFileContents = (filename) => {
         let fileString;
         if (filename.includes('#')) {
             fileString = filename; // hacky workaround for direct strings. TODO: find something more elegant
@@ -889,38 +924,7 @@ parser.getFileContents = (originalFilename, partialPath) => {
             fileString = fs.readFileSync(filepath, 'utf8');
         }
         return fileString;
-    }
-
-    /**
-     * Take comment-free input huff code, and process any include statements recursively, returning a list of the neccesary files, and the original huff code with the include statements removed
-     * @param formatted
-     * @param filename
-     * @returns {{formatted: *, imported: Array}}
-     */
-    function processIncludes(formatted, filename) {
-        let huffToProcess = formatted;
-        let imported = [];
-        let index = 0;
-        while (true) {
-            const whitespace = huffToProcess.slice(index).match(grammar.topLevel.WHITESPACE);
-            const importStatement = huffToProcess.slice(index).match(grammar.topLevel.IMPORT);
-            if (whitespace) {
-                index += whitespace[0].length;
-            } else if (importStatement) {
-                huffToProcess = huffToProcess.replace(importStatement[0], importStatement[0].replace(/./g, ' '));
-                index += importStatement[0].length;
-                if (!included.includes(importStatement[2])) {
-                    imported = [...imported, ...processFile(importStatement[2])];
-                } else {
-                    const upToNow = huffToProcess.slice(0, index).split('\n').length;
-                    console.warn(`Note: file "${importStatement[2]}" is called/imported multiple times, the further import in ${filename} on line ${upToNow} was not carried out.`);
-                }
-            } else {
-                break;
-            }
-        }
-        return { imported, formatted: huffToProcess };
-    }
+    };
 
     /**
      * Process a file, recursively processing any files which are included
@@ -931,6 +935,7 @@ parser.getFileContents = (originalFilename, partialPath) => {
         included.push(filename);
         const fileString = huffCodeFileContents(filename);
         const fileStringWithoutComments = parser.removeComments(fileString);
+        // eslint-disable-next-line no-use-before-define
         const { imported, formatted } = processIncludes(fileStringWithoutComments, filename);
         const result = [...imported, {
             filename,
@@ -938,6 +943,40 @@ parser.getFileContents = (originalFilename, partialPath) => {
         }];
         return result;
     };
+
+    /**
+     * Take comment-free input huff code, and process any include statements recursively, returning a list of the
+     * necessary files, and the original huff code with the include statements removed
+     * @param formatted
+     * @param filename
+     * @returns {{formatted: *, imported: Array}}
+     */
+    const processIncludes = (formatted, filename) => {
+        let huffToProcess = formatted;
+        let imported = [];
+        let index = 0;
+        let whitespace = true;
+        let importStatement = true;
+        while (whitespace || importStatement) {
+            whitespace = huffToProcess.slice(index).match(grammar.topLevel.WHITESPACE);
+            importStatement = huffToProcess.slice(index).match(grammar.topLevel.IMPORT);
+            if (whitespace) {
+                index += whitespace[0].length;
+            } else if (importStatement) {
+                huffToProcess = huffToProcess.replace(importStatement[0], importStatement[0].replace(/./g, ' '));
+                index += importStatement[0].length;
+                if (!included.includes(importStatement[2])) {
+                    imported = [...imported, ...processFile(importStatement[2])];
+                } else {
+                    const upToNow = huffToProcess.slice(0, index).split('\n').length;
+                    console.warn(`Note: file "${importStatement[2]}" is called/imported multiple times, `
+                        + `the further import in ${filename} on line ${upToNow} was not carried out.`);
+                }
+            }
+        }
+        return { imported, formatted: huffToProcess };
+    };
+
     const filedata = processFile(originalFilename);
     const raw = filedata.reduce((acc, { data }) => {
         return acc + data;
