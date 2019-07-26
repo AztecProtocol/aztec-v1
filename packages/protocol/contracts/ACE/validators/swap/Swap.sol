@@ -12,7 +12,7 @@ import "./SwapABIEncoder.sol";
  * The intended use case is to call this externally via `staticcall`. External
  * calls to OptimizedAZTEC can be treated as pure functions as this contract
  * contains no storage and makes no external calls (other than to precompiles)
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract Swap {
 
