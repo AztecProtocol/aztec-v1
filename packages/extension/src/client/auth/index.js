@@ -101,10 +101,44 @@ export default {
             .method('registerAZTECExtension')
             .send(address, linkedPublicKey, v, r, s);
     },
-    registerAddress: async address => mutate(`
-        registerAddress(address: "${address}")
-    `),
-    enableAsset: async asset => mutate(`
-        enableAssetForDomain(asset: "${asset}")
-    `),
+    registerAddress: async (address) => {
+        const {
+            registerAddress,
+        } = await mutate(`
+            registerAddress(address: "${address}") {
+                account {
+                    address
+                    linkedPublicKey
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `);
+
+        return registerAddress;
+    },
+    enableAsset: async (asset) => {
+        const {
+            enableAssetForDomain,
+        } = await mutate(`
+            enableAssetForDomain(asset: "${asset}") {
+                asset {
+                    address
+                    linkedTokenAddress
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `);
+
+        return enableAssetForDomain;
+    },
 };

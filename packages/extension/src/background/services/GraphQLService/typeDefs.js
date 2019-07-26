@@ -44,6 +44,7 @@ export default gql`
     type Asset {
         id: ID!
         address: String!
+        linkedTokenAddress: String
         balance: Int
     }
     type Note {
@@ -123,6 +124,6 @@ export default gql`
         enableAssetForDomain(
             domain: String!
             asset: String!
-        ): Domain
+        ): AssetApiResponse
     }
 `;
