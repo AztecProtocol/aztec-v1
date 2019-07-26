@@ -10,6 +10,7 @@ import {
     errorLog,
 } from '~utils/log';
 import SyncService from '../SyncService';
+import enableAssetForDomain from './enableAssetForDomain';
 
 export default {
     validateUserAddress: async (address) => {
@@ -180,50 +181,7 @@ export default {
 
         return session;
     },
-    enableAssetForDomain: async ({
-        domain,
-        asset,
-    }) => {
-        // the session has already been validated at this point so we can freely write to the db
-        // graphnode server is not needd and should be configured via config.
-        const {
-            data,
-            modified,
-        } = await domainModel.set(
-            {
-                domain,
-                assets: {
-                    [asset]: true,
-                },
-            },
-            {
-                ignoreDuplicate: true,
-            },
-        );
-        if (!modified.length) {
-            const {
-                domain: {
-                    [domain]: {
-                        assets: prevAssets,
-                    },
-                },
-            } = data;
-
-            const {
-                data: updatedData,
-            } = await domainModel.update({
-                domain,
-                assets: {
-                    ...prevAssets,
-                    [asset]: true,
-                },
-            });
-
-            return updatedData.domain[domain];
-        }
-
-        return data.domain[domain];
-    },
+    enableAssetForDomain,
     registerExtension: async ({ password, salt }) => {
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,

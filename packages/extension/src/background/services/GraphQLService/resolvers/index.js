@@ -51,7 +51,9 @@ export default {
         ]),
         enableAssetForDomain: pipe([
             validateSession,
-            async (_, args) => AuthService.enableAssetForDomain(args),
+            async (_, args) => ({
+                asset: AuthService.enableAssetForDomain(args),
+            }),
         ]),
     },
 };
