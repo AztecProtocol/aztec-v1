@@ -9,6 +9,7 @@ class Web3Service {
         this.web3 = null;
         this.contracts = {};
         this.abis = {};
+        this.account = null;
     }
 
     async init({
@@ -126,18 +127,28 @@ class Web3Service {
         const { bytecode } = config;
         const { address } = this.account;
         contractObj.options.data = bytecode;
+        const deployOptions = {
+            data: bytecode,
+            arguments: constructorArguments,
+        };
+        const gas = await contractObj.deploy(deployOptions).estimateGas();
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             contractObj
-                .deploy({
-                    arguments: constructorArguments,
-                })
+                .deploy(deployOptions)
                 .send({
                     from: address,
-                    gas: 6500000,
-                }, async (error, transactionHash) => {
-                    const receipt = await this.web3.eth.getTransactionReceipt(transactionHash);
-                    resolve(receipt);
+                    gas: gas * 5,
+                })
+                .on('error', (error) => {
+                    reject(error);
+                })
+                .on('confirmation', (confirmationNumber, receipt) => {
+                    if (!receipt) {
+                        reject();
+                    } else {
+                        resolve(receipt);
+                    }
                 });
         });
     }
@@ -153,10 +164,30 @@ class Web3Service {
             ? args.slice(0, args.length - 1)
             : args;
 
-        return method(...methodArgs)[type]({
-            from: address,
-            gas: 6500000,
-            ...methodSetting,
+        if (type === 'call') {
+            return method(...methodArgs).call({
+                from: address,
+                gas: 6500000,
+                ...methodSetting,
+            });
+        }
+
+        return new Promise((resolve, reject) => {
+            method(...methodArgs)[type]({
+                from: address,
+                ...methodSetting,
+                gas: 6500000,
+            })
+                .on('error', (error) => {
+                    reject(error);
+                })
+                .on('confirmation', (confirmationNumber, receipt) => {
+                    if (!receipt) {
+                        reject();
+                    } else {
+                        resolve(receipt);
+                    }
+                });
         });
     };
 
