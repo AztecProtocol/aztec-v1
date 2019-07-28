@@ -1,25 +1,21 @@
 import devUtils from '@aztec/dev-utils';
 import bn128 from '@aztec/bn128';
+/* eslint-disable import/no-unresolved */
+import ZkAssetOwnable from '../../../build/protocol/ZkAssetOwnable';
+import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
+import JoinSplit from '../../../build/protocol/JoinSplit';
+/* eslint-enable */
 import Web3Service from '../services/Web3Service';
-import ACE from '../contracts/ACE';
-import ZkAssetOwnable from '../contracts/ZkAssetOwnable';
-import ERC20Mintable from '../contracts/ERC20Mintable';
-import JoinSplit from '../contracts/JoinSplit';
 
 export default async function createNewAsset({
-    initialBalance = 200,
-    epoch = 1,
-    category = 1,
-    proofId = 1,
-    filter = 17,
-    scalingFactor = 1,
-    canAdjustSupply = true,
-    canConvert = true,
-} = {}) {
-    Web3Service.registerContract(ACE);
-    Web3Service.registerInterface(ERC20Mintable);
-    Web3Service.registerInterface(ZkAssetOwnable);
-
+    epoch,
+    category,
+    proofId,
+    filter,
+    scalingFactor,
+    canAdjustSupply,
+    canConvert,
+}) {
     await Web3Service
         .useContract('ACE')
         .method('setCommonReferenceString')
@@ -50,20 +46,8 @@ export default async function createNewAsset({
     }
 
     const {
-        address: userAddress,
-    } = Web3Service.account;
-
-    const {
         contractAddress: erc20Address,
     } = await Web3Service.deploy(ERC20Mintable);
-    await Web3Service
-        .useContract('ERC20Mintable')
-        .at(erc20Address)
-        .method('mint')
-        .send(
-            userAddress,
-            initialBalance,
-        );
 
     const aceAddress = Web3Service.contract('ACE').address;
 
@@ -78,7 +62,7 @@ export default async function createNewAsset({
     ]);
 
     await Web3Service
-        .useContract('ZkAssetOwnable')
+        .useContract('ZkAsset')
         .at(zkAssetAddress)
         .method('setProofs')
         .send(

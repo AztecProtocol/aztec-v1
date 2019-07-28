@@ -30,6 +30,7 @@ export default gql`
     type User {
         id: ID!
         address: String!
+        spendingPublicKey: String
         linkedPublicKey: String
         lastSynced: Int
     }
@@ -82,6 +83,11 @@ export default gql`
         error: Error
     }
     type Query {
+        user(
+            id: ID
+            currentAddress: String!
+            domain: String!
+        ): UserAccountApiResponse
         asset(
             id: ID!
             currentAddress: String!

@@ -1,0 +1,131 @@
+import aztec from 'aztec.js';
+import {
+    createNotes,
+} from '~utils/note';
+import {
+    randomSumArray,
+} from '~utils/random';
+import {
+    addAccess,
+} from '~utils/metadata';
+import encryptedViewingKey from '~utils/encryptedViewingKey';
+import asyncForEach from '~utils/asyncForEach';
+import Web3Service from '../../services/Web3Service';
+import ContractError from '../../utils/ContractError';
+
+export default async function deposit({
+    assetAddress,
+    amount,
+    linkedPublicKey,
+    spendingPublicKey,
+    sender,
+    publicOwner,
+    numberOfOutputNotes,
+}) {
+    const noteValues = Array.isArray(amount)
+        ? amount
+        : randomSumArray(amount, numberOfOutputNotes);
+    const notes = await createNotes(
+        noteValues,
+        spendingPublicKey,
+        sender,
+    );
+    const {
+        JoinSplitProof,
+        ProofUtils,
+    } = aztec;
+    const publicValue = ProofUtils.getPublicValue(
+        [],
+        noteValues,
+    );
+    const inputNotes = [];
+    const depositInputOwnerAccounts = [];
+    const depositProof = new JoinSplitProof(
+        inputNotes,
+        notes,
+        sender,
+        publicValue,
+        publicOwner,
+    );
+
+    const sum = typeof amount === 'number'
+        ? amount
+        : noteValues.reduce((accum, v) => accum + v, 0);
+
+    // TODO
+    // this step should be done somewhere else
+    try {
+        await Web3Service
+            .useContract('ACE')
+            .method('publicApprove')
+            .send(
+                assetAddress,
+                depositProof.hash,
+                sum,
+            );
+    } catch (error) {
+        throw new ContractError('ace.publicApprove', {
+            asset: assetAddress,
+            amount: sum,
+            error,
+        });
+    }
+
+    const depositData = depositProof.encodeABI(assetAddress);
+    const depositSignatures = depositProof.constructSignatures(
+        assetAddress,
+        depositInputOwnerAccounts,
+    );
+
+    try {
+        await Web3Service
+            .useContract('ZkAsset')
+            .at(assetAddress)
+            .method('confidentialTransfer')
+            .send(
+                depositData,
+                depositSignatures,
+            );
+    } catch (error) {
+        throw new ContractError('zkAsset.confidentialTransfer', {
+            asset: assetAddress,
+            error,
+            notes,
+        });
+    }
+
+    const {
+        outputCoder,
+    } = aztec.encoder;
+    await asyncForEach(notes, async (note, i) => {
+        const {
+            noteHash,
+        } = note.exportNote();
+        const realViewingKey = note.getView();
+        const outputNotes = outputCoder.getOutputNotes(depositProof.output);
+        const outputNote = outputCoder.getNote(outputNotes, i);
+        const metadata = outputCoder.getMetadata(outputNote);
+        const viewingKey = encryptedViewingKey(linkedPublicKey, realViewingKey);
+        const newMetadata = addAccess(metadata, {
+            address: sender,
+            viewingKey: viewingKey.toHexString(),
+        });
+
+        try {
+            await Web3Service
+                .useContract('ZkAsset')
+                .at(assetAddress)
+                .method('updateNoteMetaData')
+                .send(
+                    noteHash,
+                    newMetadata,
+                );
+        } catch (error) {
+            throw new ContractError('zkAsset.updateNoteMetaData', {
+                note,
+            });
+        }
+    });
+
+    return notes;
+}

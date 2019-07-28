@@ -1,16 +1,22 @@
 import assetModel from '~database/models/asset';
+import userModel from '~database/models/user';
 import accountModel from '~database/models/account';
 import noteModel from '~database/models/note';
 import AuthService from '../../AuthService';
 import {
+    ensureUserPermission,
     ensureEntityPermission,
 } from '../decorators';
 import pipe from '../utils/pipe';
 import validateSession from '../validators/validateSession';
+import getUserSpendingPublicKey from './getUserSpendingPublicKey';
 import requestGrantAccess from './requestGrantAccess';
 import createNoteFromBalance from './createNoteFromBalance';
 
 export default {
+    User: {
+        spendingPublicKey: async ({ address }) => getUserSpendingPublicKey(address),
+    },
     Note: {
         asset: async ({ asset }) => assetModel.get({ key: asset }),
         owner: async ({ owner }) => accountModel.get({ key: owner }),
@@ -19,6 +25,11 @@ export default {
         asset: ({ asset }) => asset && assetModel.get({ id: asset }),
     },
     Query: {
+        user: ensureUserPermission(async (_, args) => ({
+            account: await userModel.get({
+                id: (args.id || args.currentAddress).toLowerCase(),
+            }),
+        })),
         asset: ensureEntityPermission(async (_, args) => ({
             asset: await assetModel.get(args),
         })),
