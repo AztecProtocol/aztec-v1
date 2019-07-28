@@ -34,8 +34,8 @@ export default async function syncAssetInfo(address) {
         assetModel.set(
             {
                 address,
-                balance: 0,
                 linkedTokenAddress,
+                balance: 0,
             },
             {
                 // asset might have been created in SyncService

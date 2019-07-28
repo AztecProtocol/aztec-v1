@@ -1,6 +1,6 @@
 import insertVariablesToGql from '~utils/insertVariablesToGql';
-import Web3Service from '../../services/Web3Service';
-import postToContentScript from '../../utils/postToContentScript';
+import Web3Service from '../services/Web3Service';
+import postToContentScript from './postToContentScript';
 import ApiError from './ApiError';
 
 const handleResponse = (response) => {

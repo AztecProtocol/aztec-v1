@@ -224,6 +224,9 @@ class Web3Service {
                 };
             },
             at: (address) => {
+                if (!address) {
+                    throw new Error(`'address' cannot be empty in useContract(${contractName}).at(address)`);
+                }
                 if (!this.abis[contractName]) {
                     warnLog(`'${contractName}' is not registered as an interface.`);
                 }

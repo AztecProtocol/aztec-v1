@@ -1,6 +1,6 @@
 import Web3Service from '../services/Web3Service';
-import query from './utils/query';
-import ApiError from './utils/ApiError';
+import query from '../utils/query';
+import ApiError from '../utils/ApiError';
 
 const dataProperties = [
     'hash',
