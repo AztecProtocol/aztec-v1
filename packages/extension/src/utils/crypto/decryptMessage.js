@@ -1,4 +1,34 @@
-export default function decryptMessage(publicKey, messsage) {
-    // TODO
-    return messsage;
+import nacl from './nacl';
+import fromHexString from './fromHexString';
+import {
+    errorLog,
+} from '~utils/log';
+
+export default function decryptMessage(privateKey, encryptedData) {
+    let output;
+    try {
+        const privateKeyBase64 = Buffer.from(privateKey, 'hex').toString('base64');
+        const privateKeyUint8Array = nacl.util.decodeBase64(privateKeyBase64);
+        const recieverEncryptionPrivateKey = nacl
+            .box
+            .keyPair
+            .fromSecretKey(privateKeyUint8Array)
+            .secretKey;
+
+        const encryptedMessage = encryptedData.export();
+        const nonce = fromHexString(encryptedMessage.nonce);
+        const ciphertext = fromHexString(encryptedMessage.ciphertext);
+        const ephemPublicKey = fromHexString(encryptedMessage.ephemPublicKey);
+        const decryptedMessage = nacl.box.open(
+            ciphertext,
+            nonce,
+            ephemPublicKey,
+            recieverEncryptionPrivateKey,
+        );
+        output = nacl.util.encodeUTF8(decryptedMessage);
+    } catch (error) {
+        errorLog('Decryption failed.', error);
+    }
+
+    return output || '';
 }
