@@ -19,6 +19,7 @@ describe('encryptMessage', () => {
         const massage = 'my secret';
         const encrypted = encryptMessage(publicKey, massage);
         expect(Object.keys(encrypted).sort()).toEqual([
+            'decrypt',
             'export',
             'toHexString',
         ]);
@@ -36,10 +37,25 @@ describe('encryptMessage', () => {
 });
 
 describe('decryptMessage', () => {
+    it('call decrypt in EncryptedMessage object to get original message', () => {
+        const message = 'my secret';
+        const encrypted = encryptMessage(publicKey, message);
+        const recovered = encrypted.decrypt(privateKey);
+        expect(recovered).toBe(message);
+    });
+
     it('take an EncryptedMessage object and return original message', () => {
         const message = 'my secret';
         const encrypted = encryptMessage(publicKey, message);
         const recovered = decryptMessage(privateKey, encrypted);
+        expect(recovered).toBe(message);
+    });
+
+    it('take encrypted data object and return original message', () => {
+        const message = 'my secret';
+        const encrypted = encryptMessage(publicKey, message);
+        const encryptedData = encrypted.export();
+        const recovered = decryptMessage(privateKey, encryptedData);
         expect(recovered).toBe(message);
     });
 });
