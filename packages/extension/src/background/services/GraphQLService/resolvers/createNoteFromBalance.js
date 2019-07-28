@@ -1,7 +1,7 @@
 import aztec from 'aztec.js';
 import secp256k1 from '@aztec/secp256k1';
 import assetModel from '~database/models/asset';
-import accountModel from '~database/models/account';
+import addressModel from '~database/models/address';
 import {
     get,
 } from '~utils/storage';
@@ -85,7 +85,7 @@ export default async function createNoteFromBalance(args, ctx) {
     if (!ownerKey) {
         ({
             key: ownerKey,
-        } = await accountModel.set({
+        } = await addressModel.set({
             address: ownerAddress,
         }) || {});
     }
