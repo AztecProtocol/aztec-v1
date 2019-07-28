@@ -6,6 +6,7 @@ import {
 } from '~config/constants';
 import metadata, {
     toString,
+    addAccess,
 } from '../metadata';
 
 const pad = (val, len, padWith = '0') => `${val}`.padStart(len, padWith);
@@ -118,5 +119,89 @@ describe('metadata constructor', () => {
             viewingKeys: [],
             appData: appDataByte,
         });
+    });
+});
+
+describe('metadata addAccess', () => {
+    const obj = {
+        aztecData,
+        addresses,
+        viewingKeys,
+        appData,
+    };
+    const metadataStr = toString(obj);
+
+    const numberOfNewAccounts = 2;
+    const newAddressBytes = [];
+    const newViewingKeyBytes = [];
+    for (let i = 0; i < numberOfNewAccounts; i += 1) {
+        newAddressBytes.push('0x'.padEnd(ADDRESS_LENGTH + 2, `adn${i}`));
+        newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cn${i}`));
+    }
+
+    it('add note access info to metadata string', () => {
+        const newMetadata = addAccess(metadataStr, {
+            address: newAddressBytes[0],
+            viewingKey: newViewingKeyBytes[0],
+        });
+
+        expect(metadata(newMetadata)).toMatchObject({
+            aztecData: aztecDataByte,
+            addresses: [
+                ...addressBytes,
+                newAddressBytes[0],
+            ],
+            viewingKeys: [
+                ...viewingKeyBytes,
+                newViewingKeyBytes[0],
+            ],
+            appData: appDataByte,
+        });
+    });
+
+    it('can add multiple note access at a time', () => {
+        const newMetadata = addAccess(metadataStr, [
+            {
+                address: newAddressBytes[0],
+                viewingKey: newViewingKeyBytes[0],
+            },
+            {
+                address: newAddressBytes[1],
+                viewingKey: newViewingKeyBytes[1],
+            },
+        ]);
+
+        expect(metadata(newMetadata)).toMatchObject({
+            aztecData: aztecDataByte,
+            addresses: [
+                ...addressBytes,
+                newAddressBytes[0],
+                newAddressBytes[1],
+            ],
+            viewingKeys: [
+                ...viewingKeyBytes,
+                newViewingKeyBytes[0],
+                newViewingKeyBytes[1],
+            ],
+            appData: appDataByte,
+        });
+    });
+
+    it('ignore address that is already in metadata', () => {
+        const newMetadata = addAccess(metadataStr, [
+            {
+                address: newAddressBytes[0],
+                viewingKey: newViewingKeyBytes[0],
+            },
+        ]);
+
+        const newNewMetadata = addAccess(metadataStr, [
+            {
+                address: newAddressBytes[0],
+                viewingKey: newViewingKeyBytes[0],
+            },
+        ]);
+
+        expect(newNewMetadata).toBe(newMetadata);
     });
 });
