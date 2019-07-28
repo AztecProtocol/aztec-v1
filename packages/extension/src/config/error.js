@@ -46,8 +46,12 @@ export default {
             notEnough: 'Asset balance is not enough.',
         },
     },
+    note: {
+        viewingKey: {
+            encrypt: 'Failed to encrypt viewing key.',
+        },
+    },
     data: {
         graphql: 'Something went wrong fetching graphQL data',
     },
-
 };

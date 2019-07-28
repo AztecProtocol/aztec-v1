@@ -7,9 +7,7 @@ import {
 import {
     fromAction,
 } from '~utils/noteStatus';
-import {
-    toString,
-} from '~utils/viewingKey';
+import encryptedViewingKey from '~utils/encryptedViewingKey';
 import {
     argsError,
 } from '~utils/error';
@@ -73,10 +71,16 @@ export default async function createNoteFromBalance(args, ctx) {
     const {
         noteHash,
     } = note.exportNote();
-    const encryptedViewingKey = await keyStore.curve25519Encrypt(
+    const viewingKey = encryptedViewingKey(
         linkedPublicKey,
         note.getView(),
     );
+    if (!viewingKey) {
+        throw argsError('note.viewingKey.encrypt', {
+            owner: ownerAddress,
+            linkedPublicKey,
+        });
+    }
 
     // TODO
     // implement getKeyById in Model
@@ -94,7 +98,7 @@ export default async function createNoteFromBalance(args, ctx) {
 
     return {
         hash: noteHash,
-        viewingKey: toString(encryptedViewingKey),
+        viewingKey: viewingKey.toString(),
         value: amount,
         asset: assetKey,
         owner: ownerKey,
