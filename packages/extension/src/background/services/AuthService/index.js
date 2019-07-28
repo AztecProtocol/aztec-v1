@@ -2,7 +2,9 @@ import domainModel from '~database/models/domain';
 import userModel from '~database/models/user';
 import { get, set, remove } from '~utils/storage';
 import { KeyStore } from '~utils/keyvault';
-import generateRandomId from '~utils/generateRandomId';
+import {
+    randomId,
+} from '~utils/random';
 import {
     permissionError,
 } from '~utils/error';
@@ -187,7 +189,7 @@ export default {
             password,
             salt,
         });
-        const mnemonic = KeyStore.generateRandomSeed(generateRandomId());
+        const mnemonic = KeyStore.generateRandomSeed(randomId());
 
         const keyStore = new KeyStore({
             pwDerivedKey,
