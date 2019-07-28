@@ -2,10 +2,12 @@ import {
     clientEvent,
     contentEvent,
 } from '~config/event';
-import generateRandomId from '~utils/generateRandomId';
+import {
+    randomId,
+} from '~utils/random';
 
 export default async function postToContentScript(data, cb) {
-    const requestId = generateRandomId();
+    const requestId = randomId();
 
     return new Promise((resolve) => {
         const responseHandler = async (event) => {
