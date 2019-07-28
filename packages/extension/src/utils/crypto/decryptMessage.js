@@ -15,7 +15,9 @@ export default function decryptMessage(privateKey, encryptedData) {
             .fromSecretKey(privateKeyUint8Array)
             .secretKey;
 
-        const encryptedMessage = encryptedData.export();
+        const encryptedMessage = 'export' in encryptedData
+            ? encryptedData.export()
+            : encryptedData;
         const nonce = fromHexString(encryptedMessage.nonce);
         const ciphertext = fromHexString(encryptedMessage.ciphertext);
         const ephemPublicKey = fromHexString(encryptedMessage.ephemPublicKey);
