@@ -1,43 +1,17 @@
 import {
-    KeyStore,
-    utils as keyvaultUtils,
-} from '~utils/keyvault';
-import {
-    randomId,
-} from '~utils/random';
-import {
     encryptMessage,
     decryptMessage,
 } from '../crypto';
+import generateTestingKeys from './generateTestingKeys';
 
 let publicKey;
 let privateKey;
 
 beforeAll(async () => {
-    const password = 'password01';
-    const salt = 'peper';
-    const mnemonic = KeyStore.generateRandomSeed(randomId());
-
-    const {
-        pwDerivedKey,
-    } = await KeyStore.generateDerivedKey({
-        password,
-        salt,
-    });
-
-    const keyStore = new KeyStore({
-        pwDerivedKey,
-        salt,
-        mnemonic,
-        hdPathString: "m/44'/60'/0'/0",
-    });
-
-    let encPrivKey;
     ({
         publicKey,
-        encPrivKey,
-    } = keyStore.privacyKeys);
-    privateKey = keyvaultUtils.decryptString(encPrivKey, pwDerivedKey);
+        privateKey,
+    } = await generateTestingKeys());
 });
 
 describe('encryptMessage', () => {
