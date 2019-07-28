@@ -1,4 +1,3 @@
-import aztec from 'aztec.js';
 import secp256k1 from '@aztec/secp256k1';
 import assetModel from '~database/models/asset';
 import addressModel from '~database/models/address';
@@ -14,6 +13,9 @@ import {
 import {
     argsError,
 } from '~utils/error';
+import {
+    createNote,
+} from '~utils/note';
 
 export default async function createNoteFromBalance(args, ctx) {
     const {
@@ -63,7 +65,7 @@ export default async function createNoteFromBalance(args, ctx) {
     const ownerAddress = owner || userAddress;
     const privateKey = keyStore.exportPrivateKey(pwDerivedKey);
     const spendingKey = secp256k1.ec.keyFromPrivate(privateKey);
-    const note = await aztec.note.create(
+    const note = await createNote(
         `0x${spendingKey.getPublic(true, 'hex')}`,
         amount,
         ownerAddress,
