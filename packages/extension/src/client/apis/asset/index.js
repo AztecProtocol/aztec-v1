@@ -2,6 +2,9 @@ import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import deposit from './deposit';
+import {
+    noteFactory,
+} from '../note';
 
 const dataProperties = [
     'address',
@@ -108,48 +111,19 @@ export default class Asset {
         publicOwner = '',
         numberOfOutputNotes = 2,
     } = {}) => {
-        const {
-            user,
-        } = await query(`
-            user(id: "${from || ''}") {
-                account {
-                    address
-                    linkedPublicKey
-                    spendingPublicKey
-                }
-                error {
-                    type
-                    key
-                    message
-                    response
-                }
-            }
-        `);
-
-        const {
-            account,
-        } = user || {};
-        if (!account) {
-            return null;
-        }
-
-        const {
-            address,
-            linkedPublicKey,
-            spendingPublicKey,
-        } = account;
-
         const notes = await deposit({
             assetAddress: this.address,
-            linkedPublicKey,
-            spendingPublicKey,
-            sender: address,
             amount,
-            publicOwner: publicOwner || address,
+            from,
+            publicOwner,
             numberOfOutputNotes,
         });
 
-        return notes;
+        if (!notes) {
+            return null;
+        }
+
+        return Promise.all(notes.map(({ noteHash }) => noteFactory(noteHash)));
     };
 
     createNoteFromBalance = async ({

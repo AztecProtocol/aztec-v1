@@ -134,6 +134,7 @@ export default async function demo({
         log(`Your new ERC20 account balance is ${erc20Balance}.`);
     }
 
+    log('Making deposit...');
     const newNotes = await asset.deposit(depositAmount);
     if (!newNotes) {
         log('Failed to deposit');
