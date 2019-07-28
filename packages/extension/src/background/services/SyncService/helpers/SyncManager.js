@@ -61,6 +61,7 @@ class SyncManager {
 
     async syncNotes({
         address,
+        privateKey,
         excludes = [],
         lastSynced = '',
         config,
@@ -71,6 +72,7 @@ class SyncManager {
         }
         if (this.paused) {
             this.pause(address, {
+                privateKey,
                 excludes,
                 lastSynced,
                 config,
@@ -133,11 +135,12 @@ class SyncManager {
             const notesToStore = keepAll
                 ? newNotes
                 : newNotes.filter(({ owner }) => owner.address === address);
-            await Promise.all(notesToStore.map(note => addNote(note)));
+            await Promise.all(notesToStore.map(note => addNote(note, privateKey)));
 
             if (newNotes.length === notesPerRequest) {
                 await this.syncNotes({
                     address,
+                    privateKey,
                     config,
                     excludes: nextExcludes,
                     lastSynced: nextSynced,
@@ -159,6 +162,7 @@ class SyncManager {
         const syncReq = setTimeout(() => {
             this.syncNotes({
                 address,
+                privateKey,
                 config,
                 excludes: nextExcludes,
                 lastSynced: nextSynced,
@@ -175,6 +179,7 @@ class SyncManager {
 
     sync = async ({
         address,
+        privateKey,
         lastSynced,
         config,
     }) => {
@@ -190,6 +195,7 @@ class SyncManager {
         if (!account.syncing) {
             await this.syncNotes({
                 address,
+                privateKey,
                 lastSynced,
                 config,
             });

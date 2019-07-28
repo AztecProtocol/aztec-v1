@@ -2,7 +2,7 @@ import getShortAddressKey from './getShortAddressKey';
 import createOrUpdateAsset from './createOrUpdateAsset';
 import createOrUpdateNote from './createOrUpdateNote';
 
-export default async function addNote(note) {
+export default async function addNote(note, privateKey) {
     const {
         asset,
         owner,
@@ -23,5 +23,5 @@ export default async function addNote(note) {
         assetKey,
         ownerKey,
     };
-    await createOrUpdateNote(noteData);
+    await createOrUpdateNote(noteData, privateKey);
 }

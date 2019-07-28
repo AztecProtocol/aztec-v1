@@ -9,6 +9,15 @@ import noteModel from '~database/models/note';
 import createOrUpdateNote from '../addNote/createOrUpdateNote';
 
 jest.mock('~utils/storage');
+jest.mock('~utils/note', () => ({
+    fromViewingKey: jest.fn(),
+    valueOf: jest.fn(() => 100),
+}));
+jest.mock('~utils/encryptedViewingKey', () => ({
+    fromHexString: jest.fn(() => ({
+        decrypt: jest.fn(),
+    })),
+}));
 
 describe('createOrUpdate', () => {
     let set;
@@ -36,6 +45,7 @@ describe('createOrUpdate', () => {
 
     const note = {
         hash: '0x123',
+        viewingKey: '0xabc',
         assetKey: 'a:0',
         asset: assets[0],
         account: users[0],
@@ -56,6 +66,8 @@ describe('createOrUpdate', () => {
             hash: `${prevNote.hash}${numberOfNotes}`,
         };
     };
+
+    const privateKey = '012345';
 
     const value = 100;
 
@@ -80,7 +92,7 @@ describe('createOrUpdate', () => {
         ]);
         expect(dataBefore).toEqual({});
 
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
 
         const dataAfter = await storage.get([
             'noteCount',
@@ -108,21 +120,21 @@ describe('createOrUpdate', () => {
         const countBefore = await storage.get('noteCount');
         expect(countBefore).toBeUndefined();
 
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
         const count0 = await storage.get('noteCount');
         expect(count0).toEqual(1);
 
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
         const count1 = await storage.get('noteCount');
         expect(count1).toEqual(1);
 
-        await createOrUpdateNote(newNote(note));
+        await createOrUpdateNote(newNote(note), privateKey);
         const count2 = await storage.get('noteCount');
         expect(count2).toEqual(2);
     });
 
     it('push note keys to existing assetValue array when adding notes with the same asset', async () => {
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
         const assetValueGroupKey = `${note.assetKey}v:${value}`;
         const data0 = await storage.get([
             assetValueGroupKey,
@@ -131,7 +143,7 @@ describe('createOrUpdate', () => {
             [assetValueGroupKey]: ['n:0'],
         });
 
-        await createOrUpdateNote(newNote(note));
+        await createOrUpdateNote(newNote(note), privateKey);
         const data1 = await storage.get([
             assetValueGroupKey,
         ]);
@@ -142,7 +154,7 @@ describe('createOrUpdate', () => {
 
     it('push note keys to different assetValue array when adding notes with different assets', async () => {
         const note0 = newNote(withAsset(0));
-        await createOrUpdateNote(note0);
+        await createOrUpdateNote(note0, privateKey);
         const assetValueGroupKey0 = `${note0.assetKey}v:${value}`;
         const data0 = await storage.get([
             assetValueGroupKey0,
@@ -152,7 +164,7 @@ describe('createOrUpdate', () => {
         });
 
         const note1 = newNote(withAsset(1));
-        await createOrUpdateNote(note1);
+        await createOrUpdateNote(note1, privateKey);
         const assetValueGroupKey1 = `${note1.assetKey}v:${value}`;
         const data1 = await storage.get([
             assetValueGroupKey0,
@@ -165,21 +177,21 @@ describe('createOrUpdate', () => {
     });
 
     it('will not call set when adding existing note to storage', async () => {
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
 
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
         const numberOfSet1 = set.callCount;
         expect(numberOfSet1 === numberOfSet0).toBe(true);
 
-        await createOrUpdateNote(newNote(note));
+        await createOrUpdateNote(newNote(note), privateKey);
         const numberOfSet2 = set.callCount;
         expect(numberOfSet2 === 2 * numberOfSet1).toBe(true);
     });
 
     it('will update storage if some data is changed in existing note', async () => {
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
         const savedNote = await noteModel.get({
@@ -195,7 +207,7 @@ describe('createOrUpdate', () => {
             ...note,
             status: 'DESTROYED',
         };
-        await createOrUpdateNote(updatedNote);
+        await createOrUpdateNote(updatedNote, privateKey);
         const numberOfSet1 = set.callCount;
         expect(numberOfSet1 > numberOfSet0).toBe(true);
 
@@ -209,14 +221,14 @@ describe('createOrUpdate', () => {
     });
 
     it('will not call set if changed data is not stored in model', async () => {
-        await createOrUpdateNote(note);
+        await createOrUpdateNote(note, privateKey);
         const numberOfSet0 = set.callCount;
         expect(numberOfSet0 > 0).toBe(true);
 
         await createOrUpdateNote({
             ...note,
             whaever: '',
-        });
+        }, privateKey);
         const numberOfSet1 = set.callCount;
         expect(numberOfSet1 === numberOfSet0).toBe(true);
     });

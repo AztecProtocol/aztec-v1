@@ -1,7 +1,10 @@
 import domainModel from '~database/models/domain';
 import userModel from '~database/models/user';
 import { get, set, remove } from '~utils/storage';
-import { KeyStore } from '~utils/keyvault';
+import {
+    KeyStore,
+    utils as keyvaultUtils,
+} from '~utils/keyvault';
 import {
     randomId,
 } from '~utils/random';
@@ -13,6 +16,26 @@ import {
 } from '~utils/log';
 import SyncService from '../SyncService';
 import enableAssetForDomain from './enableAssetForDomain';
+
+const getPrivateKey = async (/* userAddress */) => {
+    // TODO
+    // should use user's address to find their private key
+    const {
+        keyStore,
+        session: {
+            pwDerivedKey,
+        },
+    } = await get([
+        'keyStore',
+        'session',
+    ]);
+    const {
+        encPrivKey,
+    } = keyStore.privacyKeys;
+    const decodedKey = new Uint8Array(Object.values(JSON.parse(pwDerivedKey)));
+
+    return keyvaultUtils.decryptString(encPrivKey, decodedKey);
+};
 
 export default {
     validateUserAddress: async (address) => {
@@ -236,9 +259,14 @@ export default {
             };
 
             await userModel.set(user);
-            SyncService.syncAccount(address);
+            const privateKey = await getPrivateKey(address);
+            SyncService.syncAccount({
+                address,
+                privateKey,
+            });
         }
 
         return user;
     },
+    getPrivateKey,
 };

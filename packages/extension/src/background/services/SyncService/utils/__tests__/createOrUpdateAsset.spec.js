@@ -21,9 +21,11 @@ describe('createOrUpdate', () => {
     const assets = [
         {
             address: '0xabc',
+            linkedTokenAddress: '0x123',
         },
         {
             address: '0xdef',
+            linkedTokenAddress: '0x456',
         },
     ];
 
@@ -47,7 +49,7 @@ describe('createOrUpdate', () => {
         expect(dataAfter).toEqual({
             assetCount: 1,
             [asset.address]: 'a:0',
-            'a:0': [asset.address, 0],
+            'a:0': [asset.address, 0, asset.linkedTokenAddress],
         });
     });
 
