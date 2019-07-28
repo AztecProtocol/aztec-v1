@@ -1,19 +1,30 @@
+import {
+    errorLog,
+} from '~utils/log';
 import dataKey from '~utils/dataKey';
 import {
     toCode,
     isDestroyed,
     isEqual,
 } from '~utils/noteStatus';
+import {
+    fromHexString,
+} from '~utils/encryptedViewingKey';
+import {
+    fromViewingKey,
+    valueOf,
+} from '~utils/note';
 import noteModel from '~database/models/note';
 import noteAccessModel from '~database/models/noteAccess';
 import assetModel from '~database/models/asset';
 import pushAssetValue from './pushAssetValue';
 import removeAssetValue from './removeAssetValue';
 
-export default async function createOrUpdateNote(note) {
+export default async function createOrUpdateNote(note, privateKey) {
     const {
         assetKey,
         ownerKey,
+        viewingKey: encryptedVkString,
         status,
     } = note;
 
@@ -23,8 +34,17 @@ export default async function createOrUpdateNote(note) {
         ? noteModel
         : noteAccessModel;
 
-    // TODO - decrypt value from note hash
-    const value = 100;
+    let value = 0;
+    try {
+        const realViewingKey = fromHexString(encryptedVkString).decrypt(privateKey);
+        const aztecNote = await fromViewingKey(realViewingKey);
+        value = valueOf(aztecNote);
+    } catch (error) {
+        errorLog('Failed to decrypt note from viewingKey.', {
+            viewingKey: encryptedVkString,
+        });
+        value = -1;
+    }
 
     const newData = {
         ...note,
@@ -75,19 +95,20 @@ export default async function createOrUpdateNote(note) {
     if (isOwner
         && shouldUpdateAssetBalance
     ) {
-        promises.push(assetModel.update({
-            key: assetKey,
-            balance: (prevBalance) => {
-                const ratio = isNoteDestroyed ? -1 : 1;
-                return (prevBalance || 0) + (value * ratio);
-            },
-        }));
+        if (value > 0) {
+            promises.push(assetModel.update({
+                key: assetKey,
+                balance: (prevBalance) => {
+                    const ratio = isNoteDestroyed ? -1 : 1;
+                    return (prevBalance || 0) + (value * ratio);
+                },
+            }));
+        }
 
         const assetValueKey = dataKey('assetValue', {
             assetKey,
             value,
         });
-
         if (isNoteDestroyed) {
             promises.push(removeAssetValue(assetValueKey, noteKey));
         } else {

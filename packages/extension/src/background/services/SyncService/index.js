@@ -22,9 +22,16 @@ class SyncService {
             });
     }
 
-    async syncAccount(address) {
+    async syncAccount({
+        address,
+        privateKey,
+    }) {
         if (!address) {
-            errorLog("'address' can not be empty in SyncService.syncAccount(address)");
+            errorLog("'address' can not be empty in SyncService.syncAccount()");
+            return;
+        }
+        if (!privateKey) {
+            errorLog("'privateKey' can not be empty in SyncService.syncAccount()");
             return;
         }
 
@@ -43,6 +50,7 @@ class SyncService {
         SyncManager.sync({
             config: this.config,
             address,
+            privateKey,
             lastSynced: (lastSynced | 0) + 1, // eslint-disable-line no-bitwise
         });
     }

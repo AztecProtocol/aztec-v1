@@ -156,7 +156,7 @@ export default async function requestGrantAccess(args, ctx) {
         } = sharedAccounts.find(a => a.address === addr);
         const viewingKey = encryptMessage(publicKey, userViewingKey);
         newAddresses.push(addr);
-        newViewingKeys.push(viewingKey);
+        newViewingKeys.push(viewingKey.toString());
     });
 
     const newMetadataStr = toString({

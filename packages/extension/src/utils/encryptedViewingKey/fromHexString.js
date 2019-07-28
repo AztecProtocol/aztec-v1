@@ -11,7 +11,7 @@ import decrypt from './decrypt';
 export default function fromHexString(str) {
     const bytes = str.replace(/^0x/, '');
     if (bytes.length !== VIEWING_KEY_LENGTH) {
-        warnLog('Wrong viewing key string size.');
+        warnLog('Wrong viewing key string length.', str);
         return null;
     }
 
