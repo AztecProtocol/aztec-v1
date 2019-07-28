@@ -10,18 +10,51 @@ import {
 } from '~utils/metadata';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
 import asyncForEach from '~utils/asyncForEach';
+import query from '~client/utils/query';
 import Web3Service from '../../services/Web3Service';
 import ContractError from '../../utils/ContractError';
 
 export default async function deposit({
     assetAddress,
     amount,
-    linkedPublicKey,
-    spendingPublicKey,
-    sender,
-    publicOwner,
+    from,
+    publicOwner: assignedOwner,
     numberOfOutputNotes,
 }) {
+    const {
+        user,
+    } = await query(`
+        user(id: "${from || ''}") {
+            account {
+                address
+                linkedPublicKey
+                spendingPublicKey
+            }
+            error {
+                type
+                key
+                message
+                response
+            }
+        }
+    `);
+
+    const {
+        account,
+    } = user || {};
+
+    if (!account) {
+        return null;
+    }
+
+    const {
+        address: sender,
+        linkedPublicKey,
+        spendingPublicKey,
+    } = account;
+
+    const publicOwner = assignedOwner || sender;
+
     const noteValues = Array.isArray(amount)
         ? amount
         : randomSumArray(amount, numberOfOutputNotes);
