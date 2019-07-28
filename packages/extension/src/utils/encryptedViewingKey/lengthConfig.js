@@ -1,5 +1,5 @@
 export default {
-    ciphertext: 312,
+    ciphertext: 308,
     ephemPublicKey: 64,
     nonce: 48,
 };
