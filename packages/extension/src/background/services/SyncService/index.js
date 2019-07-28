@@ -43,7 +43,7 @@ class SyncService {
         SyncManager.sync({
             config: this.config,
             address,
-            lastSynced: (lastSynced || 0) + 1,
+            lastSynced: (lastSynced | 0) + 1, // eslint-disable-line no-bitwise
         });
     }
 }
