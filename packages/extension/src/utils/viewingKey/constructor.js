@@ -1,29 +1,26 @@
 import {
     warnLog,
 } from '~utils/log';
-
-const lengthMapping = {
-    ciphertext: 314,
-    ephemPublicKey: 66,
-    nonce: 50,
-};
+import lengthConfig from './lengthConfig';
 
 export default function constructor(str) {
     const viewingKey = {};
-    let startAt = 2;
-    Object.keys(lengthMapping)
+    let startAt = str.startsWith('0x')
+        ? 2
+        : 0;
+    Object.keys(lengthConfig)
         .forEach((key) => {
-            const len = lengthMapping[key];
-            viewingKey[key] = `0x${str.slice(startAt, startAt + len - 2)}`;
-            startAt += (len - 2);
+            const len = lengthConfig[key];
+            viewingKey[key] = `0x${str.slice(startAt, startAt + len)}`;
+            startAt += len;
         });
 
     const wrongFormat = Object.keys(viewingKey)
-        .find(key => viewingKey[key].length !== lengthMapping[key]);
+        .find(key => viewingKey[key].length !== (lengthConfig[key] + 2));
 
     if (wrongFormat) {
         warnLog(`Wrong viewing key format. input = ${str}`);
-        return '';
+        return null;
     }
 
     return viewingKey;
