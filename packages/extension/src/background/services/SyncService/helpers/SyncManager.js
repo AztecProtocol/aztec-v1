@@ -96,6 +96,7 @@ class SyncManager {
         const {
             notesPerRequest,
             syncInterval,
+            keepAll,
         } = config;
 
         const newNotes = await fetchNoteFromServer({
@@ -129,7 +130,10 @@ class SyncManager {
         });
 
         if (newNotes.length) {
-            await Promise.all(newNotes.map(note => addNote(note)));
+            const notesToStore = keepAll
+                ? newNotes
+                : newNotes.filter(({ owner }) => owner.address === address);
+            await Promise.all(notesToStore.map(note => addNote(note)));
 
             if (newNotes.length === notesPerRequest) {
                 await this.syncNotes({

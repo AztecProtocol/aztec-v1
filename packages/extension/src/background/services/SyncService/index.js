@@ -9,6 +9,7 @@ class SyncService {
         this.config = {
             notesPerRequest: 10,
             syncInterval: 2000, // ms
+            keepAll: false, // store all notes user has access to even when they are not the owner
         };
     }
 
