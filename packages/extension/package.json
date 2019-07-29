@@ -51,7 +51,6 @@
     "scripts": {
         "build:dev": "webpack --config webpack.dev.js",
         "lint": "eslint ./ --color",
-        "mockServer": "babel-node ./mockServer",
         "test": "jest ./src",
         "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
         "test:test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
