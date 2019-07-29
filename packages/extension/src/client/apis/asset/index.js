@@ -1,10 +1,8 @@
 import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
+import proofFactory from '../proof';
 import deposit from './deposit';
-import {
-    noteFactory,
-} from '../note';
 
 const dataProperties = [
     'address',
@@ -111,19 +109,28 @@ export default class Asset {
         sender = '',
         numberOfOutputNotes = 2,
     } = {}) => {
-        const notes = await deposit({
+        const options = {
             assetAddress: this.address,
             amount,
             from,
             sender,
             numberOfOutputNotes,
-        });
+        };
 
-        if (!notes) {
+        const {
+            proof,
+            ...data
+        } = await deposit(options) || {};
+
+        if (!proof) {
             return null;
         }
 
-        return Promise.all(notes.map(({ noteHash }) => noteFactory(noteHash)));
+        return proofFactory('deposit', {
+            options,
+            proof,
+            data,
+        });
     };
 
     createNoteFromBalance = async ({
