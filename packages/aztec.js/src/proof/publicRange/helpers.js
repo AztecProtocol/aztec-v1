@@ -6,7 +6,7 @@ const helpers = {};
  * Check that the publicComparison integer is well formed. Specifically, check that it is positive and
  * that it is an integer.
  * @method checkPublicComparisonWellFormed
- * @param {Number} publicComparison - array of proof data from proof construction
+ * @param {Number} publicComparison - publicly visible integer, against which an AZTEC note is being compared
  */
 helpers.checkPublicComparisonWellFormed = (publicComparison) => {
     if (publicComparison < 0) {
@@ -28,7 +28,7 @@ helpers.checkPublicComparisonWellFormed = (publicComparison) => {
 /**
  * Check whether publicComparison is an integer
  *
- * @method isFloat
+ * @method isInteger
  * @param {Number} number - JavaScript number to be checked whether it is a float or not
  * @returns boolean - true if input is an integer, false if it is a float
  */

@@ -21,7 +21,7 @@ class PublicRangeProof extends Proof {
      * originalNoteValue = publicComparison + utilityNoteValue
      *
      * @param {Object} originalNote the note that a user is comparing against the publicComparison
-     * @param {Object} publicComparison publicly visible integer, which the note is being compared against
+     * @param {Number} publicComparison publicly visible integer, which the note is being compared against
      * @param {string} sender Ethereum address of the transaction sender
      * @param {bool} isGreaterOrEqual modifier controlling whether this is a greater than, or less
      * than proof. If true, it is a proof that originalNoteValue > publicComparison. If false, it is a
