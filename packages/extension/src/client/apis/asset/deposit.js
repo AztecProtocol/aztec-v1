@@ -18,13 +18,13 @@ export default async function deposit({
     assetAddress,
     amount,
     from,
-    publicOwner: assignedOwner,
+    sender,
     numberOfOutputNotes,
 }) {
     const {
         user,
     } = await query(`
-        user(id: "${from || ''}") {
+        user(id: "${sender || ''}") {
             account {
                 address
                 linkedPublicKey
@@ -48,12 +48,10 @@ export default async function deposit({
     }
 
     const {
-        address: sender,
+        address: owner,
         linkedPublicKey,
         spendingPublicKey,
     } = account;
-
-    const publicOwner = assignedOwner || sender;
 
     const noteValues = Array.isArray(amount)
         ? amount
@@ -61,7 +59,7 @@ export default async function deposit({
     const notes = await createNotes(
         noteValues,
         spendingPublicKey,
-        sender,
+        owner,
     );
     const {
         JoinSplitProof,
@@ -73,10 +71,11 @@ export default async function deposit({
     );
     const inputNotes = [];
     const depositInputOwnerAccounts = [];
+    const publicOwner = from || owner;
     const depositProof = new JoinSplitProof(
         inputNotes,
         notes,
-        sender,
+        owner,
         publicValue,
         publicOwner,
     );
@@ -140,7 +139,7 @@ export default async function deposit({
         const metadata = outputCoder.getMetadata(outputNote);
         const viewingKey = encryptedViewingKey(linkedPublicKey, realViewingKey);
         const newMetadata = addAccess(metadata, {
-            address: sender,
+            address: owner,
             viewingKey: viewingKey.toHexString(),
         });
 

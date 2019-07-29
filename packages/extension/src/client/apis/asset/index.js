@@ -101,21 +101,21 @@ export default class Asset {
      * - amount (Int! or [Int!])
      * - options
      *       from (Address)
-     *       publicOwner (Address)
+     *       sender (Address)
      *       numberOfOutputNotes (Int): number of new notes; if input amount is an array, this value will be ignored.
      *
      * @returns ([Notes!])
      */
     deposit = async (amount, {
         from = '',
-        publicOwner = '',
+        sender = '',
         numberOfOutputNotes = 2,
     } = {}) => {
         const notes = await deposit({
             assetAddress: this.address,
             amount,
             from,
-            publicOwner,
+            sender,
             numberOfOutputNotes,
         });
 
