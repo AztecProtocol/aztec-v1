@@ -9,7 +9,7 @@ import "../../interfaces/Behaviour.sol";
  * AZTEC notes for a particular address
  * @author AZTEC
  * @dev TODO
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract Behaviour201907 is NoteRegistryBehaviour {
     using NoteUtils for bytes;
