@@ -44,18 +44,19 @@ export default async function demo({
         address: userAddress,
     } = Web3Service.account;
 
-    const registerResponse = await aztec.auth.registerAddress(userAddress);
-    if (!registerResponse || registerResponse.error) {
-        log('Failed to register account.', registerResponse);
-        return;
-    }
-    log('Account registered!', registerResponse.account);
+    // // const registerResponse = await aztec.auth.registerAddress(userAddress);
+    // if (!registerResponse || registerResponse.error) {
+    //     log('Failed to register account.', registerResponse);
+    //     return;
+    // }
+    log('Account registered!');
 
 
-    let zkAssetAddress = '0x2fc8dcf1dbcf87cc474d2dcd50f5cdb8a7c2fc16'; // ADD EXISTING ASSET ADDRESS HERE
+    await sleep(2000);
+    let zkAssetAddress = '0xd81fc950c144b33d3fa85d62efa12f8c1154f5d7';
     let enableAssetResponse;
     if (zkAssetAddress) {
-        enableAssetResponse = await aztec.auth.enableAsset(zkAssetAddress);
+    //     // enableAssetResponse = await aztec.auth.enableAsset(zkAssetAddress);
     } else {
         log('Creating new asset...');
         const {
@@ -70,6 +71,7 @@ export default async function demo({
             canAdjustSupply,
             canConvert,
         });
+        console.log(erc20Address, newZkAssetAddress);
 
         await depositToERC20({
             userAddress,
@@ -87,16 +89,16 @@ export default async function demo({
             'Add this address to demo file to prevent creating new asset:',
             zkAssetAddress,
         );
-        enableAssetResponse = await aztec.auth.enableAsset(zkAssetAddress);
+        // enableAssetResponse = await aztec.auth.enableAsset(zkAssetAddress);
     }
-    if (!enableAssetResponse || enableAssetResponse.error) {
-        log(
-            `Failed to enable asset '${zkAssetAddress}'.`,
-            enableAssetResponse.error,
-        );
-        return;
-    }
-    log('Asset enabled!', enableAssetResponse.asset);
+    // if (!enableAssetResponse || enableAssetResponse.error) {
+    //     log(
+    //         `Failed to enable asset '${zkAssetAddress}'.`,
+    //         enableAssetResponse.error,
+    //     );
+    //     return;
+    // }
+    log('Asset enabled!');
 
 
     let asset = await aztec.asset(zkAssetAddress);

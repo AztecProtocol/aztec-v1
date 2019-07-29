@@ -24,7 +24,7 @@ class Web3Service {
 
         if (!this.web3) {
             const provider = new Web3.providers.HttpProvider(providerUrl);
-            this.web3 = new Web3(provider);
+            this.web3 = new Web3(window.web3.currentProvider);
         }
 
         if (account) {

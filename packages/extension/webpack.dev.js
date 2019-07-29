@@ -39,6 +39,22 @@ module.exports = {
                     'css-loader',
                 ],
             },
+            {
+                test: /\.(png|woff|woff2|eot|ttf)$/,
+                loader: 'file-loader?limit=100000',
+            },
+            {
+                test: /\.svg$/,
+                use: [
+                    {
+                        loader: 'svg-sprite-loader',
+                        options: {
+                            name: '[name]_[hash:base64:3]',
+                            extract: false,
+                        },
+                    },
+                ],
+            },
         ],
     },
     plugins: [

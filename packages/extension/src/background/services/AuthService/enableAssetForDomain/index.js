@@ -1,5 +1,4 @@
 import domainModel from '~database/models/domain';
-import syncAssetInfo from './syncAssetInfo';
 
 export default async function enableAssetForDomain({
     domain,
@@ -39,6 +38,4 @@ export default async function enableAssetForDomain({
             });
         }
     }
-
-    return syncAssetInfo(assetAddress);
 }

@@ -60,10 +60,8 @@ const sendRegisterExtensionTx = async ({linkedPublicKey, address}) => {
 
 
     const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
-    console.log(AZTECAccountRegistry.networks);
     const lastNetworkId = Object.keys(AZTECAccountRegistry.networks).pop();
     const network = AZTECAccountRegistry.networks[lastNetworkId];
-    console.log(lastNetworkId);
     await Web3Service
         .useContract('AZTECAccountRegistry')
         .method('updateChainId')

@@ -37,4 +37,5 @@ type Account @entity {
   id: ID!
   address: Bytes!
   linkedPublicKey: Bytes
+  registered: Boolean
 }

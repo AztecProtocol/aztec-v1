@@ -159,6 +159,7 @@ class SyncManager {
             account = {
                 syncing: false,
                 syncReq: null,
+                registered: true,
             };
             this.accounts.set(address, account);
         }

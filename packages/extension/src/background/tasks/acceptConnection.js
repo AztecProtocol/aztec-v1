@@ -29,14 +29,11 @@ import {
 import GraphQLService from '../services/GraphQLService';
 
 
-const updateActionState = async (action) => {
+const updateActionState = async action =>
     // lookup action
-    return actionModel.set({
+    actionModel.set({
         ...action,
     });
-};
-
-
 class Connection {
     constructor() {
         this.UiSubject = new Subject();
@@ -48,10 +45,10 @@ class Connection {
 
         this.ui$.pipe(
 
-            map(({timestamp}) => {
+            map(({ timestamp }) => {
                 const popupURL = browser.extension.getURL('pages/popup.html');
                 browser.windows.create({
-                    url: popupURL + `?id=${timestamp}`,
+                    url: `${popupURL}?id=${timestamp}`,
                     width: 300,
                     height: 400,
                     type: 'panel',
@@ -123,7 +120,6 @@ class Connection {
                 );
 
 
-
                 return forkJoin({
                     response: from(
                         GraphQLService[type]({
@@ -135,11 +131,11 @@ class Connection {
                     request: of(requestId),
                 });
             }),
-            switchMap(({response, request: requestId}) => {
-                console.log(response);
+            switchMap(({ response, request: requestId }) => {
                 const queryName = Object.keys(response)
                     .find(name => !!response[name].error);
                 const errorData = queryName ? response[queryName].error : false;
+                console.log(errorData, response);
                 // check the action mapping
                 if (errorData && errorToActionMap[errorData.key]) {
                     // trigger the UI flow
@@ -148,7 +144,7 @@ class Connection {
                         timestamp: Date.now(),
                         data: {
                             requestId,
-                            response: JSON.parse(errorData.response)
+                            response: JSON.parse(errorData.response),
                         },
                     });
                     action$.subscribe((actionResponse) => {

@@ -13,11 +13,12 @@ export default async function syncAssetInfo(address) {
         ({
             asset,
         } = await GraphNodeService.query(`
-            asset(id: "${address}") {
-                address
-                linkedTokenAddress
-            }
-        `));
+                asset(id: "${address}") {
+                    address
+                    linkedTokenAddress
+                }
+            `));
+
 
         if (!asset) {
             throw argsError('asset.notFound.onChain', {
