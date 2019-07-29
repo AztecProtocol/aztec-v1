@@ -738,3 +738,150 @@ describe('invalid constructor parameters', () => {
         expect(errors.pop()).toMatch(/autoIncrementBy/);
     });
 });
+
+describe('Model.each', () => {
+    it('loop through every entry of nested model data', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: {
+                key: 'name',
+                fields: [
+                    'color',
+                ],
+            },
+        });
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        const collected = [];
+        await pokemonModel.each((data) => {
+            collected.push(data);
+        });
+
+        expect(collected).toEqual([
+            {
+                id: 'pikachu',
+                name: 'pikachu',
+                color: 'yellow',
+            },
+            {
+                id: 'eevee',
+                name: 'eevee',
+                color: 'brown',
+            },
+            {
+                id: 'chikorita',
+                name: 'chikorita',
+                color: 'green',
+            },
+        ]);
+
+        expect(errors).toEqual([]);
+    });
+
+    it('loop through every entry of model with dataKey mapping', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: [
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            id: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            id: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            id: 'chikorita',
+            color: 'green',
+        });
+
+        const collected = [];
+        await pokemonModel.each((data) => {
+            collected.push(data);
+        });
+
+        expect(collected).toEqual([
+            {
+                key: 'p:0',
+                color: 'yellow',
+            },
+            {
+                key: 'p:1',
+                color: 'brown',
+            },
+            {
+                key: 'p:2',
+                color: 'green',
+            },
+        ]);
+
+        expect(errors).toEqual([]);
+    });
+
+    it('loop through every entry of model with dataKey mapping and index', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            index: 'name',
+            fields: [
+                'name',
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        const collected = [];
+        await pokemonModel.each((data) => {
+            collected.push(data);
+        });
+
+        expect(collected).toEqual([
+            {
+                key: 'p:0',
+                id: 'pikachu',
+                name: 'pikachu',
+                color: 'yellow',
+            },
+            {
+                key: 'p:1',
+                id: 'eevee',
+                name: 'eevee',
+                color: 'brown',
+            },
+            {
+                key: 'p:2',
+                id: 'chikorita',
+                name: 'chikorita',
+                color: 'green',
+            },
+        ]);
+
+        expect(errors).toEqual([]);
+    });
+});

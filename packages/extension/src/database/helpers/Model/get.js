@@ -61,11 +61,11 @@ export default async function get(params = {}) {
         return null;
     }
 
-    if (subFieldsDataKey && !subFieldsKey) {
-        if (!storageData) {
-            return null;
-        }
+    if (!storageData) {
+        return null;
+    }
 
+    if (subFieldsDataKey && !subFieldsKey) {
         const allData = {};
         Object.keys(storageData).forEach((subField) => {
             const readableData = transformDataFromDb(fields.fields, storageData[subField]);
@@ -76,10 +76,6 @@ export default async function get(params = {}) {
             };
         });
         return allData;
-    }
-
-    if (subFieldsKey && !storageData) {
-        return null;
     }
 
     const readableData = subFieldsKey
