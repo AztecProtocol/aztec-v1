@@ -5,6 +5,7 @@ import transformDataForDb from '~database/utils/transformDataForDb';
 import get from './get';
 import set from './set';
 import update from './update';
+import each from './each';
 
 const configType = {
     name: {
@@ -86,6 +87,21 @@ const validateConfig = (config) => {
             return true;
         });
 
+    if (!isValid) {
+        return null;
+    }
+
+    const {
+        name,
+        autoIncrementBy,
+        dataKeyPattern,
+    } = validated;
+    if (dataKeyPattern
+        && !autoIncrementBy
+    ) {
+        validated.autoIncrementBy = `${name}Count`;
+    }
+
     return isValid
         ? validated
         : null;
@@ -104,10 +120,16 @@ export default function Model(config) {
         config: validatedConfig,
     };
 
+    const modelGet = get.bind(settings);
+
     return {
-        get: get.bind(settings),
+        get: modelGet,
         set: set.bind(settings),
         update: update.bind(settings),
         toStorageData: data => transformDataForDb(fields, data),
+        each: each.bind({
+            ...settings,
+            get: modelGet,
+        }),
     };
 }

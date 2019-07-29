@@ -15,20 +15,12 @@ export default async function set(
         fields,
         index,
         dataKeyPattern,
+        autoIncrementBy,
     } = this.config;
     const id = data[index];
     let key = id;
     let subFieldsKey = '';
     let res1;
-
-    let {
-        autoIncrementBy,
-    } = this.config;
-    if (dataKeyPattern
-        && !autoIncrementBy
-    ) {
-        autoIncrementBy = `${name}Count`;
-    }
 
     if (!Array.isArray(fields)) {
         key = name;
