@@ -67,13 +67,9 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         bool _canConvert
     ) public {
         require(initialised != true, "registry already initialised");
-        super.initialise(
-            _newOwner,
-            _linkedTokenAddress,
-            _scalingFactor,
-            _canAdjustSupply,
-            _canConvert
-        );
+        _transferOwnership(_newOwner);
+
+        dataLocation = msg.sender;
 
         registry = Registry({
             active: true,
@@ -86,6 +82,8 @@ contract Behaviour201907 is NoteRegistryBehaviour {
             canConvert: _canConvert,
             canAdjustSupply: _canAdjustSupply
         });
+
+        initialised = true;
     }
 
      /**
