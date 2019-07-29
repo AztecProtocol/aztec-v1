@@ -6,15 +6,12 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { proofs } = require('@aztec/dev-utils');
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
 const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
 const Behaviour = artifacts.require('./noteRegistry/interfaces/NoteRegistryBehaviour');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
-
-const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = proofs;
 
 const generateFactoryId = (epoch, cryptoSystem, assetType) => {
     return (epoch * 256**(2) + cryptoSystem * 256**(1) + assetType * 256**(0));
