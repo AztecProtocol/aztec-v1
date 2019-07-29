@@ -33,6 +33,7 @@ export default gql`
         spendingPublicKey: String
         linkedPublicKey: String
         lastSynced: String
+        registered: Boolean
     }
 
     type Domain {
@@ -151,7 +152,7 @@ export default gql`
             address: String!
             domain: String!
         ): UserAccountApiResponse
-        enableAssetForDomain(
+        approveAssetForDomain(
             domain: String!
             asset: String!
         ): AssetApiResponse

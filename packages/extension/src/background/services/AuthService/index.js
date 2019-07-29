@@ -62,7 +62,6 @@ export default {
     validateExtension: async (_, args) => {
         const keyStore = await get('keyStore');
         if (!keyStore) {
-
             return permissionError('extension.not.registered', args);
         }
         return {};
@@ -104,6 +103,10 @@ export default {
                         note: noteId,
                         asset: assetId,
                     },
+                    domain,
+                    note: noteId,
+                    asset: assetId,
+
                 });
             }
             return permissionError('domain.not.grantedAccess.asset', {
@@ -111,6 +114,9 @@ export default {
                     domain,
                     asset: assetId,
                 },
+                domain,
+                asset: assetId,
+
             });
         }
 
@@ -228,20 +234,29 @@ export default {
                 createdAt: Date.now(),
             },
         });
-        const user = {
-            address,
-            linkedPublicKey: keyStore.privacyKeys.publicKey,
-        }; await userModel.set(user);
 
+        let user = await userModel.get({
+            address,
+        });
+
+        if (!user) {
+            user = {
+                address,
+                linkedPublicKey: keyStore.privacyKeys.publicKey,
+                registered: true,
+            };
+
+            await userModel.set(user);
+        }
         return {
             linkedPublicKey: keyStore.privacyKeys.publicKey,
         };
     },
     registerAddress: async ({
-        userAddress,
+        address,
         linkedPublicKey,
     }) => {
-        if (!userAddress) { // this shouldn't happend in production
+        if (!address) { // this shouldn't happend in production
             errorLog('Address cannot be empty in AuthService.registerAddress()');
             return null;
         }
@@ -250,24 +265,23 @@ export default {
             return null;
         }
 
-        const address = userAddress.toLowerCase();
         let user = await userModel.get({
-            address,
+            address: address.toLowerCase(),
         });
 
         if (!user) {
             user = {
-                address,
+                address: address.toLowerCase(),
                 linkedPublicKey,
             };
 
             await userModel.set(user);
-            const privateKey = await getPrivateKey(address);
-            SyncService.syncAccount({
-                address,
-                privateKey,
-            });
         }
+        const privateKey = await getPrivateKey(address);
+        SyncService.syncAccount({
+            address: address.toLowerCase(),
+            privateKey,
+        });
 
         return user;
     },

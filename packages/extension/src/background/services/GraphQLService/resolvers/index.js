@@ -1,7 +1,6 @@
 import assetModel from '~database/models/asset';
 import userModel from '~database/models/user';
 import accountModel from '~database/models/account';
-import userModel from '~database/models/user';
 import noteModel from '~database/models/note';
 import {
     fromCode,
@@ -17,6 +16,7 @@ import validateSession from '../validators/validateSession';
 import getUserSpendingPublicKey from './getUserSpendingPublicKey';
 import requestGrantAccess from './requestGrantAccess';
 import createNoteFromBalance from './createNoteFromBalance';
+import syncAssetInfo from '../../AuthService/enableAssetForDomain/syncAssetInfo';
 
 export default {
     User: {
@@ -36,9 +36,13 @@ export default {
                 id: (args.id || args.currentAddress).toLowerCase(),
             }),
         })),
-        asset: ensureEntityPermission(async (_, args) => ({
-            asset: await assetModel.get(args),
-        })),
+        asset: ensureEntityPermission(async (_, args) => {
+            await syncAssetInfo(args.id);
+            // change format so we can just do this
+            return {
+                asset: await assetModel.get(args),
+            };
+        }),
         note: ensureEntityPermission(async (_, args) => ({
             note: await noteModel.get(args),
         })),
@@ -49,10 +53,12 @@ export default {
             note: await createNoteFromBalance(args, ctx),
         })),
         account: ensureKeyvault(async (_, args, ctx) => {
+            const account = await userModel.get({ address: args.currentAddress });
+            await AuthService.registerAddress({ address: args.currentAddress, linkedPublicKey: account.linkedPublicKey });
             return {
-                account: await userModel.get({address: args.currentAddress}),
+                account,
             };
-        })
+        }),
     },
     Mutation: {
         login: (_, args) => AuthService.login(args),
@@ -60,8 +66,7 @@ export default {
         registerExtension: pipe([
             async (_, args) => ({
                 account: await AuthService.registerExtension(args),
-            }),
-        ]),
+            })]),
         registerAddress: pipe([
             validateSession,
             async (_, args, ctx) => ({
@@ -71,11 +76,16 @@ export default {
                 }),
             }),
         ]),
-        enableAssetForDomain: pipe([
+        approveAssetForDomain: pipe([
             validateSession,
-            async (_, args) => ({
-                asset: AuthService.enableAssetForDomain(args),
-            }),
+            async (_, args) => {
+                await AuthService.enableAssetForDomain(args);
+                return {
+                    asset: await assetModel.get({
+                        address: args.asset,
+                    }),
+                };
+            },
         ]),
     },
 };

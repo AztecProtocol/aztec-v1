@@ -5,6 +5,7 @@ export default gql`
     registerExtension(password: $password, salt: $salt, domain: $domain, address: $address) {
         account {
             linkedPublicKey
+            registered
         }
     }
   }

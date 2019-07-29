@@ -7,6 +7,7 @@ import {
 import settings from '~background/utils/settings';
 import SyncService from '~backgroundServices/SyncService';
 import GraphNodeService from '~backgroundServices/GraphNodeService';
+import syncAssetInfo from '../services/AuthService/enableAssetForDomain/syncAssetInfo';
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
@@ -33,6 +34,7 @@ export default async function init() {
             },
         );
     }
+
 
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),

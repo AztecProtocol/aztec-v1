@@ -8,6 +8,7 @@ export default async function account() {
             account {
                 linkedPublicKey
                 address
+                registered
             }
             error {
                 type

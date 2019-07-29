@@ -8,6 +8,7 @@ export default Model({
             'address',
             'linkedPublicKey',
             'lastSynced',
+            'registered',
         ],
     },
 });

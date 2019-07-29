@@ -1,99 +1,108 @@
 import React, { Component } from 'react';
+
 import browser from 'webextension-polyfill';
 import { Mutation } from 'react-apollo';
-import actionModel from '~database/models/action';
+import {
+    Loader, Block, Button, Text,
+} from '@aztec/guacamole-ui'; import actionModel from '~database/models/action';
 import RegisterExtension from './mutations/RegisterExtension';
+import '@aztec/guacamole-ui/dist/styles/guacamole.css';
 import Login from './mutations/Login';
 import ApproveAssetForDomain from './mutations/ApproveDomain';
 
 class App extends Component {
+    state ={
+
+    }
+
+    componentDidMount() {
+        const search = new URLSearchParams(window.location.search);
+        actionModel.get({ timestamp: search.get('id') })
+            .then((resp) => {
+                this.setState({ action: resp });
+            });
+    }
+
+
     render() {
+        if (!this.state.action) {
+            return (
+                <Loader
+                    theme="primary"
+                    hasBackground
+                />
+            );
+        }
+
+        const actionMap = {
+            'ui.register.extension': {
+                mutation: RegisterExtension,
+                buttonText: 'Register',
+                onClick: mutation => async () => {
+                    const data = await mutation({
+                        variables: {
+                            password: 'password',
+                            salt: 'salt',
+                            domain: 'test',
+                            address: this.state.action.data.response.currentAddress,
+                        },
+                    });
+                    browser.runtime.sendMessage({
+                        type: 'UI_CONFIRM',
+                        requestId: this.state.action.data.requestId,
+                        data,
+                    });
+                },
+                text: () => 'You need to set up the AZTEC extension to continue',
+            },
+            'ui.account.login': {
+                mutation: Login,
+                buttonText: 'Login',
+                onClick: mutation => async () => {
+
+                },
+                text: () => 'You need to login to continue',
+            },
+            'ui.asset.approve': {
+                mutation: ApproveAssetForDomain,
+                buttonText: 'Approve',
+                onClick: mutation => async () => {
+                    const data = await mutation({
+                        variables: {
+                            domain: this.state.action.data.response.domain,
+                            asset: this.state.action.data.response.asset,
+                        },
+                    });
+                    browser.runtime.sendMessage({
+                        type: 'UI_CONFIRM',
+                        requestId: this.state.action.data.requestId,
+                        data,
+                    });
+                },
+                text: ({ asset, domain }) => `${domain} is requesting access to your balance of ${asset}`,
+            },
+        };
         return (
             <div className="App">
-                <h1>
-                    AZTEC Extension
-                </h1>
-                <hr />
-                <br />
+                <Block background="primary" stretch padding="xl" align="center">
 
-                <Mutation mutation={RegisterExtension}>
-                    {(registerExtension, { data }) => (
-                        <div>
-                            <button onClick={async () => {
-                                const search = new URLSearchParams(window.location.search);
-                                const action =  await actionModel.get({timestamp: search.get('id')});
-                                const data = await registerExtension({
-                                    variables: {
-                                        password: 'password',
-                                        salt: 'salt',
-                                        domain: 'test',
-                                        address: action.data.response.currentAddress
-                                    },
-                                });
-                                console.log(data);
-                                browser.runtime.sendMessage({
-                                    type: 'UI_CONFIRM',
-                                    requestId: action.data.requestId,
-                                    data
-                                });
-                            }}
-                            >
-                        Register Extension
-                            </button>
-                        </div>
-                    )
-                    }
+                    <Mutation mutation={actionMap[this.state.action.type].mutation}>
+                        {(mutation, { data }) => (
+                            <div>
+                                <Text text={actionMap[this.state.action.type].text(this.state.action.data.response)} />
+                                <br />
+                                <br />
+                                <Button
+                                    text={actionMap[this.state.action.type].buttonText}
+                                    onClick={actionMap[this.state.action.type].onClick(mutation)}
+                                />
+                            </div>
+                        )
+                        }
 
-                </Mutation>
-                <br />
-                <Mutation mutation={Login}>
-                    {(login, { data }) => (
-                        <div>
-                            <button onClick={async () => {
-                                const reqId = prompt('Req Id');
-                                await login({
-                                    variables: {
-                                        password: 'password',
-                                        domain: 'test',
-                                    },
-                                });
-                                browser.runtime.sendMessage({
-                                    type: 'UI_CONFIRM',
-                                    requestId: reqId,
-                                });
-                            }}
-                            >
-                        Login
-                            </button>
-                        </div>
-                    )
-                    }
+                    </Mutation>
+                </Block>
 
-                </Mutation>
-                <br />
-                <Mutation mutation={ApproveAssetForDomain}>
-                    {(approveAssetForDomain, { data }) => (
-                        <div>
-                            <button onClick={async () => {
-                                const reqId = prompt('Req Id');
-                                await approveAssetForDomain({
-                                    variables: {
-                                        asset: '__asset__01__',
-                                        domain: 'test',
-                                    },
-                                });
-                                browser.runtime.sendMessage({
-                                    type: 'UI_CONFIRM',
-                                    requestId: reqId,
-                                });
-                            }}
-                            >
-                        Approve Domain
-                            </button>
-                        </div>
-                    )
-                    }
-                </Mutation>
             </div>
         );
     }

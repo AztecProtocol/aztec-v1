@@ -370,4 +370,13 @@ export class Account extends Entity {
       this.set("linkedPublicKey", Value.fromBytes(value as Bytes));
     }
   }
+
+  get registered(): boolean {
+    let value = this.get("registered");
+    return value.toBoolean();
+  }
+
+  set registered(value: boolean) {
+    this.set("registered", Value.fromBoolean(value));
+  }
 }
