@@ -134,16 +134,23 @@ export default async function demo({
         log(`Your new ERC20 account balance is ${erc20Balance}.`);
     }
 
+    log('Generating deposit proof...');
+    const depositProof = await asset.deposit(depositAmount);
+    if (!depositProof) {
+        log('Failed to generate deposit proof');
+        return;
+    }
+    log(depositProof.export());
+
     log('Making deposit...');
-    const newNotes = await asset.deposit(depositAmount);
-    if (!newNotes) {
+    const incomeNotes = await depositProof.send();
+    if (!incomeNotes) {
         log('Failed to deposit');
         return;
     }
     log(`Successfully deposited ${depositAmount} to asset '${zkAssetAddress}'.`, {
-        notes: newNotes,
+        notes: incomeNotes,
     });
-    if (newNotes) return;
 
     const newNote = await asset.createNoteFromBalance({
         amount: 5,
