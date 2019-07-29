@@ -1,13 +1,10 @@
 /* global chrome */
 import {
-    NOTES_PER_SYNC_REQUEST,
-    SYNC_INTERVAL,
-} from '~config/settings';
-import {
     get,
     set,
     onIdle,
 } from '~utils/storage';
+import settings from '~background/utils/settings';
 import SyncService from '~backgroundServices/SyncService';
 import GraphNodeService from '~backgroundServices/GraphNodeService';
 
@@ -38,8 +35,8 @@ export default async function init() {
     }
 
     SyncService.set({
-        notesPerRequest: NOTES_PER_SYNC_REQUEST,
-        syncInterval: SYNC_INTERVAL,
+        notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),
+        syncInterval: await settings('SYNC_INTERVAL'),
     });
 
     const graphNodeServerUrl = await get('__graphNode');
