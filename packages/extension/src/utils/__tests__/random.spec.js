@@ -1,5 +1,6 @@
 import {
     randomInt,
+    randomInts,
     randomSumArray,
     randomId,
 } from '../random';
@@ -48,6 +49,54 @@ describe('randomInt', () => {
 
         const rand2 = randomInt(0);
         expect(rand2).toBe(0);
+    });
+});
+
+describe('randomInts', () => {
+    it('generate an array of sorted integers in specified range', () => {
+        const rands0 = randomInts(2, 0, 10);
+        expect(rands0.every(v => v >= 0 && v <= 10)).toBe(true);
+
+        const rands1 = randomInts(2, 0, 2);
+        expect(rands1.every(v => v >= 0 && v <= 2)).toBe(true);
+
+        const rands2 = randomInts(2, 0, 1);
+        expect(rands2).toEqual([0, 1]);
+
+        const rands3 = randomInts(3, 14, 16);
+        expect(rands3).toEqual([14, 15, 16]);
+    });
+
+    it('return all valid values if required number is larger than range', () => {
+        const rands0 = randomInts(4, 1, 1);
+        expect(rands0).toEqual([1]);
+
+        const rands1 = randomInts(4, 2, 3);
+        expect(rands1).toEqual([2, 3]);
+    });
+
+    it('accept negative range', () => {
+        const rands0 = randomInts(2, -10, -5);
+        expect(rands0.every(v => v >= -10 && v <= -5)).toBe(true);
+
+        const rands1 = randomInts(4, -12, -11);
+        expect(rands1).toEqual([-12, -11]);
+    });
+
+    it('the order of start and end can be switch', () => {
+        const rands0 = randomInts(3, 15, 13);
+        expect(rands0).toEqual([13, 14, 15]);
+
+        const rands1 = randomInts(3, -5, -7);
+        expect(rands1).toEqual([-7, -6, -5]);
+    });
+
+    it('set another side of the range to be 0 if only one value is provided', () => {
+        const rands0 = randomInts(3, 2);
+        expect(rands0).toEqual([0, 1, 2]);
+
+        const rands1 = randomInts(3, -2);
+        expect(rands1).toEqual([-2, -1, 0]);
     });
 });
 
