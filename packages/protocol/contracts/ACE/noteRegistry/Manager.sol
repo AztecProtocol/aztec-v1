@@ -90,7 +90,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
             // Conveniently, the multiplications we have to perform on epoch, cryptoSystem and assetType correspond
             // to their byte positions in _factoryId.
-            // i.e. (epoch * 0x10000) = and(_factoryId, 0xffff0000)
+            // i.e. (epoch * 0x10000) = and(_factoryId, 0xff0000)
             // and  (cryptoSystem * 0x100) = and(_factoryId, 0xff00)
             // and  (assetType) = and(_factoryId, 0xff)
 
@@ -139,7 +139,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
     /**
     * @dev Query the ACE for a previously validated proof
-    * @notice This is a virtual function, that must be overwritten by the contract that inherits from NoteRegistr
+    * @notice This is a virtual function, that must be overwritten by the contract that inherits from NoteRegistry
     *
     * @param _proof - unique identifier for the proof in question and being validated
     * @param _proofHash - keccak256 hash of a bytes proofOutput argument. Used to identify the proof in question
