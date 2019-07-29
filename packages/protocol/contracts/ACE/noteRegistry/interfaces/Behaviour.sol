@@ -31,13 +31,7 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         uint256 /* _scalingFactor */,
         bool /* _canAdjustSupply */,
         bool /* _canConvert */
-    ) public {
-        require(initialised != true, "registry already initialised");
-        _transferOwnership(_newOwner);
-
-        dataLocation = msg.sender;
-        initialised = true;
-    }
+    ) public;
 
     function getRegistry() public view returns (
         address linkedToken,
