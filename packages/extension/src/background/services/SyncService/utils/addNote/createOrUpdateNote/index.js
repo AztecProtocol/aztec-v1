@@ -17,6 +17,7 @@ import {
 import noteModel from '~database/models/note';
 import noteAccessModel from '~database/models/noteAccess';
 import assetModel from '~database/models/asset';
+import NoteService from '~background/services/NoteService';
 import pushAssetValue from './pushAssetValue';
 import removeAssetValue from './removeAssetValue';
 
@@ -24,6 +25,9 @@ export default async function createOrUpdateNote(note, privateKey) {
     const {
         assetKey,
         ownerKey,
+        owner: {
+            address: ownerAddress,
+        },
         viewingKey: encryptedVkString,
         status,
     } = note;
@@ -111,8 +115,20 @@ export default async function createOrUpdateNote(note, privateKey) {
         });
         if (isNoteDestroyed) {
             promises.push(removeAssetValue(assetValueKey, noteKey));
+            NoteService.removeNoteValue({
+                assetKey,
+                ownerAddress,
+                noteKey,
+                value,
+            });
         } else {
             promises.push(pushAssetValue(assetValueKey, noteKey));
+            NoteService.addNoteValue({
+                assetKey,
+                ownerAddress,
+                noteKey,
+                value,
+            });
         }
     }
 
