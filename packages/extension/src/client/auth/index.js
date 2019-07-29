@@ -17,6 +17,7 @@ import {
 
 import mutate from '../utils/mutate';
 import Web3Service from '../services/Web3Service';
+import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
 import account from './account';
 
 
@@ -59,10 +60,20 @@ const sendRegisterExtensionTx = async ({linkedPublicKey, address}) => {
 
 
     const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
+    console.log(AZTECAccountRegistry.networks);
+    const lastNetworkId = Object.keys(AZTECAccountRegistry.networks).pop();
+    const network = AZTECAccountRegistry.networks[lastNetworkId];
+    console.log(lastNetworkId);
+    await Web3Service
+        .useContract('AZTECAccountRegistry')
+        .method('updateChainId')
+        .send(lastNetworkId);
+
+
     const domainData = {
         name: 'AZTECAccountRegistry',
         version: '2',
-        chainId: 1564159239768,
+        chainId: lastNetworkId,
         verifyingContract: accountRegistryContract.address,
         salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
     };
@@ -99,6 +110,12 @@ const sendRegisterExtensionTx = async ({linkedPublicKey, address}) => {
         .useContract('AZTECAccountRegistry')
         .method('registerAZTECExtension')
         .send(address, linkedPublicKey, v, r, s);
+    return {
+        account:{
+            account: address,
+            linkedPublicKey
+        }
+    }
 }
 
 export default async function ensureExtensionInstalled() {
@@ -124,6 +141,9 @@ export default async function ensureExtensionInstalled() {
                 return empty();
 
             }),
+            map(d=> {
+                return d;
+            })
         )
         
         return stream.toPromise();
