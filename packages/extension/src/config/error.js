@@ -50,6 +50,10 @@ export default {
         viewingKey: {
             encrypt: 'Failed to encrypt viewing key.',
         },
+        pick: {
+            sum: 'Asset balance is not enough to generate a note with value %{value}.',
+            count: 'Cannot generate a new note with %{count} notes that sum to %{value}.',
+        },
     },
     data: {
         graphql: 'Something went wrong fetching graphQL data',
