@@ -54,11 +54,11 @@ describe('regex tests', () => {
         expect(result).to.deep.equal(['foo']);
     });
 
-    it('containsOperators will correctly test if operators exist', () => {
-        expect(regex.containsOperators('abc + def')).to.equal(true);
-        expect(regex.containsOperators('abc - def')).to.equal(true);
-        expect(regex.containsOperators('abc * def')).to.equal(true);
-        expect(regex.containsOperators('abc , def')).to.equal(false);
+    it('containsOperatorsAndIsNotStackOp will correctly test if operators exist', () => {
+        expect(regex.containsOperatorsAndIsNotStackOp('abc + def')).to.equal(true);
+        expect(regex.containsOperatorsAndIsNotStackOp('abc - def')).to.equal(true);
+        expect(regex.containsOperatorsAndIsNotStackOp('abc * def')).to.equal(true);
+        expect(regex.containsOperatorsAndIsNotStackOp('abc , def')).to.equal(false);
     });
 
     it('isLiteral will correctly test if string is a literal', () => {

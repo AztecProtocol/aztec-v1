@@ -1,50 +1,52 @@
 const grammar = {};
 
 function regex(params) {
-    const val = new RegExp(params.join('\\s*\\n*'));
+    const val = new RegExp(params.join('[\\s\\n]*'));
     return val;
 }
 
 grammar.topLevel = {
     TEMPLATE: regex([
-        '^(?:[\\s\\n]*)template',
+        '^template',
         '\\<(.*)\\>',
     ]),
     MACRO: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '(^(?:#[\\s\\n]*define)',
         '\\b(macro)\\b',
-        '([A-Za-z0-9_]\\w*)',
+        '(\\w+)',
         '=',
         'takes',
         '\\((\\d+)\\)',
         'returns',
         '\\((\\d+)\\)',
-        '\\{((?:[^\\}])*)\\}',
+        '\\{)((?:[^\\}])*)\\}',
     ]),
     CODE_TABLE: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
-        '\\b(table)\\b',
-        '([A-Za-z0-9_]\\w*)',
+        '(^(?:#[\\s\\n]*define)',
+        '\\b(table)\\b[\\s\\n]*)(\\w+)',
         '\\{((?:[^\\}])*)\\}',
     ]),
     JUMP_TABLE: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '^(?:#[\\s\\n]*define)',
         '\\b(jumptable)\\b',
-        '([A-Za-z0-9_]\\w*)',
+        '(\\w+)',
         '\\{((?:[^\\}])*)\\}',
     ]),
     JUMP_TABLE_PACKED: regex([
-        '^(?:[\\s\\n]*#[\\s\\n]*define)',
+        '^(?:#[\\s\\n]*define)',
         '\\b(jumptable__packed)\\b',
-        '([A-Za-z0-9_]\\w*)',
+        '(\\w+)',
         '\\{((?:[^\\}])*)\\}',
     ]),
     IMPORT: regex([
-        '^(?:[\\s\\n]*)#',
+        '^#',
         '(?:include)',
-        '(?:\\"|\\\')',
-        '(.*)',
-        '(?:\\"|\\\')',
+        '(\\"|\\\')',
+        '(.+?)',
+        '\\1',
+    ]),
+    WHITESPACE: regex([
+        '^([\\s\\n\\r]+)',
     ]),
 };
 
@@ -55,47 +57,49 @@ grammar.jumpTable = {
 // ^(?:\s*\n*)*__codesize\(([a-zA-Z0-9_\-]+)(?:<([a-zA-Z0-9_\-\+,\s\n]+)>)?\)
 grammar.macro = {
     MACRO_CALL: regex([
-        '^(?:[\\s\\n]*)([a-zA-Z0-9_]+)',
-        '(?:<([a-zA-Z0-9_,\\+\\-\\*\\(\\)\\s\\n]+)>)?',
+        '^(\\w+)(?:<([\\w,\\+\\-\\*\\(\\)\\s\\n<>]+?)>)?',
         '(?:\\(\\))',
     ]),
     TEMPLATE: regex([
-        '^(?:[\\s\\n]*)<',
-        '([a-zA-Z0-9_\\-\\+\\*\\(\\)]+)',
-        '>\\s*\\n*',
+        '^<',
+        '([\\w\\-\\+\\*\\(\\)\\<\\>]+)',
+        '>',
     ]),
     CODE_SIZE: regex([
-        '^(?:[\\s\\n]*)__codesize',
+        '^__codesize',
         '\\(',
-        '([a-zA-Z0-9_\\-]+)',
-        '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
-        '\\)\\s*\\n*',
+        '([\\w\\-]+)',
+        '(?:<([\\w,\\s\\n]+)>)?',
+        '\\)',
     ]),
     TABLE_SIZE: regex([
-        '^(?:[\\s\\n]*)__tablesize',
+        '^__tablesize',
         '\\(',
-        '([a-zA-Z0-9_\\-]+)',
-        '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
-        '\\)\\s*\\n*',
+        '([\\w_\\-]+)',
+        '(?:<([\\w,\\s\\n]+)>)?',
+        '\\)',
     ]),
     TABLE_START: regex([
-        '^(?:[\\s\\n]*)__tablestart',
+        '^__tablestart',
         '\\(',
-        '([a-zA-Z0-9_\\-]+)',
-        '(?:<([a-zA-Z0-9_,\\s\\n]+)>)?',
-        '\\)\\s*\\n*',
+        '([\\w_\\-]+)',
+        '(?:<([\\w,\\s\\n]+)>)?',
+        '\\)',
     ]),
     JUMP_LABEL: regex([
-        '^(?:[\\s\\n]*)([a-zA-Z0-9_\\-]+):\\s*\\n*',
+        '^([\\w\\-]+):',
     ]),
     LITERAL_DECIMAL: regex([
-        '^(?:[\\s\\n]*)(\\d+)\\b',
+        '^(\\d+)\\b',
     ]),
     LITERAL_HEX: regex([
-        '^(?:[\\s\\n]*)0x([0-9a-fA-F]+)\\b',
+        '^0x([0-9a-fA-F]+)\\b',
     ]),
     TOKEN: regex([
-        '\\s*\\n*([^\\s]*)\\s*\\n*',
+        '([^\\s\\n\\r]+)',
+    ]),
+    WHITESPACE: regex([
+        '^([\\s\\n\\r]+)',
     ]),
 };
 

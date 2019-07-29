@@ -173,12 +173,12 @@ const {
     memory,
     gas,
     bytecode,
-    returnData,
+    returnValue,
 } = await main('MACRO_NAME', initialStack, initialMemory, calldata, callvalue);
 
 console.log('gas cost when executing macro = ', gas);
 console.log('macro bytecode = ', bytecode);
-console.log('macro return data = ', returnData);
+console.log('macro return data = ', returnValue);
 console.log('output stack state = ', stack);
 console.log('output memory state = ', memory);
 ```

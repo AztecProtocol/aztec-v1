@@ -3,11 +3,13 @@
 const BN = require('bn.js');
 
 const {
+    // eslint-disable-next-line no-unused-vars
     p,
     pRed,
     toAffine,
 } = require('../js_snippets/bn128_reference');
 
+// eslint-disable-next-line no-unused-vars
 const { generatePointData, referenceCurve } = require('../js_snippets/utils');
 
 const Weierstrudel = artifacts.require('Weierstrudel');

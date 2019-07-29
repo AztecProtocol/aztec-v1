@@ -14,7 +14,7 @@ const {
 
 const {
     data: { bytecode: compilerCode },
-} = parser.processMacro('MAIN__CONSTRUCTOR', 0, [], macros, inputMap, jumptables);
+} = parser.processMacro('WEIERSTRUDEL__CONSTRUCTOR', 0, [], macros, inputMap, jumptables);
 
 const bytecode = compilerCode + macroCode;
 
@@ -29,6 +29,6 @@ fs.writeFileSync(
     JSON.stringify(contract)
 );
 
-compiler('weierstrudel_project.json', pathToData);
+compiler('huff_projects/weierstrudel_project.json', pathToData);
 
 console.log('written bytecode to weierstrudel.json');

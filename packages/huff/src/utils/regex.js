@@ -36,38 +36,37 @@ regex.isolateTemplate = (val) => {
     // return match[0].includes(' ') ? null : match[0];
 };
 
-regex.containsOperators = (input) => {
+regex.containsOperatorsAndIsNotStackOp = (input) => {
     return operators.test(input) && !input.includes('dup') && !input.includes('swap'); // .test(input);
 };
 
+/**
+ * Returns whether a string represents a number or not (either dec or hex)
+ * @param input string to be matched
+ * @returns {boolean} whether the string can feasibly represent a number
+ */
 regex.isLiteral = (input) => {
-    if (regex.containsOperators(input)) {
-        return true;
-    }
-    if (input.match(new RegExp('^(?:\\s*\\n*)*0x([0-9a-fA-F]+)\\b'))) {
-        return true;
-    }
-    if (input.match(new RegExp('^(?:\\s*\\n*)*(\\d+)\\b'))) {
+    if (regex.containsOperatorsAndIsNotStackOp(input)
+        || input.match(new RegExp('^(?:\\s*\\n*)*((0x[0-9a-fA-F]+)|(\\d+))\\b'))) {
         return true;
     }
     return false;
 };
 
 regex.isModifiedOpcode = (input) => {
-    const hasOperators = input.includes('-') || input.includes('+');
-    const hasStackOpcodes = input.includes('dup') || input.includes('swap');
-    return hasOperators && hasStackOpcodes;
+    return input.match(new RegExp('\\s*(dup|swap)(0x[0-9a-fA-F]+|\\d+)([+\\-])(0x[0-9a-fA-F]+|\\d+)\\s*'));
 };
 
 regex.removeSpacesAndLines = (input) => {
     return input.replace(/(\r\n\t|\n|\r\t|\s)/gm, '');
 };
 
-regex.isPush = (input) => {
-    if (input.slice(0, 4) === 'push') {
-        return true;
-    }
-    return false;
+/**
+ * Check that input conforms to name rules (must contain at least one alphabetical character and cannot begin with "0x")
+ * @param input
+ */
+regex.conformsToNameRules = (input) => {
+    return !!input.match(new RegExp('^(?!0x.*$)\\w*[A-Za-z]\\w*'));
 };
 
 module.exports = regex;

@@ -66,6 +66,7 @@ describe('parser tests', () => {
                     value: '83',
                     args: [],
                     index: 0,
+                    debug: {},
                 }],
                 templateParams: [],
             });
@@ -88,6 +89,7 @@ describe('parser tests', () => {
                     value: '7f',
                     args: [numericResult.toString(16)],
                     index: 0,
+                    debug: {},
                 }],
                 templateParams: [],
             });
@@ -100,7 +102,11 @@ describe('parser tests', () => {
         start:
          dup4 mulmod
          0x1234 swap2 start jumpi`;
-            const ops = parser.parseMacro(foo, {}, 0);
+            const files = [
+                { filename: 'FOO', data: foo },
+            ];
+            const map = inputMap.createInputMap(files);
+            const ops = parser.parseMacro(foo, {}, 0, 0, map);
             const macros = {
                 FOO: {
                     name: 'FOO',
@@ -108,10 +114,6 @@ describe('parser tests', () => {
                     templateParams: [],
                 },
             };
-            const files = [
-                { filename: 'FOO', data: foo },
-            ];
-            const map = inputMap.createInputMap(files);
             const output = parser.processMacro('FOO', 0, [], macros, map);
             const expected = [
                 opcodes.jumpdest,
@@ -140,7 +142,11 @@ describe('parser tests', () => {
         start
         __codesize(FOO) 0x1234aae 123554
             `;
-            const fullOps = parser.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0);
+            const files = [
+                { filename: 'SOURCE', data: source },
+            ];
+            const map = inputMap.createInputMap(files);
+            const fullOps = parser.parseMacro(source, { FOO: 'FOO', BAR: 'BAR' }, 0, 0, map);
             const ops = fullOps.map((o) => {
                 expect(typeof (o.index)).to.equal('number');
                 return { args: o.args, type: o.type, value: o.value };
@@ -280,18 +286,19 @@ describe('parser tests', () => {
 
 
         it('can process codesize macro', () => {
+            const macroName = 'BAR';
             const source = `
             template <p, q>
             #define macro FOO = takes(0) returns (4) {
                 dup4 0x1234aae <p> <q> swap5
             }
             
-            #define macro BAR = takes(0) returns (1) {
+            #define macro ${macroName} = takes(0) returns (1) {
                 __codesize(FOO<1,2>)
             }`;
-
-            const { bytecode } = parser.compileMacro('BAR', source, '');
-            expect(bytecode).to.equal('600b');
+            const pushEleven = '600b';
+            const { bytecode } = parser.compileMacro(macroName, source, '');
+            expect(bytecode).to.equal(pushEleven);
         });
     });
 });
