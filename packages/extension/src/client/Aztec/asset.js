@@ -100,9 +100,11 @@ export default class Asset {
      *
      * - amount (Int! or [Int!])
      * - options
-     *       from (Address)
-     *       sender (Address)
-     *       numberOfOutputNotes (Int): number of new notes; if input amount is an array, this value will be ignored.
+     *       from (Address):            The address that will be funding the deposit of ERC20 tokens.
+     *                                  This address needs to approve on the linked ERC20 token.
+     *       sender (Address):          The proof sender.
+     *       numberOfOutputNotes (Int): Number of new notes.
+     *                                  If input amount is an array, this value will be ignored.
      *
      * @returns ([Notes!])
      */

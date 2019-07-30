@@ -40,7 +40,7 @@ export default async function proveDeposit({
     }
 
     const {
-        address: owner,
+        address: notesOwnerAddress,
         linkedPublicKey,
         spendingPublicKey,
     } = account;
@@ -51,7 +51,7 @@ export default async function proveDeposit({
     const notes = await createNotes(
         noteValues,
         spendingPublicKey,
-        owner,
+        notesOwnerAddress,
     );
     const {
         JoinSplitProof,
@@ -62,20 +62,22 @@ export default async function proveDeposit({
         noteValues,
     );
     const inputNotes = [];
-    const publicOwner = from || owner;
+    const publicOwner = from || notesOwnerAddress;
     const proof = new JoinSplitProof(
         inputNotes,
         notes,
-        owner,
+        notesOwnerAddress,
         publicValue,
         publicOwner,
     );
 
     return {
         proof,
-        owner,
-        linkedPublicKey,
         notes,
+        notesOwner: {
+            address: notesOwnerAddress,
+            linkedPublicKey,
+        },
         noteValues,
     };
 }

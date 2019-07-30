@@ -13,9 +13,11 @@ export default async function sendDeposit({
         assetAddress,
     },
     data: {
-        owner,
+        notesOwner: {
+            address: notesOwnerAddress,
+            linkedPublicKey,
+        },
         notes,
-        linkedPublicKey,
     },
 }) {
     const depositInputOwnerAccounts = [];
@@ -55,7 +57,7 @@ export default async function sendDeposit({
         const metadata = outputCoder.getMetadata(outputNote);
         const viewingKey = encryptedViewingKey(linkedPublicKey, realViewingKey);
         const newMetadata = addAccess(metadata, {
-            address: owner,
+            address: notesOwnerAddress,
             viewingKey: viewingKey.toHexString(),
         });
 
