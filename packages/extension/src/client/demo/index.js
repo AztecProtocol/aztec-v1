@@ -29,8 +29,6 @@ export default async function demo({
     const { aztec } = window;
 
     await aztec.enable();
-    // await aztec.auth.registerExtension({ password: 'test', salt: 'aaa' });
-    // await aztec.auth.login({ password: 'test' });
     Web3Service.registerContract(ACE);
     Web3Service.registerInterface(ERC20Mintable, {
         name: 'ERC20',
@@ -44,19 +42,9 @@ export default async function demo({
         address: userAddress,
     } = Web3Service.account;
 
-    // // const registerResponse = await aztec.auth.registerAddress(userAddress);
-    // if (!registerResponse || registerResponse.error) {
-    //     log('Failed to register account.', registerResponse);
-    //     return;
-    // }
-    log('Account registered!');
 
-
-    await sleep(2000);
-    let zkAssetAddress = '0xab7f50b26b4079a682c92dd15d4917c8989915ba';
-    if (zkAssetAddress) {
-    //     // enableAssetResponse = await aztec.auth.enableAsset(zkAssetAddress);
-    } else {
+    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
+    if (!zkAssetAddress) {
         log('Creating new asset...');
         const {
             erc20Address,
@@ -70,7 +58,6 @@ export default async function demo({
             canAdjustSupply,
             canConvert,
         });
-        console.log(erc20Address, newZkAssetAddress);
 
         await depositToERC20({
             userAddress,
@@ -88,25 +75,16 @@ export default async function demo({
             'Add this address to demo file to prevent creating new asset:',
             zkAssetAddress,
         );
-        // enableAssetResponse = await aztec.auth.enableAsset(zkAssetAddress);
     }
-    // if (!enableAssetResponse || enableAssetResponse.error) {
-    //     log(
-    //         `Failed to enable asset '${zkAssetAddress}'.`,
-    //         enableAssetResponse.error,
-    //     );
-    //     return;
-    // }
-    log('Asset enabled!');
 
 
-    let asset = await aztec.asset(zkAssetAddress);
+    const asset = await aztec.asset(zkAssetAddress);
     if (!asset.isValid()) {
         // TODO
         // wait for data to be processed by graph node
         // this should be handled in background script
         await sleep(2000);
-        asset = await aztec.asset(zkAssetAddress);
+        await asset.refresh();
     }
     log(asset);
     if (!asset.isValid()) {
@@ -141,15 +119,19 @@ export default async function demo({
     log('Generating deposit proof...');
     const depositProof = await asset.deposit(depositAmount);
     if (!depositProof) {
-        log('Failed to generate deposit proof');
+        log('Failed to generate deposit proof.');
         return;
     }
     log(depositProof.export());
 
+    log('Approving deposit...');
+    await depositProof.approve();
+    log('Approved!');
+
     log('Making deposit...');
     const incomeNotes = await depositProof.send();
     if (!incomeNotes) {
-        log('Failed to deposit');
+        log('Failed to deposit.');
         return;
     }
     log(`Successfully deposited ${depositAmount} to asset '${zkAssetAddress}'.`, {

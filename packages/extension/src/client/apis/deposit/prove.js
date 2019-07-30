@@ -7,7 +7,7 @@ import {
 } from '~utils/random';
 import query from '~client/utils/query';
 
-export default async function depositProof({
+export default async function proveDeposit({
     amount,
     from,
     sender,
