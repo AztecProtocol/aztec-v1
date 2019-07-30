@@ -218,26 +218,6 @@ export class RedeemTokens__Params {
   }
 }
 
-export class ZkAsset__flagsResult {
-  value0: boolean;
-  value1: boolean;
-  value2: boolean;
-
-  constructor(value0: boolean, value1: boolean, value2: boolean) {
-    this.value0 = value0;
-    this.value1 = value1;
-    this.value2 = value2;
-  }
-
-  toMap(): TypedMap<string, EthereumValue> {
-    let map = new TypedMap<string, EthereumValue>();
-    map.set("value0", EthereumValue.fromBoolean(this.value0));
-    map.set("value1", EthereumValue.fromBoolean(this.value1));
-    map.set("value2", EthereumValue.fromBoolean(this.value2));
-    return map;
-  }
-}
-
 export class ZkAsset extends SmartContract {
   static bind(address: Address): ZkAsset {
     return new ZkAsset("ZkAsset", address);
@@ -264,15 +244,6 @@ export class ZkAsset extends SmartContract {
   PRIVATE_RANGE_PROOF(): i32 {
     let result = super.call("PRIVATE_RANGE_PROOF", []);
     return result[0].toI32();
-  }
-
-  flags(): ZkAsset__flagsResult {
-    let result = super.call("flags", []);
-    return new ZkAsset__flagsResult(
-      result[0].toBoolean(),
-      result[1].toBoolean(),
-      result[2].toBoolean()
-    );
   }
 
   DIVIDEND_PROOF(): i32 {
@@ -308,120 +279,6 @@ export class ZkAsset extends SmartContract {
   scalingFactor(): BigInt {
     let result = super.call("scalingFactor", []);
     return result[0].toBigInt();
-  }
-}
-
-export class ConstructorCall extends EthereumCall {
-  get inputs(): ConstructorCall__Inputs {
-    return new ConstructorCall__Inputs(this);
-  }
-
-  get outputs(): ConstructorCall__Outputs {
-    return new ConstructorCall__Outputs(this);
-  }
-}
-
-export class ConstructorCall__Inputs {
-  _call: ConstructorCall;
-
-  constructor(call: ConstructorCall) {
-    this._call = call;
-  }
-
-  get _aceAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get _linkedTokenAddress(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get _scalingFactor(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
-  }
-
-  get _canAdjustSupply(): boolean {
-    return this._call.inputValues[3].value.toBoolean();
-  }
-
-  get _canConvert(): boolean {
-    return this._call.inputValues[4].value.toBoolean();
-  }
-}
-
-export class ConstructorCall__Outputs {
-  _call: ConstructorCall;
-
-  constructor(call: ConstructorCall) {
-    this._call = call;
-  }
-}
-
-export class ConfidentialTransferCall extends EthereumCall {
-  get inputs(): ConfidentialTransferCall__Inputs {
-    return new ConfidentialTransferCall__Inputs(this);
-  }
-
-  get outputs(): ConfidentialTransferCall__Outputs {
-    return new ConfidentialTransferCall__Outputs(this);
-  }
-}
-
-export class ConfidentialTransferCall__Inputs {
-  _call: ConfidentialTransferCall;
-
-  constructor(call: ConfidentialTransferCall) {
-    this._call = call;
-  }
-
-  get _proofData(): Bytes {
-    return this._call.inputValues[0].value.toBytes();
-  }
-
-  get _signatures(): Bytes {
-    return this._call.inputValues[1].value.toBytes();
-  }
-}
-
-export class ConfidentialTransferCall__Outputs {
-  _call: ConfidentialTransferCall;
-
-  constructor(call: ConfidentialTransferCall) {
-    this._call = call;
-  }
-}
-
-export class ConfidentialTransferFromCall extends EthereumCall {
-  get inputs(): ConfidentialTransferFromCall__Inputs {
-    return new ConfidentialTransferFromCall__Inputs(this);
-  }
-
-  get outputs(): ConfidentialTransferFromCall__Outputs {
-    return new ConfidentialTransferFromCall__Outputs(this);
-  }
-}
-
-export class ConfidentialTransferFromCall__Inputs {
-  _call: ConfidentialTransferFromCall;
-
-  constructor(call: ConfidentialTransferFromCall) {
-    this._call = call;
-  }
-
-  get _proof(): i32 {
-    return this._call.inputValues[0].value.toI32();
-  }
-
-  get _proofOutput(): Bytes {
-    return this._call.inputValues[1].value.toBytes();
-  }
-}
-
-export class ConfidentialTransferFromCall__Outputs {
-  _call: ConfidentialTransferFromCall;
-
-  constructor(call: ConfidentialTransferFromCall) {
-    this._call = call;
   }
 }
 
@@ -497,6 +354,112 @@ export class UpdateNoteMetaDataCall__Outputs {
   _call: UpdateNoteMetaDataCall;
 
   constructor(call: UpdateNoteMetaDataCall) {
+    this._call = call;
+  }
+}
+
+export class ConfidentialTransferCall extends EthereumCall {
+  get inputs(): ConfidentialTransferCall__Inputs {
+    return new ConfidentialTransferCall__Inputs(this);
+  }
+
+  get outputs(): ConfidentialTransferCall__Outputs {
+    return new ConfidentialTransferCall__Outputs(this);
+  }
+}
+
+export class ConfidentialTransferCall__Inputs {
+  _call: ConfidentialTransferCall;
+
+  constructor(call: ConfidentialTransferCall) {
+    this._call = call;
+  }
+
+  get _proofData(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get _signatures(): Bytes {
+    return this._call.inputValues[1].value.toBytes();
+  }
+}
+
+export class ConfidentialTransferCall__Outputs {
+  _call: ConfidentialTransferCall;
+
+  constructor(call: ConfidentialTransferCall) {
+    this._call = call;
+  }
+}
+
+export class ConfidentialTransferFromCall extends EthereumCall {
+  get inputs(): ConfidentialTransferFromCall__Inputs {
+    return new ConfidentialTransferFromCall__Inputs(this);
+  }
+
+  get outputs(): ConfidentialTransferFromCall__Outputs {
+    return new ConfidentialTransferFromCall__Outputs(this);
+  }
+}
+
+export class ConfidentialTransferFromCall__Inputs {
+  _call: ConfidentialTransferFromCall;
+
+  constructor(call: ConfidentialTransferFromCall) {
+    this._call = call;
+  }
+
+  get _proof(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+
+  get _proofOutput(): Bytes {
+    return this._call.inputValues[1].value.toBytes();
+  }
+}
+
+export class ConfidentialTransferFromCall__Outputs {
+  _call: ConfidentialTransferFromCall;
+
+  constructor(call: ConfidentialTransferFromCall) {
+    this._call = call;
+  }
+}
+
+export class ConstructorCall extends EthereumCall {
+  get inputs(): ConstructorCall__Inputs {
+    return new ConstructorCall__Inputs(this);
+  }
+
+  get outputs(): ConstructorCall__Outputs {
+    return new ConstructorCall__Outputs(this);
+  }
+}
+
+export class ConstructorCall__Inputs {
+  _call: ConstructorCall;
+
+  constructor(call: ConstructorCall) {
+    this._call = call;
+  }
+
+  get _aceAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get _linkedTokenAddress(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get _scalingFactor(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class ConstructorCall__Outputs {
+  _call: ConstructorCall;
+
+  constructor(call: ConstructorCall) {
     this._call = call;
   }
 }
