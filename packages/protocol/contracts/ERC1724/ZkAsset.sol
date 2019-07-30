@@ -29,7 +29,4 @@ contract ZkAsset is ZkAssetBase {
     ) {
     }
 
-    function updateNoteMetaData(bytes32 _noteHash, bytes calldata _metaData) external {
-        emit UpdateNoteMetaData(_noteHash, _metaData);
-    }
 }
