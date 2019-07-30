@@ -90,9 +90,14 @@ class Connection {
                 const {
                     url,
                 } = sender;
-                const {
-                    domain,
-                } = psl.parse(url.replace(/^https?:\/\//, '').split('/')[0]);
+                let domain;
+                if (url.match(/^https?:\/\/(127.0.0.1|localhost)(:[0-9+]|\/)/)) {
+                    domain = 'localhost';
+                } else {
+                    ({
+                        domain,
+                    } = psl.parse(url.replace(/^https?:\/\//, '').split('/')[0]));
+                }
 
                 return {
                     domain,
