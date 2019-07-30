@@ -1,4 +1,3 @@
-import findLastIndex from 'lodash/findLastIndex';
 import userModel from '~database/models/user';
 import {
     warnLog,
@@ -62,7 +61,6 @@ class SyncManager {
     async syncNotes({
         address,
         privateKey,
-        excludes = [],
         lastSynced = '',
         config,
     } = {}) {
@@ -73,7 +71,6 @@ class SyncManager {
         if (this.paused) {
             this.pause(address, {
                 privateKey,
-                excludes,
                 lastSynced,
                 config,
             });
@@ -88,7 +85,6 @@ class SyncManager {
 
         const {
             syncReq: prevSyncReq,
-            lastSynced: savedLastSynced,
         } = account;
 
         if (prevSyncReq) {
@@ -103,7 +99,6 @@ class SyncManager {
 
         const newNotes = await fetchNoteFromServer({
             lastSynced,
-            excludes,
             account: address,
             numberOfNotes: notesPerRequest,
             onError: this.handleFetchError,
@@ -111,25 +106,8 @@ class SyncManager {
 
         const lastNote = newNotes[newNotes.length - 1];
         const nextSynced = lastNote
-            ? lastNote.timestamp
+            ? lastNote.logId
             : lastSynced;
-
-        let nextExcludes = [];
-        if (nextSynced === lastSynced) {
-            nextExcludes = [
-                ...excludes,
-            ];
-        }
-        findLastIndex(newNotes, ({
-            hash,
-            timestamp,
-        }) => {
-            const isSameTime = timestamp === nextSynced;
-            if (isSameTime) {
-                nextExcludes.push(hash);
-            }
-            return !isSameTime;
-        });
 
         if (newNotes.length) {
             const notesToStore = keepAll
@@ -142,21 +120,16 @@ class SyncManager {
                     address,
                     privateKey,
                     config,
-                    excludes: nextExcludes,
                     lastSynced: nextSynced,
                 });
 
                 return;
             }
 
-            // use lastest note's timestamp as the next lastSynced
-            // Don't use Date.now() since we can't be sure the timezones are the same
-            if (nextSynced !== savedLastSynced) {
-                await userModel.update({
-                    address,
-                    lastSynced: nextSynced,
-                });
-            }
+            await userModel.update({
+                address,
+                lastSynced: nextSynced,
+            });
         }
 
         const syncReq = setTimeout(() => {
@@ -164,14 +137,12 @@ class SyncManager {
                 address,
                 privateKey,
                 config,
-                excludes: nextExcludes,
                 lastSynced: nextSynced,
             });
         }, syncInterval);
 
         this.accounts.set(address, {
             ...account,
-            lastSynced: nextSynced,
             syncing: false,
             syncReq,
         });
@@ -186,7 +157,6 @@ class SyncManager {
         let account = this.accounts.get(address);
         if (!account) {
             account = {
-                lastSynced,
                 syncing: false,
                 syncReq: null,
             };

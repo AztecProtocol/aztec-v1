@@ -32,7 +32,7 @@ export default gql`
         address: String!
         spendingPublicKey: String
         linkedPublicKey: String
-        lastSynced: Int
+        lastSynced: String
     }
 
     type Domain {

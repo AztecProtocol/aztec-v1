@@ -5,7 +5,7 @@ import GraphNodeService from '~backgroundServices/GraphNodeService';
 
 export default async function fetchNoteFromServer({
     account,
-    lastSynced = 0,
+    lastSynced = '',
     numberOfNotes = 1,
     excludes = [],
     onError,
@@ -17,23 +17,25 @@ export default async function fetchNoteFromServer({
 
     const query = `
         query($first: Int!, $where: NoteAccess_filter, $orderBy: NoteAccess_orderBy) {
-            noteAccesses(first: $first, where: $where, orderBy: $orderBy) {
+            noteLogs(first: $first, where: $where, orderBy: $orderBy) {
+                logId: id
                 account {
                     address
                 }
-                viewingKey
-                note {
-                    hash
-                    asset {
-                        address
-                        linkedTokenAddress
+                noteAccess {
+                    viewingKey
+                    note {
+                        hash
+                        asset {
+                            address
+                            linkedTokenAddress
+                        }
+                        owner {
+                            address
+                        }
                     }
-                    owner {
-                        address
-                    }
-                    status
                 }
-                timestamp
+                status
             }
         }
     `;
@@ -42,10 +44,10 @@ export default async function fetchNoteFromServer({
         first: numberOfNotes,
         where: {
             account,
-            note_not_in: excludes,
-            timestamp_gte: lastSynced,
+            id_gt: lastSynced,
+            id_not_in: excludes,
         },
-        orderBy: 'timestamp',
+        orderBy: 'id',
     };
 
     const data = await GraphNodeService.query({
@@ -55,13 +57,17 @@ export default async function fetchNoteFromServer({
     });
 
     const {
-        noteAccesses = [],
+        noteLogs = [],
     } = data || {};
 
-    return noteAccesses.map(({
-        note,
+    return noteLogs.map(({
+        noteAccess: {
+            note,
+            ...noteAccess
+        },
         ...rest
     }) => ({
+        ...noteAccess,
         ...note,
         ...rest,
     }));
