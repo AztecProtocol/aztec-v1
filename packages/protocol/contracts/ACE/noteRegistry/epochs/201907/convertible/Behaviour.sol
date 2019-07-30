@@ -5,22 +5,15 @@ import "../../../../../libs/NoteUtils.sol";
 import "../Behaviour.sol";
 
 /**
- * @title NoteRegistryBehaviour contract which contains the storage variables that define the set of valid
- * AZTEC notes for a particular address
+ * @title BehaviourConvertible201907
  * @author AZTEC
- * @dev TODO
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * @dev This contract extends Behaviour201907, to add methods which enable public/private conversion. Methods are documented in interface.
+ *
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract BehaviourConvertible201907 is Behaviour201907 {
     constructor () Behaviour201907() public {}
 
-    /**
-        * @dev Update the state of the note registry according to transfer instructions issued by a
-        * zero-knowledge proof
-        *
-        * @param _proof - unique identifier for a proof
-        * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
-    */
     function updateNoteRegistry(
         uint24 _proof,
         bytes memory _proofOutput
@@ -65,20 +58,7 @@ contract BehaviourConvertible201907 is Behaviour201907 {
         }
     }
 
-    /**
-    * @dev This should be called from an asset contract.
-    */
     function publicApprove(address _publicOwner, bytes32 _proofHash, uint256 _value) public onlyOwner {
         registry.publicApprovals[_publicOwner][_proofHash] = _value;
-    }
-
-    function setConfidentialTotalMinted(bytes32 newTotalNoteHash) internal onlyOwner returns (bytes32) {
-        require(registry.canAdjustSupply == true, "this asset is not mintable");
-        return ZERO_VALUE_NOTE_HASH;
-    }
-
-    function setConfidentialTotalBurned(bytes32 newTotalNoteHash) internal onlyOwner returns (bytes32) {
-        require(registry.canAdjustSupply == true, "this asset is not burnable");
-        return ZERO_VALUE_NOTE_HASH;
     }
 }

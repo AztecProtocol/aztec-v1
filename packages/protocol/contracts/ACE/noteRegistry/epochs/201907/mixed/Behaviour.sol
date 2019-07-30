@@ -5,19 +5,15 @@ import "../../../../../libs/NoteUtils.sol";
 import "../Behaviour.sol";
 
 /**
- * @title NoteRegistryBehaviour contract which contains the storage variables that define the set of valid
- * AZTEC notes for a particular address
+ * @title BehaviourMixed201907
  * @author AZTEC
- * @dev TODO
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * @dev This contract extends Behaviour201907, to add methods which enable minting, burning, and public/private conversion. Methods are documented in interface.
+ *
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract BehaviourMixed201907 is Behaviour201907 {
     constructor () Behaviour201907() public {}
 
-    /**
-    * @dev Burn AZTEC notes
-    * TODO
-    */
     function burn(bytes calldata _proofOutputs) external onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not burnable");
         // Dealing with notes representing totals
@@ -40,10 +36,6 @@ contract BehaviourMixed201907 is Behaviour201907 {
         updateInputNotes(burnedNotes);
     }
 
-        /**
-    * @dev Mint AZTEC notes
-    * TODO
-    */
     function mint(bytes calldata _proofOutputs) external onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not mintable");
         // Dealing with notes representing totals
@@ -65,13 +57,6 @@ contract BehaviourMixed201907 is Behaviour201907 {
         updateOutputNotes(mintedNotes);
     }
 
-    /**
-        * @dev Update the state of the note registry according to transfer instructions issued by a
-        * zero-knowledge proof
-        *
-        * @param _proof - unique identifier for a proof
-        * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
-    */
     function updateNoteRegistry(
         uint24 _proof,
         bytes memory _proofOutput
@@ -116,9 +101,6 @@ contract BehaviourMixed201907 is Behaviour201907 {
         }
     }
 
-    /**
-    * @dev This should be called from an asset contract.
-    */
     function publicApprove(address _publicOwner, bytes32 _proofHash, uint256 _value) public onlyOwner {
         registry.publicApprovals[_publicOwner][_proofHash] = _value;
     }

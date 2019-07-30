@@ -126,10 +126,10 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
     *      linked to `_proof`. The validator smart contract will have the following interface:
-    *      
+    *
     *      function validate(
-    *          bytes _proofData, 
-    *          address _sender, 
+    *          bytes _proofData,
+    *          address _sender,
     *          bytes32[6] _commonReferenceString
     *      ) public returns (bytes)
     *
