@@ -26,7 +26,7 @@ export default async function proofFactory(type, cb, options) {
     const {
         proof,
         ...data
-    } = await cb(options);
+    } = await cb(options) || {};
 
     if (!proof) {
         return null;
