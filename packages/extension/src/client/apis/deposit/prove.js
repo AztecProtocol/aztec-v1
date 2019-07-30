@@ -7,7 +7,7 @@ import {
 } from '~utils/random';
 import query from '~client/utils/query';
 
-export default async function deposit({
+export default async function depositProof({
     amount,
     from,
     sender,
@@ -63,7 +63,7 @@ export default async function deposit({
     );
     const inputNotes = [];
     const publicOwner = from || owner;
-    const depositProof = new JoinSplitProof(
+    const proof = new JoinSplitProof(
         inputNotes,
         notes,
         owner,
@@ -72,7 +72,7 @@ export default async function deposit({
     );
 
     return {
-        proof: depositProof,
+        proof,
         owner,
         linkedPublicKey,
         notes,

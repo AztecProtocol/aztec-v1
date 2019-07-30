@@ -55,6 +55,7 @@ export default gql`
         asset: Asset!
         owner: Account
         viewingKey: String
+        decryptedViewingKey: String
         metadata: String
         value: Int
         status: String
@@ -76,6 +77,11 @@ export default gql`
     }
     type NoteApiResponse {
         note: Note
+        error: Error
+        action: Action
+    }
+    type NotesApiResponse {
+        notes: [Note!]
         error: Error
         action: Action
     }
@@ -113,6 +119,14 @@ export default gql`
             currentAddress: String!
             domain: String!
         ): GrantAccessApiResponse
+        pickNotesFromBalance(
+            assetId: ID!
+            amount: Int!
+            owner: String
+            numberOfNotes: Int
+            currentAddress: String!
+            domain: String!
+        ): NotesApiResponse
         createNoteFromBalance(
             assetId: ID!
             amount: Int!

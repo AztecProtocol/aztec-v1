@@ -1,8 +1,9 @@
 import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
-import proofFactory from '../proof';
-import deposit from './deposit';
+import proofFactory from '~client/apis/proofFactory';
+import deposit from '~client/apis/deposit/prove';
+import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
 const dataProperties = [
     'address',
@@ -108,67 +109,34 @@ export default class Asset {
         from = '',
         sender = '',
         numberOfOutputNotes = 2,
-    } = {}) => {
-        const options = {
+    } = {}) => proofFactory(
+        'deposit',
+        deposit,
+        {
             assetAddress: this.address,
             amount,
             from,
             sender,
             numberOfOutputNotes,
-        };
-
-        const {
-            proof,
-            ...data
-        } = await deposit(options) || {};
-
-        if (!proof) {
-            return null;
-        }
-
-        return proofFactory('deposit', {
-            options,
-            proof,
-            data,
-        });
-    };
+        },
+    );
 
     createNoteFromBalance = async ({
         amount,
+        sender = '',
         userAccess = [],
-        owner = '',
-    }) => {
-        const {
-            newNote,
-        } = await query(`
-            newNote: createNoteFromBalance(
-                assetId: "${this.id}",
-                amount: ${amount},
-                owner: "${owner}",
-                userAccess: "${userAccess.join('')}"
-            ) {
-                note {
-                    hash
-                    value
-                    viewingKey
-                    owner {
-                        address
-                    }
-                    asset {
-                        balance
-                    }
-                }
-                error {
-                    type
-                    key
-                    message
-                    response
-                }
-            }
-        `) || {};
-
-        return newNote;
-    };
+        numberOfInputNotes = 0,
+    }) => proofFactory(
+        'createNoteFromBalance',
+        createNoteFromBalance,
+        {
+            assetAddress: this.address,
+            amount,
+            sender,
+            userAccess,
+            numberOfInputNotes,
+        },
+    );
 }
 
 export const assetFactory = async (assetId) => {

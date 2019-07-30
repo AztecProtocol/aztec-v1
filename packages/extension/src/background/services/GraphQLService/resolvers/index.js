@@ -3,6 +3,9 @@ import userModel from '~database/models/user';
 import accountModel from '~database/models/account';
 import userModel from '~database/models/user';
 import noteModel from '~database/models/note';
+import {
+    fromCode,
+} from '~utils/noteStatus';
 import AuthService from '../../AuthService';
 import {
     ensureUserPermission,
@@ -22,6 +25,7 @@ export default {
     Note: {
         asset: async ({ asset }) => assetModel.get({ key: asset }),
         owner: async ({ owner }) => accountModel.get({ key: owner }),
+        status: ({ status }) => fromCode(status),
     },
     GrantNoteAccessPermission: {
         asset: ({ asset }) => asset && assetModel.get({ id: asset }),

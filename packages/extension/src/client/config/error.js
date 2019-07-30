@@ -9,4 +9,8 @@ export default {
         confidentialTransfer: 'Failed to send zkAsset.confidentialTransfer',
         updateNoteMetaData: "Failed to update note's metadata.",
     },
+    note: {
+        fromViewingKey: 'Failed to recover note from its viewing key.',
+        shareAccess: 'Failed to shared note access.',
+    },
 };
