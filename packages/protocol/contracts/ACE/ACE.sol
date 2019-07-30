@@ -16,7 +16,7 @@ import "../libs/SafeMath8.sol";
  * @author AZTEC
  * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
  *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ACE is IAZTEC, Ownable, NoteRegistry {
     using NoteUtils for bytes;

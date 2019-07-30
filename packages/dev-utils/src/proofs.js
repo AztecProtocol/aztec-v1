@@ -11,5 +11,6 @@ module.exports = {
     DIVIDEND_PROOF: '66561',
     JOIN_SPLIT_PROOF: '65793',
     MINT_PROOF: '66049',
+    PRIVATE_RANGE_PROOF: '66562',
     SWAP_PROOF: '65794',
 };
