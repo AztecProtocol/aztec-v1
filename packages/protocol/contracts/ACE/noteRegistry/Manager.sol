@@ -134,7 +134,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         require(canConvert == true, "note registry does not have conversion rights");
         require(canAdjustSupply == true, "note registry does not have mint and burn rights");
         IERC20(linkedToken).transferFrom(msg.sender, address(this), _value.mul(scalingFactor));
-        registry.supplementTokens(_value);
+        registry.incrementTotalSupply(_value);
     }
 
     /**
