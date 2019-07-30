@@ -38,6 +38,7 @@ dataSources:
             - Account
               Note
               NoteAccess
+              NoteLog
           abis:
             - name: ZkAsset
               file: ./build/abis/ZkAssetOwnable.json

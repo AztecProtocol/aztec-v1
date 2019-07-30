@@ -248,6 +248,73 @@ export class NoteAccess extends Entity {
   }
 }
 
+export class NoteLog extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save NoteLog entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save NoteLog entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("NoteLog", id.toString(), this);
+  }
+
+  static load(id: string): NoteLog | null {
+    return store.get("NoteLog", id) as NoteLog | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get noteAccess(): string {
+    let value = this.get("noteAccess");
+    return value.toString();
+  }
+
+  set noteAccess(value: string) {
+    this.set("noteAccess", Value.fromString(value));
+  }
+
+  get account(): string {
+    let value = this.get("account");
+    return value.toString();
+  }
+
+  set account(value: string) {
+    this.set("account", Value.fromString(value));
+  }
+
+  get status(): string {
+    let value = this.get("status");
+    return value.toString();
+  }
+
+  set status(value: string) {
+    this.set("status", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+}
+
 export class Account extends Entity {
   constructor(id: string) {
     super();
