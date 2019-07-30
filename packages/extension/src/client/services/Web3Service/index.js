@@ -90,6 +90,7 @@ class Web3Service {
         if (!this.hasContract(contractName)) {
             warnLog(`Contract object "${contractName}" hasn't been initiated.`);
         }
+        this.contracts[contractName].address = this.contracts[contractName]._address;
 
         return this.contracts[contractName];
     }
@@ -138,17 +139,29 @@ class Web3Service {
                 .deploy(deployOptions)
                 .send({
                     from: address,
-                    gas: gas * 5,
+                    gas: gas * 3,
                 })
-                .on('error', (error) => {
-                    reject(error);
-                })
-                .on('confirmation', (confirmationNumber, receipt) => {
-                    if (!receipt) {
-                        reject();
-                    } else {
-                        resolve(receipt);
-                    }
+                .once('transactionHash', (receipt) => {
+                    console.log(receipt);
+                    const interval = setInterval(() => {
+                        console.log('in interval');
+                        this.web3.eth.getTransactionReceipt(receipt, (error, transactionReceipt) => {
+                            console.log('data', transactionReceipt);
+                            if (transactionReceipt) {
+                                clearInterval(interval);
+                                resolve(transactionReceipt);
+                            } else if (error) {
+                                console.log('error', error);
+                                clearInterval(interval);
+                                reject(new Error(error));
+                            }
+                        });
+                    }, 1000);
+                // if (!receipt) {
+                //     reject();
+                // } else {
+                //     resolve(receipt);
+                // }
                 });
         });
     }
@@ -167,25 +180,40 @@ class Web3Service {
         if (type === 'call') {
             return method(...methodArgs).call({
                 from: address,
+                gas: 6500000,
                 ...methodSetting,
             });
         }
 
-        return new Promise((resolve, reject) => {
-            method(...methodArgs)[type]({
+        return new Promise(async (resolve, reject) => {
+            const methodCall = method(...methodArgs)[type]({
                 from: address,
                 ...methodSetting,
-            })
-                .on('error', (error) => {
-                    reject(error);
-                })
-                .on('confirmation', (confirmationNumber, receipt) => {
-                    if (!receipt) {
-                        reject();
-                    } else {
-                        resolve(receipt);
-                    }
-                });
+                gas: 6500000,
+            });
+
+            methodCall.once('transactionHash', (receipt) => {
+                console.log(receipt);
+                const interval = setInterval(() => {
+                    console.log('in interval');
+                    this.web3.eth.getTransactionReceipt(receipt, (error, transactionReceipt) => {
+                        console.log('data', transactionReceipt);
+                        if (transactionReceipt) {
+                            clearInterval(interval);
+                            resolve(transactionReceipt);
+                        } else if (error) {
+                            console.log('error', error);
+                            clearInterval(interval);
+                            reject(new Error(error));
+                        }
+                    });
+                }, 1000);
+                // if (!receipt) {
+                //     reject();
+                // } else {
+                //     resolve(receipt);
+                // }
+            });
         });
     };
 
