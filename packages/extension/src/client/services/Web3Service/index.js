@@ -167,7 +167,6 @@ class Web3Service {
         if (type === 'call') {
             return method(...methodArgs).call({
                 from: address,
-                gas: 6500000,
                 ...methodSetting,
             });
         }
@@ -176,7 +175,6 @@ class Web3Service {
             method(...methodArgs)[type]({
                 from: address,
                 ...methodSetting,
-                gas: 6500000,
             })
                 .on('error', (error) => {
                     reject(error);

@@ -53,8 +53,7 @@ export default async function demo({
 
 
     await sleep(2000);
-    let zkAssetAddress = '0xd81fc950c144b33d3fa85d62efa12f8c1154f5d7';
-    let enableAssetResponse;
+    let zkAssetAddress = '0xab7f50b26b4079a682c92dd15d4917c8989915ba';
     if (zkAssetAddress) {
     //     // enableAssetResponse = await aztec.auth.enableAsset(zkAssetAddress);
     } else {

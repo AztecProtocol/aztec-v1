@@ -17,7 +17,6 @@ class Aztec {
     constructor() {
         this.enabled = false;
         this.auth = auth;
-
     }
 
     enable = async ({
@@ -25,11 +24,10 @@ class Aztec {
         contractAddresses,
     } = {
         contractAddresses: {
-            ace: '0xec85f3d1fc95ca5e02a9e4b08998bd4bf92ef914',
+            // ace: '0xec85f3d1fc95ca5e02a9e4b08998bd4bf92ef914',
             // aztecAccountRegistry: '0x2DC7d67896DB3D58d029a747e149F68165cE863E',
         },
     }) => {
-
         await Web3Service.init();
         Web3Service.registerContract(ACE);
 
@@ -42,24 +40,19 @@ class Aztec {
 
         const {
             error,
-            account: user
+            account: user,
         } = await ensureExtensionEnabled();
 
-        if(error) {
-            
+        if (error) {
             console.log(error);
             this.error = new Error(error);
-            return
-        }
-        else {
-
+        } else {
             this.enabled = true;
 
             this.asset = assetFactory;
             this.note = noteFactory;
         }
-         
-        };
+    };
 }
 
 export default Aztec;
