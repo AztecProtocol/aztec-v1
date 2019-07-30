@@ -10,17 +10,19 @@ export default async function syncAssetInfo(address) {
     });
 
     if (!asset) {
-        ({
-            asset,
+        const {
+            onChainAsset,
         } = await GraphNodeService.query(`
-                asset(id: "${address}") {
-                    address
-                    linkedTokenAddress
-                }
-            `));
+            onChainAsset: asset(id: "${address}") {
+                address
+                linkedTokenAddress
+                scalingFactor
+                canAdjustSupply
+                canConvert
+            }
+        `);
 
-
-        if (!asset) {
+        if (!onChainAsset) {
             throw argsError('asset.notFound.onChain', {
                 messageOptions: {
                     asset: address,
@@ -28,14 +30,11 @@ export default async function syncAssetInfo(address) {
             });
         }
 
-        const {
-            linkedTokenAddress,
-        } = asset;
-
-        assetModel.set(
+        await assetModel.set(
             {
+                ...onChainAsset,
+                scalingFactor: +(onChainAsset.scalingFactor || 0),
                 address,
-                linkedTokenAddress,
                 balance: 0,
             },
             {
@@ -43,6 +42,10 @@ export default async function syncAssetInfo(address) {
                 ignoreDuplicate: true,
             },
         );
+
+        asset = await assetModel.get({
+            address,
+        });
     }
 
     return asset;

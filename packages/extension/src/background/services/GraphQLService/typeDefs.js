@@ -46,8 +46,11 @@ export default gql`
     type Asset {
         id: ID!
         address: String!
-        linkedTokenAddress: String
         balance: Int
+        linkedTokenAddress: String
+        scalingFactor: Int
+        canAdjustSupply: Boolean
+        canConvert: Boolean
     }
     type Note {
         id: ID!

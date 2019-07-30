@@ -29,6 +29,9 @@ export default async function fetchNoteFromServer({
                         asset {
                             address
                             linkedTokenAddress
+                            scalingFactor
+                            canAdjustSupply
+                            canConvert
                         }
                         owner {
                             address

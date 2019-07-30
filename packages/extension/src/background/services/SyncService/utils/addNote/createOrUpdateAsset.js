@@ -7,6 +7,7 @@ export default async function createOrUpdateAsset(asset) {
     } = await assetModel.set(
         {
             ...asset,
+            scalingFactor: +(asset.scalingFactor || 0),
             balance: 0,
         },
         {

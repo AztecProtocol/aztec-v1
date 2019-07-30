@@ -9,5 +9,8 @@ export default Model({
         'address',
         'balance',
         'linkedTokenAddress',
+        'scalingFactor',
+        'canAdjustSupply',
+        'canConvert',
     ],
 });
