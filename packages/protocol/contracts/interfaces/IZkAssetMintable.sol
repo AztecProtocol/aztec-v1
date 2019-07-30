@@ -15,7 +15,7 @@ import "../ERC1724/ZkAssetOwnable.sol";
  * @title IZkAssetMintable
  * @author AZTEC
  * @dev An interface defining the ZkAssetMintable standard.
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 
 interface IZkAssetMintable {

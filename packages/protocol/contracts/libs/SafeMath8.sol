@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <= 0.6.0;
 /**
  * @title Library of SafeMath arithmetic operations
  * @author AZTEC
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 
 library SafeMath8 {

@@ -6,7 +6,7 @@ import "../../ERC1724/ZkAssetOwnable.sol";
  * @title ZkAssetOwnableTest
  * @author AZTEC 
  * @dev Used for testing purposes
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ZkAssetOwnableTest {
 

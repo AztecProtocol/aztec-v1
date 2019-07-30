@@ -27,6 +27,7 @@ utils.constants = {
  */
 utils.createSharedSecret = (publicKeyHex) => {
     const publicKey = secp256k1.ec.keyFromPublic(publicKeyHex.slice(2), 'hex');
+    // When on the web crypto comes from a dependency which acts as a wrapper for browser-level entropy. The version should be fixed to make sure randomness is maintained.
     const ephemeralKey = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
     const sharedSecret = publicKey.getPublic().mul(ephemeralKey.priv);
     const sharedSecretHex = `0x${sharedSecret.encode(false).toString('hex')}`;

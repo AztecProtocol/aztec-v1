@@ -175,4 +175,5 @@ module.exports = {
     getDefaultDepositNotes,
     getDepositAndTransferNotes,
     getDefaultDepositAndTransferNotes,
+    getNotesForAccount,
 };
