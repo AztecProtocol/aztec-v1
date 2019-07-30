@@ -51,7 +51,7 @@ class SyncService {
             config: this.config,
             address,
             privateKey,
-            lastSynced: (lastSynced | 0) + 1, // eslint-disable-line no-bitwise
+            lastSynced,
         });
     }
 }
