@@ -25,6 +25,14 @@ type NoteAccess @entity {
   timestamp: BigInt!
 }
 
+type NoteLog @entity {
+  id: ID!
+  noteAccess: NoteAccess!
+  account: Account!
+  status: String!
+  timestamp: BigInt!
+}
+
 type Account @entity {
   id: ID!
   address: Bytes!

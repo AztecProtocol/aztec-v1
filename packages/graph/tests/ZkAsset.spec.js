@@ -33,7 +33,7 @@ const {
 const METADATA_AZTEC_DATA_LENGTH = 194;
 const METADATA_VAR_LEN_LENGTH = 32;
 const METADATA_ADDRESS_LENGTH = 40;
-const METADATA_VIEWING_KEY_LENGTH = 424;
+const METADATA_VIEWING_KEY_LENGTH = 420;
 
 describe('ZkAsset', () => {
     const epoch = 1;
