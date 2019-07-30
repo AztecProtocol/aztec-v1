@@ -14,7 +14,9 @@ import {
 import pipe from '../utils/pipe';
 import validateSession from '../validators/validateSession';
 import getUserSpendingPublicKey from './getUserSpendingPublicKey';
+import decryptViewingKey from './decryptViewingKey';
 import requestGrantAccess from './requestGrantAccess';
+import pickNotesFromBalance from './pickNotesFromBalance';
 import createNoteFromBalance from './createNoteFromBalance';
 import syncAssetInfo from '../../AuthService/enableAssetForDomain/syncAssetInfo';
 
@@ -25,6 +27,7 @@ export default {
     Note: {
         asset: async ({ asset }) => assetModel.get({ key: asset }),
         owner: async ({ owner }) => accountModel.get({ key: owner }),
+        decryptedViewingKey: async ({ viewingKey, owner }) => decryptViewingKey(viewingKey, owner),
         status: ({ status }) => fromCode(status),
     },
     GrantNoteAccessPermission: {
@@ -48,6 +51,9 @@ export default {
         })),
         grantNoteAccessPermission: ensureEntityPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),
+        })),
+        pickNotesFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
+            notes: await pickNotesFromBalance(args, ctx),
         })),
         createNoteFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
             note: await createNoteFromBalance(args, ctx),
