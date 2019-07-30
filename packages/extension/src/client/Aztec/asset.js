@@ -9,8 +9,11 @@ import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
 const dataProperties = [
     'address',
-    'linkedTokenAddress',
     'balance',
+    'linkedTokenAddress',
+    'scalingFactor',
+    'canAdjustSupply',
+    'canConvert',
 ];
 
 export default class Asset {
@@ -31,8 +34,11 @@ export default class Asset {
             assetResponse: asset(id: "${this.id}") {
                 asset {
                     address
-                    linkedTokenAddress
                     balance
+                    linkedTokenAddress
+                    scalingFactor
+                    canAdjustSupply
+                    canConvert
                 }
                 error {
                     type

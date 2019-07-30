@@ -38,13 +38,9 @@ export default {
                 id: (args.id || args.currentAddress).toLowerCase(),
             }),
         })),
-        asset: ensureEntityPermission(async (_, args) => {
-            await syncAssetInfo(args.id);
-            // change format so we can just do this
-            return {
-                asset: await assetModel.get(args),
-            };
-        }),
+        asset: ensureEntityPermission(async (_, args) => ({
+            asset: await syncAssetInfo(args.id),
+        })),
         note: ensureEntityPermission(async (_, args) => ({
             note: await noteModel.get(args),
         })),
