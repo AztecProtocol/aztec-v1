@@ -3,6 +3,7 @@ import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import proofFactory from '~client/apis/proofFactory';
 import deposit from '~client/apis/deposit/prove';
+import withdraw from '~client/apis/withdraw/prove';
 import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
 const dataProperties = [
@@ -118,6 +119,20 @@ export default class Asset {
             from,
             sender,
             numberOfOutputNotes,
+        },
+    );
+
+    withdraw = async (amount, {
+        sender = '',
+        numberOfInputNotes,
+    } = {}) => proofFactory(
+        'withdraw',
+        withdraw,
+        {
+            assetAddress: this.address,
+            amount,
+            sender,
+            numberOfInputNotes,
         },
     );
 
