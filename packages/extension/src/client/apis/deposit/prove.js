@@ -5,7 +5,9 @@ import {
 import {
     randomSumArray,
 } from '~utils/random';
+import address from '~utils/address';
 import query from '~client/utils/query';
+import ApiError from '~client/utils/ApiError';
 
 export default async function proveDeposit({
     amount,
@@ -13,10 +15,23 @@ export default async function proveDeposit({
     sender,
     numberOfOutputNotes,
 }) {
+    const fromAddress = address(from);
+    const senderAddress = address(from);
+    if (from && !fromAddress) {
+        throw new ApiError('input.address.notValid', {
+            address: from,
+        });
+    }
+    if (sender && !senderAddress) {
+        throw new ApiError('input.address.notValid', {
+            address: sender,
+        });
+    }
+
     const {
         user,
     } = await query(`
-        user(id: "${sender || ''}") {
+        user(id: "${senderAddress}") {
             account {
                 address
                 linkedPublicKey
@@ -62,7 +77,7 @@ export default async function proveDeposit({
         noteValues,
     );
     const inputNotes = [];
-    const publicOwner = from || notesOwnerAddress;
+    const publicOwner = fromAddress || notesOwnerAddress;
     const proof = new JoinSplitProof(
         inputNotes,
         notes,
