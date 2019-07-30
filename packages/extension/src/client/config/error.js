@@ -16,4 +16,9 @@ export default {
         fromViewingKey: 'Failed to recover note from its viewing key.',
         shareAccess: 'Failed to shared note access.',
     },
+    input: {
+        address: {
+            notValid: 'Input address not valid.',
+        },
+    },
 };
