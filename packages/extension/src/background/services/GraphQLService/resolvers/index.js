@@ -17,7 +17,6 @@ import getUserSpendingPublicKey from './getUserSpendingPublicKey';
 import decryptViewingKey from './decryptViewingKey';
 import requestGrantAccess from './requestGrantAccess';
 import pickNotesFromBalance from './pickNotesFromBalance';
-import createNoteFromBalance from './createNoteFromBalance';
 import syncAssetInfo from '../../AuthService/enableAssetForDomain/syncAssetInfo';
 
 export default {
@@ -55,12 +54,12 @@ export default {
         pickNotesFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
         })),
-        createNoteFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
-            note: await createNoteFromBalance(args, ctx),
-        })),
-        account: ensureKeyvault(async (_, args, ctx) => {
+        account: ensureKeyvault(async (_, args) => {
             const account = await userModel.get({ address: args.currentAddress });
-            await AuthService.registerAddress({ address: args.currentAddress, linkedPublicKey: account.linkedPublicKey });
+            await AuthService.registerAddress({
+                address: args.currentAddress,
+                linkedPublicKey: account.linkedPublicKey,
+            });
             return {
                 account,
             };

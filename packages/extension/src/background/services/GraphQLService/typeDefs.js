@@ -35,7 +35,6 @@ export default gql`
         lastSynced: String
         registered: Boolean
     }
-
     type Domain {
         assets: [Asset!]
     }
@@ -72,7 +71,7 @@ export default gql`
         action: Action
     }
     type AccountApiResponse {
-        account: User 
+        account: User
         error: Error
         action: Action
     }
@@ -108,7 +107,7 @@ export default gql`
         account(
             currentAddress: String!
             domain: String!
-        ): AccountApiResponse 
+        ): AccountApiResponse
         note(
             id: ID!
             currentAddress: String!
@@ -128,14 +127,6 @@ export default gql`
             currentAddress: String!
             domain: String!
         ): NotesApiResponse
-        createNoteFromBalance(
-            assetId: ID!
-            amount: Int!
-            owner: String
-            userAccess: String
-            currentAddress: String!
-            domain: String!
-        ): NoteApiResponse
     }
     type Mutation {
         login(
