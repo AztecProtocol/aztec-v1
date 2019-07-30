@@ -4,7 +4,7 @@ import ZkAsset from '../contracts/ZkAsset';
 import auth from '../auth';
 import {
     assetFactory,
-} from '../apis/asset';
+} from './asset';
 import {
     noteFactory,
 } from '../apis/note';

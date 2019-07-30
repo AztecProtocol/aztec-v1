@@ -6,6 +6,7 @@ const dataProperties = [
     'hash',
     'value',
     'owner',
+    'status',
 ];
 
 export default class Note {
@@ -33,6 +34,7 @@ export default class Note {
                     asset {
                         balance
                     }
+                    status
                 }
                 error {
                     type

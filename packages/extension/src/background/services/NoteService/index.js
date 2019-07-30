@@ -71,7 +71,7 @@ class NoteService {
         noteKey,
     }) {
         if (!this.assetNoteValues[ownerAddress]
-            || !this.assetNoteValuesp[ownerAddress][assetId]
+            || !this.assetNoteValues[ownerAddress][assetId]
             || !this.assetNoteValues[ownerAddress][assetId][value]
         ) {
             return;
@@ -100,7 +100,9 @@ class NoteService {
         } = this.assetNoteValues[ownerAddress][assetId];
         if (minSum > maxSum) {
             throw argsError('note.pick.sum', {
-                value: minSum,
+                messageOptions: {
+                    value: minSum,
+                },
             });
         }
 

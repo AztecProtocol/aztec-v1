@@ -113,6 +113,9 @@ export default async function demo({
         return;
     }
 
+    log(`Asset balance = ${asset.balance}`);
+
+
     const depositAmount = randomInt(1, 50);
 
     let erc20Balance = await asset.balanceOfLinkedToken();
@@ -152,20 +155,31 @@ export default async function demo({
         notes: incomeNotes,
     });
 
-    const newNote = await asset.createNoteFromBalance({
-        amount: 5,
-    });
-    log(newNote);
 
-    const note = await aztec.note('0x2153f72cb02058d3e4ac18267731095c2f56fbc17aa58ea709f5628856dbc59e');
-    log(note);
+    await sleep(1000);
+    await asset.refresh();
+    log(`Asset balance = ${asset.balance}`);
 
-    if (!note.isValid()) {
-        log('Note is not valid');
-        return;
-    }
 
-    await note.grantAccess([
-        '0x0563a36603911daaB46A3367d59253BaDF500bF9',
-    ]);
+    // const newNoteProof = await asset.createNoteFromBalance({
+    //     amount: 5,
+    // });
+    // if (!newNoteProof) {
+    //     log('Failed to generate proof for creating note from balance');
+    //     return;
+    // }
+    // log(newNoteProof.export());
+    // if (newNoteProof) return;
+
+    // const note = await aztec.note('0x2153f72cb02058d3e4ac18267731095c2f56fbc17aa58ea709f5628856dbc59e');
+    // log(note);
+    //
+    // if (!note.isValid()) {
+    //     log('Note is not valid');
+    //     return;
+    // }
+    //
+    // await note.grantAccess([
+    //     '0x0563a36603911daaB46A3367d59253BaDF500bF9',
+    // ]);
 }
