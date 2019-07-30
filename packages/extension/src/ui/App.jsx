@@ -52,6 +52,7 @@ class App extends Component {
                         requestId: this.state.action.data.requestId,
                         data,
                     });
+                    window.close();
                 },
                 text: () => 'You need to set up the AZTEC extension to continue',
             },
@@ -78,6 +79,7 @@ class App extends Component {
                         requestId: this.state.action.data.requestId,
                         data,
                     });
+                    window.close();
                 },
                 text: ({ asset, domain }) => `${domain} is requesting access to your balance of ${asset}`,
             },
