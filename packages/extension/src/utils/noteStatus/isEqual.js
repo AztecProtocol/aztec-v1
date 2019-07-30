@@ -8,8 +8,12 @@ Object.keys(noteStatus).forEach((status) => {
     codeStatusMapping[noteStatus[status]] = status;
 });
 
-const getCode = status => ((status in codeStatusMapping) && status)
-    || noteStatus[status];
+const getCode = (status) => {
+    if (status in codeStatusMapping) {
+        return status;
+    }
+    return noteStatus[status];
+};
 
 const isEqual = (status1, status2) => {
     const code1 = getCode(status1);
