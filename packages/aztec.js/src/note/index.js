@@ -65,6 +65,11 @@ class Note {
              * @member {Point}
              */
             this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
+
+            /**
+             * Metadata for the note. This is general purpose data
+             */
+            this.metadata = null;
         }
         if (viewingKey) {
             if (typeof viewingKey !== 'string') {
@@ -80,6 +85,7 @@ class Note {
             this.gamma = mu.mul(this.a);
             this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
             this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
+            this.metadata = null;
         }
         /**
          * keccak256 hash of note coordinates, aligned in 32-byte chunks.
@@ -107,8 +113,30 @@ class Note {
      *
      * @returns {string} hex-string compressed ephemeral key
      */
-    exportMetadata() {
+    exportEphemeralKey() {
         return `0x${this.ephemeral.getPublic(true, 'hex')}`;
+    }
+
+
+    /**
+     * Appends custom metadata onto the end of the ephemeral key and encodes it according
+     * to the schema for one note. It then sets this.ephemeral to this value and returns
+     * the encoded data
+     * 
+     * @param {String} customData
+     * @returns {String} ephemeral key appended by the customData
+     * 
+     * Doing this with a fixed customData so far: 32 bytes, as a string
+     */
+    setMetadata(customData) {
+        const exportedKey = secp256k1.compress(this.ephemeral.getPublic())
+
+        if (!customData) {
+            this.metadata = exportedKey;
+        } else {
+            this.metadata = exportedKey + padLeft(customData, 64);
+        }
+        return this.metadata;
     }
 
     /**
@@ -226,7 +254,7 @@ note.derive = async (publicKey, spendingKey) => {
  */
 note.encodeMetadata = (noteArray) => {
     return noteArray.reduce((acc, aztecNote) => {
-        const ephemeral = aztecNote.exportMetadata();
+        const ephemeral = aztecNote.exportEphemeralKey();
         return `${acc}${padLeft(ephemeral.slice(2), 66)}`; // remove elliptic.js encoding byte, broadcast metadata is always compressed
     }, '0x');
 };
