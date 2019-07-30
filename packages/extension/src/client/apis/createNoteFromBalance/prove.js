@@ -7,6 +7,7 @@ import {
 import {
     randomSumArray,
 } from '~utils/random';
+import address from '~utils/address';
 import asyncMap from '~utils/asyncMap';
 import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
@@ -23,7 +24,7 @@ export default async function createNoteFromBalanceProof({
     const {
         user,
     } = await query(`
-        user(id: "${sender || ''}") {
+        user(id: "${address(sender)}") {
             account {
                 address
                 linkedPublicKey
@@ -39,11 +40,46 @@ export default async function createNoteFromBalanceProof({
     `);
 
     const {
-        account,
+        account: inputNotesOwner,
     } = user || {};
 
-    if (!account) {
-        return null;
+    if (!inputNotesOwner) {
+        throw new ApiError('account.notLinked', {
+            address: sender,
+        });
+    }
+
+    let outputNotesOwner = inputNotesOwner;
+    if (owner
+        && address(owner) !== inputNotesOwner.address
+    ) {
+        const {
+            user2,
+        } = await query(`
+            user2(id: "${address(sender)}") {
+                account {
+                    address
+                    linkedPublicKey
+                    spendingPublicKey
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `);
+
+        ({
+            account: outputNotesOwner,
+        } = user2 || {});
+
+        if (!outputNotesOwner) {
+            throw new ApiError('account.notLinked', {
+                address: owner,
+            });
+        }
     }
 
     const {
@@ -52,7 +88,7 @@ export default async function createNoteFromBalanceProof({
         notesResponse: pickNotesFromBalance(
             assetId: "${assetAddress}",
             amount: ${amount},
-            owner: "${sender}",
+            owner: "${inputNotesOwner.address}",
             numberOfNotes: ${numberOfInputNotes || 0}
         ) {
             notes {
@@ -78,19 +114,13 @@ export default async function createNoteFromBalanceProof({
         return null;
     }
 
-    const {
-        address: senderAddress,
-        linkedPublicKey,
-        spendingPublicKey,
-    } = account;
-
     let inputNotes;
     try {
         inputNotes = await asyncMap(
             notes,
             async ({ decryptedViewingKey }) => fromViewingKey(
                 decryptedViewingKey,
-                senderAddress,
+                inputNotesOwner.address,
             ),
         );
     } catch (error) {
@@ -99,7 +129,7 @@ export default async function createNoteFromBalanceProof({
         });
     }
 
-    const publicOwner = owner || senderAddress;
+    const publicOwner = outputNotesOwner.address;
     const inputValues = notes.map(({ value }) => value);
     const sum = notes.reduce((accum, { value }) => accum + value, 0);
     const extraAmount = sum - amount;
@@ -115,15 +145,15 @@ export default async function createNoteFromBalanceProof({
 
         outputNotes = await createNotes(
             outputValues,
-            spendingPublicKey,
+            outputNotesOwner.spendingPublicKey,
             publicOwner,
         );
     }
     if (extraAmount > 0) {
         const remainderNote = await createNote(
             extraAmount,
-            spendingPublicKey,
-            senderAddress,
+            inputNotesOwner.spendingPublicKey,
+            inputNotesOwner.address,
         );
         outputValues.push(extraAmount);
         outputNotes.push(remainderNote);
@@ -140,7 +170,7 @@ export default async function createNoteFromBalanceProof({
     const proof = new JoinSplitProof(
         inputNotes,
         outputNotes,
-        senderAddress,
+        inputNotesOwner.address,
         publicValue,
         publicOwner,
     );
@@ -148,9 +178,8 @@ export default async function createNoteFromBalanceProof({
     return {
         proof,
         inputNotes,
+        inputNotesOwner,
         outputNotes,
-        sender: senderAddress,
-        owner: publicOwner,
-        linkedPublicKey,
+        outputNotesOwner,
     };
 }

@@ -1,6 +1,6 @@
 import createNoteFromBalance from '../createNoteFromBalance/prove';
 
-export default async function withdrawProof({
+export default async function proveWithdraw({
     assetAddress,
     amount,
     sender,
