@@ -10,46 +10,17 @@ import ContractError from '~client/utils/ContractError';
 
 const { JOIN_SPLIT_PROOF } = devUtils.proofs;
 
-export default async function withdraw({
+export default async function sendWithdraw({
     proof,
     options: {
         assetAddress,
     },
     data: {
-        sender,
-        inputNotes,
+        inputNotesOwner,
         outputNotes,
-        linkedPublicKey,
+        outputNotesOwner,
     },
 }) {
-    const privateKey = '0xb8a23114e720d45005b608f8741639464a341c32c61920bf341b5cbddae7651d';
-    try {
-        await asyncForEach(inputNotes, async ({
-            noteHash,
-        }) => {
-            const signature = aztec.signer.signNote(
-                assetAddress,
-                noteHash,
-                sender,
-                privateKey,
-            );
-            await Web3Service
-                .useContract('ZkAsset')
-                .at(assetAddress)
-                .method('confidentialApprove')
-                .send(
-                    noteHash,
-                    sender,
-                    true,
-                    signature,
-                );
-        });
-    } catch (error) {
-        throw new ContractError('zkAsset.confidentialApprove', {
-            error,
-        });
-    }
-
     try {
         const transferData = proof.encodeABI(assetAddress);
         await Web3Service
@@ -57,7 +28,7 @@ export default async function withdraw({
             .method('validateProof')
             .send(
                 JOIN_SPLIT_PROOF,
-                sender,
+                inputNotesOwner.address,
                 transferData,
             );
     } catch (error) {
@@ -91,13 +62,20 @@ export default async function withdraw({
         await asyncForEach(outputNotes, async (note, i) => {
             const {
                 noteHash,
+                owner,
             } = note.exportNote();
             const realViewingKey = note.getView();
             const outputNote = outputCoder.getNote(outputNoteHashes, i);
             const metadata = outputCoder.getMetadata(outputNote);
+            const {
+                address,
+                linkedPublicKey,
+            } = owner === outputNotesOwner.address
+                ? outputNotesOwner
+                : inputNotesOwner;
             const viewingKey = encryptedViewingKey(linkedPublicKey, realViewingKey);
             const newMetadata = addAccess(metadata, {
-                address: sender,
+                address,
                 viewingKey: viewingKey.toHexString(),
             });
 

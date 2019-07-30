@@ -1,5 +1,6 @@
 import depositApprove from './deposit/approve';
 import depositSend from './deposit/send';
+import withdrawApprove from './withdraw/approve';
 import withdrawSend from './withdraw/send';
 import yieldNotes from './utils/yieldNotes';
 
@@ -10,6 +11,7 @@ const deposit = data => ({
 });
 
 const withdraw = data => ({
+    approve: async () => withdrawApprove(data),
     send: async () => yieldNotes(withdrawSend, data),
     export: () => data.proof,
 });
