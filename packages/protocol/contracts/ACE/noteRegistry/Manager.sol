@@ -12,17 +12,21 @@ import "./interfaces/Factory.sol";
 import "./proxies/AdminUpgradeabilityProxy.sol";
 
 /**
- * @title NoteRegistryManager contract which contains the storage variables that define the set of valid
- * AZTEC notes for a particular address
+ * @title NoteRegistryManager
  * @author AZTEC
- * @dev The NoteRegistry defines the state of valid AZTEC notes. It enacts instructions to update the
- * state, given to it by the ACE and only the note registry owner can enact a state update.
+ * @dev NoteRegistryManager will be inherrited by ACE, and its purpose is to manage the entire lifecycle of noteRegistries and of
+ * factories. It defines the methods which are used to deploy and upgrade registries, the methods to enact state changes sent by
+ * the owner of a registry, and it also manages the list of factories which are available.
+ *
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 contract NoteRegistryManager is IAZTEC, Ownable {
     using SafeMath for uint256;
     using VersioningUtils for uint24;
 
+    /**
+    * @dev event transmitted if and when a factory gets registered.
+    */
     event SetFactory(
         uint8 indexed epoch,
         uint8 indexed cryptoSystem,
@@ -43,10 +47,14 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     mapping(address => NoteRegistryBehaviour) public registries;
     mapping(address => IERC20) internal publicTokens;
     mapping(address => uint24) internal registryFactories;
+    /**
+    * @dev index of available factories, using very similar structure to proof registry in ACE.sol.
+    * The structure of the index is (epoch, cryptoSystem, assetType).
+    */
     address[0x100][0x100][0x10000] factories;
-    address[0x100][0x100][0x10000] disabledFactories;
 
-    uint8 public latestRegistryEpoch = 1;
+
+    uint8 public defaultRegistryEpoch = 1;
     uint8 public defaultCryptoSystem = 1;
 
     mapping(bytes32 => bool) public validatedProofs;
@@ -56,8 +64,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         _;
     }
 
-    function incrementLatestRegistryEpoch() public onlyOwner {
-        latestRegistryEpoch = latestRegistryEpoch + 1;
+    function incrementDefaultRegistryEpoch() public onlyOwner {
+        defaultRegistryEpoch = defaultRegistryEpoch + 1;
     }
 
     function setDefaultCryptoSystem(uint8 _defaultCryptoSystem) public onlyOwner {
@@ -65,19 +73,27 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     }
 
     /**
-    * @dev Register a new Factory
+    * @dev Register a new Factory, iff no factory for that ID exists. The epoch of any new factory must be at least as big as
+    * the default registry epoch. Each asset type for each cryptosystem for each epoch should have a note registry
+    *
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    * @param _factoryAddress - address of the deployed factory
     */
     function setFactory(uint24 _factoryId, address _factoryAddress) public onlyOwner {
         require(_factoryAddress != address(0x0), "expected the factory contract to exist");
         (uint8 epoch, uint8 cryptoSystem, uint8 assetType) = _factoryId.getVersionComponents();
-        require(epoch <= latestRegistryEpoch, "the factory epoch cannot be bigger than the latest epoch");
+        require(epoch <= defaultRegistryEpoch, "the factory epoch cannot be bigger than the latest epoch");
         require(factories[epoch][cryptoSystem][assetType] == address(0x0), "existing factories cannot be modified");
         factories[epoch][cryptoSystem][assetType] = _factoryAddress;
         emit SetFactory(epoch, cryptoSystem, assetType, _factoryAddress);
     }
 
+    /**
+    * @dev Get the factory address associated with a particular factoryId. Fail if resulting address is 0x0.
+    *
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    */
     function getFactoryAddress(uint24 _factoryId) public view returns (address factoryAddress) {
-        bool isFactoryDisabled;
         bool queryInvalid;
         assembly {
             // To compute the storage key for factoryAddress[epoch][cryptoSystem][assetType], we do the following:
@@ -99,27 +115,21 @@ contract NoteRegistryManager is IAZTEC, Ownable {
             // i.e. the storage slot offset IS the value of _factoryId
             factoryAddress := sload(add(_factoryId, factories_slot))
 
-            isFactoryDisabled :=
-                shr(
-                    shl(0x03, and(_factoryId, 0x1f)),
-                    sload(add(shr(5, _factoryId), disabledFactories_slot))
-                )
-            queryInvalid := or(iszero(factoryAddress), isFactoryDisabled)
+            queryInvalid := iszero(factoryAddress)
         }
 
         // wrap both require checks in a single if test. This means the happy path only has 1 conditional jump
         if (queryInvalid) {
             require(factoryAddress != address(0x0), "expected the factory address to exist");
-            require(isFactoryDisabled == false, "expected the factory address to not be disabled");
         }
     }
 
     /**
-    * @dev Call transferFrom on a linked ERC20 token. Used in cases where the ACE's mint
-    * function is called but the token balance of the note registry in question is
-    * insufficient
+    * @dev called when a mintable and convertible asset wants to perform an action which putts the zero-knowledge and public
+    * balance out of balance. For example, if minting in zero-knowledge, some public tokens need to be added to the pool
+    * managed by ACE, otherwise any private->public conversion runs the risk of not having any public tokens to send.
     *
-    * @param _value the value to be transferred
+    * @param _value the value to be added
     */
     function supplementTokens(uint256 _value) external {
         NoteRegistryBehaviour registry = registries[msg.sender];
@@ -148,6 +158,14 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     */
     function validateProofByHash(uint24 _proof, bytes32 _proofHash, address _sender) public view returns (bool);
 
+    /**
+    * @dev Default noteRegistry creation method. Doesn't take the id of the factory to use, but generates it based on defaults and on the passed flags.
+    *
+    * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
+    * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
+    * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
+    * @param _canConvert - whether the noteRegistry can transfer value from private to public representation and vice versa
+    */
     function createNoteRegistry(
         address _linkedTokenAddress,
         uint256 _scalingFactor,
@@ -156,7 +174,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     ) public {
         uint8 assetType = getAssetTypeFromFlags(_canConvert, _canAdjustSupply);
 
-        uint24 factoryId = computeVersionFromComponents(latestRegistryEpoch, defaultCryptoSystem, assetType);
+        uint24 factoryId = computeVersionFromComponents(defaultRegistryEpoch, defaultCryptoSystem, assetType);
 
         createNoteRegistry(
             _linkedTokenAddress,
@@ -167,6 +185,15 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         );
     }
 
+    /**
+    * @dev NoteRegistry creation method. Takes an id of the factory to use.
+    *
+    * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
+    * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
+    * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
+    * @param _canConvert - whether the noteRegistry can transfer value from private to public representation and vice versa
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    */
     function createNoteRegistry(
         address _linkedTokenAddress,
         uint256 _scalingFactor,
@@ -220,6 +247,12 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         );
     }
 
+    /**
+    * @dev Method to upgrade the registry linked with the msg.sender to a new factory, based on _factoryId.
+    * The submitted _factoryId must be of epoch equal or greater than previous _factoryId, and of the same assetType.
+    *
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    */
     function upgradeNoteRegistry(
         uint24 _factoryId
     ) public {
@@ -241,14 +274,24 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         registryFactories[address(registry)] = _factoryId;
     }
 
-    function transferFrom(address from, address to, uint256 value)
+    /**
+    * @dev Method used to transfer public tokens to or from ACE. This function should only be called by a registry, and only if the registry checks
+    * if a particular spend of public tokens has been approved. This method exists in order to make the client side API be able to authorise spends/transfer
+    * to a constant address (ACE). The alternative would be to have all public funds owned by the Proxy contract, but the client side API would then need to
+    * first find the deployed proxy for any zk asset. Prior to production, this needs to be moved to the second scenario.
+    *
+    * @param _from - address from which tokens are to be transfered
+    * @param _to - address to which tokens are to be transfered
+    * @param _value - value of tokens to be transfered
+    */
+    function transferFrom(address _from, address _to, uint256 _value)
         public
         onlyRegistry
     {
-        if (from == address(this)) {
-            publicTokens[msg.sender].transfer(to, value);
+        if (_from == address(this)) {
+            publicTokens[msg.sender].transfer(_to, _value);
         } else {
-            publicTokens[msg.sender].transferFrom(from, to, value);
+            publicTokens[msg.sender].transferFrom(_from, _to, _value);
         }
     }
 
