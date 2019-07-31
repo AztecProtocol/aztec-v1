@@ -5,7 +5,8 @@ import "../../201907/mixed/Behaviour.sol";
 /**
  * @title BehaviourMixed201908
  * @author AZTEC
- * @dev TODO
+ * @dev This contract extends BehaviourMixed201907.
+ *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract BehaviourMixed201908 is BehaviourMixed201907 {
