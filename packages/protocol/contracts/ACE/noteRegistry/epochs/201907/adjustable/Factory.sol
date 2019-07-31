@@ -4,10 +4,10 @@ import "../../../interfaces/Factory.sol";
 import "./Behaviour.sol";
 
 /**
- * @title NoteRegistryFactory contract which contains the storage variables that define the set of valid
- * AZTEC notes for a particular address
- * @author AZTEC
- * @dev todo
+  * @title FactoryAdjustable201907
+  * @author AZTEC
+  * @dev Deploys a BehaviourAdjustable201907
+  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract FactoryAdjustable201907 is NoteRegistryFactory {
     constructor(address _aceAddress) public NoteRegistryFactory(_aceAddress) {}

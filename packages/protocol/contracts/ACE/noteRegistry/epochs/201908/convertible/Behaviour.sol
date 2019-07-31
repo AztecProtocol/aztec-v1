@@ -7,7 +7,7 @@ import "../../201907/convertible/Behaviour.sol";
  * AZTEC notes for a particular address
  * @author AZTEC
  * @dev TODO
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract BehaviourConvertible201908 is BehaviourConvertible201907 {
     constructor () BehaviourConvertible201907() public {}

@@ -18,7 +18,7 @@ import "./proxies/AdminUpgradeabilityProxy.sol";
  * factories. It defines the methods which are used to deploy and upgrade registries, the methods to enact state changes sent by
  * the owner of a registry, and it also manages the list of factories which are available.
  *
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract NoteRegistryManager is IAZTEC, Ownable {
     using SafeMath for uint256;

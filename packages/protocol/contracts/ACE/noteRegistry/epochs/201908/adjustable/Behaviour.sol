@@ -7,7 +7,7 @@ import "../../201907/adjustable/Behaviour.sol";
  * AZTEC notes for a particular address
  * @author AZTEC
  * @dev TODO
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract BehaviourAdjustable201908 is BehaviourAdjustable201907 {
     constructor () BehaviourAdjustable201907() public {}
