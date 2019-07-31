@@ -42,7 +42,27 @@ describe('Join-Split Proof', () => {
             let publicValue = ProofUtils.getPublicValue(kIn, kOut);
             publicValue = bn128.groupModulus.add(new BN(publicValue)).umod(bn128.groupModulus);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            expect(proof.data.length).to.equal(5);
+            expect(proof.challengeHex.length).to.equal(66);
+            validateScalar(proof.challengeHex);
 
+            const dataLength = proof.data.length;
+            proof.data.forEach((note, i) => {
+                validateScalar(note[0], i === dataLength - 1);
+                validateScalar(note[1]);
+                validateElement(note[2], note[3]);
+                validateElement(note[4], note[5]);
+            });
+            const lastNote = proof.data[dataLength - 1];
+            expect(new BN(lastNote[0].slice(2), 16).eq(publicValue)).to.equal(true);
+        });
+
+        it('should construct a Join-Split proof with customMetaData', async () => {
+            let publicValue = ProofUtils.getPublicValue(kIn, kOut);
+            publicValue = bn128.groupModulus.add(new BN(publicValue)).umod(bn128.groupModulus);
+
+            const customMetadata = '0123456789';
+            const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner, customMetadata);
             expect(proof.data.length).to.equal(5);
             expect(proof.challengeHex.length).to.equal(66);
             validateScalar(proof.challengeHex);

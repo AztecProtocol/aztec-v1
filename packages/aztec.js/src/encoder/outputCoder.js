@@ -148,18 +148,19 @@ outputCoder.encodeInputNote = (note) => {
 outputCoder.encodeNotes = (notes, isOutput) => {
     let encodedNotes;
     if (isOutput) {
+        // if it's an output note
         encodedNotes = notes.map((note) => {
             if (note.forceNoMetadata) {
-                return outputCoder.encodeInputNote(note, isOutput);
+                return outputCoder.encodeInputNote(note);
             }
-            return outputCoder.encodeOutputNote(note, isOutput);
+            return outputCoder.encodeOutputNote(note);
         });
     } else {
         encodedNotes = notes.map((note) => {
             if (note.forceMetadata) {
-                return outputCoder.encodeOutputNote(note, isOutput);
+                return outputCoder.encodeOutputNote(note);
             }
-            return outputCoder.encodeInputNote(note, isOutput);
+            return outputCoder.encodeInputNote(note);
         });
     }
     const offsetToData = 0x40 + 0x20 * encodedNotes.length;
@@ -189,14 +190,32 @@ outputCoder.encodeNotes = (notes, isOutput) => {
  */
 outputCoder.encodeOutputNote = (note) => {
     const encoded = Array(7).fill();
-    encoded[0] = padLeft('e1', 64);
+
+    // boolean to mark whether custom metadata exists. Used to automatically update note encodings if present
+    let isMetadataPresent;
+    if (note.metadata) {
+        encoded[7] = note.metadata.slice(2);
+        isMetadataPresent = 1;
+    } else {
+        encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
+        isMetadataPresent = 0;
+    }
+
+    // total length of note
+    const noteLength = (0x20 * 5 + 0x21 + 0x20 + (0x20 * isMetadataPresent)).toString(16);
+
+    // total byte length of note data. Note data = (sigma + gamma + metadata)
+    const noteDataLength = (0x20 * 2 + 0x21 + (0x20 * isMetadataPresent)).toString(16);
+
+    encoded[0] = padLeft(noteLength, 64);
     encoded[1] = padLeft('1', 64);
     encoded[2] = padLeft(note.owner.slice(2), 64);
     encoded[3] = padLeft(note.noteHash.slice(2), 64);
-    encoded[4] = padLeft('61', 64);
+    encoded[4] = padLeft(noteDataLength, 64);
     encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
     encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-    encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
+
+
     return encoded.join('');
 };
 

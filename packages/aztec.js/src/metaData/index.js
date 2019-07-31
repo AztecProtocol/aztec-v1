@@ -16,9 +16,11 @@ const { padLeft } = require('web3-utils');
  */
 metaData.extractNoteMetadata = (notes) => {
     const extractedMetaData = notes.map((individualNote) => {
-        const noteMetadataLength = (individualNote.metadata.length/2).toString(16);
-        return `${padLeft(noteMetadataLength, 64)}${individualNote.metadata.slice(2)}`
+        // const noteMetadataLength = (individualNote.metadata.length/2).toString(16);
+        // 0x41, as this is the length of the note's metadata (ephemeral key + customData)
+        return `${padLeft('0x41', 64)}${individualNote.metadata.slice(2)}`.slice(2);
     });
+
     const { length } = extractedMetaData;
 
     const offsets = extractedMetaData.reduce(

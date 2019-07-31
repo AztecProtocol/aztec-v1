@@ -66,10 +66,6 @@ class Note {
              */
             this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
 
-            /**
-             * Metadata for the note. This is general purpose data
-             */
-            this.metadata = null;
         }
         if (viewingKey) {
             if (typeof viewingKey !== 'string') {
@@ -85,8 +81,7 @@ class Note {
             this.gamma = mu.mul(this.a);
             this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
             this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
-            this.metadata = null;
-        }
+=        }
         /**
          * keccak256 hash of note coordinates, aligned in 32-byte chunks.
          *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
@@ -129,7 +124,7 @@ class Note {
      * Doing this with a fixed customData so far: 32 bytes, as a string
      */
     setMetadata(customData) {
-        const exportedKey = secp256k1.compress(this.ephemeral.getPublic())
+        const exportedKey = secp256k1.compress(this.ephemeral.getPublic());
 
         if (!customData) {
             this.metadata = exportedKey;
