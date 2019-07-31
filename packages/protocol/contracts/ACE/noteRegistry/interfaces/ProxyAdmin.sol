@@ -1,12 +1,8 @@
 pragma solidity ^0.5.0;
 
 /**
- * @title BaseAdminUpgradeabilityProxy
- * @dev This contract combines an upgradeability proxy with an authorization
- * mechanism for administrative tasks.
- * All external functions in this contract must be guarded by the
- * `ifAdmin` modifier. See ethereum/solidity#3864 for a Solidity
- * feature proposal that would enable this to be done automatically.
+ * @title ProxyAdmin
+ * @dev Minimal interface for the proxy contract to be used by the Factory contract.
  */
 contract ProxyAdmin {
   function admin() external returns (address);
