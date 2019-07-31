@@ -21,7 +21,6 @@ import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry'
 import account from './account';
 
 
-
 const domainParams = [
     {
         name: 'name',
@@ -56,9 +55,7 @@ const AZTECAccount = [
     },
 ];
 
-const sendRegisterExtensionTx = async ({linkedPublicKey, address}) => {
-
-
+const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
     const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
     const lastNetworkId = Object.keys(AZTECAccountRegistry.networks).pop();
     const network = AZTECAccountRegistry.networks[lastNetworkId];
@@ -109,45 +106,37 @@ const sendRegisterExtensionTx = async ({linkedPublicKey, address}) => {
         .method('registerAZTECExtension')
         .send(address, linkedPublicKey, v, r, s);
     return {
-        account:{
+        account: {
             account: address,
-            linkedPublicKey
-        }
-    }
-}
+            linkedPublicKey,
+        },
+    };
+};
 
 export default async function ensureExtensionInstalled() {
-    
     const stream = from(account())
         .pipe(
             switchMap(({
-                error, 
+                error,
                 account,
                 hasKeyVault,
                 ...rest
-            })=> {
+            }) => {
+                console.log(account);
 
-                if(account && !account.registered) {
+                if (account && !account.registered) {
                     return from(sendRegisterExtensionTx(account));
                 }
-                else if (account ) {
+                if (account) {
                     return of({ account });
                 }
-                else {
-                    throw new Error(error);
-                }
+
+                throw new Error(error);
+
                 return empty();
-
             }),
-            map(d=> {
-                return d;
-            })
-        )
-        
-        return stream.toPromise();
+            map(d => d),
+        );
 
-
+    return stream.toPromise();
 }
-
-
-

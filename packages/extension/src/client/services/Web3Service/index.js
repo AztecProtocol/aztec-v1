@@ -14,6 +14,7 @@ class Web3Service {
 
     async init({
         providerUrl = 'http://localhost:8545',
+        provider = window.web3.currentProvider,
         account,
     } = {}) {
         if (process.env.NODE_ENV !== 'production'
@@ -21,9 +22,9 @@ class Web3Service {
         ) {
             this.web3 = MockWeb3;
         }
+        await window.web3.currentProvider.enable();
 
         if (!this.web3) {
-            const provider = new Web3.providers.HttpProvider(providerUrl);
             this.web3 = new Web3(window.web3.currentProvider);
         }
 

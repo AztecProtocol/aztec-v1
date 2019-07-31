@@ -212,12 +212,14 @@ export default {
         return session;
     },
     enableAssetForDomain,
-    registerExtension: async ({ password, salt, address }) => {
+    registerExtension: async ({
+        password, salt, address, seedPhrase,
+    }) => {
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
             salt,
         });
-        const mnemonic = KeyStore.generateRandomSeed(randomId());
+        const mnemonic = seedPhrase;
 
         const keyStore = new KeyStore({
             pwDerivedKey,
@@ -243,7 +245,6 @@ export default {
             user = {
                 address,
                 linkedPublicKey: keyStore.privacyKeys.publicKey,
-                registered: true,
             };
 
             await userModel.set(user);
@@ -269,14 +270,13 @@ export default {
             address: address.toLowerCase(),
         });
 
-        if (!user) {
-            user = {
-                address: address.toLowerCase(),
-                linkedPublicKey,
-            };
+        user = {
+            address: address.toLowerCase(),
+            linkedPublicKey,
+            registered: true,
+        };
 
-            await userModel.set(user);
-        }
+        await userModel.set(user, { forceReplace: true });
         const privateKey = await getPrivateKey(address);
         SyncService.syncAccount({
             address: address.toLowerCase(),

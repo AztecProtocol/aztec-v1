@@ -11,5 +11,6 @@ export function registerExtension(event: RegisterExtension): void {
     }
     account.linkedPublicKey = linkedPublicKey;
     account.registered = true;
+    account.address = address;
     account.save();
 }

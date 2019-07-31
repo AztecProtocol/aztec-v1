@@ -47,14 +47,18 @@ class Connection {
 
             map(({ timestamp }) => {
                 const popupURL = browser.extension.getURL('pages/popup.html');
+                const { width, height } = window.screen;
+
                 browser.windows.create({
                     url: `${popupURL}?id=${timestamp}`,
-                    width: 300,
-                    height: 400,
-                    type: 'panel',
+                    width: 340, // approximate golden ratio
+                    top: (height - 550) / 2,
+                    left: (width - 340) / 2,
+                    height: 550,
+                    type: 'popup',
                     focused: true,
                 });
-                // window.open('popup.html', 'AZTEC Extension', 'width=300,height=400,resizable=no,alwaysRaised=yes,alwaysOnTop=yes,z-lock=yes')
+                // window.open('popup.html', 'AZTEC Extension', 'width=300,height=400,resizable=no,alwaysRaised=yes,alwaysOnTop=yes,z-lock=yes,centerscreen=yes')
             }),
             // we can extend this to automatically close the window after a timeout
         ).subscribe();

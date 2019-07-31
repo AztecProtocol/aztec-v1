@@ -1,14 +1,23 @@
 import React, { Component } from 'react';
-
-import browser from 'webextension-polyfill';
-import { Mutation } from 'react-apollo';
 import {
-    Loader, Block, Button, Text,
-} from '@aztec/guacamole-ui'; import actionModel from '~database/models/action';
-import RegisterExtension from './mutations/RegisterExtension';
+    Block,
+} from '@aztec/guacamole-ui';
+import { Route, withRouter } from 'react-router-dom';
 import '@aztec/guacamole-ui/dist/styles/guacamole.css';
-import Login from './mutations/Login';
-import ApproveAssetForDomain from './mutations/ApproveDomain';
+
+import Login from './pages/Login/index.jsx';
+import Home from './pages/Home/index.jsx';
+import Register from './pages/Register/index.jsx';
+import ApproveAsset from './pages/ApproveAsset/index.jsx';
+
+import actionModel from '~database/models/action';
+
+const actionToRouteMap = {
+
+    'ui.register.extension': '/register',
+    'ui.asset.approve': '/approveAsset',
+
+};
 
 class App extends Component {
     state ={
@@ -19,95 +28,46 @@ class App extends Component {
         const search = new URLSearchParams(window.location.search);
         actionModel.get({ timestamp: search.get('id') })
             .then((resp) => {
-                this.setState({ action: resp });
+                this.props.history.push(actionToRouteMap[resp.type]);
+                console.log(actionToRouteMap[resp.type]);
+                setTimeout(() => {
+                    this.setState({ action: resp });
+                }, 1000);
             });
     }
 
-
     render() {
-        if (!this.state.action) {
-            return (
-                <Loader
-                    theme="primary"
-                    hasBackground
-                />
-            );
-        }
-
-        const actionMap = {
-            'ui.register.extension': {
-                mutation: RegisterExtension,
-                buttonText: 'Register',
-                onClick: mutation => async () => {
-                    const data = await mutation({
-                        variables: {
-                            password: 'password',
-                            salt: 'salt',
-                            domain: 'test',
-                            address: this.state.action.data.response.currentAddress,
-                        },
-                    });
-                    browser.runtime.sendMessage({
-                        type: 'UI_CONFIRM',
-                        requestId: this.state.action.data.requestId,
-                        data,
-                    });
-                    window.close();
-                },
-                text: () => 'You need to set up the AZTEC extension to continue',
-            },
-            'ui.account.login': {
-                mutation: Login,
-                buttonText: 'Login',
-                onClick: mutation => async () => {
-
-                },
-                text: () => 'You need to login to continue',
-            },
-            'ui.asset.approve': {
-                mutation: ApproveAssetForDomain,
-                buttonText: 'Approve',
-                onClick: mutation => async () => {
-                    const data = await mutation({
-                        variables: {
-                            domain: this.state.action.data.response.domain,
-                            asset: this.state.action.data.response.asset,
-                        },
-                    });
-                    browser.runtime.sendMessage({
-                        type: 'UI_CONFIRM',
-                        requestId: this.state.action.data.requestId,
-                        data,
-                    });
-                    window.close();
-                },
-                text: ({ asset, domain }) => `${domain} is requesting access to your balance of ${asset}`,
-            },
-        };
         return (
             <div className="App">
-                <Block background="primary" stretch padding="xl" align="center">
+                <Block
+                    background="primary"
+                    stretch
+                    padding="0"
+                    align="center"
+                    style={{
+                        background: 'linear-gradient(115deg, #808DFF 0%, #9FC4FF 100%, #7174FF 100%)',
+                    }}
+                >
+                    <Route
+                        path="/"
+                        render={props => (<Home action={this.state.action} />)}
 
-                    <Mutation mutation={actionMap[this.state.action.type].mutation}>
-                        {(mutation, { data }) => (
-                            <div>
-                                <Text text={actionMap[this.state.action.type].text(this.state.action.data.response)} />
-                                <br />
-                                <br />
-                                <Button
-                                    text={actionMap[this.state.action.type].buttonText}
-                                    onClick={actionMap[this.state.action.type].onClick(mutation)}
-                                />
-                            </div>
-                        )
-                        }
 
-                    </Mutation>
+                    />
+                    <Route path="/login" component={Login} />
+                    <Route
+                        path="/register"
+                        render={() => (<Register action={this.state.action} />)}
+                    />
+                    <Route
+                        path="/approveAsset"
+                        render={() => (<ApproveAsset action={this.state.action} />)}
+                    />
+
                 </Block>
 
             </div>
         );
     }
 }
-
-export default App;
+export default withRouter(App);

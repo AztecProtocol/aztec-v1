@@ -141,6 +141,7 @@ export default gql`
             salt: String!
             domain: String!
             address: String!
+            seedPhrase: String!
         ): UserAccountApiResponse
         registerAddress(
             address: String!
