@@ -1,6 +1,7 @@
 import assetModel from '~database/models/asset';
 import userModel from '~database/models/user';
 import accountModel from '~database/models/account';
+import GraphNodeService from '~backgroundServices/GraphNodeService';
 import noteModel from '~database/models/note';
 import {
     fromCode,
@@ -52,10 +53,24 @@ export default {
         })),
         account: ensureKeyvault(async (_, args) => {
             const account = await userModel.get({ address: args.currentAddress });
-            await AuthService.registerAddress({
-                address: args.currentAddress,
-                linkedPublicKey: account.linkedPublicKey,
-            });
+            if (!account.registered) {
+                const { account: user } = await GraphNodeService.query(`
+                    account(id: "${args.currentAddress.toLowerCase()}") {
+                        address
+                        linkedPublicKey
+                        registered 
+                    }
+                `);
+                if (user) {
+                    await AuthService.registerAddress({
+                        address: user.address,
+                        linkedPublicKey: user.linkedPublicKey,
+                    });
+                }
+                return {
+                    account: user || account,
+                };
+            }
             return {
                 account,
             };

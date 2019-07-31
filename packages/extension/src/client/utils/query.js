@@ -36,7 +36,7 @@ export default async function query(queryStr) {
             query: insertVariablesToGql(
                 queryStr,
                 {
-                    currentAddress: address || '',
+                    currentAddress: address.toLowerCase() || '',
                 },
             ),
         },
