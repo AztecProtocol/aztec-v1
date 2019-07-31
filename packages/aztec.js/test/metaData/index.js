@@ -21,7 +21,6 @@ describe('Metadata', () => {
 
             const testNotes = [testNoteA, testNoteB];
             const metadata = metaData.extractNoteMetadata(testNotes);
-
             const result = new HexString(metadata);
 
             expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(result.hexLength() - 0x20);
@@ -41,7 +40,7 @@ describe('Metadata', () => {
                 // go to the location of the metadata for this note. Jump over the length of the metadata
                 // take the first 0x21
                 const ephemeralKey = result.slice(offset + 0x20, offset + 0x20 + ephemeralKeyLength);
-                expect(secp256k1.decompressHex(ephemeralKey).eq(testNotes[i].ephemeral.getPublic())).to.equal(true);
+                expect(secp256k1.decompressHex(ephemeralKey).eq(testNotes[i].ephemeral.getPublic()));
 
                 const recoveredCustomData = result.slice(
                     offset + 0x20 + ephemeralKeyLength,

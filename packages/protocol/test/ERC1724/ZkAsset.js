@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-const { JoinSplitProof, signer } = require('aztec.js');
+const { JoinSplitProof, metaData, signer } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const {
     constants,
@@ -129,6 +129,89 @@ contract('ZkAsset', (accounts) => {
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
         });
+
+        it('should emit CreateNote() events with customMetadata when a single note is created', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const publicValue = depositPublicValue * -1;
+
+            const customMetadata = '0123456789';
+            depositOutputNotes.forEach((individualNote) => {
+                return individualNote.setMetadata(customMetadata)
+            })
+
+            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
+            const proof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                publicValue,
+                publicOwner,
+                metadata,
+            );
+
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            const balancePreTransfer = await erc20.balanceOf(accounts[0]);
+            const transferAmountBN = new BN(depositPublicValue);
+            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
+
+            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
+            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const balancePostTransfer = await erc20.balanceOf(accounts[0]);
+            expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
+
+            // Crucial check, confirm that the event contains the custom metadata
+            const event = receipt.logs.find(l => l.event === 'CreateNote');
+            expect(event.args.metadata.slice(-64)).to.equal(depositOutputNotes[0].metadata.slice(-64));
+        });
+
+        it('should emit CreateNote() events with customMetadata when multiple notes are created', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const aztecAccount = secp256k1.generateAccount();
+
+            const depositInputNotes = [];
+            const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [10, 20])
+            const depositPublicValue = 30
+            const depositInputOwnerAccounts = [];
+            const publicValue = depositPublicValue * -1;
+
+            const customMetadataA = '01';
+            const customMetadataB = '02';
+            const customMetadata = [customMetadataA, customMetadataB];
+            depositOutputNotes.forEach((individualNote, index) => {
+                return individualNote.setMetadata(customMetadata[index])
+            })
+
+            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
+            const proof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                publicValue,
+                publicOwner,
+                metadata,
+            );
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            const balancePreTransfer = await erc20.balanceOf(accounts[0]);
+            const transferAmountBN = new BN(depositPublicValue);
+            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
+
+            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
+            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const balancePostTransfer = await erc20.balanceOf(accounts[0]);
+            expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
+            console.log(receipt.logs);
+        });
+
 
         it('should update a note registry by consuming input notes, with kPublic negative', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);

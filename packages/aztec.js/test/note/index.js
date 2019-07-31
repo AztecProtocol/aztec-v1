@@ -83,7 +83,7 @@ describe('Note', () => {
 
         it('should correctly set note.metadata property to custom metadata', async () => {
             const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
-            const customData = randomHex(200);
+            const customData = padLeft(randomHex(20), 64);
             const customMetadata = testNote.setMetadata(customData);
             expect(customMetadata).to.equal(testNote.metadata);
         });
