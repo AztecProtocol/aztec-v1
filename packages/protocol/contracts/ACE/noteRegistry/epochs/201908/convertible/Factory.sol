@@ -9,14 +9,14 @@ import "./Behaviour.sol";
  * @author AZTEC
  * @dev todo
  **/
-contract FactoryConvertible201907 is NoteRegistryFactory {
+contract FactoryConvertible201908 is NoteRegistryFactory {
     constructor(address _aceAddress) public NoteRegistryFactory(_aceAddress) {}
 
     function deployNewBehaviourInstance() public
       onlyOwner
       returns (address)
     {
-        BehaviourConvertible201907 behaviourContract = new BehaviourConvertible201907();
+        BehaviourConvertible201908 behaviourContract = new BehaviourConvertible201908();
         emit NoteRegistryDeployed(address(behaviourContract));
         return address(behaviourContract);
     }
