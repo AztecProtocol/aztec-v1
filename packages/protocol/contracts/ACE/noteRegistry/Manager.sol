@@ -297,7 +297,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
     /**
     * @dev Update the state of the note registry according to transfer instructions issued by a
-    * zero-knowledge proof
+    * zero-knowledge proof. This method will verify that the relevant proof has been validated,
+    * make sure the same proof has can't be re-used, and it then delegates to the relevant noteRegistry.
     *
     * @param _proof - unique identifier for a proof
     * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
@@ -322,7 +323,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     }
 
     /**
-    * @dev This should be called from an asset contract.
+    * @dev Adds a public approval record to the noteRegistry, for use by ACE when it needs to transfer public tokens it holds
+    * to an external address. It needs to be associated with the hash of a proof.
     */
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         NoteRegistryBehaviour registry = registries[_registryOwner];
@@ -334,10 +336,11 @@ contract NoteRegistryManager is IAZTEC, Ownable {
      * @dev Returns the registry for a given address.
      *
      * @param _owner - address of the registry owner in question
+     *
      * @return linkedTokenAddress - public ERC20 token that is linked to the NoteRegistry. This is used to
      * transfer public value into and out of the system
      * @return scalingFactor - defines how many ERC20 tokens are represented by one AZTEC note
-     * @return totalSupply - TODO
+     * @return totalSupply - represents the total current supply of public tokens associated with a particular registry
      * @return confidentialTotalMinted - keccak256 hash of the note representing the total minted supply
      * @return confidentialTotalBurned - keccak256 hash of the note representing the total burned supply
      * @return canConvert - flag set by the owner to decide whether the registry has public to private, and
@@ -362,6 +365,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
      *
      * @param _registryOwner - address of the registry owner
      * @param _noteHash - keccak256 hash of the note coordiantes (gamma and sigma)
+     *
      * @return status - status of the note, details whether the note is in a note registry
      * or has been destroyed
      * @return createdOn - time the note was created
@@ -378,16 +382,32 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         return registry.getNote(_noteHash);
     }
 
-    function getAssetTypeFromFlags(bool canConvert, bool canAdjust) internal pure returns (uint8 assetType) {
-        uint8 convert = canConvert ? 1 : 0;
-        uint8 adjust = canAdjust ? 2 : 0;
+    /**
+    * @dev Internal utility method which converts two booleans into a uint8 where the first boolean
+    * represents (1 == true, 0 == false) the bit in position 1, and the second boolean the bit in position 2.
+    * The output is 1 for an asset which can convert between public and private, 2 for one with no conversion
+    * but with the ability to mint and/or burn, and 3 for a mixed asset which can convert and mint/burn
+    *
+    * @param _canConvert
+    * @param _canAdjust
+    */
+    function getAssetTypeFromFlags(bool _canConvert, bool _canAdjust) internal pure returns (uint8 assetType) {
+        uint8 convert = _canConvert ? 1 : 0;
+        uint8 adjust = _canAdjust ? 2 : 0;
 
         assetType = convert + adjust;
     }
 
-    function computeVersionFromComponents(uint8 first, uint8 second, uint8 third) internal pure returns (uint24 version) {
+    /**
+    * @dev Internal utility method which converts three uint8s into a uint24
+    *
+    * @param _first
+    * @param _second
+    * @param _third
+    */
+    function computeVersionFromComponents(uint8 _first, uint8 _second, uint8 _third) internal pure returns (uint24 version) {
         assembly {
-            version := or(mul(first, 0x10000), or(mul(second, 0x100), third))
+            version := or(mul(_first, 0x10000), or(mul(_second, 0x100), _third))
         }
     }
 }
