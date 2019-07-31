@@ -11,7 +11,7 @@ import "../Manager.sol";
  * @dev This interface will mostly be used by ACE, in order to have an API to interact with note registries through proxies.
  * The implementation of all write methods should have an onlyOwner modifier.
  *
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract NoteRegistryBehaviour is Ownable, IAZTEC {
     using SafeMath for uint256;
