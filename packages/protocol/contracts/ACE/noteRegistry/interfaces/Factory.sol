@@ -8,10 +8,11 @@ import "../../../interfaces/IAZTEC.sol";
 import "./ProxyAdmin.sol";
 
 /**
- * @title NoteRegistryFactory contract which contains the storage variables that define the set of valid
- * AZTEC notes for a particular address
+ * @title NoteRegistryFactory
  * @author AZTEC
- * @dev todo
+ * @dev Interface definition for factories. Factory contracts have the responsibility of managing the full lifecycle of
+ * Behaviour contracts, from deploy to eventual upgrade. They are owned by ACE, and all methods should only be callable
+ * by ACE.
  **/
 contract NoteRegistryFactory is IAZTEC, Ownable  {
     event NoteRegistryDeployed(address behaviourContract);
