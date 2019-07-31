@@ -45,10 +45,10 @@ contract('NoteRegistryManager', (accounts) => {
             expect(event.args.factoryAddress).to.equal(factoryContract.address);
         });
 
-        it('should increment latestRegistryEpoch', async () => {
-            const epoch = await ace.latestRegistryEpoch();
-            await ace.incrementLatestRegistryEpoch();
-            const newEpoch = await ace.latestRegistryEpoch();
+        it('should increment defaultRegistryEpoch', async () => {
+            const epoch = await ace.defaultRegistryEpoch();
+            await ace.incrementDefaultRegistryEpoch();
+            const newEpoch = await ace.defaultRegistryEpoch();
             expect(newEpoch.toNumber()).to.equal(epoch.toNumber() + 1);
         });
 
