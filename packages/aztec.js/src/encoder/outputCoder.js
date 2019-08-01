@@ -25,15 +25,17 @@ outputCoder.decodeNote = (note) => {
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
-    let ephemeral;
+    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
+    let ephemeral = null;
 
-    if (note.metadata) {
-        const metaDataSize = 0x198;
-        expectedLength = (0x20 * 4 + 0x20 * 2 + metaDataSize).toString(16);
+    if (metadataLength === 0x198) { // output note with metadata set
+        expectedLength = (0x20 * 4 + 0x20 * 2 + metadataLength).toString(16);
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
-    } else {
+    } else if (metadataLength === 0x61) { // ouputNote with no metadata set
+        expectedLength = 0xe1;
+        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
+    } else { // inputNote
         expectedLength = 0xc0;
-        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     }
 
     if (length !== expectedLength) {
@@ -52,6 +54,7 @@ outputCoder.decodeNote = (note) => {
         ephemeral,
     };
 };
+
 
 /**
  * Decode an array of notes
@@ -205,7 +208,6 @@ outputCoder.encodeOutputNote = (note) => {
         noteDataLength = (0x20 * 2 + isMetadataPresent * metaDataSize).toString(16); // this is returning a non hex number, causing problems
         noteLength = (0x20 * 4 + 0x20 * 2 + isMetadataPresent * metaDataSize).toString(16);
     } else {
-        console.log('entered correct spot');
         encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
         noteLength = 'e1'
         noteDataLength = '61'; // (0x20 * 2 + 0x21).toString(16);
