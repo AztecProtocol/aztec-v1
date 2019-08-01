@@ -23,14 +23,12 @@ const getPrivateKey = async (currentAddress) => {
     // should use user's address to find their private key
     const {
         keyStore,
-        session: {
-            pwDerivedKey,
-        } = {},
+        session,
     } = await get([
         'keyStore',
         'session',
     ]);
-    if (!pwDerivedKey) {
+    if (session && !session.pwDerivedKey) {
         return permissionError('account.not.login', {
             messageOptions: { account: currentAddress },
             currentAddress,
@@ -41,7 +39,7 @@ const getPrivateKey = async (currentAddress) => {
     const {
         encPrivKey,
     } = keyStore.privacyKeys;
-    const decodedKey = new Uint8Array(Object.values(JSON.parse(pwDerivedKey)));
+    const decodedKey = new Uint8Array(Object.values(JSON.parse(session.pwDerivedKey)));
 
     return keyvaultUtils.decryptString(encPrivKey, decodedKey);
 };
