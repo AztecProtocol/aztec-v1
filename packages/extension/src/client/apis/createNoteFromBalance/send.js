@@ -8,9 +8,12 @@ import encryptedViewingKey from '~utils/encryptedViewingKey';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 
+const {
+    outputCoder,
+} = aztec.encoder;
 const { JOIN_SPLIT_PROOF } = devUtils.proofs;
 
-export default async function sendWithdraw({
+export default async function sendCreateNoteFromBalance({
     proof,
     options: {
         assetAddress,
@@ -18,7 +21,7 @@ export default async function sendWithdraw({
     data: {
         inputNotesOwner,
         outputNotes,
-        outputNotesOwner,
+        outputNotesOwnerMapping,
     },
 }) {
     try {
@@ -54,25 +57,17 @@ export default async function sendWithdraw({
     }
 
     try {
-        const {
-            outputCoder,
-        } = aztec.encoder;
-        const outputNoteHashes = outputCoder.getOutputNotes(proof.output);
-
-        await asyncForEach(outputNotes, async (note, i) => {
+        await asyncForEach(outputNotes, async (note) => {
             const {
                 noteHash,
-                owner,
             } = note.exportNote();
             const realViewingKey = note.getView();
-            const outputNote = outputCoder.getNote(outputNoteHashes, i);
+            const outputNote = outputCoder.encodeOutputNote(note);
             const metadata = outputCoder.getMetadata(outputNote);
             const {
                 address,
                 linkedPublicKey,
-            } = owner === outputNotesOwner.address
-                ? outputNotesOwner
-                : inputNotesOwner;
+            } = outputNotesOwnerMapping[note.owner];
             const viewingKey = encryptedViewingKey(linkedPublicKey, realViewingKey);
             const newMetadata = addAccess(metadata, {
                 address,

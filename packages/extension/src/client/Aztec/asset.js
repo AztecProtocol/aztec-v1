@@ -6,6 +6,7 @@ import ApiError from '~client/utils/ApiError';
 import proofFactory from '~client/apis/proofFactory';
 import deposit from '~client/apis/deposit/prove';
 import withdraw from '~client/apis/withdraw/prove';
+import send from '~client/apis/send/prove';
 import mint from '~client/apis/mint/prove';
 import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
@@ -143,6 +144,36 @@ export default class Asset {
             amount,
             sender,
             numberOfInputNotes,
+        },
+    );
+
+    /**
+     *
+     * Send
+     *
+     * - transaction (Transaction or [Transaction])   Transaction = { amount, to, numberOfOutputNotes }
+     * - options
+     *       sender (Address):          The proof sender.
+     *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
+     *                                  Will use extension's or user's setting if undefined.
+     *       numberOfOutputNotes (Int): Number of new notes for each transaction.
+     *                                  Unless numberOfOutputNotes is defined in that transaction.
+     *
+     * @returns ([Notes!])
+     */
+    send = async (transaction, {
+        sender = '',
+        numberOfInputNotes,
+        numberOfOutputNotes,
+    } = {}) => proofFactory(
+        'send',
+        send,
+        {
+            assetAddress: this.address,
+            transaction,
+            sender,
+            numberOfInputNotes,
+            numberOfOutputNotes,
         },
     );
 
