@@ -2,6 +2,7 @@ import depositApprove from './deposit/approve';
 import depositSend from './deposit/send';
 import withdrawApprove from './withdraw/approve';
 import withdrawSend from './withdraw/send';
+import mintSend from './mint/send';
 import yieldNotes from './utils/yieldNotes';
 
 const deposit = data => ({
@@ -16,6 +17,11 @@ const withdraw = data => ({
     export: () => data.proof,
 });
 
+const mint = data => ({
+    send: async () => yieldNotes(mintSend, data),
+    export: () => data.proof,
+});
+
 const createNoteFromBalance = data => ({
     export: () => data.proof,
 });
@@ -23,6 +29,7 @@ const createNoteFromBalance = data => ({
 const proofMapping = {
     deposit,
     withdraw,
+    mint,
     createNoteFromBalance,
 };
 

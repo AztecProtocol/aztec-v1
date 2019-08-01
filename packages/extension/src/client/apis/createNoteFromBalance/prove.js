@@ -12,7 +12,7 @@ import asyncMap from '~utils/asyncMap';
 import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
 
-export default async function createNoteFromBalanceProof({
+export default async function proveCreateNoteFromBalance({
     assetAddress,
     amount,
     sender,
