@@ -131,7 +131,7 @@ contract('ZkAsset', (accounts) => {
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
         });
 
-        it('should emit CreateNote() events with customMetadata when a single note is created', async () => {
+        it('should emit CreateNote() event with customMetadata when a single note is created', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
@@ -169,7 +169,15 @@ contract('ZkAsset', (accounts) => {
             expect(event.args.metadata.slice(196, 752)).to.equal(customMetadata);
         });
 
-        it('should update the metadata of a note in a note registry', async () => {
+        it('should update the metadata of a note when ZkAsset.updateNoteMetadData() called', async () => {
+            /**
+             * Using ZkAssetTest as the ZkAsset here. ZkAssetTest has the safety feature
+             * require(noteOwner === msg.sender) removed. This is because it would not be possible to satisfy
+             * this condition and also create the note in question with a truffle account (they do not expose
+             * privateKeys or publicKeys).
+             *
+             * Failure test added for require(noteOwner === msg.sender) for a ZkAsset contract
+             */
             const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
             const depositInputNotes = [];
             const depositInputOwnerAccounts = [];
@@ -207,9 +215,53 @@ contract('ZkAsset', (accounts) => {
             });
 
             // check updateNoteMetaData() has updated the note metadata
-            truffleAssert.eventEmitted(tx2, 'UpdatedNoteMetadata', (event) => {
+            truffleAssert.eventEmitted(tx2, 'UpdateNoteMetadata', (event) => {
                 return event.metadata === updatedMetaData;
             });
+        });
+
+        it('should emit CreateNote() event with appropriate metadata for multiple notes', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const depositInputNotes = [];
+            const depositInputOwnerAccounts = [];
+            const depositPublicValue = 30;
+
+            const aztecAccount = secp256k1.generateAccount(); // this is just an address. Need the publicKey
+            const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20, 10]);
+            const publicValue = depositPublicValue * -1;
+
+            const customMetadataA =
+                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+
+            // changed the first non-zero digit from 2 to 3
+            const customMetadataB =
+                '00000000000000000000000000000038000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+
+            const customMetadata = [customMetadataA, customMetadataB];
+
+            depositOutputNotes.forEach((individualNote, index) => {
+                return individualNote.setMetadata(customMetadata[index]);
+            });
+
+            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner, metadata);
+
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            const balancePreTransfer = await erc20.balanceOf(accounts[0]);
+            const transferAmountBN = new BN(depositPublicValue);
+            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
+
+            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
+            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const balancePostTransfer = await erc20.balanceOf(accounts[0]);
+            expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
+
+            // Crucial check, confirm that the event contains the custom metadata
+            const event = receipt.logs.filter((l) => l.event === 'CreateNote');
+            expect(event[0].args.metadata.slice(196, 752)).to.equal(customMetadataA); // 1st note metadata
+            expect(event[1].args.metadata.slice(196, 752)).to.equal(customMetadataB); // 2nd note metadata
         });
 
         it('should update a note registry with proofs where a mixture of notes with set metadata have been used', async () => {
@@ -582,6 +634,41 @@ contract('ZkAsset', (accounts) => {
             const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
             await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
+        });
+
+        it('should fail if ZkAsset.updateNoteMetaData() called when msg.sender !== noteOwner', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const depositInputNotes = [];
+            const depositInputOwnerAccounts = [];
+            const depositPublicValue = 20;
+
+            const aztecAccount = secp256k1.generateAccount(); // this is just an address. Need the publicKey
+            const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20]);
+            const publicValue = depositPublicValue * -1;
+
+            const customMetadata =
+                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+            depositOutputNotes.forEach((individualNote) => {
+                return individualNote.setMetadata(customMetadata);
+            });
+
+            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner, metadata);
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+
+            const dummyEphemeralKeys = randomHex(192);
+            const updatedMetaData =
+                dummyEphemeralKeys +
+                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+            await truffleAssert.reverts(
+                zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
+                    from: accounts[0],
+                }),
+            );
         });
     });
 });
