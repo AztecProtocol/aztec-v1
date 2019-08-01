@@ -32,14 +32,6 @@ export default async function pickNotesFromBalance(args, ctx) {
         });
     }
 
-    const {
-        balance,
-    } = asset;
-
-    if (balance < amount) {
-        throw argsError('asset.balance.notEnough');
-    }
-
     const ownerAddress = owner || userAddress;
 
     const noteKeys = await NoteService.pick({

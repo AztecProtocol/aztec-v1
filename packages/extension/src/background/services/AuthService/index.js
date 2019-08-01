@@ -45,6 +45,16 @@ const getPrivateKey = async (currentAddress) => {
 
     return keyvaultUtils.decryptString(encPrivKey, decodedKey);
 };
+
+const getCurrentUser = async () => {
+    // TODO
+    const users = await userModel.get();
+    if (!users) {
+        return null;
+    }
+    return users[Object.keys(users)[0]];
+};
+
 const AuthService = {
     validateUserAddress: async (address) => {
         if (!address) { // this shouldn't happend in production
@@ -322,6 +332,7 @@ const AuthService = {
         return user;
     },
     getPrivateKey,
+    getCurrentUser,
 };
 
 export default AuthService;

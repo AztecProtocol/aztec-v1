@@ -35,7 +35,6 @@ export default async function syncAssetInfo(address) {
                 ...onChainAsset,
                 scalingFactor: +(onChainAsset.scalingFactor || 0),
                 address,
-                balance: 0,
             },
             {
                 // asset might have been created in SyncService

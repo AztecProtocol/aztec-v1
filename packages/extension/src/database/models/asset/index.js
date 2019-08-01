@@ -7,7 +7,6 @@ export default Model({
     index: 'address',
     fields: [
         'address',
-        'balance',
         'linkedTokenAddress',
         'scalingFactor',
         'canAdjustSupply',
