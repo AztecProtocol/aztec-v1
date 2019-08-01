@@ -104,6 +104,43 @@
             "type": "function"
         },
         {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "registryOwner",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "registryAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "scalingFactor",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "name": "linkedTokenAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "canAdjustSupply",
+                    "type": "bool"
+                },
+                {
+                    "indexed": false,
+                    "name": "canConvert",
+                    "type": "bool"
+                }
+            ],
+            "name": "CreateNoteRegistry",
+            "type": "event"
+        },
+        {
             "constant": false,
             "inputs": [
                 {
