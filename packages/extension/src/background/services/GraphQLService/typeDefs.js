@@ -26,6 +26,7 @@ export default gql`
     type Account {
         id: ID!
         address: String!
+        linkedPublicKey: String
     }
     type User {
         id: ID!
@@ -68,6 +69,10 @@ export default gql`
         metadata: String
         asset: Asset
     }
+    input Account_filter {
+        address: String
+        address_in: [String!]
+    }
     type AssetApiResponse {
         asset: Asset
         error: Error
@@ -75,6 +80,11 @@ export default gql`
     }
     type AccountApiResponse {
         account: User
+        error: Error
+        action: Action
+    }
+    type AccountsApiResponse {
+        accounts: [Account!]
         error: Error
         action: Action
     }
@@ -105,12 +115,18 @@ export default gql`
         ): UserAccountApiResponse
         asset(
             id: ID!
-            currentAddress: String!  domain: String!
+            currentAddress: String!
+            domain: String!
         ): AssetApiResponse
         account(
             currentAddress: String!
             domain: String!
         ): AccountApiResponse
+        accounts(
+            where: Account_filter
+            currentAddress: String!
+            domain: String!
+        ): AccountsApiResponse
         note(
             id: ID!
             currentAddress: String!

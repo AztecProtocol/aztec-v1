@@ -6,8 +6,8 @@ import {
     randomSumArray,
 } from '~utils/random';
 import address from '~utils/address';
-import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
+import validateAccount from '../utils/validateAccount';
 
 export default async function proveDeposit({
     amount,
@@ -16,49 +16,17 @@ export default async function proveDeposit({
     numberOfOutputNotes,
 }) {
     const fromAddress = address(from);
-    const senderAddress = address(from);
     if (from && !fromAddress) {
         throw new ApiError('input.address.notValid', {
             address: from,
         });
     }
-    if (sender && !senderAddress) {
-        throw new ApiError('input.address.notValid', {
-            address: sender,
-        });
-    }
 
-    const {
-        user,
-    } = await query(`
-        user(id: "${senderAddress}") {
-            account {
-                address
-                linkedPublicKey
-                spendingPublicKey
-            }
-            error {
-                type
-                key
-                message
-                response
-            }
-        }
-    `);
-
-    const {
-        account,
-    } = user || {};
-
-    if (!account) {
-        return null;
-    }
-
+    const notesOwner = await validateAccount(sender, true);
     const {
         address: notesOwnerAddress,
-        linkedPublicKey,
         spendingPublicKey,
-    } = account;
+    } = notesOwner;
 
     const noteValues = Array.isArray(amount)
         ? amount
@@ -89,10 +57,7 @@ export default async function proveDeposit({
     return {
         proof,
         notes,
-        notesOwner: {
-            address: notesOwnerAddress,
-            linkedPublicKey,
-        },
+        notesOwner,
         noteValues,
     };
 }
