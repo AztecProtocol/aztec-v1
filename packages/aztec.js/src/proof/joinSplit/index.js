@@ -118,7 +118,6 @@ class JoinSplitProof extends Proof {
 
     formatMetadata() {
         if (this.metadata === this.outputNotes) {
-            console.log('entered here');
             this.encodedMetadata = inputCoder.encodeMetadata(this.metadata)
         } else {
             this.encodedMetadata = this.metadata;
