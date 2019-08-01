@@ -330,7 +330,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
         // Only the note owner can update the note's metadata
         require(noteOwner == msg.sender, "transaction sender does not match the owner of the note being updated");
-        emit UpdatedNote(noteOwner, noteHash, updateMetadata);
+        emit UpdatedNoteMetadata(noteOwner, noteHash, updateMetadata);
     }
 
     /**
