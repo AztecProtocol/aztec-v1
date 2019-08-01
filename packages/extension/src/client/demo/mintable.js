@@ -86,7 +86,7 @@ export default async function demoMintable({
     }
 
 
-    log(`Asset balance = ${asset.balance}`);
+    log(`Asset balance = ${await asset.balance()}`);
 
 
     const mintAmount = randomInt(1, 50);
@@ -101,8 +101,7 @@ export default async function demoMintable({
 
 
     await sleep(2000);
-    await asset.refresh();
-    log(`Asset balance = ${asset.balance}`);
+    log(`Asset balance = ${await asset.balance()}`);
 
 
     const totalSupplyBefore = await asset.totalSupplyOfLinkedToken();
