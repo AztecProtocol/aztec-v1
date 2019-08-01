@@ -58,7 +58,7 @@ function fetchAllBehaviourData(dirPath) {
     return newBehaviours;
 }
 
-contract.only('Verify inherritance of behaviour contracts', (accounts) => {
+contract('Verify inherritance of behaviour contracts', (accounts) => {
     let inherritanceObj;
     const [owner, newOwner, attacker] = accounts;
 
@@ -98,7 +98,7 @@ contract.only('Verify inherritance of behaviour contracts', (accounts) => {
             assessProperInherritance(NoteRegistryBehaviour);
         });
 
-        it.only('should always set initialised flag and transfer ownership when initialise() is called once', async () => {
+        it('should always set initialised flag and transfer ownership when initialise() is called once', async () => {
             async function assessProperInitialisation(obj) {
                 const { behaviourPath, contractName, next } = obj;
                 if (behaviourPath) {
