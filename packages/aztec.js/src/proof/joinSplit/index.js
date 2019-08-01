@@ -16,6 +16,7 @@ class JoinSplitProof extends Proof {
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
+        this.formatMetadata();
         this.constructOutputs();
     }
 
@@ -110,6 +111,19 @@ class JoinSplitProof extends Proof {
         });
     }
 
+    /**
+     * Format the metadata, depending on whethe§r custom data has been passed or if the default
+     * metadata = outputNotes is used
+     */
+
+    formatMetadata() {
+        if (this.metadata === this.outputNotes) {
+            this.encodedMetadata = inputCoder.encodeMetadata(this.metadata);
+        } else {
+            this.encodedMetadata = this.metadata;
+        }
+    }
+
     // TODO: normalise proof output encoding. In some places it's expected to use `encodeProofOutputs`
     // while in others `encodeProofOutput`.
     constructOutputs() {
@@ -168,7 +182,7 @@ class JoinSplitProof extends Proof {
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
-            inputCoder.encodeMetadata(this.metadata),
+            this.encodedMetadata,
         ];
 
         const length = 3 + encodedParams.length + 1;
