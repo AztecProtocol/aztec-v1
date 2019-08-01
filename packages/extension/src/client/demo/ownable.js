@@ -39,7 +39,7 @@ export default async function demoOwnable({
     } = Web3Service.account;
 
 
-    let zkAssetAddress = '0xab7f50b26b4079a682c92dd15d4917c8989915ba'; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {
@@ -84,7 +84,7 @@ export default async function demoOwnable({
         return;
     }
 
-    log(`Asset balance = ${asset.balance}`);
+    log(`Asset balance = ${await asset.balance()}`);
 
 
     const depositAmount = randomInt(1, 50);
@@ -134,8 +134,7 @@ export default async function demoOwnable({
 
 
     await sleep(1000);
-    await asset.refresh();
-    log(`Asset balance = ${asset.balance}`);
+    log(`Asset balance = ${await asset.balance()}`);
 
 
     const withdrawAmount = randomInt(1, 10);
@@ -159,6 +158,5 @@ export default async function demoOwnable({
 
 
     await sleep(1000);
-    await asset.refresh();
-    log(`Asset balance = ${asset.balance}`);
+    log(`Asset balance = ${await asset.balance()}`);
 }

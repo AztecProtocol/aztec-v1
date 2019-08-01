@@ -12,7 +12,6 @@ import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
 const dataProperties = [
     'address',
-    'balance',
     'linkedTokenAddress',
     'scalingFactor',
     'canAdjustSupply',
@@ -37,7 +36,6 @@ export default class Asset {
             assetResponse: asset(id: "${this.id}") {
                 asset {
                     address
-                    balance
                     linkedTokenAddress
                     scalingFactor
                     canAdjustSupply
@@ -61,6 +59,30 @@ export default class Asset {
             });
         }
     };
+
+    async balance() {
+        const {
+            assetResponse,
+        } = await query(`
+            assetResponse: asset(id: "${this.id}") {
+                asset {
+                    balance
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `) || {};
+
+        const {
+            asset,
+        } = assetResponse || {};
+
+        return (asset && asset.balance) || 0;
+    }
 
     async totalSupplyOfLinkedToken() {
         let totalSupply;
