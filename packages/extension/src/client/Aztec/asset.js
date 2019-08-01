@@ -2,9 +2,11 @@ import address from '~utils/address';
 import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
+import ApiError from '~client/utils/ApiError';
 import proofFactory from '~client/apis/proofFactory';
 import deposit from '~client/apis/deposit/prove';
 import withdraw from '~client/apis/withdraw/prove';
+import mint from '~client/apis/mint/prove';
 import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
 const dataProperties = [
@@ -59,29 +61,28 @@ export default class Asset {
         }
     };
 
+    async totalSupplyOfLinkedToken() {
+        let totalSupply;
+        try {
+            totalSupply = await Web3Service
+                .useContract('ERC20')
+                .at(this.linkedTokenAddress)
+                .method('totalSupply')
+                .call();
+        } catch (error) {
+            throw new ContractError('erc20.totalSupply');
+        }
+
+        return totalSupply;
+    }
+
     balanceOfLinkedToken = async (account) => {
         let balance = 0;
         let accountAddress = account;
         if (!accountAddress) {
             ({
-                user: {
-                    account: {
-                        address: accountAddress,
-                    },
-                },
-            } = await query(`
-                user {
-                    account {
-                        address
-                    }
-                    error {
-                        type
-                        key
-                        message
-                        response
-                    }
-                }
-            `));
+                address: accountAddress,
+            } = Web3Service.account);
         }
 
         try {
@@ -144,6 +145,41 @@ export default class Asset {
             numberOfInputNotes,
         },
     );
+
+
+    /**
+     *
+     * Mint
+     * This api is available only when the asset is ZkAssetMintable
+     *
+     * - amount (Int! or [Int!])
+     * - options
+     *       sender (Address):          The proof sender.
+     *                                  If empty, will use extension's current user.
+     *       numberOfOutputNotes (Int): Number of new notes.
+     *                                  If input amount is an array, this value will be ignored.
+     *
+     * @returns ([Notes!])
+     */
+    mint = async (amount, {
+        sender = '',
+        numberOfOutputNotes = 1,
+    } = {}) => {
+        if (!this.canAdjustSupply) {
+            throw new ApiError('api.mint.notValid');
+        }
+
+        return proofFactory(
+            'mint',
+            mint,
+            {
+                assetAddress: this.address,
+                amount,
+                sender,
+                numberOfOutputNotes,
+            },
+        );
+    };
 
     createNoteFromBalance = async ({
         amount,
