@@ -31,7 +31,7 @@ contract ZkAssetTest is ZkAsset {
         require(status == 1, "only unspent notes can be approved");
 
         // Remove check for only note owner can call this function for testing purposes
-        emit UpdatedNoteMetadata(noteOwner, noteHash, updateMetadata);
+        emit UpdateNoteMetadata(noteOwner, noteHash, updateMetadata);
     }
 
 

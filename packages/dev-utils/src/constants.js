@@ -11,10 +11,6 @@ const constants = {
      * 1 note value = 0.1 DAI
      */
     ERC20_SCALING_FACTOR: new BN('100000000000000000', 10),
-    /**
-     * Length of an IES encrypted viewing key
-     */
-    IES_ENCRYPTION_LENGTH: 0x177,
     /** Maximum value that can be held in an AZTEC Note
      *  @constant K_MAX
      *  @type {string}
