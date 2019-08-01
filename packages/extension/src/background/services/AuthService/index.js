@@ -45,12 +45,19 @@ const getPrivateKey = async (currentAddress) => {
 };
 
 const getCurrentUser = async () => {
-    // TODO
+    const {
+        address,
+    } = await get('session') || {};
+    if (!address) {
+        return null;
+    }
+
     const users = await userModel.get();
     if (!users) {
         return null;
     }
-    return users[Object.keys(users)[0]];
+
+    return users[address];
 };
 
 const AuthService = {
