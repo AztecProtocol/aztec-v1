@@ -1,3 +1,4 @@
+const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const { expect } = require('chai');
 const { padLeft } = require('web3-utils');
@@ -11,10 +12,11 @@ describe('Metadata', () => {
     const noteValue = 10;
     describe('Success states', async () => {
         it('should create metadata for multiple notes when metadata has been set', async () => {
+            // customData is an examole of an IES encrypted viewing kewy
             const numNotes = 2;
             const testNoteA = await note.create(account.publicKey, noteValue);
             const testNoteB = await note.create(account.publicKey, noteValue);
-            const customData = '0123456789';
+            const customData = '04a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             // set the note metadata (this is done in the extension)
             testNoteA.setMetadata(customData);
             testNoteB.setMetadata(customData);
@@ -35,7 +37,7 @@ describe('Metadata', () => {
 
                 // this is the length of the metadata for that note
                 const ephemeralKeyLength = 0x21;
-                const customDataLength = 0x20;
+                const customDataLength = 0x177;
                 // this is extracting the ephemeral key and checking it is as expected
                 // go to the location of the metadata for this note. Jump over the length of the metadata
                 // take the first 0x21
@@ -46,7 +48,6 @@ describe('Metadata', () => {
                     offset + 0x20 + ephemeralKeyLength,
                     offset + 0x20 + ephemeralKeyLength + customDataLength,
                 );
-
                 expect(recoveredCustomData).to.equal(padLeft(customData, 64));
             }
         });

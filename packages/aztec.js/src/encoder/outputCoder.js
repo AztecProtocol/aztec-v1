@@ -17,6 +17,7 @@ const outputCoder = {};
  * @param {note} note - AZTEC note
  * @returns {Object[]} note variables - extracted variables: noteType, owner,
  * noteHash, gamma, sigma, ephemeral
+ * // TODO: check what happens on develop; only decoding
  */
 outputCoder.decodeNote = (note) => {
     const length = parseInt(note.slice(0x00, 0x40), 16);
@@ -24,13 +25,15 @@ outputCoder.decodeNote = (note) => {
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
-    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
-    let ephemeral = null;
-    if (metadataLength === 0x61) {
+    let ephemeral;
+
+    if (note.metadata) {
+        const metaDataSize = 0x198;
+        expectedLength = (0x20 * 4 + 0x20 * 2 + metaDataSize).toString(16);
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
-        expectedLength = 0xe1;
     } else {
         expectedLength = 0xc0;
+        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     }
 
     if (length !== expectedLength) {
@@ -148,7 +151,6 @@ outputCoder.encodeInputNote = (note) => {
 outputCoder.encodeNotes = (notes, isOutput) => {
     let encodedNotes;
     if (isOutput) {
-        // if it's an output note
         encodedNotes = notes.map((note) => {
             if (note.forceNoMetadata) {
                 return outputCoder.encodeInputNote(note);
@@ -193,19 +195,23 @@ outputCoder.encodeOutputNote = (note) => {
 
     // boolean to mark whether custom metadata exists. Used to automatically update note encodings if present
     let isMetadataPresent;
+    let noteDataLength;
+    let noteLength;
     if (note.metadata) {
         encoded[7] = note.metadata.slice(2);
         isMetadataPresent = 1;
+
+        const metaDataSize = 0x198;
+        noteDataLength = (0x20 * 2 + isMetadataPresent * metaDataSize).toString(16); // this is returning a non hex number, causing problems
+        noteLength = (0x20 * 4 + 0x20 * 2 + isMetadataPresent * metaDataSize).toString(16);
     } else {
+        console.log('entered correct spot');
         encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
-        isMetadataPresent = 0;
+        noteLength = 'e1'
+        noteDataLength = '61'; // (0x20 * 2 + 0x21).toString(16);
     }
 
-    // total length of note
-    const noteLength = (0x20 * 5 + 0x21 + 0x20 + (0x20 * isMetadataPresent)).toString(16);
-
-    // total byte length of note data. Note data = (sigma + gamma + metadata)
-    const noteDataLength = (0x20 * 2 + 0x21 + (0x20 * isMetadataPresent)).toString(16);
+    // const expectedDataNoteLength = 0x198 + 0x40;
 
     encoded[0] = padLeft(noteLength, 64);
     encoded[1] = padLeft('1', 64);
@@ -214,7 +220,6 @@ outputCoder.encodeOutputNote = (note) => {
     encoded[4] = padLeft(noteDataLength, 64);
     encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
     encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-
 
     return encoded.join('');
 };
@@ -254,6 +259,7 @@ outputCoder.encodeProofOutput = ({ inputNotes, outputNotes, publicOwner, publicV
     encoded[5] = padLeft(challenge.slice(2), 64);
     encoded[6] = encodedInputNotes;
     encoded[7] = encodedOutputNotes;
+
     return encoded.join('');
 };
 

@@ -112,12 +112,13 @@ class JoinSplitProof extends Proof {
     }
 
     /**
-     * Format the metadata, depending on whether custom data has been passed or if the default
+     * Format the metadata, depending on whethe§r custom data has been passed or if the default
      * metadata = outputNotes is used
      */
 
     formatMetadata() {
         if (this.metadata === this.outputNotes) {
+            console.log('entered here');
             this.encodedMetadata = inputCoder.encodeMetadata(this.metadata)
         } else {
             this.encodedMetadata = this.metadata;

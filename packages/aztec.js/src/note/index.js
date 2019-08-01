@@ -81,7 +81,7 @@ class Note {
             this.gamma = mu.mul(this.a);
             this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
             this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
-=        }
+        }
         /**
          * keccak256 hash of note coordinates, aligned in 32-byte chunks.
          *  Alignment is [gamma.x, gamma.y, sigma.x, sigma.y]
@@ -121,7 +121,7 @@ class Note {
      * @param {String} customData
      * @returns {String} ephemeral key appended by the customData
      * 
-     * Doing this with a fixed customData so far: 32 bytes, as a string
+     * Doing this with a fixed customData so far: 0x177 in length - length of one IES encrypted viewing key
      */
     setMetadata(customData) {
         const exportedKey = secp256k1.compress(this.ephemeral.getPublic());
