@@ -45,11 +45,10 @@ describe('Output Coder', () => {
         expect(isHex('x1234')).to.equal(false);
     });
 
-    it('should encode output note', () => {
+    it('should encode output note', async () => {
         const encoded = new HexString(outputCoder.encodeOutputNote(notes[0]));
         expect(isHex(encoded)).to.equal(true);
         expect(encoded.hexLength()).to.equal(0x101);
-
         expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(0xe1);
         expect(clean(encoded.slice(0x20, 0x40))).to.equal('1');
         expect(encoded.slice(0x40, 0x60)).to.equal(padLeft(notes[0].owner.slice(2), 64));
@@ -74,9 +73,9 @@ describe('Output Coder', () => {
         expect(bn128.decompressHex(encoded.slice(0xc0, 0xe0)).eq(notes[0].sigma)).to.equal(true);
     });
 
-    it('should encode notes', () => {
+    it('should encode notes inputnotes', () => {
         const inputNotes = [notes[0], notes[2], notes[5]];
-        const encoded = new HexString(outputCoder.encodeNotes(inputNotes, true));
+        const encoded = new HexString(outputCoder.encodeNotes(inputNotes, false));
 
         expect(isHex(encoded)).to.equal(true);
         const length = parseInt(encoded.slice(0x20, 0x40), 16);
@@ -88,7 +87,7 @@ describe('Output Coder', () => {
             const byteLength = parseInt(encoded.slice(location, location + 0x20), 16);
             const encodedNote = encoded.slice(location, location + 0x20 + byteLength);
             sum += byteLength + 0x40;
-            expect(encodedNote).to.equal(outputCoder.encodeOutputNote(inputNotes[i]));
+            expect(encodedNote).to.equal(outputCoder.encodeInputNote(inputNotes[i]));
         }
         expect(parseInt(encoded.slice(0x00, 0x20), 16)).to.equal(sum - 0x20);
         expect(encoded.hexLength()).to.equal(sum);
@@ -190,13 +189,12 @@ describe('Output Coder', () => {
     });
 
     it('should decode encoded input notes', () => {
-        const encoded = outputCoder.encodeNotes([notes[0], notes[1]], true);
-        const result = outputCoder.decodeNotes(encoded, true);
+        const encoded = outputCoder.encodeNotes([notes[0], notes[1]], false);
+        const result = outputCoder.decodeNotes(encoded);
         expect(result.length).to.equal(2);
         for (let i = 0; i < result.length; i += 1) {
             expect(result[i].gamma.eq(notes[i].gamma)).to.equal(true);
             expect(result[i].sigma.eq(notes[i].sigma)).to.equal(true);
-            expect(result[i].ephemeral.eq(notes[i].ephemeral.getPublic())).to.equal(true);
             expect(result[i].owner).to.equal(notes[i].owner);
             expect(result[i].noteHash).to.equal(notes[i].noteHash);
         }

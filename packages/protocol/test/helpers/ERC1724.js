@@ -144,7 +144,7 @@ const getDepositAndTransferNotes = async (depositOutputNoteValues, transferOutpu
  * - withdrawalPublicValue = 10
  * - two output notes owned by a different user, userB, with values 20 and 30
  *
- * @method getDefaultDepositNotes
+ * @method getDefaultDepositAndTransferNotes
  * @returns {Object} ...notes - outputs from the getDepositNotes() function
  * @returns {Numbner} depositPublicValue - number of tokens being converted into notes
  */

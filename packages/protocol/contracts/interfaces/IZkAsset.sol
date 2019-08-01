@@ -21,6 +21,7 @@ contract IZkAsset {
     event UpdateNoteMetaData(bytes32 indexed noteHash, bytes metadata);
     event ConvertTokens(address indexed owner, uint256 value);
     event RedeemTokens(address indexed owner, uint256 value);
+    event UpdateNoteMetadata(address indexed owner, bytes32 indexed noteHash, bytes metadata);
     
     function confidentialApprove(
         bytes32 _noteHash,

@@ -182,6 +182,7 @@ contract NoteRegistry is IAZTEC {
         // If publicValue != 0, enact a token transfer
         // (publicValue < 0) => transfer from publicOwner to ACE
         // (publicValue > 0) => transfer from ACE to publicOwner
+
         if (publicValue != 0) {
             require(flags.canConvert == true, "asset cannot be converted into public tokens");
 

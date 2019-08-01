@@ -20,6 +20,33 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
 
+    /**
+    * Note struct. This is the data that we store when we log AZTEC notes inside a NoteRegistry
+    *
+    * Data structured so that the entire struct fits in 1 storage word.
+    *
+    * @notice Yul is used to pack and unpack Note structs in storage for efficiency reasons,
+    *   see `NoteRegistry.updateInputNotes` and `NoteRegistry.updateOutputNotes` for more details
+    **/
+    struct Note {
+        // `status` uses the IAZTEC.NoteStatus enum to track the lifecycle of a note.
+        uint8 status;
+
+        // `createdOn` logs the timestamp of the block that created this note. There are a few
+        // use cases that require measuring the age of a note, (e.g. interest rate computations).
+        // These lifetime are relevant on timescales of days/months, the 900-ish seconds that a miner
+        // can manipulate a timestamp has little effect, but should be considered when utilizing this parameter.
+        // We store `createdOn` in 5 bytes of data - just in case this contract is still around in 2038 :)
+        // This kicks the 'year 2038' problem down the road by about 400 years
+        uint40 createdOn;
+
+        // `destroyedOn` logs the timestamp of the block that destroys this note in a transaction.
+        // Default value is 0x0000000000 for notes that have not been spent.
+        uint40 destroyedOn;
+
+        // The owner of the note
+        address owner;
+    }
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
@@ -288,6 +315,22 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
             }
 
         }
+    }
+
+    /**
+    * @dev Update the metadata of a note that already exists in storage. 
+    * @param noteHash - hash of a note, used as a unique identifier for the note
+    * @param updateMetadata - metadata to update the note with. This should be the length of
+    * an IES encrypted viewing key, 0x177
+    */
+    function updateNoteMetaData(bytes32 noteHash, bytes calldata updateMetadata) external {
+        // Get the note from this assets registry
+        ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
+        require(status == 1, "only unspent notes can be approved");
+
+        // Only the note owner can update the note's metadata
+        require(noteOwner == msg.sender, "transaction sender does not match the owner of the note being updated");
+        emit UpdateNoteMetadata(noteOwner, noteHash, updateMetadata);
     }
 
     /**
