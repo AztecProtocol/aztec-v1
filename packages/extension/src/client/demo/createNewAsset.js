@@ -57,8 +57,6 @@ export default async function createNewAsset({
         aceAddress,
         erc20Address,
         scalingFactor,
-        canAdjustSupply,
-        canConvert,
     ]);
 
     await Web3Service

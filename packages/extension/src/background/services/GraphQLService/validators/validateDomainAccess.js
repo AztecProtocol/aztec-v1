@@ -43,5 +43,6 @@ export default async function validateDomainAccess(_, args, ctx, info) {
         assetId,
         noteId,
         domain: args.domain,
+        currentAddress: args.currentAddress,
     });
 }

@@ -167,6 +167,7 @@ export default gql`
         approveAssetForDomain(
             domain: String!
             asset: String!
+            currentAddress: String!
         ): AssetApiResponse
     }
 `;
