@@ -16,6 +16,7 @@ export default {
         not: {
             register: 'Account %{account} is not registered.',
             login: 'Account %{account} is not logged in.',
+            linked: 'Address has no linked AZTEC extension account.',
         },
         notFound: {
             _: "Account '%{account}' not found.",

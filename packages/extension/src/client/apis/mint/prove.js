@@ -1,5 +1,4 @@
 import aztec from 'aztec.js';
-import address from '~utils/address';
 import {
     createNote,
     createNotes,
@@ -9,7 +8,7 @@ import {
 } from '~utils/random';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
-import query from '~client/utils/query';
+import validateAccount from '../utils/validateAccount';
 
 const {
     MintProof,
@@ -21,31 +20,7 @@ export default async function proveMint({
     numberOfOutputNotes,
     sender,
 }) {
-    const {
-        user,
-    } = await query(`
-        user(id: "${address(sender)}") {
-            account {
-                address
-                linkedPublicKey
-                spendingPublicKey
-            }
-            error {
-                type
-                key
-                message
-                response
-            }
-        }
-    `);
-
-    const {
-        account: notesOwner,
-    } = user || {};
-
-    if (!notesOwner) {
-        return null;
-    }
+    const notesOwner = await validateAccount(sender, true);
 
     let confidentialTotalMinted;
     try {

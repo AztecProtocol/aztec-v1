@@ -20,11 +20,15 @@ export default {
         shareAccess: 'Failed to shared note access.',
     },
     account: {
-        notLinked: 'Address has no linked AZTEC extension account.',
+        not: {
+            linked: 'Address has no linked AZTEC extension account.',
+        },
     },
     input: {
         address: {
-            notValid: 'Input address not valid.',
+            not: {
+                valid: 'Input address not valid.',
+            },
         },
     },
     api: {

@@ -15,6 +15,7 @@ import {
 import pipe from '../utils/pipe';
 import validateSession from '../validators/validateSession';
 import getUserSpendingPublicKey from './getUserSpendingPublicKey';
+import getAccounts from './getAccounts';
 import decryptViewingKey from './decryptViewingKey';
 import requestGrantAccess from './requestGrantAccess';
 import pickNotesFromBalance from './pickNotesFromBalance';
@@ -75,6 +76,9 @@ export default {
                 account,
             };
         }),
+        accounts: ensureUserPermission(async (_, args) => ({
+            accounts: await getAccounts(args),
+        })),
     },
     Mutation: {
         login: (_, args) => AuthService.login(args),

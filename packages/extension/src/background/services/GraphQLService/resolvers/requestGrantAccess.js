@@ -95,7 +95,7 @@ export default async function requestGrantAccess(args, ctx) {
         }
 
         const notFound = addressList
-            .filter(addr => !sharedAccounts.find(a => a.address !== addr));
+            .filter(addr => !sharedAccounts.find(a => a.address === addr));
         throw argsError('account.notFound.count', {
             messageOptions: {
                 count: notFound.length,
