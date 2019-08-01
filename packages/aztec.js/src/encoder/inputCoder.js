@@ -34,6 +34,7 @@ inputCoder.encodeMetadata = (standardData) => {
     * 
     * For each note publicKey, it then prepends '21' and pads left
     */
+    console.log('output notes: ', standardData);
     const encodedMetadata = standardData
         .map((n) => secp256k1.compress(n.ephemeral.getPublic()))
         .map((m) => `${padLeft('21', 64)}${m.slice(2)}`);

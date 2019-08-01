@@ -130,7 +130,7 @@ contract('ZkAsset', (accounts) => {
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
         });
 
-        it('should emit CreateNote() events with customMetadata when a single note is created', async () => {
+        it.only('should emit CreateNote() events with customMetadata when a single note is created', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
@@ -140,7 +140,7 @@ contract('ZkAsset', (accounts) => {
             } = await helpers.getDefaultDepositNotes();
             const publicValue = depositPublicValue * -1;
 
-            const customMetadata = '0123456789';
+            const customMetadata = '04a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata)
             })
@@ -169,10 +169,10 @@ contract('ZkAsset', (accounts) => {
 
             // Crucial check, confirm that the event contains the custom metadata
             const event = receipt.logs.find(l => l.event === 'CreateNote');
-            expect(event.args.metadata.slice(-64)).to.equal(depositOutputNotes[0].metadata.slice(-64));
+            expect(event.args.metadata.slice(-750)).to.equal(depositOutputNotes[0].metadata.slice(-750));
         });
 
-        it('should emit CreateNote() events with customMetadata when multiple notes are created', async () => {
+        it.skip('should emit CreateNote() events with customMetadata when multiple notes are created', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const aztecAccount = secp256k1.generateAccount();
 
@@ -210,6 +210,48 @@ contract('ZkAsset', (accounts) => {
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
             console.log(receipt.logs);
+        });
+
+        it.skip('should update the metadata of a note in a note registry', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+
+            const publicValue = depositPublicValue * -1;
+
+            const customMetadata = '04a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+            depositOutputNotes.forEach((individualNote) => {
+                return individualNote.setMetadata(customMetadata)
+            })
+
+            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
+            const proof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                publicValue,
+                publicOwner,
+                metadata,
+            );
+
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
+            await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+
+            // second digit has been changed from 4 to 5
+            const updatedMetaData = '05a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef'
+            const tx = await zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData);
+
+            truffleAssert.eventsEmitted(tx, 'UpdatedNote', (event) => {
+                return event.metadata === updatedMetaData
+            });
+            expect(true).to.equal(false);
         });
 
 

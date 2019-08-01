@@ -48,7 +48,7 @@ contract('Join-Split Validator', (accounts) => {
     });
 
     describe('Success States', () => {
-        it('should validate Join-Split proof with negative public value', async () => {
+        it.only('should validate Join-Split proof with negative public value', async () => {
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(joinSplitValidator.address);
