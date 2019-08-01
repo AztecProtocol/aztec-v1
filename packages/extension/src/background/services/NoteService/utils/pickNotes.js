@@ -55,26 +55,26 @@ export default function pickNotes({
         throw argsError('note.pick.count');
     }
 
+    let values;
     const totalNotes = sortedValues.length;
     if (totalNotes <= count) {
-        return maxSet;
-    }
-
-    let values;
-    let start = 0;
-    while (start < totalNotes - 1) {
-        values = pickValues(sortedValues, count, start, totalNotes - 1);
-        if (arraySum(values) >= minSum) {
-            break;
+        values = maxSet;
+    } else {
+        let start = 0;
+        while (start < totalNotes - 1) {
+            values = pickValues(sortedValues, count, start, totalNotes - 1);
+            if (arraySum(values) >= minSum) {
+                break;
+            }
+            // skip redundant identical values
+            const minValue = sortedValues[start];
+            const firstMinIndex = sortedValues.indexOf(minValue, start);
+            const lastMinIndex = sortedValues.lastIndexOf(minValue);
+            start = Math.max(
+                firstMinIndex + 1,
+                (lastMinIndex - count) + 1,
+            );
         }
-        // skip redundant identical values
-        const minValue = sortedValues[start];
-        const firstMinIndex = sortedValues.indexOf(minValue, start);
-        const lastMinIndex = sortedValues.lastIndexOf(minValue);
-        start = Math.max(
-            firstMinIndex + 1,
-            (lastMinIndex - count) + 1,
-        );
     }
 
     return pickKeysByValues(noteValues, values);
