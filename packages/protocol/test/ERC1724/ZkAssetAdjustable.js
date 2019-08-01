@@ -76,7 +76,6 @@ contract('ZkAssetAdjustable', (accounts) => {
             await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
             await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
 
-
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
         });
@@ -123,7 +122,10 @@ contract('ZkAssetAdjustable', (accounts) => {
                 aztecAccount,
                 aztecAccount,
             ]);
-            const { receipt: transferReceipt } = await zkAssetAdjustable.confidentialTransfer(withdrawalData, withdrawalSignatures);
+            const { receipt: transferReceipt } = await zkAssetAdjustable.confidentialTransfer(
+                withdrawalData,
+                withdrawalSignatures,
+            );
 
             const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
             expect(erc20TotalSupplyAfterWithdrawal).to.equal(withdrawalPublicValue * scalingFactor);
@@ -153,7 +155,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             const burnData = burnProof.encodeABI(zkAssetAdjustable.address);
 
             const { receipt: burnReceipt } = await zkAssetAdjustable.confidentialBurn(BURN_PROOF, burnData);
-            // expect(burnReceipt.status).to.equal(true);
+            expect(burnReceipt.status).to.equal(true);
         });
 
         it('should perform mint when using confidentialTransferFrom()', async () => {
