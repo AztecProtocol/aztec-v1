@@ -1,9 +1,9 @@
 import gql from 'graphql-tag';
 
 export default gql`
-  mutation login($password: String!, $salt: String!, $domain: String!) {
-    login(password:$password, salt: $salt, domain: $domain) {
-        account    
+  mutation login($password: String!, $domain: String! $address: String!) {
+    login(password:$password, domain: $domain, address: $address) {
+        id
     }
   }
 `;

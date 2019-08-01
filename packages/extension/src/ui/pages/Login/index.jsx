@@ -1,36 +1,106 @@
 import React, { Component } from 'react';
 
+import browser from 'webextension-polyfill';
+import { Mutation } from 'react-apollo';
 import {
-    Block, Button, Text,
+    Loader, Block, Button, Text, TextInput,
 } from '@aztec/guacamole-ui';
 
-const Step1 = () => (
-    <Block
-        background="white"
-        stretch
-        padding="xl"
-        align="center"
-    >
-        <Block padding="l xl">
-            <Text text="Create your privacy keys" weight="semibold" color="primary" size="xl" />
-        </Block>
+import Login from '../../mutations/Login.js';
 
-        <Block padding="l xl">
-            <Text text="AZTEC creates a set of privacy keys that are used to keep your assets private. These are stored in encrypted form inside the extension." weight="light" color="label" size="m" />
-            <br />
-            <br />
-            <br />
-            <Text text="We never have access to your privacy keys. Your privacy keys do not control the spending of assets / tokens." color="label" size="m" />
-            <br />
-            <br />
-            <br />
-            <Text text="These keys are used to decrypt your balance and construct the Zero-Knowledge proofs needed to interact with AZTEC assets, while keeping your balances private." color="label" weight="light" size="m" />
-        </Block>
-        <Block padding="l l l 0">
-            <Button text="Create Keys" />
-            <Text text="Restore from seed phrase" color="label" weight="light" size="xxs" />
-        </Block>
-    </Block>
-);
 
-export default Step1;
+class ApproveAssetForDomain extends Component {
+    state ={
+
+    }
+
+    __updatePassword(value) {
+        this.setState({ password: value });
+    }
+
+    __handleLogin = async (mutation) => {
+        const {
+            action: {
+                data: {
+                    requestId,
+                    response: {
+                        currentAddress,
+                    },
+                },
+            },
+        } = this.props;
+
+        const data = await mutation({
+            variables: {
+                address: currentAddress.toLowerCase(),
+                password: this.state.password,
+                domain: window.location.host,
+            },
+        });
+        browser.runtime.sendMessage({
+            type: 'UI_CONFIRM',
+            requestId,
+            data,
+        });
+        setTimeout(() => {
+            window.close();
+        }, 1000);
+    }
+
+
+    render() {
+        if (!this.props.action) {
+            return (
+                <Block style={{
+                    background: 'linear-gradient(115deg, #808DFF 0%, #9FC4FF 100%, #7174FF 100%)',
+                }}
+                >
+                    <Loader
+                        theme="primary"
+                        hasBackground
+                    />
+                </Block>
+            );
+        }
+
+        // we want to always render a router depending on the page we want to handle the url
+        // we then render a react router and parse the query string for handling actions.
+        // the extension ui will have a different flow
+
+        return (
+            <Block
+                stretch
+                padding="xl"
+                align="center"
+                background="white"
+            >
+
+                <Text
+                    text="Login"
+                    size="l"
+                    color="primary"
+                    weight="semibold"
+                />
+                <Block padding="l xl">
+                    <TextInput type="password" placeholder="Enter password..." onChange={e => this.__updatePassword(e)} />
+                </Block>
+                <Mutation mutation={Login}>
+                    {(mutation, { data }) => (
+                        <div>
+                            <br />
+                            <br />
+                            <Button
+                                text="Login"
+                                onClick={() => this.__handleLogin(mutation)}
+                            />
+                        </div>
+                    )
+                    }
+
+                </Mutation>
+            </Block>
+        );
+    }
+}
+
+export default ApproveAssetForDomain;

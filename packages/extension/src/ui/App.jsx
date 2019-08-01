@@ -16,6 +16,7 @@ const actionToRouteMap = {
 
     'ui.register.extension': '/register',
     'ui.asset.approve': '/approveAsset',
+    'ui.account.login': '/login',
 
 };
 
@@ -54,7 +55,10 @@ class App extends Component {
 
 
                     />
-                    <Route path="/login" component={Login} />
+                    <Route
+                        path="/login"
+                        render={() => (<Login action={this.state.action} />)}
+                    />
                     <Route
                         path="/register"
                         render={() => (<Register action={this.state.action} />)}

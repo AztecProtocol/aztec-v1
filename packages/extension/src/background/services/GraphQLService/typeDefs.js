@@ -151,6 +151,7 @@ export default gql`
         login(
             password: String!
             domain: String!
+            address: String!
         ): Session
         registerExtension(
             password: String!

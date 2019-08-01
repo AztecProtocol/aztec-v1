@@ -5,6 +5,7 @@ export default Model({
     fields: [
         'lastLogin',
         'createdAt',
+        'address',
         'pwDerivedKey',
     ],
 });
