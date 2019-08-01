@@ -54,5 +54,12 @@ interface IACE {
     function getCommonReferenceString() external view returns (bytes32[6] memory);
 
     function getValidatorAddress(uint24 _proof) external view returns (address validatorAddress);
+
+    function getNote(address _registryOwner, bytes32 _noteHash) external view returns (
+        uint8 status,
+        uint40 createdOn,
+        uint40 destroyedOn,
+        address noteOwner
+    );
 }
 
