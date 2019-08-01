@@ -159,4 +159,27 @@ export default async function demoOwnable({
 
     await sleep(1000);
     log(`Asset balance = ${await asset.balance()}`);
+
+
+    const sendAmount = 1;
+    const receiver = '0x0563a36603911daaB46A3367d59253BaDF500bF9';
+
+    log('Generating send proof...');
+    const sendProof = await asset.send({
+        amount: sendAmount,
+        to: receiver,
+        numberOfOutputNotes: 1,
+    });
+    log(sendProof.export());
+
+    log('Approving send proof...');
+    await sendProof.approve();
+    log('Approved!');
+
+    log('Sending...');
+    await sendProof.send();
+    log(`Successfully sent ${sendAmount} to account '${receiver}'.`);
+
+    await sleep(1000);
+    log(`Asset balance = ${await asset.balance()}`);
 }
