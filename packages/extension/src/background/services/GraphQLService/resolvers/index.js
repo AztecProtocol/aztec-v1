@@ -54,7 +54,7 @@ export default {
         })),
         account: ensureKeyvault(async (_, args) => {
             const account = await userModel.get({ address: args.currentAddress });
-            if (!account.registered) {
+            if (account && !account.registered) {
                 const { account: user } = await GraphNodeService.query(`
                     account(id: "${args.currentAddress.toLowerCase()}") {
                         address

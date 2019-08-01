@@ -1,6 +1,7 @@
 import domainModel from '~database/models/domain';
 import userModel from '~database/models/user';
 import { get, set, remove } from '~utils/storage';
+import GraphNodeService from '~backgroundServices/GraphNodeService';
 import {
     KeyStore,
     utils as keyvaultUtils,
@@ -17,18 +18,26 @@ import {
 import SyncService from '../SyncService';
 import enableAssetForDomain from './enableAssetForDomain';
 
-const getPrivateKey = async (/* userAddress */) => {
+const getPrivateKey = async (currentAddress) => {
     // TODO
     // should use user's address to find their private key
     const {
         keyStore,
         session: {
             pwDerivedKey,
-        },
+        } = {},
     } = await get([
         'keyStore',
         'session',
     ]);
+    if (!pwDerivedKey) {
+        return permissionError('account.not.login', {
+            messageOptions: { account: currentAddress },
+            currentAddress,
+
+        });
+    }
+
     const {
         encPrivKey,
     } = keyStore.privacyKeys;
@@ -36,8 +45,7 @@ const getPrivateKey = async (/* userAddress */) => {
 
     return keyvaultUtils.decryptString(encPrivKey, decodedKey);
 };
-
-export default {
+const AuthService = {
     validateUserAddress: async (address) => {
         if (!address) { // this shouldn't happend in production
             errorLog('Address cannot be empty in AuthService.validateUserAddress()');
@@ -124,7 +132,7 @@ export default {
             domain,
         };
     },
-    validateSession: async () => {
+    validateSession: async ({ currentAddress }) => {
         // we check the particular host has access
         const now = Date.now();
         const {
@@ -139,7 +147,18 @@ export default {
 
         if (!session) {
             return permissionError('account.not.login', {
-                messageOptions: {},
+                messageOptions: { account: currentAddress },
+                currentAddress,
+
+            });
+        }
+
+        if (session.address !== currentAddress) {
+            await remove('session');
+            return permissionError('account.not.login', {
+                messageOptions: { account: currentAddress },
+                currentAddress,
+
             });
         }
 
@@ -148,7 +167,9 @@ export default {
             await remove('session');
 
             return permissionError('account.not.login', {
-                messageOptions: {},
+                messageOptions: { account: currentAddress },
+                currentAddress,
+
             });
             // throw new Error('The session is > 21 days old please login');
         }
@@ -157,9 +178,12 @@ export default {
         if (session.lastActive < now - 60 * 60 * 24 * 7 * 1000) {
             await remove('session');
             return permissionError('account.not.login', {
-                messageOptions: {},
+                messageOptions: { account: currentAddress },
+                currentAddress,
+
             });
         }
+
 
         // we can now fetch the pwDerivedKey
         const decodedKey = new Uint8Array(Object.values(JSON.parse(session.pwDerivedKey)));
@@ -175,6 +199,7 @@ export default {
             session: {
                 ...session,
                 lastActive: now,
+                address: currentAddress,
             },
         });
 
@@ -182,11 +207,12 @@ export default {
             session: {
                 ...session,
                 pwDerivedKey: decodedKey,
+                address: currentAddress,
             },
             keyStore: k,
         };
     },
-    login: async ({ password }) => {
+    login: async ({ password, address }) => {
         const { keyStore } = await get(['keyStore']);
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
@@ -200,16 +226,25 @@ export default {
                 messageOptions: {},
             });
         }
+        const account = await userModel.get({ address });
+
+        if (!account) {
+            await userModel.set({
+                address,
+                linkedPublicKey: keyStore.privacyKeys.publicKey,
+            });
+        }
 
         const { session } = await set({
             session: {
                 lastActive: Date.now(),
                 createdAt: Date.now(),
+                address,
                 pwDerivedKey: JSON.stringify(pwDerivedKey),
             },
         });
 
-        return session;
+        return await userModel.get({ address });
     },
     enableAssetForDomain,
     registerExtension: async ({
@@ -234,6 +269,7 @@ export default {
                 pwDerivedKey: JSON.stringify(pwDerivedKey),
                 lastActive: Date.now(),
                 createdAt: Date.now(),
+                address,
             },
         });
 
@@ -287,3 +323,5 @@ export default {
     },
     getPrivateKey,
 };
+
+export default AuthService;

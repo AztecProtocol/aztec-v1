@@ -59,10 +59,6 @@ const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
     const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
     const lastNetworkId = Object.keys(AZTECAccountRegistry.networks).pop();
     const network = AZTECAccountRegistry.networks[lastNetworkId];
-    await Web3Service
-        .useContract('AZTECAccountRegistry')
-        .method('updateChainId')
-        .send(lastNetworkId);
 
 
     const domainData = {
@@ -103,8 +99,14 @@ const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
 
     await Web3Service
         .useContract('AZTECAccountRegistry')
+        .method('updateChainId')
+        .send(lastNetworkId);
+
+    await Web3Service
+        .useContract('AZTECAccountRegistry')
         .method('registerAZTECExtension')
         .send(address, linkedPublicKey, v, r, s);
+
     return {
         account: {
             account: address,
@@ -119,10 +121,9 @@ export default async function ensureExtensionInstalled() {
             switchMap(({
                 error,
                 account,
-                hasKeyVault,
                 ...rest
             }) => {
-                console.log(account);
+                console.log(account, error);
 
                 if (account && !account.registered) {
                     return from(sendRegisterExtensionTx(account));
