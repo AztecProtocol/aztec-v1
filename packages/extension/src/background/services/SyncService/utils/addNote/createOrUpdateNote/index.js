@@ -4,7 +4,6 @@ import {
 import {
     toCode,
     isDestroyed,
-    isEqual,
 } from '~utils/noteStatus';
 import {
     fromHexString,
@@ -16,6 +15,42 @@ import {
 import noteModel from '~database/models/note';
 import noteAccessModel from '~database/models/noteAccess';
 import NoteService from '~background/services/NoteService';
+
+import {
+    permissionError,
+} from '~utils/error';
+import { get } from '~utils/storage';
+import {
+    utils as keyvaultUtils,
+} from '~utils/keyvault';
+
+const getPrivateKey = async (currentAddress) => {
+    // TODO
+    // should use user's address to find their private key
+    const {
+        keyStore,
+        session,
+    } = await get([
+        'keyStore',
+        'session',
+    ]);
+    if (session && !session.pwDerivedKey) {
+        return permissionError('account.not.login', {
+            messageOptions: { account: currentAddress },
+            currentAddress,
+
+        });
+    }
+
+    const {
+        encPrivKey,
+    } = keyStore.privacyKeys;
+    const decodedKey = new Uint8Array(Object.values(JSON.parse(session.pwDerivedKey)));
+
+    const privateKey = await keyvaultUtils.decryptString(encPrivKey, decodedKey);
+
+    return privateKey;
+};
 
 export default async function createOrUpdateNote(note, privateKey) {
     const {
@@ -40,8 +75,11 @@ export default async function createOrUpdateNote(note, privateKey) {
         const aztecNote = await fromViewingKey(realViewingKey);
         value = valueOf(aztecNote);
     } catch (error) {
+        const privateKeyNew = await getPrivateKey(note.owner.address);
         errorLog('Failed to decrypt note from viewingKey.', {
             viewingKey: encryptedVkString,
+            privateKey,
+            privateKeyNew,
         });
         value = -1;
     }
@@ -56,7 +94,6 @@ export default async function createOrUpdateNote(note, privateKey) {
 
     const {
         key: noteKey,
-        data: prevData,
         storage: prevStorage,
         modified,
     } = await model.set(
@@ -66,9 +103,6 @@ export default async function createOrUpdateNote(note, privateKey) {
         },
     );
 
-    const {
-        [noteKey]: prevNoteData,
-    } = prevData;
     const justCreated = modified.length > 0;
 
     const promises = [];
@@ -85,26 +119,18 @@ export default async function createOrUpdateNote(note, privateKey) {
         }
     }
 
-    const {
-        status: prevStatus,
-    } = prevNoteData;
-    const isNoteDestroyed = isDestroyed(status);
-    const shouldUpdateAssetBalance = justCreated
-        ? !isNoteDestroyed
-        : !isEqual(status, prevStatus);
-    if (isOwner
-        && shouldUpdateAssetBalance
-    ) {
-        if (isNoteDestroyed) {
+    if (isOwner) {
+        const assetId = note.asset.address;
+        if (isDestroyed(status)) {
             NoteService.removeNoteValue({
-                assetKey,
+                assetId,
                 ownerAddress,
                 noteKey,
                 value,
             });
         } else {
             NoteService.addNoteValue({
-                assetKey,
+                assetId,
                 ownerAddress,
                 noteKey,
                 value,
