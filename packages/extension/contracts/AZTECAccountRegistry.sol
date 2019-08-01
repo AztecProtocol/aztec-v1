@@ -28,7 +28,7 @@ contract AZTECAccountRegistry is LibEIP712 {
     address owner = msg.sender;
 
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        // require(msg.sender == owner);
         _;
     }
 
