@@ -87,10 +87,9 @@ describe('Note', () => {
             const customMetadata = testNote.setMetadata(customData);
             expect(customMetadata).to.equal(testNote.metadata);
         });
-    })
+    });
 
     describe('Failure states', async () => {
-
         it('should throw if given both a public key and a viewing key', async () => {
             const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
             const { publicKey, viewingKey } = testNote.exportNote();
@@ -136,5 +135,5 @@ describe('Note', () => {
                 expect(err.message).to.equal('invalid viewing key length, expected 140, got 146');
             }
         });
-    })
+    });
 });

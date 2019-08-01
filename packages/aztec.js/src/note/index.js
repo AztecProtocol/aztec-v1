@@ -65,7 +65,6 @@ class Note {
              * @member {Point}
              */
             this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
-
         }
         if (viewingKey) {
             if (typeof viewingKey !== 'string') {
@@ -112,15 +111,14 @@ class Note {
         return `0x${this.ephemeral.getPublic(true, 'hex')}`;
     }
 
-
     /**
      * Appends custom metadata onto the end of the ephemeral key and encodes it according
      * to the schema for one note. It then sets this.ephemeral to this value and returns
      * the encoded data
-     * 
+     *
      * @param {String} customData
      * @returns {String} ephemeral key appended by the customData
-     * 
+     *
      * Doing this with a fixed customData so far: 0x177 in length - length of one IES encrypted viewing key
      */
     setMetadata(customData) {
