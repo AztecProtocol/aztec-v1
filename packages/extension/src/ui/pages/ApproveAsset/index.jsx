@@ -26,6 +26,7 @@ class ApproveAssetForDomain extends Component {
                     response: {
                         domain,
                         asset,
+                        currentAddress,
                     },
                 },
             },
@@ -35,6 +36,7 @@ class ApproveAssetForDomain extends Component {
             variables: {
                 domain,
                 asset,
+                address: currentAddress,
             },
         });
         browser.runtime.sendMessage({

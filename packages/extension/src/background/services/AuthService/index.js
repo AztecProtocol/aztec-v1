@@ -104,6 +104,7 @@ const AuthService = {
         domain,
         assetId,
         noteId,
+        currentAddress,
     }) => {
         const {
             assets: {
@@ -124,6 +125,7 @@ const AuthService = {
                     domain,
                     note: noteId,
                     asset: assetId,
+                    currentAddress,
 
                 });
             }
@@ -134,6 +136,7 @@ const AuthService = {
                 },
                 domain,
                 asset: assetId,
+                currentAddress,
 
             });
         }
@@ -142,7 +145,7 @@ const AuthService = {
             domain,
         };
     },
-    validateSession: async ({ currentAddress }) => {
+    validateSession: async ({ currentAddress, address }) => {
         // we check the particular host has access
         const now = Date.now();
         const {
@@ -162,8 +165,8 @@ const AuthService = {
 
             });
         }
-
-        if (session.address !== currentAddress) {
+        // hack figure out whats going on here
+        if ((currentAddress || address) && session.address !== (currentAddress || address)) {
             await remove('session');
             return permissionError('account.not.login', {
                 messageOptions: { account: currentAddress },
@@ -209,7 +212,7 @@ const AuthService = {
             session: {
                 ...session,
                 lastActive: now,
-                address: currentAddress,
+                address: currentAddress || address || session.address,
             },
         });
 
