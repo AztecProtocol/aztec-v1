@@ -22,10 +22,16 @@ describe('createOrUpdate', () => {
         {
             address: '0xabc',
             linkedTokenAddress: '0x123',
+            scalingFactor: 1,
+            canAdjustSupply: false,
+            canConvert: true,
         },
         {
             address: '0xdef',
             linkedTokenAddress: '0x456',
+            scalingFactor: 10,
+            canAdjustSupply: false,
+            canConvert: true,
         },
     ];
 
@@ -49,7 +55,13 @@ describe('createOrUpdate', () => {
         expect(dataAfter).toEqual({
             assetCount: 1,
             [asset.address]: 'a:0',
-            'a:0': [asset.address, 0, asset.linkedTokenAddress],
+            'a:0': [
+                asset.address,
+                asset.linkedTokenAddress,
+                1,
+                false,
+                true,
+            ],
         });
     });
 

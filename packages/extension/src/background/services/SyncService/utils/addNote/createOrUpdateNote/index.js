@@ -1,7 +1,6 @@
 import {
     errorLog,
 } from '~utils/log';
-import dataKey from '~utils/dataKey';
 import {
     toCode,
     isDestroyed,
@@ -16,10 +15,7 @@ import {
 } from '~utils/note';
 import noteModel from '~database/models/note';
 import noteAccessModel from '~database/models/noteAccess';
-import assetModel from '~database/models/asset';
 import NoteService from '~background/services/NoteService';
-import pushAssetValue from './pushAssetValue';
-import removeAssetValue from './removeAssetValue';
 
 export default async function createOrUpdateNote(note, privateKey) {
     const {
@@ -99,22 +95,7 @@ export default async function createOrUpdateNote(note, privateKey) {
     if (isOwner
         && shouldUpdateAssetBalance
     ) {
-        if (value > 0) {
-            promises.push(assetModel.update({
-                key: assetKey,
-                balance: (prevBalance) => {
-                    const ratio = isNoteDestroyed ? -1 : 1;
-                    return (prevBalance || 0) + (value * ratio);
-                },
-            }));
-        }
-
-        const assetValueKey = dataKey('assetValue', {
-            assetKey,
-            value,
-        });
         if (isNoteDestroyed) {
-            promises.push(removeAssetValue(assetValueKey, noteKey));
             NoteService.removeNoteValue({
                 assetKey,
                 ownerAddress,
@@ -122,7 +103,6 @@ export default async function createOrUpdateNote(note, privateKey) {
                 value,
             });
         } else {
-            promises.push(pushAssetValue(assetValueKey, noteKey));
             NoteService.addNoteValue({
                 assetKey,
                 ownerAddress,

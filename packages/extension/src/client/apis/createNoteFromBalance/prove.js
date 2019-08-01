@@ -154,9 +154,6 @@ export default async function proveCreateNoteFromBalance({
         });
     }
 
-    console.log('input', inputValues, inputNotes);
-    console.log('output', outputValues, outputNotes);
-
     const {
         JoinSplitProof,
         ProofUtils,

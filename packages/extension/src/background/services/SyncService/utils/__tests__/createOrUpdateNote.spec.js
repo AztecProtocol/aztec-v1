@@ -53,12 +53,6 @@ describe('createOrUpdate', () => {
         status: 'CREATED',
     };
 
-    const withAsset = (assetIndex, prevNote = note) => ({
-        ...prevNote,
-        asset: assets[assetIndex],
-        assetKey: assets[assetIndex].key,
-    });
-
     const newNote = (prevNote) => {
         numberOfNotes += 1;
         return {
@@ -82,13 +76,10 @@ describe('createOrUpdate', () => {
     });
 
     it('set note and assetValue to storage', async () => {
-        const assetValueGroupKey = `${note.assetKey}v:${value}`;
-
         const dataBefore = await storage.get([
             'noteCount',
             note.hash,
             'n:0',
-            assetValueGroupKey,
         ]);
         expect(dataBefore).toEqual({});
 
@@ -97,12 +88,10 @@ describe('createOrUpdate', () => {
         const dataAfter = await storage.get([
             'noteCount',
             note.hash,
-            assetValueGroupKey,
         ]);
         expect(dataAfter).toEqual({
             noteCount: 1,
             [note.hash]: 'n:0',
-            [assetValueGroupKey]: ['n:0'],
         });
 
         const savedNote = await noteModel.get({
@@ -131,49 +120,6 @@ describe('createOrUpdate', () => {
         await createOrUpdateNote(newNote(note), privateKey);
         const count2 = await storage.get('noteCount');
         expect(count2).toEqual(2);
-    });
-
-    it('push note keys to existing assetValue array when adding notes with the same asset', async () => {
-        await createOrUpdateNote(note, privateKey);
-        const assetValueGroupKey = `${note.assetKey}v:${value}`;
-        const data0 = await storage.get([
-            assetValueGroupKey,
-        ]);
-        expect(data0).toEqual({
-            [assetValueGroupKey]: ['n:0'],
-        });
-
-        await createOrUpdateNote(newNote(note), privateKey);
-        const data1 = await storage.get([
-            assetValueGroupKey,
-        ]);
-        expect(data1).toEqual({
-            [assetValueGroupKey]: ['n:0', 'n:1'],
-        });
-    });
-
-    it('push note keys to different assetValue array when adding notes with different assets', async () => {
-        const note0 = newNote(withAsset(0));
-        await createOrUpdateNote(note0, privateKey);
-        const assetValueGroupKey0 = `${note0.assetKey}v:${value}`;
-        const data0 = await storage.get([
-            assetValueGroupKey0,
-        ]);
-        expect(data0).toEqual({
-            [assetValueGroupKey0]: ['n:0'],
-        });
-
-        const note1 = newNote(withAsset(1));
-        await createOrUpdateNote(note1, privateKey);
-        const assetValueGroupKey1 = `${note1.assetKey}v:${value}`;
-        const data1 = await storage.get([
-            assetValueGroupKey0,
-            assetValueGroupKey1,
-        ]);
-        expect(data1).toEqual({
-            [assetValueGroupKey0]: ['n:0'],
-            [assetValueGroupKey1]: ['n:1'],
-        });
     });
 
     it('will not call set when adding existing note to storage', async () => {

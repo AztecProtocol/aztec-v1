@@ -17,6 +17,7 @@ import validateSession from '../validators/validateSession';
 import getUserSpendingPublicKey from './getUserSpendingPublicKey';
 import getAccounts from './getAccounts';
 import decryptViewingKey from './decryptViewingKey';
+import getAssetBalance from './getAssetBalance';
 import requestGrantAccess from './requestGrantAccess';
 import pickNotesFromBalance from './pickNotesFromBalance';
 import syncAssetInfo from '../../AuthService/enableAssetForDomain/syncAssetInfo';
@@ -30,6 +31,9 @@ export default {
         owner: async ({ owner }) => accountModel.get({ key: owner }),
         decryptedViewingKey: async ({ viewingKey, owner }) => decryptViewingKey(viewingKey, owner),
         status: ({ status }) => fromCode(status),
+    },
+    Asset: {
+        balance: async ({ address }) => getAssetBalance(address),
     },
     GrantNoteAccessPermission: {
         asset: ({ asset }) => asset && assetModel.get({ id: asset }),
@@ -59,7 +63,7 @@ export default {
                     account(id: "${args.currentAddress.toLowerCase()}") {
                         address
                         linkedPublicKey
-                        registered 
+                        registered
                     }
                 `);
                 if (user) {

@@ -1,6 +1,7 @@
 import {
     argsError,
 } from '~utils/error';
+import initAll from './utils/initAll';
 import initAssetNoteValues from './utils/initAssetNoteValues';
 import pickNotes from './utils/pickNotes';
 
@@ -11,17 +12,28 @@ class NoteService {
              * Structure in assetNoteValues:
              * [ownerAddress]: {
              *     [assetId]: {
-             *         maxSum: Int
+             *         balance: Int
              *         noteValues: {
              *             [value]: [NoteKey!],
              *         },
+             *         syncing: Boolean,
              *     }
              * }
              */
         };
+        this.syncing = false;
     }
 
-    async init(assetId, ownerAddress) {
+    async init() {
+        this.syncing = true;
+        this.assetNoteValues = await initAll();
+        this.syncing = false;
+    }
+
+    async initOwnerAsset(assetId, ownerAddress) {
+        // should use this if the number of notes becomes too large
+        this.syncing = true;
+
         if (!this.assetNoteValues[ownerAddress]) {
             this.assetNoteValues[ownerAddress] = {};
         } else if (this.assetNoteValues[ownerAddress][assetId]) {
@@ -32,8 +44,53 @@ class NoteService {
             assetId,
             ownerAddress,
         );
+
+        this.syncing = false;
         // TODO
         // delete least frequently used asset
+    }
+
+    safeSet(ownerAddress) {
+        let group;
+        if (!this.assetNoteValues[ownerAddress]) {
+            this.assetNoteValues[ownerAddress] = {};
+        }
+        group = this.assetNoteValues[ownerAddress];
+
+        return (assetId) => {
+            if (!group[assetId]) {
+                group[assetId] = {
+                    balance: 0,
+                    noteValues: [],
+                };
+            }
+            group = group[assetId];
+
+            return (value) => {
+                if (!group.noteValues[value]) {
+                    group.noteValues[value] = [];
+                }
+
+                return (noteKey) => {
+                    if (group.noteValues[value].indexOf(noteKey) < 0) {
+                        group.balance += value;
+                        group.noteValues[value].push(noteKey);
+                    }
+
+                    return group;
+                };
+            };
+        };
+    }
+
+    safeFind(ownerAddress) {
+        return (assetId) => {
+            const group = this.assetNoteValues[ownerAddress] || {};
+            return group[assetId] || {
+                balance: 0,
+                noteValues: {},
+            };
+        };
     }
 
     removeOwner(ownerAddress) {
@@ -48,20 +105,12 @@ class NoteService {
         value,
         noteKey,
     }) {
-        if (!this.assetNoteValues[ownerAddress]
-            || !this.assetNoteValues[ownerAddress][assetId]
-        ) {
+        if (this.syncing) {
+            // TODO
             return;
         }
 
-        const noteKeys = this.assetNoteValues[ownerAddress][assetId][value];
-        if (!noteKeys) {
-            this.assetNoteValues[ownerAddress][assetId][value] = [];
-        } else if (noteKeys.indexOf(noteKey) >= 0) {
-            return;
-        }
-
-        noteKeys.push(noteKey);
+        this.safeSet(ownerAddress)(assetId)(value)(noteKey);
     }
 
     removeNoteValue({
@@ -70,21 +119,32 @@ class NoteService {
         value,
         noteKey,
     }) {
-        if (!this.assetNoteValues[ownerAddress]
+        if (this.syncing
+            || !this.assetNoteValues[ownerAddress]
             || !this.assetNoteValues[ownerAddress][assetId]
             || !this.assetNoteValues[ownerAddress][assetId][value]
         ) {
             return;
         }
 
-        const noteKeys = this.assetNoteValues[ownerAddress][assetId][value];
+        const noteKeys = this.assetNoteValues[ownerAddress][assetId].noteValues[value];
         const idx = noteKeys.indexOf(noteKey);
         if (idx >= 0) {
             noteKeys.splice(idx, 1);
             if (!noteKeys.length) {
-                delete this.assetNoteValues[ownerAddress][assetId][value];
+                delete this.assetNoteValues[ownerAddress][assetId].noteValues[value];
             }
+            this.assetNoteValues[ownerAddress][assetId].balance -= value;
         }
+    }
+
+    async getBalance(ownerAddress, assetId) {
+        if (this.syncing) {
+            // TODO
+            // return a promice and resolve after synced
+        }
+
+        return this.safeFind(ownerAddress)(assetId).balance;
     }
 
     async pick({
@@ -93,12 +153,17 @@ class NoteService {
         minSum,
         numberOfNotes = 1,
     }) {
-        await this.init(assetId, ownerAddress);
+        if (this.syncing) {
+            // TODO
+            // waitInQueue
+        }
+
         const {
-            maxSum,
+            balance,
             noteValues,
-        } = this.assetNoteValues[ownerAddress][assetId];
-        if (minSum > maxSum) {
+        } = this.safeFind(ownerAddress)(assetId);
+
+        if (minSum > balance) {
             throw argsError('note.pick.sum', {
                 messageOptions: {
                     value: minSum,

@@ -5,17 +5,18 @@ import {
 import {
     errorLog,
 } from '~utils/log';
+import asyncForEach from '~utils/asyncForEach';
 
 const normalLoop = async (get, cb) => {
     const data = await get();
     if (!data) return;
 
-    Object.keys(data).forEach((id) => {
+    asyncForEach(Object.keys(data), async (id) => {
         const entry = {
             ...data[id],
             id,
         };
-        cb(entry);
+        await cb(entry);
     });
 };
 
@@ -34,12 +35,12 @@ const mapLoog = async (get, config, cb) => {
         const data = await get({
             key,
         });
-        /* eslint-enable no-await-in-loop */
 
-        cb({
+        await cb({
             ...data,
             key,
         });
+        /* eslint-enable no-await-in-loop */
     }
 };
 

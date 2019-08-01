@@ -8,7 +8,6 @@ export default async function createOrUpdateAsset(asset) {
         {
             ...asset,
             scalingFactor: +(asset.scalingFactor || 0),
-            balance: 0,
         },
         {
             ignoreDuplicate: true,

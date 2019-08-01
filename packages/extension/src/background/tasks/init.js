@@ -7,7 +7,7 @@ import {
 import settings from '~background/utils/settings';
 import SyncService from '~backgroundServices/SyncService';
 import GraphNodeService from '~backgroundServices/GraphNodeService';
-import syncAssetInfo from '../services/AuthService/enableAssetForDomain/syncAssetInfo';
+import NoteService from '~background/services/NoteService';
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
@@ -45,4 +45,6 @@ export default async function init() {
     GraphNodeService.set({
         graphNodeServerUrl,
     });
+
+    NoteService.init();
 }
