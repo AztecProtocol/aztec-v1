@@ -18,6 +18,9 @@ export default {
     note: {
         fromViewingKey: 'Failed to recover note from its viewing key.',
         shareAccess: 'Failed to shared note access.',
+        pick: {
+            empty: 'Failed to pick notes from balance.',
+        },
     },
     account: {
         not: {
@@ -28,6 +31,13 @@ export default {
         address: {
             not: {
                 valid: 'Input address not valid.',
+            },
+        },
+        amount: {
+            not: {
+                match: {
+                    transaction: 'Input amount does not match total transactions.',
+                },
             },
         },
     },
