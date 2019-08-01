@@ -26,15 +26,19 @@ outputCoder.decodeNote = (note) => {
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
     const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
+
     let ephemeral = null;
 
-    if (metadataLength === 0x198) { // output note with metadata set
+    if (metadataLength === 0x137) {
+        // output note with metadata set
         expectedLength = (0x20 * 4 + 0x20 * 2 + metadataLength).toString(16);
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
-    } else if (metadataLength === 0x61) { // ouputNote with no metadata set
+    } else if (metadataLength === 0x61) {
+        // ouputNote with no metadata set
         expectedLength = 0xe1;
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
-    } else { // inputNote
+    } else {
+        // inputNote
         expectedLength = 0xc0;
     }
 
@@ -54,7 +58,6 @@ outputCoder.decodeNote = (note) => {
         ephemeral,
     };
 };
-
 
 /**
  * Decode an array of notes
@@ -204,16 +207,14 @@ outputCoder.encodeOutputNote = (note) => {
         encoded[7] = note.metadata.slice(2);
         isMetadataPresent = 1;
 
-        const metaDataSize = 0x198;
-        noteDataLength = (0x20 * 2 + isMetadataPresent * metaDataSize).toString(16); // this is returning a non hex number, causing problems
+        const metaDataSize = 0x137;
+        noteDataLength = (0x20 * 2 + isMetadataPresent * metaDataSize).toString(16);
         noteLength = (0x20 * 4 + 0x20 * 2 + isMetadataPresent * metaDataSize).toString(16);
     } else {
         encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
-        noteLength = 'e1'
-        noteDataLength = '61'; // (0x20 * 2 + 0x21).toString(16);
+        noteLength = 'e1';
+        noteDataLength = '61';
     }
-
-    // const expectedDataNoteLength = 0x198 + 0x40;
 
     encoded[0] = padLeft(noteLength, 64);
     encoded[1] = padLeft('1', 64);

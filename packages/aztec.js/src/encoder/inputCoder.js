@@ -24,16 +24,15 @@ inputCoder.encodeInputSignatures = (inputSignatures) => {
     return data;
 };
 
-
 inputCoder.encodeMetadata = (standardData) => {
     /**
-    * metadata here is the outputNotes supplied to a proof
-    * this function goes through each note (n = note), selects the
-    * ephemeral publicKey of the note and extracts the publicKey representation
-    * of the note
-    * 
-    * For each note publicKey, it then prepends '21' and pads left
-    */
+     * metadata here is the outputNotes supplied to a proof
+     * this function goes through each note (n = note), selects the
+     * ephemeral publicKey of the note and extracts the publicKey representation
+     * of the note
+     *
+     * For each note publicKey, it then prepends '21' and pads left
+     */
     const encodedMetadata = standardData
         .map((n) => secp256k1.compress(n.ephemeral.getPublic()))
         .map((m) => `${padLeft('21', 64)}${m.slice(2)}`);

@@ -16,7 +16,7 @@ class JoinSplitProof extends Proof {
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
-        this.formatMetadata()
+        this.formatMetadata();
         this.constructOutputs();
     }
 
@@ -118,7 +118,7 @@ class JoinSplitProof extends Proof {
 
     formatMetadata() {
         if (this.metadata === this.outputNotes) {
-            this.encodedMetadata = inputCoder.encodeMetadata(this.metadata)
+            this.encodedMetadata = inputCoder.encodeMetadata(this.metadata);
         } else {
             this.encodedMetadata = this.metadata;
         }
@@ -134,7 +134,7 @@ class JoinSplitProof extends Proof {
             publicOwner: this.publicOwner,
             challenge: this.challengeHex,
         };
-        this.output = outputCoder.encodeProofOutput(proofOutput); // need this encodeProofOutput to encode according to metadata schema, as metadata is supplied
+        this.output = outputCoder.encodeProofOutput(proofOutput);
         this.outputs = outputCoder.encodeProofOutputs([proofOutput]);
         this.hash = outputCoder.hashProofOutput(this.output);
         this.validatedProofHash = keccak256(

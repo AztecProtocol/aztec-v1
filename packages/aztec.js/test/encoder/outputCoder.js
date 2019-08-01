@@ -53,7 +53,7 @@ describe('Output Coder', () => {
         expect(clean(encoded.slice(0x20, 0x40))).to.equal('1');
         expect(encoded.slice(0x40, 0x60)).to.equal(padLeft(notes[0].owner.slice(2), 64));
         expect(encoded.slice(0x60, 0x80)).to.equal(padLeft(notes[0].noteHash.slice(2), 64));
-        expect(clean(encoded.slice(0x80, 0xa0))).to.equal('61')
+        expect(clean(encoded.slice(0x80, 0xa0))).to.equal('61');
         expect(bn128.decompressHex(encoded.slice(0xa0, 0xc0)).eq(notes[0].gamma)).to.equal(true);
         expect(bn128.decompressHex(encoded.slice(0xc0, 0xe0)).eq(notes[0].sigma)).to.equal(true);
         expect(secp256k1.decompressHex(encoded.slice(0xe0)).eq(notes[0].ephemeral.getPublic())).to.equal(true);

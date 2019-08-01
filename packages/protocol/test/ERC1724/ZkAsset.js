@@ -10,14 +10,14 @@ const typedData = require('@aztec/typed-data');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const truffleAssert = require('truffle-assertions');
-const { keccak256, padLeft } = require('web3-utils');
+const { keccak256, padLeft, randomHex } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
 
 const ACE = artifacts.require('./ACE');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ZkAsset = artifacts.require('./ZkAsset');
-const ZkAssetTest = artifacts.require('./ZkAssetTest')
+const ZkAssetTest = artifacts.require('./ZkAssetTest');
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
@@ -142,7 +142,7 @@ contract('ZkAsset', (accounts) => {
             const publicValue = depositPublicValue * -1;
 
             const customMetadata =
-                '04a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata);
             });
@@ -164,7 +164,9 @@ contract('ZkAsset', (accounts) => {
 
             // Crucial check, confirm that the event contains the custom metadata
             const event = receipt.logs.find((l) => l.event === 'CreateNote');
-            expect(event.args.metadata.slice(-750)).to.equal(depositOutputNotes[0].metadata.slice(-750));
+
+            // check customMetadata is correct
+            expect(event.args.metadata.slice(196, 752)).to.equal(customMetadata);
         });
 
         it('should update the metadata of a note in a note registry', async () => {
@@ -178,7 +180,7 @@ contract('ZkAsset', (accounts) => {
             const publicValue = depositPublicValue * -1;
 
             const customMetadata =
-                '04a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata);
             });
@@ -191,16 +193,17 @@ contract('ZkAsset', (accounts) => {
             await ace.publicApprove(zkAssetTest.address, proof.hash, 200, { from: accounts[0] });
             const tx1 = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
 
-            // second digit has been changed from 4 to 5
+            const dummyEphemeralKeys = randomHex(192);
             const updatedMetaData =
-                '0x05a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+                dummyEphemeralKeys +
+                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             const tx2 = await zkAssetTest.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
                 from: accounts[0],
             });
 
             // check original note created has expected metadata
             truffleAssert.eventEmitted(tx1, 'CreateNote', (event) => {
-                return event.metadata.slice(-750) === customMetadata;
+                return event.metadata.slice(196, 752) === customMetadata;
             });
 
             // check updateNoteMetaData() has updated the note metadata
@@ -220,7 +223,7 @@ contract('ZkAsset', (accounts) => {
             const publicValue = depositPublicValue * -1;
 
             const customMetadata =
-                '04a9ee474e6f1545e681cc62e518c43332715a2ea01067b9cb9356354e9c1c5398c43a1c80580c261eb75a96289f9b531fbf01dd02275dd5c2f36b17a6f62b0c8be765f2f27ad50383769ff0ceed7a97d07bc76c09599fee641e55764a8912860100000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata);
             });
@@ -240,7 +243,6 @@ contract('ZkAsset', (accounts) => {
             await ace.publicApprove(zkAsset.address, depositProof.hash, 20, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
 
-            console.log('completed first note registry updated');
             const transferInputNotes = depositOutputNotes;
             const transferInputOwnerAccounts = [aztecAccount];
             const transferOutputNotes = await await helpers.getNotesForAccount(aztecAccount, [10]);
@@ -253,9 +255,7 @@ contract('ZkAsset', (accounts) => {
                 withdrawPublicValue,
                 publicOwner,
             );
-            console.log('constructed withdraw proof');
             const withdrawData = withdrawProof.encodeABI(zkAsset.address);
-            console.log('constructed withdraw data');
             const withdrawSignatures = withdrawProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
 
             const { receipt } = await zkAsset.confidentialTransfer(withdrawData, withdrawSignatures, { from: accounts[0] });
