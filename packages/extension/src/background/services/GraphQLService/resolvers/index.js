@@ -56,7 +56,7 @@ export default {
         pickNotesFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
         })),
-        account: ensureKeyvault(async (_, args) => {
+        account: ensureKeyvault(async (_, args, ctx) => {
             const account = await userModel.get({ address: args.currentAddress });
             if (account && !account.registered) {
                 const { account: user } = await GraphNodeService.query(`
@@ -66,14 +66,15 @@ export default {
                         registered
                     }
                 `);
-                if (user) {
+
+                if (user && user.registered) {
                     await AuthService.registerAddress({
                         address: user.address,
                         linkedPublicKey: user.linkedPublicKey,
                     });
                 }
                 return {
-                    account: user || account,
+                    account: user && user.registered ? user : account,
                 };
             }
             return {
