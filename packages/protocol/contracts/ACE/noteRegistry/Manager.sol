@@ -388,8 +388,6 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     * The output is 1 for an asset which can convert between public and private, 2 for one with no conversion
     * but with the ability to mint and/or burn, and 3 for a mixed asset which can convert and mint/burn
     *
-    * @param _canConvert
-    * @param _canAdjust
     */
     function getAssetTypeFromFlags(bool _canConvert, bool _canAdjust) internal pure returns (uint8 assetType) {
         uint8 convert = _canConvert ? 1 : 0;
@@ -401,9 +399,6 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     /**
     * @dev Internal utility method which converts three uint8s into a uint24
     *
-    * @param _first
-    * @param _second
-    * @param _third
     */
     function computeVersionFromComponents(uint8 _first, uint8 _second, uint8 _third) internal pure returns (uint24 version) {
         assembly {
