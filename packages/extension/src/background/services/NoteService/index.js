@@ -22,12 +22,14 @@ class NoteService {
              */
         };
         this.syncing = false;
+        this.queue = [];
     }
 
     async init() {
         this.syncing = true;
         this.assetNoteValues = await initAll();
         this.syncing = false;
+        this.flushQueue();
     }
 
     async initOwnerAsset(assetId, ownerAddress) {
@@ -50,6 +52,31 @@ class NoteService {
         // delete least frequently used asset
     }
 
+    async waitInQueue(
+        method,
+        ...params
+    ) {
+        return new Promise((resolve) => {
+            this.queue.add({
+                method,
+                params,
+                resolve,
+            });
+        });
+    }
+
+    flushQueue() {
+        this.queue.map(async ({
+            method,
+            params,
+            resolve,
+        }) => {
+            const result = await this[method](...params);
+            resolve(result);
+        });
+        this.queue = [];
+    }
+
     safeSet(ownerAddress) {
         let group;
         if (!this.assetNoteValues[ownerAddress]) {
@@ -61,7 +88,7 @@ class NoteService {
             if (!group[assetId]) {
                 group[assetId] = {
                     balance: 0,
-                    noteValues: [],
+                    noteValues: {},
                 };
             }
             group = group[assetId];
@@ -99,49 +126,64 @@ class NoteService {
         delete this.assetNoteValues[ownerAddress];
     }
 
-    addNoteValue({
+    async addNoteValue({
         assetId,
         ownerAddress,
         value,
         noteKey,
     }) {
         if (this.syncing) {
-            // TODO
-            return;
+            this.waitInQueue(
+                'addNoteValue',
+                {
+                    assetId,
+                    ownerAddress,
+                    value,
+                    noteKey,
+                },
+            );
+        } else {
+            this.safeSet(ownerAddress)(assetId)(value)(noteKey);
         }
-
-        this.safeSet(ownerAddress)(assetId)(value)(noteKey);
     }
 
-    removeNoteValue({
+    async removeNoteValue({
         assetId,
         ownerAddress,
         value,
         noteKey,
     }) {
-        if (this.syncing
-            || !this.assetNoteValues[ownerAddress]
-            || !this.assetNoteValues[ownerAddress][assetId]
-            || !this.assetNoteValues[ownerAddress][assetId][value]
-        ) {
-            return;
-        }
-
-        const noteKeys = this.assetNoteValues[ownerAddress][assetId].noteValues[value];
-        const idx = noteKeys.indexOf(noteKey);
-        if (idx >= 0) {
-            noteKeys.splice(idx, 1);
-            if (!noteKeys.length) {
-                delete this.assetNoteValues[ownerAddress][assetId].noteValues[value];
+        if (this.syncing) {
+            await this.waitInQueue(
+                'removeNoteValue',
+                {
+                    assetId,
+                    ownerAddress,
+                    value,
+                    noteKey,
+                },
+            );
+        } else {
+            const group = this.safeFind(ownerAddress)(assetId);
+            const noteKeys = group.noteValues[value];
+            const idx = noteKeys.indexOf(noteKey);
+            if (idx >= 0) {
+                noteKeys.splice(idx, 1);
+                if (!noteKeys.length) {
+                    delete group.noteValues[value];
+                }
+                group.balance -= value;
             }
-            this.assetNoteValues[ownerAddress][assetId].balance -= value;
         }
     }
 
     async getBalance(ownerAddress, assetId) {
         if (this.syncing) {
-            // TODO
-            // return a promice and resolve after synced
+            return this.waitInQueue(
+                'getBalance',
+                ownerAddress,
+                assetId,
+            );
         }
 
         return this.safeFind(ownerAddress)(assetId).balance;
@@ -154,8 +196,15 @@ class NoteService {
         numberOfNotes = 1,
     }) {
         if (this.syncing) {
-            // TODO
-            // waitInQueue
+            return this.waitInQueue(
+                'pick',
+                {
+                    assetId,
+                    ownerAddress,
+                    minSum,
+                    numberOfNotes,
+                },
+            );
         }
 
         const {
