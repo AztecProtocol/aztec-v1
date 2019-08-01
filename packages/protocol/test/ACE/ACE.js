@@ -114,14 +114,14 @@ contract('ACE', (accounts) => {
                 expect(proof.eth.outputs).to.equal(receipt.logs[0].args.proofOutputs);
             });
 
-            it.skip('should validate-by-hash previously set proofs', async () => {
+            it('should validate-by-hash previously set proofs', async () => {
                 const data = proof.encodeABI(joinSplitValidator.address);
                 await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
                 const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.hash, sender);
                 expect(result).to.equal(true);
             });
 
-            it.skip('should not validate-by-hash not previously set proofs', async () => {
+            it('should not validate-by-hash not previously set proofs', async () => {
                 const result = await ace.validateProofByHash(proofs.BOGUS_PROOF, proof.hash, sender);
                 expect(result).to.equal(false);
             });
