@@ -134,7 +134,7 @@ export default async function proveCreateNoteFromBalance({
             outputNotes.push(...newNotes);
         }
     } else if (transactions) {
-        asyncForEach(transactions, async ({
+        await asyncForEach(transactions, async ({
             amount: transactionAmount,
             to,
             numberOfOutputNotes: count,
