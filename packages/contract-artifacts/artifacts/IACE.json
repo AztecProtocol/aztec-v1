@@ -213,6 +213,41 @@
             "payable": false,
             "stateMutability": "view",
             "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "_registryOwner",
+                    "type": "address"
+                },
+                {
+                    "name": "_noteHash",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "getNote",
+            "outputs": [
+                {
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "createdOn",
+                    "type": "uint40"
+                },
+                {
+                    "name": "destroyedOn",
+                    "type": "uint40"
+                },
+                {
+                    "name": "noteOwner",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
         }
     ],
     "bytecode": "0x",
