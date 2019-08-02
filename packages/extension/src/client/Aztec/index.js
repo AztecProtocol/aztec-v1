@@ -1,14 +1,17 @@
+/* eslint-disable import/no-unresolved */
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
-import ACE from '../contracts/ACE';
-import ZkAsset from '../contracts/ZkAsset';
-import auth from '../auth';
+import ACE from '../../../build/protocol/ACE';
+import ZkAssetOwnable from '../../../build/protocol/ZkAssetOwnable';
+import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable';
+import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
+import ZkAsset from '../../../build/protocol/ZkAsset';
+/* eslint-enable */
 import {
     assetFactory,
 } from './asset';
 import {
     noteFactory,
 } from '../apis/note';
-
 import ensureExtensionEnabled from '../auth';
 
 import Web3Service from '../services/Web3Service';
@@ -16,7 +19,6 @@ import Web3Service from '../services/Web3Service';
 class Aztec {
     constructor() {
         this.enabled = false;
-        this.auth = auth;
     }
 
     enable = async ({
@@ -29,22 +31,24 @@ class Aztec {
         },
     }) => {
         await Web3Service.init();
-        Web3Service.registerContract(ACE);
-
-        Web3Service.registerContract(AZTECAccountRegistry);
-
+        Web3Service.registerContract(ACE, {
+            contractAddress: contractAddresses.ace,
+        });
+        Web3Service.registerInterface(ERC20Mintable, {
+            name: 'ERC20',
+        });
         Web3Service.registerInterface(ZkAsset);
-        const {
-            address,
-        } = Web3Service.account;
+        Web3Service.registerInterface(ZkAssetOwnable);
+        Web3Service.registerInterface(ZkAssetMintable);
+        Web3Service.registerContract(AZTECAccountRegistry, {
+            contractAddress: contractAddresses.aztecAccountRegistry,
+        });
 
         const {
             error,
-            account: user,
         } = await ensureExtensionEnabled();
 
         if (error) {
-            console.log(error);
             this.error = new Error(error);
         } else {
             this.enabled = true;
