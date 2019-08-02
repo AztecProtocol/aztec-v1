@@ -320,7 +320,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     /**
     * @dev Update the metadata of a note that already exists in storage. 
     * @param noteHash - hash of a note, used as a unique identifier for the note
-    * @param updateMetadata - metadata to update the note with. This should be the length of
+    * @param metadata - metadata to update the note with. This should be the length of
     * an IES encrypted viewing key, 0x177
     */
     function updateNoteMetaData(bytes32 noteHash, bytes calldata metadata) external {
