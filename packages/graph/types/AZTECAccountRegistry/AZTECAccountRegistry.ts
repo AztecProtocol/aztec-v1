@@ -138,36 +138,6 @@ export class ConstructorCall__Outputs {
   }
 }
 
-export class UpdateChainIdCall extends EthereumCall {
-  get inputs(): UpdateChainIdCall__Inputs {
-    return new UpdateChainIdCall__Inputs(this);
-  }
-
-  get outputs(): UpdateChainIdCall__Outputs {
-    return new UpdateChainIdCall__Outputs(this);
-  }
-}
-
-export class UpdateChainIdCall__Inputs {
-  _call: UpdateChainIdCall;
-
-  constructor(call: UpdateChainIdCall) {
-    this._call = call;
-  }
-
-  get _chainId(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
-  }
-}
-
-export class UpdateChainIdCall__Outputs {
-  _call: UpdateChainIdCall;
-
-  constructor(call: UpdateChainIdCall) {
-    this._call = call;
-  }
-}
-
 export class RegisterAZTECExtensionCall extends EthereumCall {
   get inputs(): RegisterAZTECExtensionCall__Inputs {
     return new RegisterAZTECExtensionCall__Inputs(this);

@@ -11,8 +11,8 @@ import "../libs/ProofUtils.sol";
  * @title NoteRegistry contract which contains the storage variables that define the set of valid
  * AZTEC notes for a particular address
  * @author AZTEC
- * @dev The NoteRegistry defines the state of valid AZTEC notes. It enacts instructions to update the
- * state, given to it by the ACE and only the note registry owner can enact a state update.
+ * @dev The NoteRegistry defines the state of valid AZTEC notes. It enacts instructions to update the 
+ * state, given to it by the ACE and only the note registry owner can enact a state update.  
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract NoteRegistry is IAZTEC {
@@ -92,10 +92,10 @@ contract NoteRegistry is IAZTEC {
         Registry storage registry = registries[msg.sender];
         require(registry.flags.active == true, "note registry does not exist for the given address");
         require(registry.flags.canConvert == true, "note registry does not have conversion rights");
-
+        
         // Only scenario where supplementTokens() should be called is when a mint/burn operation has been executed
         require(registry.flags.canAdjustSupply == true, "note registry does not have mint and burn rights");
-
+        
         registry.linkedToken.transferFrom(msg.sender, address(this), _value.mul(registry.scalingFactor));
 
         registry.totalSupply = registry.totalSupply.add(_value);
@@ -139,15 +139,16 @@ contract NoteRegistry is IAZTEC {
 
         emit CreateNoteRegistry(
             msg.sender,
-            _linkedTokenAddress,
+            address(this),
             _scalingFactor,
+            _linkedTokenAddress,
             _canAdjustSupply,
             _canConvert
         );
     }
 
     /**
-    * @dev Update the state of the note registry according to transfer instructions issued by a
+    * @dev Update the state of the note registry according to transfer instructions issued by a 
     * zero-knowledge proof
     *
     * @param _proof - unique identifier for a proof
@@ -167,10 +168,10 @@ contract NoteRegistry is IAZTEC {
             validateProofByHash(_proof, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
         );
-
+        
         // clear record of valid proof - stops re-entrancy attacks and saves some gas
         validatedProofs[proofHash] = false;
-
+        
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -206,7 +207,7 @@ contract NoteRegistry is IAZTEC {
         }
     }
 
-    /**
+    /** 
     * @dev This should be called from an asset contract.
     */
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
@@ -220,14 +221,14 @@ contract NoteRegistry is IAZTEC {
      *
      * @param _owner - address of the registry owner in question
      * @return linkedTokenAddress - public ERC20 token that is linked to the NoteRegistry. This is used to
-     * transfer public value into and out of the system
+     * transfer public value into and out of the system     
      * @return scalingFactor - defines how many ERC20 tokens are represented by one AZTEC note
      * @return totalSupply - TODO
      * @return confidentialTotalMinted - keccak256 hash of the note representing the total minted supply
      * @return confidentialTotalBurned - keccak256 hash of the note representing the total burned supply
-     * @return canConvert - flag set by the owner to decide whether the registry has public to private, and
+     * @return canConvert - flag set by the owner to decide whether the registry has public to private, and 
      * vice versa, conversion privilege
-     * @return canAdjustSupply - determines whether the registry has minting and burning privileges
+     * @return canAdjustSupply - determines whether the registry has minting and burning privileges 
      */
     function getRegistry(address _owner) public view returns (
         address linkedToken,
@@ -269,7 +270,7 @@ contract NoteRegistry is IAZTEC {
         address noteOwner
     ) {
         require(
-            registries[_registryOwner].notes[_noteHash].status != uint8(NoteStatus.DOES_NOT_EXIST),
+            registries[_registryOwner].notes[_noteHash].status != uint8(NoteStatus.DOES_NOT_EXIST), 
             "expected note to exist"
         );
         // Load out a note for a given registry owner. Struct unpacking is done in Yul to improve efficiency

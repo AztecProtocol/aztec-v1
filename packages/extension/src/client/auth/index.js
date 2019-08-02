@@ -31,10 +31,6 @@ const domainParams = [
         type: 'string',
     },
     {
-        name: 'chainId',
-        type: 'uint256',
-    },
-    {
         name: 'verifyingContract',
         type: 'address',
     },
@@ -64,7 +60,6 @@ const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
     const domainData = {
         name: 'AZTECAccountRegistry',
         version: '2',
-        chainId: lastNetworkId,
         verifyingContract: accountRegistryContract.address,
         salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
     };
@@ -97,10 +92,10 @@ const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
     const s = `0x${signature.substring(64, 128)}`;
     const v = parseInt(signature.substring(128, 130), 16);
 
-    await Web3Service
-        .useContract('AZTECAccountRegistry')
-        .method('updateChainId')
-        .send(lastNetworkId);
+    // await Web3Service
+    //     .useContract('AZTECAccountRegistry')
+    //     .method('updateChainId')
+    //     .send(lastNetworkId);
 
     await Web3Service
         .useContract('AZTECAccountRegistry')
