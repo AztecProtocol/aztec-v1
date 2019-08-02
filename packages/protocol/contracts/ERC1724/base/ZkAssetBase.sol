@@ -323,14 +323,14 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     * @param updateMetadata - metadata to update the note with. This should be the length of
     * an IES encrypted viewing key, 0x177
     */
-    function updateNoteMetaData(bytes32 noteHash, bytes calldata updateMetadata) external {
+    function updateNoteMetaData(bytes32 noteHash, bytes calldata metadata) external {
         // Get the note from this assets registry
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
         require(status == 1, "only unspent notes can be approved");
 
         // Only the note owner can update the note's metadata
         require(noteOwner == msg.sender, "transaction sender does not match the owner of the note being updated");
-        emit UpdateNoteMetadata(noteOwner, noteHash, updateMetadata);
+        emit UpdateNoteMetadata(noteOwner, noteHash, metadata);
     }
 
     /**
