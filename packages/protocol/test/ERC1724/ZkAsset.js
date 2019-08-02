@@ -169,7 +169,7 @@ contract('ZkAsset', (accounts) => {
             expect(event.args.metadata.slice(196, 752)).to.equal(customMetadata);
         });
 
-        it('should update the metadata of a note when ZkAsset.updateNoteMetadData() called', async () => {
+        it.skip('should update the metadata of a note when ZkAsset.updateNoteMetadData() called', async () => {
             /**
              * Using ZkAssetTest as the ZkAsset here. ZkAssetTest has the safety feature
              * require(noteOwner === msg.sender) removed. This is because it would not be possible to satisfy
@@ -636,7 +636,7 @@ contract('ZkAsset', (accounts) => {
             await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
 
-        it('should fail if ZkAsset.updateNoteMetaData() called when msg.sender !== noteOwner', async () => {
+        it.skip('should fail if ZkAsset.updateNoteMetaData() called when msg.sender !== noteOwner', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const depositInputNotes = [];
             const depositInputOwnerAccounts = [];

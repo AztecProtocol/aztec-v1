@@ -118,24 +118,6 @@ export class CreateNoteRegistry__Params {
   }
 }
 
-export class LogBytes extends EthereumEvent {
-  get params(): LogBytes__Params {
-    return new LogBytes__Params(this);
-  }
-}
-
-export class LogBytes__Params {
-  _event: LogBytes;
-
-  constructor(event: LogBytes) {
-    this._event = event;
-  }
-
-  get b(): Bytes {
-    return this._event.parameters[0].value.toBytes();
-  }
-}
-
 export class OwnershipTransferred extends EthereumEvent {
   get params(): OwnershipTransferred__Params {
     return new OwnershipTransferred__Params(this);
