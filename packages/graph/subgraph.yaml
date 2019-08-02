@@ -47,7 +47,7 @@ dataSources:
               handler: createNote
             - event: DestroyNote(address,bytes32,bytes)
               handler: destroyNote
-            - event: UpdateNoteMetaData(bytes32,bytes)
+            - event: UpdateNoteMetadata(address,bytes32,bytes)
               handler: updateNoteMetaData
   - kind: ethereum/contract
     name: AZTECAccountRegistry
