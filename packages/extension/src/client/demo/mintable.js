@@ -6,12 +6,6 @@ import {
     randomInt,
 } from '~utils/random';
 import Web3Service from '~client/services/Web3Service';
-/* eslint-disable import/no-unresolved */
-import ACE from '../../../build/protocol/ACE';
-import ZkAssetOwnable from '../../../build/protocol/ZkAssetOwnable';
-import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable';
-import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
-/* eslint-enable */
 import createNewAsset from './helpers/createNewAsset';
 import depositToERC20 from './helpers/depositToERC20';
 import sleep from './utils/sleep';
@@ -22,16 +16,6 @@ export default async function demoMintable({
 } = {}) {
     const { aztec } = window;
     await aztec.enable();
-
-    Web3Service.registerContract(ACE);
-    Web3Service.registerInterface(ERC20Mintable, {
-        name: 'ERC20',
-    });
-    Web3Service.registerInterface(ZkAssetOwnable, {
-        name: 'ZkAsset',
-    });
-    Web3Service.registerInterface(ZkAssetOwnable);
-    Web3Service.registerInterface(ZkAssetMintable);
 
     const {
         address: userAddress,
