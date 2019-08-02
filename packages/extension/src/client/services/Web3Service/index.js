@@ -22,10 +22,13 @@ class Web3Service {
         ) {
             this.web3 = MockWeb3;
         }
-        await window.web3.currentProvider.enable();
+
+        if (typeof provider.enable === 'function') {
+            await provider.enable();
+        }
 
         if (!this.web3) {
-            this.web3 = new Web3(window.web3.currentProvider);
+            this.web3 = new Web3(provider);
         }
 
         if (account) {
@@ -90,8 +93,12 @@ class Web3Service {
     contract(contractName) {
         if (!this.hasContract(contractName)) {
             warnLog(`Contract object "${contractName}" hasn't been initiated.`);
+        } else {
+            const {
+                _address: address,
+            } = this.contracts[contractName];
+            this.contracts[contractName].address = address;
         }
-        this.contracts[contractName].address = this.contracts[contractName]._address;
 
         return this.contracts[contractName];
     }
@@ -143,26 +150,20 @@ class Web3Service {
                     gas: gas * 3,
                 })
                 .once('transactionHash', (receipt) => {
-                    console.log(receipt);
                     const interval = setInterval(() => {
-                        console.log('in interval');
-                        this.web3.eth.getTransactionReceipt(receipt, (error, transactionReceipt) => {
-                            console.log('data', transactionReceipt);
+                        this.web3.eth.getTransactionReceipt(receipt, (
+                            error,
+                            transactionReceipt,
+                        ) => {
                             if (transactionReceipt) {
                                 clearInterval(interval);
                                 resolve(transactionReceipt);
                             } else if (error) {
-                                console.log('error', error);
                                 clearInterval(interval);
                                 reject(new Error(error));
                             }
                         });
                     }, 1000);
-                // if (!receipt) {
-                //     reject();
-                // } else {
-                //     resolve(receipt);
-                // }
                 });
         });
     }
@@ -194,26 +195,20 @@ class Web3Service {
             });
 
             methodCall.once('transactionHash', (receipt) => {
-                console.log(receipt);
                 const interval = setInterval(() => {
-                    console.log('in interval');
-                    this.web3.eth.getTransactionReceipt(receipt, (error, transactionReceipt) => {
-                        console.log('data', transactionReceipt);
+                    this.web3.eth.getTransactionReceipt(receipt, (
+                        error,
+                        transactionReceipt,
+                    ) => {
                         if (transactionReceipt) {
                             clearInterval(interval);
                             resolve(transactionReceipt);
                         } else if (error) {
-                            console.log('error', error);
                             clearInterval(interval);
                             reject(new Error(error));
                         }
                     });
                 }, 1000);
-                // if (!receipt) {
-                //     reject();
-                // } else {
-                //     resolve(receipt);
-                // }
             });
         });
     };

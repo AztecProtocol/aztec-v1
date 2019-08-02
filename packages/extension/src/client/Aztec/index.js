@@ -24,7 +24,7 @@ class Aztec {
     enable = async ({
         // networkId,
         contractAddresses = {},
-    }) => {
+    } = {}) => {
         await Web3Service.init();
         Web3Service.registerContract(ACE, {
             contractAddress: contractAddresses.ace,
