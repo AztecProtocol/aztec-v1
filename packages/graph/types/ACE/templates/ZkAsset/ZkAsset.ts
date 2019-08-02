@@ -152,28 +152,6 @@ export class DestroyNote__Params {
   }
 }
 
-export class UpdateNoteMetaData extends EthereumEvent {
-  get params(): UpdateNoteMetaData__Params {
-    return new UpdateNoteMetaData__Params(this);
-  }
-}
-
-export class UpdateNoteMetaData__Params {
-  _event: UpdateNoteMetaData;
-
-  constructor(event: UpdateNoteMetaData) {
-    this._event = event;
-  }
-
-  get noteHash(): Bytes {
-    return this._event.parameters[0].value.toBytes();
-  }
-
-  get metadata(): Bytes {
-    return this._event.parameters[1].value.toBytes();
-  }
-}
-
 export class ConvertTokens extends EthereumEvent {
   get params(): ConvertTokens__Params {
     return new ConvertTokens__Params(this);
