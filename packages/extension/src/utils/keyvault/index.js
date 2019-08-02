@@ -11,7 +11,7 @@ Object.defineProperty(global, '_bitcore', { get() { return undefined; }, set() {
 function toHexString(byteArray) {
     let s = '0x';
     byteArray.forEach((byte) => {
-        s += (`0${(byte & 0xFF).toString(16)}`).slice(-2);
+        s += (`0${(byte & 0xFF).toString(16)}`).slice(-2); // eslint-disable-line no-bitwise
     });
     return s;
 }
