@@ -53,8 +53,7 @@ const AZTECAccount = [
 
 const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
     const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
-    const lastNetworkId = Object.keys(AZTECAccountRegistry.networks).pop();
-    const network = AZTECAccountRegistry.networks[lastNetworkId];
+    console.log(accountRegistryContract);
 
 
     const domainData = {
@@ -118,8 +117,6 @@ export default async function ensureExtensionInstalled() {
                 account,
                 ...rest
             }) => {
-                console.log(account, error);
-
                 if (account && !account.registered) {
                     return from(sendRegisterExtensionTx(account));
                 }
