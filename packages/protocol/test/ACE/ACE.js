@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, it:true */
-const { JoinSplitProof, note } = require('aztec.js');
+const { JoinSplitProof, metaData, note } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -140,6 +140,29 @@ contract('ACE', (accounts) => {
                 await ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proof.hash]);
                 const secondResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.hash, sender);
                 expect(secondResult).to.equal(false);
+            });
+
+            it('should validate a join-split proof when metadata has been set', async () => {
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                const customMetadata =
+                    '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+
+                outputNotes.forEach((individualNote) => {
+                    return individualNote.setMetadata(customMetadata);
+                });
+                const metadata = metaData.extractNoteMetadata(outputNotes);
+
+                const proofWithNoteMetaData = new JoinSplitProof(
+                    inputNotes,
+                    outputNotes,
+                    sender,
+                    publicValue,
+                    publicOwner,
+                    metadata,
+                );
+                const customData = proofWithNoteMetaData.encodeABI(joinSplitValidator.address);
+                const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, customData);
+                expect(receipt.status).to.equal(true);
             });
         });
 

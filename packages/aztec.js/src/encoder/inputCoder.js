@@ -5,7 +5,7 @@ const { padLeft } = require('web3-utils');
 const inputCoder = {};
 
 /**
- * Encode encodeInputSignatures into ABI compatible string array format
+ * Encode input signatures into ABI compatible string array format
  *
  * @method encodeInputSignatures
  * @param {Object[]} inputSignatures - ECDSA signatures provided by note owners for their notes to be
@@ -24,19 +24,16 @@ inputCoder.encodeInputSignatures = (inputSignatures) => {
     return data;
 };
 
-/**
- * Encode metadata of AZTEC notes into ABI compatible string array format. The secp256k1.compress
- * method compresses the 64 bytes shared secret down to 33 bytes.
- *
- * @method encodeMetadata
- * @param {Object[]} metadata - AZTEC metadata
- * @returns {string} data - string comprising offsets to elements in the note metadata, followed
- * by the length of the metadata and then the information representing the metadata
- * @returns {Number} length - length of the inputOwners string, divided by 2 because hexadecimal
- * characters each represent 0.5 bytes
- */
-inputCoder.encodeMetadata = (metadata) => {
-    const encodedMetadata = metadata
+inputCoder.encodeMetadata = (standardData) => {
+    /**
+     * metadata here is the outputNotes supplied to a proof
+     * this function goes through each note (n = note), selects the
+     * ephemeral publicKey of the note and extracts the publicKey representation
+     * of the note
+     *
+     * For each note publicKey, it then prepends '21' and pads left
+     */
+    const encodedMetadata = standardData
         .map((n) => secp256k1.compress(n.ephemeral.getPublic()))
         .map((m) => `${padLeft('21', 64)}${m.slice(2)}`);
     const { length } = encodedMetadata;
@@ -46,6 +43,7 @@ inputCoder.encodeMetadata = (metadata) => {
         },
         [0x40 + length * 0x20],
     );
+
     const data = [
         padLeft((offsets.slice(-1)[0] - 0x20).toString(16), 64),
         padLeft(Number(length).toString(16), 64),

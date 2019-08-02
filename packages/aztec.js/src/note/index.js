@@ -107,8 +107,29 @@ class Note {
      *
      * @returns {string} hex-string compressed ephemeral key
      */
-    exportMetadata() {
+    exportEphemeralKey() {
         return `0x${this.ephemeral.getPublic(true, 'hex')}`;
+    }
+
+    /**
+     * Appends custom metadata onto the end of the ephemeral key and encodes it according
+     * to the schema for one note. It then sets this.ephemeral to this value and returns
+     * the encoded data
+     *
+     * @param {String} customData
+     * @returns {String} ephemeral key appended by the customData
+     *
+     * Doing this with a fixed customData so far: 0x177 in length - length of one IES encrypted viewing key
+     */
+    setMetadata(customData) {
+        const exportedKey = secp256k1.compress(this.ephemeral.getPublic());
+
+        if (!customData) {
+            this.metadata = exportedKey;
+        } else {
+            this.metadata = exportedKey + padLeft(customData, 64);
+        }
+        return this.metadata;
     }
 
     /**
@@ -226,7 +247,7 @@ note.derive = async (publicKey, spendingKey) => {
  */
 note.encodeMetadata = (noteArray) => {
     return noteArray.reduce((acc, aztecNote) => {
-        const ephemeral = aztecNote.exportMetadata();
+        const ephemeral = aztecNote.exportEphemeralKey();
         return `${acc}${padLeft(ephemeral.slice(2), 66)}`; // remove elliptic.js encoding byte, broadcast metadata is always compressed
     }, '0x');
 };
