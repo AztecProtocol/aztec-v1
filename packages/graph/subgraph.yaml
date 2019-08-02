@@ -8,7 +8,7 @@ dataSources:
     name: ACE
     network: development
     source:
-      address: '0x8a863D4615D00caf2271059035EF28f9b8967cA3'
+      address: '0x968b336450279c785069d531B6C0937dB3D06e25'
       abi: ACE
     mapping:
       kind: ethereum/events
@@ -21,7 +21,7 @@ dataSources:
         - name: ACE
           file: ./build/abis/ACE.json
       eventHandlers:
-        - event: CreateNoteRegistry(address,address,uint256,bool,bool)
+        - event: CreateNoteRegistry(address,address,uint256,address,bool,bool)
           handler: createNoteRegistry
     templates:
       - name: ZkAsset
@@ -53,7 +53,7 @@ dataSources:
     name: AZTECAccountRegistry
     network: development
     source:
-      address: '0x588716A284A149b5EA61EE7d4bae5690685f768A'
+      address: '0x2c44607F9e10EBf8F76508479a3cc66568fa47A7'
       abi: AZTECAccountRegistry
     mapping:
       kind: ethereum/events

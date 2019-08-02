@@ -26,6 +26,7 @@ export default async function proveDeposit({
     const {
         address: notesOwnerAddress,
         spendingPublicKey,
+        linkedPublicKey,
     } = notesOwner;
 
     const noteValues = Array.isArray(amount)
@@ -35,6 +36,7 @@ export default async function proveDeposit({
         noteValues,
         spendingPublicKey,
         notesOwnerAddress,
+        linkedPublicKey,
     );
     const {
         JoinSplitProof,

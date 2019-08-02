@@ -18,7 +18,7 @@ contract AZTECAccountRegistry is LibEIP712 {
         bytes linkedPublicKey;
     }
 
-    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
+    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract,bytes32 salt)";
     string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey)";
 
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
@@ -41,7 +41,6 @@ contract AZTECAccountRegistry is LibEIP712 {
             EIP712_DOMAIN_TYPEHASH,
             keccak256("AZTECAccountRegistry"),
             keccak256("2"),
-            chainId,
             address(this),
             0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558
         ));
@@ -55,9 +54,6 @@ contract AZTECAccountRegistry is LibEIP712 {
             )))));
     }
 
-    function updateChainId(uint _chainId) external onlyOwner {
-        chainId = _chainId;
-    }
 
     event RegisterExtension(
         address indexed account,

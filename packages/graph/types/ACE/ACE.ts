@@ -80,6 +80,62 @@ export class IncrementLatestEpoch__Params {
   }
 }
 
+export class CreateNoteRegistry extends EthereumEvent {
+  get params(): CreateNoteRegistry__Params {
+    return new CreateNoteRegistry__Params(this);
+  }
+}
+
+export class CreateNoteRegistry__Params {
+  _event: CreateNoteRegistry;
+
+  constructor(event: CreateNoteRegistry) {
+    this._event = event;
+  }
+
+  get registryOwner(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get registryAddress(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get scalingFactor(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+
+  get linkedTokenAddress(): Address {
+    return this._event.parameters[3].value.toAddress();
+  }
+
+  get canAdjustSupply(): boolean {
+    return this._event.parameters[4].value.toBoolean();
+  }
+
+  get canConvert(): boolean {
+    return this._event.parameters[5].value.toBoolean();
+  }
+}
+
+export class LogBytes extends EthereumEvent {
+  get params(): LogBytes__Params {
+    return new LogBytes__Params(this);
+  }
+}
+
+export class LogBytes__Params {
+  _event: LogBytes;
+
+  constructor(event: LogBytes) {
+    this._event = event;
+  }
+
+  get b(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+}
+
 export class OwnershipTransferred extends EthereumEvent {
   get params(): OwnershipTransferred__Params {
     return new OwnershipTransferred__Params(this);
@@ -102,16 +158,16 @@ export class OwnershipTransferred__Params {
   }
 }
 
-export class CreateNoteRegistry extends EthereumEvent {
-  get params(): CreateNoteRegistry__Params {
-    return new CreateNoteRegistry__Params(this);
+export class CreateNoteRegistry1 extends EthereumEvent {
+  get params(): CreateNoteRegistry1__Params {
+    return new CreateNoteRegistry1__Params(this);
   }
 }
 
-export class CreateNoteRegistry__Params {
-  _event: CreateNoteRegistry;
+export class CreateNoteRegistry1__Params {
+  _event: CreateNoteRegistry1;
 
-  constructor(event: CreateNoteRegistry) {
+  constructor(event: CreateNoteRegistry1) {
     this._event = event;
   }
 

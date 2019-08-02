@@ -14,6 +14,24 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class LogBytes extends EthereumEvent {
+  get params(): LogBytes__Params {
+    return new LogBytes__Params(this);
+  }
+}
+
+export class LogBytes__Params {
+  _event: LogBytes;
+
+  constructor(event: LogBytes) {
+    this._event = event;
+  }
+
+  get b(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+}
+
 export class CreateNoteRegistry extends EthereumEvent {
   get params(): CreateNoteRegistry__Params {
     return new CreateNoteRegistry__Params(this);
@@ -218,6 +236,32 @@ export class RedeemTokens__Params {
   }
 }
 
+export class UpdateNoteMetadata extends EthereumEvent {
+  get params(): UpdateNoteMetadata__Params {
+    return new UpdateNoteMetadata__Params(this);
+  }
+}
+
+export class UpdateNoteMetadata__Params {
+  _event: UpdateNoteMetadata;
+
+  constructor(event: UpdateNoteMetadata) {
+    this._event = event;
+  }
+
+  get owner(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get noteHash(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+
+  get metadata(): Bytes {
+    return this._event.parameters[2].value.toBytes();
+  }
+}
+
 export class ZkAsset extends SmartContract {
   static bind(address: Address): ZkAsset {
     return new ZkAsset("ZkAsset", address);
@@ -341,11 +385,11 @@ export class UpdateNoteMetaDataCall__Inputs {
     this._call = call;
   }
 
-  get _noteHash(): Bytes {
+  get noteHash(): Bytes {
     return this._call.inputValues[0].value.toBytes();
   }
 
-  get _metaData(): Bytes {
+  get metadata(): Bytes {
     return this._call.inputValues[1].value.toBytes();
   }
 }
