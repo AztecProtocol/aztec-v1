@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const sinon = require('sinon');
 
 const BN = require('bn.js');
-const bn128 = require('../../src');
+const bn128 = require('../src');
 
 describe('bn128', () => {
     let kMaxStub;
