@@ -123,6 +123,28 @@
             "type": "event"
         },
         {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "name": "metadata",
+                    "type": "bytes"
+                }
+            ],
+            "name": "UpdateNoteMetadata",
+            "type": "event"
+        },
+        {
             "constant": false,
             "inputs": [
                 {

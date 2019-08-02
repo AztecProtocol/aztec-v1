@@ -78,6 +78,24 @@
             "type": "function"
         },
         {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "name": "metadata",
+                    "type": "bytes"
+                }
+            ],
+            "name": "updateNoteMetaData",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "constant": true,
             "inputs": [],
             "name": "PRIVATE_RANGE_PROOF",
@@ -450,6 +468,28 @@
                 }
             ],
             "name": "RedeemTokens",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "name": "metadata",
+                    "type": "bytes"
+                }
+            ],
+            "name": "UpdateNoteMetadata",
             "type": "event"
         },
         {
