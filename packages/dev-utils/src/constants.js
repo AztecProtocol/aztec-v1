@@ -1,7 +1,7 @@
 const BN = require('bn.js');
 
+// Precomputed values from MPC setup
 const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-
 const H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
 const t2 = [
     '0x01cf7cc93bfbf7b2c5f04a3bc9cb8b72bbcf2defcabdceb09860c493bdf1588d',
@@ -66,8 +66,12 @@ const constants = {
      * @default 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c
      */
     ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
+    /**
+     * Common reference string
+     * @constant CRS
+     * @type {string}
+     */
     CRS: [`0x${H_X.toString(16)}`, `0x${H_Y.toString(16)}`, ...t2],
-
 };
 
 /**
