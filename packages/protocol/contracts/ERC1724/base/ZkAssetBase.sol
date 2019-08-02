@@ -328,8 +328,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
         require(status == 1, "only unspent notes can be approved");
 
-        // Only the note owner can update the note's metadata
-        require(noteOwner == msg.sender, "transaction sender does not match the owner of the note being updated");
+        // There should be a permission lock here requiring that only the noteOwner can call
+        // this function. It has been deliberately removed on a short term basis
         emit UpdateNoteMetadata(noteOwner, noteHash, metadata);
     }
 
