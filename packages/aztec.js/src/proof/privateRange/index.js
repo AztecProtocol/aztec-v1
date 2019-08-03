@@ -47,7 +47,7 @@ class PrivateRangeProof extends Proof {
         const comparisonNoteValue = this.notes[1].k.toNumber();
         const utilityNoteValue = this.notes[2].k.toNumber();
 
-        if (!originalNoteValue === comparisonNoteValue + utilityNoteValue) {
+        if (originalNoteValue !== comparisonNoteValue + utilityNoteValue) {
             throw new AztecError(errors.codes.BALANCING_RELATION_NOT_SATISFIED, {
                 message: 'The supplied note values do not satisfy the privateRange balancing relationship',
                 originalNoteValue,
