@@ -1,3 +1,0 @@
-#define macro FOO = takes(0) returns(0) {
-    0x40 0x00 keccak
-}
