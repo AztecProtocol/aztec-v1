@@ -1,7 +1,0 @@
-{
-    "name": "weierstrudel_test",
-    "file": "main_loop.huff",
-    "constructor": "TEST_CONSTRUCTOR",
-    "entryMacro": "MAIN__WEIERSTRUDEL",
-    "abi": []
-}
