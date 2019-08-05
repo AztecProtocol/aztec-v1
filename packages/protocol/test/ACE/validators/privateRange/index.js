@@ -102,7 +102,7 @@ contract('Private range validator', (accounts) => {
                 comparisonNoteValue,
                 utilityNoteValue,
             );
-            const proof = new PrivateRangeProof(originalNote, comparisonNote, utilityNote, sender);
+            const proof = new PrivateRangeProof(originalNote, comparisonNote, utilityNote, sender, false);
             const data = proof.encodeABI();
             await truffleAssert.reverts(
                 privateRangeValidator.validatePrivateRange(data, sender, bn128.CRS),
