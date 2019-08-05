@@ -22,15 +22,18 @@ class PrivateRangeProof extends Proof {
     @param {Note} utilityNote helper note used to construct a balancing relationship in the proof. The value of this note must
                               be chosen to satisfy the equation: originalNoteValue = comparisonNoteValue + utilityNoteValue
     @param {string} sender Ethereum address of the transaction sender
+    @param {boolean} safeguard Boolean flag to turn on a balancing check prior to construction of proof
     */
-    constructor(originalNote, comparisonNote, utilityNote, sender) {
+    constructor(originalNote, comparisonNote, utilityNote, sender, safeguard = true) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
         super(ProofType.PRIVATE_RANGE.name, [originalNote, comparisonNote], [utilityNote], sender, publicValue, publicOwner, [
             utilityNote,
         ]);
 
-        this.checkBalancingRelationShipSatisfied();
+        if (safeguard) {
+            this.checkBalancingRelationShipSatisfied();
+        }
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
