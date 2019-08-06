@@ -1,8 +1,5 @@
 /* eslint-disable */
 const ACE = require('../artifacts/ACE');
-const AdjustSupply = require('../artifacts/AdjustSupply');
-const AdjustSupplyABIEncoder = require('../artifacts/AdjustSupplyABIEncoder');
-const AdjustSupplyInterface = require('../artifacts/AdjustSupplyInterface');
 const Dividend = require('../artifacts/Dividend');
 const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
 const DividendInterface = require('../artifacts/DividendInterface');
@@ -15,6 +12,9 @@ const IZkAssetBurnable = require('../artifacts/IZkAssetBurnable');
 const IZkAssetMintable = require('../artifacts/IZkAssetMintable');
 const JoinSplit = require('../artifacts/JoinSplit');
 const JoinSplitABIEncoder = require('../artifacts/JoinSplitABIEncoder');
+const JoinSplitFluid = require('../artifacts/JoinSplitFluid');
+const JoinSplitFluidABIEncoder = require('../artifacts/JoinSplitFluidABIEncoder');
+const JoinSplitFluidInterface = require('../artifacts/JoinSplitFluidInterface');
 const JoinSplitInterface = require('../artifacts/JoinSplitInterface');
 const LibEIP712 = require('../artifacts/LibEIP712');
 const NoteRegistry = require('../artifacts/NoteRegistry');
@@ -28,16 +28,17 @@ const Swap = require('../artifacts/Swap');
 const SwapABIEncoder = require('../artifacts/SwapABIEncoder');
 const SwapInterface = require('../artifacts/SwapInterface');
 const ZkAsset = require('../artifacts/ZkAsset');
+const ZkAssetBase = require('../artifacts/ZkAssetBase');
 const ZkAssetBurnable = require('../artifacts/ZkAssetBurnable');
+const ZkAssetBurnableBase = requie('../artifacts/ZkAssetBurnableBase');
 const ZkAssetDetailed = require('../artifacts/ZkAssetDetailed');
 const ZkAssetMintable = require('../artifacts/ZkAssetMintable');
+const ZkAssetMintableBase = require('../artifacts/ZkAssetMintableBase');
 const ZkAssetOwnable = require('../artifacts/ZkAssetOwnable');
+const ZkAssetOwnableBase = require('../artifacts/ZkAssetOwnableBase');
 
 module.exports = {
     ACE,
-    AdjustSupply,
-    AdjustSupplyABIEncoder,
-    AdjustSupplyInterface,
     Dividend,
     DividendABIEncoder,
     DividendInterface,
@@ -50,6 +51,9 @@ module.exports = {
     IZkAssetMintable,
     JoinSplit,
     JoinSplitABIEncoder,
+    JoinSplitFluid,
+    JoinSplitFluidABIEncoder,
+    JoinSplitFluidInterface,
     JoinSplitInterface,
     LibEIP712,
     NoteRegistry,
@@ -63,8 +67,12 @@ module.exports = {
     SwapABIEncoder,
     SwapInterface,
     ZkAsset,
+    ZkAssetBase,
     ZkAssetBurnable,
+    ZkAssetBurnableBase,
     ZkAssetDetailed,
     ZkAssetMintable,
+    ZkAssetMintableBase,
     ZkAssetOwnable,
+    ZkAssetOwnableBase,
 };
