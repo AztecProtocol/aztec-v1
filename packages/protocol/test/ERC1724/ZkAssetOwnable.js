@@ -35,7 +35,7 @@ contract('ZkAssetOwnable', (accounts) => {
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
         await Promise.all(
             indexes.map((i) => {
-                const signature = signer.signNote(
+                const signature = signer.signNoteForConfidentialApprove(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
@@ -252,7 +252,7 @@ contract('ZkAssetOwnable', (accounts) => {
             });
             await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
 
-            const signature = signer.signNote(
+            const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
@@ -309,7 +309,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
             await zkAssetOwnable.confidentialTransfer(transferData, transferSignatures);
 
-            const signature = signer.signNote(
+            const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
                 transferInputNotes[0].noteHash,
                 zkAssetOwnableTest.address,

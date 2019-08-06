@@ -339,7 +339,6 @@ contract('ZkAsset', (accounts) => {
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
-
             const withdrawalProof = new JoinSplitProof(
                 transferInputNotes,
                 transferOutputNotes,
@@ -350,7 +349,6 @@ contract('ZkAsset', (accounts) => {
 
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
-
             const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
         });
