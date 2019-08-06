@@ -1,6 +1,13 @@
-/* global expect */
-
 const parseValue = (value) => {
+    if (typeof value === 'string') {
+        const int = parseInt(value, 10);
+        if (`${int}` === value) {
+            return int;
+        }
+
+        return value;
+    }
+
     if (typeof value !== 'object') {
         return value;
     }
@@ -29,31 +36,30 @@ const parseValue = (value) => {
     return valueMap;
 };
 
-const parseEvents = (events) =>
-    events.map(({
-        event: name,
-        returnValues,
-        ...rest
-    }) => {
-        const argsList = [];
-        const argsMapping = {};
-        const len = Object.keys(returnValues).length / 2;
-        Object.keys(returnValues).forEach((key, i) => {
-            const value = parseValue(returnValues[key]);
-            if (i < len) {
-                argsList.push(value);
-            } else {
-                argsMapping[key] = value;
-            }
-        });
-
-        return {
-            ...rest,
-            name,
-            argsMapping,
-            args: argsList,
-        };
+const parseEvents = events => events.map(({
+    event: name,
+    returnValues,
+    ...rest
+}) => {
+    const argsList = [];
+    const argsMapping = {};
+    const len = Object.keys(returnValues).length / 2;
+    Object.keys(returnValues).forEach((key, i) => {
+        const value = parseValue(returnValues[key]);
+        if (i < len) {
+            argsList.push(value);
+        } else {
+            argsMapping[key] = value;
+        }
     });
+
+    return {
+        ...rest,
+        name,
+        argsMapping,
+        args: argsList,
+    };
+});
 
 const isBytes = str => typeof str === 'string' && str.startsWith('0x');
 
@@ -77,8 +83,8 @@ const deepEqual = (data, expected, noExtraFields = false) => {
         return false;
     }
 
-    return Object.keys(expected).every(key =>
-        deepEqual(data[key], expected[key]));
+    return Object.keys(expected)
+        .every(key => deepEqual(data[key], expected[key]));
 };
 
 class Web3Event {
@@ -146,11 +152,11 @@ class Web3Events {
     }
 
     contain(eventName) {
-        return this.observedEvents.some((e) => e.name === eventName);
+        return this.observedEvents.some(e => e.name === eventName);
     }
 
     event(eventName) {
-        const allMatches = this.observedEvents.filter((e) => e.name === eventName);
+        const allMatches = this.observedEvents.filter(e => e.name === eventName);
         return new Web3Event(allMatches);
     }
 

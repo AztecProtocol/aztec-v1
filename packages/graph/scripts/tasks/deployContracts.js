@@ -9,7 +9,7 @@ export default function migrate({
             packageName: 'extension',
             onError,
             onClose,
-        })
+        });
     };
 
     migrateContractsInstance({

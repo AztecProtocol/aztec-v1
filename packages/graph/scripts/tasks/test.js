@@ -29,7 +29,7 @@ export default function test({
             return;
         }
         if (runningProcesses) {
-            stopProcesses(runningProcesses,  (name) => {
+            stopProcesses(runningProcesses, (name) => {
                 runningProcesses[name] = null;
             });
         } else if (onClose) {

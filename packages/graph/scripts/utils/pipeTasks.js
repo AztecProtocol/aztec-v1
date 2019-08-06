@@ -4,7 +4,7 @@ import asyncForEach from './asyncForEach';
 export const log = (...messages) => ({
     onClose,
 }) => {
-    console.log(...messages);
+    console.log(...messages); // eslint-disable-line no-console
     onClose();
 };
 

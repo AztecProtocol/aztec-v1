@@ -2,46 +2,15 @@ import Web3 from 'web3';
 import {
     getPort,
 } from '../../scripts/instances/ganacheInstance';
+import {
+    log,
+} from '../../scripts/utils/log';
 import AuthService from './AuthService';
-
-const triggerMethod = async (type, method, ...args) => {
-    const { address } = AuthService.getAccount();
-    const methodSetting = (args.length
-        && typeof args[args.length - 1] === 'object'
-        && !Array.isArray(args[args.length - 1])
-        && args[args.length - 1])
-        || null;
-    const methodArgs = methodSetting
-        ? args.slice(0, args.length - 1)
-        : args;
-
-    if (type === 'call') {
-        return method(...methodArgs).call({
-            from: address,
-            gas: 6500000,
-            ...methodSetting,
-        });
-    }
-
-    return new Promise((resolve, reject) => {
-        method(...methodArgs)[type]({
-            from: address,
-            ...methodSetting,
-            gas: 6500000,
-        })
-            .on('confirmation', async (confirmationNumber, receipt) => {
-                if (!receipt) {
-                    reject();
-                    return;
-                }
-                resolve(receipt);
-            });
-    });
-};
 
 class Web3Service {
     constructor() {
         this.web3 = null;
+        this.account = null;
         this.contracts = {};
         this.abis = {};
     }
@@ -52,14 +21,8 @@ class Web3Service {
         const port = getPort();
         const provider = new Web3.providers.HttpProvider(`http://localhost:${port}`);
         this.web3 = new Web3(provider);
-    }
 
-    async getAccounts() {
-        if (!this.web3) {
-            return [];
-        }
-
-        return this.web3.eth.getAccounts();
+        this.account = AuthService.getAccount();
     }
 
     registerContract(
@@ -69,30 +32,42 @@ class Web3Service {
             contractAddress = '',
         } = {},
     ) {
-        if (!this.web3) return;
+        if (!this.web3) {
+            return null;
+        }
 
         const name = contractName || config.contractName;
 
         if (!config.abi) {
-            console.log(`Contract object "${name}" doesn't have an abi.`);
-            return;
+            log(`Contract object "${name}" doesn't have an abi.`);
+            return null;
         }
 
-        let address = contractAddress;
-        if (!address) {
+        let customAddress = contractAddress;
+        if (!customAddress) {
             const lastNetworkId = Object.keys(config.networks).pop();
             const network = config.networks[lastNetworkId];
-            address = network && network.address;
+            customAddress = network && network.address;
         }
-        if (!address) {
-            console.log(`Contract object "${name}" doesn't have an address. Please set an address first.`);
+        if (!customAddress) {
+            log(`Contract object "${name}" doesn't have an address. Please set an address first.`);
+            return null;
         }
 
         this.abis[name] = config.abi;
-        this.contracts[name] = new this.web3.eth.Contract(
+
+        const contract = new this.web3.eth.Contract(
             config.abi,
-            address,
+            customAddress,
         );
+
+        const {
+            _address: address,
+        } = contract;
+        contract.address = address;
+        this.contracts[name] = contract;
+
+        return contract;
     }
 
     registerInterface(
@@ -101,10 +76,14 @@ class Web3Service {
             name = '',
         } = {},
     ) {
-        if (!this.web3) return;
+        if (!this.web3) {
+            return null;
+        }
 
         const interfaceName = name || config.contractName;
         this.abis[interfaceName] = config.abi;
+
+        return this.abis[interfaceName];
     }
 
     hasContract(contractName) {
@@ -113,7 +92,7 @@ class Web3Service {
 
     contract(contractName) {
         if (!this.hasContract(contractName)) {
-            console.log(`Contract object "${contractName}" hasn't been initiated.`);
+            log(`Contract object "${contractName}" hasn't been initiated.`);
         }
 
         return this.contracts[contractName];
@@ -128,20 +107,31 @@ class Web3Service {
                 this.abis[contractName],
                 contractAddress,
             );
+            const {
+                _address: address,
+            } = contract;
+            contract.address = address;
         }
         if (!contract) {
-            console.log(`'${contractName}' is not registered as a contract.`);
+            log(`'${contractName}' is not registered as a contract.`);
         }
         return contract;
     }
 
     async deploy(config, constructorArguments = []) {
-        const contractObj = new this.web3.eth.Contract(config.abi);
+        const {
+            contractName,
+            abi,
+        } = config;
+        if (!this.abis[contractName]) {
+            this.registerInterface(config);
+        }
+        const contractObj = new this.web3.eth.Contract(abi);
         const { bytecode } = config;
-        const { address } = AuthService.getAccount();
+        const { address } = this.account;
         contractObj.options.data = bytecode;
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             contractObj
                 .deploy({
                     arguments: constructorArguments,
@@ -151,10 +141,51 @@ class Web3Service {
                     gas: 6500000,
                 }, async (error, transactionHash) => {
                     const receipt = await this.web3.eth.getTransactionReceipt(transactionHash);
-                    resolve(receipt);
+                    if (!receipt) {
+                        reject(error);
+                        return;
+                    }
+
+                    const {
+                        contractAddress,
+                    } = receipt;
+                    const contract = this.deployed(contractName, contractAddress);
+                    resolve(contract);
                 });
         });
     }
+
+    triggerMethod = async (type, method, ...args) => {
+        const { address } = this.account;
+        const methodSetting = (args.length
+            && typeof args[args.length - 1] === 'object'
+            && !Array.isArray(args[args.length - 1])
+            && args[args.length - 1])
+            || null;
+        const methodArgs = methodSetting
+            ? args.slice(0, args.length - 1)
+            : args;
+
+        const methodCall = method(...methodArgs)[type]({
+            from: address,
+            gas: 6500000,
+            ...methodSetting,
+        });
+
+        if (type === 'call') {
+            return methodCall;
+        }
+
+        return new Promise((resolve, reject) => {
+            methodCall
+                .then((receipt) => {
+                    resolve(receipt);
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
+    };
 
     useContract(contractName, contractAddress = null) {
         return {
@@ -170,8 +201,8 @@ class Web3Service {
                 }
 
                 return {
-                    call: async (...args) => triggerMethod('call', method, ...args),
-                    send: async (...args) => triggerMethod('send', method, ...args),
+                    call: async (...args) => this.triggerMethod('call', method, ...args),
+                    send: async (...args) => this.triggerMethod('send', method, ...args),
                 };
             },
             events: (eventName) => {
@@ -191,7 +222,7 @@ class Web3Service {
             },
             at: (address) => {
                 if (!this.abis[contractName]) {
-                    console.log(`'${contractName}' is not registered as an interface.`);
+                    log(`'${contractName}' is not registered as an interface.`);
                 }
                 return this.useContract(contractName, address);
             },

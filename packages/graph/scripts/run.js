@@ -37,6 +37,6 @@ if (process.argv.length > 2) {
     delete require.cache[__filename]; // eslint-disable-line no-underscore-dangle
 
     const taskName = process.argv[2];
-    const module = require(`./tasks/${taskName}`).default; // eslint-disable-line global-require
+    const module = require(`./tasks/${taskName}`).default; // eslint-disable-line
     run(module, process.argv.slice(3)).catch(err => errorLog(err.stack));
 }
