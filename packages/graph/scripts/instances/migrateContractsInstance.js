@@ -32,7 +32,7 @@ export default function migrateContractsInstance({
     }
 
     return instance(
-        `cd ${targetPath} && ${trufflePath} migrate --reset`,
+        `cd ${targetPath} && ${trufflePath} compile --all && ${trufflePath} migrate --reset`,
         {
             onError,
             onClose,
