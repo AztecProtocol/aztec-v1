@@ -34,10 +34,6 @@ const domainParams = [
         name: 'verifyingContract',
         type: 'address',
     },
-    {
-        name: 'salt',
-        type: 'bytes32',
-    },
 ];
 
 const AZTECAccount = [
@@ -53,14 +49,12 @@ const AZTECAccount = [
 
 const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
     const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
-    console.log(accountRegistryContract);
 
 
     const domainData = {
         name: 'AZTECAccountRegistry',
         version: '2',
         verifyingContract: accountRegistryContract.address,
-        salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
     };
 
     const message = {

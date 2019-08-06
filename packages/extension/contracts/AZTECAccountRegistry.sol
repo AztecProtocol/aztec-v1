@@ -18,25 +18,18 @@ contract AZTECAccountRegistry is LibEIP712 {
         bytes linkedPublicKey;
     }
 
-    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract,bytes32 salt)";
+    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
     string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey)";
 
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
-
-    uint chainId;
-
-    constructor (uint _chainId) public {
-        chainId = _chainId;
-    }
 
     function hashAZTECAccount(AZTECAccount memory _AZTECAccount) internal view returns (bytes32){
         bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
             EIP712_DOMAIN_TYPEHASH,
             keccak256("AZTECAccountRegistry"),
             keccak256("2"),
-            address(this),
-            0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558
+            address(this)
         ));
             return keccak256(abi.encodePacked(
                 "\x19\x01",
