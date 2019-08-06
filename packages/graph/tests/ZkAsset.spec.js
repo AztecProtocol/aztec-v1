@@ -1,7 +1,4 @@
-/* global jest, expect, beforeAll */
-import dotenv from 'dotenv';
 import devUtils from '@aztec/dev-utils';
-import secp256k1 from '@aztec/secp256k1';
 import bn128 from '@aztec/bn128';
 import aztec from 'aztec.js';
 /* eslint-disable import/no-unresolved */
@@ -16,7 +13,6 @@ import Query from './helpers/Query';
 import asyncMap from './utils/asyncMap';
 import generateRandomId from './utils/generateRandomId';
 
-dotenv.config();
 jest.setTimeout(50000);
 
 const { JOIN_SPLIT_PROOF } = devUtils.proofs;
@@ -35,28 +31,26 @@ const METADATA_VAR_LEN_LENGTH = 32;
 const METADATA_ADDRESS_LENGTH = 40;
 const METADATA_VIEWING_KEY_LENGTH = 420;
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 describe('ZkAsset', () => {
     const epoch = 1;
     const category = 1;
     const proofId = 1;
     const filter = 17;
     const scalingFactor = 1;
-    const canAdjustSupply = true;
-    const canConvert = true;
     const depositAmount = 10;
     let erc20Address;
     let zkAssetAddress;
     let notes;
     let depositProof;
+    let sender;
 
-    const sender = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_0);
-    sender.address = sender.address.toLowerCase();
-
-    const generateNotes = async (noteValues) =>
+    const generateNotes = async noteValues =>
         // throw an error from web3-providers
         // "Connection refused or URL couldn't be resolved: http://localhost:8545"
         // if create notes ascyncronously and then call .send or .call on contracts
-        asyncMap(noteValues, async (val) => {
+        asyncMap(noteValues, async (val) => { // eslint-disable-line implicit-arrow-linebreak
             const {
                 publicKey,
             } = sender;
@@ -76,14 +70,14 @@ describe('ZkAsset', () => {
             metadata: metadata.startsWith('0x')
                 ? metadata
                 : `0x${metadata}`,
-        }
+        };
     };
 
     beforeAll(async () => {
         Web3Service.init();
         Web3Service.registerContract(ACE);
-        Web3Service.registerInterface(ERC20Mintable);
-        Web3Service.registerInterface(ZkAssetOwnable);
+
+        sender = Web3Service.account;
 
         await Web3Service
             .useContract('ACE')
@@ -113,10 +107,9 @@ describe('ZkAsset', () => {
     });
 
     beforeEach(async () => {
-        const {
-            contractAddress: erc20ContractAddress,
-        } = await Web3Service.deploy(ERC20Mintable);
-        erc20Address = erc20ContractAddress;
+        ({
+            address: erc20Address,
+        } = await Web3Service.deploy(ERC20Mintable));
 
         await Web3Service
             .useContract('ERC20Mintable')
@@ -139,13 +132,11 @@ describe('ZkAsset', () => {
             );
 
         const {
-            contractAddress: zkAssetContractAddress,
+            address: zkAssetContractAddress,
         } = await Web3Service.deploy(ZkAssetOwnable, [
             aceAddress,
             erc20Address,
             scalingFactor,
-            canAdjustSupply,
-            canConvert,
         ]);
         zkAssetAddress = zkAssetContractAddress.toLowerCase();
 
@@ -169,6 +160,9 @@ describe('ZkAsset', () => {
             [],
             noteValues,
         );
+
+        await sleep(1000);
+
         depositProof = new JoinSplitProof(
             inputNotes,
             notes,
@@ -187,7 +181,10 @@ describe('ZkAsset', () => {
             );
 
         const depositData = depositProof.encodeABI(zkAssetAddress);
-        const depositSignatures = depositProof.constructSignatures(zkAssetAddress, depositInputOwnerAccounts);
+        const depositSignatures = depositProof.constructSignatures(
+            zkAssetAddress,
+            depositInputOwnerAccounts,
+        );
 
         await Web3Service
             .useContract('ZkAssetOwnable')
@@ -200,9 +197,6 @@ describe('ZkAsset', () => {
     });
 
     it('create Note entity from CreateNote event', async () => {
-        const accounts = await Web3Service.getAccounts();
-        expect(accounts[0].toLowerCase()).toBe(sender.address);
-
         const pastEvents = await Web3Service
             .useContract('ZkAssetOwnable')
             .at(zkAssetAddress)
@@ -241,6 +235,7 @@ describe('ZkAsset', () => {
                 }
             }
         `;
+
         const data = await Query({
             query,
             variables: {
@@ -252,19 +247,17 @@ describe('ZkAsset', () => {
                 },
             },
         });
-        expect(data).toEqual({
-            notes: [
-                {
-                    id: noteHash0,
-                },
-                {
-                    id: noteHash1,
-                },
-            ],
-        });
+        expect(data.notes.sort((a, b) => a.id > b.id)).toEqual([
+            {
+                id: noteHash0,
+            },
+            {
+                id: noteHash1,
+            },
+        ].sort((a, b) => a.id > b.id));
     });
 
-    it('create NoteAccess entities from UpdateNoteMetaData event', async () => {
+    it('create NoteAccess entities from UpdateNoteMetadata event', async () => {
         const {
             noteHash,
             metadata,
@@ -288,7 +281,7 @@ describe('ZkAsset', () => {
             + METADATA_AZTEC_DATA_LENGTH
             + (METADATA_VAR_LEN_LENGTH * 3)
             + METADATA_ADDRESS_LENGTH
-            + METADATA_VIEWING_KEY_LENGTH
+            + METADATA_VIEWING_KEY_LENGTH,
         );
 
         await Web3Service
@@ -303,13 +296,11 @@ describe('ZkAsset', () => {
         const pastEvents = await Web3Service
             .useContract('ZkAssetOwnable')
             .at(zkAssetAddress)
-            .events('UpdateNoteMetaData')
-            .where({
-                id: noteHash,
-            });
+            .events()
+            .all();
 
         Web3Events(pastEvents)
-            .event('UpdateNoteMetaData')
+            .event('UpdateNoteMetadata')
             .toHaveBeenCalledTimes(1)
             .toHaveBeenCalledWith({
                 noteHash,
@@ -356,7 +347,7 @@ describe('ZkAsset', () => {
                         id: noteHash,
                     },
                     account: {
-                        address: sender.address,
+                        address: sender.address.toLowerCase(),
                     },
                     viewingKey: `0x${viewingKey}`,
                 },

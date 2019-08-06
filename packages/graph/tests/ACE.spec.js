@@ -1,4 +1,3 @@
-/* global expect, beforeAll */
 /* eslint-disable import/no-unresolved */
 import ACE from '../build/contracts/ACE';
 import ERC20Mintable from '../build/contracts/ERC20Mintable';
@@ -9,32 +8,24 @@ import Web3Events from './helpers/Web3Events';
 import Query from './helpers/Query';
 
 describe('ACE', () => {
-    beforeAll(() => {
+    beforeAll(async () => {
         Web3Service.init();
         Web3Service.registerContract(ACE);
     });
 
     it('trigger CreateNoteRegistry event', async () => {
-        Web3Service.registerInterface(ERC20Mintable);
         const {
-            contractAddress: erc20Address,
+            address: erc20Address,
         } = await Web3Service.deploy(ERC20Mintable);
-
-        Web3Service.registerInterface(ZkAsset);
         const aceAddress = Web3Service.contract('ACE').address;
         const scalingFactor = 1;
-        const canAdjustSupply = true;
-        const canConvert = true;
-
         const transaction = await Web3Service.deploy(ZkAsset, [
             aceAddress,
             erc20Address,
             scalingFactor,
-            canAdjustSupply,
-            canConvert,
         ]);
         let {
-            contractAddress: zkAssetAddress,
+            address: zkAssetAddress,
         } = transaction;
         zkAssetAddress = zkAssetAddress.toLowerCase();
 
@@ -49,7 +40,12 @@ describe('ACE', () => {
             .event('CreateNoteRegistry')
             .toHaveBeenCalledTimes(1)
             .toHaveBeenCalledWith({
-                zkAssetAddress,
+                canAdjustSupply: false,
+                canConvert: true,
+                scalingFactor,
+                linkedTokenAddress: erc20Address,
+                registryOwner: zkAssetAddress,
+                registryAddress: aceAddress,
             });
 
         const query = `

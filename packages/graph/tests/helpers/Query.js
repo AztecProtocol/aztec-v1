@@ -2,17 +2,24 @@ import fetch from 'node-fetch';
 import {
     getHttpUrl,
 } from '../../scripts/utils/graph';
+import {
+    log,
+} from '../../scripts/utils/log';
+import sleep from '../utils/sleep';
 
 const graphQLServerUrl = getHttpUrl();
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const dataNotReady = (data) => {
     if (data === undefined || data === null) {
         return true;
     }
 
-    return Object.keys(data).some(key => data[key] === null);
+    return Object.keys(data).some((key) => {
+        if (data[key] === null) {
+            return true;
+        }
+        return Array.isArray(data[key]) && !data[key].legnth;
+    });
 };
 
 export default async function Query({
@@ -45,7 +52,7 @@ export default async function Query({
             errors,
         } = json || {});
         if (errors) {
-            console.log(errors);
+            log(errors);
             throw new Error('Fetch query from GraphQL server failed');
         }
     } catch (error) {

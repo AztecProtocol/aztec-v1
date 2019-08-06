@@ -133,7 +133,7 @@ const copyContractAddresses = (prevAddresses, srcFolderPaths) =>
             const srcFilePath = srcFolderPaths
                 .map(p => path.join(p, `${name}.json`))
                 .find(isFile);
-            const contract = require(path.relative( // eslint-disable-line global-require
+            const contract = require(path.relative( // eslint-disable-line
                 __dirname,
                 srcFilePath,
             ));

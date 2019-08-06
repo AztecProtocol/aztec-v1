@@ -8,6 +8,7 @@ import {
     log,
     successLog,
     warnLog,
+    errorLog,
 } from '../utils/log';
 import taskPromise from '../utils/taskPromise';
 import pipeTasks, {
@@ -105,7 +106,7 @@ export default function setup({
         try {
             await taskPromise(resetdb);
         } catch (error) {
-            console.log(error);
+            errorLog('Failed to reset database', error);
             handleClose();
             return null;
         }

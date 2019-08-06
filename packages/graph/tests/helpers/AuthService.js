@@ -1,6 +1,5 @@
+import secp256k1 from '@aztec/secp256k1';
 import '../../env';
-
-const secp256k1 = require('@aztec/secp256k1');
 
 class AuthService {
     constructor() {

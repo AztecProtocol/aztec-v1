@@ -34,7 +34,7 @@ const getUrl = (protocol) => {
             'Url not defined',
             '  File: config/graphNode',
             `  Protocol: ${protocol}`,
-            `  Network: ${network}`
+            `  Network: ${network}`,
         );
         return '';
     }
@@ -56,13 +56,9 @@ const getUrl = (protocol) => {
     return url.endsWith('/') ? `${url}${name}` : `${url}/${name}`;
 };
 
-const getHttpUrl = () => {
-    return getUrl('http');
-};
+const getHttpUrl = () => getUrl('http');
 
-const getWebSocketUrl = () => {
-    return getUrl('ws');
-};
+const getWebSocketUrl = () => getUrl('ws');
 
 export {
     getProjectName,
