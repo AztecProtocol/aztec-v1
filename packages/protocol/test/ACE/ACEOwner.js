@@ -33,9 +33,10 @@ contract('ACEOwner', (accounts) => {
         it('should create an ACE with ACEOwner as owner', async () => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
+                gas: 6000000,
             });
-            const aceAddres = await aceOwner.ace();
-            const ace = await ACE.at(aceAddres);
+            const aceAddress = await aceOwner.ace();
+            const ace = await ACE.at(aceAddress);
 
             const owner = await ace.owner();
             expect(owner).to.equal(aceOwner.address);
@@ -48,9 +49,10 @@ contract('ACEOwner', (accounts) => {
         it('should set the common reference string through ACEOwner', async () => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
+                gas: 6000000,
             });
-            const aceAddres = await aceOwner.ace();
-            const ace = await ACE.at(aceAddres);
+            const aceAddress = await aceOwner.ace();
+            const ace = await ACE.at(aceAddress);
 
             const txData = ace.contract.methods.setCommonReferenceString(bn128.CRS).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
@@ -67,8 +69,8 @@ contract('ACEOwner', (accounts) => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
             });
-            const aceAddres = await aceOwner.ace();
-            const ace = await ACE.at(aceAddres);
+            const aceAddress = await aceOwner.ace();
+            const ace = await ACE.at(aceAddress);
 
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
@@ -87,8 +89,8 @@ contract('ACEOwner', (accounts) => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
                 from: owners[0],
             });
-            const aceAddres = await aceOwner.ace();
-            const ace = await ACE.at(aceAddres);
+            const aceAddress = await aceOwner.ace();
+            const ace = await ACE.at(aceAddress);
 
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
@@ -117,8 +119,8 @@ contract('ACEOwner', (accounts) => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
                 from: owners[0],
             });
-            const aceAddres = await aceOwner.ace();
-            const ace = await ACE.at(aceAddres);
+            const aceAddress = await aceOwner.ace();
+            const ace = await ACE.at(aceAddress);
 
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
