@@ -74,7 +74,10 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
             const tx = await multiSig.confirmTransaction(txId, { from: owners[1] });
             const log = tx.receipt.logs[1];
             const { timestamp } = await web3.eth.getBlock(log.blockNumber);
-            expect(log.args.confirmationTime.toNumber()).to.be.equal(timestamp);
+
+            const difference = timestamp - log.args.confirmationTime.toNumber();
+
+            expect(Math.abs(difference) <= 100).to.equal(true);
             expect(log.args.transactionId.toNumber()).to.be.equal(txId.toNumber());
         });
     });
@@ -194,7 +197,10 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
                     from: owners[0],
                 });
 
-                expect(timestamp).to.be.equal(transactionConfirmationTime.toNumber());
+                const difference = timestamp - transactionConfirmationTime.toNumber();
+
+                expect(transactionConfirmationTime.toNumber()).to.not.equal(0);
+                expect(Math.abs(difference) <= 100).to.equal(true);
             });
 
             it('should be executable with enough confirmations and secondsTimeLocked of 0', async () => {
