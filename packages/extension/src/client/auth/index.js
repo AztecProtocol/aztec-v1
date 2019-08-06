@@ -86,20 +86,10 @@ const sendRegisterExtensionTx = async ({ linkedPublicKey, address }) => {
         from: address,
     });
 
-    const signature = result.substring(2);
-    const r = `0x${signature.substring(0, 64)}`;
-    const s = `0x${signature.substring(64, 128)}`;
-    const v = parseInt(signature.substring(128, 130), 16);
-
-    // await Web3Service
-    //     .useContract('AZTECAccountRegistry')
-    //     .method('updateChainId')
-    //     .send(lastNetworkId);
-
     await Web3Service
         .useContract('AZTECAccountRegistry')
         .method('registerAZTECExtension')
-        .send(address, linkedPublicKey, v, r, s);
+        .send(address, linkedPublicKey, result);
 
     return {
         account: {
