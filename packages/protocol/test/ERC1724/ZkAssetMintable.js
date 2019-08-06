@@ -44,7 +44,7 @@ const getCustomMintNotes = async (newMintCounterValue, mintedNoteValues) => {
 const confidentialApprove = async (zkAssetMintable, delegateAddress, indexes, notes, ownerAccount) => {
     await Promise.all(
         indexes.map((i) => {
-            const signature = signer.signNote(
+            const signature = signer.signNoteForConfidentialApprove(
                 zkAssetMintable.address,
                 notes[i].noteHash,
                 delegateAddress,
