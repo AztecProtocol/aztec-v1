@@ -163,16 +163,8 @@ export class RegisterAZTECExtensionCall__Inputs {
     return this._call.inputValues[1].value.toBytes();
   }
 
-  get v(): i32 {
-    return this._call.inputValues[2].value.toI32();
-  }
-
-  get r(): Bytes {
-    return this._call.inputValues[3].value.toBytes();
-  }
-
-  get s(): Bytes {
-    return this._call.inputValues[4].value.toBytes();
+  get _signature(): Bytes {
+    return this._call.inputValues[2].value.toBytes();
   }
 }
 

@@ -25,12 +25,6 @@ contract AZTECAccountRegistry is LibEIP712 {
     bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
 
     uint chainId;
-    address owner = msg.sender;
-
-    modifier onlyOwner() {
-        // require(msg.sender == owner);
-        _;
-    }
 
     constructor (uint _chainId) public {
         chainId = _chainId;
@@ -82,23 +76,18 @@ contract AZTECAccountRegistry is LibEIP712 {
      * sender is the ethereum address in question        *
      * @param _account - address the address to which a public key is being         registered
      * @param _linkedPublicKey - the public key the sender wishes to link to the _account
+     * @param _signature - an EIP712 compatible signature of the acount & public key 
      */
 
     function registerAZTECExtension(
         address _account,
         bytes memory _linkedPublicKey,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-        // bytes memory _signature
+        bytes memory _signature
     ) public {
-        emit LogAddress(address(this));
-            // valid EIP712 signature
-        address signer = ecrecover(
+        address signer = recoverSignature(
             hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey)),
-            v,r,s
+            _signature
         );
-        emit LogAddress(signer);
         require(_account == signer, 'signer must be the account');
         accountMapping[_account] = _linkedPublicKey;
         // emit event for the graph
