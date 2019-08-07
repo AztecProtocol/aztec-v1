@@ -7,8 +7,10 @@ import "../../interfaces/Behaviour.sol";
 /**
  * @title Behaviour201907
  * @author AZTEC
- * @dev Details the methods and the storage schema of a note registry. Is an ownable contract, and should always inherrit from the previous
- * epoch of the behaviour contract. This contract defines the shared methods between all asset types for the 201907 generation (epoch 1).
+ * @dev Details the methods and the storage schema of a note registry.
+        Is an ownable contract, and should always inherrit from the previous
+        epoch of the behaviour contract. This contract defines the shared methods
+        between all asset types for the 201907 generation (epoch 1).
  * Methods are documented in interface.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
@@ -141,7 +143,11 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         }
     }
 
-    function publicApprove(address /* _publicOwner */, bytes32 /* _proofHash */, uint256 /* _value */) public onlyOwner {
+    function publicApprove(
+        address /* _publicOwner */,
+        bytes32 /* _proofHash */,
+        uint256 /* _value */
+    ) public onlyOwner {
         require(registry.canConvert == true, "this asset is not convertible");
     }
 
@@ -277,9 +283,9 @@ contract Behaviour201907 is NoteRegistryBehaviour {
                     )
                 )
             }
-            // Check that the note status is UNSPENT
-            require(noteStatusOld == uint256(NoteStatus.UNSPENT), "input note status is not UNSPENT");
-            // Check that the note owner is the expected owner
-            require(storedNoteOwner == _noteOwner, "input note owner does not match");
+        // Check that the note status is UNSPENT
+        require(noteStatusOld == uint256(NoteStatus.UNSPENT), "input note status is not UNSPENT");
+        // Check that the note owner is the expected owner
+        require(storedNoteOwner == _noteOwner, "input note owner does not match");
     }
 }

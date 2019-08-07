@@ -14,9 +14,11 @@ import "./proxies/AdminUpgradeabilityProxy.sol";
 /**
  * @title NoteRegistryManager
  * @author AZTEC
- * @dev NoteRegistryManager will be inherrited by ACE, and its purpose is to manage the entire lifecycle of noteRegistries and of
- * factories. It defines the methods which are used to deploy and upgrade registries, the methods to enact state changes sent by
- * the owner of a registry, and it also manages the list of factories which are available.
+ * @dev NoteRegistryManager will be inherrited by ACE, and its purpose is to manage the entire
+        lifecycle of noteRegistries and of
+        factories. It defines the methods which are used to deploy and upgrade registries, the methods
+        to enact state changes sent by
+        the owner of a registry, and it also manages the list of factories which are available.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
@@ -73,8 +75,10 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     }
 
     /**
-    * @dev Register a new Factory, iff no factory for that ID exists. The epoch of any new factory must be at least as big as
-    * the default registry epoch. Each asset type for each cryptosystem for each epoch should have a note registry
+    * @dev Register a new Factory, iff no factory for that ID exists.
+            The epoch of any new factory must be at least as big as
+            the default registry epoch. Each asset type for each cryptosystem for
+            each epoch should have a note registry
     *
     * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
     * @param _factoryAddress - address of the deployed factory
@@ -125,9 +129,12 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     }
 
     /**
-    * @dev called when a mintable and convertible asset wants to perform an action which putts the zero-knowledge and public
-    * balance out of balance. For example, if minting in zero-knowledge, some public tokens need to be added to the pool
-    * managed by ACE, otherwise any private->public conversion runs the risk of not having any public tokens to send.
+    * @dev called when a mintable and convertible asset wants to perform an
+            action which putts the zero-knowledge and public
+            balance out of balance. For example, if minting in zero-knowledge, some
+            public tokens need to be added to the pool
+            managed by ACE, otherwise any private->public conversion runs the risk of not
+            having any public tokens to send.
     *
     * @param _value the value to be added
     */
@@ -159,12 +166,14 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     function validateProofByHash(uint24 _proof, bytes32 _proofHash, address _sender) public view returns (bool);
 
     /**
-    * @dev Default noteRegistry creation method. Doesn't take the id of the factory to use, but generates it based on defaults and on the passed flags.
+    * @dev Default noteRegistry creation method. Doesn't take the id of the factory to use,
+            but generates it based on defaults and on the passed flags.
     *
     * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
     * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
     * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
-    * @param _canConvert - whether the noteRegistry can transfer value from private to public representation and vice versa
+    * @param _canConvert - whether the noteRegistry can transfer value from private to public
+        representation and vice versa
     */
     function createNoteRegistry(
         address _linkedTokenAddress,
@@ -191,7 +200,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
     * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
     * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
-    * @param _canConvert - whether the noteRegistry can transfer value from private to public representation and vice versa
+    * @param _canConvert - whether the noteRegistry can transfer value from private to public
+        representation and vice versa
     * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
     */
     function createNoteRegistry(
@@ -275,10 +285,14 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     }
 
     /**
-    * @dev Method used to transfer public tokens to or from ACE. This function should only be called by a registry, and only if the registry checks
-    * if a particular spend of public tokens has been approved. This method exists in order to make the client side API be able to authorise spends/transfer
-    * to a constant address (ACE). The alternative would be to have all public funds owned by the Proxy contract, but the client side API would then need to
-    * first find the deployed proxy for any zk asset. Prior to production, this needs to be moved to the second scenario.
+    * @dev Method used to transfer public tokens to or from ACE. This function should only be
+        called by a registry, and only if the registry checks
+        if a particular spend of public tokens has been approved. This method exists in order to
+        make the client side API be able to authorise spends/transfer
+        to a constant address (ACE). The alternative would be to have all public funds owned by the
+        Proxy contract, but the client side API would then need to
+        first find the deployed proxy for any zk asset. Prior to production, this needs to be moved to
+        the second scenario.
     *
     * @param _from - address from which tokens are to be transfered
     * @param _to - address to which tokens are to be transfered
@@ -323,8 +337,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     }
 
     /**
-    * @dev Adds a public approval record to the noteRegistry, for use by ACE when it needs to transfer public tokens it holds
-    * to an external address. It needs to be associated with the hash of a proof.
+    * @dev Adds a public approval record to the noteRegistry, for use by ACE when it needs to transfer
+        public tokens it holds to an external address. It needs to be associated with the hash of a proof.
     */
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         NoteRegistryBehaviour registry = registries[_registryOwner];
@@ -400,7 +414,11 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     * @dev Internal utility method which converts three uint8s into a uint24
     *
     */
-    function computeVersionFromComponents(uint8 _first, uint8 _second, uint8 _third) internal pure returns (uint24 version) {
+    function computeVersionFromComponents(
+        uint8 _first,
+        uint8 _second,
+        uint8 _third
+    ) internal pure returns (uint24 version) {
         assembly {
             version := or(mul(_first, 0x10000), or(mul(_second, 0x100), _third))
         }

@@ -18,7 +18,7 @@ module.exports = (deployer) => {
         return deployer.deploy(ConvertibleFactory, ACE.address).then(async ({ address }) => {
             const ace = await ACE.at(ACE.address);
 
-            await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 1 * 256**(0), address);
+            await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 1 * 256 ** 0, address);
         });
     });
 };
