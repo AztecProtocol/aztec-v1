@@ -1,4 +1,7 @@
 import devUtils from '@aztec/dev-utils';
+import {
+    log,
+} from '~utils/log';
 import Web3Service from '~client/services/Web3Service';
 /* eslint-disable import/no-unresolved */
 import ZkAssetOwnable from '../../../../build/protocol/ZkAssetOwnable';
@@ -8,55 +11,45 @@ import JoinSplit from '../../../../build/protocol/JoinSplit';
 import JoinSplitFluid from '../../../../build/protocol/JoinSplitFluid';
 /* eslint-enable */
 
-const {
-    JOIN_SPLIT_PROOF,
-    MINT_PROOF,
-} = devUtils.proofs;
-
-const setJoinSplitProofInAce = async () => {
-    const existingProof = await Web3Service
-        .useContract('ACE')
-        .method('validators')
-        .call(
-            1,
-            1,
-            1,
-        );
-
-    if (!existingProof) {
-        Web3Service.registerContract(JoinSplit);
-        const joinSplitAddress = Web3Service.contract('JoinSplit').address;
-
-        await Web3Service
-            .useContract('ACE')
-            .method('setProof')
-            .send(
-                JOIN_SPLIT_PROOF,
-                joinSplitAddress,
-            );
-    }
+const contractMapping = {
+    ZkAssetOwnable,
+    ZkAssetMintable,
 };
 
-const setMintProofInAce = async () => {
+const proofEpoch = 1;
+const proofId = 1;
+const proofCategoryMapping = {
+    JOIN_SPLIT_PROOF: 1,
+    MINT_PROOF: 2,
+};
+
+const proofContractMapping = {
+    JOIN_SPLIT_PROOF: JoinSplit,
+    MINT_PROOF: JoinSplitFluid,
+};
+
+const setProofInAce = async (proofName) => {
+    const category = proofCategoryMapping[proofName];
     const existingProof = await Web3Service
         .useContract('ACE')
         .method('validators')
         .call(
-            1,
-            2,
-            1,
+            proofEpoch,
+            category,
+            proofId,
         );
 
     if (!existingProof) {
-        Web3Service.registerContract(JoinSplitFluid);
-        const joinSplitFluidAddress = Web3Service.contract('JoinSplitFluid').address;
+        log(`Setting ${proofName} in ACE...'`);
+        const proof = devUtils.proofs[proofName];
+        const proofContract = Web3Service.registerContract(proofContractMapping[proofName]);
 
         await Web3Service
             .useContract('ACE')
             .method('setProof')
             .send(
-                MINT_PROOF,
-                joinSplitFluidAddress,
+                proof,
+                proofContract.address,
             );
     }
 };
@@ -65,37 +58,33 @@ export default async function createNewAsset({
     zkAssetType = 'ZkAssetOwnable',
     scalingFactor,
 }) {
-    await setJoinSplitProofInAce();
-
+    log('Deploying ERC20Mintable...');
     const {
-        contractAddress: erc20Address,
+        address: erc20Address,
     } = await Web3Service.deploy(ERC20Mintable);
 
     const aceAddress = Web3Service.contract('ACE').address;
 
-    let zkAssetAddress;
-    if (zkAssetType === 'ZkAssetMintable') {
-        await setMintProofInAce();
+    await setProofInAce('JOIN_SPLIT_PROOF');
 
-        ({
-            contractAddress: zkAssetAddress,
-        } = await Web3Service.deploy(ZkAssetMintable, [
-            aceAddress,
-            erc20Address,
-            scalingFactor,
-        ]));
-    } else {
-        ({
-            contractAddress: zkAssetAddress,
-        } = await Web3Service.deploy(ZkAssetOwnable, [
-            aceAddress,
-            erc20Address,
-            scalingFactor,
-        ]));
+    if (zkAssetType === 'ZkAssetMintable') {
+        await setProofInAce('MINT_PROOF');
+    } else if (zkAssetType === 'ZkAssetOwnable') {
+        await setProofInAce('BURN_PROOF');
     }
 
+    log(`Deploying ${zkAssetType}...`);
+    const {
+        address: zkAssetAddress,
+    } = await Web3Service.deploy(contractMapping[zkAssetType], [
+        aceAddress,
+        erc20Address,
+        scalingFactor,
+    ]);
+
+    log(`Setting proof in ${zkAssetType}...`);
     await Web3Service
-        .useContract('ZkAssetOwnable')
+        .useContract(zkAssetType)
         .at(zkAssetAddress)
         .method('setProofs')
         .send(
@@ -105,6 +94,6 @@ export default async function createNewAsset({
 
     return {
         erc20Address,
-        zkAssetAddress: zkAssetAddress.toLowerCase(),
+        zkAssetAddress,
     };
 }
