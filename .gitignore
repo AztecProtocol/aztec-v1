@@ -26,3 +26,10 @@ yarn-error.log*
 packages/weierstrudel/debug.txt
 packages/weierstrudel/log.txt
 packages/weierstrudel/js_snippets/hashToPoint.js
+packages/weierstrudel/package-lock.json
+packages/aztec.js/package-lock.json
+packages/contract-addresses/package-lock.json
+packages/contract-artifacts/package-lock.json
+packages/dev-utils/package-lock.json
+packages/huff/package-lock.json
+packages/protocol/package-lock.json
