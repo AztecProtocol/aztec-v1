@@ -234,6 +234,15 @@ contract('ACE', (accounts) => {
                 );
             });
 
+            it('should not get address of validator if proof was invalidated', async () => {
+                await ace.invalidateProof(JOIN_SPLIT_PROOF);
+
+                await truffleAssert.reverts(
+                    ace.getValidatorAddress(JOIN_SPLIT_PROOF, { from: accounts[0] }),
+                    'expected the validator address to not be disabled',
+                );
+            });
+
             it('should not invalidate proof if not owner', async () => {
                 const data = proof.encodeABI(joinSplitValidator.address);
                 await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], data);
