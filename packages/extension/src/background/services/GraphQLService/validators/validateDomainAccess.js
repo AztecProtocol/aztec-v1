@@ -7,16 +7,16 @@ export default async function validateDomainAccess(_, args, ctx, info) {
     let noteId;
     const entityType = info.fieldName;
     switch (entityType) {
-    case 'asset':
-        assetId = args.id;
-        break;
-    case 'note':
-        noteId = args.id;
-        break;
-    case 'grantNoteAccessPermission':
-        ({ noteId } = args);
-        break;
-    default:
+        case 'asset':
+            assetId = args.id;
+            break;
+        case 'note':
+            noteId = args.id;
+            break;
+        case 'grantNoteAccessPermission':
+            ({ noteId } = args);
+            break;
+        default:
     }
 
     if (noteId) {

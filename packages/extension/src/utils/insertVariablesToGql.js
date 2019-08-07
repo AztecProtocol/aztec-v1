@@ -1,9 +1,9 @@
 const toValueStr = (val) => {
     switch (typeof val) {
-    case 'string':
-        return `"${val}"`;
-    default:
-        return `${val}`;
+        case 'string':
+            return `"${val}"`;
+        default:
+            return `${val}`;
     }
 };
 

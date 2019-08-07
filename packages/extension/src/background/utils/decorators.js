@@ -8,25 +8,25 @@ export const accountDecorator = async () => AuthService.requiresRegistration();
 export const assetAccessDecorator = async (_, args, ctx, info) => {
     const validation = {};
     switch (info.fieldName.toUpperCase()) {
-    case 'ASSET': {
-        validation.asset = args.id;
-        validation.domain = args.domain;
-        break;
-    }
-    case 'NOTE': {
-        // we need to fetch the note to get the asset
-        const note = await noteModel.get({
-            id: args.id,
-        });
+        case 'ASSET': {
+            validation.asset = args.id;
+            validation.domain = args.domain;
+            break;
+        }
+        case 'NOTE': {
+            // we need to fetch the note to get the asset
+            const note = await noteModel.get({
+                id: args.id,
+            });
 
-        validation.asset = note.asset;
-        validation.domain = args.domain;
-        break;
-    }
+            validation.asset = note.asset;
+            validation.domain = args.domain;
+            break;
+        }
 
-    default: {
-        break;
-    }
+        default: {
+            break;
+        }
     }
 
     return AuthService.validateDomainAccess({
