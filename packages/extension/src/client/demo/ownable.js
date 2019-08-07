@@ -1,3 +1,4 @@
+import Web3 from 'web3';
 import {
     log,
     warnLog,
@@ -14,10 +15,17 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 export default async function demoOwnable({
     initialERC20Balance = 200,
     scalingFactor = 1,
+    useHttpProvider = true,
 } = {}) {
     const { aztec } = window;
 
     await aztec.enable();
+
+    if (useHttpProvider) {
+        Web3Service.init({
+            provider: new Web3.providers.HttpProvider('http://localhost:8545'),
+        });
+    }
 
     const {
         address: userAddress,
