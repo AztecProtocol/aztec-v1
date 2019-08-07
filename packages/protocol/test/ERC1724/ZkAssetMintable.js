@@ -1,6 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 const { JoinSplitProof, MintProof, note, signer } = require('aztec.js');
-const bn128 = require('@aztec/bn128');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
@@ -175,10 +174,12 @@ contract('ZkAssetMintable', (accounts) => {
             expect(finalAceBalance).to.equal(0);
         });
 
+        // eslint-disable-next-line max-len
         it('should not mint and not call supplementTokens() ACE has insufficient number of tokens when using confidentialTransferFrom()', async () => {
             // first, creating a deposit proof to convert 50 tokens into notes
             // second, creating a withdraw proof to convert the same 50 tokens back into notes - using confidentialTransferFrom()
-            // ensuring that no extra tokens are, incorrectly, minted with supplementTokens() by checking ACE balance is as expected
+            // ensuring that no extra tokens are, incorrectly, minted with supplementTokens() by checking ACE balance is as
+            // expected
             const sender = accounts[0];
             const recipient1 = accounts[1];
             const delegateAddress = accounts[2];
