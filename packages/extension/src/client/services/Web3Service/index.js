@@ -109,6 +109,7 @@ class Web3Service {
 
         return this.contracts[contractName];
     }
+
     deployed(contractName, contractAddress = '') {
         let contract;
         if (!contractAddress) {

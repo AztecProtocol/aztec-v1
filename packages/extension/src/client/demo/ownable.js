@@ -1,4 +1,3 @@
-import Web3 from 'web3';
 import {
     log,
     warnLog,
@@ -9,30 +8,25 @@ import {
 import Web3Service from '../services/Web3Service';
 import createNewAsset from './helpers/createNewAsset';
 import depositToERC20 from './helpers/depositToERC20';
+import deposit from './tasks/deposit';
+import withdraw from './tasks/withdraw';
+import send from './tasks/send';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export default async function demoOwnable({
     initialERC20Balance = 200,
     scalingFactor = 1,
-    useHttpProvider = true,
 } = {}) {
     const { aztec } = window;
-
     await aztec.enable();
-
-    if (useHttpProvider) {
-        Web3Service.init({
-            provider: new Web3.providers.HttpProvider('http://localhost:8545'),
-        });
-    }
 
     const {
         address: userAddress,
     } = Web3Service.account;
 
 
-    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = '0x4579bddE4D9F07059CD0623C7c927BC54d90F86e'; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {
@@ -103,27 +97,8 @@ export default async function demoOwnable({
         log(`Your new ERC20 account balance is ${erc20Balance}.`);
     }
 
-    log('Generating deposit proof...');
-    const depositProof = await asset.deposit(depositAmount);
-    if (!depositProof) {
-        log('Failed to generate deposit proof.');
-        return;
-    }
-    log(depositProof.export());
 
-    log('Approving deposit...');
-    await depositProof.approve();
-    log('Approved!');
-
-    log('Making deposit...');
-    const incomeNotes = await depositProof.send();
-    if (!incomeNotes) {
-        log('Failed to deposit.');
-        return;
-    }
-    log(`Successfully deposited ${depositAmount} to asset '${zkAssetAddress}'.`, {
-        notes: incomeNotes,
-    });
+    await deposit(asset, depositAmount);
 
 
     await sleep(1000);
@@ -131,23 +106,7 @@ export default async function demoOwnable({
 
 
     const withdrawAmount = randomInt(1, 10);
-    log('Generating withdraw proof...');
-    const withdrawProof = await asset.withdraw(withdrawAmount, {
-        numberOfInputNotes: 1,
-    });
-    if (!withdrawProof) {
-        log('Failed to generate withdraw proof');
-        return;
-    }
-    log(withdrawProof.export());
-
-    log('Approving withdrawal...');
-    await withdrawProof.approve();
-    log('Approved!');
-
-    log('Withdrawing...');
-    await withdrawProof.send();
-    log(`Successfully withdrew ${withdrawAmount} from asset '${zkAssetAddress}'.`);
+    await withdraw(asset, withdrawAmount);
 
 
     await sleep(1000);
@@ -156,22 +115,8 @@ export default async function demoOwnable({
 
     const sendAmount = 1;
     const receiver = '0x0563a36603911daaB46A3367d59253BaDF500bF9';
+    await send(asset, sendAmount, receiver);
 
-    log('Generating send proof...');
-    const sendProof = await asset.send({
-        amount: sendAmount,
-        to: receiver,
-        numberOfOutputNotes: 1,
-    });
-    log(sendProof.export());
-
-    log('Approving send proof...');
-    await sendProof.approve();
-    log('Approved!');
-
-    log('Sending...');
-    await sendProof.send();
-    log(`Successfully sent ${sendAmount} to account '${receiver}'.`);
 
     await sleep(1000);
     log(`Asset balance = ${await asset.balance()}`);
