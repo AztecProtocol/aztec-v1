@@ -5,23 +5,21 @@
 const fs = require('fs');
 const path = require('path');
 const truffleAssert = require('truffle-assertions');
-const { constants: { addresses } } = require('@aztec/dev-utils');
-
+const {
+    constants: { addresses },
+} = require('@aztec/dev-utils');
 
 function findBehaviourContracts(epochPath) {
     const paths = fs.readdirSync(epochPath);
-    const contractPaths = paths
-        .filter(p => (/.*[bB]ehaviour.*\.sol/).test(p))
-        .map(c => path.join(epochPath, c));
-    const dirPaths = paths
-        .filter(p => !((/.*\.sol/).test(p)))
-        .map(d => path.join(epochPath, d));
+    const contractPaths = paths.filter((p) => /.*[bB]ehaviour.*\.sol/.test(p)).map((c) => path.join(epochPath, c));
+    const dirPaths = paths.filter((p) => !/.*\.sol/.test(p)).map((d) => path.join(epochPath, d));
 
-    return contractPaths.concat(dirPaths
-        .map(p => findBehaviourContracts(p))
-        .reduce((acc, a) => {
-            return acc.concat(a);
-        }, [])
+    return contractPaths.concat(
+        dirPaths
+            .map((p) => findBehaviourContracts(p))
+            .reduce((acc, a) => {
+                return acc.concat(a);
+            }, []),
     );
 }
 
@@ -33,7 +31,7 @@ function fetchAllBehaviourData(dirPath) {
         const contract = fs.readFileSync(behaviourPath, 'utf-8');
         const regexMatch = contract.match(/contract (.*) is (.*) \{/);
         const contractName = regexMatch[1];
-        const inherritedBehaviour = regexMatch[2].split(',').find(c => (/[bB]ehaviour/).test(c));
+        const inherritedBehaviour = regexMatch[2].split(',').find((c) => /[bB]ehaviour/.test(c));
 
         behaviours[contractName] = {
             next: [],
@@ -42,7 +40,7 @@ function fetchAllBehaviourData(dirPath) {
             contractName,
             inherritedBehaviour,
             behaviourPath,
-        }
+        };
 
         if (behaviours[inherritedBehaviour]) {
             behaviours[inherritedBehaviour].next.push(contractName);
@@ -74,7 +72,7 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
              * We are testing that in the inherritance tree, no node at level n inherrits directly from any
              * node at level n - 2 or greater.
              * In effect, we want to ensure that the tree looks like:
-             * 
+             *
              *        [*]                            [*]      | Epoch 1
              *        / \                            / \      |
              *      [*] [*]    and never like      [*]  \     | Epoch 2
@@ -88,11 +86,11 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
                 if (next.length === 0) return;
                 const baseNextEpoch = next[0] ? inherritanceObj[next[0]].epochInt : 0;
                 expect(baseNextEpoch >= epochInt).to.equal(true);
-                next.forEach(c => {
+                next.forEach((c) => {
                     expect(inherritanceObj[c].epochInt).to.equal(baseNextEpoch);
                     assessProperInherritance(inherritanceObj[c]);
                 });
-            };
+            }
             // Getting the root
             const NoteRegistryBehaviour = inherritanceObj.NoteRegistryBehaviour;
             assessProperInherritance(NoteRegistryBehaviour);
@@ -102,7 +100,7 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
             async function assessProperInitialisation(obj) {
                 const { behaviourPath, contractName, next } = obj;
                 if (behaviourPath) {
-                    const [,baseArtifactsPath] = behaviourPath.match(/.*contracts\/(.*)\/Behaviour.sol/);
+                    const [, baseArtifactsPath] = behaviourPath.match(/.*contracts\/(.*)\/Behaviour.sol/);
                     const artifactsPath = `./${baseArtifactsPath}/${contractName}`;
                     const Contract = artifacts.require(artifactsPath);
                     const contract = await Contract.new({
@@ -111,42 +109,27 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
 
                     const flagPreInitialise = await contract.initialised();
                     expect(flagPreInitialise).to.equal(false);
-                    await contract.initialise(
-                        newOwner,
-                        addresses.ZERO_ADDRESS,
-                        1,
-                        true,
-                        false,
-                        { from: owner }
-                    );
+                    await contract.initialise(newOwner, addresses.ZERO_ADDRESS, 1, true, false, { from: owner });
                     const flagPostInitialise = await contract.initialised();
                     expect(flagPostInitialise).to.equal(true);
                     const ownerPostInitialise = await contract.owner();
                     expect(ownerPostInitialise).to.equal(newOwner);
 
-                    await truffleAssert.reverts(contract.initialise(
-                        attacker,
-                        addresses.ZERO_ADDRESS,
-                        1,
-                        true,
-                        false,
-                        { from: attacker }
-                    ));
+                    await truffleAssert.reverts(
+                        contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: attacker }),
+                    );
 
-                    await truffleAssert.reverts(contract.initialise(
-                        attacker,
-                        addresses.ZERO_ADDRESS,
-                        1,
-                        true,
-                        false,
-                        { from: newOwner }
-                    ));
+                    await truffleAssert.reverts(
+                        contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: newOwner }),
+                    );
                 }
 
-                await Promise.all(next.map(async c => {
-                    return assessProperInitialisation(inherritanceObj[c]);
-                }));
-            };
+                await Promise.all(
+                    next.map(async (c) => {
+                        return assessProperInitialisation(inherritanceObj[c]);
+                    }),
+                );
+            }
             // Getting the root
             const NoteRegistryBehaviour = inherritanceObj.NoteRegistryBehaviour;
             await assessProperInitialisation(NoteRegistryBehaviour);

@@ -6,9 +6,11 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../../../interfaces/IAZTEC.sol";
 import "../Manager.sol";
 /**
- * @title NoteRegistryBehaviour interface which defines the base API which must be implemented for every behaviour contract.
+ * @title NoteRegistryBehaviour interface which defines the base API
+        which must be implemented for every behaviour contract.
  * @author AZTEC
- * @dev This interface will mostly be used by ACE, in order to have an API to interact with note registries through proxies.
+ * @dev This interface will mostly be used by ACE, in order to have an API to
+        interact with note registries through proxies.
  * The implementation of all write methods should have an onlyOwner modifier.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
@@ -31,7 +33,8 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
         * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
         * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
-        * @param _canConvert - whether the noteRegistry can transfer value from private to public representation and vice versa
+        * @param _canConvert - whether the noteRegistry can transfer value from private to public
+            representation and vice versa
     */
     function initialise(
         address _newOwner,
@@ -47,10 +50,14 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         * @return linkedToken - address of any erc20 linked token (can not be 0x0 if canConvert is true)
         * @return scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
         * @return totalSupply - defines the number of public tokens associated with this note registry.
-        * @return confidentialTotalMinted - the hash of the AZTEC note representing the total amount which has been minted.
-        * @return confidentialTotalBurned - the hash of the AZTEC note representing the total amount which has been burned.
-        * @return canConvert - the boolean whih defines if the noteRegistry can convert between public and private.
-        * @return canConvert - the boolean whih defines if the noteRegistry can make use of minting and burning methods.
+        * @return confidentialTotalMinted - the hash of the AZTEC note representing the total amount
+            which has been minted.
+        * @return confidentialTotalBurned - the hash of the AZTEC note representing the total amount
+            which has been burned.
+        * @return canConvert - the boolean whih defines if the noteRegistry can convert between
+            public and private.
+        * @return canConvert - the boolean whih defines if the noteRegistry can make use of
+            minting and burning methods.
     */
     function getRegistry() public view returns (
         address linkedToken,
@@ -98,7 +105,8 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
     ) public;
 
     /**
-        * @dev Adds a public approval record to the noteRegistry, for use by ACE when it needs to transfer public tokens it holds
+        * @dev Adds a public approval record to the noteRegistry, for use by ACE when it needs
+            to transfer public tokens it holds
         * to an external address. It needs to be associated with the hash of a proof.
         *
         * @param _publicOwner - the id of the proof
@@ -122,8 +130,10 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
     function setConfidentialTotalBurned(bytes32 _newTotalNoteHash) internal returns (bytes32);
 
     /**
-        * @dev Gets a defined note from the note registry, and returns the deconstructed object. This is to avoid the interface to be
-        * _too_ opninated on types, even though it does require any subsequent note type to have (or be able to mock) the return fields.
+        * @dev Gets a defined note from the note registry, and returns the deconstructed object.
+            This is to avoid the interface to be
+        * _too_ opninated on types, even though it does require any subsequent note type to have
+            (or be able to mock) the return fields.
         *
         * @param _noteHash - the hash of the note being fetched
         *

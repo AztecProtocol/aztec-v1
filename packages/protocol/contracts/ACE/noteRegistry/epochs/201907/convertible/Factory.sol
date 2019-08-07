@@ -12,9 +12,10 @@ import "./Behaviour.sol";
 contract FactoryConvertible201907 is NoteRegistryFactory {
     constructor(address _aceAddress) public NoteRegistryFactory(_aceAddress) {}
 
-    function deployNewBehaviourInstance() public
-      onlyOwner
-      returns (address)
+    function deployNewBehaviourInstance()
+        public
+        onlyOwner
+        returns (address)
     {
         BehaviourConvertible201907 behaviourContract = new BehaviourConvertible201907();
         emit NoteRegistryDeployed(address(behaviourContract));

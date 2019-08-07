@@ -1,5 +1,5 @@
 /* eslint-disable prefer-destructuring */
-/* global artifacts, expect, contract, beforeEach, it, web3:true */
+/* global artifacts, expect, contract, beforeEach, it */
 // ### External Dependencies
 
 // ### Internal Dependencies
@@ -9,7 +9,6 @@ const truffleAssert = require('truffle-assertions');
 // ### Artifacts
 const NoteRegistryBehaviour = artifacts.require('./noteRegistry/epochs/201907/convertible/BehaviourConvertible201907');
 const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
-
 
 contract('NoteRegistryFactory', (accounts) => {
     const [owner, notOwner] = accounts;
@@ -22,12 +21,10 @@ contract('NoteRegistryFactory', (accounts) => {
 
     describe('Success States', async () => {
         it('should successfully deploy note registry', async () => {
-            const receipt = await factoryContract.deployNewBehaviourInstance(
-                {
-                    from: owner,
-                }
-            );
-            const event = receipt.logs.find(l => l.event === 'NoteRegistryDeployed');
+            const receipt = await factoryContract.deployNewBehaviourInstance({
+                from: owner,
+            });
+            const event = receipt.logs.find((l) => l.event === 'NoteRegistryDeployed');
             const behaviourContract = await NoteRegistryBehaviour.at(event.args.behaviourContract);
             expect(behaviourContract).to.not.equal(undefined);
         });
@@ -35,11 +32,11 @@ contract('NoteRegistryFactory', (accounts) => {
 
     describe('Failure States', async () => {
         it('should fail to deploy note registry if not owner', async () => {
-            await truffleAssert.reverts(factoryContract.deployNewBehaviourInstance(
-                {
+            await truffleAssert.reverts(
+                factoryContract.deployNewBehaviourInstance({
                     from: notOwner,
-                }
-            ));
+                }),
+            );
         });
     });
 });

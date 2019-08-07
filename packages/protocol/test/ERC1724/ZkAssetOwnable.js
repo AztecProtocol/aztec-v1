@@ -1,6 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 const { JoinSplitProof, signer } = require('aztec.js');
-const bn128 = require('@aztec/bn128');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },

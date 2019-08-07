@@ -7,7 +7,9 @@ import "../Behaviour.sol";
 /**
  * @title BehaviourMixed201907
  * @author AZTEC
- * @dev This contract extends Behaviour201907, to add methods which enable minting, burning, and public/private conversion. Methods are documented in interface.
+ * @dev This contract extends Behaviour201907, to add methods which enable minting, burning,
+        and public/private conversion.
+        Methods are documented in interface.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
