@@ -1,6 +1,9 @@
-import Web3Service from '../services/Web3Service';
-import query from '../utils/query';
-import ApiError from '../utils/ApiError';
+import {
+    fromViewingKey,
+} from '~utils/note';
+import Web3Service from '~client/services/Web3Service';
+import query from '~client/utils/query';
+import ApiError from '~client/utils/ApiError';
 
 const dataProperties = [
     'hash',
@@ -30,9 +33,6 @@ export default class Note {
                     value
                     owner {
                         address
-                    }
-                    asset {
-                        balance
                     }
                     status
                 }
@@ -152,12 +152,3 @@ export default class Note {
         return updated;
     }
 }
-
-export const noteFactory = async (noteId) => {
-    const note = new Note({
-        id: noteId,
-    });
-    await note.refresh();
-
-    return note;
-};

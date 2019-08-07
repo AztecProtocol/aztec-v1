@@ -1,6 +1,4 @@
-import {
-    noteFactory,
-} from '../note';
+import noteFactory from '../noteFactory';
 
 export default async function yieldNotes(cb, ...params) {
     const notes = await cb(...params);
