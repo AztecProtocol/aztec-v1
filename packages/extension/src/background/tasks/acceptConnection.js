@@ -191,18 +191,18 @@ export default function acceptConnection() {
 
     browser.runtime.onMessage.addListener((msg, sender) => {
         switch (msg.type) {
-        case clientEvent: {
-            return connection.handleMessage(msg, sender);
-        }
-        case 'UI_CONFIRM': {
-            connection.UiConfirmationSubject.next(msg, sender);
-            break;
-        }
-        case 'UI_REJECTION': {
-            connection.UiRejectionSubject.next(msg, sender);
-            break;
-        }
-        default:
+            case clientEvent: {
+                return connection.handleMessage(msg, sender);
+            }
+            case 'UI_CONFIRM': {
+                connection.UiConfirmationSubject.next(msg, sender);
+                break;
+            }
+            case 'UI_REJECTION': {
+                connection.UiRejectionSubject.next(msg, sender);
+                break;
+            }
+            default:
         }
         return null;
     });
