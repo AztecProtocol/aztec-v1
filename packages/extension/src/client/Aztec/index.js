@@ -27,7 +27,7 @@ class Aztec {
     } = {}) => {
         await Web3Service.init();
         Web3Service.registerContract(ACE, {
-            contractAddress: contractAddresses.ace,
+            address: contractAddresses.ace,
         });
         Web3Service.registerInterface(ERC20Mintable, {
             name: 'ERC20',
@@ -36,7 +36,7 @@ class Aztec {
         Web3Service.registerInterface(ZkAssetOwnable);
         Web3Service.registerInterface(ZkAssetMintable);
         Web3Service.registerContract(AZTECAccountRegistry, {
-            contractAddress: contractAddresses.aztecAccountRegistry,
+            address: contractAddresses.aztecAccountRegistry,
         });
 
         const {
