@@ -41,6 +41,15 @@ export default {
                 },
             },
         },
+        note: {
+            not: {
+                defined: 'Input note cannot be empty.',
+                valid: 'Input note is not a valid AZTEC note.',
+                eq: 'Target note value should be equal to its comparison note value.',
+                gt: 'Target note value should be greater than its comparison note value.',
+                gte: 'Target note value should be greater than or equal to its comparison note value.',
+            },
+        },
     },
     api: {
         mint: {
