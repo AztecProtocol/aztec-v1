@@ -55,6 +55,45 @@ export default class Note {
         }
     };
 
+    export = async () => {
+        if (!this.isValid) {
+            return null;
+        }
+
+        const {
+            noteResponse,
+        } = await query(`
+            noteResponse: note(id: "${this.id}") {
+                note {
+                    decryptedViewingKey
+                    owner {
+                        address
+                    }
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `) || {};
+
+        const {
+            note,
+        } = noteResponse || {};
+        if (!note || !note.decryptedViewingKey) {
+            return null;
+        }
+
+        const {
+            decryptedViewingKey,
+            owner = {},
+        } = note;
+
+        return fromViewingKey(decryptedViewingKey, owner.address);
+    };
+
     async grantAccess(addresses) {
         const addressList = typeof addresses === 'string'
             ? [addresses]
