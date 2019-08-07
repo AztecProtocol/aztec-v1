@@ -6,12 +6,9 @@ import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable';
 import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 import ZkAsset from '../../../build/protocol/ZkAsset';
 /* eslint-enable */
-import {
-    assetFactory,
-} from './asset';
+import assetFactory from '../apis/assetFactory';
 import noteFactory from '../apis/noteFactory';
 import ensureExtensionEnabled from '../auth';
-
 import Web3Service from '../services/Web3Service';
 
 class Aztec {

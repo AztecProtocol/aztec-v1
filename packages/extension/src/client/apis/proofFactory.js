@@ -1,8 +1,14 @@
+import proveDeposit from './deposit/prove';
 import approveDeposit from './deposit/approve';
+import proveWithdraw from './withdraw/prove';
+import proveSend from './send/prove';
 import sendDeposit from './deposit/send';
+import proveCreateNoteFromBalance from './createNoteFromBalance/prove';
 import approveCreateNoteFromBalance from './createNoteFromBalance/approve';
 import sendCreateNoteFromBalance from './createNoteFromBalance/send';
+import proveMint from './mint/prove';
 import sendMint from './mint/send';
+import proveBurn from './burn/prove';
 import sendBurn from './burn/send';
 import yieldNotes from './utils/yieldNotes';
 
@@ -40,7 +46,16 @@ const createNoteFromBalance = data => ({
     export: () => data.proof,
 });
 
-const proofMapping = {
+const proveMapping = {
+    deposit: proveDeposit,
+    withdraw: proveWithdraw,
+    send: proveSend,
+    mint: proveMint,
+    burn: proveBurn,
+    createNoteFromBalance: proveCreateNoteFromBalance,
+};
+
+const proofResultMapping = {
     deposit,
     withdraw,
     send,
@@ -49,17 +64,18 @@ const proofMapping = {
     createNoteFromBalance,
 };
 
-export default async function proofFactory(type, cb, options) {
+export default async function proofFactory(type, options) {
+    const prove = proveMapping[type];
     const {
         proof,
         ...data
-    } = await cb(options) || {};
+    } = await prove(options) || {};
 
     if (!proof) {
         return null;
     }
 
-    return proofMapping[type]({
+    return proofResultMapping[type]({
         proof,
         options,
         data,

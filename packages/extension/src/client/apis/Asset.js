@@ -4,12 +4,6 @@ import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
 import proofFactory from '~client/apis/proofFactory';
-import deposit from '~client/apis/deposit/prove';
-import withdraw from '~client/apis/withdraw/prove';
-import send from '~client/apis/send/prove';
-import mint from '~client/apis/mint/prove';
-import burn from '~client/apis/burn/prove';
-import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
 const dataProperties = [
     'address',
@@ -146,7 +140,6 @@ export default class Asset {
         numberOfOutputNotes = 2,
     } = {}) => proofFactory(
         'deposit',
-        deposit,
         {
             assetAddress: this.address,
             amount,
@@ -161,7 +154,6 @@ export default class Asset {
         numberOfInputNotes,
     } = {}) => proofFactory(
         'withdraw',
-        withdraw,
         {
             assetAddress: this.address,
             amount,
@@ -190,7 +182,6 @@ export default class Asset {
         numberOfOutputNotes,
     } = {}) => proofFactory(
         'send',
-        send,
         {
             assetAddress: this.address,
             transaction,
@@ -225,7 +216,6 @@ export default class Asset {
 
         return proofFactory(
             'mint',
-            mint,
             {
                 assetAddress: this.address,
                 amount,
@@ -258,7 +248,6 @@ export default class Asset {
 
         return proofFactory(
             'burn',
-            burn,
             {
                 assetAddress: this.address,
                 notes,
@@ -274,7 +263,6 @@ export default class Asset {
         numberOfInputNotes = 0,
     }) => proofFactory(
         'createNoteFromBalance',
-        createNoteFromBalance,
         {
             assetAddress: this.address,
             amount,
@@ -284,12 +272,3 @@ export default class Asset {
         },
     );
 }
-
-export const assetFactory = async (assetId) => {
-    const asset = new Asset({
-        id: assetId,
-    });
-    await asset.refresh();
-
-    return asset;
-};
