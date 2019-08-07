@@ -4,6 +4,7 @@ import {
 import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
+import proofFactory from './noteProofFactory';
 
 const dataProperties = [
     'hash',
@@ -23,7 +24,7 @@ export default class Note {
         return !!this.hash;
     }
 
-    refresh = async () => {
+    async refresh() {
         const {
             noteResponse,
         } = await query(`
@@ -53,9 +54,9 @@ export default class Note {
                 this[key] = note[key];
             });
         }
-    };
+    }
 
-    export = async () => {
+    async export() {
         if (!this.isValid) {
             return null;
         }
@@ -92,7 +93,7 @@ export default class Note {
         } = note;
 
         return fromViewingKey(decryptedViewingKey, owner.address);
-    };
+    }
 
     async grantAccess(addresses) {
         const addressList = typeof addresses === 'string'
@@ -150,5 +151,128 @@ export default class Note {
         }
 
         return updated;
+    }
+
+    /**
+     *
+     * Equal
+     *
+     * - note (Note! or aztec.Note!)
+     * - options
+     *       sender (Address):          The proof sender.
+     *
+     * @returns (Bool!)
+     */
+    async equal(note, {
+        sender,
+    } = {}) {
+        const originalNote = await this.export();
+        return proofFactory(
+            'privateRange',
+            {
+                type: 'eq',
+                originalNote,
+                comparisonNote: note,
+                sender,
+            },
+        );
+    }
+
+    /**
+     *
+     * GreaterThan
+     *
+     * - note (Note! or aztec.Note!)
+     * - options
+     *       sender (Address):          The proof sender.
+     *
+     * @returns (Bool!)
+     */
+    async greaterThan(note, {
+        sender,
+    } = {}) {
+        const originalNote = await this.export();
+        return proofFactory(
+            'privateRange',
+            {
+                originalNote,
+                comparisonNote: note,
+                sender,
+            },
+        );
+    }
+
+    /**
+     *
+     * LessThan
+     *
+     * - note (Note! or aztec.Note!)
+     * - options
+     *       sender (Address):          The proof sender.
+     *
+     * @returns (Bool!)
+     */
+    async lessThan(note, {
+        sender,
+    } = {}) {
+        const comparisonNote = await this.export();
+        return proofFactory(
+            'privateRange',
+            {
+                originalNote: note,
+                comparisonNote,
+                sender,
+            },
+        );
+    }
+
+    /**
+     *
+     * GreaterThanOrEqualTo
+     *
+     * - note (Note! or aztec.Note!)
+     * - options
+     *       sender (Address):          The proof sender.
+     *
+     * @returns (Bool!)
+     */
+    async greaterThanOrEqualTo(note, {
+        sender,
+    } = {}) {
+        const originalNote = await this.export();
+        return proofFactory(
+            'privateRange',
+            {
+                type: 'gte',
+                originalNote,
+                comparisonNote: note,
+                sender,
+            },
+        );
+    }
+
+    /**
+     *
+     * LessThanOrEqualTo
+     *
+     * - note (Note! or aztec.Note!)
+     * - options
+     *       sender (Address):          The proof sender.
+     *
+     * @returns (Bool!)
+     */
+    async lessThanOrEqualTo(note, {
+        sender,
+    } = {}) {
+        const comparisonNote = await this.export();
+        return proofFactory(
+            'privateRange',
+            {
+                type: 'gte',
+                originalNote: note,
+                comparisonNote,
+                sender,
+            },
+        );
     }
 }
