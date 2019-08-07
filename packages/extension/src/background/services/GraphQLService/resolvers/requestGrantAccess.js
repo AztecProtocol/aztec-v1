@@ -18,7 +18,7 @@ export default async function requestGrantAccess(args, ctx) {
         address,
     } = args;
     const {
-        user: currentUser,
+        address: userAddress,
     } = ctx;
 
     const addressList = [];
@@ -54,7 +54,7 @@ export default async function requestGrantAccess(args, ctx) {
     `;
     const variables = {
         userAccessesWhere: {
-            account: currentUser.address,
+            account: userAddress,
         },
         noteAccessesWhere: {
             note: noteId,
@@ -77,7 +77,7 @@ export default async function requestGrantAccess(args, ctx) {
         throw argsError('account.noteAccess', {
             messageOptions: {
                 noteId,
-                account: currentUser.address,
+                account: userAddress,
             },
         });
     }
