@@ -1,6 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 const { BurnProof, JoinSplitProof, note } = require('aztec.js');
-const bn128 = require('@aztec/bn128');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
