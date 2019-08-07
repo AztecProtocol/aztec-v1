@@ -1,6 +1,6 @@
 <p align="center"><img src="https://i.imgur.com/Cmu8ocU.png" width="280px"/></p>
 
-<p align="center"> AZTEC is an efficient zero-knowledge privacy protocol. The protocol powers real world financial applications on Ethereum mainnet today. A complete explanation of AZTEC can be found in our <a href="https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf">white paper</a>.</p>
+<p align="center"> AZTEC is an efficient zero-knowledge privacy protocol. The protocol powers real world financial applications on Ethereum mainnet today. A complete explanation of AZTEC can be found in our <a href="https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf">white paper</a> and you can learn more about the protocol implementation in our <a href="https://aztec-protocol.gitbook.io/aztec-documentation/">documentation</p>.
 
 <p align="center">
   <a href="https://circleci.com/gh/AztecProtocol/AZTEC">
