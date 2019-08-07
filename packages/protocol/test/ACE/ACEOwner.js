@@ -31,14 +31,9 @@ contract('ACEOwner', (accounts) => {
         const secondsTimeLocked = new BN(0);
 
         it('should initiate ACEOwner and transfer ownership of ACE', async () => {
-            const aceOwner = await ACEOwner.new(
-                owners,
-                REQUIRED_APPROVALS,
-                secondsTimeLocked,
-                {
-                    from: owners[0],
-                }
-            );
+            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+                from: owners[0],
+            });
             const ace = await ACE.new({ from: owners[0] });
             await ace.transferOwnership(aceOwner.address);
 
