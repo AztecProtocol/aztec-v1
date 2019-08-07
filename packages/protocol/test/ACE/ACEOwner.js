@@ -33,7 +33,6 @@ contract('ACEOwner', (accounts) => {
         it('should create an ACE with ACEOwner as owner', async () => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
-                gas: 6000000,
             });
             const aceAddress = await aceOwner.ace();
             const ace = await ACE.at(aceAddress);
@@ -49,7 +48,6 @@ contract('ACEOwner', (accounts) => {
         it('should set the common reference string through ACEOwner', async () => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
-                gas: 6000000,
             });
             const aceAddress = await aceOwner.ace();
             const ace = await ACE.at(aceAddress);
