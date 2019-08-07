@@ -74,9 +74,9 @@ contract('LibEIP712', (accounts) => {
             );
 
             // see https://ethereum.stackexchange.com/questions/69328/how-to-get-0x0-from-ecrecover/69329#69329
-            
+
             // Replacing v with an incorrect value of 10
-            const incorrectSignature = signature.slice(0, 128) + '10'
+            const incorrectSignature = signature.slice(0, 128) + '10';
             await truffleAssert.reverts(
                 libEIP712._recoverSignature(encodedTypedData, incorrectSignature),
                 'signer address cannot be 0',
