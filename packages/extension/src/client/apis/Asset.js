@@ -3,7 +3,7 @@ import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
-import proofFactory from '~client/apis/proofFactory';
+import proofFactory from './assetProofFactory';
 
 const dataProperties = [
     'address',
