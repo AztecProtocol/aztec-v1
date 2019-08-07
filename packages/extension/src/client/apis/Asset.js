@@ -256,11 +256,11 @@ export default class Asset {
         );
     };
 
-    createNoteFromBalance = async ({
-        amount,
+    createNoteFromBalance = async (amount, {
         sender = '',
         userAccess = [],
         numberOfInputNotes = 0,
+        numberOfOutputNotes = 1,
     }) => proofFactory(
         'createNoteFromBalance',
         {
@@ -269,6 +269,7 @@ export default class Asset {
             sender,
             userAccess,
             numberOfInputNotes,
+            numberOfOutputNotes,
         },
     );
 }
