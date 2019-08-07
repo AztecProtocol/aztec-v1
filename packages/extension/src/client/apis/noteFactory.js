@@ -1,4 +1,4 @@
-import Note from './note';
+import Note from './Note';
 
 export default async function noteFactory(noteId) {
     const note = new Note({
