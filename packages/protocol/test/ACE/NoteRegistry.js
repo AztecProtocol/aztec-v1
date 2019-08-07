@@ -45,10 +45,10 @@ contract('NoteRegistry', (accounts) => {
         joinSplitValidator = JoinSplitValidator;
 
         const convertibleFactory = await ConvertibleFactory.new(ace.address);
-        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 0 * 256**(0), convertibleFactory.address);
-        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 1 * 256**(0), convertibleFactory.address);
-        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 2 * 256**(0), convertibleFactory.address);
-        await ace.setFactory(1 * 256**(2) + 1 * 256**(1) + 3 * 256**(0), convertibleFactory.address);
+        await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 0 * 256 ** 0, convertibleFactory.address);
+        await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 1 * 256 ** 0, convertibleFactory.address);
+        await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 2 * 256 ** 0, convertibleFactory.address);
+        await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 3 * 256 ** 0, convertibleFactory.address);
 
         erc20 = await ERC20Mintable.new();
         await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert);
@@ -76,15 +76,15 @@ contract('NoteRegistry', (accounts) => {
             const registryOwner = accounts[1];
             const linkedTokenAddress = erc20.address;
 
-            const createEvent = result.logs.find(l => l.event === 'CreateNoteRegistry');
+            const createEvent = result.logs.find((l) => l.event === 'CreateNoteRegistry');
             expect(createEvent).to.not.equal(undefined);
 
             const { args } = createEvent;
-            expect(args.registryOwner).to.equal(registryOwner)
-            expect(args.scalingFactor.toNumber()).to.equal(scalingFactor.toNumber())
-            expect(args.linkedTokenAddress).to.equal(linkedTokenAddress)
-            expect(args.canAdjustSupply).to.equal(canAdjustSupply)
-            expect(args.canConvert).to.equal(canConvert)
+            expect(args.registryOwner).to.equal(registryOwner);
+            expect(args.scalingFactor.toNumber()).to.equal(scalingFactor.toNumber());
+            expect(args.linkedTokenAddress).to.equal(linkedTokenAddress);
+            expect(args.canAdjustSupply).to.equal(canAdjustSupply);
+            expect(args.canConvert).to.equal(canConvert);
         });
 
         it('should be able to read a registry from storage', async () => {
@@ -219,8 +219,7 @@ contract('NoteRegistry', (accounts) => {
         });
 
         it('should fail to create a note registry if sender already owns one', async () => {
-            await truffleAssert.reverts(
-                ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert));
+            await truffleAssert.reverts(ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert));
         });
 
         it('should fail to create a note registry if linked token address is 0x0', async () => {

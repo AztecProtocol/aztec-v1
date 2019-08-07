@@ -189,9 +189,7 @@ contract('ZkAsset', (accounts) => {
             const tx1 = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
 
             const dummyEphemeralKeys = randomHex(192);
-            const updatedMetaData =
-                dummyEphemeralKeys +
-                customMetadata;
+            const updatedMetaData = dummyEphemeralKeys + customMetadata;
             const tx2 = await zkAssetTest.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
                 from: accounts[0],
             });
@@ -404,8 +402,10 @@ contract('ZkAsset', (accounts) => {
         });
 
         it('should should fail to create zkAsset if 0x0 is linked token address', async () => {
-            await truffleAssert.reverts(ZkAsset.new(ace.address, constants.addresses.ZERO_ADDRESS, scalingFactor),
-                "can not create asset with convert and adjust flags set to false");
+            await truffleAssert.reverts(
+                ZkAsset.new(ace.address, constants.addresses.ZERO_ADDRESS, scalingFactor),
+                'can not create asset with convert and adjust flags set to false',
+            );
         });
 
         it('should fail if signatures are zero', async () => {
@@ -642,9 +642,7 @@ contract('ZkAsset', (accounts) => {
             await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
 
             const dummyEphemeralKeys = randomHex(192);
-            const updatedMetaData =
-                dummyEphemeralKeys +
-                customMetadata;
+            const updatedMetaData = dummyEphemeralKeys + customMetadata;
             await truffleAssert.reverts(
                 zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
                     from: accounts[0],
