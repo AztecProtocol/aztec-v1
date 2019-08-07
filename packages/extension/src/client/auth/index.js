@@ -101,7 +101,8 @@ export default async function ensureExtensionInstalled() {
                 account,
                 ...rest
             }) => {
-                if (account && !account.registered) {
+                console.log(account, error);
+                if (!account || !account.registered) {
                     return from(sendRegisterExtensionTx(account));
                 }
                 if (account) {
@@ -112,7 +113,6 @@ export default async function ensureExtensionInstalled() {
 
                 return empty();
             }),
-            map(d => d),
         );
 
     return stream.toPromise();

@@ -167,16 +167,6 @@ const AuthService = {
             return permissionError('account.not.login', {
                 messageOptions: { account: currentAddress },
                 currentAddress,
-
-            });
-        }
-        // hack figure out whats going on here
-        if ((currentAddress || address) && session.address !== (currentAddress || address)) {
-            await remove('session');
-            return permissionError('account.not.login', {
-                messageOptions: { account: currentAddress },
-                currentAddress,
-
             });
         }
 
@@ -225,10 +215,33 @@ const AuthService = {
             session: {
                 ...session,
                 pwDerivedKey: decodedKey,
-                address: currentAddress,
+                address: currentAddress || address || session.address,
             },
             keyStore: k,
         };
+    },
+    ensureAccount: async ({ currentAddress: address }) => {
+        // we already have a session if we are here so can use that to get the pwDerrivedKey
+        const { keyStore, session } = await get(['keyStore', 'session']);
+
+        const decodedKey = new Uint8Array(Object.values(JSON.parse(session.pwDerivedKey)));
+        const k = KeyStore.deserialize(keyStore, decodedKey);
+
+        if (!k.isDerivedKeyCorrect(decodedKey)) {
+            return permissionError('account.incorrect.password', {
+                messageOptions: {},
+            });
+        }
+
+        const account = await userModel.get({ address });
+
+        if (!account) {
+            await userModel.set({
+                address,
+                linkedPublicKey: k.privacyKeys.publicKey,
+            });
+        }
+        return account;
     },
     login: async ({ password, address }) => {
         const { keyStore } = await get(['keyStore']);
@@ -242,14 +255,6 @@ const AuthService = {
         if (!k.isDerivedKeyCorrect(pwDerivedKey)) {
             return permissionError('account.incorrect.password', {
                 messageOptions: {},
-            });
-        }
-        const account = await userModel.get({ address });
-
-        if (!account) {
-            await userModel.set({
-                address,
-                linkedPublicKey: keyStore.privacyKeys.publicKey,
             });
         }
 
