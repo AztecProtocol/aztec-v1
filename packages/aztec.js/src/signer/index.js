@@ -39,6 +39,7 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
     };
 };
 
+
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a
  * ZkAsset. The ZkAsset.confidentialApprove() method must be called when granting note spending permission
@@ -47,6 +48,8 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
  * This is expected to be the most commonly used note signing() function. However for use cases, such as
  * testing, where ACE domain params are required then the signNoteACEDomain() function is
  * available.
+ * 
+ * Formats `r` and `s` as occupying 32 bytes, and `v` as occupying 1 byte
  * @method signNoteForConfidentialApprove
  * @param {string} verifyingContract address of target contract
  * @param {string} noteHash noteHash of the note being signed
@@ -63,16 +66,18 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, p
         spender,
         status,
     };
-    const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-    const r = signature[1];
-    const s = signature[2].slice(2);
-    const v = signature[0].slice(-2);
-    return r + s + v;
+
+    const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
+    const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    return signature;
 };
+
 
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, to be used to give permission for
- * note expenditure during a zkAsset confidentialTransfer() method call
+ * note expenditure during a zkAsset confidentialTransfer() method call.
+ * 
+ * Uses the default format of `r`, `s` and `v` as occupying 32 bytes
  *
  * @method signNoteForConfidentialTransfer
  * @param {string} verifyingContract address of target contract
@@ -83,7 +88,7 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, p
  * @param {string} sender address of the transaction sender
  * @returns {string} ECDSA signature parameters [r, s, v]
  */
-signer.signNotesForConfidentialTransfer = (verifyingContract, noteOwnerAccount, noteHash, challenge, sender) => {
+signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, noteHash, challenge, sender) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.JOIN_SPLIT_SIGNATURE;
     const message = {
@@ -94,22 +99,19 @@ signer.signNotesForConfidentialTransfer = (verifyingContract, noteOwnerAccount, 
     };
 
     const { privateKey } = noteOwnerAccount;
-    const { signature } = signer.signTypedData(domain, schema, message, privateKey);
-
-    const r = signature[1].slice(2);
-    const s = signature[2].slice(2);
-    const v = padRight(signature[0].slice(-2), 64);
-
-    return r + s + v;
+    const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
+    return unformattedSignature
 };
 
 /**
- * Create an EIP712 ECDSA signature over an AZTEC note, for an ACE.sol domain
+ * Create an EIP712 ECDSA signature over an AZTEC note, for an ACE.sol domain.
+ * 
+ * Formats `r` and `s` as occupying 32 bytes, and `v` as occupying 1 byte
  * @method signNoteACEDomain
  * @param {string} verifyingContract address of target contract
  * @param {string} spender address of the note spender
  * @param {string} privateKey the private key of message signer
- * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ * @returns {string[]} ECDSA signature parameters, [r, s, v], formatted as 32-byte wide hex-strings
  */
 
 signer.signNoteACEDomain = (verifyingContract, spender, privateKey) => {
@@ -122,17 +124,26 @@ signer.signNoteACEDomain = (verifyingContract, spender, privateKey) => {
         spender,
         status,
     };
-    return signer.signTypedData(domain, schema, message, privateKey);
+
+    const { unformattedSignature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
+    const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    return { signature, encodedTypedData }
 };
 
 /**
- * Create an EIP712 ECDSA signature over structured data
+ * Create an EIP712 ECDSA signature over structured data. This is a low level function that returns the signature parameters
+ * in an unstructured form - `r`, `s` and `v` are all 32 bytes in size. 
+ * 
+ * Higher level functions such as 
+ * signNoteForConfidentialApprove() and signNotesForConfidentialTransfer() will then format the signature params as required
+ * by the relevant verification procedure. 
+ * 
  * @method signTypedData
  * @param {string} schema JSON object that defines the structured data of the signature
  * @param {string[]} domain variables required for the domain hash part of the signature
  * @param {string} message the Ethereum address sending the AZTEC transaction (not necessarily the note signer)
  * @param {string} privateKey the private key of message signer
- * @returns {string[]} ECDSA signature parameters [v, r, s], formatted as 32-byte wide hex-strings
+ * @returns {string[]} ECDSA signature parameters, `[r, s, v]`, formatted as 32-byte wide hex-strings
  */
 signer.signTypedData = (domain, schema, message, privateKey) => {
     const encodedTypedData = typedData.encodeTypedData({
@@ -140,9 +151,15 @@ signer.signTypedData = (domain, schema, message, privateKey) => {
         ...schema,
         message,
     });
-    const signature = secp256k1.ecdsa.signMessage(encodedTypedData, privateKey);
+    let unformattedSignature = secp256k1.ecdsa.signMessage(encodedTypedData, privateKey);
+
+    const r = unformattedSignature[1].slice(2);
+    const s = unformattedSignature[2].slice(2);
+    const v = padRight(unformattedSignature[0].slice(-2), 64);
+    unformattedSignature = r + s + v;
+
     return {
-        signature,
+        unformattedSignature,
         encodedTypedData,
     };
 };
