@@ -8,6 +8,7 @@ import deposit from '~client/apis/deposit/prove';
 import withdraw from '~client/apis/withdraw/prove';
 import send from '~client/apis/send/prove';
 import mint from '~client/apis/mint/prove';
+import burn from '~client/apis/burn/prove';
 import createNoteFromBalance from '~client/apis/createNoteFromBalance/prove';
 
 const dataProperties = [
@@ -230,6 +231,38 @@ export default class Asset {
                 amount,
                 sender,
                 numberOfOutputNotes,
+            },
+        );
+    };
+
+    /**
+     *
+     * Burn
+     * This api is available only when the asset is ZkAssetBurnable
+     *
+     * - notes ([AztecNote!])
+     * - options
+     *       sender (Address):          The proof sender.
+     *                                  If empty, will use extension's current user.
+     *       numberOfOutputNotes (Int): Number of new notes.
+     *                                  If input amount is an array, this value will be ignored.
+     *
+     * @returns ([Notes!])
+     */
+    burn = async (notes, {
+        sender = '',
+    } = {}) => {
+        if (!this.canAdjustSupply) {
+            throw new ApiError('api.burn.notValid');
+        }
+
+        return proofFactory(
+            'burn',
+            burn,
+            {
+                assetAddress: this.address,
+                notes,
+                sender,
             },
         );
     };
