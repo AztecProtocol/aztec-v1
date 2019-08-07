@@ -11,6 +11,7 @@ import {
     ensureUserPermission,
     ensureEntityPermission,
     ensureKeyvault,
+    ensureAccount,
 } from '../decorators';
 import pipe from '../utils/pipe';
 import validateSession from '../validators/validateSession';
@@ -56,8 +57,8 @@ export default {
         pickNotesFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
         })),
-        account: ensureKeyvault(async (_, args, ctx) => {
-            const account = await userModel.get({ address: args.currentAddress });
+        account: ensureKeyvault(ensureAccount(async (_, args, ctx) => {
+            let account = await userModel.get({ address: args.currentAddress });
             if (account && !account.registered) {
                 const { account: user } = await GraphNodeService.query(`
                     account(id: "${args.currentAddress.toLowerCase()}") {
@@ -80,13 +81,14 @@ export default {
             return {
                 account,
             };
-        }),
+        })),
+
         accounts: ensureUserPermission(async (_, args) => ({
             accounts: await getAccounts(args),
         })),
     },
     Mutation: {
-        login: (_, args) => AuthService.login(args),
+        login: pipe([ensureAccount, async (_, args) => AuthService.login(args)]),
         // logout: sessionDecorator(AuthService.logout),
         registerExtension: pipe([
             async (_, args) => ({
