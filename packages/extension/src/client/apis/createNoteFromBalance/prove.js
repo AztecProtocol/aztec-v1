@@ -18,8 +18,8 @@ export default async function proveCreateNoteFromBalance({
     assetAddress,
     amount,
     sender,
-    owner,
-    transaction, // will be ignore if owner is set
+    owner, // will be ignore if transaction is not empty
+    transaction,
     publicOwner,
     // userAccess,
     numberOfInputNotes,
@@ -31,12 +31,7 @@ export default async function proveCreateNoteFromBalance({
     const outputNotesOwnerMapping = {};
     let outputNotesOwner = inputNotesOwner;
     let transactions;
-    if (owner) {
-        if (address(owner) !== inputNotesOwner.address) {
-            outputNotesOwner = await validateAccount(owner);
-        }
-        outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
-    } else if (transaction) {
+    if (transaction) {
         transactions = Array.isArray(transaction)
             ? transaction
             : [transaction];
@@ -51,6 +46,11 @@ export default async function proveCreateNoteFromBalance({
         if (amount && inputAmount !== amount) {
             throw new ApiError('input.amount.not.match.transaction');
         }
+    } else if (owner) {
+        if (address(owner) !== inputNotesOwner.address) {
+            outputNotesOwner = await validateAccount(owner);
+        }
+        outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
     }
 
     const {
@@ -117,23 +117,7 @@ export default async function proveCreateNoteFromBalance({
         outputNotesOwnerMapping[inputNotesOwner.address] = inputNotesOwner;
     }
 
-    if (owner) {
-        if (numberOfOutputNotes > 0) {
-            outputValues.push(...randomSumArray(
-                inputAmount,
-                extraAmount > 0 && numberOfOutputNotes > 1
-                    ? numberOfOutputNotes - 1
-                    : numberOfOutputNotes,
-            ));
-
-            const newNotes = await createNotes(
-                outputValues,
-                outputNotesOwner.spendingPublicKey,
-                outputNotesOwner.address,
-            );
-            outputNotes.push(...newNotes);
-        }
-    } else if (transactions) {
+    if (transactions) {
         await asyncForEach(transactions, async ({
             amount: transactionAmount,
             to,
@@ -152,6 +136,19 @@ export default async function proveCreateNoteFromBalance({
             );
             outputNotes.push(...newNotes);
         });
+    } else if (numberOfOutputNotes > 0) {
+        const values = randomSumArray(
+            inputAmount,
+            numberOfOutputNotes,
+        );
+        outputValues.push(...values);
+
+        const newNotes = await createNotes(
+            values,
+            outputNotesOwner.spendingPublicKey,
+            outputNotesOwner.address,
+        );
+        outputNotes.push(...newNotes);
     }
 
     const {
