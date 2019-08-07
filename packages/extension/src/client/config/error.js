@@ -14,6 +14,7 @@ export default {
         confidentialApprove: 'Failed to send zkAsset.confidentialApprove',
         confidentialTransferFrom: 'Failed to send zkAsset.confidentialTransferFrom',
         confidentialMint: 'Failed to send zkAsset.confidentialMint',
+        confidentialBurn: 'Failed to send zkAsset.confidentialBurn',
     },
     note: {
         fromViewingKey: 'Failed to recover note from its viewing key.',
@@ -44,6 +45,9 @@ export default {
     api: {
         mint: {
             notValid: "Cannot call mint on an asset that doesn't allow to adjust total supply.",
+        },
+        burn: {
+            notValid: 'Cannot call burn on an asset that is not ZkAssetBurnable.',
         },
     },
 };

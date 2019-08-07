@@ -3,6 +3,7 @@ import sendDeposit from './deposit/send';
 import approveCreateNoteFromBalance from './createNoteFromBalance/approve';
 import sendCreateNoteFromBalance from './createNoteFromBalance/send';
 import sendMint from './mint/send';
+import sendBurn from './burn/send';
 import yieldNotes from './utils/yieldNotes';
 
 const deposit = data => ({
@@ -19,6 +20,11 @@ const withdraw = data => ({
 
 const mint = data => ({
     send: async () => yieldNotes(sendMint, data),
+    export: () => data.proof,
+});
+
+const burn = data => ({
+    send: async () => yieldNotes(sendBurn, data),
     export: () => data.proof,
 });
 
@@ -39,6 +45,7 @@ const proofMapping = {
     withdraw,
     send,
     mint,
+    burn,
     createNoteFromBalance,
 };
 

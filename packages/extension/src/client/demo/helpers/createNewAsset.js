@@ -6,6 +6,7 @@ import Web3Service from '~client/services/Web3Service';
 /* eslint-disable import/no-unresolved */
 import ZkAssetOwnable from '../../../../build/protocol/ZkAssetOwnable';
 import ZkAssetMintable from '../../../../build/protocol/ZkAssetMintable';
+import ZkAssetBurnable from '../../../../build/protocol/ZkAssetBurnable';
 import ERC20Mintable from '../../../../build/protocol/ERC20Mintable';
 import JoinSplit from '../../../../build/protocol/JoinSplit';
 import JoinSplitFluid from '../../../../build/protocol/JoinSplitFluid';
@@ -14,6 +15,7 @@ import JoinSplitFluid from '../../../../build/protocol/JoinSplitFluid';
 const contractMapping = {
     ZkAssetOwnable,
     ZkAssetMintable,
+    ZkAssetBurnable,
 };
 
 const proofEpoch = 1;
@@ -21,11 +23,13 @@ const proofId = 1;
 const proofCategoryMapping = {
     JOIN_SPLIT_PROOF: 1,
     MINT_PROOF: 2,
+    BURN_PROOF: 3,
 };
 
 const proofContractMapping = {
     JOIN_SPLIT_PROOF: JoinSplit,
     MINT_PROOF: JoinSplitFluid,
+    BURN_PROOF: JoinSplitFluid,
 };
 
 const setProofInAce = async (proofName) => {
