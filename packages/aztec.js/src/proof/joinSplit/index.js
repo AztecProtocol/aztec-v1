@@ -150,16 +150,13 @@ class JoinSplitProof extends Proof {
      * @returns {string} array of signatures
      */
     constructSignatures(verifyingContract, inputNoteOwners) {
-        const signaturesArray = inputNoteOwners.map((inputNoteOwner, index) => {
-            return signer.signNotesForConfidentialTransfer(
-                verifyingContract,
-                inputNoteOwner,
-                this.inputNotes[index].noteHash,
-                this.challengeHex,
-                this.sender,
-            );
-        });
-        return `0x${signaturesArray.join('')}`;
+        return signer.signMultipleNotesForConfidentialTransfer(
+            verifyingContract,
+            inputNoteOwners,
+            this.inputNotes,
+            this.challengeHex,
+            this.sender,
+        );
     }
 
     /**
