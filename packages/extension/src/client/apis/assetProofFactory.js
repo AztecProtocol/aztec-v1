@@ -10,7 +10,9 @@ import proveMint from './mint/prove';
 import sendMint from './mint/send';
 import proveBurn from './burn/prove';
 import sendBurn from './burn/send';
+import provePrivateRange from './privateRange/prove';
 import yieldNotes from './utils/yieldNotes';
+import makeProofFactory from './utils/makeProofFactory';
 
 const deposit = data => ({
     approve: async () => approveDeposit(data),
@@ -46,6 +48,10 @@ const createNoteFromBalance = data => ({
     export: () => data.proof,
 });
 
+const privateRange = data => ({
+    export: () => data.proof,
+});
+
 const proveMapping = {
     deposit: proveDeposit,
     withdraw: proveWithdraw,
@@ -53,6 +59,7 @@ const proveMapping = {
     mint: proveMint,
     burn: proveBurn,
     createNoteFromBalance: proveCreateNoteFromBalance,
+    privateRange: provePrivateRange,
 };
 
 const proofResultMapping = {
@@ -62,22 +69,9 @@ const proofResultMapping = {
     mint,
     burn,
     createNoteFromBalance,
+    privateRange,
 };
 
-export default async function proofFactory(type, options) {
-    const prove = proveMapping[type];
-    const {
-        proof,
-        ...data
-    } = await prove(options) || {};
+const proofFactory = makeProofFactory(proveMapping, proofResultMapping);
 
-    if (!proof) {
-        return null;
-    }
-
-    return proofResultMapping[type]({
-        proof,
-        options,
-        data,
-    });
-}
+export default proofFactory;
