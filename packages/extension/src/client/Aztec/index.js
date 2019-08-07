@@ -9,9 +9,7 @@ import ZkAsset from '../../../build/protocol/ZkAsset';
 import {
     assetFactory,
 } from './asset';
-import {
-    noteFactory,
-} from '../apis/note';
+import noteFactory from '../apis/noteFactory';
 import ensureExtensionEnabled from '../auth';
 
 import Web3Service from '../services/Web3Service';
