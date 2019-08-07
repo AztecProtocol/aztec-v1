@@ -20,9 +20,7 @@ const randomNoteValue = () => {
  * @returns {Object[]} - an object containing inputNotes[] and outputNotes[] (arrays of Note objects)
  */
 const getNotesForAccount = async (aztecAccount, noteValues = []) => {
-    return Promise.all(
-        noteValues.map((inputNoteValue) => note.create(aztecAccount.publicKey, inputNoteValue)),
-    );
+    return Promise.all(noteValues.map((inputNoteValue) => note.create(aztecAccount.publicKey, inputNoteValue)));
 };
 
 module.exports = {

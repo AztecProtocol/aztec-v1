@@ -29,8 +29,8 @@ const scalingFactor = new BN(10);
 const tokensTransferred = new BN(100000);
 
 const generateFactoryId = (epoch, cryptoSystem, assetType) => {
-    return (epoch * 256**(2) + cryptoSystem * 256**(1) + assetType * 256**(0));
-}
+    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
+};
 
 contract('NoteRegistry', (accounts) => {
     let confidentialProof;
@@ -48,10 +48,9 @@ contract('NoteRegistry', (accounts) => {
         await ace.setCommonReferenceString(bn128.CRS);
         ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: sender });
 
-        const convertibleFactory = await ConvertibleFactory.new((ace.address));
+        const convertibleFactory = await ConvertibleFactory.new(ace.address);
         const adjustableFactory = await AdjustableFactory.new(ace.address);
         const mixedFactory = await MixedFactory.new(ace.address);
-
 
         await ace.setFactory(generateFactoryId(1, 1, 1), convertibleFactory.address);
         await ace.setFactory(generateFactoryId(1, 1, 2), adjustableFactory.address);
@@ -191,8 +190,10 @@ contract('NoteRegistry', (accounts) => {
             const registryAddress = await ace.registries(sender);
             const registry = await BehaviourContract.at(registryAddress);
 
-            await truffleAssert.reverts(registry.initialise(publicOwner, erc20.address, scalingFactor, canAdjustSupply, canConvert),
-                "registry already initialised");
+            await truffleAssert.reverts(
+                registry.initialise(publicOwner, erc20.address, scalingFactor, canAdjustSupply, canConvert),
+                'registry already initialised',
+            );
         });
 
         it('should fail to read a non-existent note', async () => {
@@ -204,8 +205,7 @@ contract('NoteRegistry', (accounts) => {
         });
 
         it('should fail to create a note registry if sender already owns one', async () => {
-            await truffleAssert.reverts(
-                ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert));
+            await truffleAssert.reverts(ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert));
         });
 
         it('should fail to create a note registry if linked token address is 0x0', async () => {
@@ -280,9 +280,10 @@ contract('NoteRegistry', (accounts) => {
             const canAdjustSupplyFlag = false;
             const canConvertFlag = false;
             const opts = { from: accounts[3] };
-            await truffleAssert.reverts(ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupplyFlag, canConvertFlag, opts), 
-                "can not create asset with convert and adjust flags set to false");
-
+            await truffleAssert.reverts(
+                ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupplyFlag, canConvertFlag, opts),
+                'can not create asset with convert and adjust flags set to false',
+            );
         });
 
         it('should fail to update a note registry if public approval value is insufficient', async () => {

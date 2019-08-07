@@ -5,7 +5,9 @@
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const truffleAssert = require('truffle-assertions');
-const { constants: { addresses } } = require('@aztec/dev-utils');
+const {
+    constants: { addresses },
+} = require('@aztec/dev-utils');
 
 // ### Artifacts
 const AdminUpgradeabilityProxy = artifacts.require('./noteRegistry/proxies/AdminUpgradeabilityProxy.sol');
@@ -20,11 +22,7 @@ contract('Proxy', (accounts) => {
 
     beforeEach(async () => {
         behaviourContract = await Behaviour.new();
-        proxyContract = await AdminUpgradeabilityProxy.new(
-            behaviourContract.address,
-            owner,
-            []
-        );
+        proxyContract = await AdminUpgradeabilityProxy.new(behaviourContract.address, owner, []);
     });
 
     describe('Success States', async () => {
@@ -39,7 +37,7 @@ contract('Proxy', (accounts) => {
                 from: owner,
             });
 
-            const event = receipt.logs.find(l => l.event === 'AdminChanged');
+            const event = receipt.logs.find((l) => l.event === 'AdminChanged');
             expect(event.args.newAdmin).to.equal(secondOwner);
         });
 
@@ -49,12 +47,13 @@ contract('Proxy', (accounts) => {
                 from: owner,
             });
             await proxyContract.admin({ from: nonOwner });
-            const topic = web3.utils.keccak256('ReachedBehaviour()')
+            const topic = web3.utils.keccak256('ReachedBehaviour()');
             const logs = await new Promise((resolve) => {
-                web3.eth.getPastLogs({
-                    address: proxyContract.address,
-                    topics: [topic],
-                })
+                web3.eth
+                    .getPastLogs({
+                        address: proxyContract.address,
+                        topics: [topic],
+                    })
                     .then(resolve);
             });
             expect(logs.length).to.not.equal(0);
@@ -63,22 +62,28 @@ contract('Proxy', (accounts) => {
 
     describe('Failure States', async () => {
         it('should fail to change admin if called by non-admin', async () => {
-            await truffleAssert.reverts(proxyContract.changeAdmin(secondOwner, {
-                from: nonOwner,
-            }));
+            await truffleAssert.reverts(
+                proxyContract.changeAdmin(secondOwner, {
+                    from: nonOwner,
+                }),
+            );
         });
 
         it('should fail to upgrade if not admin', async () => {
             const newBehaviour = await Behaviour.new();
-            await truffleAssert.reverts(proxyContract.upgradeTo(newBehaviour.address, {
-                from: nonOwner,
-            }));
+            await truffleAssert.reverts(
+                proxyContract.upgradeTo(newBehaviour.address, {
+                    from: nonOwner,
+                }),
+            );
         });
 
         it('should fail to set implementation to 0x0', async () => {
-            await truffleAssert.reverts(proxyContract.upgradeTo(addresses.ZERO_ADDRESS, {
-                from: owner,
-            }));
+            await truffleAssert.reverts(
+                proxyContract.upgradeTo(addresses.ZERO_ADDRESS, {
+                    from: owner,
+                }),
+            );
         });
     });
 });
