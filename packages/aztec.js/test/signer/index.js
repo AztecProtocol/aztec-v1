@@ -65,15 +65,19 @@ describe('Signer', () => {
                 sender: senderAddress,
             };
             const { privateKey } = accounts[0];
-            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
+            const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
 
-            const expectedLength = 3;
+            const expectedLength = 192; // r (64 char), s (64 char), v (64 chars)
             const expectedNumCharacters = 64; // v, r and s should be 32 bytes
 
-            expect(signature.length).to.equal(expectedLength);
-            expect(signature[0].length - 2).to.equal(expectedNumCharacters);
-            expect(signature[1].length - 2).to.equal(expectedNumCharacters);
-            expect(signature[2].length - 2).to.equal(expectedNumCharacters);
+            const r = unformattedSignature.slice(0, 64);
+            const s = unformattedSignature.slice(64, 128);
+            const v = unformattedSignature.slice(128, 192);
+
+            expect(unformattedSignature.length).to.equal(expectedLength);
+            expect(r.length).to.equal(expectedNumCharacters);
+            expect(s.length).to.equal(expectedNumCharacters);
+            expect(v.length).to.equal(expectedNumCharacters);
         });
 
         it('should recover public key from signature params', () => {
@@ -94,12 +98,12 @@ describe('Signer', () => {
                 sender: senderAddress,
             };
             const { privateKey, publicKey } = accounts[0];
-            const { signature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
+            const { unformattedSignature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
-            const v = parseInt(signature[0], 16); // has to be in number format
-            const r = Buffer.from(signature[1].slice(2), 'hex');
-            const s = Buffer.from(signature[2].slice(2), 'hex');
+            const v = parseInt(unformattedSignature.slice(128, 130), 16); // has to be in number format
+            const r = Buffer.from(unformattedSignature.slice(0, 64), 'hex');
+            const s = Buffer.from(unformattedSignature.slice(64, 128), 'hex');
 
             const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
             expect(publicKeyRecover).to.equal(publicKey.slice(4));

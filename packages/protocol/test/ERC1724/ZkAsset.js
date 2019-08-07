@@ -96,7 +96,7 @@ contract('ZkAsset', (accounts) => {
             expect(result.toNumber()).to.equal(scalingFactor.toNumber());
         });
 
-        it('should update a note registry with output notes', async () => {
+        it.only ('should update a note registry with output notes', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
@@ -313,6 +313,7 @@ contract('ZkAsset', (accounts) => {
             );
             const depositData = depositProof.encodeABI(zkAsset.address);
             const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures);

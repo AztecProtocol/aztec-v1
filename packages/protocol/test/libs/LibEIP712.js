@@ -59,8 +59,7 @@ contract('LibEIP712', (accounts) => {
                 aztecAccount.address,
                 aztecAccount.privateKey,
             );
-            const concatenatedSignature = signature[1] + signature[2].slice(2) + signature[0].slice(-2);
-            const result = await libEIP712._recoverSignature(encodedTypedData, concatenatedSignature);
+            const result = await libEIP712._recoverSignature(encodedTypedData, signature);
             expect(result).to.equal(aztecAccount.address);
         });
     });
@@ -75,12 +74,11 @@ contract('LibEIP712', (accounts) => {
             );
 
             // see https://ethereum.stackexchange.com/questions/69328/how-to-get-0x0-from-ecrecover/69329#69329
-            const r = signature[0];
-            const s = signature[1].slice(2);
-            const v = '10';
-            const concatenatedSignature = r + s + v;
+            
+            // Replacing v with an incorrect value of 10
+            const incorrectSignature = signature.slice(0, 128) + '10'
             await truffleAssert.reverts(
-                libEIP712._recoverSignature(encodedTypedData, concatenatedSignature),
+                libEIP712._recoverSignature(encodedTypedData, incorrectSignature),
                 'signer address cannot be 0',
             );
         });
