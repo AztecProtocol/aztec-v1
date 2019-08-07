@@ -1,4 +1,3 @@
-import Web3 from 'web3';
 import {
     log,
     warnLog,
@@ -11,20 +10,14 @@ import Web3Service from '~client/services/Web3Service';
 import createNewAsset from './helpers/createNewAsset';
 import depositToERC20 from './helpers/depositToERC20';
 import sleep from './utils/sleep';
+import deposit from './tasks/deposit';
 
 export default async function demoBurnable({
     initialERC20Balance = 200,
     scalingFactor = 1,
-    useHttpProvider = true,
 } = {}) {
     const { aztec } = window;
     await aztec.enable();
-
-    if (useHttpProvider) {
-        Web3Service.init({
-            provider: new Web3.providers.HttpProvider('http://localhost:8545'),
-        });
-    }
 
     const {
         address: userAddress,
@@ -84,20 +77,7 @@ export default async function demoBurnable({
 
 
     const burnAmount = randomInt(1, 50);
-
-    log('Generating deposit proof...');
-    const depositProof = await asset.deposit(burnAmount);
-    log(depositProof.export());
-
-    log('Approving deposit...');
-    await depositProof.approve();
-    log('Approved!');
-
-    log('Making deposit...');
-    const depositedNotes = await depositProof.send();
-    log(`Successfully deposited ${burnAmount} to asset '${zkAssetAddress}'.`, {
-        notes: depositedNotes,
-    });
+    const depositedNotes = await deposit(asset, burnAmount);
 
 
     await sleep(2000);

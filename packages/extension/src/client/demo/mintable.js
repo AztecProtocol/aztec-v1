@@ -1,4 +1,3 @@
-import Web3 from 'web3';
 import {
     log,
     warnLog,
@@ -6,22 +5,16 @@ import {
 import {
     randomInt,
 } from '~utils/random';
-import Web3Service from '~client/services/Web3Service';
 import createNewAsset from './helpers/createNewAsset';
 import sleep from './utils/sleep';
+import withdraw from './tasks/withdraw';
 
 export default async function demoMintable({
     scalingFactor = 1,
-    useHttpProvider = true,
 } = {}) {
     const { aztec } = window;
     await aztec.enable();
 
-    if (useHttpProvider) {
-        Web3Service.init({
-            provider: new Web3.providers.HttpProvider('http://localhost:8545'),
-        });
-    }
 
     let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
@@ -76,26 +69,16 @@ export default async function demoMintable({
     await sleep(2000);
     log(`Asset balance = ${await asset.balance()}`);
 
-
     const totalSupplyBefore = await asset.totalSupplyOfLinkedToken();
     log(`Total supply of linked token = ${totalSupplyBefore}`);
 
 
     const withdrawAmount = randomInt(1, mintAmount);
-    log('Generating withdraw proof...');
-    const withdrawProof = await asset.withdraw(withdrawAmount, {
-        numberOfInputNotes: 1,
-    });
-    log(withdrawProof.export());
+    await withdraw(asset, withdrawAmount);
 
-    log('Approving withdrawal...');
-    await withdrawProof.approve();
-    log('Approved!');
 
-    log('Withdrawing...');
-    await withdrawProof.send();
-    log(`Successfully withdrew ${withdrawAmount} from asset '${zkAssetAddress}'.`);
-
+    await sleep(2000);
+    log(`Asset balance = ${await asset.balance()}`);
 
     const totalSupplyAfter = await asset.totalSupplyOfLinkedToken();
     log(`Total supply of linked token = ${totalSupplyAfter}`);
