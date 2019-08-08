@@ -1,6 +1,7 @@
 import {
     argsError,
 } from '~utils/error';
+import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import initAll from './utils/initAll';
 import initAssetNoteValues from './utils/initAssetNoteValues';
 import pickNotes from './utils/pickNotes';
@@ -144,6 +145,11 @@ class NoteService {
             );
         } else {
             this.safeSet(ownerAddress)(assetId)(value)(noteKey);
+
+            const {
+                balance,
+            } = this.safeFind(ownerAddress)(assetId);
+            ClientSubscriptionService.onChange('ASSET_BALANCE', assetId, balance);
         }
     }
 
@@ -173,6 +179,8 @@ class NoteService {
                     delete group.noteValues[value];
                 }
                 group.balance -= value;
+
+                ClientSubscriptionService.onChange('ASSET_BALANCE', assetId, group.balance);
             }
         }
     }

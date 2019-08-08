@@ -30,7 +30,7 @@ export default function listenMessagesFromClient() {
     ).subscribe();
 
     const subscriptions = new Map();
-    window.addEventListener('message', (event) => {
+    window.addEventListener('message', async (event) => {
         if (!isClientEvent(event)) return;
 
         const {
@@ -47,7 +47,9 @@ export default function listenMessagesFromClient() {
             return;
         }
 
-        const subscription = subscribeToBackgroundScript(event.data);
-        subscriptions.set(requestId, subscription);
+        const subscription = await subscribeToBackgroundScript(event.data);
+        if (subscription) {
+            subscriptions.set(requestId, subscription);
+        }
     });
 }

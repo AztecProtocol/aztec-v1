@@ -107,6 +107,10 @@ export default gql`
         account: User
         error: Error
     }
+    type SubscriptionApiResponse {
+        success: Boolean
+        error: Error
+    }
     type Query {
         user(
             id: ID
@@ -146,6 +150,14 @@ export default gql`
             currentAddress: String!
             domain: String!
         ): NotesApiResponse
+        subscribe(
+            type: String!
+            requestId: String!
+            assetId: ID
+            noteId: ID
+            currentAddress: String!
+            domain: String!
+        ): SubscriptionApiResponse
     }
     type Mutation {
         login(

@@ -24,12 +24,14 @@ import {
 import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     clientEvent,
+    contentSubscribeEvent,
+    contentUnsubscribeEvent,
 } from '~config/event';
 import {
     errorToActionMap,
 } from '~config/action';
+import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import GraphQLService from '../services/GraphQLService';
-
 
 const updateActionState = async action => actionModel.set(action);
 
@@ -113,7 +115,6 @@ class Connection {
                 variables,
                 requestId,
             }) => {
-                console.log(domain, requestId);
                 let type = 'query';
                 if (mutation) {
                     type = 'mutation';
@@ -140,7 +141,6 @@ class Connection {
                 const queryName = Object.keys(response)
                     .find(name => !!response[name].error);
                 const errorData = queryName ? response[queryName].error : false;
-                console.log(errorData, response);
                 // check the action mapping
                 if (errorData && errorToActionMap[errorData.key]) {
                     // trigger the UI flow
@@ -182,6 +182,24 @@ class Connection {
     }
 }
 
+const handleContentScriptSubscription = (data, port) => {
+    const {
+        type,
+    } = data;
+
+    switch (type) {
+        case contentSubscribeEvent:
+            ClientSubscriptionService.subscribe(port);
+            break;
+        case contentUnsubscribeEvent:
+            ClientSubscriptionService.unsubscribe(port);
+            port.onMessage.removeListener(handleContentScriptSubscription);
+            port.disconnect();
+            break;
+        default:
+    }
+};
+
 export default function acceptConnection() {
     const connection = new Connection();
 
@@ -201,5 +219,10 @@ export default function acceptConnection() {
             default:
         }
         return null;
+    });
+
+    browser.runtime.onConnect.addListener((port) => {
+        port.onMessage.addListener(handleContentScriptSubscription);
+        port.onDisconnect.addListener(p => ClientSubscriptionService.unsubscribe(p));
     });
 }
