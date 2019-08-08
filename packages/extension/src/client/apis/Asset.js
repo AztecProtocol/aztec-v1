@@ -3,6 +3,7 @@ import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
+import subscribeToContentScript from '~client/utils/subscribeToContentScript';
 import proofFactory from './assetProofFactory';
 
 const dataProperties = [
@@ -18,6 +19,12 @@ export default class Asset {
         id,
     } = {}) {
         this.id = address(id);
+        this.subscriptions = {
+            balance: {
+                receipt: null,
+                subscribers: new Set(),
+            },
+        };
     }
 
     isValid() {
@@ -77,6 +84,69 @@ export default class Asset {
         } = assetResponse || {};
 
         return (asset && asset.balance) || 0;
+    }
+
+    notifySubscribers = (type, response) => {
+        const {
+            subscribers,
+        } = this.subscriptions[type];
+
+        let data;
+        switch (type) {
+            case 'balance':
+                data = (response.asset && response.asset.balance) || 0;
+                break;
+            default:
+        }
+
+        subscribers.forEach(subscriber => subscriber(data, this));
+    };
+
+    addListener(type, cb) {
+        if (!this.subscriptions[type]) return;
+
+        if (!this.subscriptions[type].receipt) {
+            let queryStr;
+            switch (type) {
+                case 'balance':
+                    queryStr = `
+                        response: asset(id: "${this.id}") {
+                            asset {
+                                balance
+                            }
+                            error {
+                                type
+                                key
+                                message
+                                response
+                            }
+                        }
+                    `;
+                    break;
+                default:
+            }
+
+            this.subscriptions[type].receipt = subscribeToContentScript(
+                queryStr,
+                result => this.notifySubscribers(type, result.response),
+            );
+        }
+
+        this.subscriptions[type].subscribers.add(cb);
+    }
+
+    removeListener(type, cb) {
+        if (!this.subscriptions[type]) return;
+
+        this.subscriptions[type].subscribers.delete(cb);
+
+        if (!this.subscriptions[type].subscribers.size) {
+            this.subscriptions[type].receipt.unsubscribe();
+            this.subscriptions[type] = {
+                receipt: null,
+                subscribers: new Set(),
+            };
+        }
     }
 
     async totalSupplyOfLinkedToken() {
