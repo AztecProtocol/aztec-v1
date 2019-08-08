@@ -166,7 +166,7 @@ export default class Asset {
      *
      * Send
      *
-     * - transaction (Transaction or [Transaction])   Transaction = { amount, to, numberOfOutputNotes }
+     * - transaction (Transaction! or [Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
      * - options
      *       sender (Address):          The proof sender.
      *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
@@ -230,7 +230,7 @@ export default class Asset {
      * Burn
      * This api is available only when the asset is ZkAssetBurnable
      *
-     * - notes ([AztecNote!])
+     * - notes ([Note!] or [AztecNote!])
      * - options
      *       sender (Address):          The proof sender.
      *                                  If empty, will use extension's current user.
