@@ -5,10 +5,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../../interfaces/IAZTEC.sol";
-import "../../libs/NoteUtils.sol";
 import "../../libs/VersioningUtils.sol";
-import "./interfaces/Behaviour.sol";
-import "./interfaces/Factory.sol";
+import "./interfaces/NoteRegistryBehaviour.sol";
+import "./interfaces/NoteRegistryFactory.sol";
 import "./proxies/AdminUpgradeabilityProxy.sol";
 
 /**
