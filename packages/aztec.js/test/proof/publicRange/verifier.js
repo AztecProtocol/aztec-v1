@@ -49,7 +49,7 @@ describe('Public range proof verifier', () => {
         it('should fail for unsatisfied proof relations', async () => {
             const bogusTargetNoteValue = 41;
             const bogusUtilityNote = await note.create(publicKey, bogusTargetNoteValue);
-            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, bogusUtilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, bogusUtilityNote, false);
 
             const verifier = new PublicRangeVerifier(proof);
             verifier.verifyProof();
@@ -59,9 +59,7 @@ describe('Public range proof verifier', () => {
         });
 
         it('should fail for fake challenge', async () => {
-            const bogusTargetNoteValue = 41;
-            const bogusUtilityNote = await note.create(publicKey, bogusTargetNoteValue);
-            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, bogusUtilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
             proof.challenge = new BN(randomHex(31), 16);
 
             const verifier = new PublicRangeVerifier(proof);
@@ -72,9 +70,7 @@ describe('Public range proof verifier', () => {
         });
 
         it('should fail for fake proof data', async () => {
-            const bogusTargetNoteValue = 41;
-            const bogusUtilityNote = await note.create(publicKey, bogusTargetNoteValue);
-            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, bogusUtilityNote);
+            const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
             proof.data = [];
             for (let i = 0; i < 3; i += 1) {
                 proof.data[i] = [];
