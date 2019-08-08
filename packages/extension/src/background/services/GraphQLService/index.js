@@ -45,11 +45,8 @@ export default {
             const {
                 data,
             } = response || {};
-            return {
-                ...data,
-                requestId: query.requestId,
 
-            };
+            return data;
         } catch (e) {
             return formatError(e, query);
         }
@@ -60,6 +57,7 @@ export default {
             const {
                 data,
             } = response || {};
+
             return data;
         } catch (e) {
             return formatError(e, mutation);
