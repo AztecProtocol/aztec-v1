@@ -60,11 +60,18 @@ class Note {
              */
             this.sigma = bn128.curve.decodePoint(publicKey.slice(68, 134), 'hex');
             /**
-             * Note's ephemeral key, a secp256k1 group element. A note owner can use this point
-             * to compute the note's viewing key.
+             * Note's ephemeral key, .
              * @member {Point}
              */
             this.ephemeral = secp256k1.ec.keyFromPublic(publicKey.slice(134, 200), 'hex');
+            /**
+             * Note's metadata - general purpose property in which useful information can be stored. 
+             * By default it contains the note's ephemeral key - a secp256k1 group element which
+             * the note owner can use to compute the note's viewing key.
+             * 
+             * Arbitrary additional information can also be supplied, by calling setMetaData()
+             */
+            this.metaData = secp256k1.compress(this.ephemeral.getPublic());
         }
         if (viewingKey) {
             if (typeof viewingKey !== 'string') {
@@ -80,6 +87,7 @@ class Note {
             this.gamma = mu.mul(this.a);
             this.sigma = this.gamma.mul(this.k).add(bn128.h.mul(this.a));
             this.ephemeral = secp256k1.ec.keyFromPublic(viewingKey.slice(74, 140), 'hex');
+            this.metaData = secp256k1.compress(this.ephemeral.getPublic());
         }
         /**
          * keccak256 hash of note coordinates, aligned in 32-byte chunks.
@@ -109,27 +117,6 @@ class Note {
      */
     exportEphemeralKey() {
         return `0x${this.ephemeral.getPublic(true, 'hex')}`;
-    }
-
-    /**
-     * Appends custom metadata onto the end of the ephemeral key and encodes it according
-     * to the schema for one note. It then sets this.ephemeral to this value and returns
-     * the encoded data
-     *
-     * @param {String} customData
-     * @returns {String} ephemeral key appended by the customData
-     *
-     * Doing this with a fixed customData so far: 0x177 in length - length of one IES encrypted viewing key
-     */
-    setMetadata(customData) {
-        const exportedKey = secp256k1.compress(this.ephemeral.getPublic());
-
-        if (!customData) {
-            this.metadata = exportedKey;
-        } else {
-            this.metadata = exportedKey + padLeft(customData, 64);
-        }
-        return this.metadata;
     }
 
     /**
@@ -180,6 +167,28 @@ class Note {
         const k = padLeft(this.k.fromRed().toString(16), 8);
         const ephemeral = padLeft(this.ephemeral.getPublic(true, 'hex'), 66);
         return `0x${a}${k}${ephemeral}`;
+    }
+
+    /**
+     * Appends custom metadata onto the metaData property of the note - i.e.e appends it onto end of the ephemeral key. 
+     * Also encodes it according to the schema for one note
+     *
+     * @param {String} customData
+     * @returns {String} this.metaData - note metadata with the custom data appended
+     *
+     * Doing this with a fixed customData so far: 0x177 in length - length of one IES encrypted viewing key
+     */
+    setMetadata(customData) {
+        this.metaData =  this.metaData + padLeft(customData, 64).slice(2);
+        return this.metaData;
+    }
+
+    /**
+     * Export the metaData of the note
+     */
+    exportMetaData() {
+        const metaDataLength = this.metaData.slice(2).length;
+        return  `${padLeft(metaDataLength, 64)}${this.metaData.slice(2)}`.slice(2);
     }
 }
 
