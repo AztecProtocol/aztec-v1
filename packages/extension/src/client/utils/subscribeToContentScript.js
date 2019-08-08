@@ -3,13 +3,12 @@ import {
     clientUnsubscribeEvent,
     contentEvent,
 } from '~config/event';
-import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     randomId,
 } from '~utils/random';
 import Web3Service from '../services/Web3Service';
 
-export default function subscribeToContentScript(queryStr, cb) {
+export default function subscribeToContentScript(options, cb) {
     const requestId = randomId();
 
     const responseHandler = (event) => {
@@ -31,13 +30,29 @@ export default function subscribeToContentScript(queryStr, cb) {
     const {
         address = '',
     } = Web3Service.account || {};
+    const {
+        entity,
+        type,
+        assetId,
+        noteId,
+    } = options;
 
-    const query = insertVariablesToGql(
-        queryStr,
-        {
-            currentAddress: address.toLowerCase(),
-        },
-    );
+    const query = `
+        validation: subscribe(
+            type: "${entity.toUpperCase()}_${type.toUpperCase()}",
+            assetId: "${assetId || ''}",
+            noteId: "${noteId || ''}",
+            currentAddress: "${address.toLowerCase()}"
+        ) {
+            success
+            error {
+                type
+                key
+                message
+                response
+            }
+        }
+    `;
 
     window.postMessage({
         type: clientSubscribeEvent,

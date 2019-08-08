@@ -1,46 +1,55 @@
-import isEqual from 'lodash/isEqual';
+import browser from 'webextension-polyfill';
 import {
     clientEvent,
+    contentSubscribeEvent,
+    contentUnsubscribeEvent,
 } from '~config/event';
+import insertVariablesToGql from '~utils/insertVariablesToGql';
 import fetchFromBackgroundScript from './fetchFromBackgroundScript';
 import postToClientScript from './postToClientScript';
-import delay from './delay';
 
-export default function subscribeToBackgroundScript(data, interval = 1000) {
-    let subscribing = true;
-    let prevResponse = {};
+export default async function subscribeToBackgroundScript(data) {
+    const {
+        requestId,
+        query,
+    } = data;
 
-    const subscribe = async () => {
-        const returnData = await fetchFromBackgroundScript({
-            ...data,
-            type: clientEvent,
-        }) || {};
-
-        const {
+    const queryWithRequestId = insertVariablesToGql(
+        query,
+        {
             requestId,
-            data: response,
-        } = returnData;
-        if (!isEqual(response, prevResponse)) {
-            const failedQuery = Object.keys(response)
-                .find(queryName => !!response[queryName].error);
+        },
+    );
 
-            if (!failedQuery) {
-                postToClientScript(requestId, response);
-                prevResponse = response;
-            }
-        }
+    const backgroundResponse = await fetchFromBackgroundScript({
+        ...data,
+        type: clientEvent,
+        query: queryWithRequestId,
+    }) || {};
+    const {
+        data: {
+            validation,
+        },
+    } = backgroundResponse;
 
-        await delay(interval);
-        if (subscribing) {
-            subscribe();
-        }
-    };
+    if (!validation.success) {
+        return null;
+    }
 
-    subscribe();
+    const port = browser.runtime.connect({ name: requestId });
+    port.onMessage.addListener(response => postToClientScript(requestId, {
+        response,
+    }));
+
+    port.postMessage({
+        type: contentSubscribeEvent,
+    });
+
+    const unsubscribe = () => port.postMessage({
+        type: contentUnsubscribeEvent,
+    });
 
     return {
-        unsubscribe: () => {
-            subscribing = false;
-        },
+        unsubscribe,
     };
 }

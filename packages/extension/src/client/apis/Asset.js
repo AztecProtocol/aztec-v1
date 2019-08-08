@@ -90,44 +90,19 @@ export default class Asset {
         const {
             subscribers,
         } = this.subscriptions[type];
-
-        let data;
-        switch (type) {
-            case 'balance':
-                data = (response.asset && response.asset.balance) || 0;
-                break;
-            default:
-        }
-
-        subscribers.forEach(subscriber => subscriber(data, this));
+        subscribers.forEach(subscriber => subscriber(response, this));
     };
 
     addListener(type, cb) {
         if (!this.subscriptions[type]) return;
 
         if (!this.subscriptions[type].receipt) {
-            let queryStr;
-            switch (type) {
-                case 'balance':
-                    queryStr = `
-                        response: asset(id: "${this.id}") {
-                            asset {
-                                balance
-                            }
-                            error {
-                                type
-                                key
-                                message
-                                response
-                            }
-                        }
-                    `;
-                    break;
-                default:
-            }
-
             this.subscriptions[type].receipt = subscribeToContentScript(
-                queryStr,
+                {
+                    entity: 'asset',
+                    type,
+                    assetId: this.id,
+                },
                 result => this.notifySubscribers(type, result.response),
             );
         }
@@ -331,7 +306,7 @@ export default class Asset {
         userAccess = [],
         numberOfInputNotes = 0,
         numberOfOutputNotes = 1,
-    }) => proofFactory(
+    } = {}) => proofFactory(
         'createNoteFromBalance',
         {
             assetAddress: this.address,

@@ -6,7 +6,8 @@ import noteModel from '~database/models/note';
 import {
     fromCode,
 } from '~utils/noteStatus';
-import AuthService from '../../AuthService';
+import AuthService from '~background/services/AuthService';
+import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import {
     ensureUserPermission,
     ensureEntityPermission,
@@ -57,8 +58,8 @@ export default {
         pickNotesFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
         })),
-        account: ensureKeyvault(ensureAccount(async (_, args, ctx) => {
-            let account = await userModel.get({ address: args.currentAddress });
+        account: ensureKeyvault(ensureAccount(async (_, args) => {
+            const account = await userModel.get({ address: args.currentAddress });
             if (account && !account.registered) {
                 const { account: user } = await GraphNodeService.query(`
                     account(id: "${args.currentAddress.toLowerCase()}") {
@@ -82,9 +83,11 @@ export default {
                 account,
             };
         })),
-
         accounts: ensureUserPermission(async (_, args) => ({
             accounts: await getAccounts(args),
+        })),
+        subscribe: ensureEntityPermission(async (_, args) => ({
+            success: ClientSubscriptionService.grantSubscription(args),
         })),
     },
     Mutation: {
