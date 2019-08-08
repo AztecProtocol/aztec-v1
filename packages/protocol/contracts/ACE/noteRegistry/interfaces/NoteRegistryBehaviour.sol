@@ -4,7 +4,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../../../interfaces/IAZTEC.sol";
-import "../Manager.sol";
+
 /**
  * @title NoteRegistryBehaviour interface which defines the base API
         which must be implemented for every behaviour contract.

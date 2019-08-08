@@ -1,15 +1,15 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../../interfaces/Factory.sol";
-import "./Behaviour.sol";
+import "../../../interfaces/NoteRegistryFactory.sol";
+import "./BehaviourConvertible201907.sol";
 
 /**
-  * @title FactoryMixed201907
+  * @title FactoryConvertible201907
   * @author AZTEC
-  * @dev Deploys a BehaviourMixed201907
+  * @dev Deploys a BehaviourConvertible201907
   * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract FactoryMixed201907 is NoteRegistryFactory {
+contract FactoryConvertible201907 is NoteRegistryFactory {
     constructor(address _aceAddress) public NoteRegistryFactory(_aceAddress) {}
 
     function deployNewBehaviourInstance()
@@ -17,7 +17,7 @@ contract FactoryMixed201907 is NoteRegistryFactory {
         onlyOwner
         returns (address)
     {
-        BehaviourMixed201907 behaviourContract = new BehaviourMixed201907();
+        BehaviourConvertible201907 behaviourContract = new BehaviourConvertible201907();
         emit NoteRegistryDeployed(address(behaviourContract));
         return address(behaviourContract);
     }
