@@ -2,7 +2,8 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "../../../../interfaces/IAZTEC.sol";
 import "../../../../libs/NoteUtils.sol";
-import "../../interfaces/Behaviour.sol";
+import "../../interfaces/NoteRegistryBehaviour.sol";
+import "../../NoteRegistryManager.sol";
 
 /**
  * @title Behaviour201907
