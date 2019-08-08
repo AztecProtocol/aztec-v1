@@ -3,7 +3,9 @@ import gql from 'graphql-tag';
 import psl from 'psl';
 import {
     of,
-    from, Subject, forkJoin,
+    from,
+    Subject,
+    forkJoin,
     timer,
     race,
     empty,
@@ -29,11 +31,8 @@ import {
 import GraphQLService from '../services/GraphQLService';
 
 
-const updateActionState = async action =>
-    // lookup action
-    actionModel.set({
-        ...action,
-    });
+const updateActionState = async action => actionModel.set(action);
+
 class Connection {
     constructor() {
         this.UiSubject = new Subject();
@@ -44,7 +43,6 @@ class Connection {
         this.uiRejection$ = this.UiRejectionSubject.asObservable();
 
         this.ui$.pipe(
-
             map(({ timestamp }) => {
                 const popupURL = browser.extension.getURL('pages/popup.html');
                 const { width, height } = window.screen;
@@ -128,13 +126,11 @@ class Connection {
                     },
                 );
 
-
                 return forkJoin({
                     response: from(
                         GraphQLService[type]({
                             [type]: gql(`${type} {${graphQuery}}`),
                             variables,
-                            requestId,
                         }),
                     ),
                     request: of(requestId),
