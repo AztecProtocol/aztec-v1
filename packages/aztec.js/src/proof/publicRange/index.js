@@ -27,8 +27,9 @@ class PublicRangeProof extends Proof {
      * than proof. If true, it is a proof that originalNoteValue > publicComparison. If false, it is a
      * proof that originalNoteValue < publicComparison
      * @param {Note} utilityNote a helper note that is needed to satisfy a cryptographic balancing relation
+     * @param {boolean} safeguard Boolean flag to turn on a balancing check prior to construction of proof
      */
-    constructor(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote) {
+    constructor(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote, safeguard = true) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
         super(ProofType.PUBLIC_RANGE.name, [originalNote], [utilityNote], sender, publicValue, publicOwner, [utilityNote]);
@@ -40,15 +41,49 @@ class PublicRangeProof extends Proof {
         this.isGreaterOrEqual = isGreaterOrEqual;
 
         this.proofRelationChoice();
+
+        if (safeguard) {
+            this.checkBalancingRelationShipSatisfied();
+        }
+
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
         this.constructOutputs();
     }
 
+    /**
+     * Control whether the proof is used for a greater than (originalNote > publicComparison) or
+     * less than (originalNote < publicComparison) proof.
+     *
+     * If greater than, the input publicComparison value is unchanged.
+     *
+     * If less than, the publicComparison value is negated; in order to satisfy the balancing
+     * relationship
+     */
     proofRelationChoice() {
         if (!this.isGreaterOrEqual) {
             this.publicComparison = this.publicComparison.neg();
+        }
+    }
+
+    /**
+     * Check that notes have been supplied which satisfy the publicRange balancing relationship
+     *
+     * Balancing relationship: originalNoteValue = publicComparison + utilityNoteValue
+     */
+    checkBalancingRelationShipSatisfied() {
+        const originalNoteValue = this.notes[0].k.toNumber();
+        const utilityNoteValue = this.notes[1].k.toNumber();
+        const publicComparison = this.publicComparison.toNumber();
+
+        if (originalNoteValue !== publicComparison + utilityNoteValue) {
+            throw new AztecError(errors.codes.BALANCING_RELATION_NOT_SATISFIED, {
+                message: 'The supplied note values do not satisfy the publicRange balancing relationship',
+                originalNoteValue,
+                utilityNoteValue,
+                publicComparison,
+            });
         }
     }
 

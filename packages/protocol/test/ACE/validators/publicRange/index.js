@@ -47,7 +47,7 @@ contract('Public range validator', (accounts) => {
         publicRangeValidator = await PublicRange.new({ from: sender });
     });
 
-    describe('greater than tests', () => {
+    describe('Greater than tests', () => {
         describe('Success states', () => {
             it('should validate public range proof when given explicit utilityNote', async () => {
                 const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
@@ -87,7 +87,7 @@ contract('Public range validator', (accounts) => {
                 const utilityNoteValue = 41;
                 const publicComparison = 10;
                 const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote, false);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
@@ -101,7 +101,7 @@ contract('Public range validator', (accounts) => {
                 const utilityNoteValue = 0;
                 const publicComparison = 10;
                 const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote, false);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
@@ -370,7 +370,7 @@ contract('Public range validator', (accounts) => {
                 const utilityNoteValue = 0;
                 const publicComparison = 20;
                 const { originalNote, utilityNote } = await getNotes(originalNoteValue, utilityNoteValue);
-                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote, false);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
@@ -381,7 +381,7 @@ contract('Public range validator', (accounts) => {
             it('should fail for a less than proof, when a greater than proof is specified', async () => {
                 const isGreaterOrEqual = true;
                 const { originalNote, utilityNote, publicComparison } = await getDefaultLessThanNotes();
-                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote, false);
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
