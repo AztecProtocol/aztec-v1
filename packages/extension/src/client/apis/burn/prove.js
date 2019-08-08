@@ -3,9 +3,11 @@ import {
     createNote,
     valueOf,
 } from '~utils/note';
+import asyncMap from '~utils/asyncMap';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 import validateAccount from '../utils/validateAccount';
+import toAztecNote from '../utils/toAztecNote';
 
 const {
     BurnProof,
@@ -51,7 +53,8 @@ export default async function proveBurn({
         spendingPublicKey,
     } = notesOwner;
 
-    const amount = notes.reduce((accum, n) => accum + valueOf(n), 0);
+    const aztecNotes = await asyncMap(notes, async note => toAztecNote(note));
+    const amount = aztecNotes.reduce((accum, n) => accum + valueOf(n), 0);
     const newBurnedCounterNote = await createNote(
         balance + amount,
         spendingPublicKey,
@@ -61,13 +64,13 @@ export default async function proveBurn({
     const proof = new BurnProof(
         oldBurnedCounterNote,
         newBurnedCounterNote,
-        notes,
+        aztecNotes,
         assetAddress,
     );
 
     return {
         proof,
         notesOwner,
-        inputNotes: notes,
+        inputNotes: aztecNotes,
     };
 }

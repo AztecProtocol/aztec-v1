@@ -5,7 +5,6 @@ import {
 import {
     randomInt,
 } from '~utils/random';
-import asyncMap from '~utils/asyncMap';
 import Web3Service from '~client/services/Web3Service';
 import createNewAsset from './helpers/createNewAsset';
 import depositToERC20 from './helpers/depositToERC20';
@@ -90,10 +89,8 @@ export default async function demoBurnable({
     log(`Linked ERC20 account balance = ${linkedBalanceBefore}.`);
 
 
-    const notes = await asyncMap(depositedNotes, async note => note.export());
-
     log('Generating burn proof...');
-    const burnProof = await asset.burn(notes);
+    const burnProof = await asset.burn(depositedNotes);
     log('Burn proof generated!', burnProof.export());
 
     log('Burning...');
