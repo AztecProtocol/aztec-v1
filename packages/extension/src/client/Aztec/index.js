@@ -14,24 +14,32 @@ import Web3Service from '../services/Web3Service';
 class Aztec {
     constructor() {
         this.enabled = false;
+        window.ethereum.on('accountsChanged', async (accounts) => {
+            // Time to reload your interface with accounts[0]!
+            await this.enable();
+        });
     }
 
     enable = async ({
         // networkId,
         contractAddresses = {},
     } = {}) => {
+        if (!this.contractAddresses) {
+            this.contractAddresses = contractAddresses;
+        }
         await Web3Service.init();
+
         Web3Service.registerContract(ACE, {
-            address: contractAddresses.ace,
+            address: this.contractAddresses.ace,
         });
-        Web3Service.registerInterface(ERC20Mintable, {
-            name: 'ERC20',
-        });
+
+        Web3Service.registerInterface(ERC20Mintable, { name: 'ERC20' });
+
         Web3Service.registerInterface(ZkAsset);
         Web3Service.registerInterface(ZkAssetOwnable);
         Web3Service.registerInterface(ZkAssetMintable);
         Web3Service.registerContract(AZTECAccountRegistry, {
-            address: contractAddresses.aztecAccountRegistry,
+            address: this.contractAddresses.aztecAccountRegistry,
         });
 
         const {
