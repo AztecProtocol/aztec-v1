@@ -26,14 +26,14 @@ export default async function demoOwnable({
     } = Web3Service.account;
 
 
-    let zkAssetAddress = '0x4579bddE4D9F07059CD0623C7c927BC54d90F86e'; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {
             erc20Address,
             zkAssetAddress: newZkAssetAddress,
         } = await createNewAsset({
-            zkAssetType: 'ZkAssetMintable',
+            zkAssetType: 'ZkAssetOwnable',
             scalingFactor,
         });
 
