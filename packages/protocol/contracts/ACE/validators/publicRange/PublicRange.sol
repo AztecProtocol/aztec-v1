@@ -184,19 +184,18 @@ contract PublicRange {
                     // Store resulting point B at memory index b
                     result := and(result, staticcall(gas, 6, 0x160, 0x80, b, 0x40))
 
-                    // If i > 0 (i.e. if it is the utility note)
-                    // then we add \sigma^{-c} and \sigma_{acc} and store result at \sigma_{acc} (0x1e0:0x200)
-                    // we then calculate \gamma^{cx} and add into \gamma_{acc}
-                    if gt(i, 0) { // m = 0
-                        mstore(0x60, c)
-                        result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
+                    // Perform the pairing check for all notes - we do this by rolling all note coordinates into the
+                    // accumulator, upon which the pairing check is performed. 
+                    // We do this adding \sigma^{-c} and \sigma_{acc} and storing the result at 
+                    // \sigma_{acc} (0x1e0:0x200). We then calculate \gamma^{cx} and add into \gamma_{acc}
+                    mstore(0x60, c)
+                    result := and(result, staticcall(gas, 7, 0x20, 0x60, 0x220, 0x40))
 
-                       // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
-                        result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
+                    // \gamma_i^{cx} now at 0x220:0x260, \gamma_{acc} is at 0x260:0x2a0
+                    result := and(result, staticcall(gas, 6, 0x220, 0x80, 0x260, 0x40))
 
-                       // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
-                        result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40))
-                    }
+                    // add \sigma_i^{-cx} and \sigma_{acc} into \sigma_{acc} at 0x1e0
+                    result := and(result, staticcall(gas, 6, 0x1a0, 0x80, 0x1e0, 0x40))
 
                     // throw transaction if any calls to precompiled contracts failed
                     if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
