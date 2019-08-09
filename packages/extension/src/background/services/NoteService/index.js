@@ -146,10 +146,12 @@ class NoteService {
         } else {
             this.safeSet(ownerAddress)(assetId)(value)(noteKey);
 
-            const {
-                balance,
-            } = this.safeFind(ownerAddress)(assetId);
-            ClientSubscriptionService.onChange('ASSET_BALANCE', assetId, balance);
+            if (value > 0) {
+                const {
+                    balance,
+                } = this.safeFind(ownerAddress)(assetId);
+                ClientSubscriptionService.onChange('ASSET_BALANCE', assetId, balance);
+            }
         }
     }
 
@@ -180,7 +182,9 @@ class NoteService {
                 }
                 group.balance -= value;
 
-                ClientSubscriptionService.onChange('ASSET_BALANCE', assetId, group.balance);
+                if (value > 0) {
+                    ClientSubscriptionService.onChange('ASSET_BALANCE', assetId, group.balance);
+                }
             }
         }
     }
