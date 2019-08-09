@@ -5,6 +5,7 @@ import GraphNodeService from '~backgroundServices/GraphNodeService';
 
 export default async function fetchNoteFromServer({
     account,
+    noteId = '',
     lastSynced = '',
     numberOfNotes = 1,
     excludes = [],
@@ -15,14 +16,40 @@ export default async function fetchNoteFromServer({
         return [];
     }
 
-    const query = `
-        query($first: Int!, $where: NoteAccess_filter, $orderBy: NoteAccess_orderBy) {
-            noteLogs(first: $first, where: $where, orderBy: $orderBy) {
-                logId: id
-                account {
-                    address
+    const query = !noteId
+        ? `
+            query($first: Int!, $where: NoteLog_filter, $orderBy: NoteLog_orderBy) {
+                noteLogs(first: $first, where: $where, orderBy: $orderBy) {
+                    logId: id
+                    account {
+                        address
+                    }
+                    noteAccess {
+                        viewingKey
+                        note {
+                            hash
+                            asset {
+                                address
+                                linkedTokenAddress
+                                scalingFactor
+                                canAdjustSupply
+                                canConvert
+                            }
+                            owner {
+                                address
+                            }
+                        }
+                    }
+                    status
                 }
-                noteAccess {
+            }
+        `
+        : `
+            query($first: Int!, $where: NoteAccess_filter, $orderBy: NoteAccess_orderBy) {
+                noteAccesses(first: $first, where: $where, orderBy: $orderBy, orderDirection: "desc") {
+                    account {
+                        address
+                    }
                     viewingKey
                     note {
                         hash
@@ -36,21 +63,24 @@ export default async function fetchNoteFromServer({
                         owner {
                             address
                         }
+                        status
                     }
                 }
-                status
             }
-        }
-    `;
+        `;
 
+    const where = {
+        account,
+        id_gt: lastSynced,
+        id_not_in: excludes,
+    };
+    if (noteId) {
+        where.note = noteId;
+    }
     const variables = {
         first: numberOfNotes,
-        where: {
-            account,
-            id_gt: lastSynced,
-            id_not_in: excludes,
-        },
-        orderBy: 'id',
+        where,
+        orderBy: noteId ? 'timestamp' : 'id',
     };
 
     const data = await GraphNodeService.query({
@@ -61,7 +91,18 @@ export default async function fetchNoteFromServer({
 
     const {
         noteLogs = [],
+        noteAccesses = [],
     } = data || {};
+
+    if (noteId) {
+        return noteAccesses.map(({
+            note,
+            ...rest
+        }) => ({
+            ...rest,
+            ...note,
+        }));
+    }
 
     return noteLogs.map(({
         noteAccess: {

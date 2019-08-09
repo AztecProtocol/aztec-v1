@@ -1,20 +1,10 @@
 import {
-    errorLog,
-} from '~utils/log';
-import {
-    toCode,
     isDestroyed,
 } from '~utils/noteStatus';
-import {
-    fromHexString,
-} from '~utils/encryptedViewingKey';
-import {
-    fromViewingKey,
-    valueOf,
-} from '~utils/note';
 import noteModel from '~database/models/note';
 import noteAccessModel from '~database/models/noteAccess';
 import NoteService from '~background/services/NoteService';
+import validateNoteData from '../../validateNoteData';
 
 export default async function createOrUpdateNote(note, privateKey) {
     const {
@@ -23,7 +13,6 @@ export default async function createOrUpdateNote(note, privateKey) {
         owner: {
             address: ownerAddress,
         },
-        viewingKey: encryptedVkString,
         status,
     } = note;
 
@@ -33,29 +22,17 @@ export default async function createOrUpdateNote(note, privateKey) {
         ? noteModel
         : noteAccessModel;
 
-    let value = 0;
-    try {
-        const realViewingKey = fromHexString(encryptedVkString).decrypt(privateKey);
-        const aztecNote = await fromViewingKey(realViewingKey);
-        value = valueOf(aztecNote);
-    } catch (error) {
-        errorLog('Failed to decrypt note from viewingKey.', {
-            viewingKey: encryptedVkString,
-            privateKey,
-        });
-        value = -1;
-    }
+    const validatedNote = await validateNoteData(note, privateKey);
 
     const newData = {
-        ...note,
-        value,
+        ...validatedNote,
         asset: assetKey,
         owner: ownerKey,
-        status: toCode(status),
     };
 
     const {
         key: noteKey,
+        data: prevData,
         storage: prevStorage,
         modified,
     } = await model.set(
@@ -67,8 +44,7 @@ export default async function createOrUpdateNote(note, privateKey) {
 
     const justCreated = modified.length > 0;
 
-    const promises = [];
-
+    let data;
     if (!justCreated) {
         const {
             [noteKey]: prevNoteStorage,
@@ -77,12 +53,18 @@ export default async function createOrUpdateNote(note, privateKey) {
         const hasChanged = prevNoteStorage.length !== newNoteStorage.length
             || prevNoteStorage.some((v, i) => v !== newNoteStorage[i]);
         if (hasChanged) {
-            promises.push(model.update(newData));
+            ({
+                data,
+            } = await model.update(newData));
         }
     }
 
     if (isOwner) {
         const assetId = note.asset.address;
+        const {
+            value,
+        } = validatedNote;
+
         if (isDestroyed(status)) {
             NoteService.removeNoteValue({
                 assetId,
@@ -100,9 +82,8 @@ export default async function createOrUpdateNote(note, privateKey) {
         }
     }
 
-    await Promise.all(promises);
-
     return {
         key: noteKey,
+        data: (data || prevData || {})[noteKey],
     };
 }

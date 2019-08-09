@@ -1,5 +1,5 @@
 import assetModel from '~database/models/asset';
-import GraphNodeService from '~backgroundServices/GraphNodeService';
+import GraphNodeService from '~background/services/GraphNodeService';
 import {
     argsError,
 } from '~utils/error';

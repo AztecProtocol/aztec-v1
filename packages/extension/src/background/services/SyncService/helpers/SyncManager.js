@@ -1,15 +1,35 @@
 import userModel from '~database/models/user';
+import noteModel from '~database/models/note';
 import {
     warnLog,
     errorLog,
 } from '~utils/log';
 import fetchNoteFromServer from '../utils/fetchNoteFromServer';
 import addNote from '../utils/addNote';
+import validateNoteData from '../utils/validateNoteData';
 
 class SyncManager {
     constructor() {
+        this.config = {
+            notesPerRequest: 10,
+            syncInterval: 2000, // ms
+            keepAll: false, // store all notes user has access to even when they are not the owner
+        };
         this.accounts = new Map();
         this.paused = false;
+    }
+
+    setConfig(config) {
+        Object.keys(this.config)
+            .forEach((key) => {
+                if (config[key] !== undefined) {
+                    this.config[key] = config[key];
+                }
+            });
+    }
+
+    isValidAccount(address) {
+        return this.accounts.has(address);
     }
 
     handleFetchError = (error) => {
@@ -62,7 +82,6 @@ class SyncManager {
         address,
         privateKey,
         lastSynced = '',
-        config,
     } = {}) {
         const account = this.accounts.get(address);
         if (account.pausedState) {
@@ -72,7 +91,6 @@ class SyncManager {
             this.pause(address, {
                 privateKey,
                 lastSynced,
-                config,
             });
             return;
         }
@@ -95,7 +113,7 @@ class SyncManager {
             notesPerRequest,
             syncInterval,
             keepAll,
-        } = config;
+        } = this.config;
 
         const newNotes = await fetchNoteFromServer({
             lastSynced,
@@ -119,7 +137,6 @@ class SyncManager {
                 await this.syncNotes({
                     address,
                     privateKey,
-                    config,
                     lastSynced: nextSynced,
                 });
 
@@ -136,7 +153,6 @@ class SyncManager {
             this.syncNotes({
                 address,
                 privateKey,
-                config,
                 lastSynced: nextSynced,
             });
         }, syncInterval);
@@ -148,18 +164,18 @@ class SyncManager {
         });
     }
 
-    sync = async ({
+    async sync({
         address,
         privateKey,
         lastSynced,
-        config,
-    }) => {
+    }) {
         let account = this.accounts.get(address);
         if (!account) {
             account = {
                 syncing: false,
                 syncReq: null,
                 registered: true,
+                privateKey,
             };
             this.accounts.set(address, account);
         }
@@ -168,10 +184,37 @@ class SyncManager {
                 address,
                 privateKey,
                 lastSynced,
-                config,
             });
         }
-    };
+    }
+
+    async syncNote({
+        address,
+        noteId,
+    }) {
+        const [rawNote] = await fetchNoteFromServer({
+            account: address,
+            noteId,
+            numberOfNotes: 1,
+        }) || [];
+        if (!rawNote) {
+            return null;
+        }
+
+        const {
+            privateKey,
+        } = this.accounts.get(address);
+
+        if (this.config.keepAll
+            || rawNote.owner.address === address
+        ) {
+            const newNote = await addNote(rawNote, privateKey);
+            return newNote.data;
+        }
+
+        const note = await validateNoteData(rawNote, privateKey);
+        return noteModel.toStorageData(note);
+    }
 }
 
-export default new SyncManager();
+export default SyncManager;

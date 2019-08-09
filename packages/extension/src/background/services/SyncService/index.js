@@ -4,56 +4,66 @@ import {
 import userModel from '~database/models/user';
 import SyncManager from './helpers/SyncManager';
 
-class SyncService {
-    constructor() {
-        this.config = {
-            notesPerRequest: 10,
-            syncInterval: 2000, // ms
-            keepAll: false, // store all notes user has access to even when they are not the owner
-        };
+const manager = new SyncManager();
+
+const syncAccount = async ({
+    address,
+    privateKey,
+}) => {
+    if (!address) {
+        errorLog("'address' can not be empty in SyncService.syncAccount()");
+        return;
+    }
+    if (!privateKey) {
+        errorLog("'privateKey' can not be empty in SyncService.syncAccount()");
+        return;
     }
 
-    set(config) {
-        Object.keys(this.config)
-            .forEach((key) => {
-                if (config[key] !== undefined) {
-                    this.config[key] = config[key];
-                }
-            });
+    const user = await userModel.get({
+        address,
+    });
+    if (!user) {
+        errorLog(`Account '${address}' has no permission to sync notes from graph node server`);
+        return;
     }
 
-    async syncAccount({
+    const {
+        lastSynced,
+    } = user;
+
+    manager.sync({
         address,
         privateKey,
-    }) {
-        if (!address) {
-            errorLog("'address' can not be empty in SyncService.syncAccount()");
-            return;
-        }
-        if (!privateKey) {
-            errorLog("'privateKey' can not be empty in SyncService.syncAccount()");
-            return;
-        }
+        lastSynced,
+    });
+};
 
-        const user = await userModel.get({
-            address,
-        });
-        if (!user) {
-            errorLog(`Account '${address}' has no permission to sync notes from graph node server`);
-            return;
-        }
-
-        const {
-            lastSynced,
-        } = user;
-
-        SyncManager.sync({
-            config: this.config,
-            address,
-            privateKey,
-            lastSynced,
-        });
+const syncNote = async ({
+    address,
+    noteId,
+}) => {
+    if (!address) {
+        errorLog("'address' can not be empty in SyncService.syncNote()");
+        return null;
     }
-}
+    if (!noteId) {
+        errorLog("'noteId' can not be empty in SyncService.syncNote()");
+        return null;
+    }
 
-export default new SyncService();
+    if (!manager.isValidAccount(address)) {
+        errorLog(`Cannot sync note for user '${address}'`);
+        return null;
+    }
+
+    return manager.syncNote({
+        address,
+        noteId,
+    });
+};
+
+export default {
+    set: config => manager.setConfig(config),
+    syncAccount,
+    syncNote,
+};
