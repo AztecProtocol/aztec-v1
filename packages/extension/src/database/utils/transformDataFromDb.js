@@ -3,8 +3,10 @@ import {
 } from './transformDataForDb';
 
 export default function transformDataFromDb(fields, rawData) {
-    if (!rawData) {
-        return rawData;
+    if (!rawData
+        || !Array.isArray(rawData)
+    ) {
+        return null;
     }
 
     const data = {};
