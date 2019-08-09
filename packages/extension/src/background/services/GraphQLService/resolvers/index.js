@@ -2,7 +2,6 @@ import assetModel from '~database/models/asset';
 import userModel from '~database/models/user';
 import accountModel from '~database/models/account';
 import GraphNodeService from '~backgroundServices/GraphNodeService';
-import noteModel from '~database/models/note';
 import {
     fromCode,
 } from '~utils/noteStatus';
@@ -22,15 +21,16 @@ import decryptViewingKey from './decryptViewingKey';
 import getAssetBalance from './getAssetBalance';
 import requestGrantAccess from './requestGrantAccess';
 import pickNotesFromBalance from './pickNotesFromBalance';
-import syncAssetInfo from '../../AuthService/enableAssetForDomain/syncAssetInfo';
+import syncAssetInfo from './syncAssetInfo';
+import syncNoteInfo from './syncNoteInfo';
 
 export default {
     User: {
         spendingPublicKey: async ({ address }) => getUserSpendingPublicKey(address),
     },
     Note: {
-        asset: async ({ asset }) => assetModel.get({ key: asset }),
-        owner: async ({ owner }) => accountModel.get({ key: owner }),
+        asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ key: asset })) || asset,
+        owner: async ({ owner }) => (typeof owner === 'string' && accountModel.get({ key: owner })) || owner,
         decryptedViewingKey: async ({ viewingKey, owner }) => decryptViewingKey(viewingKey, owner),
         status: ({ status }) => fromCode(status),
     },
@@ -49,8 +49,8 @@ export default {
         asset: ensureEntityPermission(async (_, args) => ({
             asset: await syncAssetInfo(args.id),
         })),
-        note: ensureEntityPermission(async (_, args) => ({
-            note: await noteModel.get(args),
+        note: ensureEntityPermission(async (_, args, ctx) => ({
+            note: await syncNoteInfo(args.id, ctx),
         })),
         grantNoteAccessPermission: ensureEntityPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),

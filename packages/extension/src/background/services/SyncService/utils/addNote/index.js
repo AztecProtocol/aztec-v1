@@ -23,5 +23,6 @@ export default async function addNote(note, privateKey) {
         assetKey,
         ownerKey,
     };
-    await createOrUpdateNote(noteData, privateKey);
+
+    return createOrUpdateNote(noteData, privateKey);
 }
