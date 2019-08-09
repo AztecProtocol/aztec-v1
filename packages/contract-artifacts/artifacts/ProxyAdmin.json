@@ -1,0 +1,39 @@
+{
+    "abi": [
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "admin",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "newImplementation",
+                    "type": "address"
+                }
+            ],
+            "name": "upgradeTo",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.9"
+}
