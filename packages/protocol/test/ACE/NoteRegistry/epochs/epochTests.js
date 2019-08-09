@@ -17,8 +17,8 @@ function findBehaviourContracts(epochPath) {
     return contractPaths.concat(
         dirPaths
             .map((p) => {
-                if ((/\.DS_Store/).test(p)) return [];
-                return findBehaviourContracts(p)
+                if (/\.DS_Store/.test(p)) return [];
+                return findBehaviourContracts(p);
             })
             .reduce((acc, a) => {
                 return acc.concat(a);
@@ -79,13 +79,9 @@ async function assessProperInitialisation(obj, inherritanceObj, accounts) {
         const ownerPostInitialise = await contract.owner();
         expect(ownerPostInitialise).to.equal(newOwner);
 
-        await truffleAssert.reverts(
-            contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: attacker }),
-        );
+        await truffleAssert.reverts(contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: attacker }));
 
-        await truffleAssert.reverts(
-            contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: newOwner }),
-        );
+        await truffleAssert.reverts(contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: newOwner }));
     }
     return next;
 }
@@ -133,9 +129,11 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
             // Getting the root
             const NoteRegistryBehaviour = inherritanceObj.NoteRegistryBehaviour;
             const next = await assessProperInitialisation(NoteRegistryBehaviour, inherritanceObj, accounts);
-            await Promise.all(next.map(async (c) => {
-                return assessProperInitialisation(inherritanceObj[c], inherritanceObj, accounts)
-            }));
+            await Promise.all(
+                next.map(async (c) => {
+                    return assessProperInitialisation(inherritanceObj[c], inherritanceObj, accounts);
+                }),
+            );
         });
     });
 });

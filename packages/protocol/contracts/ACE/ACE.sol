@@ -62,7 +62,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
 
     /**
     * @dev Mint AZTEC notes
-    *      
+    *
     * @param _proof the AZTEC proof object
     * @param _proofData the mint proof construction data
     * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
@@ -94,7 +94,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
 
     /**
     * @dev Burn AZTEC notes
-    *      
+    *
     * @param _proof the AZTEC proof object
     * @param _proofData the burn proof construction data
     * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
@@ -271,7 +271,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
             // => result of disabledValidators[epoch] is stored in 0x08 * 0x100 = 0x800 storage slots
 
             // To compute the storage slot  disabledValidators[epoch][category][id], we do the following:
-            // 1. get the disabledValidators slot 
+            // 1. get the disabledValidators slot
             // 2. add (epoch * 0x800) to the slot (or epoch << 11)
             // 3. add (category * 0x08) to the slot (or category << 3)
             // 4. add (id / 0x20) to the slot (or id >> 5)
@@ -289,7 +289,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
             // to convert to a bit index, we multiply by 8
             // i.e. bit index = shl(3, and(_proof & 0x1f))
             // => result = shr(shl(3, and(_proof & 0x1f), value))
-            isValidatorDisabled := 
+            isValidatorDisabled :=
                 shr(
                     shl(
                         0x03,
