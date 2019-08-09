@@ -120,6 +120,14 @@ class Note {
     }
 
     /**
+     * Export the metaData of the note
+     */
+    exportMetaData() {
+        const metaDataLength = this.metaData.slice(2).length;
+        return `${padLeft(metaDataLength, 64)}${this.metaData.slice(2)}`.slice(2);
+    }
+
+    /**
      * Export note coordinates in a form that can be used by proofs
      *
      * @returns {{ publicKey:string, viewingKey: string, k: string, a: string, noteHash: string }}
@@ -178,17 +186,9 @@ class Note {
      *
      * Doing this with a fixed customData so far: 0x177 in length - length of one IES encrypted viewing key
      */
-    setMetadata(customData) {
+    setMetaData(customData) {
         this.metaData =  this.metaData + padLeft(customData, 64).slice(2);
         return this.metaData;
-    }
-
-    /**
-     * Export the metaData of the note
-     */
-    exportMetaData() {
-        const metaDataLength = this.metaData.slice(2).length;
-        return  `${padLeft(metaDataLength, 64)}${this.metaData.slice(2)}`.slice(2);
     }
 }
 
