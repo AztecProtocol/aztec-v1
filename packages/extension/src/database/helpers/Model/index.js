@@ -2,6 +2,7 @@ import {
     errorLog,
 } from '~utils/log';
 import transformDataForDb from '~database/utils/transformDataForDb';
+import transformToDbData from '~database/utils/transformToDbData';
 import get from './get';
 import set from './set';
 import update from './update';
@@ -127,6 +128,7 @@ export default function Model(config) {
         set: set.bind(settings),
         update: update.bind(settings),
         toStorageData: data => transformDataForDb(fields, data),
+        toData: rawData => transformToDbData(fields, rawData),
         each: each.bind({
             ...settings,
             get: modelGet,

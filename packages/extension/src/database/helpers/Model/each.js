@@ -11,7 +11,7 @@ const normalLoop = async (get, cb) => {
     const data = await get();
     if (!data) return;
 
-    asyncForEach(Object.keys(data), async (id) => {
+    await asyncForEach(Object.keys(data), async (id) => {
         const entry = {
             ...data[id],
             id,

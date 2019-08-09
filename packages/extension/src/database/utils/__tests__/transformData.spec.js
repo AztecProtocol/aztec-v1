@@ -2,6 +2,7 @@ import transformDataForDb, {
     undefinedField,
 } from '../transformDataForDb';
 import transformDataFromDb from '../transformDataFromDb';
+import transformToDbData from '../transformToDbData';
 
 const fields = [
     'name',
@@ -38,8 +39,33 @@ describe('transformDataFromDb', () => {
         });
     });
 
-    it('return null if data in db does not exist', () => {
+    it('return null if input storage data is not valid', () => {
+        expect(transformDataFromDb(fields)).toEqual(null);
         expect(transformDataFromDb(fields, null)).toEqual(null);
+        expect(transformDataFromDb(fields, 123)).toEqual(null);
+        expect(transformDataFromDb(fields, '123')).toEqual(null);
+        expect(transformDataFromDb(fields, {})).toEqual(null);
+    });
+});
+
+describe('transformToDbData', () => {
+    it('transform raw data to match the data for model', () => {
+        expect(transformToDbData(fields, {
+            id: 'poke0',
+            name: 'pikachu',
+            color: 'yellow',
+            height: 60,
+        })).toEqual({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+    });
+
+    it('return null if input data is not valid', () => {
+        expect(transformToDbData(fields)).toEqual(null);
+        expect(transformToDbData(fields, null)).toEqual(null);
+        expect(transformToDbData(fields, 123)).toEqual(null);
+        expect(transformToDbData(fields, '123')).toEqual(null);
     });
 });
 
