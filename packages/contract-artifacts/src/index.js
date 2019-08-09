@@ -17,7 +17,6 @@ const JoinSplitFluidABIEncoder = require('../artifacts/JoinSplitFluidABIEncoder'
 const JoinSplitFluidInterface = require('../artifacts/JoinSplitFluidInterface');
 const JoinSplitInterface = require('../artifacts/JoinSplitInterface');
 const LibEIP712 = require('../artifacts/LibEIP712');
-const NoteRegistry = require('../artifacts/NoteRegistry');
 const NoteUtils = require('../artifacts/NoteUtils');
 const PrivateRange = require('../artifacts/PrivateRange');
 const PrivateRangeABIEncoder = require('../artifacts/PrivateRangeABIEncoder');
@@ -56,7 +55,6 @@ module.exports = {
     JoinSplitFluidInterface,
     JoinSplitInterface,
     LibEIP712,
-    NoteRegistry,
     NoteUtils,
     PrivateRange,
     PrivateRangeABIEncoder,

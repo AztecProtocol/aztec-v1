@@ -1,6 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-const { JoinSplitProof, metaData, signer } = require('aztec.js');
-const bn128 = require('@aztec/bn128');
+const { JoinSplitProof, metaData, signer, note } = require('aztec.js');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },
@@ -22,7 +21,7 @@ const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-let joinSplitValidator;
+const { customMetadata, randomCustomMetadata } = note.utils;
 
 const computeDomainHash = (validatorAddress) => {
     const types = { EIP712Domain: constants.eip712.EIP712_DOMAIN };
@@ -43,12 +42,8 @@ contract('ZkAsset', (accounts) => {
     const tokensTransferred = new BN(100000);
 
     beforeEach(async () => {
-        ace = await ACE.new({ from: accounts[0] });
+        ace = await ACE.at(ACE.address);
         erc20 = await ERC20Mintable.new({ from: accounts[0] });
-        joinSplitValidator = await JoinSplitValidator.new({ from: sender });
-
-        await ace.setCommonReferenceString(bn128.CRS);
-        await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
         await Promise.all(
             accounts.map((account) => {
@@ -78,15 +73,11 @@ contract('ZkAsset', (accounts) => {
             expect(result).to.equal(erc20.address);
         });
 
-        it('should set canConvert flag to false if 0x0 is linked token address', async () => {
-            const nonConvertibleZkAsset = await ZkAsset.new(ace.address, constants.addresses.ZERO_ADDRESS, scalingFactor);
-
-            const registry = await ace.getRegistry(nonConvertibleZkAsset.address);
-
-            expect(registry.canConvert).to.equal(false);
+        it('should set the flags', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const registry = await ace.getRegistry(zkAsset.address);
             expect(registry.canAdjustSupply).to.equal(false);
-            const result = await nonConvertibleZkAsset.linkedToken();
-            expect(result).to.equal(constants.addresses.ZERO_ADDRESS);
+            expect(registry.canConvert).to.equal(true);
         });
 
         it('should set canConvert flag to true if linked token address is provided', async () => {
@@ -141,8 +132,6 @@ contract('ZkAsset', (accounts) => {
             } = await helpers.getDefaultDepositNotes();
             const publicValue = depositPublicValue * -1;
 
-            const customMetadata =
-                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata);
             });
@@ -187,8 +176,6 @@ contract('ZkAsset', (accounts) => {
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20]);
             const publicValue = depositPublicValue * -1;
 
-            const customMetadata =
-                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata);
             });
@@ -202,9 +189,7 @@ contract('ZkAsset', (accounts) => {
             const tx1 = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
 
             const dummyEphemeralKeys = randomHex(192);
-            const updatedMetaData =
-                dummyEphemeralKeys +
-                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+            const updatedMetaData = dummyEphemeralKeys + customMetadata;
             const tx2 = await zkAssetTest.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
                 from: accounts[0],
             });
@@ -230,17 +215,11 @@ contract('ZkAsset', (accounts) => {
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20, 10]);
             const publicValue = depositPublicValue * -1;
 
-            const customMetadataA =
-                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
-
             // changed the first non-zero digit from 2 to 3
-            const customMetadataB =
-                '00000000000000000000000000000038000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
-
-            const customMetadata = [customMetadataA, customMetadataB];
+            const metadataArray = [randomCustomMetadata(), randomCustomMetadata()];
 
             depositOutputNotes.forEach((individualNote, index) => {
-                return individualNote.setMetadata(customMetadata[index]);
+                return individualNote.setMetadata(metadataArray[index]);
             });
 
             const metadata = metaData.extractNoteMetadata(depositOutputNotes);
@@ -260,8 +239,8 @@ contract('ZkAsset', (accounts) => {
 
             // Crucial check, confirm that the event contains the custom metadata
             const event = receipt.logs.filter((l) => l.event === 'CreateNote');
-            expect(event[0].args.metadata.slice(196, 752)).to.equal(customMetadataA); // 1st note metadata
-            expect(event[1].args.metadata.slice(196, 752)).to.equal(customMetadataB); // 2nd note metadata
+            expect(event[0].args.metadata.slice(196, 752)).to.equal(metadataArray[0]); // 1st note metadata
+            expect(event[1].args.metadata.slice(196, 752)).to.equal(metadataArray[1]); // 2nd note metadata
         });
 
         it('should update a note registry with proofs where a mixture of notes with set metadata have been used', async () => {
@@ -274,8 +253,6 @@ contract('ZkAsset', (accounts) => {
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20]);
             const publicValue = depositPublicValue * -1;
 
-            const customMetadata =
-                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata);
             });
@@ -393,7 +370,8 @@ contract('ZkAsset', (accounts) => {
                 withdrawalPublicValue,
                 publicOwner,
             );
-            const transferData = transferProof.encodeABI(joinSplitValidator.address);
+
+            const transferData = transferProof.encodeABI(JoinSplitValidator.address);
             const transferSignatures = transferProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
             const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
@@ -423,6 +401,13 @@ contract('ZkAsset', (accounts) => {
             const malformedProofData = `0x0123${data.slice(6)}`;
             // no error message because it throws in assembly
             await truffleAssert.reverts(zkAsset.confidentialTransfer(malformedProofData, signatures));
+        });
+
+        it('should should fail to create zkAsset if 0x0 is linked token address', async () => {
+            await truffleAssert.reverts(
+                ZkAsset.new(ace.address, constants.addresses.ZERO_ADDRESS, scalingFactor),
+                'can not create asset with convert and adjust flags set to false',
+            );
         });
 
         it('should fail if signatures are zero', async () => {
@@ -615,7 +600,7 @@ contract('ZkAsset', (accounts) => {
             );
 
             const depositData = depositProof.encodeABI(zkAsset.address);
-            const depositSignatures = depositProof.constructSignatures(joinSplitValidator.address, depositInputOwnerAccounts);
+            const depositSignatures = depositProof.constructSignatures(JoinSplitValidator.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, depositPublicValue, { from: accounts[0] });
             await zkAsset.confidentialTransfer(depositData, depositSignatures);
@@ -646,8 +631,6 @@ contract('ZkAsset', (accounts) => {
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20]);
             const publicValue = depositPublicValue * -1;
 
-            const customMetadata =
-                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
             depositOutputNotes.forEach((individualNote) => {
                 return individualNote.setMetadata(customMetadata);
             });
@@ -661,9 +644,7 @@ contract('ZkAsset', (accounts) => {
             await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
 
             const dummyEphemeralKeys = randomHex(192);
-            const updatedMetaData =
-                dummyEphemeralKeys +
-                '00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef';
+            const updatedMetaData = dummyEphemeralKeys + customMetadata;
             await truffleAssert.reverts(
                 zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
                     from: accounts[0],
