@@ -31,6 +31,20 @@
         {
             "constant": true,
             "inputs": [],
+            "name": "defaultRegistryEpoch",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint8"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
             "name": "PRIVATE_RANGE_PROOF",
             "outputs": [
                 {
@@ -40,6 +54,15 @@
             ],
             "payable": false,
             "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "renounceOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -59,11 +82,53 @@
         {
             "constant": true,
             "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
             "name": "MINT_PROOF",
             "outputs": [
                 {
                     "name": "",
                     "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "isOwner",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "defaultCryptoSystem",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint8"
                 }
             ],
             "payable": false,
@@ -91,6 +156,25 @@
         },
         {
             "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "registries",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
             "inputs": [],
             "name": "BURN_PROOF",
             "outputs": [
@@ -102,6 +186,47 @@
             "payable": false,
             "stateMutability": "view",
             "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "transferOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "epoch",
+                    "type": "uint8"
+                },
+                {
+                    "indexed": true,
+                    "name": "cryptoSystem",
+                    "type": "uint8"
+                },
+                {
+                    "indexed": true,
+                    "name": "assetType",
+                    "type": "uint8"
+                },
+                {
+                    "indexed": false,
+                    "name": "factoryAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "SetFactory",
+            "type": "event"
         },
         {
             "anonymous": false,
@@ -139,6 +264,83 @@
             ],
             "name": "CreateNoteRegistry",
             "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "previousOwner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "OwnershipTransferred",
+            "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "incrementDefaultRegistryEpoch",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_defaultCryptoSystem",
+                    "type": "uint8"
+                }
+            ],
+            "name": "setDefaultCryptoSystem",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_factoryId",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_factoryAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "setFactory",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "_factoryId",
+                    "type": "uint24"
+                }
+            ],
+            "name": "getFactoryAddress",
+            "outputs": [
+                {
+                    "name": "factoryAddress",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
         },
         {
             "constant": false,
@@ -202,6 +404,72 @@
                 }
             ],
             "name": "createNoteRegistry",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_linkedTokenAddress",
+                    "type": "address"
+                },
+                {
+                    "name": "_scalingFactor",
+                    "type": "uint256"
+                },
+                {
+                    "name": "_canAdjustSupply",
+                    "type": "bool"
+                },
+                {
+                    "name": "_canConvert",
+                    "type": "bool"
+                },
+                {
+                    "name": "_factoryId",
+                    "type": "uint24"
+                }
+            ],
+            "name": "createNoteRegistry",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_factoryId",
+                    "type": "uint24"
+                }
+            ],
+            "name": "upgradeNoteRegistry",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_from",
+                    "type": "address"
+                },
+                {
+                    "name": "_to",
+                    "type": "address"
+                },
+                {
+                    "name": "_value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "transferFrom",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",

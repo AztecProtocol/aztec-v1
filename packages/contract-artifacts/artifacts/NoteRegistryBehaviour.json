@@ -1,0 +1,392 @@
+{
+    "abi": [
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "JOIN_SPLIT_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "dataLocation",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "initialised",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "ZERO_VALUE_NOTE_HASH",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "PRIVATE_RANGE_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "renounceOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "DIVIDEND_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "isActiveBehaviour",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "MINT_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "isOwner",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "BURN_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "transferOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "previousOwner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "OwnershipTransferred",
+            "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_newOwner",
+                    "type": "address"
+                },
+                {
+                    "name": "_linkedTokenAddress",
+                    "type": "address"
+                },
+                {
+                    "name": "_scalingFactor",
+                    "type": "uint256"
+                },
+                {
+                    "name": "_canAdjustSupply",
+                    "type": "bool"
+                },
+                {
+                    "name": "_canConvert",
+                    "type": "bool"
+                }
+            ],
+            "name": "initialise",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "getRegistry",
+            "outputs": [
+                {
+                    "name": "linkedToken",
+                    "type": "address"
+                },
+                {
+                    "name": "scalingFactor",
+                    "type": "uint256"
+                },
+                {
+                    "name": "totalSupply",
+                    "type": "uint256"
+                },
+                {
+                    "name": "confidentialTotalMinted",
+                    "type": "bytes32"
+                },
+                {
+                    "name": "confidentialTotalBurned",
+                    "type": "bytes32"
+                },
+                {
+                    "name": "canConvert",
+                    "type": "bool"
+                },
+                {
+                    "name": "canAdjustSupply",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "incrementTotalSupply",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofOutputs",
+                    "type": "bytes"
+                }
+            ],
+            "name": "burn",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofOutputs",
+                    "type": "bytes"
+                }
+            ],
+            "name": "mint",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofOutput",
+                    "type": "bytes"
+                }
+            ],
+            "name": "updateNoteRegistry",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_publicOwner",
+                    "type": "address"
+                },
+                {
+                    "name": "_proofHash",
+                    "type": "bytes32"
+                },
+                {
+                    "name": "_value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "publicApprove",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "_noteHash",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "getNote",
+            "outputs": [
+                {
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "createdOn",
+                    "type": "uint40"
+                },
+                {
+                    "name": "destroyedOn",
+                    "type": "uint40"
+                },
+                {
+                    "name": "noteOwner",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.9"
+}
