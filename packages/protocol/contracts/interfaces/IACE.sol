@@ -3,7 +3,6 @@ pragma solidity >=0.5.0 <0.6.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-import "../ACE/NoteRegistry.sol";
 import "../interfaces/IAZTEC.sol";
 
 import "../libs/NoteUtils.sol";

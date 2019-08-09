@@ -3,12 +3,14 @@ pragma solidity >=0.5.0 <0.6.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-import "./NoteRegistry.sol";
+import "./noteRegistry/NoteRegistryManager.sol";
 
 import "../interfaces/IAZTEC.sol";
 
 import "../libs/NoteUtils.sol";
+// TODO: v-- harmonize
 import "../libs/ProofUtils.sol";
+import "../libs/VersioningUtils.sol";
 import "../libs/SafeMath8.sol";
 
 /**
@@ -18,7 +20,7 @@ import "../libs/SafeMath8.sol";
  *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract ACE is IAZTEC, Ownable, NoteRegistry {
+contract ACE is IAZTEC, Ownable, NoteRegistryManager {
     using NoteUtils for bytes;
     using ProofUtils for uint24;
     using SafeMath for uint256;
@@ -29,9 +31,9 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
     event SetCommonReferenceString(bytes32[6] _commonReferenceString);
     event SetProof(
-        uint8 indexed epoch, 
-        uint8 indexed category, 
-        uint8 indexed id, 
+        uint8 indexed epoch,
+        uint8 indexed category,
+        uint8 indexed id,
         address validatorAddress
     );
     event IncrementLatestEpoch(uint8 newLatestEpoch);
@@ -60,7 +62,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
 
     /**
     * @dev Mint AZTEC notes
-    *      
+    *
     * @param _proof the AZTEC proof object
     * @param _proofData the mint proof construction data
     * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
@@ -74,11 +76,10 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         bytes calldata _proofData,
         address _proofSender
     ) external returns (bytes memory) {
-        
-        Registry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canAdjustSupply == true, "this asset is not mintable");
-        
+
+        NoteRegistryBehaviour registry = registries[msg.sender];
+        require(address(registry) != address(0x0), "note registry does not exist for the given address");
+
         // Check that it's a mintable proof
         (, uint8 category, ) = _proof.getProofComponents();
 
@@ -87,32 +88,13 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
         require(_proofOutputs.getLength() > 0, "call to validateProof failed");
 
-        // Dealing with notes representing totals
-        (bytes memory oldTotal,  // inputNotesTotal
-        bytes memory newTotal, // outputNotesTotal
-        ,
-        ) = _proofOutputs.get(0).extractProofOutput();
-
-        // Check the previous confidentialTotalSupply, and then assign the new one
-        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
-
-        require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total minted note does not match");
-        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
-        registry.confidentialTotalMinted = newTotalNoteHash;
-
-        // Dealing with minted notes
-        (,
-        bytes memory mintedNotes, // output notes
-        ,
-        ) = _proofOutputs.get(1).extractProofOutput();
-
-        updateOutputNotes(mintedNotes);
+        registry.mint(_proofOutputs);
         return(_proofOutputs);
     }
 
     /**
     * @dev Burn AZTEC notes
-    *      
+    *
     * @param _proof the AZTEC proof object
     * @param _proofData the burn proof construction data
     * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
@@ -126,46 +108,28 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
         bytes calldata _proofData,
         address _proofSender
     ) external returns (bytes memory) {
-        
-        Registry storage registry = registries[msg.sender];
-        require(registry.flags.active == true, "note registry does not exist for the given address");
-        require(registry.flags.canAdjustSupply == true, "this asset is not burnable");
-        
+        NoteRegistryBehaviour registry = registries[msg.sender];
+        require(address(registry) != address(0x0), "note registry does not exist for the given address");
+
         // Check that it's a burnable proof
         (, uint8 category, ) = _proof.getProofComponents();
 
         require(category == uint8(ProofCategory.BURN), "this is not a burn proof");
 
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
-        
-        // Dealing with notes representing totals
-        (bytes memory oldTotal, // input notes
-        bytes memory newTotal, // output notes
-        ,
-        ) = _proofOutputs.get(0).extractProofOutput();
-    
-        (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();        
-        require(oldTotalNoteHash == registry.confidentialTotalBurned, "provided total burned note does not match");
-        (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
-        registry.confidentialTotalBurned = newTotalNoteHash;
+        require(_proofOutputs.getLength() > 0, "call to validateProof failed");
 
-        // Dealing with burned notes
-        (,
-        bytes memory burnedNotes,
-        ,) = _proofOutputs.get(1).extractProofOutput();
-
-        // Although they are outputNotes, they are due to be destroyed - need removing from the note registry
-        updateInputNotes(burnedNotes);
-        return(_proofOutputs);
+        registry.burn(_proofOutputs);
+        return _proofOutputs;
     }
 
     /**
     * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
     *      linked to `_proof`. The validator smart contract will have the following interface:
-    *      
+    *
     *      function validate(
-    *          bytes _proofData, 
-    *          address _sender, 
+    *          bytes _proofData,
+    *          address _sender,
     *          bytes32[6] _commonReferenceString
     *      ) public returns (bytes)
     *
@@ -307,7 +271,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             // => result of disabledValidators[epoch] is stored in 0x08 * 0x100 = 0x800 storage slots
 
             // To compute the storage slot  disabledValidators[epoch][category][id], we do the following:
-            // 1. get the disabledValidators slot 
+            // 1. get the disabledValidators slot
             // 2. add (epoch * 0x800) to the slot (or epoch << 11)
             // 3. add (category * 0x08) to the slot (or category << 3)
             // 4. add (id / 0x20) to the slot (or id >> 5)
@@ -325,7 +289,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistry {
             // to convert to a bit index, we multiply by 8
             // i.e. bit index = shl(3, and(_proof & 0x1f))
             // => result = shr(shl(3, and(_proof & 0x1f), value))
-            isValidatorDisabled := 
+            isValidatorDisabled :=
                 shr(
                     shl(
                         0x03,

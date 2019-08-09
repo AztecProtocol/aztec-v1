@@ -30,12 +30,12 @@ contract('ACEOwner', (accounts) => {
     describe('initialization', () => {
         const secondsTimeLocked = new BN(0);
 
-        it('should create an ACE with ACEOwner as owner', async () => {
+        it('should initiate ACEOwner and transfer ownership of ACE', async () => {
             const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
             });
-            const aceAddress = await aceOwner.ace();
-            const ace = await ACE.at(aceAddress);
+            const ace = await ACE.new({ from: owners[0] });
+            await ace.transferOwnership(aceOwner.address);
 
             const owner = await ace.owner();
             expect(owner).to.equal(aceOwner.address);
@@ -44,14 +44,18 @@ contract('ACEOwner', (accounts) => {
 
     describe('initially non-time-locked', () => {
         const secondsTimeLocked = new BN(0);
+        let aceOwner;
+        let ace;
 
-        it('should set the common reference string through ACEOwner', async () => {
-            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
+        beforeEach(async () => {
+            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
                 from: owners[0],
             });
-            const aceAddress = await aceOwner.ace();
-            const ace = await ACE.at(aceAddress);
+            ace = await ACE.new({ from: owners[0] });
+            await ace.transferOwnership(aceOwner.address);
+        });
 
+        it('should set the common reference string through ACEOwner', async () => {
             const txData = ace.contract.methods.setCommonReferenceString(bn128.CRS).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
             const txLog = tx.logs[0];
@@ -64,12 +68,6 @@ contract('ACEOwner', (accounts) => {
         });
 
         it('should set a proof through ACEOwner', async () => {
-            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, secondsTimeLocked, {
-                from: owners[0],
-            });
-            const aceAddress = await aceOwner.ace();
-            const ace = await ACE.at(aceAddress);
-
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
@@ -83,13 +81,17 @@ contract('ACEOwner', (accounts) => {
     });
 
     describe('initially time-locked', () => {
-        it('should invalidate a proof through ACEOwner independent of timelock', async () => {
-            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
+        let aceOwner;
+        let ace;
+
+        beforeEach(async () => {
+            aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
                 from: owners[0],
             });
-            const aceAddress = await aceOwner.ace();
-            const ace = await ACE.at(aceAddress);
-
+            ace = await ACE.new({ from: owners[0] });
+            await ace.transferOwnership(aceOwner.address);
+        });
+        it('should invalidate a proof through ACEOwner independent of timelock', async () => {
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
@@ -114,12 +116,6 @@ contract('ACEOwner', (accounts) => {
         });
 
         it('should not execute any other tx through emergencyExecuteInvalidateProof', async () => {
-            const aceOwner = await ACEOwner.new(owners, REQUIRED_APPROVALS, SECONDS_TIME_LOCKED, {
-                from: owners[0],
-            });
-            const aceAddress = await aceOwner.ace();
-            const ace = await ACE.at(aceAddress);
-
             const aztecJoinSplit = await JoinSplit.new();
             const txData = await ace.contract.methods.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address).encodeABI();
             const tx = await aceOwner.submitTransaction(ace.address, 0, txData, { from: owners[0] });
