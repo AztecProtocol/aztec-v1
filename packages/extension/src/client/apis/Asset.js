@@ -136,7 +136,7 @@ export default class Asset {
             throw new ContractError('erc20.totalSupply');
         }
 
-        return totalSupply;
+        return totalSupply | 0; // eslint-disable-line no-bitwise
     }
 
     balanceOfLinkedToken = async (account) => {
@@ -162,7 +162,7 @@ export default class Asset {
             });
         }
 
-        return balance;
+        return balance | 0; // eslint-disable-line no-bitwise
     };
 
     /**
