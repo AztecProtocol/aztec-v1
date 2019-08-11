@@ -16,6 +16,18 @@ const t2 = [
  */
 const constants = {
     /**
+     * Common reference string
+     * @constant CRS
+     * @type {string}
+     */
+    CRS: [`0x${H_X.toString(16)}`, `0x${H_Y.toString(16)}`, ...t2],
+    /**
+     * Custom metaData to test metaData encoding functionality of AZTEC notes
+     * @constant META_DATA_TEST
+     * @type {string}
+     */
+    META_DATA_TEST: '0x00000000000000000000000000000028000000000000000000000000000001a4000000000000000000000000000000003339c3c842732f4daacf12aed335661cf4eab66b9db634426a9b63244634d33a2590f06a5ede877e0f2c671075b1aa828a31cbae7462c581c5080390c96159d5c55fdee69634a22c7b9c6d5bc5aad15459282d9277bbd68a88b19857523657a958e1425ff7f315bbe373d3287805ed2a597c3ffab3e8767f9534d8637e793844c13b8c20a574c60e9c4831942b031d2b11a5af633f36615e7a27e4cacdbc7d52fe07056db87e8b545f45b79dac1585288421cc40c8387a65afc5b0e7f2b95a68b3f106d1b76e9fcb5a42d339e031e77d0e767467b5aa2496ee8f3267cbb823168215852aa4ef',
+    /**
      * Generic scaling factor that maps between AZTEC note values and ERC20 token balances. When used for DAI,
      * 1 note value = 0.1 DAI
      */
@@ -26,29 +38,24 @@ const constants = {
      *  @default 1048576
      */
     K_MAX: 1048576,
-    /** Minimum value of an AZTEC Note
+    /** Maximum value that can be held in an AZTEC note during tests
      *  @constant K_MIN
      *  @type {string}
      *  @default 0
      */
     K_MAX_TEST: 14336,
-    /** Maximum value that can be held in an AZTEC note during tests
+    /** Minimum value that can be held in an AZTEC note
      *  @constant K_MAX_TEST
      *  @type { string }
      *  @default 0
      */
     K_MIN: 0,
-    /** Maximum value that can be held in an AZTEC note during tests
+    /** Minimum value that can be held in an AZTEC note during tests
      *  @constant K_MAX_TEST
      *  @type { string }
      *  @default 10240
      */
     K_MIN_TEST: 0,
-    /** bytes32-formatted trusted setup public key
-     *  @constant t2
-     *  @type {BN}
-     */
-    // t2,
     /** Number of signatures per file in trusted setup database
      *  @constant SIGNATURES_PER_FILE
      *  @type {number}
@@ -66,12 +73,6 @@ const constants = {
      * @default 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c
      */
     ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
-    /**
-     * Common reference string
-     * @constant CRS
-     * @type {string}
-     */
-    CRS: [`0x${H_X.toString(16)}`, `0x${H_Y.toString(16)}`, ...t2],
 };
 
 /**
