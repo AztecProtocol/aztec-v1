@@ -25,9 +25,8 @@ class Proof {
      * @param {string} sender Ethereum address of transaction sender
      * @param {string} publicValue public commitment being added to proof
      * @param {string} publicOwner holder of a public token being converted
-     * @param {Object} metadata arbitrarily-sized object
      */
-    constructor(type, inputNotes, outputNotes, sender, publicValue, publicOwner, metadata = []) {
+    constructor(type, inputNotes, outputNotes, sender, publicValue, publicOwner) {
         this.type = type;
         this.inputNotes = inputNotes;
         this.m = inputNotes.length;
@@ -35,7 +34,6 @@ class Proof {
         this.notes = [...inputNotes, ...outputNotes];
         this.sender = sender;
         this.publicOwner = publicOwner;
-        this.metadata = metadata;
         if (BN.isBN(publicValue)) {
             this.publicValue = publicValue;
         } else if (publicValue < 0) {
