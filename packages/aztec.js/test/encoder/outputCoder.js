@@ -56,7 +56,9 @@ describe('Output Coder', () => {
         expect(clean(encoded.slice(0x80, 0xa0))).to.equal('61');
         expect(bn128.decompressHex(encoded.slice(0xa0, 0xc0)).eq(notes[0].gamma)).to.equal(true);
         expect(bn128.decompressHex(encoded.slice(0xc0, 0xe0)).eq(notes[0].sigma)).to.equal(true);
-        expect(secp256k1.decompressHex(encoded.slice(0xe0)).eq(notes[0].ephemeral.getPublic())).to.equal(true);
+
+        // 1st 0x21 of metaData is the ephemeralKey
+        expect(secp256k1.decompressHex(encoded.slice(0xe0, 0x101)).eq(notes[0].ephemeral.getPublic())).to.equal(true);
     });
 
     it('should encode input note', () => {
@@ -169,7 +171,7 @@ describe('Output Coder', () => {
 
     it('should decode an encoded output note', () => {
         const encoded = outputCoder.encodeOutputNote(notes[0]);
-        const result = outputCoder.decodeNote(encoded);
+        const result = outputCoder.decodeOutputNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
         expect(result.sigma.eq(notes[0].sigma)).to.equal(true);
         expect(result.ephemeral.eq(notes[0].ephemeral.getPublic())).to.equal(true);
@@ -180,7 +182,7 @@ describe('Output Coder', () => {
 
     it('should decode an encoded input note', () => {
         const encoded = outputCoder.encodeInputNote(notes[0]);
-        const result = outputCoder.decodeNote(encoded);
+        const result = outputCoder.decodeInputNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
         expect(result.sigma.eq(notes[0].sigma)).to.equal(true);
         expect(result.owner).to.equal(notes[0].owner);
@@ -190,13 +192,26 @@ describe('Output Coder', () => {
 
     it('should decode encoded input notes', () => {
         const encoded = outputCoder.encodeNotes([notes[0], notes[1]], false);
-        const result = outputCoder.decodeNotes(encoded);
+        const result = outputCoder.decodeNotes(encoded, false);
         expect(result.length).to.equal(2);
         for (let i = 0; i < result.length; i += 1) {
             expect(result[i].gamma.eq(notes[i].gamma)).to.equal(true);
             expect(result[i].sigma.eq(notes[i].sigma)).to.equal(true);
             expect(result[i].owner).to.equal(notes[i].owner);
             expect(result[i].noteHash).to.equal(notes[i].noteHash);
+        }
+    });
+
+    it('should decode encoded output notes', () => {
+        const encoded = outputCoder.encodeNotes([notes[0], notes[1]], true); // setting to be output notes
+        const result = outputCoder.decodeNotes(encoded, true);
+        expect(result.length).to.equal(2);
+        for (let i = 0; i < result.length; i += 1) {
+            expect(result[i].gamma.eq(notes[i].gamma)).to.equal(true);
+            expect(result[i].sigma.eq(notes[i].sigma)).to.equal(true);
+            expect(result[i].owner).to.equal(notes[i].owner);
+            expect(result[i].noteHash).to.equal(notes[i].noteHash);
+            expect(result[i].ephemeral.eq(notes[i].ephemeral.getPublic())).to.equal(true);
         }
     });
 
