@@ -1,5 +1,3 @@
-const secp256k1 = require('@aztec/secp256k1');
-
 const { padLeft } = require('web3-utils');
 
 const inputCoder = {};
