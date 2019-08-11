@@ -15,10 +15,9 @@ class BurnProof extends JoinSplitFluidProof {
      * @param {Object} newTotalValueNote - note whose value represents the new total value ofburned notes
      * @param {Object[]} burnedNotes - notes to be minted or burned
      * @param {string} sender - Ethereum address of the transaction sender
-     * @param {string} metadata
      */
-    constructor(currentTotalValueNote, newTotalValueNote, burnedNotes, sender, metadata) {
-        super(ProofType.BURN.name, currentTotalValueNote, newTotalValueNote, burnedNotes, sender, metadata);
+    constructor(currentTotalValueNote, newTotalValueNote, burnedNotes, sender) {
+        super(ProofType.BURN.name, currentTotalValueNote, newTotalValueNote, burnedNotes, sender);
     }
 }
 

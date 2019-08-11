@@ -12,10 +12,10 @@ const ProofUtils = require('../utils');
 const { AztecError } = errors;
 
 class SwapProof extends Proof {
-    constructor(inputNotes, outputNotes, sender, metadata = [outputNotes[0], inputNotes[1]]) {
+    constructor(inputNotes, outputNotes, sender) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
-        super(ProofType.SWAP.name, inputNotes, outputNotes, sender, publicValue, publicOwner, metadata);
+        super(ProofType.SWAP.name, inputNotes, outputNotes, sender, publicValue, publicOwner);
 
         this.constructBlindingFactors();
         this.constructChallenge();
@@ -125,7 +125,7 @@ class SwapProof extends Proof {
         const encodedParams = [
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners([...this.inputNoteOwners, ...this.outputNoteOwners]),
-            inputCoder.encodeMetadata(this.metadata),
+            inputCoder.encodeMetaData(this.outputNotes),
         ];
 
         const length = 1 + encodedParams.length + 1;

@@ -15,10 +15,9 @@ class MintProof extends JoinSplitFluidProof {
      * @param {Object} newTotalValueNote - note whose value represents the new total value of minted or burned notes
      * @param {Object[]} mintedNotes - notes to be minted or burned
      * @param {string} sender - Ethereum address of the transaction sender
-     * @param {string} metadata
      */
-    constructor(currentTotalValueNote, newTotalValueNote, mintedNotes, sender, metadata) {
-        super(ProofType.MINT.name, currentTotalValueNote, newTotalValueNote, mintedNotes, sender, metadata);
+    constructor(currentTotalValueNote, newTotalValueNote, mintedNotes, sender) {
+        super(ProofType.MINT.name, currentTotalValueNote, newTotalValueNote, mintedNotes, sender);
     }
 }
 

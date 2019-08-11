@@ -22,12 +22,11 @@ class DividendProof extends Proof {
      * @param {string} sender
      * @param {Number} za numerator for the ratio between notionalNote and targetNote
      * @param {Number} zb denominator for the ratio between notionalNote and targetNote
-     * @param {Object} metadata
      */
-    constructor(notionalNote, residualNote, targetNote, sender, za, zb, metadata = [residualNote, targetNote]) {
+    constructor(notionalNote, residualNote, targetNote, sender, za, zb) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
-        super(ProofType.DIVIDEND.name, [notionalNote], [residualNote, targetNote], sender, publicValue, publicOwner, metadata);
+        super(ProofType.DIVIDEND.name, [notionalNote], [residualNote, targetNote], sender, publicValue, publicOwner);
 
         this.za = new BN(za);
         this.zb = new BN(zb);
@@ -121,7 +120,7 @@ class DividendProof extends Proof {
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
-            inputCoder.encodeMetadata(this.metadata),
+            inputCoder.encodeMetaData(this.outputNotes),
         ];
 
         const length = 3 + encodedParams.length + 1;
