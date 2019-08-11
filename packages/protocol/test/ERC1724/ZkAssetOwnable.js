@@ -1,4 +1,4 @@
-/* global artifacts, expect, contract, beforeEach, it:true */
+/* global artifacts, expect, web3, contract, beforeEach, it:true */
 const { JoinSplitProof, signer } = require('aztec.js');
 const {
     constants,
@@ -15,13 +15,20 @@ const ZkAssetOwnable = artifacts.require('./ZkAssetOwnable');
 const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
+const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
+
+const generateFactoryId = (epoch, cryptoSystem, assetType) => {
+    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
+};
 
 contract('ZkAssetOwnable', (accounts) => {
     let ace;
     let erc20;
     let zkAssetOwnable;
     let zkAssetOwnableTest;
+    let convertibleFactory;
 
     const epoch = 1;
     const filter = 17; // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
@@ -29,6 +36,7 @@ contract('ZkAssetOwnable', (accounts) => {
     const tokensTransferred = new BN(100000);
     const publicOwner = accounts[0];
     const sender = accounts[0];
+    const newFactoryId = generateFactoryId(2, 1, 1);
 
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
         await Promise.all(
@@ -45,7 +53,7 @@ contract('ZkAssetOwnable', (accounts) => {
         );
     };
 
-    beforeEach(async () => {
+    before(async () => {
         ace = await ACE.at(ACE.address);
         erc20 = await ERC20Mintable.new({ from: accounts[0] });
 
@@ -55,6 +63,9 @@ contract('ZkAssetOwnable', (accounts) => {
         await zkAssetOwnable.setProofs(epoch, filter);
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
         await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
+
+        convertibleFactory = await ConvertibleFactory.new(ace.address);
+        await ace.setFactory(newFactoryId, convertibleFactory.address);
 
         await Promise.all(
             accounts.map((account) => {
@@ -118,6 +129,22 @@ contract('ZkAssetOwnable', (accounts) => {
 
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
+        });
+
+        it('should be able to deploy an upgraded note registry if owner', async () => {
+            await zkAssetOwnable.upgradeRegistryVersion(newFactoryId);
+
+            const topic = web3.utils.keccak256('UpgradeNoteRegistry(address,address,address)');
+
+            const logs = await new Promise((resolve) => {
+                web3.eth
+                    .getPastLogs({
+                        address: ace.address,
+                        topics: [topic],
+                    })
+                    .then(resolve);
+            });
+            expect(logs.length).to.not.equal(0);
         });
 
         it('should delegate a contract to update a note registry by consuming input notes, with kPublic positive', async () => {
