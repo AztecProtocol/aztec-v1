@@ -7,9 +7,6 @@ const { padLeft } = require('web3-utils');
 const JoinSplitABIEncoderTest = artifacts.require('./JoinSplitABIEncoderTest');
 
 const aztecAccount = secp256k1.generateAccount();
-const aztecAccountMapping = {
-    [aztecAccount.address]: aztecAccount.privateKey,
-};
 let joinSplitAbiEncoderTest;
 
 const getNotes = async (inputNoteValues = [], outputNoteValues = []) => {
@@ -33,7 +30,6 @@ const getDefaultNotes = async () => {
 contract('Join-Split ABI Encoder', (accounts) => {
     const publicOwner = accounts[0];
     const sender = accounts[0];
-
     // Creating a collection of tests that should pass
     describe('Success States', () => {
         beforeEach(async () => {
@@ -45,7 +41,7 @@ contract('Join-Split ABI Encoder', (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             // TODO: although signatures will be removed from the validator logic anyway, this is a code smell.
             // The address put in the signature should not be the test contract's address, but rather the validator itself.
-            const data = proof.encodeABI(joinSplitAbiEncoderTest.address, aztecAccountMapping);
+            const data = proof.encodeABI(joinSplitAbiEncoderTest.address);
 
             const result = await joinSplitAbiEncoderTest.validateJoinSplit(data, sender, bn128.CRS);
             const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
