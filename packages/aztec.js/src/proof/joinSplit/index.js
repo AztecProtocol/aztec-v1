@@ -18,16 +18,14 @@ class JoinSplitProof extends Proof {
      * @param {string} sender - Ethereum address of the transaction sender
      * @param {Number} publicValue - number of public ERC20 tokens being converted into notes or vice versa
      * @param {string} publicOwner - Ethereum address of the publicValue owner
-     * @param {string} metadata
      */
-    constructor(inputNotes, outputNotes, sender, publicValue, publicOwner, metadata = outputNotes) {
-        super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicValue, publicOwner, metadata);
+    constructor(inputNotes, outputNotes, sender, publicValue, publicOwner) {
+        super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicValue, publicOwner);
 
         this.constructBlindingScalars();
         this.constructBlindingFactors();
         this.constructChallenge();
         this.constructData();
-        this.formatMetadata();
         this.constructOutputs();
     }
 
@@ -122,19 +120,6 @@ class JoinSplitProof extends Proof {
         });
     }
 
-    /**
-     * Format the metadata, depending on whethe§r custom data has been passed or if the default
-     * metadata = outputNotes is used
-     */
-
-    formatMetadata() {
-        if (this.metadata === this.outputNotes) {
-            this.encodedMetadata = inputCoder.encodeMetadata(this.metadata);
-        } else {
-            this.encodedMetadata = this.metadata;
-        }
-    }
-
     // TODO: normalise proof output encoding. In some places it's expected to use `encodeProofOutputs`
     // while in others `encodeProofOutput`.
     constructOutputs() {
@@ -184,7 +169,7 @@ class JoinSplitProof extends Proof {
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
-            this.encodedMetadata,
+            inputCoder.encodeMetaData(this.outputNotes),
         ];
 
         const length = 3 + encodedParams.length + 1;
