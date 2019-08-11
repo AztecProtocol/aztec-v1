@@ -39,7 +39,7 @@ const getDefaultNotes = async () => {
     return getNotes(asks, bids);
 };
 
-contract('Swap Validator ABI Encoder', (accounts) => {
+contract.skip('Swap Validator ABI Encoder', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
