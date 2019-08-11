@@ -108,10 +108,7 @@ contract('NoteRegistryManager', (accounts) => {
             const { factoryAddress } = receipt.logs.find((l) => l.event === 'SetFactory');
 
             const upgradeReceipt = await ace.upgradeNoteRegistry(newFactoryId, { from: zkAssetOwner });
-            const {
-                proxyAddress,
-                newBehaviourAddress,
-            } = upgradeReceipt.logs.find(l => l.event === 'UpgradeNoteRegistry').args;
+            const { proxyAddress, newBehaviourAddress } = upgradeReceipt.logs.find((l) => l.event === 'UpgradeNoteRegistry').args;
             expect(newBehaviourAddress).to.not.equal(existingProxy);
             expect(proxyAddress).to.equal(existingProxy);
 
@@ -161,7 +158,6 @@ contract('NoteRegistryManager', (accounts) => {
 
             const newBehaviourAddress = await newFactoryContract.getImplementation.call(existingProxy);
             expect(newBehaviourAddress).to.not.equal(preUpgradeBehaviour);
-
         });
 
         it('should keep state after upgrade', async () => {
@@ -170,7 +166,7 @@ contract('NoteRegistryManager', (accounts) => {
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, { from: zkAssetOwner });
 
             const depositValue = -10;
-            const depositOutputNotes = await getNotesForAccount(aztecAccount, [10])
+            const depositOutputNotes = await getNotesForAccount(aztecAccount, [10]);
             const depositProof = new JoinSplitProof([], depositOutputNotes, zkAssetOwner, depositValue, zkAssetOwner);
             await ace.publicApprove(zkAssetOwner, depositProof.hash, Math.abs(depositValue), { from: zkAssetOwner });
             const data = depositProof.encodeABI(JoinSplitValidator.address);
