@@ -41,7 +41,7 @@ const getDefaultNotes = async () => {
     return getNotes(asks, bids);
 };
 
-contract('Swap Validator', (accounts) => {
+contract.skip('Swap Validator', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
