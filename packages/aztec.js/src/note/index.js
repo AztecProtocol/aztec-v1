@@ -123,7 +123,7 @@ class Note {
      * Export the metaData of the note
      */
     exportMetaData() {
-        const metaDataLength = this.metaData.slice(2).length;
+        const metaDataLength = this.metaData.slice(2).length / 2;
         return `${padLeft(metaDataLength, 64)}${this.metaData.slice(2)}`.slice(2);
     }
 

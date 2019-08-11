@@ -84,7 +84,7 @@ describe('Note', () => {
         it('should set note.metadata property to custom metadata', async () => {
             const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
             const customData = padLeft(randomHex(20), 64);
-            const customMetadata = testNote.setMetadata(customData);
+            const customMetadata = testNote.setMetaData(customData);
             expect(customMetadata).to.equal(testNote.metaData);
         });
 
@@ -92,18 +92,17 @@ describe('Note', () => {
             const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
             const ephemeralKey = secp256k1.compress(testNote.ephemeral.getPublic());
             const ephemeralKeyLength = ephemeralKey.length;
-            const customData = padLeft(randomHex(20), 64);
+            const customData = `0x${padLeft(randomHex(20), 64)}`;
 
-            testNote.setMetadata(customData);
+            testNote.setMetaData(customData);
             const metaData = testNote.exportMetaData();
 
             // multiple subtracting of 2 chars to represent slices
             // addition of 64 to represent the prepended word of data containing length of metaData
             const expectedLength = ((customData.length - 2) + ephemeralKeyLength) - 2 + 64
-
             expect(metaData.length).to.equal(expectedLength);
             expect(metaData.slice(64, 130)).to.equal(ephemeralKey.slice(2));
-            expect(metaData.slice(130, 194)).to.equal(customData.slice(2));
+            expect(metaData.slice(130, 196)).to.equal(customData.slice(2));
         });
     });
 
