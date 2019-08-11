@@ -175,7 +175,7 @@ class PrivateRangeProof extends Proof {
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
-            inputCoder.encodeMetadata(this.metadata),
+            inputCoder.encodeMetaData(this.outputNotes),
         ];
 
         // First hardcoded value in length calc is num of
