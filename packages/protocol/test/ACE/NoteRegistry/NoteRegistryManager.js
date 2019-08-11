@@ -3,15 +3,24 @@
 // ### External Dependencies
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
+const { JoinSplitProof } = require('aztec.js');
+const bn128 = require('@aztec/bn128');
+const { proofs, constants } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
+const { getNotesForAccount } = require('../../helpers/note');
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
-const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+
 const Behaviour = artifacts.require('./noteRegistry/interfaces/NoteRegistryBehaviour');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const JoinSplitValidator = artifacts.require('./JoinSplit');
+const TestFactory = artifacts.require('./test/TestFactory');
+
+const { JOIN_SPLIT_PROOF } = proofs;
 
 const generateFactoryId = (epoch, cryptoSystem, assetType) => {
     return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
@@ -20,6 +29,7 @@ const generateFactoryId = (epoch, cryptoSystem, assetType) => {
 contract('NoteRegistryManager', (accounts) => {
     const [owner, notOwner, zkAssetOwner] = accounts;
     const scalingFactor = new BN(10);
+    const aztecAccount = secp256k1.generateAccount();
 
     let factoryContract;
     let ace;
@@ -27,12 +37,16 @@ contract('NoteRegistryManager', (accounts) => {
 
     beforeEach(async () => {
         ace = await ACE.new();
-        factoryContract = await NoteRegistryFactory.new(ace.address);
+        await ace.setCommonReferenceString(bn128.CRS);
+        ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: owner });
+        factoryContract = await TestFactory.new(ace.address);
         const epoch = 1;
         const cryptoSystem = 1;
         const assetType = 0b01; // (adjust, canConvert) in binary;
         await ace.setFactory(generateFactoryId(epoch, cryptoSystem, assetType), factoryContract.address, { from: owner });
         erc20 = await ERC20Mintable.new();
+        await erc20.mint(zkAssetOwner, 100);
+        await erc20.approve(ace.address, 100, { from: zkAssetOwner });
     });
 
     describe('Success States', async () => {
@@ -77,23 +91,30 @@ contract('NoteRegistryManager', (accounts) => {
             });
 
             expect(logs.length).to.not.equal(0);
-            const behaviourAddress = await ace.registries(zkAssetOwner);
-            expect(behaviourAddress).to.not.equal(undefined);
-            const contract = await Behaviour.at(behaviourAddress);
+            const proxyAddress = await ace.registries(zkAssetOwner);
+            expect(proxyAddress).to.not.equal(undefined);
+            const contract = await Behaviour.at(proxyAddress);
             expect(await contract.initialised()).to.equal(true);
         });
 
-        it('should upgrade to a new Note Registry behaviour contract', async () => {
+        it('should emit correct events on upgrade', async () => {
             const canAdjustSupply = false;
             const canConvert = true;
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, { from: zkAssetOwner });
-            const behaviourAddress = await ace.registries(zkAssetOwner);
+            const existingProxy = await ace.registries(zkAssetOwner);
             const newFactoryId = generateFactoryId(1, 3, 1);
             const receipt = await ace.setFactory(newFactoryId, factoryContract.address, { from: owner });
 
             const { factoryAddress } = receipt.logs.find((l) => l.event === 'SetFactory');
 
-            await ace.upgradeNoteRegistry(newFactoryId, { from: zkAssetOwner });
+            const upgradeReceipt = await ace.upgradeNoteRegistry(newFactoryId, { from: zkAssetOwner });
+            const {
+                proxyAddress,
+                newBehaviourAddress,
+            } = upgradeReceipt.logs.find(l => l.event === 'UpgradeNoteRegistry').args;
+            expect(newBehaviourAddress).to.not.equal(existingProxy);
+            expect(proxyAddress).to.equal(existingProxy);
+
             const topic = web3.utils.keccak256('NoteRegistryDeployed(address)');
             const logs = await new Promise((resolve) => {
                 web3.eth
@@ -104,20 +125,64 @@ contract('NoteRegistryManager', (accounts) => {
                     .then(resolve);
             });
             expect(logs.length).to.equal(1);
-            const newBehaviourAddress = await ace.registries(zkAssetOwner);
-            expect(newBehaviourAddress).to.not.equal(behaviourAddress);
 
             const upgradeTopic = web3.utils.keccak256('Upgraded(address)');
             const upgradeLogs = await new Promise((resolve) => {
                 web3.eth
                     .getPastLogs({
-                        address: behaviourAddress, // Actually the address of the proxy
+                        address: existingProxy,
                         topics: [upgradeTopic],
                     })
                     .then(resolve);
             });
             expect(upgradeLogs.length).to.equal(1);
             expect(parseInt(upgradeLogs[0].topics[1], 16)).to.be.equal(parseInt(newBehaviourAddress, 16));
+        });
+
+        it('should upgrade to a new Note Registry behaviour contract', async () => {
+            const canAdjustSupply = false;
+            const canConvert = true;
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, { from: zkAssetOwner });
+            const existingProxy = await ace.registries(zkAssetOwner);
+            const newFactoryId = generateFactoryId(1, 3, 1);
+            const newFactoryContract = await TestFactory.new(ace.address);
+
+            await ace.setFactory(newFactoryId, newFactoryContract.address, { from: owner });
+
+            const preUpgradeBehaviour = await factoryContract.getImplementation.call(existingProxy);
+
+            await ace.upgradeNoteRegistry(newFactoryId, { from: zkAssetOwner });
+
+            const newProxy = await ace.registries(zkAssetOwner);
+            expect(newProxy).to.equal(existingProxy);
+
+            const postUpgradeProxy = await ace.registries(zkAssetOwner);
+            expect(postUpgradeProxy).to.equal(existingProxy);
+
+            const newBehaviourAddress = await newFactoryContract.getImplementation.call(existingProxy);
+            expect(newBehaviourAddress).to.not.equal(preUpgradeBehaviour);
+
+        });
+
+        it('should keep state after upgrade', async () => {
+            const canAdjustSupply = false;
+            const canConvert = true;
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, { from: zkAssetOwner });
+
+            const depositValue = -10;
+            const depositOutputNotes = await getNotesForAccount(aztecAccount, [10])
+            const depositProof = new JoinSplitProof([], depositOutputNotes, zkAssetOwner, depositValue, zkAssetOwner);
+            await ace.publicApprove(zkAssetOwner, depositProof.hash, Math.abs(depositValue), { from: zkAssetOwner });
+            const data = depositProof.encodeABI(JoinSplitValidator.address);
+            await ace.validateProof(JOIN_SPLIT_PROOF, zkAssetOwner, data, { from: zkAssetOwner });
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, zkAssetOwner, { from: zkAssetOwner });
+
+            const newFactoryId = generateFactoryId(1, 3, 1);
+            await ace.setFactory(newFactoryId, factoryContract.address, { from: owner });
+
+            await ace.upgradeNoteRegistry(newFactoryId, { from: zkAssetOwner });
+            const firstNote = await ace.getNote(zkAssetOwner, depositProof.outputNotes[0].noteHash);
+            expect(firstNote.status.toNumber()).to.equal(constants.statuses.NOTE_UNSPENT);
         });
     });
 
