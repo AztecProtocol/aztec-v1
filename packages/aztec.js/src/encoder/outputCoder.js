@@ -28,9 +28,9 @@ outputCoder.decodeInputNote = (note) => {
     const ephemeral = null;
     const expectedLength = 0xc0;
 
-    if (length !== expectedLength) {
-        throw new Error(`unexpected note length of ${length}`);
-    }
+    // if (length !== expectedLength) {
+    //     throw new Error(`unexpected note length of ${length}`);
+    // }
 
     const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
     const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
@@ -75,9 +75,9 @@ outputCoder.decodeOutputNote = (note) => {
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     }
 
-    if (length !== expectedLength) {
-        throw new Error(`unexpected note length of ${length}`);
-    }
+    // if (length !== expectedLength) {
+    //     throw new Error(`unexpected note length of ${length}`);
+    // }
 
     const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
     const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));

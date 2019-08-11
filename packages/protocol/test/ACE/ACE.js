@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, it:true */
-const { JoinSplitProof, metaData, note, PublicRangeProof } = require('aztec.js');
+const { JoinSplitProof, note, PublicRangeProof } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -157,11 +157,11 @@ contract('ACE', (accounts) => {
 
             it('should validate a join-split proof when metadata has been set', async () => {
                 const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                const customMetadata = constants.META_DATA_TEST;
 
                 outputNotes.forEach((individualNote) => {
-                    return individualNote.setMetadata(customMetadata);
+                    return individualNote.setMetaData(customMetadata);
                 });
-                const metadata = metaData.extractNoteMetadata(outputNotes);
 
                 const proofWithNoteMetaData = new JoinSplitProof(
                     inputNotes,
@@ -169,7 +169,6 @@ contract('ACE', (accounts) => {
                     sender,
                     publicValue,
                     publicOwner,
-                    metadata,
                 );
                 const customData = proofWithNoteMetaData.encodeABI(joinSplitValidator.address);
                 const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, customData);
