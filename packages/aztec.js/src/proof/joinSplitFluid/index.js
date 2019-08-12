@@ -10,6 +10,30 @@ const ProofUtils = require('../utils');
 const { AztecError } = errors;
 
 class JoinSplitFluidProof extends JoinSplitProof {
+    /**
+     * JoinSplitFluidProof, this is a variation of the JoinSplit proof and is used to construct mint or burn proofs.
+     * A mint proof is one in which AZTEC notes are artificially created, without any transfer of ERC20 tokens, whilst a
+     * burn proof is on in which AZTEC notes are artifically destroyed, without any transfer of ERC20 tokens.
+     *
+     * It is important to have the ability to keep track of the total number of minted or burned notes. To do this,
+     * `currentTotalValueNote` and `newTotalValueNote` are supplied to the proof. `currentTotalValueNote` is an AZTEC note
+     * representing the current total value of notes minted or burned. `newTotalValueNote` is the total number of notes
+     * that will have been minted or burned after the execution of the proof.
+     *
+     * The balancing relationship being satisfied is:
+     *
+     * currentTotalValue = newTotalValue + adjustedNotesValue
+     *
+     * The cryptography of both proofs is the same as the JoinSplit proof, the difference is that there must be a minimum
+     * of 2 notes.
+     *
+     * @param {string} type - name of the proof being executed, MINT or BURN
+     * @param {Object} currentTotalValueNote - note whose value represents the total current value of minted or burned notes
+     * @param {Object} newTotalValueNote - note whose value represents the new total value of minted or burned notes
+     * @param {Object[]} adjustedNotes - notes to be minted or burned
+     * @param {string} sender - Ethereum address of the transaction sender
+     * @param {string} metadata
+     */
     constructor(
         type,
         currentTotalValueNote,
