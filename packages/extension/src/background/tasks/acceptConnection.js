@@ -188,6 +188,7 @@ const handleContentScriptSubscription = (data, port) => {
     switch (type) {
         case contentSubscribeEvent:
             ClientSubscriptionService.subscribe(port);
+            port.onDisconnect.addListener(p => ClientSubscriptionService.unsubscribe(p));
             break;
         case contentUnsubscribeEvent:
             ClientSubscriptionService.unsubscribe(port);
@@ -221,6 +222,5 @@ export default function acceptConnection() {
 
     browser.runtime.onConnect.addListener((port) => {
         port.onMessage.addListener(handleContentScriptSubscription);
-        port.onDisconnect.addListener(p => ClientSubscriptionService.unsubscribe(p));
     });
 }
