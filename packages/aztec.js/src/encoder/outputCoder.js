@@ -20,18 +20,12 @@ const outputCoder = {};
  * // TODO: check what happens on develop; only decoding
  */
 outputCoder.decodeInputNote = (note) => {
-    const length = parseInt(note.slice(0x00, 0x40), 16);
+    // expectedLength is 0xc0
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
 
     const ephemeral = null;
-    const expectedLength = 0xc0;
-
-    // if (length !== expectedLength) {
-    //     throw new Error(`unexpected note length of ${length}`);
-    // }
-
     const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
     const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
 
@@ -55,8 +49,6 @@ outputCoder.decodeInputNote = (note) => {
  * // TODO: check what happens on develop; only decoding
  */
 outputCoder.decodeOutputNote = (note) => {
-    const length = parseInt(note.slice(0x00, 0x40), 16);
-    let expectedLength;
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
@@ -64,18 +56,12 @@ outputCoder.decodeOutputNote = (note) => {
     let ephemeral = null;
 
     if (noteDataLength === 0x61) {
-        // ouputNote with no custom metaData set
-        expectedLength = 0xe1;
+        // ouputNote with no custom metaData set, expectedLength is 0xe1
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     } else {
-        // output note with custom metaData set
-        expectedLength = (0x20 * 4 + 0x20 * 2 + noteDataLength).toString(16);
+        // output note with custom metaData set, expectedLength is (0x20 * 4 + 0x20 * 2 + noteDataLength).toString(16);
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     }
-
-    // if (length !== expectedLength) {
-    //     throw new Error(`unexpected note length of ${length}`);
-    // }
 
     const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
     const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));

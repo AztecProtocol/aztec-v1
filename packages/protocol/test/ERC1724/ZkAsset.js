@@ -34,7 +34,7 @@ const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
 };
 
-contract.only('ZkAsset', (accounts) => {
+contract('ZkAsset', (accounts) => {
     let ace;
     let erc20;
     const sender = accounts[0];
