@@ -34,7 +34,7 @@ export default gql`
         spendingPublicKey: String
         linkedPublicKey: String
         lastSynced: String
-        registered: Boolean
+        registeredAt: Int
     }
     type Domain {
         assets: [Asset!]
@@ -73,13 +73,23 @@ export default gql`
         address: String
         address_in: [String!]
     }
+    type SessionApiResponse {
+        session: Session
+        error: Error
+        action: Action
+    }
     type AssetApiResponse {
         asset: Asset
         error: Error
         action: Action
     }
-    type AccountApiResponse {
+    type PermissionApiResponse {
         account: User
+        error: Error
+        action: Action
+    }
+    type AccountApiResponse {
+        account: Account
         error: Error
         action: Action
     }
@@ -112,6 +122,10 @@ export default gql`
         error: Error
     }
     type Query {
+        userPermission(
+            currentAddress: String!
+            domain: String!
+        ): PermissionApiResponse
         user(
             id: ID
             currentAddress: String!
@@ -164,7 +178,7 @@ export default gql`
             password: String!
             domain: String!
             address: String!
-        ): Session
+        ): SessionApiResponse
         registerExtension(
             password: String!
             salt: String!
@@ -174,7 +188,8 @@ export default gql`
         ): UserAccountApiResponse
         registerAddress(
             address: String!
-            domain: String!
+            linkedPublicKey: String!
+            registeredAt: Int
         ): UserAccountApiResponse
         approveAssetForDomain(
             domain: String!

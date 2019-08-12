@@ -25,6 +25,7 @@ export default {
     },
     account: {
         not: {
+            registered: 'The user has not setup the AZTEC extension.',
             linked: 'Address has no linked AZTEC extension account.',
         },
     },

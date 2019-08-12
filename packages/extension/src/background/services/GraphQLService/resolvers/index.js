@@ -1,20 +1,18 @@
 import assetModel from '~database/models/asset';
 import userModel from '~database/models/user';
 import accountModel from '~database/models/account';
-import GraphNodeService from '~backgroundServices/GraphNodeService';
+// import GraphNodeService from '~backgroundServices/GraphNodeService';
 import {
     fromCode,
 } from '~utils/noteStatus';
 import AuthService from '~background/services/AuthService';
 import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import {
-    ensureUserPermission,
-    ensureEntityPermission,
     ensureKeyvault,
     ensureAccount,
+    ensureUserPermission,
+    ensureEntityPermission,
 } from '../decorators';
-import pipe from '../utils/pipe';
-import validateSession from '../validators/validateSession';
 import getUserSpendingPublicKey from './getUserSpendingPublicKey';
 import getAccounts from './getAccounts';
 import decryptViewingKey from './decryptViewingKey';
@@ -26,7 +24,7 @@ import syncNoteInfo from './syncNoteInfo';
 
 export default {
     User: {
-        spendingPublicKey: async ({ address }) => getUserSpendingPublicKey(address),
+        spendingPublicKey: async () => getUserSpendingPublicKey(),
     },
     Note: {
         asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ key: asset })) || asset,
@@ -58,30 +56,8 @@ export default {
         pickNotesFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
         })),
-        account: ensureKeyvault(ensureAccount(async (_, args) => {
-            const account = await userModel.get({ address: args.currentAddress });
-            if (account && !account.registered) {
-                const { account: user } = await GraphNodeService.query(`
-                    account(id: "${args.currentAddress.toLowerCase()}") {
-                        address
-                        linkedPublicKey
-                        registered
-                    }
-                `);
-
-                if (user && user.registered) {
-                    await AuthService.registerAddress({
-                        address: user.address,
-                        linkedPublicKey: user.linkedPublicKey,
-                    });
-                }
-                return {
-                    account: user && user.registered ? user : account,
-                };
-            }
-            return {
-                account,
-            };
+        account: ensureUserPermission(async (_, args) => ({
+            account: await userModel.get({ address: args.currentAddress }),
         })),
         accounts: ensureUserPermission(async (_, args) => ({
             accounts: await getAccounts(args),
@@ -89,33 +65,31 @@ export default {
         subscribe: ensureEntityPermission(async (_, args) => ({
             success: ClientSubscriptionService.grantSubscription(args),
         })),
+        userPermission: ensureAccount(async (_, args) => ({
+            account: await userModel.get({ address: args.currentAddress }),
+        })),
     },
     Mutation: {
-        login: pipe([ensureAccount, async (_, args) => AuthService.login(args)]),
-        // logout: sessionDecorator(AuthService.logout),
-        registerExtension: pipe([
-            async (_, args) => ({
-                account: await AuthService.registerExtension(args),
-            })]),
-        registerAddress: pipe([
-            validateSession,
-            async (_, args, ctx) => ({
-                account: await AuthService.registerAddress({
-                    userAddress: args.address,
-                    linkedPublicKey: ctx.keyStore.privacyKeys.publicKey,
-                }),
+        registerExtension: async (_, args) => ({
+            account: await AuthService.registerExtension(args),
+        }),
+        registerAddress: ensureKeyvault(async (_, args) => ({
+            account: await AuthService.registerAddress({
+                address: args.address,
+                linkedPublicKey: args.linkedPublicKey,
+                registeredAt: args.registeredAt,
             }),
-        ]),
-        approveAssetForDomain: pipe([
-            validateSession,
-            async (_, args) => {
-                await AuthService.enableAssetForDomain(args);
-                return {
-                    asset: await assetModel.get({
-                        address: args.asset,
-                    }),
-                };
-            },
-        ]),
+        })),
+        login: ensureAccount(async (_, args) => ({
+            session: await AuthService.login(args),
+        })),
+        approveAssetForDomain: ensureAccount(async (_, args) => {
+            await AuthService.enableAssetForDomain(args);
+            return {
+                asset: await assetModel.get({
+                    address: args.asset,
+                }),
+            };
+        }),
     },
 };

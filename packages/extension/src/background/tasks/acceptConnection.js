@@ -115,10 +115,6 @@ class Connection {
                 variables,
                 requestId,
             }) => {
-                let type = 'query';
-                if (mutation) {
-                    type = 'mutation';
-                }
                 // we always want the domain to be from the sender so the user can't fake this
                 const graphQuery = insertVariablesToGql(
                     mutation || query,
@@ -127,6 +123,8 @@ class Connection {
                     },
                 );
 
+                const type = mutation ? 'mutation' : 'query';
+
                 return forkJoin({
                     response: from(
                         GraphQLService[type]({
@@ -134,10 +132,10 @@ class Connection {
                             variables,
                         }),
                     ),
-                    request: of(requestId),
+                    requestId: of(requestId),
                 });
             }),
-            switchMap(({ response, request: requestId }) => {
+            switchMap(({ response, requestId }) => {
                 const queryName = Object.keys(response)
                     .find(name => !!response[name].error);
                 const errorData = queryName ? response[queryName].error : false;

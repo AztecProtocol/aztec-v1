@@ -7,6 +7,9 @@ export default async function sync() {
     const users = await userModel.get();
 
     if (users) {
+        // TODO: check session
+        // AuthService.getPrivateKey is deprecated
+        // get keyStore and pwDerivedKey from valid session and generate privateKey with it
         const privateKeys = await asyncMap(
             Object.keys(users),
             address => AuthService.getPrivateKey(address),

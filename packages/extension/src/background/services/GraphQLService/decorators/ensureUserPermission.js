@@ -7,8 +7,8 @@ import validateDomain from '../validators/validateDomain';
 export default function ensureUserPermission(func) {
     return pipe([
         validateExtension,
-        validateAccount,
         validateSession,
+        validateAccount,
         validateDomain,
         func,
     ]);
