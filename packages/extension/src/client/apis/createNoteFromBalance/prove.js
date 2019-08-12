@@ -133,6 +133,7 @@ export default async function proveCreateNoteFromBalance({
                 values,
                 inputNotesOwner.spendingPublicKey,
                 notesOwner.address,
+                inputNotesOwner.linkedPublicKey,
             );
             outputNotes.push(...newNotes);
         });

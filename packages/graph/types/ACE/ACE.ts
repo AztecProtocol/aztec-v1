@@ -80,6 +80,36 @@ export class IncrementLatestEpoch__Params {
   }
 }
 
+export class SetFactory extends EthereumEvent {
+  get params(): SetFactory__Params {
+    return new SetFactory__Params(this);
+  }
+}
+
+export class SetFactory__Params {
+  _event: SetFactory;
+
+  constructor(event: SetFactory) {
+    this._event = event;
+  }
+
+  get epoch(): i32 {
+    return this._event.parameters[0].value.toI32();
+  }
+
+  get cryptoSystem(): i32 {
+    return this._event.parameters[1].value.toI32();
+  }
+
+  get assetType(): i32 {
+    return this._event.parameters[2].value.toI32();
+  }
+
+  get factoryAddress(): Address {
+    return this._event.parameters[3].value.toAddress();
+  }
+}
+
 export class CreateNoteRegistry extends EthereumEvent {
   get params(): CreateNoteRegistry__Params {
     return new CreateNoteRegistry__Params(this);
@@ -252,6 +282,18 @@ export class ACE extends SmartContract {
     return result[0].toBytes();
   }
 
+  getFactoryAddress(_factoryId: i32): Address {
+    let result = super.call("getFactoryAddress", [
+      EthereumValue.fromI32(_factoryId)
+    ]);
+    return result[0].toAddress();
+  }
+
+  defaultRegistryEpoch(): i32 {
+    let result = super.call("defaultRegistryEpoch", []);
+    return result[0].toI32();
+  }
+
   disabledValidators(param0: BigInt, param1: BigInt, param2: BigInt): boolean {
     let result = super.call("disabledValidators", [
       EthereumValue.fromUnsignedBigInt(param0),
@@ -300,11 +342,21 @@ export class ACE extends SmartContract {
     return result[0].toI32();
   }
 
+  defaultCryptoSystem(): i32 {
+    let result = super.call("defaultCryptoSystem", []);
+    return result[0].toI32();
+  }
+
   validatedProofs(param0: Bytes): boolean {
     let result = super.call("validatedProofs", [
       EthereumValue.fromFixedBytes(param0)
     ]);
     return result[0].toBoolean();
+  }
+
+  registries(param0: Address): Address {
+    let result = super.call("registries", [EthereumValue.fromAddress(param0)]);
+    return result[0].toAddress();
   }
 
   BURN_PROOF(): i32 {
@@ -364,6 +416,100 @@ export class ACE extends SmartContract {
   }
 }
 
+export class IncrementDefaultRegistryEpochCall extends EthereumCall {
+  get inputs(): IncrementDefaultRegistryEpochCall__Inputs {
+    return new IncrementDefaultRegistryEpochCall__Inputs(this);
+  }
+
+  get outputs(): IncrementDefaultRegistryEpochCall__Outputs {
+    return new IncrementDefaultRegistryEpochCall__Outputs(this);
+  }
+}
+
+export class IncrementDefaultRegistryEpochCall__Inputs {
+  _call: IncrementDefaultRegistryEpochCall;
+
+  constructor(call: IncrementDefaultRegistryEpochCall) {
+    this._call = call;
+  }
+}
+
+export class IncrementDefaultRegistryEpochCall__Outputs {
+  _call: IncrementDefaultRegistryEpochCall;
+
+  constructor(call: IncrementDefaultRegistryEpochCall) {
+    this._call = call;
+  }
+}
+
+export class TransferFromCall extends EthereumCall {
+  get inputs(): TransferFromCall__Inputs {
+    return new TransferFromCall__Inputs(this);
+  }
+
+  get outputs(): TransferFromCall__Outputs {
+    return new TransferFromCall__Outputs(this);
+  }
+}
+
+export class TransferFromCall__Inputs {
+  _call: TransferFromCall;
+
+  constructor(call: TransferFromCall) {
+    this._call = call;
+  }
+
+  get _from(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get _to(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get _value(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class TransferFromCall__Outputs {
+  _call: TransferFromCall;
+
+  constructor(call: TransferFromCall) {
+    this._call = call;
+  }
+}
+
+export class SetDefaultCryptoSystemCall extends EthereumCall {
+  get inputs(): SetDefaultCryptoSystemCall__Inputs {
+    return new SetDefaultCryptoSystemCall__Inputs(this);
+  }
+
+  get outputs(): SetDefaultCryptoSystemCall__Outputs {
+    return new SetDefaultCryptoSystemCall__Outputs(this);
+  }
+}
+
+export class SetDefaultCryptoSystemCall__Inputs {
+  _call: SetDefaultCryptoSystemCall;
+
+  constructor(call: SetDefaultCryptoSystemCall) {
+    this._call = call;
+  }
+
+  get _defaultCryptoSystem(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+}
+
+export class SetDefaultCryptoSystemCall__Outputs {
+  _call: SetDefaultCryptoSystemCall;
+
+  constructor(call: SetDefaultCryptoSystemCall) {
+    this._call = call;
+  }
+}
+
 export class SupplementTokensCall extends EthereumCall {
   get inputs(): SupplementTokensCall__Inputs {
     return new SupplementTokensCall__Inputs(this);
@@ -416,6 +562,36 @@ export class RenounceOwnershipCall__Outputs {
   _call: RenounceOwnershipCall;
 
   constructor(call: RenounceOwnershipCall) {
+    this._call = call;
+  }
+}
+
+export class UpgradeNoteRegistryCall extends EthereumCall {
+  get inputs(): UpgradeNoteRegistryCall__Inputs {
+    return new UpgradeNoteRegistryCall__Inputs(this);
+  }
+
+  get outputs(): UpgradeNoteRegistryCall__Outputs {
+    return new UpgradeNoteRegistryCall__Outputs(this);
+  }
+}
+
+export class UpgradeNoteRegistryCall__Inputs {
+  _call: UpgradeNoteRegistryCall;
+
+  constructor(call: UpgradeNoteRegistryCall) {
+    this._call = call;
+  }
+
+  get _factoryId(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+}
+
+export class UpgradeNoteRegistryCall__Outputs {
+  _call: UpgradeNoteRegistryCall;
+
+  constructor(call: UpgradeNoteRegistryCall) {
     this._call = call;
   }
 }
@@ -500,6 +676,52 @@ export class CreateNoteRegistryCall__Outputs {
   }
 }
 
+export class CreateNoteRegistry1Call extends EthereumCall {
+  get inputs(): CreateNoteRegistry1Call__Inputs {
+    return new CreateNoteRegistry1Call__Inputs(this);
+  }
+
+  get outputs(): CreateNoteRegistry1Call__Outputs {
+    return new CreateNoteRegistry1Call__Outputs(this);
+  }
+}
+
+export class CreateNoteRegistry1Call__Inputs {
+  _call: CreateNoteRegistry1Call;
+
+  constructor(call: CreateNoteRegistry1Call) {
+    this._call = call;
+  }
+
+  get _linkedTokenAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get _scalingFactor(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+
+  get _canAdjustSupply(): boolean {
+    return this._call.inputValues[2].value.toBoolean();
+  }
+
+  get _canConvert(): boolean {
+    return this._call.inputValues[3].value.toBoolean();
+  }
+
+  get _factoryId(): i32 {
+    return this._call.inputValues[4].value.toI32();
+  }
+}
+
+export class CreateNoteRegistry1Call__Outputs {
+  _call: CreateNoteRegistry1Call;
+
+  constructor(call: CreateNoteRegistry1Call) {
+    this._call = call;
+  }
+}
+
 export class PublicApproveCall extends EthereumCall {
   get inputs(): PublicApproveCall__Inputs {
     return new PublicApproveCall__Inputs(this);
@@ -564,6 +786,40 @@ export class TransferOwnershipCall__Outputs {
   _call: TransferOwnershipCall;
 
   constructor(call: TransferOwnershipCall) {
+    this._call = call;
+  }
+}
+
+export class SetFactoryCall extends EthereumCall {
+  get inputs(): SetFactoryCall__Inputs {
+    return new SetFactoryCall__Inputs(this);
+  }
+
+  get outputs(): SetFactoryCall__Outputs {
+    return new SetFactoryCall__Outputs(this);
+  }
+}
+
+export class SetFactoryCall__Inputs {
+  _call: SetFactoryCall;
+
+  constructor(call: SetFactoryCall) {
+    this._call = call;
+  }
+
+  get _factoryId(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+
+  get _factoryAddress(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+}
+
+export class SetFactoryCall__Outputs {
+  _call: SetFactoryCall;
+
+  constructor(call: SetFactoryCall) {
     this._call = call;
   }
 }

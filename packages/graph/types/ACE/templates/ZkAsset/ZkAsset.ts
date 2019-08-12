@@ -82,6 +82,28 @@ export class CreateZkAsset__Params {
   }
 }
 
+export class ApprovedAddress extends EthereumEvent {
+  get params(): ApprovedAddress__Params {
+    return new ApprovedAddress__Params(this);
+  }
+}
+
+export class ApprovedAddress__Params {
+  _event: ApprovedAddress;
+
+  constructor(event: ApprovedAddress) {
+    this._event = event;
+  }
+
+  get addressApproved(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get noteHash(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+}
+
 export class CreateNoteRegistry1 extends EthereumEvent {
   get params(): CreateNoteRegistry1__Params {
     return new CreateNoteRegistry1__Params(this);
@@ -196,16 +218,16 @@ export class RedeemTokens__Params {
   }
 }
 
-export class UpdateNoteMetadata extends EthereumEvent {
-  get params(): UpdateNoteMetadata__Params {
-    return new UpdateNoteMetadata__Params(this);
+export class UpdateNoteMetaData extends EthereumEvent {
+  get params(): UpdateNoteMetaData__Params {
+    return new UpdateNoteMetaData__Params(this);
   }
 }
 
-export class UpdateNoteMetadata__Params {
-  _event: UpdateNoteMetadata;
+export class UpdateNoteMetaData__Params {
+  _event: UpdateNoteMetaData;
 
-  constructor(event: UpdateNoteMetadata) {
+  constructor(event: UpdateNoteMetaData) {
     this._event = event;
   }
 
@@ -349,7 +371,7 @@ export class UpdateNoteMetaDataCall__Inputs {
     return this._call.inputValues[0].value.toBytes();
   }
 
-  get metadata(): Bytes {
+  get metaData(): Bytes {
     return this._call.inputValues[1].value.toBytes();
   }
 }

@@ -1,10 +1,11 @@
 import { BigInt, Bytes, Address } from '@graphprotocol/graph-ts';
-import { CreateNote, DestroyNote, UpdateNoteMetadata } from '../types/ACE/templates/ZkAsset/ZkAsset';
+import { CreateNote, DestroyNote, UpdateNoteMetaData } from '../types/ACE/templates/ZkAsset/ZkAsset';
 import { Account, Note, NoteAccess, NoteLog } from '../types/schema';
 import { stripLeadingZeros } from './utils';
 
+// including 0x
 var ID_SUFFIX_LEN = 4;
-var METADATA_PREFIX_LEN = 196;
+var METADATA_PREFIX_LEN = 194;
 var METADATA_VAR_LEN = 32;
 var METADATA_ADDRESS_LEN = 40;
 var METADATA_VIEWING_KEY_LEN = 420;
@@ -161,7 +162,7 @@ export function destroyNote(event: DestroyNote): void {
     createNoteLogForAllAccess(timestamp, note.metadata, 'DESTROYED');
 }
 
-export function updateNoteMetaData(event: UpdateNoteMetadata): void {
+export function updateNoteMetaData(event: UpdateNoteMetaData): void {
     let timestamp = event.block.timestamp;
     let metadata = event.params.metadata;
 

@@ -47,13 +47,13 @@ dataSources:
               handler: createNote
             - event: DestroyNote(address,bytes32,bytes)
               handler: destroyNote
-            - event: UpdateNoteMetadata(address,bytes32,bytes)
+            - event: UpdateNoteMetaData(address,bytes32,bytes)
               handler: updateNoteMetaData
   - kind: ethereum/contract
     name: AZTECAccountRegistry
     network: development
     source:
-      address: '0xBCac08778231CAAdfA3FD1E276Cc69065038A9F5'
+      address: '0x49f2bC504793541Ff9af176cA36de2881A24F246'
       abi: AZTECAccountRegistry
     mapping:
       kind: ethereum/events

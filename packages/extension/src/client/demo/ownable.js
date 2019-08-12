@@ -108,7 +108,6 @@ export default async function demoOwnable({
     const withdrawAmount = randomInt(1, 10);
     await withdraw(asset, withdrawAmount);
 
-
     await sleep(1000);
     log(`Asset balance = ${await asset.balance()}`);
 

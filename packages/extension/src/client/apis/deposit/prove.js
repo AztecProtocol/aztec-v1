@@ -41,6 +41,7 @@ export default async function proveDeposit({
     const {
         JoinSplitProof,
         ProofUtils,
+        metaData,
     } = aztec;
     const publicValue = ProofUtils.getPublicValue(
         [],
@@ -48,6 +49,7 @@ export default async function proveDeposit({
     );
     const inputNotes = [];
     const publicOwner = fromAddress || notesOwnerAddress;
+
     const proof = new JoinSplitProof(
         inputNotes,
         notes,
