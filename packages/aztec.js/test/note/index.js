@@ -99,7 +99,7 @@ describe('Note', () => {
 
             // multiple subtracting of 2 chars to represent slices
             // addition of 64 to represent the prepended word of data containing length of metaData
-            const expectedLength = ((customData.length - 2) + ephemeralKeyLength) - 2 + 64
+            const expectedLength = customData.length - 2 + ephemeralKeyLength - 2 + 64;
             expect(metaData.length).to.equal(expectedLength);
             expect(metaData.slice(64, 130)).to.equal(ephemeralKey.slice(2));
             expect(metaData.slice(130, 196)).to.equal(customData.slice(2));

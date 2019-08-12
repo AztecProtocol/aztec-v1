@@ -10,13 +10,7 @@ const ProofUtils = require('../utils');
 const { AztecError } = errors;
 
 class JoinSplitFluidProof extends JoinSplitProof {
-    constructor(
-        type,
-        currentTotalValueNote,
-        newTotalValueNote,
-        adjustedNotes,
-        sender,
-    ) {
+    constructor(type, currentTotalValueNote, newTotalValueNote, adjustedNotes, sender) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
         super([newTotalValueNote], [currentTotalValueNote, ...adjustedNotes], sender, publicValue, publicOwner);

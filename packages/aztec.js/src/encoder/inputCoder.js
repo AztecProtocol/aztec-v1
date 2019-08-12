@@ -24,14 +24,14 @@ inputCoder.encodeInputSignatures = (inputSignatures) => {
 
 /**
  * Encode the metaData of multiple notes into ABI compatible string array format
- * 
+ *
  * @method encodeMetadata
  * @param notes - array of notes with metadata as part of their schema
  * @returns {String} ABI encoded representation of the notes metaData
  */
 inputCoder.encodeMetaData = (notes) => {
     const exportedMetaData = notes.map((individualNote) => {
-        return individualNote.exportMetaData()
+        return individualNote.exportMetaData();
     });
 
     const { length } = exportedMetaData;
