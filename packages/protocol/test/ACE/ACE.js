@@ -152,13 +152,7 @@ contract('ACE', (accounts) => {
                     return individualNote.setMetaData(customMetadata);
                 });
 
-                const proofWithNoteMetaData = new JoinSplitProof(
-                    inputNotes,
-                    outputNotes,
-                    sender,
-                    publicValue,
-                    publicOwner,
-                );
+                const proofWithNoteMetaData = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
                 const customData = proofWithNoteMetaData.encodeABI(joinSplitValidator.address);
                 const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, customData);
                 expect(receipt.status).to.equal(true);

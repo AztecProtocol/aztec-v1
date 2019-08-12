@@ -32,7 +32,6 @@ class JoinSplitFluidProof extends JoinSplitProof {
      * @param {Object} newTotalValueNote - note whose value represents the new total value of minted or burned notes
      * @param {Object[]} adjustedNotes - notes to be minted or burned
      * @param {string} sender - Ethereum address of the transaction sender
-     * @param {string} metadata
      */
     constructor(
         type,

@@ -300,7 +300,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
         require(status == 1, "only unspent notes can be approved");
 
-        require(noteAccess[msg.sender] == noteHash || noteOwner == msg.sender, 'caller does not have permission to update metaData');
+        require(
+            noteAccess[msg.sender] == noteHash || noteOwner == msg.sender,
+            'caller does not have permission to update metaData'
+        );
 
         address addressToApprove = MetaDataUtils.extractAddresses(metaData);
         noteAccess[addressToApprove] = noteHash;
