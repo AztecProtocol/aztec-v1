@@ -1,7 +1,7 @@
+import BigInt from 'apollo-type-bigint';
 import assetModel from '~database/models/asset';
 import userModel from '~database/models/user';
 import accountModel from '~database/models/account';
-// import GraphNodeService from '~backgroundServices/GraphNodeService';
 import {
     fromCode,
 } from '~utils/noteStatus';
@@ -23,6 +23,7 @@ import syncAssetInfo from './syncAssetInfo';
 import syncNoteInfo from './syncNoteInfo';
 
 export default {
+    BigInt: new BigInt('safe'),
     User: {
         spendingPublicKey: async () => getUserSpendingPublicKey(),
     },

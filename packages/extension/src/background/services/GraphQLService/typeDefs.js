@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 
 export default gql`
+    scalar BigInt
     enum ErrorType {
         PERMISSION
         ARGUMENTS
@@ -34,7 +35,7 @@ export default gql`
         spendingPublicKey: String
         linkedPublicKey: String
         lastSynced: String
-        registeredAt: Int
+        registeredAt: BigInt
     }
     type Domain {
         assets: [Asset!]
@@ -189,7 +190,7 @@ export default gql`
         registerAddress(
             address: String!
             linkedPublicKey: String!
-            registeredAt: Int
+            registeredAt: BigInt
         ): UserAccountApiResponse
         approveAssetForDomain(
             domain: String!
