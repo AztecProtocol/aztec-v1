@@ -4,9 +4,11 @@ const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
 const BN = require('bn.js');
 const { expect } = require('chai');
+const ethSigUtil = require('eth-sig-util');
 const ethUtil = require('ethereumjs-util');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
+const note = require('../../src/note');
 const signer = require('../../src/signer');
 
 describe('Signer', () => {
@@ -63,15 +65,19 @@ describe('Signer', () => {
                 sender: senderAddress,
             };
             const { privateKey } = accounts[0];
-            const { signature } = signer.signTypedData(domain, schema, message, privateKey);
+            const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
 
-            const expectedLength = 3;
+            const expectedLength = 192; // r (64 char), s (64 char), v (64 chars)
             const expectedNumCharacters = 64; // v, r and s should be 32 bytes
 
-            expect(signature.length).to.equal(expectedLength);
-            expect(signature[0].length - 2).to.equal(expectedNumCharacters);
-            expect(signature[1].length - 2).to.equal(expectedNumCharacters);
-            expect(signature[2].length - 2).to.equal(expectedNumCharacters);
+            const r = unformattedSignature.slice(0, 64);
+            const s = unformattedSignature.slice(64, 128);
+            const v = unformattedSignature.slice(128, 192);
+
+            expect(unformattedSignature.length).to.equal(expectedLength);
+            expect(r.length).to.equal(expectedNumCharacters);
+            expect(s.length).to.equal(expectedNumCharacters);
+            expect(v.length).to.equal(expectedNumCharacters);
         });
 
         it('should recover public key from signature params', () => {
@@ -92,15 +98,101 @@ describe('Signer', () => {
                 sender: senderAddress,
             };
             const { privateKey, publicKey } = accounts[0];
-            const { signature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
+            const { unformattedSignature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
 
-            const v = parseInt(signature[0], 16); // has to be in number format
-            const r = Buffer.from(signature[1].slice(2), 'hex');
-            const s = Buffer.from(signature[2].slice(2), 'hex');
+            const v = parseInt(unformattedSignature.slice(128, 130), 16); // has to be in number format
+            const r = Buffer.from(unformattedSignature.slice(0, 64), 'hex');
+            const s = Buffer.from(unformattedSignature.slice(64, 128), 'hex');
 
             const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
+        });
+
+        it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const spender = randomHex(20);
+            const verifyingContract = randomHex(20);
+            const testNoteValue = 10;
+            const testNote = await note.create(publicKey, testNoteValue);
+
+            const signature = signer.signNoteForConfidentialApprove(verifyingContract, testNote.noteHash, spender, privateKey);
+            const v = parseInt(signature.slice(130, 132), 16);
+            expect(v).to.be.oneOf([27, 28]);
+        });
+
+        it('should recover publicKey from signature params', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const spender = randomHex(20);
+            const verifyingContract = randomHex(20);
+            const testNoteValue = 10;
+            const testNote = await note.create(publicKey, testNoteValue);
+
+            const signature = signer.signNoteForConfidentialApprove(verifyingContract, testNote.noteHash, spender, privateKey);
+
+            const r = Buffer.from(signature.slice(2, 66), 'hex');
+            const s = Buffer.from(signature.slice(66, 130), 'hex');
+            const v = parseInt(signature.slice(130, 132), 16);
+
+            const domain = signer.generateZKAssetDomainParams(verifyingContract);
+            const schema = constants.eip712.NOTE_SIGNATURE;
+            const message = {
+                noteHash: testNote.noteHash,
+                spender,
+                status: true,
+            };
+            const { encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
+            const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
+
+            const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
+            expect(publicKeyRecover).to.equal(publicKey.slice(4));
+        });
+
+        it('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
+            const aztecAccount = secp256k1.generateAccount();
+            const spender = randomHex(20);
+            const verifyingContract = randomHex(20);
+            const testNoteValue = 10;
+            const testNote = await note.create(aztecAccount.publicKey, testNoteValue);
+
+            const metaMaskTypedData = {
+                domain: {
+                    name: 'ZK_ASSET',
+                    version: '1',
+                    verifyingContract,
+                },
+                types: {
+                    NoteSignature: [
+                        { name: 'noteHash', type: 'bytes32' },
+                        { name: 'spender', type: 'address' },
+                        { name: 'status', type: 'bool' },
+                    ],
+                    EIP712Domain: [
+                        { name: 'name', type: 'string' },
+                        { name: 'version', type: 'string' },
+                        { name: 'verifyingContract', type: 'address' },
+                    ],
+                },
+                primaryType: 'NoteSignature',
+                message: {
+                    noteHash: testNote.noteHash,
+                    spender,
+                    status: true,
+                },
+            };
+
+            const aztecSignature = signer.signNoteForConfidentialApprove(
+                verifyingContract,
+                testNote.noteHash,
+                spender,
+                aztecAccount.privateKey,
+            );
+
+            // eth-sig-util is the MetaMask signing package
+            const metaMaskSignature = ethSigUtil.signTypedData(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
+                data: metaMaskTypedData,
+            });
+            expect(aztecSignature).to.equal(metaMaskSignature);
         });
     });
 });
