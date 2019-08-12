@@ -38,7 +38,7 @@ describe('Input coder', () => {
                 const offset = parseInt(result.slice(offsetDataStart, offsetDataFinish), 16);
 
                 // 1st word at start pos is the length of that note's metaData
-                const noteAMetaDataLength = (parseInt(result.slice(offset, offset + 0x20), 16));
+                const noteAMetaDataLength = parseInt(result.slice(offset, offset + 0x20), 16);
                 expect(noteAMetaDataLength).to.equal(expectedMetaDataLength);
 
                 // check ephemeralKey is correctly recovered
@@ -78,7 +78,7 @@ describe('Input coder', () => {
                 const offset = parseInt(result.slice(offsetDataStart, offsetDataFinish), 16);
 
                 // 1st word at start pos is the length of that note's metaData
-                const noteAMetaDataLength = (parseInt(result.slice(offset, offset + 0x20), 16));
+                const noteAMetaDataLength = parseInt(result.slice(offset, offset + 0x20), 16);
                 expect(noteAMetaDataLength).to.equal(expectedMetaDataLength);
 
                 // check ephemeralKey is correctly recovered
