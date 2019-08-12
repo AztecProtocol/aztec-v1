@@ -354,29 +354,21 @@ export class Account extends Entity {
     this.set("address", Value.fromBytes(value));
   }
 
-  get linkedPublicKey(): Bytes | null {
+  get linkedPublicKey(): Bytes {
     let value = this.get("linkedPublicKey");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
+    return value.toBytes();
   }
 
-  set linkedPublicKey(value: Bytes | null) {
-    if (value === null) {
-      this.unset("linkedPublicKey");
-    } else {
-      this.set("linkedPublicKey", Value.fromBytes(value as Bytes));
-    }
+  set linkedPublicKey(value: Bytes) {
+    this.set("linkedPublicKey", Value.fromBytes(value));
   }
 
-  get registered(): boolean {
-    let value = this.get("registered");
-    return value.toBoolean();
+  get registeredAt(): BigInt {
+    let value = this.get("registeredAt");
+    return value.toBigInt();
   }
 
-  set registered(value: boolean) {
-    this.set("registered", Value.fromBoolean(value));
+  set registeredAt(value: BigInt) {
+    this.set("registeredAt", Value.fromBigInt(value));
   }
 }
