@@ -20,10 +20,6 @@ const domainParams = [
         name: 'verifyingContract',
         type: 'address',
     },
-    {
-        name: 'salt',
-        type: 'bytes32',
-    },
 ];
 
 const AZTECAccount = [
@@ -47,7 +43,6 @@ describe('AZTECAccountRegistry', () => {
         domainData = {
             name: 'AZTECAccountRegistry',
             version: '2',
-            salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558',
             verifyingContract: Web3Service.contract('AZTECAccountRegistry').address,
         };
     });
@@ -60,7 +55,7 @@ describe('AZTECAccountRegistry', () => {
         const linkedPublicKey = '0x5b40992c57acce3ae5ed751b115f06d56eaa9c5265d1a5f950b991d604ec3815';
         const pkBuf = Buffer.from(privateKey.slice(2), 'hex');
 
-        const result = sigUtil.signTypedData(pkBuf, {
+        const signature = sigUtil.signTypedData(pkBuf, {
             data: {
                 primaryType: 'AZTECAccount',
                 types: {
@@ -74,10 +69,6 @@ describe('AZTECAccountRegistry', () => {
                 },
             },
         });
-        const signature = result.substring(2);
-        const r = `0x${signature.substring(0, 64)}`;
-        const s = `0x${signature.substring(64, 128)}`;
-        const v = parseInt(signature.substring(128, 130), 16);
 
         await Web3Service
             .useContract('AZTECAccountRegistry')
@@ -85,9 +76,7 @@ describe('AZTECAccountRegistry', () => {
             .send(
                 address,
                 linkedPublicKey,
-                v,
-                r,
-                s,
+                signature,
             );
 
         const pastEvents = await Web3Service
