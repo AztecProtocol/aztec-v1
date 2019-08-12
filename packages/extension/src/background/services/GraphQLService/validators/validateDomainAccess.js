@@ -1,10 +1,20 @@
-import AuthService from '~backgroundServices/AuthService';
 import noteModel from '~database/models/note';
 import assetModel from '~database/models/asset';
+import {
+    permissionError,
+} from '~utils/error';
+import AuthService from '~background/services/AuthService';
 
 export default async function validateDomainAccess(_, args, ctx, info) {
-    let { assetId } = args;
+    const {
+        domain,
+        currentAddress,
+    } = args;
+    let {
+        assetId,
+    } = args;
     let noteId;
+
     const entityType = info.fieldName;
     switch (entityType) {
         case 'asset':
@@ -40,10 +50,33 @@ export default async function validateDomainAccess(_, args, ctx, info) {
         return null;
     }
 
-    return AuthService.validateDomainAccess({
-        assetId,
-        noteId,
-        domain: args.domain,
-        currentAddress: args.currentAddress,
-    });
+    const assets = await AuthService.getDomainApprovedAssets(domain);
+    const isApproved = !!assets[assetId];
+
+    if (!isApproved) {
+        if (noteId) {
+            return permissionError('domain.not.grantedAccess.note', {
+                messageOptions: {
+                    domain,
+                    note: noteId,
+                    asset: assetId,
+                },
+                domain,
+                note: noteId,
+                asset: assetId,
+                currentAddress,
+            });
+        }
+        return permissionError('domain.not.grantedAccess.asset', {
+            messageOptions: {
+                domain,
+                asset: assetId,
+            },
+            domain,
+            asset: assetId,
+            currentAddress,
+        });
+    }
+
+    return {};
 }

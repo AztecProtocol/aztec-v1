@@ -1,6 +1,22 @@
-import AuthService from '~backgroundServices/AuthService';
+import {
+    permissionError,
+} from '~utils/error';
+import AuthService from '~background/services/AuthService';
 
 export default async function validateDomain(_, args) {
     const { domain } = args;
-    return AuthService.validateDomain(domain);
+
+    const registeredDomain = await AuthService.getRegisteredDomain(domain);
+
+    if (!registeredDomain) {
+        return permissionError('domain.not.register', {
+            messageOptions: {
+                domain,
+            },
+        });
+    }
+
+    return {
+        domain: registeredDomain,
+    };
 }

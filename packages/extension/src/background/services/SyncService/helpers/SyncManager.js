@@ -174,7 +174,6 @@ class SyncManager {
             account = {
                 syncing: false,
                 syncReq: null,
-                registered: true,
                 privateKey,
             };
             this.accounts.set(address, account);

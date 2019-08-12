@@ -1,8 +1,6 @@
-export const errorToActionMap = {
+export const errorToActionMap = { // eslint-disable-line import/prefer-default-export
     'extension.not.registered': 'ui.register.extension',
-    'account.not.loggedIn': 'ui.account.login',
+    'account.not.login': 'ui.account.login',
     'domain.not.grantedAccess.asset': 'ui.asset.approve',
     'domain.not.grantedAccess.note': 'ui.asset.approve',
-    'account.not.login': 'ui.account.login',
-    // 'account.not.register': 'ui.register.extension',
 };

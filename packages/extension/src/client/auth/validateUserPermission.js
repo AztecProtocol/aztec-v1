@@ -1,14 +1,14 @@
 import query from '../utils/query';
 
-export default async function account() {
+export default async function validateUserPermission() {
     const {
-        accountResponse,
+        userPermission,
     } = await query(`
-        accountResponse: account() {
+        userPermission {
             account {
                 linkedPublicKey
                 address
-                registered
+                registeredAt
             }
             error {
                 type
@@ -18,5 +18,6 @@ export default async function account() {
             }
         }
     `) || {};
-    return accountResponse;
-};
+
+    return userPermission;
+}
