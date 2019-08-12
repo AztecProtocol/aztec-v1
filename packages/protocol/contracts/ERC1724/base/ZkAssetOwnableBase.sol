@@ -55,4 +55,8 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         uint8 bit = uint8(proofs[epoch] >> (id.sub(1)) & 1);
         return bit == 1;
     }
+
+    function upgradeRegistryVersion(uint24 _factoryId) public onlyOwner {
+        ace.upgradeNoteRegistry(_factoryId);
+    }
 }
