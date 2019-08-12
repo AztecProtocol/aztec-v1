@@ -32,6 +32,13 @@ class SyncManager {
         return this.accounts.has(address);
     }
 
+    isInQueue(address) {
+        const account = this.accounts.get(address);
+        return !!(account
+            && (account.syncing || account.syncReq)
+        );
+    }
+
     handleFetchError = (error) => {
         errorLog('Failed to sync notes from graph node.', error);
         if (process.env.NODE_ENV === 'development') {
@@ -178,13 +185,11 @@ class SyncManager {
             };
             this.accounts.set(address, account);
         }
-        if (!account.syncing) {
-            await this.syncNotes({
-                address,
-                privateKey,
-                lastSynced,
-            });
-        }
+        return this.syncNotes({
+            address,
+            privateKey,
+            lastSynced,
+        });
     }
 
     async syncNote({

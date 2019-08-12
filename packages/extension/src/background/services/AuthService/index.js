@@ -11,7 +11,6 @@ import {
 import {
     permissionError,
 } from '~utils/error';
-import SyncService from '~background/services/SyncService';
 import enableAssetForDomain from './enableAssetForDomain';
 
 const AuthService = {
@@ -125,7 +124,6 @@ const AuthService = {
     registerAddress: async ({
         address,
         linkedPublicKey,
-        linkedPrivateKey,
         registeredAt,
     }) => {
         let user = await userModel.get({
@@ -148,11 +146,6 @@ const AuthService = {
                     forceReplace: true,
                 },
             );
-
-            SyncService.syncAccount({
-                address,
-                privateKey: linkedPrivateKey,
-            });
         }
 
         return user;
