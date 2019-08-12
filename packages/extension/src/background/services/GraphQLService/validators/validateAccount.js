@@ -34,13 +34,17 @@ export default async function validateAccount(_, args, ctx) {
         `) || {};
 
         const {
-            registeredAt,
+            registeredAt: prevRegisteredAt,
+            linkedPublicKey: prevLinkedPublicKey,
         } = account || {};
+        const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
 
         user = await AuthService.registerAddress({
             address: currentAddress,
-            linkedPublicKey: decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey),
-            registeredAt: registeredAt | 0, // eslint-disable-line no-bitwise
+            linkedPublicKey,
+            registeredAt: linkedPublicKey === prevLinkedPublicKey
+                ? prevRegisteredAt | 0 // eslint-disable-line no-bitwise
+                : 0,
         });
     }
 
