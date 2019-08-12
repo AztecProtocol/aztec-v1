@@ -26,7 +26,7 @@ export default function listenMessagesFromClient() {
     source$.pipe(
         filter(({ data }) => data.type === clientEvent),
         mergeMap(event => from(fetchFromBackgroundScript(event.data))),
-        map(({ data, requestId }) => postToClientScript(requestId, data)),
+        map(({ requestId, response }) => postToClientScript(requestId, response)),
     ).subscribe();
 
     const subscriptions = new Map();
