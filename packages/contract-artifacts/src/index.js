@@ -4,6 +4,9 @@ const Dividend = require('../artifacts/Dividend');
 const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
 const DividendInterface = require('../artifacts/DividendInterface');
 const ERC20Mintable = require('../artifacts/ERC20Mintable');
+const FactoryAdjustable201907 = require('../artifacts/FactoryAdjustable201907');
+const FactoryConvertible201907 = require('../artifacts/FactoryConvertible201907');
+const FactoryMixed201907 = require('../artifacts/FactoryMixed201907');
 const GenericABIEncoder = require('../artifacts/GenericABIEncoder');
 const IACE = require('../artifacts/IACE');
 const IAZTEC = require('../artifacts/IAZTEC');
@@ -45,6 +48,9 @@ module.exports = {
     DividendABIEncoder,
     DividendInterface,
     ERC20Mintable,
+    FactoryAdjustable201907,
+    FactoryConvertible201907,
+    FactoryMixed201907,
     GenericABIEncoder,
     IACE,
     IAZTEC,
