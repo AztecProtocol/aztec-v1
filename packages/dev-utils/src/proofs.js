@@ -13,4 +13,5 @@ module.exports = {
     MINT_PROOF: '66049',
     PRIVATE_RANGE_PROOF: '66562',
     SWAP_PROOF: '65794',
+    PUBLIC_RANGE_PROOF: '66563',
 };

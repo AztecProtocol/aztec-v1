@@ -87,6 +87,28 @@ const mockZeroPrivateRangeProof = () => {
     return zeroProof;
 };
 
+const mockZeroPublicRangeProof = () => {
+    const zeroProof = mockZeroProof();
+    const publicValue = padLeft('00', 64);
+    const publicComparison = padLeft('00', 64);
+    const challengeArray = [
+        zeroProof.sender,
+        publicComparison,
+        publicValue,
+        zeroProof.publicOwner,
+        ...zeroNote.slice(2),
+        ...zeroBlindingFactors,
+    ];
+    const challengeHash = keccak256(`0x${challengeArray.join('')}`);
+
+    zeroProof.challenge = new BN(challengeHash.slice(2), 16).umod(bn128.curve.n);
+    zeroProof.challengeHex = `0x${zeroProof.challenge.toString(16)}`;
+    zeroProof.data = Array(4).fill(zeroNote.map((element) => `0x${element}`));
+    zeroProof.publicValue = publicValue;
+    zeroProof.type = ProofType.PUBLIC_RANGE.name;
+    return zeroProof;
+};
+
 const mockZeroSwapProof = () => {
     const zeroProof = mockZeroProof();
     const challengeArray = [zeroProof.sender, ...zeroNote.slice(2), ...zeroBlindingFactors];
@@ -105,5 +127,6 @@ module.exports = {
     mockZeroJoinSplitFluidProof,
     mockZeroPrivateRangeProof,
     mockZeroProof,
+    mockZeroPublicRangeProof,
     mockZeroSwapProof,
 };
