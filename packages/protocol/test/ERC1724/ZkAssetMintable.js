@@ -147,7 +147,10 @@ contract('ZkAssetMintable', (accounts) => {
                 aztecAccount,
                 aztecAccount,
             ]);
-            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransfer(withdrawalData, withdrawalSignatures);
+            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransfer(
+                withdrawalData,
+                withdrawalSignatures
+            );
 
             const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
             expect(erc20TotalSupplyAfterWithdrawal).to.equal(withdrawalPublicValue * scalingFactor);
