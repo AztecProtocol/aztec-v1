@@ -21,6 +21,9 @@ const NoteUtils = require('../artifacts/NoteUtils');
 const PrivateRange = require('../artifacts/PrivateRange');
 const PrivateRangeABIEncoder = require('../artifacts/PrivateRangeABIEncoder');
 const PrivateRangeInterface = require('../artifacts/PrivateRangeInterface');
+const PublicRange = require('../artifacts/PublicRange');
+const PublicRangeABIEncoder = require('../artifacts/PublicRangeABIEncoder');
+const PublicRangeInterface = require('../artifacts/PublicRangeInterface');
 const ProofUtils = require('../artifacts/ProofUtils');
 const SafeMath8 = require('../artifacts/SafeMath8');
 const Swap = require('../artifacts/Swap');
@@ -60,6 +63,9 @@ module.exports = {
     PrivateRangeABIEncoder,
     PrivateRangeInterface,
     ProofUtils,
+    PublicRange,
+    PublicRangeABIEncoder,
+    PublicRangeInterface,
     SafeMath8,
     Swap,
     SwapABIEncoder,
