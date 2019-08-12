@@ -8,7 +8,7 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
-const { customMetadata } = note.utils;
+const { customMetaData } = note.utils;
 
 const ACE = artifacts.require('./ACE');
 const ACETest = artifacts.require('./ACETest');
@@ -144,12 +144,11 @@ contract('ACE', (accounts) => {
                 expect(secondResult).to.equal(false);
             });
 
-            it('should validate a join-split proof when metadata has been set', async () => {
+            it('should validate a join-split proof when metaData has been set', async () => {
                 const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
-                const customMetadata = constants.META_DATA_TEST;
 
                 outputNotes.forEach((individualNote) => {
-                    return individualNote.setMetaData(customMetadata);
+                    return individualNote.setMetaData(customMetaData);
                 });
 
                 const proofWithNoteMetaData = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
