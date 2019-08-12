@@ -27,18 +27,25 @@ const syncAccount = async ({
         address,
     });
     if (!user) {
-        errorLog(`Account '${address}' has no permission to sync notes from graph node server`);
+        errorLog(`Account '${address}' has no permission to sync notes from graph node server.`);
         return;
     }
 
     const {
         lastSynced,
+        registeredAt,
     } = user;
+
+    if (!registeredAt) {
+        errorLog(`Account '${address}' is not registered.`);
+        return;
+    }
 
     manager.sync({
         address,
         privateKey,
         lastSynced,
+        registeredAt,
     });
 };
 

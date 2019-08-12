@@ -85,20 +85,20 @@ class SyncManager {
         });
     };
 
-    async syncNotes({
-        address,
-        privateKey,
-        lastSynced = '',
-    } = {}) {
+    async syncNotes(options) {
+        const {
+            address,
+            privateKey,
+            lastSynced = '',
+            registeredAt = 0,
+        } = options;
+
         const account = this.accounts.get(address);
         if (account.pausedState) {
             return;
         }
         if (this.paused) {
-            this.pause(address, {
-                privateKey,
-                lastSynced,
-            });
+            this.pause(address, options);
             return;
         }
 
@@ -124,6 +124,7 @@ class SyncManager {
 
         const newNotes = await fetchNoteFromServer({
             lastSynced,
+            registeredAt,
             account: address,
             numberOfNotes: notesPerRequest,
             onError: this.handleFetchError,
@@ -142,8 +143,7 @@ class SyncManager {
 
             if (newNotes.length === notesPerRequest) {
                 await this.syncNotes({
-                    address,
-                    privateKey,
+                    ...options,
                     lastSynced: nextSynced,
                 });
 
@@ -158,8 +158,7 @@ class SyncManager {
 
         const syncReq = setTimeout(() => {
             this.syncNotes({
-                address,
-                privateKey,
+                ...options,
                 lastSynced: nextSynced,
             });
         }, syncInterval);
@@ -175,6 +174,7 @@ class SyncManager {
         address,
         privateKey,
         lastSynced,
+        registeredAt,
     }) {
         let account = this.accounts.get(address);
         if (!account) {
@@ -182,6 +182,7 @@ class SyncManager {
                 syncing: false,
                 syncReq: null,
                 privateKey,
+                registeredAt,
             };
             this.accounts.set(address, account);
         }
@@ -189,6 +190,7 @@ class SyncManager {
             address,
             privateKey,
             lastSynced,
+            registeredAt,
         });
     }
 

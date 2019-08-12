@@ -7,6 +7,7 @@ export default async function fetchNoteFromServer({
     account,
     noteId = '',
     lastSynced = '',
+    registeredAt = 0,
     numberOfNotes = 1,
     excludes = [],
     onError,
@@ -76,6 +77,9 @@ export default async function fetchNoteFromServer({
     };
     if (noteId) {
         where.note = noteId;
+    }
+    if (registeredAt) {
+        where.timestamp_gte = registeredAt;
     }
     const variables = {
         first: numberOfNotes,
