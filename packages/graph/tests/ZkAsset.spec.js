@@ -59,6 +59,9 @@ describe('ZkAsset', () => {
 
     const getNoteInfoFromDepositProof = (noteIndex) => {
         const {
+            owner,
+        } = notes[noteIndex];
+        const {
             noteHash,
         } = notes[noteIndex].exportNote();
         const outputNotes = outputCoder.getOutputNotes(depositProof.output);
@@ -66,6 +69,7 @@ describe('ZkAsset', () => {
         const metadata = outputCoder.getMetadata(outputNote);
 
         return {
+            owner,
             noteHash,
             metadata: metadata.startsWith('0x')
                 ? metadata
@@ -161,7 +165,7 @@ describe('ZkAsset', () => {
             noteValues,
         );
 
-        await sleep(1000);
+        await sleep(2000);
 
         depositProof = new JoinSplitProof(
             inputNotes,
@@ -259,6 +263,7 @@ describe('ZkAsset', () => {
 
     it('create NoteAccess entities from UpdateNoteMetadata event', async () => {
         const {
+            owner,
             noteHash,
             metadata,
         } = getNoteInfoFromDepositProof(0);
@@ -300,9 +305,10 @@ describe('ZkAsset', () => {
             .all();
 
         Web3Events(pastEvents)
-            .event('UpdateNoteMetadata')
+            .event('UpdateNoteMetaData')
             .toHaveBeenCalledTimes(1)
             .toHaveBeenCalledWith({
+                owner,
                 noteHash,
                 metadata: newMetadata,
             });

@@ -2,9 +2,9 @@ import { BigInt, Bytes, Address } from '@graphprotocol/graph-ts';
 import { CreateNote, DestroyNote, UpdateNoteMetaData } from '../types/ACE/templates/ZkAsset/ZkAsset';
 import { Account, Note, NoteAccess, NoteLog } from '../types/schema';
 import { stripLeadingZeros } from './utils';
-// including 0x
+
 var ID_SUFFIX_LEN = 4;
-var METADATA_PREFIX_LEN = 196;
+var METADATA_PREFIX_LEN = 196; // including 0x
 var METADATA_VAR_LEN = 32;
 var METADATA_ADDRESS_LEN = 40;
 var METADATA_VIEWING_KEY_LEN = 420;
@@ -88,7 +88,6 @@ function getAddressesInMetadata(metadata: Bytes): Array<Bytes> {
     let metadataStr = metadata.toHexString();
     if (metadataStr.length > METADATA_PREFIX_LEN) {
         let addressLenStr = stripLeadingZeros(metadataStr.slice(METADATA_PREFIX_LEN, METADATA_PREFIX_LEN + METADATA_VAR_LEN));
-
         let addressesLen = Bytes.fromHexString(addressLenStr).toU32();
         let addressCount = addressesLen / METADATA_ADDRESS_LEN;
         let addressStart = METADATA_PREFIX_LEN + METADATA_VAR_LEN * 3;
