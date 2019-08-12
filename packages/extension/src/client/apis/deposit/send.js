@@ -44,38 +44,5 @@ export default async function sendDeposit({
         });
     }
 
-    const {
-        outputCoder,
-    } = aztec.encoder;
-    await asyncForEach(notes, async (note, i) => {
-        const {
-            noteHash,
-        } = note.exportNote();
-        const realViewingKey = note.getView();
-        const outputNotes = outputCoder.getOutputNotes(depositProof.output);
-        const outputNote = outputCoder.getNote(outputNotes, i);
-        const metadata = outputCoder.getMetadata(outputNote);
-        const viewingKey = encryptedViewingKey(linkedPublicKey, realViewingKey);
-        const newMetadata = addAccess(metadata, {
-            address: notesOwnerAddress,
-            viewingKey: viewingKey.toHexString(),
-        });
-
-        try {
-            await Web3Service
-                .useContract('ZkAsset')
-                .at(assetAddress)
-                .method('updateNoteMetaData')
-                .send(
-                    noteHash,
-                    newMetadata,
-                );
-        } catch (error) {
-            throw new ContractError('zkAsset.updateNoteMetaData', {
-                note,
-            });
-        }
-    });
-
     return notes;
 }
