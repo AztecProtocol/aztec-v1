@@ -71,16 +71,9 @@ contract('ZkAssetAdjustable', (accounts) => {
         });
 
         it('should complete a mint operation', async () => {
-            const zkAssetAdjustable = await ZkAssetAdjustable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                0,
-                [],
-                {
-                    from: accounts[0],
-                }
-            );
+            const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
 
             const sender = zkAssetAdjustable.address;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
@@ -91,16 +84,9 @@ contract('ZkAssetAdjustable', (accounts) => {
         });
 
         it('should transfer minted value out of the note registry', async () => {
-            const zkAssetAdjustable = await ZkAssetAdjustable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                0,
-                [],
-                {
-                    from: accounts[0],
-                }
-            );
+            const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
 
             const withdrawalPublicValue = 50;
             const erc20TotalSupply = (await erc20.totalSupply()).toNumber();
@@ -128,7 +114,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             ]);
             const { receipt: transferReceipt } = await zkAssetAdjustable.confidentialTransfer(
                 withdrawalData,
-                withdrawalSignatures
+                withdrawalSignatures,
             );
 
             const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
@@ -140,16 +126,9 @@ contract('ZkAssetAdjustable', (accounts) => {
         });
 
         it('should burn minted notes', async () => {
-            const zkAssetAdjustable = await ZkAssetAdjustable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                0,
-                [],
-                {
-                    from: accounts[0],
-                }
-            );
+            const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
 
             const sender = zkAssetAdjustable.address;
             const mintValue = 50;
@@ -170,16 +149,9 @@ contract('ZkAssetAdjustable', (accounts) => {
         });
 
         it('should perform mint when using confidentialTransferFrom()', async () => {
-            const zkAssetAdjustable = await ZkAssetAdjustable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                0,
-                [],
-                {
-                    from: accounts[0],
-                }
-            );
+            const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
 
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const delegateAddress = accounts[2];
@@ -238,16 +210,9 @@ contract('ZkAssetAdjustable', (accounts) => {
             const recipient1 = accounts[1];
             const delegateAddress = accounts[2];
 
-            const zkAssetAdjustable = await ZkAssetAdjustable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                0,
-                [],
-                {
-                    from: accounts[0],
-                }
-            );
+            const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
             const depositOutputNoteValues = [20, 30];
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, depositOutputNoteValues);
 
@@ -335,16 +300,9 @@ contract('ZkAssetAdjustable', (accounts) => {
         });
 
         it('should fail if msg.sender is not owner', async () => {
-            const zkAssetAdjustable = await ZkAssetAdjustable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                0,
-                [],
-                {
-                    from: accounts[0],
-                }
-            );
+            const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
 
             const sender = zkAssetAdjustable.address;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
@@ -354,16 +312,9 @@ contract('ZkAssetAdjustable', (accounts) => {
         });
 
         it('should fail for unbalanced proof relation, totalInputs !== totalOutputs', async () => {
-            const zkAssetAdjustable = await ZkAssetAdjustable.new(
-                ace.address,
-                erc20.address,
-                scalingFactor,
-                0,
-                [],
-                {
-                    from: accounts[0],
-                }
-            );
+            const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
             const sender = zkAssetAdjustable.address;
             const newMintCounterValue = 50;
             const mintedNoteValues = [30, 30];
