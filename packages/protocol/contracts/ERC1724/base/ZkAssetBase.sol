@@ -6,6 +6,7 @@ import "../../ACE/ACE.sol";
 import "../../interfaces/IAZTEC.sol";
 import "../../interfaces/IZkAsset.sol";
 import "../../libs/LibEIP712.sol";
+import "../../libs/MetaDataUtils.sol";
 import "../../libs/ProofUtils.sol";
 
 /**
@@ -47,6 +48,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
     uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
+    mapping(address => bytes32) noteAccess;
 
     constructor(
         address _aceAddress,
@@ -291,17 +293,20 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     /**
     * @dev Update the metadata of a note that already exists in storage. 
     * @param noteHash - hash of a note, used as a unique identifier for the note
-    * @param metadata - metadata to update the note with. This should be the length of
-    * an IES encrypted viewing key, 0x177
+    * @param metaData - metadata to update the note with
     */
-    function updateNoteMetaData(bytes32 noteHash, bytes calldata metadata) external {
+    function updateNoteMetaData(bytes32 noteHash, bytes calldata metaData) external {
         // Get the note from this assets registry
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
         require(status == 1, "only unspent notes can be approved");
 
-        // There should be a permission lock here requiring that only the noteOwner can call
-        // this function. It has been deliberately removed on a short term basis
-        emit UpdateNoteMetadata(noteOwner, noteHash, metadata);
+        require(noteAccess[msg.sender] == noteHash || noteOwner == msg.sender, 'caller does not have permission to update metaData');
+
+        address addressToApprove = MetaDataUtils.extractAddresses(metaData);
+        noteAccess[addressToApprove] = noteHash;
+
+        emit ApprovedAddress(addressToApprove, noteHash);
+        emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
     }
 
     /**
