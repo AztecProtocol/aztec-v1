@@ -19,6 +19,10 @@ const syncAccount = async ({
         return;
     }
 
+    if (manager.isInQueue(address)) {
+        return;
+    }
+
     const user = await userModel.get({
         address,
     });
