@@ -10,7 +10,7 @@ const { keccak256, padLeft } = require('web3-utils');
 
 const outputCoder = {};
 
-/** 
+/**
  * Decode an inputNote
  *
  * @method decodeInputNote
@@ -45,9 +45,7 @@ outputCoder.decodeInputNote = (note) => {
     };
 };
 
-
-
-/** 
+/**
  * Decode an output note
  *
  * @method decodeOutputNote
@@ -97,7 +95,7 @@ outputCoder.decodeOutputNote = (note) => {
  *
  * @method decodeNotes
  * @param {note} notes - array of AZTEC notes
- * @param {bool} isOutputNote - boolean determining whether the supplied notes are outputNotes. 
+ * @param {bool} isOutputNote - boolean determining whether the supplied notes are outputNotes.
  * If they are, decodeOutputNote() is called rather than decodeInputNote()
  * @returns {Object[]} array of note variables - array of decoded and extracted note variables
  * where each element corresponds to the note variables for an individual note
@@ -107,15 +105,16 @@ outputCoder.decodeNotes = (notes, isOutputNote) => {
     return Array(n)
         .fill()
         .map((x, i) => {
-            let decodedResult
+            let decodedResult;
             const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
 
-            if (isOutputNote) { // multiple notes are being passed 
+            if (isOutputNote) {
+                // multiple notes are being passed
                 decodedResult = outputCoder.decodeOutputNote(notes.slice(noteOffset * 2));
             } else {
                 decodedResult = outputCoder.decodeInputNote(notes.slice(noteOffset * 2));
             }
-            return decodedResult
+            return decodedResult;
         });
 };
 
