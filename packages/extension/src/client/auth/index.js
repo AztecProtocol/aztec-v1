@@ -6,7 +6,7 @@ export default async function ensureExtensionInstalled() {
     const {
         account,
         error,
-    } = await validateUserPermission();
+    } = await validateUserPermission() || {};
 
     if (!account || error) {
         throw new ApiError('account.not.registered', {

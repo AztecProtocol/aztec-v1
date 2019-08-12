@@ -167,7 +167,7 @@ class Connection {
                 }
                 return of({
                     requestId,
-                    data: response,
+                    response,
                 });
             }),
             filter(result => !!result),
