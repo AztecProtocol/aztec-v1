@@ -11,6 +11,6 @@ export default async function createNote(value, publicKey, owner, linkedPublicKe
         address: owner,
         viewingKey: viewingKey.toHexString(),
     });
-    note.setMetaData(newMetaData.slice(2));
+    note.setMetaData(newMetaData);
     return note;
 }
