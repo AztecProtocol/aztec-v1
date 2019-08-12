@@ -45,7 +45,6 @@ describe('ACE', () => {
                 scalingFactor,
                 linkedTokenAddress: erc20Address,
                 registryOwner: zkAssetAddress,
-                registryAddress: aceAddress,
             });
 
         const query = `
