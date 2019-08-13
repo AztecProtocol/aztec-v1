@@ -5,22 +5,18 @@ import accountModel from '~database/models/account';
 import {
     fromCode,
 } from '~utils/noteStatus';
-import AuthService from '~background/services/AuthService';
-import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import {
-    ensureKeyvault,
-    ensureAccount,
     ensureUserPermission,
     ensureEntityPermission,
 } from '../decorators';
-import getUserSpendingPublicKey from './getUserSpendingPublicKey';
-import getAccounts from './getAccounts';
-import decryptViewingKey from './decryptViewingKey';
-import getAssetBalance from './getAssetBalance';
-import requestGrantAccess from './requestGrantAccess';
-import pickNotesFromBalance from './pickNotesFromBalance';
-import syncAssetInfo from './syncAssetInfo';
-import syncNoteInfo from './syncNoteInfo';
+import getUserSpendingPublicKey from './utils/getUserSpendingPublicKey';
+import getAccounts from './utils/getAccounts';
+import decryptViewingKey from './utils/decryptViewingKey';
+import getAssetBalance from './utils/getAssetBalance';
+import requestGrantAccess from './utils/requestGrantAccess';
+import pickNotesFromBalance from './utils/pickNotesFromBalance';
+import syncAssetInfo from './utils/syncAssetInfo';
+import syncNoteInfo from './utils/syncNoteInfo';
 
 export default {
     BigInt: new BigInt('safe'),
@@ -63,34 +59,6 @@ export default {
         accounts: ensureUserPermission(async (_, args) => ({
             accounts: await getAccounts(args),
         })),
-        subscribe: ensureEntityPermission(async (_, args) => ({
-            success: ClientSubscriptionService.grantSubscription(args),
-        })),
-        userPermission: ensureAccount(async (_, args) => ({
-            account: await userModel.get({ address: args.currentAddress }),
-        })),
     },
-    Mutation: {
-        registerExtension: async (_, args) => ({
-            account: await AuthService.registerExtension(args),
-        }),
-        registerAddress: ensureKeyvault(async (_, args) => ({
-            account: await AuthService.registerAddress({
-                address: args.address,
-                linkedPublicKey: args.linkedPublicKey,
-                registeredAt: args.registeredAt,
-            }),
-        })),
-        login: ensureAccount(async (_, args) => ({
-            session: await AuthService.login(args),
-        })),
-        approveAssetForDomain: ensureAccount(async (_, args) => {
-            await AuthService.enableAssetForDomain(args);
-            return {
-                asset: await assetModel.get({
-                    address: args.asset,
-                }),
-            };
-        }),
-    },
+    Mutation: {},
 };

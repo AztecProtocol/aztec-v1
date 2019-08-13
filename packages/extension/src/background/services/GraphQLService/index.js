@@ -5,8 +5,8 @@ import { makeExecutableSchema } from 'graphql-tools';
 import {
     dataError,
 } from '~utils/error';
-import typeDefs from './typeDefs';
-import resolvers from './resolvers';
+import typeDefs from './typeDefs/background';
+import resolvers from './resolvers/background';
 
 const schema = makeExecutableSchema({
     typeDefs,
