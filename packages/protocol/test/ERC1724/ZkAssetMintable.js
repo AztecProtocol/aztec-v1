@@ -75,7 +75,7 @@ contract('ZkAssetMintable', (accounts) => {
                 from: accounts[0],
             });
 
-            const sender = zkAssetMintable.address;
+            const [sender] = accounts;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
@@ -107,7 +107,7 @@ contract('ZkAssetMintable', (accounts) => {
             expect(erc20TotalSupply).to.equal(0);
             const initialBalance = (await erc20.balanceOf(accounts[1])).toNumber();
 
-            const mintSender = zkAssetMintable.address;
+            const [mintSender] = accounts;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
 
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, mintSender);
@@ -151,7 +151,7 @@ contract('ZkAssetMintable', (accounts) => {
             expect(erc20TotalSupply).to.equal(0);
             expect(initialRecipientBalance).to.equal(0);
 
-            const mintSender = zkAssetMintable.address;
+            const [mintSender] = accounts;
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, mintSender);
             const data = proof.encodeABI();
             const { receipt: mintReceipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data);
@@ -292,7 +292,7 @@ contract('ZkAssetMintable', (accounts) => {
                 from: accounts[0],
             });
 
-            const sender = zkAssetMintable.address;
+            const [sender] = accounts;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
@@ -303,7 +303,7 @@ contract('ZkAssetMintable', (accounts) => {
             const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
-            const sender = zkAssetMintable.address;
+            const [sender] = accounts;
             const newMintCounterValue = 50;
             const mintedNoteValues = [30, 30];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getCustomMintNotes(
