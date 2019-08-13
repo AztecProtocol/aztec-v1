@@ -6,7 +6,7 @@ import {
 import asyncMap from '~utils/asyncMap';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
-import validateAccount from '../utils/validateAccount';
+import validateExtensionAccount from '../utils/validateExtensionAccount';
 import toAztecNote from '../utils/toAztecNote';
 
 const {
@@ -18,7 +18,7 @@ export default async function proveBurn({
     notes,
     sender,
 }) {
-    const notesOwner = await validateAccount(sender, true);
+    const notesOwner = await validateExtensionAccount(sender);
 
     let confidentialTotalBurned;
     try {
