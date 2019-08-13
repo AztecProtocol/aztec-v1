@@ -51,6 +51,7 @@ export default async function proveBurn({
     const {
         address: ownerAddress,
         spendingPublicKey,
+        linkedPublicKey,
     } = notesOwner;
 
     const aztecNotes = await asyncMap(notes, async note => toAztecNote(note));
@@ -59,6 +60,7 @@ export default async function proveBurn({
         balance + amount,
         spendingPublicKey,
         ownerAddress,
+        linkedPublicKey,
     );
 
     const proof = new BurnProof(

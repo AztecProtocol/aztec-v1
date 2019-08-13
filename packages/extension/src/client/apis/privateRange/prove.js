@@ -47,6 +47,7 @@ export default async function provePrivateRange({
             diff,
             notesSender.spendingPublicKey,
             notesSender.address,
+            notesSender.linkedPublicKey,
         );
     }
 
