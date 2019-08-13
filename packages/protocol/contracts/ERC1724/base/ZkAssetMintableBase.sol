@@ -35,7 +35,7 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     {
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, msg.sender);
+        (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, owner());
 
         (, bytes memory newTotal, ,) = _proofOutputs.get(0).extractProofOutput();
 
