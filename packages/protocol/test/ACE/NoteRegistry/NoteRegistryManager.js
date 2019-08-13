@@ -93,7 +93,7 @@ contract('NoteRegistryManager', (accounts) => {
             expect(logs.length).to.not.equal(0);
             const proxyAddress = await ace.registries(zkAssetOwner);
             expect(proxyAddress).to.not.equal(undefined);
-            const contract = await Behaviour.at(proxyAddress);
+            const contract = await Behaviour.at(proxyAddress.behaviour);
             expect(await contract.initialised()).to.equal(true);
         });
 
@@ -110,7 +110,7 @@ contract('NoteRegistryManager', (accounts) => {
             const upgradeReceipt = await ace.upgradeNoteRegistry(newFactoryId, { from: zkAssetOwner });
             const { proxyAddress, newBehaviourAddress } = upgradeReceipt.logs.find((l) => l.event === 'UpgradeNoteRegistry').args;
             expect(newBehaviourAddress).to.not.equal(existingProxy);
-            expect(proxyAddress).to.equal(existingProxy);
+            expect(proxyAddress).to.equal(existingProxy.behaviour);
 
             const topic = web3.utils.keccak256('NoteRegistryDeployed(address)');
             const logs = await new Promise((resolve) => {
@@ -127,7 +127,7 @@ contract('NoteRegistryManager', (accounts) => {
             const upgradeLogs = await new Promise((resolve) => {
                 web3.eth
                     .getPastLogs({
-                        address: existingProxy,
+                        address: existingProxy.behaviour,
                         topics: [upgradeTopic],
                     })
                     .then(resolve);
@@ -146,17 +146,14 @@ contract('NoteRegistryManager', (accounts) => {
 
             await ace.setFactory(newFactoryId, newFactoryContract.address, { from: owner });
 
-            const preUpgradeBehaviour = await factoryContract.getImplementation.call(existingProxy);
+            const preUpgradeBehaviour = await factoryContract.getImplementation.call(existingProxy.behaviour);
 
             await ace.upgradeNoteRegistry(newFactoryId, { from: zkAssetOwner });
 
-            const newProxy = await ace.registries(zkAssetOwner);
-            expect(newProxy).to.equal(existingProxy);
-
             const postUpgradeProxy = await ace.registries(zkAssetOwner);
-            expect(postUpgradeProxy).to.equal(existingProxy);
+            expect(postUpgradeProxy.behaviour).to.equal(existingProxy.behaviour);
 
-            const newBehaviourAddress = await newFactoryContract.getImplementation.call(existingProxy);
+            const newBehaviourAddress = await newFactoryContract.getImplementation.call(existingProxy.behaviour);
             expect(newBehaviourAddress).to.not.equal(preUpgradeBehaviour);
         });
 

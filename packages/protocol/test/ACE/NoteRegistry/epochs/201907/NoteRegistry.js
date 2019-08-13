@@ -205,7 +205,7 @@ contract('NoteRegistry', (accounts) => {
     describe('Failure States', async () => {
         it('should fail to call initialise on an already initialised noteRegistry', async () => {
             const registryAddress = await ace.registries(sender);
-            const registry = await BehaviourContract.at(registryAddress);
+            const registry = await BehaviourContract.at(registryAddress.behaviour);
 
             await truffleAssert.reverts(
                 registry.initialise(publicOwner, erc20.address, scalingFactor, canAdjustSupply, canConvert),

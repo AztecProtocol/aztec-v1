@@ -77,8 +77,8 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         address _proofSender
     ) external returns (bytes memory) {
 
-        NoteRegistryBehaviour registry = registries[msg.sender];
-        require(address(registry) != address(0x0), "note registry does not exist for the given address");
+        NoteRegistry memory registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist for the given address");
 
         // Check that it's a mintable proof
         (, uint8 category, ) = _proof.getProofComponents();
@@ -88,7 +88,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
         require(_proofOutputs.getLength() > 0, "call to validateProof failed");
 
-        registry.mint(_proofOutputs);
+        registry.behaviour.mint(_proofOutputs);
         return(_proofOutputs);
     }
 
@@ -108,8 +108,8 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         bytes calldata _proofData,
         address _proofSender
     ) external returns (bytes memory) {
-        NoteRegistryBehaviour registry = registries[msg.sender];
-        require(address(registry) != address(0x0), "note registry does not exist for the given address");
+        NoteRegistry memory registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist for the given address");
 
         // Check that it's a burnable proof
         (, uint8 category, ) = _proof.getProofComponents();
@@ -119,7 +119,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
         require(_proofOutputs.getLength() > 0, "call to validateProof failed");
 
-        registry.burn(_proofOutputs);
+        registry.behaviour.burn(_proofOutputs);
         return _proofOutputs;
     }
 
