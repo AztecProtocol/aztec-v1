@@ -51,9 +51,18 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     );
 
     // Every user has their own note registry
-    mapping(address => NoteRegistryBehaviour) public registries;
-    mapping(address => IERC20) internal publicTokens;
-    mapping(address => uint24) internal registryFactories;
+
+    struct NoteRegistry {
+        NoteRegistryBehaviour behaviour;
+        uint24 latestFactory;
+        uint256 totalSupply;
+        uint256 totalSupplemented;
+        mapping(address => mapping(bytes32 => uint256)) publicApprovals;
+    }
+
+    mapping(address => NoteRegistry) public registries;
+    mapping(address => IERC20) internal publicTokens; // not needed
+
     /**
     * @dev index of available factories, using very similar structure to proof registry in ACE.sol.
     * The structure of the index is (epoch, cryptoSystem, assetType).
@@ -65,11 +74,6 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     uint8 public defaultCryptoSystem = 1;
 
     mapping(bytes32 => bool) public validatedProofs;
-
-    modifier onlyRegistry() {
-        require(registryFactories[msg.sender] != uint24(0), "method can only be called from a noteRegistry");
-        _;
-    }
 
     function incrementDefaultRegistryEpoch() public onlyOwner {
         defaultRegistryEpoch = defaultRegistryEpoch + 1;
@@ -143,19 +147,19 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     * @param _value the value to be added
     */
     function supplementTokens(uint256 _value) external {
-        NoteRegistryBehaviour registry = registries[msg.sender];
-        require(address(registry) != address(0x0), "note registry does not exist");
+        NoteRegistry memory registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist");
         (
             address linkedToken,
             uint256 scalingFactor,
             ,,,
             bool canConvert,
             bool canAdjustSupply
-        ) = registry.getRegistry();
+        ) = registry.behaviour.getRegistry();
         require(canConvert == true, "note registry does not have conversion rights");
         require(canAdjustSupply == true, "note registry does not have mint and burn rights");
         IERC20(linkedToken).transferFrom(msg.sender, address(this), _value.mul(scalingFactor));
-        registry.incrementTotalSupply(_value);
+        registry.behaviour.incrementTotalSupply(_value);
     }
 
     /**
@@ -215,7 +219,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         bool _canConvert,
         uint24 _factoryId
     ) public {
-        require(address(registries[msg.sender]) == address(0x0), "address already has a linked note registry");
+        require(address(registries[msg.sender].behaviour) == address(0x0), "address already has a linked note registry");
         (,, uint8 assetType) = _factoryId.getVersionComponents();
         // assetType is 0b00 where the bits represent (canAdjust, canConvert),
         // so assetType can be one of 1, 2, 3 where
@@ -245,12 +249,18 @@ contract NoteRegistryManager is IAZTEC, Ownable {
             behaviourInitialisation
         ));
 
-        registries[msg.sender] = NoteRegistryBehaviour(proxy);
+        NoteRegistry memory registry = NoteRegistry({
+            behaviour: NoteRegistryBehaviour(proxy),
+            latestFactory: _factoryId,
+            totalSupply: 0,
+            totalSupplemented: 0
+        });
+
+        registries[msg.sender] = registry;
         if (_canConvert) {
             require(_linkedTokenAddress != address(0x0), "expected the linked token address to exist");
             publicTokens[proxy] = IERC20(_linkedTokenAddress);
         }
-        registryFactories[proxy] = _factoryId;
         emit CreateNoteRegistry(
             msg.sender,
             proxy,
@@ -270,11 +280,11 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     function upgradeNoteRegistry(
         uint24 _factoryId
     ) public {
-        NoteRegistryBehaviour registry = registries[msg.sender];
-        require(address(registry) != address(0x0), "note registry for sender doesn't exist");
+        NoteRegistry storage registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry for sender doesn't exist");
 
         (uint8 epoch,, uint8 assetType) = _factoryId.getVersionComponents();
-        uint24 oldFactoryId = registryFactories[address(registry)];
+        uint24 oldFactoryId = registry.latestFactory;
         (uint8 oldEpoch,, uint8 oldAssetType) = oldFactoryId.getVersionComponents();
         require(epoch >= oldEpoch, "expected new registry to be of epoch equal or greater than existing registry");
         require(assetType == oldAssetType, "expected assetType to be the same for old and new registry");
@@ -283,11 +293,11 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         address newBehaviour = NoteRegistryFactory(factory).deployNewBehaviourInstance();
 
         address oldFactory = getFactoryAddress(oldFactoryId);
-        NoteRegistryFactory(oldFactory).handoverBehaviour(address(registry), newBehaviour, factory);
-        registryFactories[address(registry)] = _factoryId;
+        NoteRegistryFactory(oldFactory).handoverBehaviour(address(registry.behaviour), newBehaviour, factory);
+        registry.latestFactory = _factoryId;
         emit UpgradeNoteRegistry(
             msg.sender,
-            address(registry),
+            address(registry.behaviour),
             newBehaviour
         );
     }
@@ -308,7 +318,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     */
     function transferFrom(address _from, address _to, uint256 _value)
         public
-        onlyRegistry
+        // onlyRegistry
     {
         if (_from == address(this)) {
             publicTokens[msg.sender].transfer(_to, _value);
@@ -331,8 +341,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         bytes memory _proofOutput,
         address _proofSender
     ) public {
-        NoteRegistryBehaviour registry = registries[msg.sender];
-        require(address(registry) != address(0x0), "note registry does not exist");
+        NoteRegistry memory registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist");
         bytes32 proofHash = keccak256(_proofOutput);
         require(
             validateProofByHash(_proof, proofHash, _proofSender) == true,
@@ -341,7 +351,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         // clear record of valid proof - stops re-entrancy attacks and saves some gas
         validatedProofs[proofHash] = false;
 
-        registry.updateNoteRegistry(_proof, _proofOutput);
+        registry.behaviour.updateNoteRegistry(_proof, _proofOutput);
     }
 
     /**
@@ -349,9 +359,9 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         public tokens it holds to an external address. It needs to be associated with the hash of a proof.
     */
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
-        NoteRegistryBehaviour registry = registries[_registryOwner];
-        require(address(registry) != address(0x0), "note registry does not exist");
-        registry.publicApprove(msg.sender, _proofHash, _value);
+        NoteRegistry memory registry = registries[_registryOwner];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist");
+        registry.behaviour.publicApprove(msg.sender, _proofHash, _value);
     }
 
     /**
@@ -378,8 +388,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         bool canConvert,
         bool canAdjustSupply
     ) {
-        NoteRegistryBehaviour registry = registries[_owner];
-        return registry.getRegistry();
+        NoteRegistry memory registry = registries[_owner];
+        return registry.behaviour.getRegistry();
     }
 
     /**
@@ -400,8 +410,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         uint40 destroyedOn,
         address noteOwner
     ) {
-        NoteRegistryBehaviour registry = registries[_registryOwner];
-        return registry.getNote(_noteHash);
+        NoteRegistry memory registry = registries[_registryOwner];
+        return registry.behaviour.getNote(_noteHash);
     }
 
     /**
