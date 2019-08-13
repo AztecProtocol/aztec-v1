@@ -52,6 +52,7 @@ export default async function proveMint({
 
     const {
         address: ownerAddress,
+        linkedPublicKey,
         spendingPublicKey,
     } = notesOwner;
 
@@ -59,6 +60,7 @@ export default async function proveMint({
         balance + amount,
         spendingPublicKey,
         ownerAddress,
+        linkedPublicKey,
     );
 
     const noteValues = Array.isArray(amount)
@@ -69,6 +71,7 @@ export default async function proveMint({
         noteValues,
         spendingPublicKey,
         ownerAddress,
+        linkedPublicKey,
     );
 
     const proof = new MintProof(
