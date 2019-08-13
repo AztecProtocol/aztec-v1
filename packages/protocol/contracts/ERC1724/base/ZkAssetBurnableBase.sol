@@ -40,7 +40,7 @@ contract ZkAssetBurnableBase is ZkAssetOwnableBase {
         bytes32 noteHash,
         bytes memory metadata) = newTotal.get(0).extractNote();
 
-        logOutputNotes(burnedNotes);
+        logInputNotes(burnedNotes);
         emit UpdateTotalBurned(noteHash, metadata);
     }
 }
