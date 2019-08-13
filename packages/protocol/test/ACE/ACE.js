@@ -9,6 +9,7 @@ const { padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 const { customMetadata } = note.utils;
+const { generateFactoryId } = require('../helpers/Factory');
 
 const ACE = artifacts.require('./ACE');
 const ACETest = artifacts.require('./ACETest');
@@ -48,10 +49,6 @@ const getDefaultNotes = async () => {
     const publicValue = -20;
     const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
     return { inputNotes, outputNotes, publicValue };
-};
-
-const generateFactoryId = (epoch, cryptoSystem, assetType) => {
-    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
 };
 
 contract('ACE', (accounts) => {

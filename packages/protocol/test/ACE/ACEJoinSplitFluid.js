@@ -22,8 +22,11 @@ const JoinSplitFluid = artifacts.require('./JoinSplitFluid');
 const JoinSplitFluidInterface = artifacts.require('./JoinSplitFluidInterface');
 const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
+const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
 const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
 const MixedFactory = artifacts.require('./noteRegistry/epochs/201907/mixed/FactoryMixed201907');
+
+const { generateFactoryId } = require('../helpers/Factory');
 
 Dividend.abi = DividendInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
@@ -51,10 +54,6 @@ const getDefaultBurnNotes = async () => {
     const newBurnCounterNote = await note.create(publicKey, newBurnCounter);
     const burnedNotes = await Promise.all(burnedNoteValues.map((burnedValue) => note.create(publicKey, burnedValue)));
     return { zeroBurnCounterNote, newBurnCounterNote, burnedNotes };
-};
-
-const generateFactoryId = (epoch, cryptoSystem, assetType) => {
-    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
 };
 
 contract('ACE Mint and Burn Functionality', (accounts) => {
@@ -132,8 +131,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         let joinSplitValidator;
         const sender = accounts[0];
 
-        // TODO: think ace.publicApprove() should be called in a lot of these failure test cases
-
         beforeEach(async () => {
             ace = await ACE.new({ from: sender });
 
@@ -145,10 +142,12 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
+            const adjustableFactory = await AdjustableFactory.new(ace.address);
             const convertibleFactory = await ConvertibleFactory.new(ace.address);
             const mixedFactory = await MixedFactory.new(ace.address);
 
             await ace.setFactory(generateFactoryId(1, 1, 1), convertibleFactory.address, { from: sender });
+            await ace.setFactory(generateFactoryId(1, 1, 2), adjustableFactory.address);
             await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
         });
 
@@ -198,8 +197,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
         });
 
         it('should fail to update the validatedProofs mapping for mint proofs', async () => {
-            // MINT and BURN proofs are not in the category BALANCED. So will use a MINT proof to demonstrate this
-            // failure case
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const mintData = mintProof.encodeABI();
@@ -246,7 +243,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
             const burnData = burnProof.encodeABI();
             const { receipt: burnReceipt } = await ace.validateProof(BURN_PROOF, sender, burnData);
-            expect(burnReceipt).to.equal(true);
+            expect(burnReceipt.status).to.equal(true);
 
             await truffleAssert.reverts(
                 ace.updateNoteRegistry(BURN_PROOF, burnData, sender),
