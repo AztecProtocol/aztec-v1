@@ -108,34 +108,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             expect(burnReceipt.status).to.equal(true);
         });
 
-        it('should mint AZTEC notes and transfer out of ACE', async () => {
-            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
-            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
-            const mintData = mintProof.encodeABI();
-            const { receipt } = await ace.mint(MINT_PROOF, mintData, sender);
-            expect(receipt.status).to.equal(true);
-
-            const tokensTransferred = new BN(50);
-            const scalingFactor = new BN(1);
-            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
-            const withdrawPublicValue = 50;
-            const withdrawPublicOwner = accounts[0];
-
-            const withdrawProof = new JoinSplitProof(mintedNotes, [], sender, 500, withdrawPublicOwner);
-            const withdrawData = withdrawProof.encodeABI(joinSplitValidator.address);
-
-            await ace.publicApprove(accounts[0], withdrawProof.hash, withdrawPublicValue, { from: accounts[0] });
-            await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawData);
-            const { receipt: withdrawReceipt } = await ace.updateNoteRegistry(
-                JOIN_SPLIT_PROOF,
-                withdrawProof.eth.output,
-                accounts[0],
-            );
-            expect(withdrawReceipt.status).to.equal(true);
-        });
-
         it('should burn notes that have been minted', async () => {
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
@@ -180,41 +152,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
         });
 
-        it('should fail if attempt to withdraw a minted balance that is greater than linked token balance', async () => {
-            // ACE balance is 0. Minting 50 tokens into the noteregistry
-            // Linked token address has just 49 tokens, so supplementTokens() does not have enough tokens to transfer to
-            // ACE, so transaction should revert
-            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
-            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
-            const mintData = mintProof.encodeABI();
-
-            // Mint 49 tokens to accounts[0]
-            const tokensTransferred = new BN(49);
-            const scalingFactor = new BN(1);
-            const canAdjustSupply = true;
-            const canConvert = true;
-
-            const erc20 = await ERC20Mintable.new();
-            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                from: accounts[0],
-            });
-            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, mintData, sender);
-            expect(mintReceipt.status).to.equal(true);
-
-            const withdrawPublicValue = 50;
-            const withdrawPublicOwner = accounts[0];
-
-            const withdrawProof = new JoinSplitProof(mintedNotes, [], sender, withdrawPublicValue, withdrawPublicOwner);
-            const withdrawData = withdrawProof.encodeABI(joinSplitValidator.address);
-            const { receipt: withdrawReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawData);
-            expect(withdrawReceipt.status).to.equal(true);
-
-            // attempt to withdraw 50 tokens, when linkedToken only has 49
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, withdrawProof.eth.output, accounts[0]));
-        });
 
         it('should fail if asset is not mintable', async () => {
             const scalingFactor = new BN(1);
@@ -261,38 +198,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             );
         });
 
-        it('should fail if ACE has not been approved to extract tokens', async () => {
-            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
-            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
-            const mintData = mintProof.encodeABI();
-
-            // Mint 50 tokens to accounts[0]
-            const tokensTransferred = new BN(59);
-            const scalingFactor = new BN(1);
-            const canAdjustSupply = true;
-            const canConvert = true;
-
-            const erc20 = await ERC20Mintable.new();
-            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                from: accounts[0],
-            });
-            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-            // await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, mintData, sender);
-            expect(mintReceipt.status).to.equal(true);
-
-            const withdrawPublicValue = 50;
-            const withdrawPublicOwner = accounts[0];
-
-            const withdrawProof = new JoinSplitProof(mintedNotes, [], sender, withdrawPublicValue, withdrawPublicOwner);
-            const withdrawData = withdrawProof.encodeABI(joinSplitValidator.address);
-            const { receipt: withdrawReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawData);
-            expect(withdrawReceipt.status).to.equal(true);
-
-            // attempt to withdraw 50 tokens, when linkedToken only has 49
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, withdrawProof.eth.output, accounts[0]));
-        });
 
         it('should fail to update the validatedProofs mapping for mint proofs', async () => {
             // MINT and BURN proofs are not in the category BALANCED. So will use a MINT proof to demonstrate this
