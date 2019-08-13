@@ -5,13 +5,11 @@ const truffleAssert = require('truffle-assertions');
 
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
-const { encoder, note, proof } = require('aztec.js');
-const bn128 = require('@aztec/bn128');
-const devUtils = require('@aztec/dev-utils');
+const { BurnProof, JoinSplitProof, MintProof, note } = require('aztec.js');
+const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
-const { BURN_PROOF, DIVIDEND_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF, SWAP_PROOF } = devUtils.proofs;
-const { outputCoder } = encoder;
+const { BURN_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF } = proofs;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
@@ -24,690 +22,333 @@ const JoinSplitFluid = artifacts.require('./JoinSplitFluid');
 const JoinSplitFluidInterface = artifacts.require('./JoinSplitFluidInterface');
 const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
+const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+const MixedFactory = artifacts.require('./noteRegistry/epochs/201907/mixed/FactoryMixed201907');
 
 Dividend.abi = DividendInterface.abi;
 JoinSplit.abi = JoinSplitInterface.abi;
 JoinSplitFluid.abi = JoinSplitFluidInterface.abi;
 Swap.abi = SwapInterface.abi;
 
-contract.skip('ACE Mint and Burn Functionality', (accounts) => {
+const aztecAccount = secp256k1.generateAccount();
+const { publicKey } = aztecAccount;
+
+const getDefaultMintNotes = async () => {
+    const newMintCounter = 50;
+    const mintedNoteValues = [20, 30];
+
+    const zeroMintCounterNote = await note.createZeroValueNote();
+    const newMintCounterNote = await note.create(publicKey, newMintCounter);
+    const mintedNotes = await Promise.all(mintedNoteValues.map((mintedValue) => note.create(publicKey, mintedValue)));
+    return { zeroMintCounterNote, newMintCounterNote, mintedNotes };
+};
+
+const getDefaultBurnNotes = async () => {
+    const newBurnCounter = 50;
+    const burnedNoteValues = [20, 30];
+
+    const zeroBurnCounterNote = await note.createZeroValueNote();
+    const newBurnCounterNote = await note.create(publicKey, newBurnCounter);
+    const burnedNotes = await Promise.all(burnedNoteValues.map((burnedValue) => note.create(publicKey, burnedValue)));
+    return { zeroBurnCounterNote, newBurnCounterNote, burnedNotes };
+};
+
+const generateFactoryId = (epoch, cryptoSystem, assetType) => {
+    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
+};
+
+contract('ACE Mint and Burn Functionality', (accounts) => {
     describe('Success States', () => {
         let ace;
-        let aztecJoinSplitFluid;
-        let aztecSwap;
-        let aztecJoinSplit;
-        let aztecDividend;
+        let joinSplitFluidValidator;
+        let joinSplitValidator;
         let erc20;
-        const kPublic = 50;
-        const tokensTransferred = new BN(1000);
-        let zeroNote;
+        const sender = accounts[0];
 
         beforeEach(async () => {
-            ace = await ACE.new({
-                from: accounts[0],
-            });
+            ace = await ACE.new({ from: sender });
 
-            aztecJoinSplitFluid = await JoinSplitFluid.new();
-            aztecJoinSplit = await JoinSplit.new();
-            aztecSwap = await Swap.new();
-            aztecDividend = await Dividend.new();
+            joinSplitFluidValidator = await JoinSplitFluid.new();
+            joinSplitValidator = await JoinSplit.new();
 
-            await ace.setCommonReferenceString(bn128.CRS);
-            await ace.setProof(MINT_PROOF, aztecJoinSplitFluid.address);
-            await ace.setProof(BURN_PROOF, aztecJoinSplitFluid.address);
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-            await ace.setProof(SWAP_PROOF, aztecSwap.address);
-            await ace.setProof(DIVIDEND_PROOF, aztecDividend.address);
+            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
+            await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
+            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
-            // Creating a fixed note
-            zeroNote = await note.createZeroValueNote();
+            const convertibleFactory = await ConvertibleFactory.new(ace.address);
+            const mixedFactory = await MixedFactory.new(ace.address);
 
-            erc20 = await ERC20Mintable.new();
+            await ace.setFactory(generateFactoryId(1, 1, 1), convertibleFactory.address, { from: sender });
+            await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
+
             const scalingFactor = new BN(1);
             const canAdjustSupply = true;
             const canConvert = true;
 
-            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
+            erc20 = await ERC20Mintable.new();
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
         });
 
-        it('should mint confidential assets', async () => {
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const publicOwner = accounts[1];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
-
-            proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: accounts[0],
-                inputNoteOwners,
-                publicOwner,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            const { receipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
-            expect(receipt.status).to.equal(true);
-        });
-
         it('should validate mint proof', async () => {
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const { receipt: aceReceipt } = await ace.validateProof(MINT_PROOF, accounts[0], proofs[0].proofData);
-            expect(aceReceipt.status).to.equal(true);
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const data = proof.encodeABI();
+            const { receipt: mintRecceipt } = await ace.validateProof(MINT_PROOF, sender, data);
+            expect(mintRecceipt.status).to.equal(true);
         });
 
         it('should validate burn proof', async () => {
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
-            const { receipt: burnReceipt } = await ace.validateProof(BURN_PROOF, accounts[0], proofs[1].proofData);
-
-            expect(mintReceipt.status).to.equal(true);
+            const { zeroBurnCounterNote, newBurnCounterNote, burnedNotes } = await getDefaultBurnNotes();
+            const proof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
+            const data = proof.encodeABI();
+            const { receipt: burnReceipt } = await ace.validateProof(BURN_PROOF, sender, data);
             expect(burnReceipt.status).to.equal(true);
         });
 
-        it('should validate utility proof', async () => {
-            // Using a Swap proof
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [10, 20, 10, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
+        it('should mint AZTEC notes and transfer out of ACE', async () => {
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
+            const { receipt } = await ace.mint(MINT_PROOF, mintData, sender);
+            expect(receipt.status).to.equal(true);
+
+            const tokensTransferred = new BN(50);
+            const scalingFactor = new BN(1);
+            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
+            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
+
+            const withdrawPublicValue = 50;
+            const withdrawPublicOwner = accounts[0];
+
+            const withdrawProof = new JoinSplitProof(mintedNotes, [], sender, 500, withdrawPublicOwner);
+            const withdrawData = withdrawProof.encodeABI(joinSplitValidator.address);
+
+            await ace.publicApprove(accounts[0], withdrawProof.hash, withdrawPublicValue, { from: accounts[0] });
+            await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawData);
+            const { receipt: withdrawReceipt } = await ace.updateNoteRegistry(
+                JOIN_SPLIT_PROOF,
+                withdrawProof.eth.output,
+                accounts[0],
             );
-
-            const inputNotes = notes.slice(0, 2);
-            const outputNotes = notes.slice(2, 4);
-            const senderAddress = accounts[0];
-
-            proofs[0] = proof.swap.encodeSwapTransaction({
-                inputNotes,
-                outputNotes,
-                senderAddress,
-            });
-
-            const { receipt: utilityReceipt } = await ace.validateProof(SWAP_PROOF, accounts[0], proofs[0].proofData);
-
-            expect(utilityReceipt.status).to.equal(true);
+            expect(withdrawReceipt.status).to.equal(true);
         });
 
-        it('should mint and burn confidential assets', async () => {
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
+        it('should burn notes that have been minted', async () => {
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
+            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, mintData, sender);
+            expect(mintReceipt.status).to.equal(true);
 
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
+            // burn the minted notes
+            const burnedNotes = mintedNotes;
 
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const publicOwner = accounts[1];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
-
-            proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: accounts[0],
-                inputNoteOwners,
-                publicOwner,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
-            const { receipt } = await ace.burn(BURN_PROOF, proofs[1].proofData, accounts[0]);
-            expect(receipt.status).to.equal(true);
+            const { zeroBurnCounterNote, newBurnCounterNote } = await getDefaultBurnNotes();
+            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
+            const burnData = burnProof.encodeABI();
+            const { receipt: burnReceipt } = await ace.burn(BURN_PROOF, burnData, sender);
+            expect(burnReceipt.status).to.equal(true);
         });
     });
 
     describe('Failure States', () => {
         let ace;
-        let zeroNote;
-        let aztecJoinSplitFluid;
-        let aztecJoinSplit;
-        let aztecSwap;
-        let erc20;
+        let joinSplitFluidValidator;
+        let joinSplitValidator;
+        const sender = accounts[0];
+
+        // TODO: think ace.publicApprove() should be called in a lot of these failure test cases
 
         beforeEach(async () => {
-            ace = await ACE.new({
-                from: accounts[0],
-            });
+            ace = await ACE.new({ from: sender });
 
-            aztecJoinSplitFluid = await JoinSplitFluid.new();
-            aztecJoinSplit = await JoinSplit.new();
-            aztecSwap = await Swap.new();
+            joinSplitFluidValidator = await JoinSplitFluid.new();
+            joinSplitValidator = await JoinSplit.new();
 
-            await ace.setCommonReferenceString(bn128.CRS);
-            await ace.setProof(MINT_PROOF, aztecJoinSplitFluid.address);
-            await ace.setProof(BURN_PROOF, aztecJoinSplitFluid.address);
-            await ace.setProof(JOIN_SPLIT_PROOF, aztecJoinSplit.address);
-            await ace.setProof(SWAP_PROOF, aztecSwap.address);
+            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
+            await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
+            await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
-            zeroNote = await note.createZeroValueNote();
+            const convertibleFactory = await ConvertibleFactory.new(ace.address);
+            const mixedFactory = await MixedFactory.new(ace.address);
+
+            await ace.setFactory(generateFactoryId(1, 1, 1), convertibleFactory.address, { from: sender });
+            await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
         });
 
-        it('should fail if minted balance is greater than linked token balance', async () => {
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
+        it('should fail if attempt to withdraw a minted balance that is greater than linked token balance', async () => {
+            // ACE balance is 0. Minting 50 tokens into the noteregistry
+            // Linked token address has just 49 tokens, so supplementTokens() does not have enough tokens to transfer to
+            // ACE, so transaction should revert
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
 
-            const kPublic = 50; // kPublic is one greater than linked token balance
+            // Mint 49 tokens to accounts[0]
             const tokensTransferred = new BN(49);
-            const publicOwner = accounts[1];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-            const proofs = [];
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: accounts[0],
-                inputNoteOwners,
-                publicOwner,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            const proofOutput = outputCoder.getProofOutput(proofs[2].expectedOutput, 0);
-
-            erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
             const canAdjustSupply = true;
             const canConvert = true;
-            // Mint 49
-            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
+            const erc20 = await ERC20Mintable.new();
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
-            // ZK mint 50
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
+            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
+            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
+
+            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, mintData, sender);
             expect(mintReceipt.status).to.equal(true);
 
-            // Validate proof to transfer 50
-            const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData);
-            expect(aceReceipt.status).to.equal(true);
+            const withdrawPublicValue = 50;
+            const withdrawPublicOwner = accounts[0];
 
-            // Fail when you try to enact the transfer of 50
-            const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
+            const withdrawProof = new JoinSplitProof(mintedNotes, [], sender, withdrawPublicValue, withdrawPublicOwner);
+            const withdrawData = withdrawProof.encodeABI(joinSplitValidator.address);
+            const { receipt: withdrawReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawData);
+            expect(withdrawReceipt.status).to.equal(true);
+
+            // attempt to withdraw 50 tokens, when linkedToken only has 49
+            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, withdrawProof.eth.output, accounts[0]));
         });
 
         it('should fail if asset is not mintable', async () => {
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-            const proofs = [];
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
             const canAdjustSupply = false;
             const canConvert = true;
 
+            const erc20 = await ERC20Mintable.new();
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
 
-            await truffleAssert.reverts(ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]), 'this asset is not mintable');
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
+            await truffleAssert.reverts(ace.mint(MINT_PROOF, mintData, sender), 'this asset is not mintable');
         });
 
         it('should fail when converting value and asset is NOT convertible', async () => {
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            const kPublic = 50; // kPublic is one greater than linked token balance
-            const tokensTransferred = new BN(50);
-            const publicOwner = accounts[1];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
-            const proofs = [];
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: accounts[0],
-                inputNoteOwners,
-                publicOwner,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            const proofOutput = outputCoder.getProofOutput(proofs[2].expectedOutput, 0);
-
-            erc20 = await ERC20Mintable.new();
+            const erc20 = await ERC20Mintable.new();
             const scalingFactor = new BN(1);
             const canAdjustSupply = true;
             const canConvert = false;
-
-            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
-            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
 
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
+            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, mintData, sender);
             expect(mintReceipt.status).to.equal(true);
 
-            const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData);
-            expect(aceReceipt.status).to.equal(true);
+            const withdrawPublicValue = 50;
+            const withdrawPublicOwner = accounts[0];
 
-            const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
+            const withdrawProof = new JoinSplitProof(mintedNotes, [], sender, withdrawPublicValue, withdrawPublicOwner);
+            const withdrawData = withdrawProof.encodeABI(joinSplitValidator.address);
+            const { receipt: withdrawReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawData);
+            expect(withdrawReceipt.status).to.equal(true);
+
             await truffleAssert.reverts(
-                ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]),
+                ace.updateNoteRegistry(JOIN_SPLIT_PROOF, withdrawProof.eth.output, sender),
                 'asset cannot be converted into public tokens',
             );
         });
 
         it('should fail if ACE has not been approved to extract tokens', async () => {
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-            const proofs = [];
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
 
-            const kPublic = 50;
-            const tokensTransferred = new BN(50);
-            const publicOwner = accounts[1];
-            const inputNoteOwners = aztecAccounts.slice(2, 4);
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            proofs[2] = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: accounts[0],
-                inputNoteOwners,
-                publicOwner,
-                kPublic,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            const proofOutput = outputCoder.getProofOutput(proofs[2].expectedOutput, 0);
-
-            erc20 = await ERC20Mintable.new();
+            // Mint 50 tokens to accounts[0]
+            const tokensTransferred = new BN(59);
             const scalingFactor = new BN(1);
             const canAdjustSupply = true;
             const canConvert = true;
 
-            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
-
-            // No approval
-
+            const erc20 = await ERC20Mintable.new();
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
+            await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
+            // await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0], gas: 4700000 });
 
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
+            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, mintData, sender);
             expect(mintReceipt.status).to.equal(true);
 
-            const { receipt: aceReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], proofs[2].proofData);
-            expect(aceReceipt.status).to.equal(true);
+            const withdrawPublicValue = 50;
+            const withdrawPublicOwner = accounts[0];
 
-            const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, accounts[0]));
+            const withdrawProof = new JoinSplitProof(mintedNotes, [], sender, withdrawPublicValue, withdrawPublicOwner);
+            const withdrawData = withdrawProof.encodeABI(joinSplitValidator.address);
+            const { receipt: withdrawReceipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, withdrawData);
+            expect(withdrawReceipt.status).to.equal(true);
+
+            // attempt to withdraw 50 tokens, when linkedToken only has 49
+            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, withdrawProof.eth.output, accounts[0]));
         });
 
-        it('should not update the validatedProofs mapping if proof is not balanced', async () => {
+        it('should fail to update the validatedProofs mapping for mint proofs', async () => {
             // MINT and BURN proofs are not in the category BALANCED. So will use a MINT proof to demonstrate this
             // failure case
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-            const proofs = [];
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
 
             const scalingFactor = new BN(1);
             const canAdjustSupply = true;
             const canConvert = true;
 
-            erc20 = await ERC20Mintable.new();
+            const erc20 = await ERC20Mintable.new();
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
                 from: accounts[0],
             });
 
-            const proofOutput = outputCoder.getProofOutput(proofs[0].expectedOutput, 0);
-
-            const { receipt: aceReceipt } = await ace.validateProof(MINT_PROOF, accounts[0], proofs[0].proofData);
-            expect(aceReceipt.status).to.equal(true);
-
-            const formattedProofOutput = `0x${proofOutput.slice(0x40)}`;
-            await truffleAssert.reverts(
-                ace.updateNoteRegistry(MINT_PROOF, formattedProofOutput, accounts[0]),
-                'ACE has not validated a matching proof',
-            );
-        });
-
-        it('should not update the validatedProofs mapping for mint proofs', async () => {
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20]; // note we do not use this third note, we create a fixed one
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            erc20 = await ERC20Mintable.new();
-            const scalingFactor = new BN(1);
-            const canAdjustSupply = true;
-            const canConvert = true;
-
-            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                from: accounts[0],
-            });
-
-            const { receipt: aceReceipt } = await ace.validateProof(MINT_PROOF, accounts[0], proofs[0].proofData);
-            await truffleAssert.reverts(
-                ace.updateNoteRegistry(MINT_PROOF, proofs[0].proofData, accounts[0]),
-                'ACE has not validated a matching proof',
-            );
-
-            expect(aceReceipt.status).to.equal(true);
-        });
-
-        it('should not update the validatedProofs mapping for burn proofs', async () => {
-            const proofs = [];
-            const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            const noteValues = [50, 0, 30, 20];
-            const notes = await Promise.all(
-                aztecAccounts.map(({ publicKey }, i) => {
-                    return note.create(publicKey, noteValues[i]);
-                }),
-            );
-
-            const newTotalMinted = notes[0];
-            const oldTotalMinted = zeroNote;
-            const adjustedNotes = notes.slice(2, 4);
-
-            proofs[0] = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            const newTotalBurned = notes[0];
-            const oldTotalBurned = zeroNote;
-
-            proofs[1] = proof.burn.encodeBurnTransaction({
-                newTotalBurned,
-                oldTotalBurned,
-                adjustedNotes,
-                senderAddress: accounts[0],
-            });
-
-            erc20 = await ERC20Mintable.new();
-            const scalingFactor = new BN(1);
-            const canAdjustSupply = true;
-            const canConvert = true;
-
-            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                from: accounts[0],
-            });
-
-            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, proofs[0].proofData, accounts[0]);
-            const { receipt: burnReceipt } = await ace.validateProof(BURN_PROOF, accounts[0], proofs[1].proofData);
-
-            await truffleAssert.reverts(
-                ace.updateNoteRegistry(BURN_PROOF, proofs[1].proofData, accounts[0]),
-                'ACE has not validated a matching proof',
-            );
+            const { receipt: mintReceipt } = await ace.validateProof(MINT_PROOF, sender, mintData);
             expect(mintReceipt.status).to.equal(true);
-            expect(burnReceipt.status).to.equal(true);
+
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(MINT_PROOF, mintProof.eth.output, sender),
+                'ACE has not validated a matching proof',
+            );
         });
 
-        it('should not update the validatedProofs mapping for utility proofs', async () => {
-            // Using a Swap proof
-            // const proofs = [];
-            // const aztecAccounts = [...new Array(4)].map(() => secp256k1.generateAccount());
-            // const noteValues = [10, 20, 10, 20];
-            // const notes = await Promise.all(
-            //     aztecAccounts.map(({ publicKey }, i) => {
-            //         return note.create(publicKey, noteValues[i]);
-            //     }),
-            // );
-            // const inputNotes = notes.slice(0, 2);
-            // const outputNotes = notes.slice(2, 4);
-            // const senderAddress = accounts[0];
-            // proofs[0] = proof.swap.encodeSwapTransaction({
-            //     inputNotes,
-            //     outputNotes,
-            //     za,
-            //     zb,
-            //     senderAddress: accounts[0],
-            // });
-            // erc20 = await ERC20Mintable.new();
-            // const scalingFactor = new BN(1);
-            // const canAdjustSupply = true;
-            // const canConvert = true;
-            // await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-            //     from: accounts[0],
-            // });
-            // console.log('created the note registry');
-            // const { receipt: utilityReceipt } = await ace.validateProof(DIVIDEND_PROOF, accounts[0], dividendProof.proofData);
-            // console.log('validated the proof');
-            // await truffleAssert.reverts(
-            //     ace.updateNoteRegistry(DIVIDEND_PROOF, dividendProof.proofData, accounts[0]),
-            //     'ACE has not validated a matching proof',
-            // );
-            // expect(utilityReceipt.status).to.equal(true);
+        it('should fail to update the validatedProofs mapping for burn proofs', async () => {
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const mintData = mintProof.encodeABI();
+
+            const scalingFactor = new BN(1);
+            const canAdjustSupply = true;
+            const canConvert = true;
+
+            const erc20 = await ERC20Mintable.new();
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: accounts[0],
+            });
+
+            const { receipt: mintReceipt } = await ace.mint(MINT_PROOF, mintData, sender);
+            expect(mintReceipt.status).to.equal(true);
+
+            // burn the minted notes
+            const burnedNotes = mintedNotes;
+
+            const { zeroBurnCounterNote, newBurnCounterNote } = await getDefaultBurnNotes();
+            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
+            const burnData = burnProof.encodeABI();
+            const { receipt: burnReceipt } = await ace.validateProof(BURN_PROOF, sender, burnData);
+            expect(burnReceipt).to.equal(true);
+
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(BURN_PROOF, burnData, sender),
+                'ACE has not validated a matching proof',
+            );
         });
 
         it('should fail if two note registries are linked to the same ERC20 token', async () => {
@@ -716,12 +357,10 @@ contract.skip('ACE Mint and Burn Functionality', (accounts) => {
 
             // User A creates a note registry linked to a particular ERC20 token, and
             // transfers 50 tokens to it
-
             const [ownerA, attacker] = accounts;
             const [recipient1, recipient2] = [...new Array(2)].map(() => secp256k1.generateAccount());
 
-            erc20 = await ERC20Mintable.new();
-
+            const erc20 = await ERC20Mintable.new();
             await erc20.mint(ownerA, scalingFactor.mul(tokensTransferred), { from: ownerA, gas: 4700000 });
 
             // Set the first note registry
@@ -740,26 +379,14 @@ contract.skip('ACE Mint and Burn Functionality', (accounts) => {
 
             const outputNotes = [await note.create(recipient1.publicKey, 50)];
 
-            const depositProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: [],
-                outputNotes,
-                senderAddress: ownerA,
-                inputNoteOwners: [],
-                publicOwner: ownerA,
-                kPublic: -50,
-                validatorAddress: aztecJoinSplit.address,
-            });
+            const depositPublicValue = -50;
+            const depositPublicOwner = ownerA;
+            const depositProof = new JoinSplitProof([], outputNotes, ownerA, depositPublicValue, depositPublicOwner);
+            const depositData = depositProof.encodeABI(joinSplitValidator.address);
 
-            const depositProofOutput = outputCoder.getProofOutput(depositProof.expectedOutput, 0);
-            const depositProofHash = outputCoder.hashProofOutput(depositProofOutput);
-
-            await ace.publicApprove(ownerA, depositProofHash, 50, { from: ownerA });
-
-            await ace.validateProof(JOIN_SPLIT_PROOF, ownerA, depositProof.proofData, { from: ownerA });
-
-            const formattedProofOutput = `0x${depositProofOutput.slice(0x40)}`;
-
-            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutput, ownerA, { from: ownerA });
+            await ace.publicApprove(ownerA, depositProof.hash, 50, { from: ownerA });
+            await ace.validateProof(JOIN_SPLIT_PROOF, ownerA, depositData, { from: ownerA });
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, ownerA, { from: ownerA });
 
             // Attacker creates a note registry, linked to same public ERC20 contract
             const canAdjustSupplyAttacker = true;
@@ -769,41 +396,23 @@ contract.skip('ACE Mint and Burn Functionality', (accounts) => {
                 from: attacker,
             });
 
-            const newTotalMinted = await note.create(recipient2.publicKey, 1);
-            const oldTotalMinted = await note.createZeroValueNote();
-            const adjustedNotes = [await note.create(recipient2.publicKey, 1)];
-
-            const mintProof = proof.mint.encodeMintTransaction({
-                newTotalMinted,
-                oldTotalMinted,
-                adjustedNotes,
-                senderAddress: attacker,
-            });
-
-            await ace.mint(MINT_PROOF, mintProof.proofData, attacker, { from: attacker });
+            const newMintCounterNote = await note.create(recipient2.publicKey, 1);
+            const zeroMintCounterNote = await note.createZeroValueNote();
+            const mintedNotes = [await note.create(recipient2.publicKey, 1)];
+            const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, attacker);
+            const mintData = mintProof.encodeABI();
+            await ace.mint(MINT_PROOF, mintData, attacker, { from: attacker });
 
             // User B attempts to convert their minted note into tokens via updateNoteRegisty()
-            const attackerJoinSplitProof = proof.joinSplit.encodeJoinSplitTransaction({
-                inputNotes: adjustedNotes,
-                outputNotes: [],
-                senderAddress: attacker,
-                inputNoteOwners: [recipient2],
-                publicOwner: attacker,
-                kPublic: 1,
-                validatorAddress: aztecJoinSplit.address,
-            });
-
-            await ace.validateProof(JOIN_SPLIT_PROOF, attacker, attackerJoinSplitProof.proofData, { from: attacker });
-
-            const attackerJoinSplitProofOutput = outputCoder.getProofOutput(attackerJoinSplitProof.expectedOutput, 0);
-            const attackerJoinSplitProofHash = outputCoder.hashProofOutput(attackerJoinSplitProofOutput);
-
-            const formattedProofOutputAttacker = `0x${attackerJoinSplitProofOutput.slice(0x40)}`;
-
-            await ace.publicApprove(attacker, attackerJoinSplitProofHash, 1, { from: attacker });
+            const withdrawPublicValue = 1;
+            const withdrawPublicOwner = attacker;
+            const attackerWithdrawProof = new JoinSplitProof(mintedNotes, [], attacker, withdrawPublicValue, withdrawPublicOwner);
+            const attackerWithdrawData = attackerWithdrawProof.encodeABI(joinSplitValidator.address);
+            await ace.validateProof(JOIN_SPLIT_PROOF, attacker, attackerWithdrawData, { from: attacker });
+            await ace.publicApprove(attacker, attackerWithdrawProof.hash, withdrawPublicValue, { from: attacker });
 
             await truffleAssert.reverts(
-                ace.updateNoteRegistry(JOIN_SPLIT_PROOF, formattedProofOutputAttacker, attacker, { from: attacker }),
+                ace.updateNoteRegistry(JOIN_SPLIT_PROOF, attackerWithdrawProof.eth.output, attacker, { from: attacker }),
             );
         });
     });
