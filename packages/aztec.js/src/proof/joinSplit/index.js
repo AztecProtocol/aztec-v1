@@ -9,6 +9,17 @@ const ProofUtils = require('../utils');
 const signer = require('../../signer');
 
 class JoinSplitProof extends Proof {
+    /**
+     * Constructs a joinSplit proof. This is the standard AZTEC zero-knowledge proof that can be used
+     * to convert ERC20 tokens into AZTEC notes and vice versa. It can also be used to transfer notes.
+     *
+     * @param {Object[]} inputNotes - array of input notes, to be removed from a note registry
+     * @param {Object[]} outputNotes - array of output notes, to be added to a note registry
+     * @param {string} sender - Ethereum address of the transaction sender
+     * @param {Number} publicValue - number of public ERC20 tokens being converted into notes or vice versa
+     * @param {string} publicOwner - Ethereum address of the publicValue owner
+     * @param {string} metadata
+     */
     constructor(inputNotes, outputNotes, sender, publicValue, publicOwner, metadata = outputNotes) {
         super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicValue, publicOwner, metadata);
 
