@@ -21,13 +21,18 @@ contract ZkAssetMintable is ZkAssetMintableBase {
     constructor(
         address _aceAddress,
         address _linkedTokenAddress,
-        uint256 _scalingFactor
+        uint256 _scalingFactor,
+        uint24 _optionalMintProofId,
+        bytes memory _optionalInitialisationMint
     ) public ZkAssetOwnableBase(
         _aceAddress,
         _linkedTokenAddress,
         _scalingFactor,
         true // canAdjustSupply
     ) {
+        if (_optionalMintProofId != 0 && _optionalInitialisationMint.length != 0) {
+            confidentialMint(_optionalMintProofId, _optionalInitialisationMint);
+        }
     }
 }
 
