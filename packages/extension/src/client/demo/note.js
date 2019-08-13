@@ -39,13 +39,6 @@ export default async function demoNote({
 
 
     const asset = await aztec.asset(zkAssetAddress);
-    if (!asset.isValid()) {
-        // TODO
-        // wait for data to be processed by graph node
-        // this should be handled in background script
-        await sleep(2000);
-        await asset.refresh();
-    }
     log(asset);
     if (!asset.isValid()) {
         log('Asset is not valid.');

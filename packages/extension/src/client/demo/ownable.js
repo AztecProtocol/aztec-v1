@@ -8,11 +8,10 @@ import {
 import Web3Service from '../services/Web3Service';
 import createNewAsset from './helpers/createNewAsset';
 import depositToERC20 from './helpers/depositToERC20';
+import sleep from './utils/sleep';
 import deposit from './tasks/deposit';
 import withdraw from './tasks/withdraw';
 import send from './tasks/send';
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export default async function demoOwnable({
     initialERC20Balance = 200,
@@ -58,20 +57,19 @@ export default async function demoOwnable({
 
 
     const asset = await aztec.asset(zkAssetAddress);
-    if (!asset.isValid()) {
-        // TODO
-        // wait for data to be processed by graph node
-        // this should be handled in background script
-        await sleep(2000);
-        await asset.refresh();
-    }
     log(asset);
     if (!asset.isValid()) {
         log('Asset is not valid.');
         return;
     }
 
-    log(`Asset balance = ${await asset.balance()}`);
+    const logBalance = async () => {
+        await sleep(1000);
+        log(`Asset balance = ${await asset.balance()}`);
+    };
+
+
+    await logBalance();
 
 
     const depositAmount = randomInt(1, 50);
@@ -101,15 +99,14 @@ export default async function demoOwnable({
     await deposit(asset, depositAmount);
 
 
-    await sleep(1000);
-    log(`Asset balance = ${await asset.balance()}`);
+    await logBalance();
 
 
     const withdrawAmount = randomInt(1, 10);
     await withdraw(asset, withdrawAmount);
 
-    await sleep(1000);
-    log(`Asset balance = ${await asset.balance()}`);
+
+    await logBalance();
 
 
     const sendAmount = 1;
@@ -117,6 +114,5 @@ export default async function demoOwnable({
     await send(asset, sendAmount, receiver);
 
 
-    await sleep(1000);
-    log(`Asset balance = ${await asset.balance()}`);
+    await logBalance();
 }
