@@ -8,6 +8,7 @@ const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 
 const helpers = require('../helpers/ERC1724');
+const { generateFactoryId } = require('../helpers/Factory');
 
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ACE = artifacts.require('./ACE');
@@ -18,10 +19,6 @@ const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
-
-const generateFactoryId = (epoch, cryptoSystem, assetType) => {
-    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
-};
 
 contract('ZkAssetOwnable', (accounts) => {
     let ace;
