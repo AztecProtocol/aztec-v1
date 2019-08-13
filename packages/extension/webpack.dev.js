@@ -6,10 +6,13 @@ module.exports = {
     devtool: 'cheap-module-source-map',
     entry: {
         background: './src/background',
-        'graphql-inspector': './src/background/services/GraphQLService/inspector/index.jsx',
+        'graphql-inspector': './src/background/services/GraphQLService/inspector',
         content: './src/content',
         client: './src/client',
         ui: './src/ui',
+    },
+    resolve: {
+        extensions: ['mjs', '.js', '.jsx', '.json'],
     },
     output: {
         path: path.resolve(__dirname, './client/build/'),
@@ -29,6 +32,11 @@ module.exports = {
                 // options: {
                 //     presets: ['@babel/env'],
                 // },
+            },
+            {
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: 'javascript/auto',
             },
             {
                 test: /\.css$/,

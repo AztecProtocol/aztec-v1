@@ -37,14 +37,6 @@ export default gql`
         lastSynced: String
         registeredAt: BigInt
     }
-    type Domain {
-        assets: [Asset!]
-    }
-    type Session {
-        createdAt: Int!
-        lastLogin: Int!
-        pwDerivedKey: String!
-    }
     type Asset {
         id: ID!
         address: String!
@@ -74,18 +66,8 @@ export default gql`
         address: String
         address_in: [String!]
     }
-    type SessionApiResponse {
-        session: Session
-        error: Error
-        action: Action
-    }
     type AssetApiResponse {
         asset: Asset
-        error: Error
-        action: Action
-    }
-    type PermissionApiResponse {
-        account: User
         error: Error
         action: Action
     }
@@ -118,15 +100,7 @@ export default gql`
         account: User
         error: Error
     }
-    type SubscriptionApiResponse {
-        success: Boolean
-        error: Error
-    }
     type Query {
-        userPermission(
-            currentAddress: String!
-            domain: String!
-        ): PermissionApiResponse
         user(
             id: ID
             currentAddress: String!
@@ -165,37 +139,8 @@ export default gql`
             currentAddress: String!
             domain: String!
         ): NotesApiResponse
-        subscribe(
-            type: String!
-            requestId: String!
-            assetId: ID
-            noteId: ID
-            currentAddress: String!
-            domain: String!
-        ): SubscriptionApiResponse
     }
     type Mutation {
-        login(
-            password: String!
-            domain: String!
-            address: String!
-        ): SessionApiResponse
-        registerExtension(
-            password: String!
-            salt: String!
-            domain: String!
-            address: String!
-            seedPhrase: String!
-        ): UserAccountApiResponse
-        registerAddress(
-            address: String!
-            linkedPublicKey: String!
-            registeredAt: BigInt
-        ): UserAccountApiResponse
-        approveAssetForDomain(
-            domain: String!
-            asset: String!
-            currentAddress: String!
-        ): AssetApiResponse
+        root: String
     }
 `;
