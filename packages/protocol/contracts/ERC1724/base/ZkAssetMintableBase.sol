@@ -29,28 +29,13 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofData - bytes array of proof data, outputted from a proof construction
     */
-    function confidentialMint(uint24 _proof, bytes calldata _proofData) external onlyOwner {
-        _confidentialMint(_proof, _proofData, address(this));
-    }
-
-    /**
-    * @dev Internal function executing a minting procedure. Takes in a _proofSender argument.
-    *   If called from the constructor, that _proofSender will be the owner of the zkAsset, otherwise
-    *   will be address(this)
-    *
-    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
-    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
-    * 1) epoch number 2) category number 3) ID number for the proof
-    * @param _proofData - bytes array of proof data, outputted from a proof construction
-    * @param _proofSender - address of the proof sender
-    */
-    function _confidentialMint(uint24 _proof, bytes memory _proofData, address _proofSender)
-        internal
+    function confidentialMint(uint24 _proof, bytes memory _proofData)
+        public
         onlyOwner
     {
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, _proofSender);
+        (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, msg.sender);
 
         (, bytes memory newTotal, ,) = _proofOutputs.get(0).extractProofOutput();
 

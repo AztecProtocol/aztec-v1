@@ -110,7 +110,7 @@ contract('ZkAssetBurnable', (accounts) => {
             const expectedAceIntermediateBalance = new BN(-depositPublicValue).mul(scalingFactor).toNumber();
             expect(aceIntermediateBalance).to.equal(expectedAceIntermediateBalance);
 
-            const burnSender = zkAssetBurnable.address;
+            const [burnSender] = accounts;
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
             const burnData = burnProof.encodeABI(zkAssetBurnable.address);
 
@@ -177,7 +177,7 @@ contract('ZkAssetBurnable', (accounts) => {
             });
             await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
 
-            const burnSender = zkAssetBurnable.address;
+            const [burnSender] = accounts;
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, burnSender);
             const burnData = burnProof.encodeABI(zkAssetBurnable.address);
 
@@ -217,7 +217,7 @@ contract('ZkAssetBurnable', (accounts) => {
             });
             await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
 
-            const burnSender = zkAssetBurnable.address;
+            const [burnSender] = accounts;
 
             // Change a value of the burnedNote such that it doesn't satisfy a balancing relationship
             burnNotes[0] = await note.create(secp256k1.generateAccount().publicKey, 31);

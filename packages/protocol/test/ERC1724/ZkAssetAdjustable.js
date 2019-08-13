@@ -75,7 +75,7 @@ contract('ZkAssetAdjustable', (accounts) => {
                 from: accounts[0],
             });
 
-            const sender = zkAssetAdjustable.address;
+            const sender = accounts[0];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
@@ -93,7 +93,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             expect(erc20TotalSupply).to.equal(0);
             const initialBalance = (await erc20.balanceOf(accounts[1])).toNumber();
 
-            const mintSender = zkAssetAdjustable.address;
+            const mintSender = accounts[0];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
 
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, mintSender);
@@ -130,7 +130,7 @@ contract('ZkAssetAdjustable', (accounts) => {
                 from: accounts[0],
             });
 
-            const sender = zkAssetAdjustable.address;
+            const sender = accounts[0];
             const mintValue = 50;
             const mintNotes = [20, 30];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getCustomMintNotes(mintValue, mintNotes);
@@ -138,7 +138,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             const data = proof.encodeABI();
             await zkAssetAdjustable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
 
-            const burnSender = zkAssetAdjustable.address;
+            const [burnSender] = accounts;
             const newBurnCounterNote = await note.create(aztecAccount.publicKey, mintValue);
             const zeroBurnCounterNote = await note.createZeroValueNote();
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, mintedNotes, burnSender);
@@ -163,7 +163,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             expect(erc20TotalSupply).to.equal(0);
             expect(initialRecipientBalance).to.equal(0);
 
-            const mintSender = zkAssetAdjustable.address;
+            const mintSender = accounts[0];
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, mintSender);
             const data = proof.encodeABI();
             const { receipt: mintReceipt } = await zkAssetAdjustable.confidentialMint(MINT_PROOF, data);
@@ -304,7 +304,7 @@ contract('ZkAssetAdjustable', (accounts) => {
                 from: accounts[0],
             });
 
-            const sender = zkAssetAdjustable.address;
+            const sender = accounts[0];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
@@ -315,7 +315,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
-            const sender = zkAssetAdjustable.address;
+            const sender = accounts[0];
             const newMintCounterValue = 50;
             const mintedNoteValues = [30, 30];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getCustomMintNotes(

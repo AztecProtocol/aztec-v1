@@ -30,7 +30,7 @@ contract ZkAssetAdjustable is ZkAssetMintableBase, ZkAssetBurnableBase {
         true // canAdjustSupply
     ) {
         if (_optionalMintProofId != 0 && _optionalInitialisationMint.length != 0) {
-            _confidentialMint(_optionalMintProofId, _optionalInitialisationMint, msg.sender);
+            confidentialMint(_optionalMintProofId, _optionalInitialisationMint);
         }
     }
 }
