@@ -1,7 +1,7 @@
 import {
     errorLog,
 } from '~utils/log';
-import GraphNodeService from '~backgroundServices/GraphNodeService';
+import GraphNodeService from '~background/services/GraphNodeService';
 
 export default async function fetchNoteFromServer({
     account,
