@@ -9,7 +9,12 @@ export function registerExtension(event: RegisterExtension): void {
         account = new Account(id);
         account.address = address;
     }
-    account.linkedPublicKey = event.params.linkedPublicKey;
-    account.registeredAt = event.block.timestamp;
-    account.save();
+    let linkedPublicKey = event.params.linkedPublicKey;
+    if (account == null
+        || account.linkedPublicKey != linkedPublicKey
+    ) {
+        account.linkedPublicKey = linkedPublicKey;
+        account.registeredAt = event.block.timestamp;
+        account.save();
+    }
 }
