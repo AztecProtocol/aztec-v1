@@ -1,55 +1,8 @@
-import {
-    warnLog,
-} from '~utils/log';
 import address from '~utils/address';
 import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
 
-const validateUser = async (accountAddress) => {
-    warnLog(`validateAccount(address, isUser) is deprecated. Use 'validateExtensionAccount(${accountAddress})' instead.`);
-    const validAddress = address(accountAddress);
-    if (accountAddress && !validAddress) {
-        throw new ApiError('input.address.not.valid', {
-            address: accountAddress,
-        });
-    }
-    const {
-        user,
-    } = await query(`
-        user(id: "${validAddress}") {
-            account {
-                address
-                linkedPublicKey
-                spendingPublicKey
-            }
-            error {
-                type
-                key
-                message
-                response
-            }
-        }
-    `);
-
-    const {
-        account,
-    } = user || {};
-
-    if (!account) {
-        throw new ApiError('account.not.linked', {
-            addresses: accountAddress,
-        });
-    }
-
-    return account;
-};
-
-export default async function validateAccount(accountAddress = '', isUser = false) {
-    if (isUser && typeof accountAddress === 'string') {
-        return validateUser(accountAddress);
-    }
-
-    warnLog("validateAccount(address, isUser) is deprecated. Use 'validateAccounts(address | [address])' instead.");
+export default async function validateAccounts(accountAddress = '') {
     const addressInputs = typeof accountAddress === 'string'
         ? [accountAddress]
         : accountAddress;
