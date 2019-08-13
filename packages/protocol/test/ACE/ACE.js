@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, it:true */
-const { JoinSplitProof, metaData, note } = require('aztec.js');
+const { JoinSplitProof, metaData, note, PublicRangeProof } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -12,6 +12,7 @@ const { customMetadata } = note.utils;
 
 const ACE = artifacts.require('./ACE');
 const ACETest = artifacts.require('./ACETest');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
 
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
@@ -21,8 +22,14 @@ const JoinSplitFluidValidator = artifacts.require('./JoinSplitFluid');
 const JoinSplitFluidValidatorInterface = artifacts.require('./JoinSplitFluidInterface');
 JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
 
+const MixedFactory = artifacts.require('./noteRegistry/epochs/201907/mixed/FactoryMixed201907');
+
+const PublicRangeValidator = artifacts.require('./PublicRange');
+const PublicRangeValidatorInterface = artifacts.require('./PublicRangeInterface');
+PublicRangeValidator.abi = PublicRangeValidatorInterface.abi;
+
 const aztecAccount = secp256k1.generateAccount();
-const { BOGUS_PROOF, JOIN_SPLIT_PROOF } = proofs;
+const { BOGUS_PROOF, JOIN_SPLIT_PROOF, PUBLIC_RANGE_PROOF } = proofs;
 const publicOwner = aztecAccount.address;
 
 const getNotes = async (inputNoteValues = [], outputNoteValues = []) => {
@@ -41,6 +48,10 @@ const getDefaultNotes = async () => {
     const publicValue = -20;
     const { inputNotes, outputNotes } = await getNotes(inputNoteValues, outputNoteValues);
     return { inputNotes, outputNotes, publicValue };
+};
+
+const generateFactoryId = (epoch, cryptoSystem, assetType) => {
+    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
 };
 
 contract('ACE', (accounts) => {
@@ -75,13 +86,16 @@ contract('ACE', (accounts) => {
     describe('Runtime', () => {
         let ace;
         let joinSplitValidator;
+        let publicRangeValidator;
         let proof;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: sender });
             await ace.setCommonReferenceString(bn128.CRS);
             joinSplitValidator = await JoinSplitValidator.new({ from: sender });
+            publicRangeValidator = await PublicRangeValidator.new({ from: sender });
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
+            await ace.setProof(PUBLIC_RANGE_PROOF, publicRangeValidator.address);
 
             const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
             proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
@@ -162,6 +176,25 @@ contract('ACE', (accounts) => {
                 );
                 const customData = proofWithNoteMetaData.encodeABI(joinSplitValidator.address);
                 const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, customData);
+                expect(receipt.status).to.equal(true);
+            });
+
+            it('should validate a utility proof', async () => {
+                // Using a public range proof as the utility proof
+                const originalNote = await note.create(aztecAccount.publicKey, 20);
+                const utilityNote = await note.create(aztecAccount.publicKey, 10);
+                const isGreaterOrEqual = true;
+                const publicComparison = 10;
+                const publicRangeProof = new PublicRangeProof(
+                    originalNote,
+                    publicComparison,
+                    sender,
+                    isGreaterOrEqual,
+                    utilityNote,
+                );
+                const publicRangeData = publicRangeProof.encodeABI();
+
+                const { receipt } = await ace.validateProof(PUBLIC_RANGE_PROOF, sender, publicRangeData);
                 expect(receipt.status).to.equal(true);
             });
         });
@@ -271,6 +304,40 @@ contract('ACE', (accounts) => {
                 await truffleAssert.reverts(
                     ace.clearProofByHashes(JOIN_SPLIT_PROOF, [proof.validatedProofHash]),
                     'can only clear previously validated proofs',
+                );
+            });
+
+            it('should not update the validatedProofs mapping for utility proofs', async () => {
+                const mixedFactory = await MixedFactory.new(ace.address);
+                await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
+
+                const scalingFactor = new BN(1);
+                const canAdjustSupply = true;
+                const canConvert = true;
+
+                const erc20 = await ERC20Mintable.new();
+                await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                    from: accounts[0],
+                });
+
+                // Using a public range proof as the utility proof
+                const originalNote = await note.create(aztecAccount.publicKey, 20);
+                const utilityNote = await note.create(aztecAccount.publicKey, 10);
+                const isGreaterOrEqual = true;
+                const publicComparison = 10;
+                const publicRangeProof = new PublicRangeProof(
+                    originalNote,
+                    publicComparison,
+                    sender,
+                    isGreaterOrEqual,
+                    utilityNote,
+                );
+                const publicRangeData = publicRangeProof.encodeABI();
+
+                await ace.validateProof(PUBLIC_RANGE_PROOF, sender, publicRangeData);
+                await truffleAssert.reverts(
+                    ace.updateNoteRegistry(PUBLIC_RANGE_PROOF, publicRangeData, sender),
+                    'ACE has not validated a matching proof',
                 );
             });
         });

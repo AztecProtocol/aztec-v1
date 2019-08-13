@@ -152,7 +152,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
         });
 
-
         it('should fail if asset is not mintable', async () => {
             const scalingFactor = new BN(1);
             const canAdjustSupply = false;
@@ -197,7 +196,6 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
                 'asset cannot be converted into public tokens',
             );
         });
-
 
         it('should fail to update the validatedProofs mapping for mint proofs', async () => {
             // MINT and BURN proofs are not in the category BALANCED. So will use a MINT proof to demonstrate this
