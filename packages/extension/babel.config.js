@@ -23,7 +23,6 @@ module.exports = {
                     '~config': './src/config',
                     '~utils': './src/utils',
                     '~database': './src/database',
-                    '~backgroundServices': './src/background/services',
                     '~background': './src/background',
                     '~content': './src/content',
                     '~client': './src/client',

@@ -5,8 +5,8 @@ import {
     onIdle,
 } from '~utils/storage';
 import settings from '~background/utils/settings';
-import SyncService from '~backgroundServices/SyncService';
-import GraphNodeService from '~backgroundServices/GraphNodeService';
+import SyncService from '~background/services/SyncService';
+import GraphNodeService from '~background/services/GraphNodeService';
 import NoteService from '~background/services/NoteService';
 
 export default async function init() {

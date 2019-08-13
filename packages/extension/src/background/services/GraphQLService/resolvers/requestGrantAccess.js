@@ -1,4 +1,4 @@
-import GraphNodeService from '~backgroundServices/GraphNodeService';
+import GraphNodeService from '~background/services/GraphNodeService';
 import {
     ADDRESS_LENGTH,
 } from '~config/constants';
