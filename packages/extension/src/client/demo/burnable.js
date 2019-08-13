@@ -52,41 +52,32 @@ export default async function demoBurnable({
     }
 
     const asset = await aztec.asset(zkAssetAddress);
-    if (!asset.isValid()) {
-        // TODO
-        // wait for data to be processed by graph node
-        // this should be handled in background script
-        await sleep(2000);
-        await asset.refresh();
-    }
     log(asset);
     if (!asset.isValid()) {
         log('Asset is not valid.');
         return;
     }
 
+    const logBalances = async () => {
+        await sleep(1000);
+        log(`Asset balance = ${await asset.balance()}.`);
 
-    log(`Asset balance = ${await asset.balance()}.`);
+        const totalSupply = await asset.totalSupplyOfLinkedToken();
+        log(`Total supply of linked token = ${totalSupply}.`);
 
-    const totalSupply = await asset.totalSupplyOfLinkedToken();
-    log(`Total supply of linked token = ${totalSupply}.`);
+        const linkedBalance = await asset.balanceOfLinkedToken();
+        log(`Linked ERC20 account balance = ${linkedBalance}.`);
+    };
 
-    const linkedBalance = await asset.balanceOfLinkedToken();
-    log(`Linked ERC20 account balance = ${linkedBalance}.`);
+
+    await logBalances();
 
 
     const burnAmount = randomInt(1, 50);
     const depositedNotes = await deposit(asset, burnAmount);
 
 
-    await sleep(2000);
-    log(`Asset balance = ${await asset.balance()}.`);
-
-    const totalSupplyBefore = await asset.totalSupplyOfLinkedToken();
-    log(`Total supply of linked token = ${totalSupplyBefore}`);
-
-    const linkedBalanceBefore = await asset.balanceOfLinkedToken();
-    log(`Linked ERC20 account balance = ${linkedBalanceBefore}.`);
+    await logBalances();
 
 
     log('Generating burn proof...');
@@ -98,12 +89,5 @@ export default async function demoBurnable({
     log(`Successfully burned ${burnAmount}!`, burnedNotes);
 
 
-    await sleep(2000);
-    log(`Asset balance = ${await asset.balance()}`);
-
-    const totalSupplyAfter = await asset.totalSupplyOfLinkedToken();
-    log(`Total supply of linked token = ${totalSupplyAfter}`);
-
-    const linkedBalanceAfter = await asset.balanceOfLinkedToken();
-    log(`Linked ERC20 account balance = ${linkedBalanceAfter}.`);
+    await logBalances();
 }

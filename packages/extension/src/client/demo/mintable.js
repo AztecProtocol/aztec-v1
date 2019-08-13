@@ -35,13 +35,6 @@ export default async function demoMintable({
 
 
     const asset = await aztec.asset(zkAssetAddress);
-    if (!asset.isValid()) {
-        // TODO
-        // wait for data to be processed by graph node
-        // this should be handled in background script
-        await sleep(2000);
-        await asset.refresh();
-    }
     log(asset);
     if (!asset.isValid()) {
         log('Asset is not valid.');
@@ -49,10 +42,16 @@ export default async function demoMintable({
     }
 
 
-    log(`Asset balance = ${await asset.balance()}.`);
+    const logBalances = async () => {
+        await sleep(2000);
+        log(`Asset balance = ${await asset.balance()}`);
 
-    const linkedBalance = await asset.balanceOfLinkedToken();
-    log(`Linked ERC20 account balance = ${linkedBalance}.`);
+        const totalSupplyBefore = await asset.totalSupplyOfLinkedToken();
+        log(`Total supply of linked token = ${totalSupplyBefore}`);
+    };
+
+
+    await logBalances();
 
 
     const mintAmount = randomInt(1, 50);
@@ -66,20 +65,12 @@ export default async function demoMintable({
     log(`Successfully minted ${mintAmount}!`, notes);
 
 
-    await sleep(2000);
-    log(`Asset balance = ${await asset.balance()}`);
-
-    const totalSupplyBefore = await asset.totalSupplyOfLinkedToken();
-    log(`Total supply of linked token = ${totalSupplyBefore}`);
+    await logBalances();
 
 
     const withdrawAmount = randomInt(1, mintAmount);
     await withdraw(asset, withdrawAmount);
 
 
-    await sleep(2000);
-    log(`Asset balance = ${await asset.balance()}`);
-
-    const totalSupplyAfter = await asset.totalSupplyOfLinkedToken();
-    log(`Total supply of linked token = ${totalSupplyAfter}`);
+    await logBalances();
 }
