@@ -36,6 +36,6 @@ type NoteLog @entity {
 type Account @entity {
   id: ID!
   address: Bytes!
-  linkedPublicKey: Bytes!
-  registeredAt: BigInt!
+  linkedPublicKey: Bytes
+  registeredAt: BigInt
 }
