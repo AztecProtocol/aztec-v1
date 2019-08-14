@@ -57,9 +57,9 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 ### Private Packages
 
-| Package                                                 | Description                                             |
-| ------------------------------------------------------- | ------------------------------------------------------- |
-| [`@aztec/monorepo-scripts`](/packages/monorepo-scripts) | Scripts for managing the monorepo                       |
+| Package                                                 | Description                       |
+| ------------------------------------------------------- | --------------------------------- |
+| [`@aztec/monorepo-scripts`](/packages/monorepo-scripts) | Scripts for managing the monorepo |
 
 ## Usage :hammer_and_pick:
 
