@@ -178,7 +178,7 @@ class PublicRangeProof extends Proof {
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
-            inputCoder.encodeMetadata(this.metadata),
+            inputCoder.encodeMetaData(this.outputNotes),
         ];
 
         const length = 2 + encodedParams.length + 1;

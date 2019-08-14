@@ -14,14 +14,12 @@ describe('Note', () => {
         it('should create well formed notes using the fromPublic and fromViewKey methods', async () => {
             const aBn = new BN(crypto.randomBytes(32), 16).umod(bn128.groupModulus);
             const a = padLeft(aBn.toString(16), 64);
-
             const k = padLeft(toHex('13456').slice(2), 8);
             const ephemeral = secp256k1.ec.keyFromPrivate(crypto.randomBytes(32));
             const viewingKey = `0x${a}${k}${padLeft(ephemeral.getPublic(true, 'hex'), 66)}`;
             const testNote = await note.fromViewKey(viewingKey);
             const expectedViewKey = testNote.getView();
             expect(expectedViewKey).to.equal(viewingKey);
-
             const exportedPublicKey = testNote.getPublic();
             const importedNote = note.fromPublicKey(exportedPublicKey);
             expect(importedNote.gamma.encode('hex', false)).to.equal(testNote.gamma.encode('hex', false));
@@ -81,7 +79,7 @@ describe('Note', () => {
             expect(result.publicKey).to.equal(publicKey);
         });
 
-        it('should set note.metadata property to custom metadata', async () => {
+        it('should set note. metadata property to custom metadata', async () => {
             const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
             const customData = padLeft(randomHex(20), 64);
             const customMetadata = testNote.setMetaData(customData);
@@ -90,7 +88,7 @@ describe('Note', () => {
 
         it('should export the note metaData', async () => {
             const testNote = await note.create(secp256k1.generateAccount().publicKey, 100);
-            const ephemeralKey = secp256k1.compress(testNote.ephemeral.getPublic());
+            const ephemeralKey = secp256k1.compress(testNote.ephemeralFromMetaData().getPublic());
             const ephemeralKeyLength = ephemeralKey.length;
             const customData = `0x${padLeft(randomHex(20), 64)}`;
 
