@@ -78,8 +78,9 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
         (
             ,
             uint256 scalingFactor,
-            uint256 totalSupply,
             ,
+            ,
+            uint256 totalSupply,
             ,
             ,
         ) = ace.getRegistry(address(this));
@@ -128,8 +129,9 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
         (
             ,
             uint256 scalingFactor,
-            uint256 totalSupply,
             ,
+            ,
+            uint256 totalSupply,
             ,
             ,
         ) = ace.getRegistry(address(this));

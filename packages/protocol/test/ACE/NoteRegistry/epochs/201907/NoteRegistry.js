@@ -12,9 +12,8 @@ const ERC20BrokenTransferTest = artifacts.require('./ERC20BrokenTransferTest');
 const ERC20BrokenTransferFromTest = artifacts.require('./ERC20BrokenTransferFromTest');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const JoinSplitValidator = artifacts.require('./JoinSplit');
-const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
-const MixedFactory = artifacts.require('./noteRegistry/epochs/201907/mixed/FactoryMixed201907');
 const BehaviourContract = artifacts.require('./noteRegistry/interfaces/NoteRegistryBehaviour');
 
 const { getNotesForAccount } = require('../../../../helpers/note');
@@ -48,13 +47,12 @@ contract('NoteRegistry', (accounts) => {
         await ace.setCommonReferenceString(bn128.CRS);
         ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: sender });
 
-        const convertibleFactory = await ConvertibleFactory.new(ace.address);
+        const baseFactory = await BaseFactory.new(ace.address);
         const adjustableFactory = await AdjustableFactory.new(ace.address);
-        const mixedFactory = await MixedFactory.new(ace.address);
 
-        await ace.setFactory(generateFactoryId(1, 1, 1), convertibleFactory.address);
+        await ace.setFactory(generateFactoryId(1, 1, 1), baseFactory.address);
         await ace.setFactory(generateFactoryId(1, 1, 2), adjustableFactory.address);
-        await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address);
+        await ace.setFactory(generateFactoryId(1, 1, 3), adjustableFactory.address);
 
         erc20 = await ERC20Mintable.new();
         await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert);
@@ -205,10 +203,10 @@ contract('NoteRegistry', (accounts) => {
     describe('Failure States', async () => {
         it('should fail to call initialise on an already initialised noteRegistry', async () => {
             const registryAddress = await ace.registries(sender);
-            const registry = await BehaviourContract.at(registryAddress);
+            const registry = await BehaviourContract.at(registryAddress.behaviour);
 
             await truffleAssert.reverts(
-                registry.initialise(publicOwner, erc20.address, scalingFactor, canAdjustSupply, canConvert),
+                registry.initialise(publicOwner, scalingFactor, canAdjustSupply, canConvert),
                 'registry already initialised',
             );
         });
@@ -293,7 +291,7 @@ contract('NoteRegistry', (accounts) => {
             );
         });
 
-        it('should fail to create note registry if asset is non-convertible and non-adjustable', async () => {
+        it('should fail to create note registry if asset is non-base and non-adjustable', async () => {
             const canAdjustSupplyFlag = false;
             const canConvertFlag = false;
             const opts = { from: accounts[3] };
