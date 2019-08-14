@@ -251,15 +251,13 @@ contract NoteRegistryManager is IAZTEC, Ownable {
             behaviourInitialisation
         ));
 
-        NoteRegistry memory registry = NoteRegistry({
+        registries[msg.sender] = NoteRegistry({
             behaviour: NoteRegistryBehaviour(proxy),
             linkedToken: IERC20(_linkedTokenAddress),
             latestFactory: _factoryId,
             totalSupply: 0,
             totalSupplemented: 0
         });
-
-        registries[msg.sender] = registry;
 
         emit CreateNoteRegistry(
             msg.sender,
