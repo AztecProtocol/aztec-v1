@@ -59,53 +59,6 @@ contract BehaviourMixed201907 is Behaviour201907 {
         updateOutputNotes(mintedNotes);
     }
 
-    function updateNoteRegistry(
-        uint24 _proof,
-        bytes memory _proofOutput
-    ) public onlyOwner {
-        require(registry.active == true, "note registry does not exist for the given address");
-        bytes32 proofHash = keccak256(_proofOutput);
-
-        (bytes memory inputNotes,
-        bytes memory outputNotes,
-        address publicOwner,
-        int256 publicValue) = _proofOutput.extractProofOutput();
-
-        updateInputNotes(inputNotes);
-        updateOutputNotes(outputNotes);
-
-        // If publicValue != 0, enact a token transfer
-        // (publicValue < 0) => transfer from publicOwner to ACE
-        // (publicValue > 0) => transfer from ACE to publicOwner
-        if (publicValue != 0) {
-            require(registry.canConvert == true, "asset cannot be converted into public tokens");
-
-            if (publicValue < 0) {
-                uint256 approvalForAddressForHash = registry.publicApprovals[publicOwner][proofHash];
-                registry.totalSupply = registry.totalSupply.add(uint256(-publicValue));
-                require(
-                    approvalForAddressForHash >= uint256(-publicValue),
-                    "public owner has not validated a transfer of tokens"
-                );
-
-                registry.publicApprovals[publicOwner][proofHash] = approvalForAddressForHash.sub(uint256(-publicValue));
-                NoteRegistryManager(owner()).transferFrom(
-                    publicOwner,
-                    address(owner()),
-                    uint256(-publicValue).mul(registry.scalingFactor));
-            } else {
-                registry.totalSupply = registry.totalSupply.sub(uint256(publicValue));
-                NoteRegistryManager(owner()).transferFrom(
-                    address(owner()),
-                    publicOwner,
-                    uint256(publicValue).mul(registry.scalingFactor));
-            }
-        }
-    }
-
-    function publicApprove(address _publicOwner, bytes32 _proofHash, uint256 _value) public onlyOwner {
-        registry.publicApprovals[_publicOwner][_proofHash] = _value;
-    }
 
     function setConfidentialTotalMinted(bytes32 newTotalNoteHash) internal onlyOwner returns (bytes32) {
         registry.confidentialTotalMinted = newTotalNoteHash;

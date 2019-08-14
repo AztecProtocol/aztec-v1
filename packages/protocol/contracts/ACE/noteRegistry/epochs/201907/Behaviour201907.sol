@@ -49,16 +49,12 @@ contract Behaviour201907 is NoteRegistryBehaviour {
 
     struct Registry {
         bool active;
-        address linkedToken;
         uint256 scalingFactor;
-        uint256 totalSupply;
         bytes32 confidentialTotalMinted;
         bytes32 confidentialTotalBurned;
-        uint256 supplementTotal;
         bool canConvert;
         bool canAdjustSupply;
         mapping(bytes32 => Note) notes;
-        mapping(address => mapping(bytes32 => uint256)) publicApprovals;
     }
 
     Registry public registry;
@@ -66,7 +62,6 @@ contract Behaviour201907 is NoteRegistryBehaviour {
 
     function initialise(
         address _newOwner,
-        address _linkedTokenAddress,
         uint256 _scalingFactor,
         bool _canAdjustSupply,
         bool _canConvert
@@ -78,12 +73,9 @@ contract Behaviour201907 is NoteRegistryBehaviour {
 
         registry = Registry({
             active: true,
-            linkedToken: _linkedTokenAddress,
             scalingFactor: _scalingFactor,
-            totalSupply: 0,
             confidentialTotalMinted: ZERO_VALUE_NOTE_HASH,
             confidentialTotalBurned: ZERO_VALUE_NOTE_HASH,
-            supplementTotal: 0,
             canConvert: _canConvert,
             canAdjustSupply: _canAdjustSupply
         });
@@ -92,26 +84,18 @@ contract Behaviour201907 is NoteRegistryBehaviour {
     }
 
     function getRegistry() public view returns (
-        address linkedToken,
         uint256 scalingFactor,
-        uint256 totalSupply,
         bytes32 confidentialTotalMinted,
         bytes32 confidentialTotalBurned,
         bool canConvert,
         bool canAdjustSupply
     ) {
         require(registry.active == true, "expected registry to be created");
-        linkedToken = registry.linkedToken;
         scalingFactor = registry.scalingFactor;
-        totalSupply = registry.totalSupply;
         confidentialTotalMinted = registry.confidentialTotalMinted;
         confidentialTotalBurned = registry.confidentialTotalBurned;
         canConvert = registry.canConvert;
         canAdjustSupply = registry.canAdjustSupply;
-    }
-
-    function incrementTotalSupply(uint256 _value) external onlyOwner {
-        registry.totalSupply = registry.totalSupply.add(_value);
     }
 
     function burn(bytes calldata /* _proofOutputs */) external onlyOwner {
@@ -125,31 +109,34 @@ contract Behaviour201907 is NoteRegistryBehaviour {
     function updateNoteRegistry(
         uint24 _proof,
         bytes memory _proofOutput
-    ) public onlyOwner {
+    ) public onlyOwner returns (
+        address publicOwner,
+        uint256 transferValue,
+        int256 publicValue
+    ) {
         require(registry.active == true, "note registry does not exist for the given address");
-
-        (bytes memory inputNotes,
-        bytes memory outputNotes,
-        ,
-        int256 publicValue) = _proofOutput.extractProofOutput();
+        bytes memory inputNotes;
+        bytes memory outputNotes;
+        (
+            inputNotes,
+            outputNotes,
+            publicOwner,
+            publicValue
+        ) = _proofOutput.extractProofOutput();
 
         updateInputNotes(inputNotes);
         updateOutputNotes(outputNotes);
 
-        // If publicValue != 0, enact a token transfer
-        // (publicValue < 0) => transfer from publicOwner to ACE
-        // (publicValue > 0) => transfer from ACE to publicOwner
+        // If publicValue != 0, enact a token transfer if asset is convertible
         if (publicValue != 0) {
             require(registry.canConvert == true, "asset cannot be converted into public tokens");
+            // Should this logic go into independent behaviour contracts?
+            if (publicValue < 0) {
+                transferValue = uint256(-publicValue).mul(registry.scalingFactor);
+            } else {
+                transferValue = uint256(publicValue).mul(registry.scalingFactor);
+            }
         }
-    }
-
-    function publicApprove(
-        address /* _publicOwner */,
-        bytes32 /* _proofHash */,
-        uint256 /* _value */
-    ) public onlyOwner {
-        require(registry.canConvert == true, "this asset is not convertible");
     }
 
     function setConfidentialTotalMinted(bytes32 /* newTotalNoteHash */) internal onlyOwner returns (bytes32) {
