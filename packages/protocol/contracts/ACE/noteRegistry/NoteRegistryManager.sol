@@ -219,7 +219,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         bool _canConvert,
         uint24 _factoryId
     ) public {
-        require(address(registries[msg.sender].behaviour) == address(0x0), "address already has a linked note registry");
+        require(address(registries[msg.sender].behaviour) == address(0x0),
+            "address already has a linked note registry");
         if (_canConvert) {
             require(_linkedTokenAddress != address(0x0), "expected the linked token address to exist");
         }
