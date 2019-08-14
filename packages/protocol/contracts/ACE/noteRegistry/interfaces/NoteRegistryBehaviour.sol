@@ -30,7 +30,6 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         * @dev Initialises the data of a noteRegistry. Should be called exactly once.
         *
         * @param _newOwner - the address which the initialise call will transfer ownership to
-        * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
         * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
         * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
         * @param _canConvert - whether the noteRegistry can transfer value from private to public
@@ -38,7 +37,6 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
     */
     function initialise(
         address _newOwner,
-        address _linkedTokenAddress,
         uint256 _scalingFactor,
         bool _canAdjustSupply,
         bool _canConvert
@@ -47,9 +45,7 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
     /**
         * @dev Fetches data of the registry
         *
-        * @return linkedToken - address of any erc20 linked token (can not be 0x0 if canConvert is true)
         * @return scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
-        * @return totalSupply - defines the number of public tokens associated with this note registry.
         * @return confidentialTotalMinted - the hash of the AZTEC note representing the total amount
             which has been minted.
         * @return confidentialTotalBurned - the hash of the AZTEC note representing the total amount
@@ -60,22 +56,12 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
             minting and burning methods.
     */
     function getRegistry() public view returns (
-        address linkedToken,
         uint256 scalingFactor,
-        uint256 totalSupply,
         bytes32 confidentialTotalMinted,
         bytes32 confidentialTotalBurned,
         bool canConvert,
         bool canAdjustSupply
     );
-
-    /**
-        * @dev Provides an external method to increment the total supply of the noteRegistry. Used by Manager
-        * in the event that a mint opperation happens on a convertible asset
-        *
-        * @param _value - the amount to increment total supply by
-    */
-    function incrementTotalSupply(uint256 _value) external;
 
     /**
         * @dev Enacts the state modifications needed given a successfully validated burn proof
@@ -98,22 +84,21 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         *
         * @param _proof - the id of the proof
         * @param _proofOutput - the output of the proof validator
+        *
+        * @return publicOwner - the non-ACE party involved in this transaction. Either current or desired
+        *   owner of public tokens
+        * @return transferValue - the total public token value to transfer. Seperate value to abstract
+        *   away scaling factors in first version of AZTEC
+        * @return publicValue - the kPublic value to be used in zero-knowledge proofs
     */
     function updateNoteRegistry(
         uint24 _proof,
         bytes memory _proofOutput
-    ) public;
-
-    /**
-        * @dev Adds a public approval record to the noteRegistry, for use by ACE when it needs
-            to transfer public tokens it holds
-        * to an external address. It needs to be associated with the hash of a proof.
-        *
-        * @param _publicOwner - the id of the proof
-        * @param _proofHash - the output of the proof validator
-        * @param _value - the total value approved given the proofHash
-    */
-    function publicApprove(address _publicOwner, bytes32 _proofHash, uint256 _value) public;
+    ) public returns (
+        address publicOwner,
+        uint256 transferValue,
+        int256 publicValue
+    );
 
     /**
         * @dev Sets confidentialTotalMinted to a new value. The value must be the hash of a note;

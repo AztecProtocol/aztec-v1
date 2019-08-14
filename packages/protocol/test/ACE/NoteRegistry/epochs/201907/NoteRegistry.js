@@ -208,7 +208,7 @@ contract('NoteRegistry', (accounts) => {
             const registry = await BehaviourContract.at(registryAddress.behaviour);
 
             await truffleAssert.reverts(
-                registry.initialise(publicOwner, erc20.address, scalingFactor, canAdjustSupply, canConvert),
+                registry.initialise(publicOwner, scalingFactor, canAdjustSupply, canConvert),
                 'registry already initialised',
             );
         });
