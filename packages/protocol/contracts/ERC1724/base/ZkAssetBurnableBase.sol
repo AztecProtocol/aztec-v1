@@ -30,7 +30,7 @@ contract ZkAssetBurnableBase is ZkAssetOwnableBase {
     function confidentialBurn(uint24 _proof, bytes calldata _proofData) external onlyOwner {
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory _proofOutputs) = ace.burn(_proof, _proofData, address(this));
+        (bytes memory _proofOutputs) = ace.burn(_proof, _proofData, owner());
 
         (, bytes memory newTotal, ,) = _proofOutputs.get(0).extractProofOutput();
 
@@ -40,7 +40,7 @@ contract ZkAssetBurnableBase is ZkAssetOwnableBase {
         bytes32 noteHash,
         bytes memory metadata) = newTotal.get(0).extractNote();
 
-        logOutputNotes(burnedNotes);
+        logInputNotes(burnedNotes);
         emit UpdateTotalBurned(noteHash, metadata);
     }
 }

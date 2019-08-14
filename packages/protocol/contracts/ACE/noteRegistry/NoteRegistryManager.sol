@@ -44,6 +44,12 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         bool canConvert
     );
 
+    event UpgradeNoteRegistry(
+        address registryOwner,
+        address proxyAddress,
+        address newBehaviourAddress
+    );
+
     // Every user has their own note registry
     mapping(address => NoteRegistryBehaviour) public registries;
     mapping(address => IERC20) internal publicTokens;
@@ -85,7 +91,6 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     function setFactory(uint24 _factoryId, address _factoryAddress) public onlyOwner {
         require(_factoryAddress != address(0x0), "expected the factory contract to exist");
         (uint8 epoch, uint8 cryptoSystem, uint8 assetType) = _factoryId.getVersionComponents();
-        require(epoch <= defaultRegistryEpoch, "the factory epoch cannot be bigger than the latest epoch");
         require(factories[epoch][cryptoSystem][assetType] == address(0x0), "existing factories cannot be modified");
         factories[epoch][cryptoSystem][assetType] = _factoryAddress;
         emit SetFactory(epoch, cryptoSystem, assetType, _factoryAddress);
@@ -267,7 +272,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     ) public {
         NoteRegistryBehaviour registry = registries[msg.sender];
         require(address(registry) != address(0x0), "note registry for sender doesn't exist");
-    
+
         (uint8 epoch,, uint8 assetType) = _factoryId.getVersionComponents();
         uint24 oldFactoryId = registryFactories[address(registry)];
         (uint8 oldEpoch,, uint8 oldAssetType) = oldFactoryId.getVersionComponents();
@@ -278,9 +283,13 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         address newBehaviour = NoteRegistryFactory(factory).deployNewBehaviourInstance();
 
         address oldFactory = getFactoryAddress(oldFactoryId);
-        NoteRegistryFactory(oldFactory).upgradeBehaviour(address(registry), newBehaviour);
-        registries[msg.sender] = NoteRegistryBehaviour(newBehaviour);
+        NoteRegistryFactory(oldFactory).handoverBehaviour(address(registry), newBehaviour, factory);
         registryFactories[address(registry)] = _factoryId;
+        emit UpgradeNoteRegistry(
+            msg.sender,
+            address(registry),
+            newBehaviour
+        );
     }
 
     /**

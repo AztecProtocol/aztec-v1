@@ -6,6 +6,7 @@ const MintProof = require('./joinSplitFluid/mint');
 const { Proof, ProofType } = require('./proof');
 const ProofUtils = require('./utils');
 const PrivateRangeProof = require('./privateRange');
+const PublicRangeProof = require('./publicRange');
 const SwapProof = require('./swap');
 
 module.exports = {
@@ -18,5 +19,6 @@ module.exports = {
     Proof,
     ProofType,
     ProofUtils,
+    PublicRangeProof,
     SwapProof,
 };

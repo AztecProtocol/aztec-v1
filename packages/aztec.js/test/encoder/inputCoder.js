@@ -25,7 +25,7 @@ describe('Input coder', () => {
             expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(result.hexLength() - 0x20);
             expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(numNotes);
 
-            const expectedEphemeralKey = secp256k1.compress(testNoteA.ephemeral.getPublic());
+            const expectedEphemeralKey = secp256k1.compress(testNoteA.ephemeralFromMetaData().getPublic());
             const expectedEphemeralKeyLength = expectedEphemeralKey.slice(2).length / 2;
             const customDataLength = new HexString(customData.slice(2)).hexLength();
             const expectedMetaDataLength = expectedEphemeralKeyLength + customDataLength;
@@ -43,7 +43,7 @@ describe('Input coder', () => {
 
                 // check ephemeralKey is correctly recovered
                 const ephemeralKey = result.slice(offset + 0x20, offset + 0x20 + expectedEphemeralKeyLength);
-                expect(secp256k1.decompressHex(ephemeralKey).eq(testNoteA.ephemeral.getPublic()));
+                expect(secp256k1.decompressHex(ephemeralKey).eq(testNoteA.ephemeralFromMetaData().getPublic()));
 
                 // check metaData is correctly recovered
                 const recoveredCustomData = result.slice(
@@ -66,7 +66,7 @@ describe('Input coder', () => {
             expect(parseInt(result.slice(0x00, 0x20), 16)).to.equal(result.hexLength() - 0x20);
             expect(parseInt(result.slice(0x20, 0x40), 16)).to.equal(numNotes);
 
-            const expectedEphemeralKey = secp256k1.compress(testNoteA.ephemeral.getPublic());
+            const expectedEphemeralKey = secp256k1.compress(testNoteA.ephemeralFromMetaData().getPublic());
             const expectedEphemeralKeyLength = expectedEphemeralKey.slice(2).length / 2;
             const expectedMetaDataLength = expectedEphemeralKeyLength;
 
@@ -83,7 +83,7 @@ describe('Input coder', () => {
 
                 // check ephemeralKey is correctly recovered
                 const ephemeralKey = result.slice(offset + 0x20, offset + 0x20 + expectedEphemeralKeyLength);
-                expect(secp256k1.decompressHex(ephemeralKey).eq(testNoteA.ephemeral.getPublic()));
+                expect(secp256k1.decompressHex(ephemeralKey).eq(testNoteA.ephemeralFromMetaData().getPublic()));
             }
         });
     });

@@ -4,6 +4,9 @@ const Dividend = require('../artifacts/Dividend');
 const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
 const DividendInterface = require('../artifacts/DividendInterface');
 const ERC20Mintable = require('../artifacts/ERC20Mintable');
+const FactoryAdjustable201907 = require('../artifacts/FactoryAdjustable201907');
+const FactoryConvertible201907 = require('../artifacts/FactoryConvertible201907');
+const FactoryMixed201907 = require('../artifacts/FactoryMixed201907');
 const GenericABIEncoder = require('../artifacts/GenericABIEncoder');
 const IACE = require('../artifacts/IACE');
 const IAZTEC = require('../artifacts/IAZTEC');
@@ -21,6 +24,9 @@ const NoteUtils = require('../artifacts/NoteUtils');
 const PrivateRange = require('../artifacts/PrivateRange');
 const PrivateRangeABIEncoder = require('../artifacts/PrivateRangeABIEncoder');
 const PrivateRangeInterface = require('../artifacts/PrivateRangeInterface');
+const PublicRange = require('../artifacts/PublicRange');
+const PublicRangeABIEncoder = require('../artifacts/PublicRangeABIEncoder');
+const PublicRangeInterface = require('../artifacts/PublicRangeInterface');
 const ProofUtils = require('../artifacts/ProofUtils');
 const SafeMath8 = require('../artifacts/SafeMath8');
 const Swap = require('../artifacts/Swap');
@@ -42,6 +48,9 @@ module.exports = {
     DividendABIEncoder,
     DividendInterface,
     ERC20Mintable,
+    FactoryAdjustable201907,
+    FactoryConvertible201907,
+    FactoryMixed201907,
     GenericABIEncoder,
     IACE,
     IAZTEC,
@@ -60,6 +69,9 @@ module.exports = {
     PrivateRangeABIEncoder,
     PrivateRangeInterface,
     ProofUtils,
+    PublicRange,
+    PublicRangeABIEncoder,
+    PublicRangeInterface,
     SafeMath8,
     Swap,
     SwapABIEncoder,

@@ -59,13 +59,13 @@ describe('Private range proof Verifier', () => {
         it('should throw error if unsatisfied proof relations', async () => {
             const bogusComparisonValue = 5;
             const bogusComparisonNote = await note.create(publicKey, bogusComparisonValue);
-            let error;
-            try {
-                const _ = new PrivateRangeProof(originalNote, bogusComparisonNote, utilityNote, sender);
-            } catch (err) {
-                error = err;
-            }
-            expect(error.message).to.equal(errors.codes.BALANCING_RELATION_NOT_SATISFIED);
+            const proof = new PrivateRangeProof(originalNote, bogusComparisonNote, utilityNote, sender, false);
+
+            const verifier = new PrivateRangeVerifier(proof);
+            verifier.verifyProof();
+            expect(verifier.isValid).to.equal(false);
+            expect(verifier.errors.length).to.equal(1);
+            expect(verifier.errors[0]).to.equal(errors.codes.CHALLENGE_RESPONSE_FAIL);
         });
 
         it('should fail if malformed challenge', async () => {
