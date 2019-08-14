@@ -77,9 +77,7 @@ export default function resetdb({
                 log(`No database named '${name}'.`);
             } else {
                 errorLog('error', error);
-                if (onClose) {
-                    onClose();
-                }
+                triggerFetalError();
                 return null;
             }
 

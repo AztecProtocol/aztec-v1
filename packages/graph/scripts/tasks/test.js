@@ -76,6 +76,7 @@ export default function test({
                 runTest();
             } else {
                 warnLog(`There is already a process running on port ${ganachePort}`);
+                log(`Stop that instance or run ${chalk.cyan('yarn test --useExistingGanache')} to use the same ganache instance.'`);
                 if (onClose) {
                     onClose();
                 } else {

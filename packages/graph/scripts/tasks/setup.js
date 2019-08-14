@@ -24,6 +24,7 @@ export default function setup({
     onStart,
     onError,
     onClose,
+    showHints,
 } = {}) {
     const runningProcesses = {};
     let confirmClose;
@@ -74,6 +75,16 @@ export default function setup({
                 }
                 break;
             }
+            case 'h':
+            case 'H': {
+                if (showHints) {
+                    showHints();
+                }
+                break;
+            }
+            case 'ENTER':
+                log('\n');
+                break;
             default:
                 if (confirmClose) {
                     confirmClose = false;
