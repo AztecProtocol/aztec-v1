@@ -23,7 +23,7 @@ const JoinSplitFluidValidator = artifacts.require('./JoinSplitFluid');
 const JoinSplitFluidValidatorInterface = artifacts.require('./JoinSplitFluidInterface');
 JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
 
-const MixedFactory = artifacts.require('./noteRegistry/epochs/201907/mixed/FactoryMixed201907');
+const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
 
 const PublicRangeValidator = artifacts.require('./PublicRange');
 const PublicRangeValidatorInterface = artifacts.require('./PublicRangeInterface');
@@ -305,8 +305,8 @@ contract('ACE', (accounts) => {
             });
 
             it('should not update the validatedProofs mapping for utility proofs', async () => {
-                const mixedFactory = await MixedFactory.new(ace.address);
-                await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
+                const adjustableFactory = await AdjustableFactory.new(ace.address);
+                await ace.setFactory(generateFactoryId(1, 1, 3), adjustableFactory.address, { from: sender });
 
                 const scalingFactor = new BN(1);
                 const canAdjustSupply = true;

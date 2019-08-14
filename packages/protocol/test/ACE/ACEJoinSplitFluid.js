@@ -23,8 +23,7 @@ const JoinSplitFluidInterface = artifacts.require('./JoinSplitFluidInterface');
 const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
 const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
-const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
-const MixedFactory = artifacts.require('./noteRegistry/epochs/201907/mixed/FactoryMixed201907');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 
 const { generateFactoryId } = require('../helpers/Factory');
 
@@ -75,11 +74,11 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
-            const convertibleFactory = await ConvertibleFactory.new(ace.address);
-            const mixedFactory = await MixedFactory.new(ace.address);
+            const baseFactory = await BaseFactory.new(ace.address);
+            const adjustableFactory = await AdjustableFactory.new(ace.address);
 
-            await ace.setFactory(generateFactoryId(1, 1, 1), convertibleFactory.address, { from: sender });
-            await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
+            await ace.setFactory(generateFactoryId(1, 1, 1), baseFactory.address, { from: sender });
+            await ace.setFactory(generateFactoryId(1, 1, 3), adjustableFactory.address, { from: sender });
 
             const scalingFactor = new BN(1);
             const canAdjustSupply = true;
@@ -143,10 +142,10 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
 
             const adjustableFactory = await AdjustableFactory.new(ace.address);
-            const convertibleFactory = await ConvertibleFactory.new(ace.address);
-            const mixedFactory = await MixedFactory.new(ace.address);
+            const baseFactory = await BaseFactory.new(ace.address);
+            const mixedFactory = await AdjustableFactory.new(ace.address);
 
-            await ace.setFactory(generateFactoryId(1, 1, 1), convertibleFactory.address, { from: sender });
+            await ace.setFactory(generateFactoryId(1, 1, 1), baseFactory.address, { from: sender });
             await ace.setFactory(generateFactoryId(1, 1, 2), adjustableFactory.address);
             await ace.setFactory(generateFactoryId(1, 1, 3), mixedFactory.address, { from: sender });
         });
