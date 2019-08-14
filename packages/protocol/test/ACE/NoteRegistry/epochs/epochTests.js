@@ -5,9 +5,6 @@
 const fs = require('fs');
 const path = require('path');
 const truffleAssert = require('truffle-assertions');
-const {
-    constants: { addresses },
-} = require('@aztec/dev-utils');
 
 function findBehaviourContracts(epochPath) {
     const paths = fs.readdirSync(epochPath);

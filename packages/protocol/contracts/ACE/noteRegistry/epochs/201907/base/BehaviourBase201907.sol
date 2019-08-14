@@ -5,13 +5,13 @@ import "../../../../../libs/NoteUtils.sol";
 import "../Behaviour201907.sol";
 
 /**
- * @title BehaviourConvertible201907
+ * @title BehaviourBase201907
  * @author AZTEC
- * @dev This contract extends Behaviour201907, to add methods which enable public/private conversion.
+ * @dev This contract extends Behaviour201907.
         Methods are documented in interface.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract BehaviourConvertible201907 is Behaviour201907 {
+contract BehaviourBase201907 is Behaviour201907 {
     constructor () Behaviour201907() public {}
 }
