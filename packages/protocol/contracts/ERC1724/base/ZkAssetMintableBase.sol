@@ -18,8 +18,7 @@ import "./ZkAssetOwnableBase.sol";
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 contract ZkAssetMintableBase is ZkAssetOwnableBase {
-    event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
-
+    event UpdateTotalMinted(bytes32 noteHash, bytes metaData);
     /**
     * @dev Executes a confidential minting procedure, dependent on the provided proofData
     * being succesfully validated by the zero-knowledge validator
@@ -43,10 +42,10 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
 
         (,
         bytes32 noteHash,
-        bytes memory metadata) = newTotal.get(0).extractNote();
+        bytes memory metaData) = newTotal.get(0).extractNote();
 
         logOutputNotes(mintedNotes);
-        emit UpdateTotalMinted(noteHash, metadata);
+        emit UpdateTotalMinted(noteHash, metaData);
     }
 
     /**
