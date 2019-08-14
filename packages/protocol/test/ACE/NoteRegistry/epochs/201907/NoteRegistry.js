@@ -16,7 +16,8 @@ const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/Factory
 const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
 const BehaviourContract = artifacts.require('./noteRegistry/interfaces/NoteRegistryBehaviour');
 
-const { getNotesForAccount } = require('../../../../helpers/note');
+const { generateFactoryId } = require('../../../../helpers/Factory');
+const { getNotesForAccount } = require('../../../../helpers/ERC1724');
 
 let ace;
 const aztecAccount = secp256k1.generateAccount();
@@ -26,10 +27,6 @@ const canConvert = true;
 let erc20;
 const scalingFactor = new BN(10);
 const tokensTransferred = new BN(100000);
-
-const generateFactoryId = (epoch, cryptoSystem, assetType) => {
-    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
-};
 
 contract('NoteRegistry', (accounts) => {
     let confidentialProof;
@@ -56,7 +53,6 @@ contract('NoteRegistry', (accounts) => {
 
         erc20 = await ERC20Mintable.new();
         await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert);
-
         await erc20.mint(sender, scalingFactor.mul(tokensTransferred));
         await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
 
