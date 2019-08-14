@@ -33,13 +33,7 @@ class JoinSplitFluidProof extends JoinSplitProof {
      * @param {Object[]} adjustedNotes - notes to be minted or burned
      * @param {string} sender - Ethereum address of the transaction sender
      */
-    constructor(
-        type,
-        currentTotalValueNote,
-        newTotalValueNote,
-        adjustedNotes,
-        sender,
-    ) {
+    constructor(type, currentTotalValueNote, newTotalValueNote, adjustedNotes, sender) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
         super([newTotalValueNote], [currentTotalValueNote, ...adjustedNotes], sender, publicValue, publicOwner);

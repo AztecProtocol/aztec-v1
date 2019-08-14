@@ -58,7 +58,9 @@ describe('Output Coder', () => {
         expect(bn128.decompressHex(encoded.slice(0xc0, 0xe0)).eq(notes[0].sigma)).to.equal(true);
 
         // 1st 0x21 of metaData is the ephemeralKey
-        expect(secp256k1.decompressHex(encoded.slice(0xe0, 0x101)).eq(notes[0].ephemeral.getPublic())).to.equal(true);
+        expect(secp256k1.decompressHex(encoded.slice(0xe0, 0x101)).eq(notes[0].ephemeralFromMetaData().getPublic())).to.equal(
+            true,
+        );
     });
 
     it('should encode input note', () => {
@@ -174,7 +176,7 @@ describe('Output Coder', () => {
         const result = outputCoder.decodeOutputNote(encoded);
         expect(result.gamma.eq(notes[0].gamma)).to.equal(true);
         expect(result.sigma.eq(notes[0].sigma)).to.equal(true);
-        expect(result.ephemeral.eq(notes[0].ephemeral.getPublic())).to.equal(true);
+        expect(result.ephemeral.eq(notes[0].ephemeralFromMetaData().getPublic())).to.equal(true);
         expect(result.owner).to.equal(notes[0].owner);
         expect(result.noteHash).to.equal(notes[0].noteHash);
         // TODO: expect(result.noteType).to.equal(notes[0].noteType);
@@ -211,7 +213,7 @@ describe('Output Coder', () => {
             expect(result[i].sigma.eq(notes[i].sigma)).to.equal(true);
             expect(result[i].owner).to.equal(notes[i].owner);
             expect(result[i].noteHash).to.equal(notes[i].noteHash);
-            expect(result[i].ephemeral.eq(notes[i].ephemeral.getPublic())).to.equal(true);
+            expect(result[i].ephemeral.eq(notes[i].ephemeralFromMetaData().getPublic())).to.equal(true);
         }
     });
 
@@ -240,7 +242,7 @@ describe('Output Coder', () => {
         for (let i = 0; i < result.outputNotes.length; i += 1) {
             expect(result.outputNotes[i].gamma.eq(notes[i + 2].gamma)).to.equal(true);
             expect(result.outputNotes[i].sigma.eq(notes[i + 2].sigma)).to.equal(true);
-            expect(result.outputNotes[i].ephemeral.eq(notes[i + 2].ephemeral.getPublic())).to.equal(true);
+            expect(result.outputNotes[i].ephemeral.eq(notes[i + 2].ephemeralFromMetaData().getPublic())).to.equal(true);
             expect(result.outputNotes[i].owner).to.equal(notes[i + 2].owner);
             expect(result.outputNotes[i].noteHash).to.equal(notes[i + 2].noteHash);
         }
@@ -279,9 +281,9 @@ describe('Output Coder', () => {
                 expect(result[i].inputNotes[j].noteHash).to.equal(proofOutputs[i].inputNotes[j].noteHash);
             }
             for (let j = 0; j < result[i].outputNotes.length; j += 1) {
-                expect(result[i].outputNotes[j].ephemeral.eq(proofOutputs[i].outputNotes[j].ephemeral.getPublic())).to.equal(
-                    true,
-                );
+                expect(
+                    result[i].outputNotes[j].ephemeral.eq(proofOutputs[i].outputNotes[j].ephemeralFromMetaData().getPublic()),
+                ).to.equal(true);
                 expect(result[i].outputNotes[j].gamma.eq(proofOutputs[i].outputNotes[j].gamma)).to.equal(true);
                 expect(result[i].outputNotes[j].sigma.eq(proofOutputs[i].outputNotes[j].sigma)).to.equal(true);
                 expect(result[i].outputNotes[j].owner).to.equal(proofOutputs[i].outputNotes[j].owner.toLowerCase());
