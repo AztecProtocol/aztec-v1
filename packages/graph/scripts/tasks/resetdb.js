@@ -67,10 +67,9 @@ export default function resetdb({
                 return null;
             }
 
-            return instance(
-                `docker exec ${containerId} dropdb -U ${user} ${name}`,
-            );
+            return instance('docker-compose up -d postgres');
         })
+        .next(() => instance(`docker exec ${containerId} dropdb -U ${user} ${name}`))
         .next((data, error) => {
             if (!error) {
                 log(data || `Successfully dropped database '${name}'.`);
