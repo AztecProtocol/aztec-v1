@@ -4,6 +4,8 @@ const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
+const { toWei } = require('web3-utils');
+
 
 const { JOIN_SPLIT_PROOF, MINT_PROOF } = devUtils.proofs;
 
@@ -72,6 +74,8 @@ contract('ZkAssetMintable', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
+            await ace.setProofGasCost(MINT_PROOF, 0);
+            await ace.setGasMultiplier(0);
         });
 
         it('should complete a mint operation', async () => {
@@ -84,6 +88,32 @@ contract('ZkAssetMintable', (accounts) => {
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
+            expect(receipt.status).to.equal(true);
+        });
+
+        it('should complete a mint operation with a fee', async () => {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
+
+            const proofCost = 800000;
+            const gasMultiplier = 0.25 * 1000;
+            const gasPrice = new BN(toWei('1', 'gwei'));
+
+            await ace.setProofGasCost(MINT_PROOF, proofCost);
+            await ace.setGasMultiplier(gasMultiplier);
+
+            const fee = await ace.getFeeForProof(MINT_PROOF);
+            const totalFee = fee.mul(gasPrice);
+
+            const [sender] = accounts;
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const data = proof.encodeABI();
+            const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data, {
+                from: accounts[0],
+                value: totalFee,
+            });
             expect(receipt.status).to.equal(true);
         });
 

@@ -1,11 +1,11 @@
 /* eslint-disable prefer-destructuring */
-/* global artifacts, expect, contract, it:true */
-const { JoinSplitProof, note, PublicRangeProof } = require('aztec.js');
+/* global artifacts, expect, contract, it:true, web3:true */
+const { JoinSplitProof, metaData, note, PublicRangeProof } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
+const { padLeft, toWei, toHex } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 const { customMetaData } = require('../helpers/ERC1724');
@@ -52,7 +52,7 @@ const getDefaultNotes = async () => {
 };
 
 contract('ACE', (accounts) => {
-    const sender = accounts[0];
+    const [sender, feeOwner, nonOwner] = accounts;
 
     describe('Initialization', () => {
         let ace;
@@ -102,6 +102,76 @@ contract('ACE', (accounts) => {
             it('should read the validator address', async () => {
                 const validatorAddress = await ace.getValidatorAddress(JOIN_SPLIT_PROOF);
                 expect(validatorAddress).to.equal(joinSplitValidator.address);
+            });
+
+            it('should set the gasCost of a proof', async () => {
+                const proofCost = 800000;
+                await ace.setProofGasCost(JOIN_SPLIT_PROOF, proofCost);
+                const setGasCost = await ace.proofGasCosts(JOIN_SPLIT_PROOF);
+                expect(setGasCost.toNumber()).to.equal(proofCost);
+            });
+
+            it('should set the gasMultiplier', async () => {
+                const gasMultiplier = 1 * 1000;
+                await ace.setGasMultiplier(gasMultiplier);
+                const setGasMultiplier = await ace.gasMultiplier();
+                expect(setGasMultiplier.toNumber()).to.equal(gasMultiplier);
+            });
+
+            it('should succeed in validating join-split proof with fee', async () => {
+                const proofCost = 800000;
+                const gasMultiplier = 0.25 * 1000;
+                const gasPrice = toHex(toWei('1', 'gwei'));
+
+                await ace.setProofGasCost(JOIN_SPLIT_PROOF, proofCost);
+                await ace.setGasMultiplier(gasMultiplier);
+
+                const fee = await ace.getFeeForProof(JOIN_SPLIT_PROOF);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, data, {
+                    value: fee * gasPrice,
+                });
+                expect(receipt.status).to.equal(true);
+            });
+
+            it('should charge the correct fee', async () => {
+                const proofCost = 800000;
+                const gasMultiplier = 0.25 * 1000;
+                const gasPrice = new BN(toWei('1', 'gwei'));
+
+                await ace.setProofGasCost(JOIN_SPLIT_PROOF, proofCost);
+                await ace.setGasMultiplier(gasMultiplier);
+
+                const fee = await ace.getFeeForProof(JOIN_SPLIT_PROOF);
+                const totalFee = fee.mul(gasPrice);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, data, {
+                    value: totalFee,
+                });
+                const event = receipt.logs.find(e => e.event === 'TxFee');
+                // eslint-disable-next-line no-underscore-dangle
+                expect(event.args._txFee.toString()).to.equal(totalFee.toString());
+            });
+
+            it('should allow owner to withdraw fees to an arbitrary address', async () => {
+                const proofCost = 800000;
+                const gasMultiplier = 0.25 * 1000;
+                const gasPrice = new BN(toWei('1', 'gwei'));
+
+                await ace.setProofGasCost(JOIN_SPLIT_PROOF, proofCost);
+                await ace.setGasMultiplier(gasMultiplier);
+
+                const fee = await ace.getFeeForProof(JOIN_SPLIT_PROOF);
+                const totalFee = fee.mul(gasPrice);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, sender, data, {
+                    value: totalFee,
+                });
+                const preWithdrawBalance = new BN(await web3.eth.getBalance(feeOwner));
+                await ace.withdraw(feeOwner, totalFee);
+                const postWithdrawBalance = await web3.eth.getBalance(feeOwner);
+
+                expect(preWithdrawBalance.add(totalFee).toString()).to.equal(postWithdrawBalance)
             });
 
             it('should increment the latest epoch', async () => {
@@ -205,6 +275,41 @@ contract('ACE', (accounts) => {
                     ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address, opts),
                     'only the owner can set a proof',
                 );
+            });
+
+            it('should fail in validating join-split proof with fee if no ether attached', async () => {
+                const proofCost = 800000;
+                const gasMultiplier = 0.25 * 1000;
+                const gasPrice = toHex(toWei('1', 'gwei'));
+
+                await ace.setProofGasCost(JOIN_SPLIT_PROOF, proofCost);
+                await ace.setGasMultiplier(gasMultiplier);
+
+                const fee = await ace.getFeeForProof(JOIN_SPLIT_PROOF);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                await truffleAssert.reverts(ace.validateProof(JOIN_SPLIT_PROOF, sender, data),
+                    "msg.value has insuficient associated fee");
+            });
+
+            it('should not allow non-owner to withdraw fees to an arbitrary address', async () => {
+                const proofCost = 800000;
+                const gasMultiplier = 0.25 * 1000;
+                const gasPrice = new BN(toWei('1', 'gwei'));
+
+                await ace.setProofGasCost(JOIN_SPLIT_PROOF, proofCost);
+                await ace.setGasMultiplier(gasMultiplier);
+
+                const fee = await ace.getFeeForProof(JOIN_SPLIT_PROOF);
+                const totalFee = fee.mul(gasPrice);
+                const data = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, sender, data, {
+                    value: totalFee,
+                });
+                const preWithdrawBalance = new BN(await web3.eth.getBalance(feeOwner));
+                await truffleAssert.reverts(ace.withdraw(feeOwner, totalFee, { from: nonOwner }));
+                const postWithdrawBalance = await web3.eth.getBalance(feeOwner);
+
+                expect(preWithdrawBalance.toString()).to.equal(postWithdrawBalance)
             });
 
             it("should not set a proof if the proof's epoch is higher than the contract latest epoch", async () => {

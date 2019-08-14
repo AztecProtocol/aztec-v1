@@ -27,10 +27,10 @@ contract ZkAssetBurnableBase is ZkAssetOwnableBase {
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofData - bytes array of proof data, outputted from a proof construction
     */
-    function confidentialBurn(uint24 _proof, bytes calldata _proofData) external onlyOwner {
+    function confidentialBurn(uint24 _proof, bytes calldata _proofData) external payable onlyOwner {
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory _proofOutputs) = ace.burn(_proof, _proofData, owner());
+        (bytes memory _proofOutputs) = ace.burn.value(msg.value)(_proof, _proofData, owner());
 
         (, bytes memory newTotal, ,) = _proofOutputs.get(0).extractProofOutput();
 

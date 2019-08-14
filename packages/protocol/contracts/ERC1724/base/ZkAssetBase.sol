@@ -92,12 +92,12 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     * transfer instructions for the ACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
-    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
+    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public payable {
         // Check that it's a balanced proof
         (, uint8 category, ) = _proofId.getProofComponents();
 
         require(category == uint8(ProofCategory.BALANCED), "this is not a balanced proof");
-        bytes memory proofOutputs = ace.validateProof(_proofId, msg.sender, _proofData);
+        bytes memory proofOutputs = ace.validateProof.value(msg.value)(_proofId, msg.sender, _proofData);
         confidentialTransferInternal(_proofId, proofOutputs, _signatures, _proofData);
     }
 
@@ -112,7 +112,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     * transfer instructions for the ACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
-    function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
+    function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public payable {
         confidentialTransfer(JOIN_SPLIT_PROOF, _proofData, _signatures);
     }
 
@@ -225,7 +225,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         bytes memory outputNotes,
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
-        
+
         uint256 length = inputNotes.getLength();
         for (uint i = 0; i < length; i += 1) {
             (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();

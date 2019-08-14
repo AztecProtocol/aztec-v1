@@ -31,10 +31,11 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     function confidentialMint(uint24 _proof, bytes memory _proofData)
         public
         onlyOwner
+        payable
     {
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, owner());
+        (bytes memory _proofOutputs) = ace.mint.value(msg.value)(_proof, _proofData, owner());
 
         (, bytes memory newTotal, ,) = _proofOutputs.get(0).extractProofOutput();
 
@@ -60,14 +61,15 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     * transfer instructions for the ACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
-    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
+    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public payable {
         bool result = supportsProof(_proofId);
         require(result == true, "expected proof to be supported");
         // Check that it's a balanced proof
         (, uint8 category, ) = _proofId.getProofComponents();
 
         require(category == uint8(ProofCategory.BALANCED), "this is not a balanced proof");
-        bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
+        bytes memory proofOutputs = ace.validateProof.value(msg.value)(JOIN_SPLIT_PROOF, msg.sender, _proofData);
+
         require(proofOutputs.length != 0, "proof invalid");
 
         bytes memory proofOutput = proofOutputs.get(0);
@@ -99,7 +101,7 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     * @param _proofData bytes variable outputted from proof construction
     * @param _signatures ECDSA signatures over all input notes involved in the confidentialTransfer()
     */
-    function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
+    function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public payable {
         confidentialTransfer(JOIN_SPLIT_PROOF, _proofData, _signatures);
     }
 

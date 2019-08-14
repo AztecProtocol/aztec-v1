@@ -4,6 +4,7 @@ const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
+const { toWei } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
 
@@ -58,6 +59,8 @@ contract('ZkAssetBurnable', (accounts) => {
 
             erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
+            await ace.setProofGasCost(BURN_PROOF, 0);
+            await ace.setGasMultiplier(0);
         });
 
         it('should transfer public value in, then burn it', async () => {
@@ -127,6 +130,63 @@ contract('ZkAssetBurnable', (accounts) => {
                 .sub(new BN(-depositPublicValue).mul(scalingFactor))
                 .toNumber();
             expect(linkedTokenFinalBalance).to.equal(expectedLinkedTokenFinalBalance);
+        });
+
+        it('should complete a burn operation with a fee', async () => {
+            const zkAssetBurnable = await ZkAssetBurnable.new(ace.address, erc20.address, scalingFactor, {
+                from: accounts[0],
+            });
+
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                depositPublicValue,
+                newBurnCounterNote,
+                zeroBurnCounterNote,
+                burnNotes,
+            } = await getDefaultDepositAndBurnNotes();
+
+            const publicOwner = accounts[0];
+            const tokensTransferred = new BN(1000);
+            erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred));
+            erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
+
+            const proofCost = 800000;
+            const gasMultiplier = 0.25 * 1000;
+            const gasPrice = new BN(toWei('1', 'gwei'));
+
+            await ace.setProofGasCost(BURN_PROOF, proofCost);
+            await ace.setGasMultiplier(gasMultiplier);
+
+            const fee = await ace.getFeeForProof(BURN_PROOF);
+            const totalFee = fee.mul(gasPrice);
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                depositSender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetBurnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetBurnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetBurnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
+            });
+            const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
+            expect(joinSplitReceipt.status).to.equal(true);
+
+
+            const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, publicOwner);
+            const burnData = burnProof.encodeABI(zkAssetBurnable.address);
+
+            const { receipt: burnReceipt } = await zkAssetBurnable.confidentialBurn(BURN_PROOF, burnData, {
+                from: accounts[0],
+                value: totalFee,
+            });
+            expect(burnReceipt.status).to.equal(true);
+
         });
     });
 

@@ -12,7 +12,7 @@ const crypto = require('crypto');
 const dotenv = require('dotenv');
 const hdkey = require('ethereumjs-wallet/hdkey');
 const truffleAssert = require('truffle-assertions');
-const { keccak256, padLeft, soliditySha3 } = require('web3-utils');
+const { keccak256, padLeft, soliditySha3, toWei } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
 const timeTravel = require('../timeTravel');
@@ -66,6 +66,9 @@ contract('ZkAsset', (accounts) => {
                 return erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
             }),
         );
+
+        await ace.setProofGasCost(JOIN_SPLIT_PROOF, 0);
+        await ace.setGasMultiplier(0);
     });
 
     describe('Success States', async () => {
@@ -127,7 +130,39 @@ contract('ZkAsset', (accounts) => {
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
         });
 
-        it('should emit CreateNote() event with customMetaData when a single note is created', async () => {
+        it('should complete a confidentialTransfer with a fee', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const publicValue = depositPublicValue * -1;
+
+            const proofCost = 800000;
+            const gasMultiplier = 0.25 * 1000;
+            const gasPrice = new BN(toWei('1', 'gwei'));
+
+            await ace.setProofGasCost(JOIN_SPLIT_PROOF, proofCost);
+            await ace.setGasMultiplier(gasMultiplier);
+
+            const fee = await ace.getFeeForProof(JOIN_SPLIT_PROOF);
+            const totalFee = fee.mul(gasPrice);
+
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: accounts[0] });
+            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, {
+                from: accounts[0],
+                value: totalFee,
+            });
+            expect(receipt.status).to.equal(true);
+        });
+
+        it('should emit CreateNote() event with customMetadata when a single note is created', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,

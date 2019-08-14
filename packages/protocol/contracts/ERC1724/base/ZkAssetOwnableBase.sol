@@ -55,7 +55,7 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
     * transfer instructions for the ACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
-    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
+    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public payable {
         bool result = supportsProof(_proofId);
         require(result == true, "expected proof to be supported");
         super.confidentialTransfer(_proofId, _proofData, _signatures);

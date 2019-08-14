@@ -12,6 +12,7 @@ import "../libs/NoteUtils.sol";
 import "../libs/ProofUtils.sol";
 import "../libs/VersioningUtils.sol";
 import "../libs/SafeMath8.sol";
+import "./Chargeable.sol";
 
 /**
  * @title The AZTEC Cryptography Engine
@@ -20,7 +21,7 @@ import "../libs/SafeMath8.sol";
  *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract ACE is IAZTEC, Ownable, NoteRegistryManager {
+contract ACE is IAZTEC, Ownable, NoteRegistryManager, Chargeable {
     using NoteUtils for bytes;
     using ProofUtils for uint24;
     using SafeMath for uint256;
@@ -69,7 +70,11 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         uint24 _proof,
         bytes calldata _proofData,
         address _proofSender
-    ) external returns (bytes memory) {
+    )
+        external
+        payable
+        returns (bytes memory)
+    {
 
         NoteRegistry memory registry = registries[msg.sender];
         require(address(registry.behaviour) != address(0x0), "note registry does not exist for the given address");
@@ -79,7 +84,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
 
         require(category == uint8(ProofCategory.MINT), "this is not a mint proof");
 
-        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        bytes memory _proofOutputs = this.validateProof.value(msg.value)(_proof, _proofSender, _proofData);
         require(_proofOutputs.getLength() > 0, "call to validateProof failed");
 
         registry.behaviour.mint(_proofOutputs);
@@ -101,7 +106,11 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         uint24 _proof,
         bytes calldata _proofData,
         address _proofSender
-    ) external returns (bytes memory) {
+    )
+        external
+        payable
+        returns (bytes memory)
+    {
         NoteRegistry memory registry = registries[msg.sender];
         require(address(registry.behaviour) != address(0x0), "note registry does not exist for the given address");
 
@@ -110,7 +119,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
 
         require(category == uint8(ProofCategory.BURN), "this is not a burn proof");
 
-        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        bytes memory _proofOutputs = this.validateProof.value(msg.value)(_proof, _proofSender, _proofData);
         require(_proofOutputs.getLength() > 0, "call to validateProof failed");
 
         registry.behaviour.burn(_proofOutputs);
@@ -133,7 +142,12 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
     * Unnamed param is the AZTEC zero-knowledge proof data
     * @return a `bytes proofOutputs` variable formatted according to the Cryptography Engine standard
     */
-    function validateProof(uint24 _proof, address _sender, bytes calldata) external returns (bytes memory) {
+    function validateProof(uint24 _proof, address _sender, bytes calldata)
+        external
+        payable
+        fee(_proof)
+        returns (bytes memory)
+    {
         require(_proof != 0, "expected the proof to be valid");
         // validate that the provided _proof object maps to a corresponding validator and also that
         // the validator is not disabled
@@ -378,6 +392,33 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
             require(validatorAddress != address(0x0), "expected the validator address to exist");
             require(isValidatorDisabled == false, "expected the validator address to not be disabled");
         }
+    }
+
+    function setProofGasCost(uint24 _proofId, uint256 _gasCost)
+        public
+        onlyOwner
+    {
+        proofGasCosts[_proofId] = _gasCost;
+        emit SetGasCostForProof(_proofId, _gasCost);
+    }
+
+    function setGasMultiplier(uint256 _multiplier)
+        public
+        onlyOwner
+    {
+        gasMultiplier = _multiplier;
+        emit SetGasMultiplier(_multiplier);
+    }
+
+    function withdraw(address payable _destination, uint256 _amount)
+        public
+        onlyOwner
+        returns (bool)
+    {
+        require(_destination != address(0x0), "can not withdraw to 0x0 address");
+        require(_amount <= address(this).balance, "can not withdraw more than balance");
+        _destination.transfer(address(this).balance);
+        return true;
     }
 }
 
