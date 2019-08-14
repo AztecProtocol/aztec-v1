@@ -38,10 +38,13 @@ contract IAZTEC {
     // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
     uint24 public constant PRIVATE_RANGE_PROOF = 66562;
 
+        // proofEpoch = 1 | proofCategory = 4 | proofId = 3
+    // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
+    uint24 public constant PUBLIC_RANGE_PROOF = 66563;
+
     // proofEpoch = 1 | proofCategory = 4 | proofId = 1
     // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
     uint24 public constant DIVIDEND_PROOF = 66561;
-
 
     // Hash of a dummy AZTEC note with k = 0 and a = 1
     bytes32 public constant ZERO_VALUE_NOTE_HASH = 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c;

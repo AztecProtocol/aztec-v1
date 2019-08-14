@@ -59,8 +59,7 @@ contract('LibEIP712', (accounts) => {
                 aztecAccount.address,
                 aztecAccount.privateKey,
             );
-            const concatenatedSignature = signature[1] + signature[2].slice(2) + signature[0].slice(-2);
-            const result = await libEIP712._recoverSignature(encodedTypedData, concatenatedSignature);
+            const result = await libEIP712._recoverSignature(encodedTypedData, signature);
             expect(result).to.equal(aztecAccount.address);
         });
     });
@@ -75,12 +74,53 @@ contract('LibEIP712', (accounts) => {
             );
 
             // see https://ethereum.stackexchange.com/questions/69328/how-to-get-0x0-from-ecrecover/69329#69329
-            const r = signature[0];
-            const s = signature[1].slice(2);
-            const v = '10';
-            const concatenatedSignature = r + s + v;
+
+            // Replacing v with an incorrect value of 10
+            const incorrectSignature = signature.slice(0, 128) + '10';
             await truffleAssert.reverts(
-                libEIP712._recoverSignature(encodedTypedData, concatenatedSignature),
+                libEIP712._recoverSignature(encodedTypedData, incorrectSignature),
+                'signer address cannot be 0',
+            );
+        });
+
+        it('should fail when signature is invalid', async () => {
+            const aztecAccount = secp256k1.generateAccount();
+            const { signature, encodedTypedData } = signer.signNoteACEDomain(
+                libEIP712.address,
+                aztecAccount.address,
+                aztecAccount.privateKey,
+            );
+
+            const seg1 = signature[1].slice(2);
+            const v1 = padLeft('0', seg1.length);
+            expect(v1).not.to.equal(seg1);
+            const invalidSignature1 = `0x${signature[0] + v1 + signature[2].slice(2)}`;
+            await truffleAssert.reverts(
+                libEIP712._recoverSignature(encodedTypedData, invalidSignature1),
+                'signer address cannot be 0',
+            );
+
+            const seg2 = signature[2].slice(2);
+            const v2 = padLeft('0', seg2.length);
+            expect(v2).not.to.equal(seg2);
+            const invalidSignature2 = `0x${signature[0] + signature[1].slice(2) + v2}`;
+            await truffleAssert.reverts(
+                libEIP712._recoverSignature(encodedTypedData, invalidSignature2),
+                'signer address cannot be 0',
+            );
+        });
+
+        it('should fail when signature has wrong length', async () => {
+            const aztecAccount = secp256k1.generateAccount();
+            const { signature, encodedTypedData } = signer.signNoteACEDomain(
+                libEIP712.address,
+                aztecAccount.address,
+                aztecAccount.privateKey,
+            );
+
+            const invalidSignature2 = `0x${signature[0] + signature[1].slice(2) + signature[2].slice(2) + '10'}`;
+            await truffleAssert.reverts(
+                libEIP712._recoverSignature(encodedTypedData, invalidSignature2),
                 'signer address cannot be 0',
             );
         });

@@ -76,6 +76,23 @@ contract('NoteRegistry', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
+        it('should emit correct noteRegistry creation event', async () => {
+            const opts = { from: accounts[1] };
+            const result = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
+            const registryOwner = accounts[1];
+            const linkedTokenAddress = erc20.address;
+
+            const createEvent = result.logs.find((l) => l.event === 'CreateNoteRegistry');
+            expect(createEvent).to.not.equal(undefined);
+
+            const { args } = createEvent;
+            expect(args.registryOwner).to.equal(registryOwner);
+            expect(args.scalingFactor.toNumber()).to.equal(scalingFactor.toNumber());
+            expect(args.linkedTokenAddress).to.equal(linkedTokenAddress);
+            expect(args.canAdjustSupply).to.equal(canAdjustSupply);
+            expect(args.canConvert).to.equal(canConvert);
+        });
+
         it('should be able to read a registry from storage', async () => {
             const registry = await ace.getRegistry(sender);
             expect(registry.canAdjustSupply).to.equal(false);

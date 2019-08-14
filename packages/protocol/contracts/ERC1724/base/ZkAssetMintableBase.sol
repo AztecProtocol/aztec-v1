@@ -18,8 +18,7 @@ import "./ZkAssetOwnableBase.sol";
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 contract ZkAssetMintableBase is ZkAssetOwnableBase {
-    event UpdateTotalMinted(bytes32 noteHash, bytes noteData);
-
+    event UpdateTotalMinted(bytes32 noteHash, bytes metaData);
     /**
     * @dev Executes a confidential minting procedure, dependent on the provided proofData
     * being succesfully validated by the zero-knowledge validator
@@ -29,10 +28,13 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofData - bytes array of proof data, outputted from a proof construction
     */
-    function confidentialMint(uint24 _proof, bytes calldata _proofData) external onlyOwner {
+    function confidentialMint(uint24 _proof, bytes memory _proofData)
+        public
+        onlyOwner
+    {
         require(_proofData.length != 0, "proof invalid");
 
-        (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, address(this));
+        (bytes memory _proofOutputs) = ace.mint(_proof, _proofData, owner());
 
         (, bytes memory newTotal, ,) = _proofOutputs.get(0).extractProofOutput();
 
@@ -40,11 +42,12 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
 
         (,
         bytes32 noteHash,
-        bytes memory metadata) = newTotal.get(0).extractNote();
+        bytes memory metaData) = newTotal.get(0).extractNote();
 
         logOutputNotes(mintedNotes);
-        emit UpdateTotalMinted(noteHash, metadata);
+        emit UpdateTotalMinted(noteHash, metaData);
     }
+
     /**
     * @dev Executes a basic unilateral, confidential transfer of AZTEC notes adapted for use with
     * a mintable ZkAsset.

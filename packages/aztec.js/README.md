@@ -20,7 +20,7 @@ Then import it in your project:
 const aztec = require('aztec.js');
 ```
 
-To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in the [@aztec/demo](https://github.com/AztecProtocol/AZTEC/tree/master/packages/demo) package. For full API docs, view our [GitHub Pages website](https://aztecprotocol.github.io/AZTEC)
+To see how this library can be used to issue AZTEC confidential transactions and create AZTEC notes, view our demonstration script and documentation in the [aztec-ganache-starter-kit](https://github.com/AztecProtocol/aztec-ganache-starter-kit/blob/master/test/demo.js) package. For full API docs, view our [GitHub Pages website](https://aztecprotocol.github.io/AZTEC)
 
 ## Contributing
 
@@ -65,7 +65,7 @@ $ yarn test
 ## Example
 
 ```node
-const { note, proof } = require('aztec.js');
+const { JoinSplitProof, note } = require('aztec.js');
 const secp256k1 = require('@aztec/secp256k1');
 
 // dummy address of confidential AZTEC - DAI smart contract
@@ -77,19 +77,14 @@ const inputNotes = [note.create(accounts[0].publicKey, 80), note.create(accounts
 
 const outputNotes = [note.create(accounts[1].publicKey, 50), note.create(accounts[1].publicKey, 100)];
 
-const kPublic = -10; // input notes contain 10 fewer than output notes = deposit of 10 public tokens
+const publicValue = -10; // input notes contain 10 fewer than output notes = deposit of 10 public tokens
 const sender = accounts[0].address; // address of transaction sender
+const publicOwner = accounts[0].address; // address of public token owner
 
-// proofData can be directly fed into an ZKERC20.sol contract's confidentialTransfer method
-const { proofData } = proof.joinSplit.encodeJoinSplitTransaction({
-    inputNotes: inputNotes,
-    outputNotes: outputNotes,
-    senderAddress: sender,
-    inputNoteOwners: [accounts[0], accounts[0]],
-    publicOwner: sender,
-    kPublic: kPublic,
-    validatorAddress: validatorAddress,
-});
+const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
 
-console.log('proofData', proofData);
+// data can be directly fed into an ZkAsset.sol contract's confidentialTransfer method
+const data = proof.encodeABI(validatorAddress);
+
+console.log('data', data);
 ```

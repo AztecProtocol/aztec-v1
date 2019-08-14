@@ -17,6 +17,8 @@ const ZkAssetMintable = artifacts.require('./ZkAssetMintable');
 
 const helpers = require('../helpers/ERC1724');
 
+const { customMetaData } = note.utils;
+
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
 
@@ -71,11 +73,11 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should complete a mint operation', async () => {
-            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
 
-            const sender = zkAssetMintable.address;
+            const [sender] = accounts;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
@@ -83,8 +85,22 @@ contract('ZkAssetMintable', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
+        it('should deploy a zkAsset and complete a mint operation in a single transaction', async () => {
+            const [sender] = accounts;
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const data = proof.encodeABI();
+
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, MINT_PROOF, data, {
+                from: accounts[0],
+            });
+
+            const mintedNote = await ace.getNote(zkAssetMintable.address, mintedNotes[0].noteHash);
+            expect(mintedNote.noteOwner).to.equal(aztecAccount.address);
+        });
+
         it('should transfer minted value out of the note registry', async () => {
-            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
 
@@ -93,7 +109,7 @@ contract('ZkAssetMintable', (accounts) => {
             expect(erc20TotalSupply).to.equal(0);
             const initialBalance = (await erc20.balanceOf(accounts[1])).toNumber();
 
-            const mintSender = zkAssetMintable.address;
+            const [mintSender] = accounts;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
 
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, mintSender);
@@ -123,7 +139,7 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should perform mint when using confidentialTransferFrom()', async () => {
-            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
 
@@ -137,7 +153,7 @@ contract('ZkAssetMintable', (accounts) => {
             expect(erc20TotalSupply).to.equal(0);
             expect(initialRecipientBalance).to.equal(0);
 
-            const mintSender = zkAssetMintable.address;
+            const [mintSender] = accounts;
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, mintSender);
             const data = proof.encodeABI();
             const { receipt: mintReceipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data);
@@ -184,7 +200,7 @@ contract('ZkAssetMintable', (accounts) => {
             const recipient1 = accounts[1];
             const delegateAddress = accounts[2];
 
-            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: sender,
             });
             const depositOutputNoteValues = [20, 30];
@@ -258,6 +274,31 @@ contract('ZkAssetMintable', (accounts) => {
             const finalAceBalance = (await erc20.balanceOf(ace.address)).toNumber();
             expect(finalAceBalance).to.equal(0);
         });
+
+        it('should correctly attach metaData to minted notes', async () => {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
+                from: accounts[0],
+            });
+
+            const [sender] = accounts;
+            const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const ephemeral = newMintCounterNote.metaData.slice(2);
+
+            newMintCounterNote.setMetaData(customMetaData);
+            const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const data = proof.encodeABI();
+            const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
+            expect(receipt.status).to.equal(true);
+
+
+            // Crucial check, confirm that the event contains the expected metaData
+            const event = receipt.logs.find((l) => l.event === 'UpdateTotalMinted');
+            const emittedEphemeral = event.args.metaData.slice(130, 196);
+            const emittedCustomData = event.args.metaData.slice(196, 752);
+            expect(emittedEphemeral).to.equal(ephemeral);
+            expect(emittedCustomData).to.equal(customMetaData.slice(2));
+            expect(true).to.equal(false);
+        });
     });
 
     describe('Failure States', () => {
@@ -274,11 +315,11 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should fail if msg.sender is not owner', async () => {
-            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
 
-            const sender = zkAssetMintable.address;
+            const [sender] = accounts;
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
@@ -286,10 +327,10 @@ contract('ZkAssetMintable', (accounts) => {
         });
 
         it('should fail for unbalanced proof relation, totalInputs !== totalOutputs', async () => {
-            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, {
+            const zkAssetMintable = await ZkAssetMintable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
-            const sender = zkAssetMintable.address;
+            const [sender] = accounts;
             const newMintCounterValue = 50;
             const mintedNoteValues = [30, 30];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getCustomMintNotes(
