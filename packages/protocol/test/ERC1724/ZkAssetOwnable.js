@@ -15,7 +15,7 @@ const ZkAssetOwnable = artifacts.require('./ZkAssetOwnable');
 const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
-const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
@@ -28,7 +28,7 @@ contract('ZkAssetOwnable', (accounts) => {
     let erc20;
     let zkAssetOwnable;
     let zkAssetOwnableTest;
-    let convertibleFactory;
+    let baseFactory;
 
     const epoch = 1;
     const filter = 17; // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
@@ -64,8 +64,8 @@ contract('ZkAssetOwnable', (accounts) => {
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
         await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
 
-        convertibleFactory = await ConvertibleFactory.new(ace.address);
-        await ace.setFactory(newFactoryId, convertibleFactory.address);
+        baseFactory = await BaseFactory.new(ace.address);
+        await ace.setFactory(newFactoryId, baseFactory.address);
 
         await Promise.all(
             accounts.map((account) => {

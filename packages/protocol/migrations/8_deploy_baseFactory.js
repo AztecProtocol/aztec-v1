@@ -5,7 +5,7 @@ const {
 const { isUndefined } = require('lodash');
 
 const ACE = artifacts.require('./ACE.sol');
-const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 
 module.exports = (deployer) => {
     if (isUndefined(ACE) || isUndefined(ACE.address)) {
@@ -15,7 +15,7 @@ module.exports = (deployer) => {
 
     /* eslint-disable no-new */
     new Promise(() => {
-        return deployer.deploy(ConvertibleFactory, ACE.address).then(async ({ address }) => {
+        return deployer.deploy(BaseFactory, ACE.address).then(async ({ address }) => {
             const ace = await ACE.at(ACE.address);
 
             await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 1 * 256 ** 0, address);
