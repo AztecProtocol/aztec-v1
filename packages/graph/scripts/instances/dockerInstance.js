@@ -6,22 +6,29 @@ import {
 
 const killedSig = '137';
 
-export default function graphNodeDockerInstance({
+export default function dockerInstance({
     onClose,
     onError,
 }) {
+    const exitOnError = () => {
+        if (onError) {
+            onError();
+        }
+        if (onClose) {
+            onClose();
+        }
+    };
+
     const handleReceiveOutput = (output) => {
         if (output.includes('exited with code')) {
             const [, code] = output.match(/exited with code ([0-9]+)/) || [];
             if (code !== killedSig) {
-                errorLog(`✖ Graph Node exited with code ${code}`, code);
+                errorLog(`✖ Graph Node exited with code ${code}`);
             }
-            if (onError) {
-                onError();
-            }
-            if (onClose) {
-                onClose();
-            }
+            exitOnError();
+        } else if (output.includes('change networks without changing the network name')) {
+            errorLog('Network not match.', output);
+            exitOnError();
         } else if (!output.includes('TokioContention')) {
             process.stdout.write(output);
         }
