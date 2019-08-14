@@ -107,7 +107,7 @@ library JoinSplitFluidABIEncoder {
             // get pointer to metadata
             let metadataIndex := calldataload(metadata)
             // get size of metadata
-            let metadataLength := calldataload(add(metadataIndex, sub(metadata, 0x40)))
+            let metadataLength := 0
 
             // copy note data to 0x20 - 0xa0
             mstore(0x00, 0x01)
@@ -140,7 +140,6 @@ library JoinSplitFluidABIEncoder {
                 )
             )
             // copy metadata into `s + 0xe0`
-            calldatacopy(0x400, add(metadataIndex, sub(metadata, 0x20)), metadataLength)
             // compute the relative offset to index this note in our returndata
 
             // increase s by note length
@@ -156,7 +155,9 @@ library JoinSplitFluidABIEncoder {
             // 0x400 + metadataLength = byte length of output notes (0x120)
             // 0x420 + metadataLength = # of output notes (1)
             // 0x440 + metadataLength = offset to outputNotes[0] (0x60)
-            mstore(add(0x400, metadataLength), 0x120) // store length of output notes
+            let metadataLengthTemp := calldataload(add(metadataIndex, sub(metadata, 0x40)))
+
+            mstore(add(0x400, metadataLength), add(0x120, metadataLengthTemp)) // store length of output notes
             mstore(add(0x420, metadataLength), 0x01) // store number of output notes
             mstore(add(0x440, metadataLength), 0x60) // store offset to outputNotes[0]
 
@@ -165,7 +166,7 @@ library JoinSplitFluidABIEncoder {
             calldatacopy(0x20, add(notes, 0x60), 0x80) // get gamma, sigma
 
             // store note length in `s`
-            mstore(add(0x460, metadataLength), 0xc0)
+            mstore(add(0x460, metadataLength), add(0xc0, metadataLengthTemp))
             // store note type (UXTO type, 0x01) in `s + 0x20`
             mstore(add(0x480, metadataLength), 0x01)
             // store note owner in `s + 0x40`
@@ -173,7 +174,7 @@ library JoinSplitFluidABIEncoder {
             // store note hash in `s + 0x60`
             mstore(add(0x4c0, metadataLength), keccak256(0x00, 0xa0))
             // store note metadata length in `s + 0x80` (just the coordinates)
-            mstore(add(0x4e0, metadataLength), 0x40)
+            mstore(add(0x4e0, metadataLength), add(0x40, metadataLengthTemp))
             // store compressed note coordinate gamma in `s + 0xa0`
             mstore(
                 add(0x500, metadataLength),
@@ -190,8 +191,13 @@ library JoinSplitFluidABIEncoder {
                     shl(255, and(mload(0x80), 0x01))
                 )
             )
+
+            metadataLength := calldataload(add(metadataIndex, sub(metadata, 0x40)))
+
+            calldatacopy(0x540, add(metadataIndex, sub(metadata, 0x20)), metadataLength) // THINK this is wrong - this should be the outputNote bit
+
             // compute the relative offset to index this note in our returndata
-            mstore(add(0x440, metadataLength), 0x60) // relative offset to note
+            mstore(add(0x440, 0), 0x60) // relative offset to note
 
             // now we need to transition between first and second proofOutput
             // s is going to point to the end of the outputNotes array
