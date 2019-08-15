@@ -1,35 +1,15 @@
 import constructor from './constructor';
 import toString from './toString';
+import _addAccess from './_addAccess';
 
-export default function addAccess(metadataStr, access) {
-    const noteAccess = Array.isArray(access)
-        ? access
-        : [access];
-    const metadata = constructor(metadataStr);
-    const {
-        addresses,
-        viewingKeys,
-    } = metadata;
-    const newAddresses = [];
-    const newViewingKeys = [];
-    noteAccess.forEach(({
-        address,
-        viewingKey,
-    }) => {
-        if (addresses.indexOf(address) >= 0) return;
-        newAddresses.push(address);
-        newViewingKeys.push(viewingKey);
-    });
+export default function addAccess(prevMetadata, access) {
+    const isString = typeof prevMetadata === 'string';
+    const metadata = isString
+        ? constructor(prevMetadata)
+        : prevMetadata;
+    const newMetaData = _addAccess(metadata, access);
 
-    return toString({
-        ...metadata,
-        addresses: [
-            ...addresses,
-            ...newAddresses,
-        ],
-        viewingKeys: [
-            ...viewingKeys,
-            ...newViewingKeys,
-        ],
-    });
+    return isString
+        ? toString(newMetaData)
+        : newMetaData;
 }
