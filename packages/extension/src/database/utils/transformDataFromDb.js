@@ -2,12 +2,16 @@ import {
     undefinedField,
 } from './transformDataForDb';
 
-export default function transformDataFromDb(fields, rawData) {
+export default function transformDataFromDb(fieldsConfig, rawData) {
     if (!rawData
         || !Array.isArray(rawData)
     ) {
         return null;
     }
+
+    const fields = Array.isArray(fieldsConfig)
+        ? fieldsConfig
+        : fieldsConfig.fields;
 
     const data = {};
     fields.forEach((field, i) => {

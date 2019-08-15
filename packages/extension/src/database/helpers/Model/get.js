@@ -68,19 +68,22 @@ export default async function get(params = {}) {
     if (subFieldsDataKey && !subFieldsKey) {
         const allData = {};
         Object.keys(storageData).forEach((subField) => {
-            const readableData = transformDataFromDb(fields.fields, storageData[subField]);
+            const readableData = transformDataFromDb(fields, storageData[subField]);
             allData[subField] = {
-                id,
                 [subFieldsDataKey]: subField,
                 ...readableData,
             };
+            if (id) {
+                allData[subField].id = id;
+            }
         });
         return allData;
     }
 
-    const readableData = subFieldsKey
-        ? transformDataFromDb(fields.fields, storageData[subFieldsKey])
-        : transformDataFromDb(fields, storageData);
+    const readableData = transformDataFromDb(
+        fields,
+        subFieldsKey ? storageData[subFieldsKey] : storageData,
+    );
 
     if (readableData) {
         if (!id
