@@ -21,7 +21,7 @@ export default async function validateSession(_, args) {
         || isDaysAgo(lastActive, 7)
     ) {
         if (session) {
-            await AuthService.removeSession();
+            await AuthService.logout();
         }
         return permissionError('account.not.login', {
             messageOptions: { account: currentAddress },
