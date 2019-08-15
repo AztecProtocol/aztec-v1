@@ -1,6 +1,22 @@
-import { BigInt, Bytes, Address } from '@graphprotocol/graph-ts';
-import { CreateNote, DestroyNote, UpdateNoteMetaData } from '../types/ACE/templates/ZkAsset/ZkAsset';
-import { Account, Note, NoteAccess, NoteLog } from '../types/schema';
+import {
+    BigInt,
+    Bytes,
+    Address,
+} from '@graphprotocol/graph-ts';
+import {
+    CreateNote,
+    DestroyNote,
+    UpdateNoteMetaData,
+    UpdateTotalMinted,
+    UpdateTotalBurned,
+} from '../types/ACE/templates/ZkAsset/ZkAssetTemplate';
+import {
+    Account,
+    Note,
+    NoteAccess,
+    NoteLog,
+    UtilityNote,
+} from '../types/schema';
 import { stripLeadingZeros } from './utils';
 
 var ID_SUFFIX_LEN = 4;
@@ -173,4 +189,29 @@ export function updateNoteMetaData(event: UpdateNoteMetaData): void {
     note.save();
 
     createAccessFromMetadata(timestamp, note, metadata, prevMetadata);
+}
+
+function createUtilityNote(noteHash: Bytes, metadata: Bytes, asset: Address): void {
+    let noteId = noteHash.toHexString();
+    let note = new UtilityNote(noteId);
+    note.hash = noteHash;
+    note.asset = asset.toHexString();
+    note.metadata = metadata;
+    note.save();
+}
+
+export function updateTotalMinted(event: UpdateTotalMinted): void {
+    createUtilityNote(
+        event.params.noteHash,
+        event.params.metaData,
+        event.address,
+    );
+}
+
+export function updateTotalBurned(event: UpdateTotalBurned): void {
+    createUtilityNote(
+        event.params.noteHash,
+        event.params.noteData,
+        event.address,
+    );
 }

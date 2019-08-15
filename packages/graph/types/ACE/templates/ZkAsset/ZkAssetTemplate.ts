@@ -14,6 +14,72 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class UpdateTotalBurned extends EthereumEvent {
+  get params(): UpdateTotalBurned__Params {
+    return new UpdateTotalBurned__Params(this);
+  }
+}
+
+export class UpdateTotalBurned__Params {
+  _event: UpdateTotalBurned;
+
+  constructor(event: UpdateTotalBurned) {
+    this._event = event;
+  }
+
+  get noteHash(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get noteData(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+}
+
+export class UpdateTotalMinted extends EthereumEvent {
+  get params(): UpdateTotalMinted__Params {
+    return new UpdateTotalMinted__Params(this);
+  }
+}
+
+export class UpdateTotalMinted__Params {
+  _event: UpdateTotalMinted;
+
+  constructor(event: UpdateTotalMinted) {
+    this._event = event;
+  }
+
+  get noteHash(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get metaData(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+}
+
+export class OwnershipTransferred extends EthereumEvent {
+  get params(): OwnershipTransferred__Params {
+    return new OwnershipTransferred__Params(this);
+  }
+}
+
+export class OwnershipTransferred__Params {
+  _event: OwnershipTransferred;
+
+  constructor(event: OwnershipTransferred) {
+    this._event = event;
+  }
+
+  get previousOwner(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get newOwner(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+}
+
 export class CreateNoteRegistry extends EthereumEvent {
   get params(): CreateNoteRegistry__Params {
     return new CreateNoteRegistry__Params(this);
@@ -244,9 +310,9 @@ export class UpdateNoteMetaData__Params {
   }
 }
 
-export class ZkAsset extends SmartContract {
-  static bind(address: Address): ZkAsset {
-    return new ZkAsset("ZkAsset", address);
+export class ZkAssetTemplate extends SmartContract {
+  static bind(address: Address): ZkAssetTemplate {
+    return new ZkAssetTemplate("ZkAssetTemplate", address);
   }
 
   JOIN_SPLIT_PROOF(): i32 {
@@ -257,6 +323,11 @@ export class ZkAsset extends SmartContract {
   ZERO_VALUE_NOTE_HASH(): Bytes {
     let result = super.call("ZERO_VALUE_NOTE_HASH", []);
     return result[0].toBytes();
+  }
+
+  PUBLIC_RANGE_PROOF(): i32 {
+    let result = super.call("PUBLIC_RANGE_PROOF", []);
+    return result[0].toI32();
   }
 
   confidentialApproved(param0: Bytes, param1: Address): boolean {
@@ -272,14 +343,34 @@ export class ZkAsset extends SmartContract {
     return result[0].toI32();
   }
 
+  proofs(param0: i32): BigInt {
+    let result = super.call("proofs", [EthereumValue.fromI32(param0)]);
+    return result[0].toBigInt();
+  }
+
+  supportsProof(_proof: i32): boolean {
+    let result = super.call("supportsProof", [EthereumValue.fromI32(_proof)]);
+    return result[0].toBoolean();
+  }
+
   DIVIDEND_PROOF(): i32 {
     let result = super.call("DIVIDEND_PROOF", []);
     return result[0].toI32();
   }
 
+  owner(): Address {
+    let result = super.call("owner", []);
+    return result[0].toAddress();
+  }
+
   MINT_PROOF(): i32 {
     let result = super.call("MINT_PROOF", []);
     return result[0].toI32();
+  }
+
+  isOwner(): boolean {
+    let result = super.call("isOwner", []);
+    return result[0].toBoolean();
   }
 
   ace(): Address {
@@ -305,6 +396,74 @@ export class ZkAsset extends SmartContract {
   scalingFactor(): BigInt {
     let result = super.call("scalingFactor", []);
     return result[0].toBigInt();
+  }
+}
+
+export class ConfidentialBurnCall extends EthereumCall {
+  get inputs(): ConfidentialBurnCall__Inputs {
+    return new ConfidentialBurnCall__Inputs(this);
+  }
+
+  get outputs(): ConfidentialBurnCall__Outputs {
+    return new ConfidentialBurnCall__Outputs(this);
+  }
+}
+
+export class ConfidentialBurnCall__Inputs {
+  _call: ConfidentialBurnCall;
+
+  constructor(call: ConfidentialBurnCall) {
+    this._call = call;
+  }
+
+  get _proof(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+
+  get _proofData(): Bytes {
+    return this._call.inputValues[1].value.toBytes();
+  }
+}
+
+export class ConfidentialBurnCall__Outputs {
+  _call: ConfidentialBurnCall;
+
+  constructor(call: ConfidentialBurnCall) {
+    this._call = call;
+  }
+}
+
+export class ConfidentialMintCall extends EthereumCall {
+  get inputs(): ConfidentialMintCall__Inputs {
+    return new ConfidentialMintCall__Inputs(this);
+  }
+
+  get outputs(): ConfidentialMintCall__Outputs {
+    return new ConfidentialMintCall__Outputs(this);
+  }
+}
+
+export class ConfidentialMintCall__Inputs {
+  _call: ConfidentialMintCall;
+
+  constructor(call: ConfidentialMintCall) {
+    this._call = call;
+  }
+
+  get _proof(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+
+  get _proofData(): Bytes {
+    return this._call.inputValues[1].value.toBytes();
+  }
+}
+
+export class ConfidentialMintCall__Outputs {
+  _call: ConfidentialMintCall;
+
+  constructor(call: ConfidentialMintCall) {
+    this._call = call;
   }
 }
 
@@ -350,6 +509,36 @@ export class ConfidentialApproveCall__Outputs {
   }
 }
 
+export class UpgradeRegistryVersionCall extends EthereumCall {
+  get inputs(): UpgradeRegistryVersionCall__Inputs {
+    return new UpgradeRegistryVersionCall__Inputs(this);
+  }
+
+  get outputs(): UpgradeRegistryVersionCall__Outputs {
+    return new UpgradeRegistryVersionCall__Outputs(this);
+  }
+}
+
+export class UpgradeRegistryVersionCall__Inputs {
+  _call: UpgradeRegistryVersionCall;
+
+  constructor(call: UpgradeRegistryVersionCall) {
+    this._call = call;
+  }
+
+  get _factoryId(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+}
+
+export class UpgradeRegistryVersionCall__Outputs {
+  _call: UpgradeRegistryVersionCall;
+
+  constructor(call: UpgradeRegistryVersionCall) {
+    this._call = call;
+  }
+}
+
 export class UpdateNoteMetaDataCall extends EthereumCall {
   get inputs(): UpdateNoteMetaDataCall__Inputs {
     return new UpdateNoteMetaDataCall__Inputs(this);
@@ -380,6 +569,66 @@ export class UpdateNoteMetaDataCall__Outputs {
   _call: UpdateNoteMetaDataCall;
 
   constructor(call: UpdateNoteMetaDataCall) {
+    this._call = call;
+  }
+}
+
+export class RenounceOwnershipCall extends EthereumCall {
+  get inputs(): RenounceOwnershipCall__Inputs {
+    return new RenounceOwnershipCall__Inputs(this);
+  }
+
+  get outputs(): RenounceOwnershipCall__Outputs {
+    return new RenounceOwnershipCall__Outputs(this);
+  }
+}
+
+export class RenounceOwnershipCall__Inputs {
+  _call: RenounceOwnershipCall;
+
+  constructor(call: RenounceOwnershipCall) {
+    this._call = call;
+  }
+}
+
+export class RenounceOwnershipCall__Outputs {
+  _call: RenounceOwnershipCall;
+
+  constructor(call: RenounceOwnershipCall) {
+    this._call = call;
+  }
+}
+
+export class SetProofsCall extends EthereumCall {
+  get inputs(): SetProofsCall__Inputs {
+    return new SetProofsCall__Inputs(this);
+  }
+
+  get outputs(): SetProofsCall__Outputs {
+    return new SetProofsCall__Outputs(this);
+  }
+}
+
+export class SetProofsCall__Inputs {
+  _call: SetProofsCall;
+
+  constructor(call: SetProofsCall) {
+    this._call = call;
+  }
+
+  get _epoch(): i32 {
+    return this._call.inputValues[0].value.toI32();
+  }
+
+  get _proofs(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+}
+
+export class SetProofsCall__Outputs {
+  _call: SetProofsCall;
+
+  constructor(call: SetProofsCall) {
     this._call = call;
   }
 }
@@ -452,40 +701,32 @@ export class ConfidentialTransferFromCall__Outputs {
   }
 }
 
-export class ConstructorCall extends EthereumCall {
-  get inputs(): ConstructorCall__Inputs {
-    return new ConstructorCall__Inputs(this);
+export class TransferOwnershipCall extends EthereumCall {
+  get inputs(): TransferOwnershipCall__Inputs {
+    return new TransferOwnershipCall__Inputs(this);
   }
 
-  get outputs(): ConstructorCall__Outputs {
-    return new ConstructorCall__Outputs(this);
+  get outputs(): TransferOwnershipCall__Outputs {
+    return new TransferOwnershipCall__Outputs(this);
   }
 }
 
-export class ConstructorCall__Inputs {
-  _call: ConstructorCall;
+export class TransferOwnershipCall__Inputs {
+  _call: TransferOwnershipCall;
 
-  constructor(call: ConstructorCall) {
+  constructor(call: TransferOwnershipCall) {
     this._call = call;
   }
 
-  get _aceAddress(): Address {
+  get newOwner(): Address {
     return this._call.inputValues[0].value.toAddress();
-  }
-
-  get _linkedTokenAddress(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get _scalingFactor(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
   }
 }
 
-export class ConstructorCall__Outputs {
-  _call: ConstructorCall;
+export class TransferOwnershipCall__Outputs {
+  _call: TransferOwnershipCall;
 
-  constructor(call: ConstructorCall) {
+  constructor(call: TransferOwnershipCall) {
     this._call = call;
   }
 }

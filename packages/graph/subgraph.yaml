@@ -28,7 +28,7 @@ dataSources:
         kind: ethereum/contract
         network: development
         source:
-          abi: ZkAsset
+          abi: ZkAssetTemplate
         mapping:
           kind: ethereum/events
           apiVersion: 0.0.2
@@ -39,9 +39,11 @@ dataSources:
               Note
               NoteAccess
               NoteLog
+              UtilityNote
+              UtilityNoteAccess
           abis:
-            - name: ZkAsset
-              file: ./build/abis/ZkAssetOwnable.json
+            - name: ZkAssetTemplate
+              file: ./build/abis/ZkAsset.json
           eventHandlers:
             - event: CreateNote(address,bytes32,bytes)
               handler: createNote
@@ -49,6 +51,10 @@ dataSources:
               handler: destroyNote
             - event: UpdateNoteMetaData(address,bytes32,bytes)
               handler: updateNoteMetaData
+            - event: UpdateTotalMinted(bytes32,bytes)
+              handler: updateTotalMinted
+            - event: UpdateTotalBurned(bytes32,bytes)
+              handler: updateTotalBurned
   - kind: ethereum/contract
     name: AZTECAccountRegistry
     network: development

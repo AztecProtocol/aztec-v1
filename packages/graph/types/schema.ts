@@ -315,6 +315,64 @@ export class NoteLog extends Entity {
   }
 }
 
+export class UtilityNote extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save UtilityNote entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save UtilityNote entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("UtilityNote", id.toString(), this);
+  }
+
+  static load(id: string): UtilityNote | null {
+    return store.get("UtilityNote", id) as UtilityNote | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get hash(): Bytes {
+    let value = this.get("hash");
+    return value.toBytes();
+  }
+
+  set hash(value: Bytes) {
+    this.set("hash", Value.fromBytes(value));
+  }
+
+  get asset(): string {
+    let value = this.get("asset");
+    return value.toString();
+  }
+
+  set asset(value: string) {
+    this.set("asset", Value.fromString(value));
+  }
+
+  get metadata(): Bytes {
+    let value = this.get("metadata");
+    return value.toBytes();
+  }
+
+  set metadata(value: Bytes) {
+    this.set("metadata", Value.fromBytes(value));
+  }
+}
+
 export class Account extends Entity {
   constructor(id: string) {
     super();

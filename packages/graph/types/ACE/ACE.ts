@@ -148,6 +148,32 @@ export class CreateNoteRegistry__Params {
   }
 }
 
+export class UpgradeNoteRegistry extends EthereumEvent {
+  get params(): UpgradeNoteRegistry__Params {
+    return new UpgradeNoteRegistry__Params(this);
+  }
+}
+
+export class UpgradeNoteRegistry__Params {
+  _event: UpgradeNoteRegistry;
+
+  constructor(event: UpgradeNoteRegistry) {
+    this._event = event;
+  }
+
+  get registryOwner(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get proxyAddress(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get newBehaviourAddress(): Address {
+    return this._event.parameters[2].value.toAddress();
+  }
+}
+
 export class OwnershipTransferred extends EthereumEvent {
   get params(): OwnershipTransferred__Params {
     return new OwnershipTransferred__Params(this);
@@ -280,6 +306,11 @@ export class ACE extends SmartContract {
   ZERO_VALUE_NOTE_HASH(): Bytes {
     let result = super.call("ZERO_VALUE_NOTE_HASH", []);
     return result[0].toBytes();
+  }
+
+  PUBLIC_RANGE_PROOF(): i32 {
+    let result = super.call("PUBLIC_RANGE_PROOF", []);
+    return result[0].toI32();
   }
 
   getFactoryAddress(_factoryId: i32): Address {
