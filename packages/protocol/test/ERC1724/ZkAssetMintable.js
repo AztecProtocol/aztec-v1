@@ -290,14 +290,12 @@ contract('ZkAssetMintable', (accounts) => {
             const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
 
-
             // Crucial check, confirm that the event contains the expected metaData
             const event = receipt.logs.find((l) => l.event === 'UpdateTotalMinted');
             const emittedEphemeral = event.args.metaData.slice(130, 196);
             const emittedCustomData = event.args.metaData.slice(196, 752);
             expect(emittedEphemeral).to.equal(ephemeral);
             expect(emittedCustomData).to.equal(customMetaData.slice(2));
-            expect(true).to.equal(false);
         });
     });
 
