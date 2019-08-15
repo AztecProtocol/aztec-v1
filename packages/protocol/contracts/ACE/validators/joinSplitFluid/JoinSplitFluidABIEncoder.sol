@@ -194,7 +194,7 @@ library JoinSplitFluidABIEncoder {
 
             metadataLength := calldataload(add(metadataIndex, sub(metadata, 0x40)))
 
-            calldatacopy(0x540, add(metadataIndex, sub(metadata, 0x20)), metadataLength) // THINK this is wrong - this should be the outputNote bit
+            calldatacopy(0x540, add(metadataIndex, sub(metadata, 0x20)), metadataLength)
 
             // compute the relative offset to index this note in our returndata
             mstore(add(0x440, 0), 0x60) // relative offset to note

@@ -8,7 +8,7 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
-const { customMetadata } = note.utils;
+const { customMetaData } = note.utils;
 const { generateFactoryId } = require('../helpers/Factory');
 
 const ACE = artifacts.require('./ACE');
