@@ -54,7 +54,7 @@ export const copyFile = (src, dest) =>
         readStream.pipe(fs.createWriteStream(dest));
     });
 
-export const copyFolder = (src, dest) =>
+export const copyFolder = (src, dest, overwrite = false) =>
     new Promise(async (resolve) => {
         ensureDirectory(dest);
         await Promise.all(fs.readdirSync(src)
@@ -65,8 +65,13 @@ export const copyFolder = (src, dest) =>
                     return copyFolder(srcPath, destPath);
                 }
 
+                if (!overwrite && isFile(destPath)) {
+                    return null;
+                }
+
                 return copyFile(srcPath, destPath);
-            }));
+            })
+            .filter(p => p));
 
         resolve({
             src,
