@@ -17,7 +17,7 @@ export default async function sendBurn({
         const proofData = proof.encodeABI(assetAddress);
 
         await Web3Service
-            .useContract('ZkAssetBurnable')
+            .useContract('ZkAsset')
             .at(assetAddress)
             .method('confidentialBurn')
             .send(
