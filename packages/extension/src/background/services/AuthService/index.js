@@ -14,7 +14,7 @@ import {
 import enableAssetForDomain from './enableAssetForDomain';
 
 const AuthService = {
-    getKeyStore: async () => get('keyStore'),
+    getKeyStore: async () => get('keyStore') || null,
     getSession: async () => {
         const session = await get('session');
         const {
@@ -22,7 +22,7 @@ const AuthService = {
         } = session || {};
 
         if (!pwDerivedKey) {
-            return session;
+            return null;
         }
 
         return {
@@ -77,7 +77,6 @@ const AuthService = {
 
         return session;
     },
-    removeSession: async () => remove('session'),
     registerExtension: async ({
         password,
         salt,
@@ -158,16 +157,20 @@ const AuthService = {
 
         return user;
     },
+    logout: async () => remove('session'),
     login: async ({ password, address }) => {
-        const keyStore = await get('keyStore');
-        const { pwDerivedKey } = await KeyStore.generateDerivedKey({
-            password,
-            salt: keyStore.salt,
-        });
+        const keyStore = await get('keyStore') || {};
+        let pwDerivedKey;
+        try {
+            ({
+                pwDerivedKey,
+            } = await KeyStore.generateDerivedKey({
+                password,
+                salt: keyStore.salt,
+            }));
 
-        const k = KeyStore.deserialize(keyStore, pwDerivedKey);
-
-        if (!k.isDerivedKeyCorrect(pwDerivedKey)) {
+            KeyStore.deserialize(keyStore, pwDerivedKey);
+        } catch {
             throw permissionError('account.incorrect.password');
         }
 
