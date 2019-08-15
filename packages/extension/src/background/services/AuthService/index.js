@@ -52,8 +52,16 @@ const AuthService = {
             : null;
     },
     getCurrentUser: async () => {
-        const session = await get('session');
-        return session && session.address;
+        const {
+            address,
+        } = await get('session') || {};
+        if (!address) {
+            return null;
+        }
+
+        return {
+            address,
+        };
     },
     updateSession: async (address) => {
         const prevSession = await get('session');
