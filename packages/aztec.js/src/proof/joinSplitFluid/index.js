@@ -62,13 +62,11 @@ class JoinSplitFluidProof extends JoinSplitProof {
                 inputNotes: [
                     {
                         ...this.outputNotes[0],
-                        switchEncoding: false,
                     },
                 ],
                 outputNotes: [
                     {
                         ...this.inputNotes[0],
-                        switchEncoding: false,
                     },
                 ],
                 publicValue: this.publicValue,
