@@ -17,7 +17,7 @@ export default async function sendMint({
         const proofData = proof.encodeABI();
 
         await Web3Service
-            .useContract('ZkAssetMintable')
+            .useContract('ZkAsset')
             .at(assetAddress)
             .method('confidentialMint')
             .send(
