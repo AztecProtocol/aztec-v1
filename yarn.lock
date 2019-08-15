@@ -10256,6 +10256,11 @@ lodash.get@^4.4.2:
   resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
   integrity sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=
 
+lodash.isequal@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
+  integrity sha1-QVxEePK8wwEgwizhDtMib30+GOA=
+
 lodash.ismatch@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.ismatch/-/lodash.ismatch-4.4.0.tgz#756cb5150ca3ba6f11085a78849645f188f85f37"
@@ -15246,12 +15251,13 @@ trim-right@^1.0.1:
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
   integrity sha1-yy4SAwZ+DI3h9hQJS5/kVwTqYAM=
 
-truffle-assertions@^0.8.2:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/truffle-assertions/-/truffle-assertions-0.8.2.tgz#6f0fda2cbc9f9dae597d6a1c81c28bdf7fe85595"
-  integrity sha512-WpUlGMsttkNHuIRYk7Th3I/4d2TeCxDhQI2ZiY+poI8dtfii4seIMXATB9aQLHU+uHAKWxpRJcTzZzm2zl/JnA==
+truffle-assertions@^0.9.1:
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/truffle-assertions/-/truffle-assertions-0.9.1.tgz#74379a208f1175d6de9f33fba9a8cbb3aec27aa5"
+  integrity sha512-MtcyXMTzRfg8WfE3TfrbVJm9HWMTPFksWg0K/8ZhajaxzFyPJ56/9AzNjQCROQluI0X1vs6XDsegwMlT1UFUNw==
   dependencies:
     assertion-error "^1.1.0"
+    lodash.isequal "^4.5.0"
 
 truffle-hdwallet-provider@1.0.16:
   version "1.0.16"
