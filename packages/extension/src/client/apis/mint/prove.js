@@ -2,12 +2,16 @@ import aztec from 'aztec.js';
 import {
     createNote,
     createNotes,
+    fromViewingKey,
+    valueOf,
 } from '~utils/note';
 import {
     randomSumArray,
 } from '~utils/random';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
+import ApiError from '~client/utils/ApiError';
+import query from '~client/utils/query';
 import validateExtensionAccount from '../utils/validateExtensionAccount';
 
 const {
@@ -47,7 +51,38 @@ export default async function proveMint({
         balance = 0;
         oldMintCounterNote = zeroNote;
     } else {
-        // TODO
+        const {
+            utilityNote,
+        } = await query(`
+            utilityNote(id: "${confidentialTotalMinted}") {
+                note {
+                    decryptedViewingKey
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `) || {};
+
+        const {
+            note,
+        } = utilityNote || {};
+        if (!note) {
+            throw new ApiError('api.mint.totalMinted.not.found');
+        }
+
+        const {
+            decryptedViewingKey,
+        } = note;
+        if (!decryptedViewingKey) {
+            throw new ApiError('api.mint.totalMinted.not.valid');
+        }
+
+        oldMintCounterNote = await fromViewingKey(decryptedViewingKey);
+        balance = valueOf(oldMintCounterNote);
     }
 
     const {
@@ -78,7 +113,7 @@ export default async function proveMint({
         oldMintCounterNote,
         newMintCounterNote,
         mintedNotes,
-        assetAddress,
+        notesOwner.address,
     );
 
     return {

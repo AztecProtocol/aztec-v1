@@ -56,6 +56,13 @@ export default {
             count: 'Cannot generate a new note with %{count} notes that sum to %{value}.',
         },
     },
+    utilityNote: {
+        not: {
+            found: {
+                onChain: "Utility note '%{id}' does not exist on blockchain.",
+            },
+        },
+    },
     data: {
         graphql: 'Something went wrong fetching graphQL data',
     },

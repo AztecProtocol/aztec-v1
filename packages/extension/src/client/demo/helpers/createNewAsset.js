@@ -78,13 +78,17 @@ export default async function createNewAsset({
     }
 
     log(`Deploying ${zkAssetType}...`);
-    const {
-        address: zkAssetAddress,
-    } = await Web3Service.deploy(contractMapping[zkAssetType], [
+    const assetParams = [
         aceAddress,
         erc20Address,
         scalingFactor,
-    ]);
+    ];
+    if (zkAssetType === 'ZkAssetMintable') {
+        assetParams.push(0, '0x');
+    }
+    const {
+        address: zkAssetAddress,
+    } = await Web3Service.deploy(contractMapping[zkAssetType], assetParams);
 
     log(`Setting proof in ${zkAssetType}...`);
     await Web3Service

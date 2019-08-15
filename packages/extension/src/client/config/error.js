@@ -55,9 +55,21 @@ export default {
     api: {
         mint: {
             notValid: "Cannot call mint on an asset that doesn't allow to adjust total supply.",
+            totalMinted: {
+                not: {
+                    found: 'Cannot find previous balance note.',
+                    valid: 'Cannot recover previous balance note.',
+                },
+            },
         },
         burn: {
             notValid: 'Cannot call burn on an asset that is not ZkAssetBurnable.',
+            totalBurned: {
+                not: {
+                    found: 'Cannot find previous balance note.',
+                    valid: 'Cannot recover previous balance note.',
+                },
+            },
         },
     },
 };

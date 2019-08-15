@@ -25,6 +25,8 @@ export default async function syncNoteInfo(noteId, ctx) {
             address: userAddress,
             noteId,
         });
+
+        // TODO: check permission to asset
     }
 
     return note;

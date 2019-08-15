@@ -12,11 +12,14 @@ import {
 import getUserSpendingPublicKey from './utils/getUserSpendingPublicKey';
 import getAccounts from './utils/getAccounts';
 import decryptViewingKey from './utils/decryptViewingKey';
+import getViewingKeyFromMetadata from './utils/getViewingKeyFromMetadata';
+import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
 import getAssetBalance from './utils/getAssetBalance';
 import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
 import syncAssetInfo from './utils/syncAssetInfo';
 import syncNoteInfo from './utils/syncNoteInfo';
+import syncUtilityNoteInfo from './utils/syncUtilityNoteInfo';
 
 export default {
     BigInt: new BigInt('safe'),
@@ -28,6 +31,11 @@ export default {
         owner: async ({ owner }) => (typeof owner === 'string' && accountModel.get({ key: owner })) || owner,
         decryptedViewingKey: async ({ viewingKey, owner }) => decryptViewingKey(viewingKey, owner),
         status: ({ status }) => fromCode(status),
+    },
+    UtilityNote: {
+        asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ id: asset })) || asset,
+        viewingKey: async ({ metadata }) => getViewingKeyFromMetadata(metadata),
+        decryptedViewingKey: async ({ metadata }) => getDecryptedViewingKeyFromMetadata(metadata),
     },
     Asset: {
         balance: async ({ address }) => getAssetBalance(address),
@@ -46,6 +54,9 @@ export default {
         })),
         note: ensureEntityPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args.id, ctx),
+        })),
+        utilityNote: ensureUserPermission(async (_, args, ctx) => ({
+            note: await syncUtilityNoteInfo(args.id, ctx),
         })),
         grantNoteAccessPermission: ensureEntityPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),

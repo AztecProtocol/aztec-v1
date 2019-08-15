@@ -1,11 +1,14 @@
 import aztec from 'aztec.js';
 import {
     createNote,
+    fromViewingKey,
     valueOf,
 } from '~utils/note';
 import asyncMap from '~utils/asyncMap';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
+import ApiError from '~client/utils/ApiError';
+import query from '~client/utils/query';
 import validateExtensionAccount from '../utils/validateExtensionAccount';
 import toAztecNote from '../utils/toAztecNote';
 
@@ -45,7 +48,38 @@ export default async function proveBurn({
         balance = 0;
         oldBurnedCounterNote = zeroNote;
     } else {
-        // TODO
+        const {
+            utilityNote,
+        } = await query(`
+            utilityNote(id: "${confidentialTotalBurned}") {
+                note {
+                    decryptedViewingKey
+                }
+                error {
+                    type
+                    key
+                    message
+                    response
+                }
+            }
+        `) || {};
+
+        const {
+            note,
+        } = utilityNote || {};
+        if (!note) {
+            throw new ApiError('api.burn.totalBurned.not.found');
+        }
+
+        const {
+            decryptedViewingKey,
+        } = note;
+        if (!decryptedViewingKey) {
+            throw new ApiError('api.burn.totalBurned.not.valid');
+        }
+
+        oldBurnedCounterNote = await fromViewingKey(decryptedViewingKey);
+        balance = valueOf(oldBurnedCounterNote);
     }
 
     const {
@@ -67,7 +101,7 @@ export default async function proveBurn({
         oldBurnedCounterNote,
         newBurnedCounterNote,
         aztecNotes,
-        assetAddress,
+        ownerAddress,
     );
 
     return {

@@ -57,6 +57,14 @@ export default gql`
         value: Int
         status: String
     }
+    type UtilityNote {
+        id: ID!
+        hash: String!
+        asset: Asset!
+        metadata: String
+        viewingKey: String
+        decryptedViewingKey: String
+    }
     type GrantNoteAccessPermission {
         prevMetadata: String
         metadata: String
@@ -90,6 +98,11 @@ export default gql`
         notes: [Note!]
         error: Error
         action: Action
+    }
+    type UtilityNoteApiResponse {
+      note: UtilityNote
+      error: Error
+      action: Action
     }
     type GrantAccessApiResponse {
         permission: GrantNoteAccessPermission
@@ -125,6 +138,11 @@ export default gql`
             currentAddress: String!
             domain: String!
         ): NoteApiResponse
+        utilityNote(
+            id: ID!
+            currentAddress: String!
+            domain: String!
+        ): UtilityNoteApiResponse
         grantNoteAccessPermission(
             noteId: ID!
             address: String!
