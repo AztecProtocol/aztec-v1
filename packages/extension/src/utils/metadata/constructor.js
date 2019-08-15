@@ -3,6 +3,9 @@ import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
 } from '~config/constants';
+import _addAccess from './_addAccess';
+import _getAccess from './_getAccess';
+import toString from './toString';
 
 const arrayValues = [
     'addresses',
@@ -45,10 +48,25 @@ export default function constructor(metadataStr) {
             VIEWING_KEY_LENGTH,
         )}`);
     }
+    metadata.addresses = addresses;
+    metadata.viewingKeys = viewingKeys;
 
     return {
         ...metadata,
-        addresses,
-        viewingKeys,
+        addAccess: (access) => {
+            const {
+                addresses: newAddresses,
+                viewingKeys: newViewingKeys,
+            } = _addAccess(metadata, access);
+
+            newAddresses.forEach((a, i) => {
+                if (addresses.indexOf(a) >= 0) return;
+
+                addresses.push(a);
+                viewingKeys.push(newViewingKeys[i]);
+            });
+        },
+        getAccess: address => _getAccess(metadata, address),
+        toString: () => toString(metadata),
     };
 }

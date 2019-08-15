@@ -32,6 +32,14 @@ for (let i = 0; i < numberOfAccounts; i += 1) {
 const addressesStr = addresses.join('');
 const viewingKeysStr = viewingKeys.join('');
 
+const numberOfNewAccounts = 2;
+const newAddressBytes = [];
+const newViewingKeyBytes = [];
+for (let i = 0; i < numberOfNewAccounts; i += 1) {
+    newAddressBytes.push('0x'.padEnd(ADDRESS_LENGTH + 2, `adn${i}`));
+    newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cn${i}`));
+}
+
 describe('metadata toString', () => {
     it('generate a metadata string from data object', () => {
         const expectedStr = [
@@ -89,15 +97,15 @@ describe('metadata toString', () => {
 });
 
 describe('metadata constructor', () => {
-    it('parse a string into object', () => {
-        const obj = {
-            aztecData,
-            addresses,
-            viewingKeys,
-            appData,
-        };
-        const metadataStr = toString(obj);
+    const obj = {
+        aztecData,
+        addresses,
+        viewingKeys,
+        appData,
+    };
+    const metadataStr = toString(obj);
 
+    it('parse a string into object', () => {
         expect(metadata(metadataStr)).toMatchObject({
             aztecData: aztecDataByte,
             addresses: addressBytes,
@@ -107,22 +115,124 @@ describe('metadata constructor', () => {
     });
 
     it('allow zero length info', () => {
-        const obj = {
+        const objWithNoAccess = {
             aztecData,
             appData,
         };
-        const metadataStr = toString(obj);
+        const metadataStrWithNoAccess = toString(objWithNoAccess);
 
-        expect(metadata(metadataStr)).toMatchObject({
+        expect(metadata(metadataStrWithNoAccess)).toMatchObject({
             aztecData: aztecDataByte,
             addresses: [],
             viewingKeys: [],
             appData: appDataByte,
         });
     });
+
+    it('get access by address', () => {
+        const m = metadata(metadataStr);
+        expect(m.getAccess(addressBytes[0])).toEqual({
+            address: addressBytes[0],
+            viewingKey: viewingKeyBytes[0],
+        });
+        expect(m.getAccess(addressBytes[1])).toEqual({
+            address: addressBytes[1],
+            viewingKey: viewingKeyBytes[1],
+        });
+    });
+
+    it('add access to metadata object', () => {
+        const m = metadata(metadataStr);
+        m.addAccess({
+            address: newAddressBytes[0],
+            viewingKey: newViewingKeyBytes[0],
+        });
+        expect(m.addresses).toEqual([
+            ...addressBytes,
+            newAddressBytes[0],
+        ]);
+        expect(m.viewingKeys).toEqual([
+            ...viewingKeyBytes,
+            newViewingKeyBytes[0],
+        ]);
+    });
+
+    it('add multiple access to metadata object', () => {
+        const m = metadata(metadataStr);
+        m.addAccess([
+            {
+                address: newAddressBytes[0],
+                viewingKey: newViewingKeyBytes[0],
+            },
+            {
+                address: newAddressBytes[1],
+                viewingKey: newViewingKeyBytes[1],
+            },
+        ]);
+        expect(m.addresses).toEqual([
+            ...addressBytes,
+            newAddressBytes[0],
+            newAddressBytes[1],
+        ]);
+        expect(m.viewingKeys).toEqual([
+            ...viewingKeyBytes,
+            newViewingKeyBytes[0],
+            newViewingKeyBytes[1],
+        ]);
+    });
+
+    it('will not add existing access to metadata object', () => {
+        const m = metadata(metadataStr);
+        m.addAccess({
+            address: newAddressBytes[0],
+            viewingKey: newViewingKeyBytes[0],
+        });
+        expect(m.addresses).toEqual([
+            ...addressBytes,
+            newAddressBytes[0],
+        ]);
+        expect(m.viewingKeys).toEqual([
+            ...viewingKeyBytes,
+            newViewingKeyBytes[0],
+        ]);
+
+        m.addAccess({
+            address: newAddressBytes[0],
+            viewingKey: newViewingKeyBytes[0],
+        });
+        expect(m.addresses).toEqual([
+            ...addressBytes,
+            newAddressBytes[0],
+        ]);
+        expect(m.viewingKeys).toEqual([
+            ...viewingKeyBytes,
+            newViewingKeyBytes[0],
+        ]);
+
+        m.addAccess([
+            {
+                address: newAddressBytes[1],
+                viewingKey: newViewingKeyBytes[1],
+            },
+            {
+                address: newAddressBytes[1],
+                viewingKey: newViewingKeyBytes[1],
+            },
+        ]);
+        expect(m.addresses).toEqual([
+            ...addressBytes,
+            newAddressBytes[0],
+            newAddressBytes[1],
+        ]);
+        expect(m.viewingKeys).toEqual([
+            ...viewingKeyBytes,
+            newViewingKeyBytes[0],
+            newViewingKeyBytes[1],
+        ]);
+    });
 });
 
-describe('metadata addAccess', () => {
+describe('addAccess util', () => {
     const obj = {
         aztecData,
         addresses,
@@ -131,21 +241,14 @@ describe('metadata addAccess', () => {
     };
     const metadataStr = toString(obj);
 
-    const numberOfNewAccounts = 2;
-    const newAddressBytes = [];
-    const newViewingKeyBytes = [];
-    for (let i = 0; i < numberOfNewAccounts; i += 1) {
-        newAddressBytes.push('0x'.padEnd(ADDRESS_LENGTH + 2, `adn${i}`));
-        newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cn${i}`));
-    }
-
-    it('add note access info to metadata string', () => {
-        const newMetadata = addAccess(metadataStr, {
+    it('take a metadata object and add note access info to it', () => {
+        const m = metadata(metadataStr);
+        const newMetadata = addAccess(m, {
             address: newAddressBytes[0],
             viewingKey: newViewingKeyBytes[0],
         });
 
-        expect(metadata(newMetadata)).toMatchObject({
+        expect(newMetadata).toMatchObject({
             aztecData: aztecDataByte,
             addresses: [
                 ...addressBytes,
@@ -157,6 +260,27 @@ describe('metadata addAccess', () => {
             ],
             appData: appDataByte,
         });
+    });
+
+    it('take a metadata string and return a string with new access info', () => {
+        const newMetadata = addAccess(metadataStr, {
+            address: newAddressBytes[0],
+            viewingKey: newViewingKeyBytes[0],
+        });
+
+        const expectedStr = toString({
+            aztecData: aztecDataByte,
+            addresses: [
+                ...addressBytes,
+                newAddressBytes[0],
+            ],
+            viewingKeys: [
+                ...viewingKeyBytes,
+                newViewingKeyBytes[0],
+            ],
+            appData: appDataByte,
+        });
+        expect(newMetadata).toBe(expectedStr);
     });
 
     it('can add multiple note access at a time', () => {
