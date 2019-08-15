@@ -106,15 +106,13 @@ library JoinSplitFluidABIEncoder {
             // Start of inputNote[0]
             // get pointer to metadata
             let metadataIndex := calldataload(metadata)
-            // get size of metadata
-            let metadataLength := 0
 
             // copy note data to 0x20 - 0xa0
             mstore(0x00, 0x01)
             calldatacopy(0x20, add(notes, 0x120), 0x80) // get gamma, sigma
 
             // store note length in `s` = 0x320
-            mstore(0x320, add(0xc0, metadataLength))
+            mstore(0x320, 0xc0)
             // store note type (UXTO type, 0x01) in `s + 0x20`
             mstore(0x340, 0x01)
             // store the owner of the note in `s + 0x40`
@@ -122,7 +120,7 @@ library JoinSplitFluidABIEncoder {
             // store note hash
             mstore(0x380, keccak256(0x00, 0xa0))
             // store note metadata length if `s + 0x80`
-            mstore(0x3a0, add(0x40, metadataLength))
+            mstore(0x3a0, 0x40)
             // store compressed note coordinate gamma in `s + 0xa0`
             mstore(
                 0x3c0,
@@ -145,9 +143,9 @@ library JoinSplitFluidABIEncoder {
             // increase s by note length
 
             // store relative memory offset to outputNotes
-            mstore(0x240, add(0x200, metadataLength))
+            mstore(0x240, 0x200)
             // store the length of inputNotes at 0x2c0
-            mstore(0x2c0, add(0x120, metadataLength))
+            mstore(0x2c0, 0x120)
             ///////////////// PROOF OUTPUT A: START OF OUTPUT NOTES (1) ///////////////////
 
             // transition between input and output notes
@@ -157,27 +155,27 @@ library JoinSplitFluidABIEncoder {
             // 0x440 + metadataLength = offset to outputNotes[0] (0x60)
             let metadataLengthTemp := calldataload(add(metadataIndex, sub(metadata, 0x40)))
 
-            mstore(add(0x400, metadataLength), add(0x120, metadataLengthTemp)) // store length of output notes
-            mstore(add(0x420, metadataLength), 0x01) // store number of output notes
-            mstore(add(0x440, metadataLength), 0x60) // store offset to outputNotes[0]
+            mstore(0x400, add(0x120, metadataLengthTemp)) // store length of output notes
+            mstore(0x420, 0x01) // store number of output notes
+            mstore(0x440, 0x60) // store offset to outputNotes[0]
 
             // construct note hash
             // copy 1st note note to 0x20 - 0xa0
             calldatacopy(0x20, add(notes, 0x60), 0x80) // get gamma, sigma
 
             // store note length in `s`
-            mstore(add(0x460, metadataLength), add(0xc0, metadataLengthTemp))
+            mstore(0x460, add(0xc0, metadataLengthTemp))
             // store note type (UXTO type, 0x01) in `s + 0x20`
-            mstore(add(0x480, metadataLength), 0x01)
+            mstore(0x480, 0x01)
             // store note owner in `s + 0x40`
-            mstore(add(0x4a0, metadataLength), calldataload(inputOwners))
+            mstore(0x4a0, calldataload(inputOwners))
             // store note hash in `s + 0x60`
-            mstore(add(0x4c0, metadataLength), keccak256(0x00, 0xa0))
+            mstore(0x4c0, keccak256(0x00, 0xa0))
             // store note metadata length in `s + 0x80` (just the coordinates)
-            mstore(add(0x4e0, metadataLength), add(0x40, metadataLengthTemp))
+            mstore(0x4e0, add(0x40, metadataLengthTemp))
             // store compressed note coordinate gamma in `s + 0xa0`
             mstore(
-                add(0x500, metadataLength),
+                0x500,
                 or(
                     mload(0x20),
                     shl(255, and(mload(0x40), 0x01))
@@ -185,14 +183,14 @@ library JoinSplitFluidABIEncoder {
             )
             // store compressed note coordinate sigma in `s + 0xc0`
             mstore(
-                add(0x520, metadataLength),
+                0x520,
                 or(
                     mload(0x60),
                     shl(255, and(mload(0x80), 0x01))
                 )
             )
 
-            metadataLength := calldataload(add(metadataIndex, sub(metadata, 0x40)))
+            let metadataLength := calldataload(add(metadataIndex, sub(metadata, 0x40)))
 
             calldatacopy(0x540, add(metadataIndex, sub(metadata, 0x20)), metadataLength)
 
