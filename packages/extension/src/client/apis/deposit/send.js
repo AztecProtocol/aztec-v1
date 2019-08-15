@@ -1,9 +1,3 @@
-import aztec from 'aztec.js';
-import {
-    addAccess,
-} from '~utils/metadata';
-import encryptedViewingKey from '~utils/encryptedViewingKey';
-import asyncForEach from '~utils/asyncForEach';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 
@@ -13,10 +7,6 @@ export default async function sendDeposit({
         assetAddress,
     },
     data: {
-        notesOwner: {
-            address: notesOwnerAddress,
-            linkedPublicKey,
-        },
         notes,
     },
 }) {

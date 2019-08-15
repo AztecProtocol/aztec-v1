@@ -7,7 +7,12 @@ import {
 } from '~utils/random';
 import address from '~utils/address';
 import ApiError from '~client/utils/ApiError';
-import validateAccount from '../utils/validateAccount';
+import validateExtensionAccount from '../utils/validateExtensionAccount';
+
+const {
+    JoinSplitProof,
+    ProofUtils,
+} = aztec;
 
 export default async function proveDeposit({
     amount,
@@ -22,7 +27,7 @@ export default async function proveDeposit({
         });
     }
 
-    const notesOwner = await validateAccount(sender, true);
+    const notesOwner = await validateExtensionAccount(sender);
     const {
         address: notesOwnerAddress,
         spendingPublicKey,
@@ -38,11 +43,7 @@ export default async function proveDeposit({
         notesOwnerAddress,
         linkedPublicKey,
     );
-    const {
-        JoinSplitProof,
-        ProofUtils,
-        metaData,
-    } = aztec;
+
     const publicValue = ProofUtils.getPublicValue(
         [],
         noteValues,
