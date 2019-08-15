@@ -12,7 +12,8 @@ import asyncMap from '~utils/asyncMap';
 import asyncForEach from '~utils/asyncForEach';
 import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
-import validateAccount from '../utils/validateAccount';
+import validateExtensionAccount from '../utils/validateExtensionAccount';
+import validateAccounts from '../utils/validateAccounts';
 
 export default async function proveCreateNoteFromBalance({
     assetAddress,
@@ -25,7 +26,7 @@ export default async function proveCreateNoteFromBalance({
     numberOfInputNotes,
     numberOfOutputNotes = 1,
 }) {
-    const inputNotesOwner = await validateAccount(sender, true);
+    const inputNotesOwner = await validateExtensionAccount(sender);
     let inputAmount = amount;
 
     const outputNotesOwnerMapping = {};
@@ -37,7 +38,7 @@ export default async function proveCreateNoteFromBalance({
             : [transaction];
 
         const userAddresses = transactions.map(t => t.to);
-        const notesOwners = await validateAccount(userAddresses);
+        const notesOwners = await validateAccounts(userAddresses);
         notesOwners.forEach((o) => {
             outputNotesOwnerMapping[o.address] = o;
         });
@@ -48,7 +49,7 @@ export default async function proveCreateNoteFromBalance({
         }
     } else if (owner) {
         if (address(owner) !== inputNotesOwner.address) {
-            outputNotesOwner = await validateAccount(owner);
+            outputNotesOwner = await validateAccounts(owner);
         }
         outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
     }
@@ -111,6 +112,7 @@ export default async function proveCreateNoteFromBalance({
             extraAmount,
             inputNotesOwner.spendingPublicKey,
             inputNotesOwner.address,
+            inputNotesOwner.linkedPublicKey,
         );
         outputValues.push(extraAmount);
         outputNotes.push(remainderNote);
@@ -133,7 +135,7 @@ export default async function proveCreateNoteFromBalance({
                 values,
                 inputNotesOwner.spendingPublicKey,
                 notesOwner.address,
-                inputNotesOwner.linkedPublicKey,
+                notesOwner.linkedPublicKey,
             );
             outputNotes.push(...newNotes);
         });
@@ -146,8 +148,9 @@ export default async function proveCreateNoteFromBalance({
 
         const newNotes = await createNotes(
             values,
-            outputNotesOwner.spendingPublicKey,
+            inputNotesOwner.spendingPublicKey,
             outputNotesOwner.address,
+            outputNotesOwner.linkedPublicKey,
         );
         outputNotes.push(...newNotes);
     }
