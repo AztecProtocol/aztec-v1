@@ -63,5 +63,4 @@ export default {
             return formatError(e, mutation);
         }
     },
-    apollo,
 };
