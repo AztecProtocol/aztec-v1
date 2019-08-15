@@ -90,12 +90,6 @@ contract('ZkAsset', (accounts) => {
             expect(result).to.equal(erc20.address);
         });
 
-        it('should set the scaling factor', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
-            const result = await zkAsset.scalingFactor();
-            expect(result.toNumber()).to.equal(scalingFactor.toNumber());
-        });
-
         it('should update a note registry with output notes', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
