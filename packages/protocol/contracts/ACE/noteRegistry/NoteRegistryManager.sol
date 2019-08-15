@@ -149,6 +149,8 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     function supplementTokens(uint256 _value) external {
         NoteRegistry storage registry = registries[msg.sender];
         require(address(registry.behaviour) != address(0x0), "note registry does not exist");
+        registry.totalSupply = registry.totalSupply.add(_value);
+        registry.totalSupplemented = registry.totalSupplemented.add(_value);
         (
             uint256 scalingFactor,
             ,,
@@ -158,8 +160,6 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         require(canConvert == true, "note registry does not have conversion rights");
         require(canAdjustSupply == true, "note registry does not have mint and burn rights");
         registry.linkedToken.transferFrom(msg.sender, address(this), _value.mul(scalingFactor));
-        registry.totalSupply = registry.totalSupply.add(_value);
-        registry.totalSupplemented = registry.totalSupplemented.add(_value);
     }
 
     /**
@@ -292,8 +292,9 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         address newBehaviour = NoteRegistryFactory(factory).deployNewBehaviourInstance();
 
         address oldFactory = getFactoryAddress(oldFactoryId);
-        NoteRegistryFactory(oldFactory).handoverBehaviour(address(registry.behaviour), newBehaviour, factory);
         registry.latestFactory = _factoryId;
+
+        NoteRegistryFactory(oldFactory).handoverBehaviour(address(registry.behaviour), newBehaviour, factory);
         emit UpgradeNoteRegistry(
             msg.sender,
             address(registry.behaviour),
@@ -392,7 +393,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
     /**
      * @dev Returns the registry for a given address.
      *
-     * @param _owner - address of the registry owner in question
+     * @param _registryOwner - address of the registry owner in question
      *
      * @return linkedTokenAddress - public ERC20 token that is linked to the NoteRegistry. This is used to
      * transfer public value into and out of the system
@@ -404,7 +405,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
      * vice versa, conversion privilege
      * @return canAdjustSupply - determines whether the registry has minting and burning privileges
      */
-    function getRegistry(address _owner) public view returns (
+    function getRegistry(address _registryOwner) public view returns (
         address linkedToken,
         uint256 scalingFactor,
         bytes32 confidentialTotalMinted,
@@ -414,7 +415,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         bool canConvert,
         bool canAdjustSupply
     ) {
-        NoteRegistry memory registry = registries[_owner];
+        NoteRegistry memory registry = registries[_registryOwner];
         (
             scalingFactor,
             confidentialTotalMinted,

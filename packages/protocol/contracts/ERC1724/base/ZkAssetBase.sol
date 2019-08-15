@@ -22,9 +22,6 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
 
-    // EIP712 Domain Version value
-    string constant internal EIP712_DOMAIN_VERSION = "1";
-
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
             "bytes32 noteHash,",
@@ -45,7 +42,6 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     ACE public ace;
     IERC20 public linkedToken;
 
-    uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
 
     constructor(
@@ -63,7 +59,6 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
         ));
         ace = ACE(_aceAddress);
         linkedToken = IERC20(_linkedTokenAddress);
-        scalingFactor = _scalingFactor;
         ace.createNoteRegistry(
             _linkedTokenAddress,
             _scalingFactor,

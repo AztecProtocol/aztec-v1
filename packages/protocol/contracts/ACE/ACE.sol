@@ -26,9 +26,6 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
     using SafeMath for uint256;
     using SafeMath8 for uint8;
 
-    // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
-    bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH =
-        0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462;
     event SetCommonReferenceString(bytes32[6] _commonReferenceString);
     event SetProof(
         uint8 indexed epoch,
@@ -48,13 +45,10 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
 
     // a list of invalidated proof ids, used to blacklist proofs in the case of a vulnerability being discovered
     bool[0x100][0x100][0x10000] public disabledValidators;
-    
+
     // latest proof epoch accepted by this contract
     uint8 public latestEpoch = 1;
 
-    // keep track of validated balanced proofs
-    mapping(bytes32 => bool) public validatedProofs;
-    
     /**
     * @dev contract constructor. Sets the owner of ACE
     **/
