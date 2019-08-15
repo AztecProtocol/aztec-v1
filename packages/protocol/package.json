@@ -38,7 +38,7 @@
     "truffle-assertions": "^0.8.2",
     "truffle-hdwallet-provider": "1.0.16",
     "web3": "1.0.0-beta.55",
-    "web3-utils": "1.0.0-beta.55"
+    "web3-utils": "1.2.1"
   },
   "engines": {
     "node": ">=8.3"
