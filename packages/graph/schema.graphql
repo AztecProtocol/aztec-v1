@@ -33,6 +33,13 @@ type NoteLog @entity {
   timestamp: BigInt!
 }
 
+type UtilityNote @entity {
+  id: ID!
+  hash: Bytes!
+  asset: Asset!
+  metadata: Bytes!
+}
+
 type Account @entity {
   id: ID!
   address: Bytes!
