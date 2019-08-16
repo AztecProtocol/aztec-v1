@@ -93,12 +93,11 @@ class JoinSplitFluidProof extends JoinSplitProof {
      * @returns {Object} AZTEC proof data
      */
     encodeABI() {
-        const outputNotesForEncoder = [this.inputNotes[0], ...this.outputNotes.slice(1)];
         const encodedParams = [
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
-            inputCoder.encodeMetaData(outputNotesForEncoder),
+            inputCoder.encodeMetaData([this.inputNotes[0], ...this.outputNotes.slice(1)]),
         ];
 
         const length = 1 + encodedParams.length + 1;

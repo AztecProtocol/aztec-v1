@@ -28,11 +28,7 @@ outputCoder.decodeNote = (note) => {
     if (length === 0xc0) {
         // inputNote, no metaData attached
         ephemeral = null;
-    } else if (length === 0xe1) {
-        // ouputNote with no custom metaData set
-        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     } else {
-        // output note with custom metaData set
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     }
 
@@ -63,8 +59,7 @@ outputCoder.decodeNotes = (notes) => {
         .fill()
         .map((x, i) => {
             const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
-            const decodedResult = outputCoder.decodeNote(notes.slice(noteOffset * 2));
-            return decodedResult;
+            return outputCoder.decodeNote(notes.slice(noteOffset * 2));
         });
 };
 
