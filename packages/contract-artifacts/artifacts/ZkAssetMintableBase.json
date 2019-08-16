@@ -113,7 +113,7 @@
                     "type": "bytes32"
                 },
                 {
-                    "name": "metadata",
+                    "name": "metaData",
                     "type": "bytes"
                 }
             ],
@@ -338,7 +338,7 @@
                 },
                 {
                     "indexed": false,
-                    "name": "noteData",
+                    "name": "metaData",
                     "type": "bytes"
                 }
             ],
@@ -392,6 +392,23 @@
                 }
             ],
             "name": "CreateZkAsset",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "addressApproved",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "noteHash",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "ApprovedAddress",
             "type": "event"
         },
         {
@@ -503,7 +520,7 @@
                     "type": "bytes"
                 }
             ],
-            "name": "UpdateNoteMetadata",
+            "name": "UpdateNoteMetaData",
             "type": "event"
         },
         {

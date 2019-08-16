@@ -1,0 +1,23 @@
+{
+    "abi": [
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "data",
+                    "type": "bytes"
+                }
+            ],
+            "name": "MetaData",
+            "type": "event"
+        }
+    ],
+    "bytecode": "0x604c6023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea165627a7a72305820476305dd0044a84e5019d16293afc59303921b779c4e21c9c8ec1871293d53300029",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea165627a7a72305820476305dd0044a84e5019d16293afc59303921b779c4e21c9c8ec1871293d53300029",
+    "schemaVersion": "3.0.9"
+}
