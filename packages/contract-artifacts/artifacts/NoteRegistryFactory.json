@@ -31,6 +31,20 @@
         {
             "constant": true,
             "inputs": [],
+            "name": "PUBLIC_RANGE_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
             "name": "PRIVATE_RANGE_PROOF",
             "outputs": [
                 {
@@ -193,15 +207,19 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_oldImplementation",
+                    "name": "_proxy",
                     "type": "address"
                 },
                 {
                     "name": "_newImplementation",
                     "type": "address"
+                },
+                {
+                    "name": "_newProxyAdmin",
+                    "type": "address"
                 }
             ],
-            "name": "upgradeBehaviour",
+            "name": "handoverBehaviour",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
