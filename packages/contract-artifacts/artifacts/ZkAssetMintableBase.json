@@ -30,6 +30,20 @@
         },
         {
             "constant": true,
+            "inputs": [],
+            "name": "PUBLIC_RANGE_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
             "inputs": [
                 {
                     "name": "",
@@ -72,6 +86,20 @@
                 }
             ],
             "name": "confidentialApprove",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_factoryId",
+                    "type": "uint24"
+                }
+            ],
+            "name": "upgradeRegistryVersion",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
@@ -280,20 +308,6 @@
                 {
                     "name": "",
                     "type": "address"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "scalingFactor",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256"
                 }
             ],
             "payable": false,
