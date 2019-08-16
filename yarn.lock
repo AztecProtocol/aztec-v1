@@ -14238,12 +14238,13 @@ solc@^0.5.5:
     yargs "^11.0.0"
 
 solhint@^2.0.0:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/solhint/-/solhint-2.1.2.tgz#3cde9ecbd3c41f095ab9298337db6970df64fa6a"
-  integrity sha512-ryJrxNyy7pfx5724HxMtsDFrYLmei02ihHe+dRZL67sFWXInbrHXY1jItNNH3qlj5KYTdgSmBC6PRvHcIv0eAA==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/solhint/-/solhint-2.2.0.tgz#c9ea75b8c2a5a9f4ec8f16d813c7efd851614273"
+  integrity sha512-KNi9qGu17XNV75q9eFftrWIpDVHbejyZ5vaDuNQwet0e9+k8Xw0BdckyVUjYRfFQXAQA3nBTafxUVUtkM4cfIA==
   dependencies:
     ajv "^6.6.1"
     antlr4 "4.7.1"
+    chalk "^2.4.2"
     commander "2.18.0"
     cosmiconfig "^5.0.7"
     eslint "^5.6.0"
