@@ -23,7 +23,7 @@
     "prettier": "^1.16.4",
     "semantic-release": "^15.12.4",
     "shx": "^0.3.2",
-    "wsrun": "^3.6.4"
+    "wsrun": "^5.0.0"
   },
   "engines": {
     "node": ">=8.3"
