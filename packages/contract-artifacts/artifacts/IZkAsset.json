@@ -36,6 +36,23 @@
             "anonymous": false,
             "inputs": [
                 {
+                    "indexed": true,
+                    "name": "addressApproved",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "noteHash",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "ApprovedAddress",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
                     "indexed": false,
                     "name": "noteRegistryId",
                     "type": "uint256"
@@ -141,7 +158,7 @@
                     "type": "bytes"
                 }
             ],
-            "name": "UpdateNoteMetadata",
+            "name": "UpdateNoteMetaData",
             "type": "event"
         },
         {
