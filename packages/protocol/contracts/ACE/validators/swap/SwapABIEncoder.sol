@@ -323,7 +323,7 @@ library SwapABIEncoder {
             // ABI encoding of the input data should encode 2 metadata entries.
             // => relative offset to this note's metadata = `calldataload(metadataPtr)`
             let metadataIndex := calldataload(metadataPtr)
-
+    
             // To convert this into a calldata offset, we must add the number of bytes of calldata
             // that preceeds the start of the `metadata` array.
 
@@ -341,7 +341,7 @@ library SwapABIEncoder {
             // Because each metadata entry is itself a dynamic bytes array, the first word will
             // be the length of the metadata entry. This is what we want, so we directly call
             // `calldataload` on our offset
-            let metadataLength := calldataload(add(sub(metadataPtr, 0x40), metadataIndex))
+            let metadataLength := calldataload(add(metadataIndex, sub(metadataPtr, 0x40)))
 
             // 0x4e0 = noteData length = 0x40 + metadata length
             mstore(0x4e0, add(0x40, metadataLength))
@@ -534,8 +534,7 @@ library SwapABIEncoder {
             // We now need to compute the metadata length. We want to access the 2nd metadata entry,
             // at (metadataPtr + 0x20)
             metadataIndex := calldataload(add(metadataPtr, 0x20))
-            metadataLength := calldataload(add(sub(metadataPtr, 0x40), metadataIndex))
-
+            metadataLength := calldataload(add(metadataIndex, sub(metadataPtr, 0x40)))
             // (proofPtr + 0x2e0) = noteData length (0x40 + metadataLength)
             mstore(add(proofPtr, 0x2e0), add(0x40, metadataLength))
 
