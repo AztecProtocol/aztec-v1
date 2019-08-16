@@ -12,6 +12,8 @@ const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
 Swap.abi = SwapInterface.abi;
 
+const { customMetaData } = note.utils;
+
 const Keccak = keccak;
 const maker = secp256k1.generateAccount();
 let swapValidator;
@@ -69,6 +71,17 @@ contract('Swap Validator', (accounts) => {
 
         it('should validate Swap proof with challenge that has group modulus added to it', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
+            const proof = new SwapProof(inputNotes, outputNotes, sender);
+            proof.challenge = proof.challenge.add(bn128.groupModulus);
+            proof.constructOutputs();
+            const data = proof.encodeABI();
+            const result = await swapValidator.validateSwap(data, sender, bn128.CRS, { from: sender });
+            expect(result).to.equal(proof.eth.outputs);
+        });
+
+        it('should validate proof when customMetaData set', async () => {
+            const { inputNotes, outputNotes } = await getDefaultNotes();
+            inputNotes[1].setMetaData(customMetaData);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.challenge = proof.challenge.add(bn128.groupModulus);
             proof.constructOutputs();

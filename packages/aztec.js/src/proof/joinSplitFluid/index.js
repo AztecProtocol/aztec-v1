@@ -32,19 +32,11 @@ class JoinSplitFluidProof extends JoinSplitProof {
      * @param {Object} newTotalValueNote - note whose value represents the new total value of minted or burned notes
      * @param {Object[]} adjustedNotes - notes to be minted or burned
      * @param {string} sender - Ethereum address of the transaction sender
-     * @param {string} metadata
      */
-    constructor(
-        type,
-        currentTotalValueNote,
-        newTotalValueNote,
-        adjustedNotes,
-        sender,
-        metadata = [currentTotalValueNote, ...adjustedNotes],
-    ) {
+    constructor(type, currentTotalValueNote, newTotalValueNote, adjustedNotes, sender) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
-        super([newTotalValueNote], [currentTotalValueNote, ...adjustedNotes], sender, publicValue, publicOwner, metadata);
+        super([newTotalValueNote], [currentTotalValueNote, ...adjustedNotes], sender, publicValue, publicOwner);
 
         // Overriding this because JoinSplit sets the type to `JOIN_SPLIT`
         if (type !== ProofType.BURN.name && type !== ProofType.MINT.name) {
@@ -70,13 +62,11 @@ class JoinSplitFluidProof extends JoinSplitProof {
                 inputNotes: [
                     {
                         ...this.outputNotes[0],
-                        forceMetadata: true,
                     },
                 ],
                 outputNotes: [
                     {
                         ...this.inputNotes[0],
-                        forceNoMetadata: true,
                     },
                 ],
                 publicValue: this.publicValue,
@@ -107,7 +97,7 @@ class JoinSplitFluidProof extends JoinSplitProof {
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners(this.inputNoteOwners),
             inputCoder.encodeOwners(this.outputNoteOwners),
-            inputCoder.encodeMetadata(this.metadata),
+            inputCoder.encodeMetaData([this.inputNotes[0], ...this.outputNotes.slice(1)]),
         ];
 
         const length = 1 + encodedParams.length + 1;

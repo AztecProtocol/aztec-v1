@@ -17,33 +17,19 @@ const outputCoder = {};
  * @param {note} note - AZTEC note
  * @returns {Object[]} note variables - extracted variables: noteType, owner,
  * noteHash, gamma, sigma, ephemeral
- * // TODO: check what happens on develop; only decoding
  */
 outputCoder.decodeNote = (note) => {
     const length = parseInt(note.slice(0x00, 0x40), 16);
-    let expectedLength;
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
-    const metadataLength = parseInt(note.slice(0x100, 0x140), 16);
+    let ephemeral;
 
-    let ephemeral = null;
-
-    if (metadataLength === 0x137) {
-        // output note with metadata set
-        expectedLength = (0x20 * 4 + 0x20 * 2 + metadataLength).toString(16);
-        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
-    } else if (metadataLength === 0x61) {
-        // ouputNote with no metadata set
-        expectedLength = 0xe1;
-        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
+    if (length === 0xc0) {
+        // inputNote, no metaData attached
+        ephemeral = null;
     } else {
-        // inputNote
-        expectedLength = 0xc0;
-    }
-
-    if (length !== expectedLength) {
-        throw new Error(`unexpected note length of ${length}`);
+        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     }
 
     const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
@@ -127,50 +113,20 @@ outputCoder.decodeProofOutput = (proofOutput) => {
 };
 
 /**
- * Encode an input note, according to the ABI encoding specification
- *
- * @method encodeInputNote
- * @param {Note} note - AZTEC note
- * @returns {string} ABI encoded representation of the notes array
- */
-outputCoder.encodeInputNote = (note) => {
-    const encoded = Array(6).fill();
-    encoded[0] = padLeft('c0', 64);
-    encoded[1] = padLeft('1', 64);
-    encoded[2] = padLeft(note.owner.slice(2), 64);
-    encoded[3] = padLeft(note.noteHash.slice(2), 64);
-    encoded[4] = padLeft('40', 64);
-    encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
-    encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-    return encoded.join('');
-};
-
-/**
  * Encode an array of notes according to the ABI specification. Able to encode both input and output
  * notes
  *
  * @method encodeNotes
  * @param {note[]} notes - array of AZTEC notes
- * @param {boolean} isOutput - boolean describing whether the array of AZTEC notes are input or output notes
+ * @param {boolean} encodeMetaData - boolean controlling whether metaData is to be encoded or not. Typically, if
+ * inputNotes are being encoded the metadata is not encoded whereas if outputNotes are being encoded then
+ * the metaData is encoded
  * @returns {string} ABI encoded representation of the notes array
  */
-outputCoder.encodeNotes = (notes, isOutput) => {
-    let encodedNotes;
-    if (isOutput) {
-        encodedNotes = notes.map((note) => {
-            if (note.forceNoMetadata) {
-                return outputCoder.encodeInputNote(note);
-            }
-            return outputCoder.encodeOutputNote(note);
-        });
-    } else {
-        encodedNotes = notes.map((note) => {
-            if (note.forceMetadata) {
-                return outputCoder.encodeOutputNote(note);
-            }
-            return outputCoder.encodeInputNote(note);
-        });
-    }
+outputCoder.encodeNotes = (notes, encodeMetaData) => {
+    const encodedNotes = notes.map((note) => {
+        return outputCoder.encodeNote(note, encodeMetaData);
+    });
     const offsetToData = 0x40 + 0x20 * encodedNotes.length;
     const noteLengths = encodedNotes.reduce(
         (acc, p) => {
@@ -191,30 +147,29 @@ outputCoder.encodeNotes = (notes, isOutput) => {
 /**
  * Encode an output note, according to the ABI encoding specification
  *
- * @method encodeOutputNote
+ * @method encodeNote
  * @param {note} note - AZTEC note
+ * @param {bool} encodeMetaData - boolean controlling whether metaData is to be encoded or not. Typically, if
+ * inputNotes are being encoded the metadata is not encoded whereas if outputNotes are being encoded then
+ * the metaData is encoded
  * @returns {string} the various components of an AZTEC output note, encoded appropriately and concatenated
  * together
  */
-outputCoder.encodeOutputNote = (note) => {
-    const encoded = Array(7).fill();
+outputCoder.encodeNote = (note, encodeMetaData) => {
+    let encoded;
+    let metaDataSize;
 
-    // boolean to mark whether custom metadata exists. Used to automatically update note encodings if present
-    let isMetadataPresent;
-    let noteDataLength;
-    let noteLength;
-    if (note.metadata) {
-        encoded[7] = note.metadata.slice(2);
-        isMetadataPresent = 1;
-
-        const metaDataSize = 0x137;
-        noteDataLength = (0x20 * 2 + isMetadataPresent * metaDataSize).toString(16);
-        noteLength = (0x20 * 4 + 0x20 * 2 + isMetadataPresent * metaDataSize).toString(16);
+    if (encodeMetaData) {
+        encoded = Array(8).fill();
+        encoded[7] = note.metaData.slice(2);
+        metaDataSize = parseInt(note.metaData.slice(2).length / 2, 10);
     } else {
-        encoded[7] = secp256k1.compress(note.ephemeral.getPublic()).slice(2);
-        noteLength = 'e1';
-        noteDataLength = '61';
+        encoded = Array(7).fill();
+        metaDataSize = 0;
     }
+
+    const noteDataLength = (0x20 * 2 + metaDataSize).toString(16);
+    const noteLength = (0x20 * 4 + 0x20 * 2 + metaDataSize).toString(16);
 
     encoded[0] = padLeft(noteLength, 64);
     encoded[1] = padLeft('1', 64);
@@ -223,7 +178,6 @@ outputCoder.encodeOutputNote = (note) => {
     encoded[4] = padLeft(noteDataLength, 64);
     encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
     encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-
     return encoded.join('');
 };
 

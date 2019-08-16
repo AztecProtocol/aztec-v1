@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, it:true */
-const { JoinSplitProof, metaData, note, PublicRangeProof } = require('aztec.js');
+const { JoinSplitProof, note, PublicRangeProof } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -8,7 +8,7 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
-const { customMetadata } = note.utils;
+const { customMetaData } = note.utils;
 const { generateFactoryId } = require('../helpers/Factory');
 
 const ACE = artifacts.require('./ACE');
@@ -155,22 +155,14 @@ contract('ACE', (accounts) => {
                 expect(secondResult).to.equal(false);
             });
 
-            it('should validate a join-split proof when metadata has been set', async () => {
+            it('should validate a join-split proof when metaData has been set', async () => {
                 const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
 
                 outputNotes.forEach((individualNote) => {
-                    return individualNote.setMetadata(customMetadata);
+                    return individualNote.setMetaData(customMetaData);
                 });
-                const metadata = metaData.extractNoteMetadata(outputNotes);
 
-                const proofWithNoteMetaData = new JoinSplitProof(
-                    inputNotes,
-                    outputNotes,
-                    sender,
-                    publicValue,
-                    publicOwner,
-                    metadata,
-                );
+                const proofWithNoteMetaData = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
                 const customData = proofWithNoteMetaData.encodeABI(joinSplitValidator.address);
                 const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, customData);
                 expect(receipt.status).to.equal(true);

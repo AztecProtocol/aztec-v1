@@ -15,12 +15,13 @@ contract IZkAsset {
         bool indexed _canAdjustSupply,
         bool _canConvert
     );
+    event ApprovedAddress(address indexed addressApproved, bytes32 indexed noteHash);
     event CreateNoteRegistry(uint256 noteRegistryId);
     event CreateNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
     event DestroyNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
     event ConvertTokens(address indexed owner, uint256 value);
     event RedeemTokens(address indexed owner, uint256 value);
-    event UpdateNoteMetadata(address indexed owner, bytes32 indexed noteHash, bytes metadata);
+    event UpdateNoteMetaData(address indexed owner, bytes32 indexed noteHash, bytes metadata);
     
     function confidentialApprove(
         bytes32 _noteHash,
