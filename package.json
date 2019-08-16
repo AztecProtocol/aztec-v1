@@ -14,7 +14,7 @@
     "@semantic-release/github": "^5.2.10",
     "@semantic-release/npm": "^5.1.4",
     "@semantic-release/release-notes-generator": "^7.1.4",
-    "commitizen": "^3.0.7",
+    "commitizen": "^4.0.3",
     "cz-conventional-changelog": "^2.1.0",
     "fixpack": "^2.3.1",
     "husky": "^3.0.3",
