@@ -1,94 +1,13 @@
 import browser from 'webextension-polyfill';
-import gql from 'graphql-tag';
-import psl from 'psl';
-import {
-    of,
-    from,
-    Subject,
-    forkJoin,
-    timer,
-    race,
-    empty,
-} from 'rxjs';
-import {
-    mergeMap,
-    switchMap,
-    take,
-    map,
-    filter,
-} from 'rxjs/operators';
-import actionModel from '~database/models/action';
-import {
-    dataError,
-} from '~utils/error';
-import insertVariablesToGql from '~utils/insertVariablesToGql';
 import {
     clientEvent,
     contentSubscribeEvent,
     contentUnsubscribeEvent,
 } from '~config/event';
-import {
-    errorToActionMap,
-} from '~config/action';
+import Connection from '../utils/connection.js';
 import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
-import GraphQLService from '../services/GraphQLService';
 
-const updateActionState = async action => actionModel.set(action);
-
-class Connection {
-    constructor() {
-        this.UiSubject = new Subject();
-        this.UiConfirmationSubject = new Subject();
-        this.UiRejectionSubject = new Subject();
-        this.ui$ = this.UiSubject.asObservable();
-        this.uiConfirmation$ = this.UiConfirmationSubject.asObservable();
-        this.uiRejection$ = this.UiRejectionSubject.asObservable();
-
-        this.ui$.pipe(
-            map(({ timestamp }) => {
-                const popupURL = browser.extension.getURL('pages/popup.html');
-                const { width, height } = window.screen;
-
-                browser.windows.create({
-                    url: `${popupURL}?id=${timestamp}`,
-                    width: 340, // approximate golden ratio
-                    top: (height - 550) / 2,
-                    left: (width - 340) / 2,
-                    height: 550,
-                    type: 'popup',
-                    focused: true,
-                });
-                // window.open('popup.html', 'AZTEC Extension', 'width=300,height=400,resizable=no,alwaysRaised=yes,alwaysOnTop=yes,z-lock=yes,centerscreen=yes')
-            }),
-            // we can extend this to automatically close the window after a timeout
-        ).subscribe();
-    }
-
-    handleAction(action) {
-        return from(updateActionState(action)).pipe(
-            mergeMap(() => {
-                this.UiSubject.next(action);
-                return race(
-                    this.uiConfirmation$.pipe(
-                        filter(({ requestId }) => requestId === action.data.requestId),
-                        take(1),
-                    ),
-                    this.uiRejection$.pipe(
-                        filter(({ requestId }) => requestId === action.data.requestId),
-                        take(1),
-                    ),
-                    timer(15000).pipe(
-                        map(() => dataError('extension.timeout')),
-                    ),
-                );
-            }),
-            take(1),
-        );
-    }
-
-    handleMessage(msg, senderDetails) {
-        const messageSubject = new Subject();
-
+<<<<<<< HEAD
         const message$ = messageSubject.asObservable().pipe(
             map(({ data, sender }) => {
                 const {
@@ -179,6 +98,8 @@ class Connection {
         });
     }
 }
+=======
+>>>>>>> feat(extension): refactor rxjs so we can await metamask
 
 const handleContentScriptSubscription = (data, port) => {
     const {
@@ -202,17 +123,17 @@ const handleContentScriptSubscription = (data, port) => {
 export default function acceptConnection() {
     const connection = new Connection();
 
-    browser.runtime.onMessage.addListener((msg, sender) => {
+    browser.runtime.onMessage.addListener(async (msg, sender) => {
         switch (msg.type) {
             case clientEvent: {
-                return connection.handleMessage(msg, sender);
+                return await connection.handleMessage({ data: msg, sender });
             }
             case 'UI_CONFIRM': {
-                connection.UiConfirmationSubject.next(msg, sender);
+                connection.UiEventSubject.next(msg, sender);
                 break;
             }
             case 'UI_REJECTION': {
-                connection.UiRejectionSubject.next(msg, sender);
+                connection.UiEventSubject.next(msg, sender);
                 break;
             }
             default:
