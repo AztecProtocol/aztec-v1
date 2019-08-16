@@ -1,5 +1,3 @@
-const secp256k1 = require('@aztec/secp256k1');
-
 const { padLeft } = require('web3-utils');
 
 const inputCoder = {};
@@ -24,20 +22,20 @@ inputCoder.encodeInputSignatures = (inputSignatures) => {
     return data;
 };
 
-inputCoder.encodeMetadata = (standardData) => {
-    /**
-     * metadata here is the outputNotes supplied to a proof
-     * this function goes through each note (n = note), selects the
-     * ephemeral publicKey of the note and extracts the publicKey representation
-     * of the note
-     *
-     * For each note publicKey, it then prepends '21' and pads left
-     */
-    const encodedMetadata = standardData
-        .map((n) => secp256k1.compress(n.ephemeral.getPublic()))
-        .map((m) => `${padLeft('21', 64)}${m.slice(2)}`);
-    const { length } = encodedMetadata;
-    const offsets = encodedMetadata.reduce(
+/**
+ * Encode the metaData of multiple notes into ABI compatible string array format
+ *
+ * @method encodeMetadata
+ * @param notes - array of notes with metadata as part of their schema
+ * @returns {String} ABI encoded representation of the notes metaData
+ */
+inputCoder.encodeMetaData = (notes) => {
+    const exportedMetaData = notes.map((individualNote) => {
+        return individualNote.exportMetaData();
+    });
+
+    const { length } = exportedMetaData;
+    const offsets = exportedMetaData.reduce(
         (acc, data) => {
             return [...acc, acc[acc.length - 1] + data.length / 2];
         },
@@ -45,10 +43,10 @@ inputCoder.encodeMetadata = (standardData) => {
     );
 
     const data = [
-        padLeft((offsets.slice(-1)[0] - 0x20).toString(16), 64),
-        padLeft(Number(length).toString(16), 64),
-        ...offsets.slice(0, -1).map((o) => padLeft(o.toString(16), 64)),
-        ...encodedMetadata,
+        padLeft((offsets.slice(-1)[0] - 0x20).toString(16), 64), // length, number of bytes
+        padLeft(Number(length).toString(16), 64), // number of notes
+        ...offsets.slice(0, -1).map((o) => padLeft(o.toString(16), 64)), // offsets to the info for different notes
+        ...exportedMetaData,
     ].join('');
     return data;
 };

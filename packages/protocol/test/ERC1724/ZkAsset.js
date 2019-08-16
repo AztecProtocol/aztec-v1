@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-const { JoinSplitProof, metaData, signer, note } = require('aztec.js');
+const { JoinSplitProof, note, signer } = require('aztec.js');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },
@@ -21,7 +21,7 @@ const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-const { customMetadata, randomCustomMetadata } = note.utils;
+const { customMetaData } = note.utils;
 
 const computeDomainHash = (validatorAddress) => {
     const types = { EIP712Domain: constants.eip712.EIP712_DOMAIN };
@@ -116,7 +116,7 @@ contract('ZkAsset', (accounts) => {
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
         });
 
-        it('should emit CreateNote() event with customMetadata when a single note is created', async () => {
+        it('should emit CreateNote() event with customMetaData when a single note is created', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
@@ -125,13 +125,13 @@ contract('ZkAsset', (accounts) => {
                 depositInputOwnerAccounts,
             } = await helpers.getDefaultDepositNotes();
             const publicValue = depositPublicValue * -1;
+            const ephemeral = depositOutputNotes[0].metaData.slice(2);
 
             depositOutputNotes.forEach((individualNote) => {
-                return individualNote.setMetadata(customMetadata);
+                return individualNote.setMetaData(customMetaData);
             });
 
-            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner, metadata);
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
 
             const data = proof.encodeABI(zkAsset.address);
             const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
@@ -145,58 +145,13 @@ contract('ZkAsset', (accounts) => {
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
 
-            // Crucial check, confirm that the event contains the custom metadata
+            // Crucial check, confirm that the event contains the expected metaData
             const event = receipt.logs.find((l) => l.event === 'CreateNote');
 
-            // check customMetadata is correct
-            expect(event.args.metadata.slice(196, 752)).to.equal(customMetadata);
-        });
-
-        it.skip('should update the metadata of a note when ZkAsset.updateNoteMetadData() called', async () => {
-            /**
-             * Using ZkAssetTest as the ZkAsset here. ZkAssetTest has the safety feature
-             * require(noteOwner === msg.sender) removed. This is because it would not be possible to satisfy
-             * this condition and also create the note in question with a truffle account (they do not expose
-             * privateKeys or publicKeys).
-             *
-             * Failure test added for require(noteOwner === msg.sender) for a ZkAsset contract
-             */
-            const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
-            const depositInputNotes = [];
-            const depositInputOwnerAccounts = [];
-            const depositPublicValue = 20;
-
-            const aztecAccount = secp256k1.generateAccount(); // this is just an address. Need the publicKey
-            const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20]);
-            const publicValue = depositPublicValue * -1;
-
-            depositOutputNotes.forEach((individualNote) => {
-                return individualNote.setMetadata(customMetadata);
-            });
-
-            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner, metadata);
-            const data = proof.encodeABI(zkAssetTest.address);
-            const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
-
-            await ace.publicApprove(zkAssetTest.address, proof.hash, 200, { from: accounts[0] });
-            const tx1 = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
-
-            const dummyEphemeralKeys = randomHex(192);
-            const updatedMetaData = dummyEphemeralKeys + customMetadata;
-            const tx2 = await zkAssetTest.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
-                from: accounts[0],
-            });
-
-            // check original note created has expected metadata
-            truffleAssert.eventEmitted(tx1, 'CreateNote', (event) => {
-                return event.metadata.slice(196, 752) === customMetadata;
-            });
-
-            // check updateNoteMetaData() has updated the note metadata
-            truffleAssert.eventEmitted(tx2, 'UpdateNoteMetadata', (event) => {
-                return event.metadata === updatedMetaData;
-            });
+            const emittedEphemeral = event.args.metadata.slice(130, 196);
+            const emittedCustomData = event.args.metadata.slice(196, 754);
+            expect(emittedEphemeral).to.equal(ephemeral);
+            expect(emittedCustomData).to.equal(customMetaData.slice(2));
         });
 
         it('should emit CreateNote() event with appropriate metadata for multiple notes', async () => {
@@ -209,15 +164,17 @@ contract('ZkAsset', (accounts) => {
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20, 10]);
             const publicValue = depositPublicValue * -1;
 
-            // changed the first non-zero digit from 2 to 3
-            const metadataArray = [randomCustomMetadata(), randomCustomMetadata()];
+            const customMetadataA = customMetaData;
+
+            // changed the first digit of META_DATA_TEST from 0 to 3
+            const customMetadataB = '0x3' + customMetaData.slice(3);
+            const customMetadataArray = [customMetadataA, customMetadataB];
 
             depositOutputNotes.forEach((individualNote, index) => {
-                return individualNote.setMetadata(metadataArray[index]);
+                return individualNote.setMetaData(customMetadataArray[index]);
             });
 
-            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner, metadata);
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
 
             const data = proof.encodeABI(zkAsset.address);
             const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
@@ -233,8 +190,8 @@ contract('ZkAsset', (accounts) => {
 
             // Crucial check, confirm that the event contains the custom metadata
             const event = receipt.logs.filter((l) => l.event === 'CreateNote');
-            expect(event[0].args.metadata.slice(196, 752)).to.equal(metadataArray[0]); // 1st note metadata
-            expect(event[1].args.metadata.slice(196, 752)).to.equal(metadataArray[1]); // 2nd note metadata
+            expect(event[0].args.metadata.slice(196, 754)).to.equal(customMetadataA.slice(2)); // 1st note metadata
+            expect(event[1].args.metadata.slice(196, 754)).to.equal(customMetadataB.slice(2)); // 2nd note metadata
         });
 
         it('should update a note registry with proofs where a mixture of notes with set metadata have been used', async () => {
@@ -248,18 +205,10 @@ contract('ZkAsset', (accounts) => {
             const publicValue = depositPublicValue * -1;
 
             depositOutputNotes.forEach((individualNote) => {
-                return individualNote.setMetadata(customMetadata);
+                return individualNote.setMetaData(customMetaData);
             });
 
-            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
-            const depositProof = new JoinSplitProof(
-                depositInputNotes,
-                depositOutputNotes,
-                sender,
-                publicValue,
-                publicOwner,
-                metadata,
-            );
+            const depositProof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
             const depositData = depositProof.encodeABI(zkAsset.address);
             const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
@@ -367,6 +316,95 @@ contract('ZkAsset', (accounts) => {
             const transferSignatures = transferProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
             const { receipt } = await zkAsset.confidentialTransfer(transferData, transferSignatures);
             expect(receipt.status).to.equal(true);
+        });
+
+        it('should update the metadata of a note when ZkAsset.updateNoteMetadData() called', async () => {
+            /**
+             * Using ZkAssetTest as the ZkAsset here. ZkAssetTest has the safety feature
+             * require(noteOwner === msg.sender) removed. This is because it would not be possible to satisfy
+             * this condition and also create the note in question with a truffle account (they do not expose
+             * privateKeys or publicKeys).
+             *
+             */
+            const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
+            const depositInputNotes = [];
+            const depositInputOwnerAccounts = [];
+            const depositPublicValue = 20;
+
+            const aztecAccount = secp256k1.generateAccount(); // this is just an address. Need the publicKey
+            const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20]);
+            const publicValue = depositPublicValue * -1;
+
+            depositOutputNotes.forEach((individualNote) => {
+                return individualNote.setMetaData(customMetaData);
+            });
+
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAssetTest.address);
+            const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAssetTest.address, proof.hash, 200, { from: accounts[0] });
+            const { receipt: depositReceipt } = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
+
+            const updatedMetaData = randomHex(265);
+            const updatedMetaDataLength = updatedMetaData.length;
+            const { receipt: updateReceipt } = await zkAssetTest.updateNoteMetaData(
+                depositOutputNotes[0].noteHash,
+                updatedMetaData,
+                {
+                    from: accounts[0],
+                },
+            );
+
+            const depositEvent = depositReceipt.logs.find((l) => l.event === 'CreateNote');
+            const emittedCustomData = depositEvent.args.metadata.slice(196, 754);
+            expect(emittedCustomData).to.equal(customMetaData.slice(2));
+
+            const updateEvent = updateReceipt.logs.find((l) => l.event === 'UpdateNoteMetaData');
+            const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, updatedMetaDataLength);
+            expect(emittedUpdateMetaData).to.equal(updatedMetaData);
+        });
+
+        it('should update the noteAccess mapping with an approved user', async () => {
+            // create one outputNote, then place other addresses on the approved noteAccess mapping
+            const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const publicValue = depositPublicValue * -1;
+
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAssetTest.address);
+            const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAssetTest.address, proof.hash, depositPublicValue, { from: accounts[0] });
+            const { receipt } = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
+            expect(receipt.status).to.equal(true);
+
+            // for the purposes of the test, assuming that just one address is being approved
+            // and it is the first EVM word
+            const addressToApprove = padLeft(randomHex(20), 64);
+            const updatedMetaData = addressToApprove + randomHex(256).slice(2);
+            const updatedMetaDataLength = updatedMetaData.length;
+
+            const { receipt: updateReceipt } = await zkAssetTest.updateNoteMetaData(
+                depositOutputNotes[0].noteHash,
+                updatedMetaData,
+                {
+                    from: accounts[0],
+                },
+            );
+
+            const updateEvent = updateReceipt.logs.find((l) => l.event === 'UpdateNoteMetaData');
+            const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, updatedMetaDataLength);
+            expect(emittedUpdateMetaData).to.equal(updatedMetaData);
+
+            const approvedAddressEvent = updateReceipt.logs.find((l) => l.event === 'ApprovedAddress');
+            const approvedAddress = approvedAddressEvent.args.addressApproved;
+            expect(padLeft(approvedAddress, 64).toLowerCase()).to.equal(addressToApprove);
         });
     });
 
@@ -613,7 +651,7 @@ contract('ZkAsset', (accounts) => {
             await truffleAssert.reverts(zkAsset.confidentialTransfer(transferData, malformedtransferSignatures));
         });
 
-        it.skip('should fail if ZkAsset.updateNoteMetaData() called when msg.sender !== noteOwner', async () => {
+        it('should fail to update note metaData if msg.sender !== noteOwner or on approved noteAccess mapping', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const depositInputNotes = [];
             const depositInputOwnerAccounts = [];
@@ -624,19 +662,17 @@ contract('ZkAsset', (accounts) => {
             const publicValue = depositPublicValue * -1;
 
             depositOutputNotes.forEach((individualNote) => {
-                return individualNote.setMetadata(customMetadata);
+                return individualNote.setMetaData(customMetaData);
             });
 
-            const metadata = metaData.extractNoteMetadata(depositOutputNotes);
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner, metadata);
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
             const data = proof.encodeABI(zkAsset.address);
             const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
             await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
 
-            const dummyEphemeralKeys = randomHex(192);
-            const updatedMetaData = dummyEphemeralKeys + customMetadata;
+            const updatedMetaData = randomHex(265);
             await truffleAssert.reverts(
                 zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, updatedMetaData, {
                     from: accounts[0],

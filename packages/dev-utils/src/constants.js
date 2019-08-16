@@ -16,6 +16,12 @@ const t2 = [
  */
 const constants = {
     /**
+     * Common reference string
+     * @constant CRS
+     * @type {string}
+     */
+    CRS: [`0x${H_X.toString(16)}`, `0x${H_Y.toString(16)}`, ...t2],
+    /**
      * Generic scaling factor that maps between AZTEC note values and ERC20 token balances. When used for DAI,
      * 1 note value = 0.1 DAI
      */
@@ -26,29 +32,24 @@ const constants = {
      *  @default 1048576
      */
     K_MAX: 1048576,
-    /** Minimum value of an AZTEC Note
-     *  @constant K_MIN
+    /** Maximum value that can be held in an AZTEC note during tests
+     *  @constant K_MAX_TEST
      *  @type {string}
      *  @default 0
      */
     K_MAX_TEST: 14336,
-    /** Maximum value that can be held in an AZTEC note during tests
-     *  @constant K_MAX_TEST
+    /** Minimum value that can be held in an AZTEC note
+     *  @constant K_MIN
      *  @type { string }
      *  @default 0
      */
     K_MIN: 0,
-    /** Maximum value that can be held in an AZTEC note during tests
-     *  @constant K_MAX_TEST
+    /** Minimum value that can be held in an AZTEC note during tests
+     *  @constant K_MIN_TEST
      *  @type { string }
      *  @default 10240
      */
     K_MIN_TEST: 0,
-    /** bytes32-formatted trusted setup public key
-     *  @constant t2
-     *  @type {BN}
-     */
-    // t2,
     /** Number of signatures per file in trusted setup database
      *  @constant SIGNATURES_PER_FILE
      *  @type {number}
@@ -66,12 +67,6 @@ const constants = {
      * @default 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c
      */
     ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
-    /**
-     * Common reference string
-     * @constant CRS
-     * @type {string}
-     */
-    CRS: [`0x${H_X.toString(16)}`, `0x${H_Y.toString(16)}`, ...t2],
 };
 
 /**

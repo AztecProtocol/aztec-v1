@@ -1,6 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "../../ERC1724/ZkAsset.sol";
+import "../../libs/MetaDataUtils.sol";
 
 /**
  * @title ZkAssetBaseTest
@@ -22,18 +23,19 @@ contract ZkAssetTest is ZkAsset {
     /**
     * @dev Update the metadata of a note that already exists in storage. 
     * @param noteHash - hash of a note, used as a unique identifier for the note
-    * @param updateMetadata - metadata to update the note with. This should be the length of
-    * an IES encrypted viewing key, 0x177
+    * @param metaData - metadata to update the note with
     */
-    function updateNoteMetaData(bytes32 noteHash, bytes calldata updateMetadata) external {
+    function updateNoteMetaData(bytes32 noteHash, bytes calldata metaData) external {
         // Get the note from this assets registry
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
         require(status == 1, "only unspent notes can be approved");
 
-        // Remove check for only note owner can call this function for testing purposes
-        emit UpdateNoteMetadata(noteOwner, noteHash, updateMetadata);
+        // extract the approved addresses
+        // using MetaDataUtils for bytes;
+        address addressToApprove = MetaDataUtils.extractAddresses(metaData);
+        noteAccess[addressToApprove] = noteHash;
+
+        emit ApprovedAddress(addressToApprove, noteHash);
+        emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
     }
-
-
-
 }
