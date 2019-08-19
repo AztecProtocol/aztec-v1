@@ -103,12 +103,12 @@
     lodash "^4.17.11"
 
 "@0x/sol-trace@^2.0.8":
-  version "2.0.16"
-  resolved "https://registry.yarnpkg.com/@0x/sol-trace/-/sol-trace-2.0.16.tgz#ebbf809d4d74b72d18b37abf54a219e4f7d5135f"
-  integrity sha512-sblHxumAQMxsQuvgAH1fx+A5nupJq0o7fBh+SqzCexOzP/GvQyFBiB45zxLFTVRdA9YKeg2s0vMBFmq1MOQqTQ==
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/@0x/sol-trace/-/sol-trace-2.0.17.tgz#04fcd9f9b268cdf8ae1f102f6dd2bd61a29c634b"
+  integrity sha512-3Nnj0zMU6UN67Zc3CAsr7mlajDap7Q+fJMgeFi/68WOOW7oJePr9v7ZTA9elHvC1BQMOzdGUXyvNzCwHd79mpA==
   dependencies:
-    "@0x/sol-tracing-utils" "^6.0.15"
-    "@0x/subproviders" "^5.0.0"
+    "@0x/sol-tracing-utils" "^6.0.16"
+    "@0x/subproviders" "^5.0.1"
     "@0x/typescript-typings" "^4.2.4"
     chalk "^2.3.0"
     ethereum-types "^2.1.4"
