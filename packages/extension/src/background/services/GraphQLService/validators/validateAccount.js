@@ -1,6 +1,7 @@
 import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import SyncService from '~background/services/SyncService';
+import RegisterExtensionSyncService from '~background/services/eventsSyncServices/RegisterExtensionSyncService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import decodePrivateKey from '~background/utils/decodePrivateKey';
@@ -46,6 +47,11 @@ export default async function validateAccount(_, args, ctx) {
                 ? prevRegisteredAt | 0 // eslint-disable-line no-bitwise
                 : 0,
         });
+    } else {
+        //TODO: Check weather should we start syncing an address if the address has an `RegisterExtension` event
+        RegisterExtensionSyncService.syncEthAddress({
+            address: user.address,
+        })
     }
 
     if (user.registeredAt) {
