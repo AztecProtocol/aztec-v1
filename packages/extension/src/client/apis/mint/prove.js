@@ -89,7 +89,6 @@ export default async function proveMint({
         address: ownerAddress,
         linkedPublicKey,
         spendingPublicKey,
-        linkedPublicKey,
     } = notesOwner;
 
     const newMintCounterNote = await createNote(
