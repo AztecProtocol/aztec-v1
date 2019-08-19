@@ -14,7 +14,7 @@ class Web3Service {
     }
 
     async init({
-        provider = window.web3.currentProvider,
+        provider,
         account,
     } = {}) {
         if (!provider) {
@@ -258,6 +258,7 @@ class Web3Service {
             },
             events: (eventName) => {
                 const contract = this.deployed(contractName, contractAddress);
+                console.log("contract address:  " + contract.address)
                 if (!contract) {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }

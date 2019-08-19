@@ -7,6 +7,7 @@ import {
     safeReadFileSync,
     ensureDirectory,
     copyFolder,
+    copyFile,
     isFile,
 } from '../utils/fs';
 import {
@@ -21,6 +22,9 @@ import {
     errorLog,
     log,
 } from '../utils/log';
+import {
+    AZTECAccountRegistryConfig
+} from '../config/contracts';
 
 const {
     manifest: manifestFilename,
@@ -38,6 +42,7 @@ const destAbisFolder = 'abis';
 const destContractsFolder = 'contracts';
 
 const extensionContractsFolder = 'build/protocol';
+const extensionBackgroundContractsFolder = 'src/background/contracts';
 
 const srcContractsFolder = 'build/contracts';
 
@@ -132,7 +137,7 @@ const copyContractAddresses = (prevAddresses, srcFolderPaths) =>
         }) => {
             const srcFilePath = srcFolderPaths
                 .map(p => path.join(p, `${name}.json`))
-                .find(isFile);
+                .find(isFile);    
             const contract = require(path.relative( // eslint-disable-line
                 __dirname,
                 srcFilePath,
@@ -250,6 +255,26 @@ export default async function copy({
         path.join(packagePathsMap.protocol, srcContractsFolder),
         path.join(packagePathsMap.extension, extensionContractsFolder),
     ));
+
+    /*
+    * Copy Contracts into background for syncing events
+    */
+   ensureDirectory(path.join(packagePathsMap.extension, extensionBackgroundContractsFolder));
+   [AZTECAccountRegistryConfig, ]
+        .map(c => c.name)
+        .map(contractName => ({
+            contractName,
+            sourcPath: path.join(projectRoot, destBuildFolder, destContractsFolder, `${contractName}.json`)
+        }))
+        .forEach(({contractName, sourcPath}) => 
+            promises.push(
+                copyFile(
+                    sourcPath,
+                    path.join(packagePathsMap.extension, extensionBackgroundContractsFolder, `${contractName}.json`),
+                )
+            )
+        )
+    
 
     /*
      * graph-cli (v) doesn't work with yarn workspaces
