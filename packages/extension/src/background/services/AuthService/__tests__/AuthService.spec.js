@@ -2,11 +2,14 @@ import * as storage from '~utils/storage';
 import {
     KeyStore,
 } from '~utils/keyvault';
-import {
-    permissionError,
-} from '~utils/error';
 import userModel from '~database/models/user';
 import domainModel from '~database/models/domain';
+import expectErrorResponse from '~helpers/expectErrorResponse';
+import {
+    userAccount,
+    userAccount2,
+    registrationData,
+} from '~helpers/testData';
 import AuthService from '..';
 
 jest.mock('~utils/storage');
@@ -14,14 +17,6 @@ jest.mock('~utils/storage');
 afterEach(() => {
     storage.reset();
 });
-
-const userAccount = {
-    address: '0x3339C3c842732F4DAaCf12aed335661cf4eab66b',
-};
-
-const userAccount2 = {
-    address: '0x0563a36603911daaB46A3367d59253BaDF500bF9',
-};
 
 describe('AuthService getters', () => {
     it('get keyStore from storage', async () => {
@@ -145,16 +140,9 @@ describe('AuthService setters', () => {
 
     const constantDate = new Date();
 
-    const registrationData = {
-        password: 'password01',
-        salt: 'sss',
-        address: userAccount.address,
-        seedPhrase: 'sunny rival motion enforce misery retreat cram acid define use they purpose',
-    };
-
     const advanceTime = () => {
-        const advancedTime = Date.now() + 1;
-        now = jest.spyOn(Date, 'now').mockImplementation(() => advancedTime);
+        const advancedTime = Date.now() + 1000;
+        now.mockImplementation(() => advancedTime);
         return advancedTime;
     };
 
@@ -162,9 +150,8 @@ describe('AuthService setters', () => {
         now = jest.spyOn(Date, 'now').mockImplementation(() => constantDate.getTime());
     });
 
-    beforeEach(async () => {
-        const emptyDb = await storage.get();
-        expect(emptyDb).toEqual({});
+    beforeEach(() => {
+        now.mockClear();
     });
 
     afterAll(() => {
@@ -285,7 +272,7 @@ describe('AuthService setters', () => {
         expect(pwDerivedKeyAfterLogin).toEqual(pwDerivedKey);
     });
 
-    it('will fail if wrong password is provided', async () => {
+    it('fail to login if wrong password is provided', async () => {
         await AuthService.registerExtension(registrationData);
 
         await AuthService.logout();
@@ -297,38 +284,170 @@ describe('AuthService setters', () => {
             password,
         } = registrationData;
 
-        let error;
-        try {
-            await AuthService.login({
-                address,
-                password: `${password}0`,
-            });
-        } catch (e) {
-            error = e;
-        }
-
-        expect(error).toEqual(permissionError('account.incorrect.password'));
+        await expectErrorResponse(async () => AuthService.login({
+            address,
+            password: `${password}0`,
+        })).toBe('account.incorrect.password');
 
         const session = await AuthService.getSession();
-
         expect(session).toBe(null);
     });
 
-    it('will update address and last active time when calling updateSession', async () => {
+    it('update address and last active time when calling updateSession', async () => {
         await AuthService.registerExtension(registrationData);
         const session = await AuthService.getSession();
 
         const advancedTime = advanceTime();
 
-        await AuthService.updateSession(userAccount2.address);
+        const updateResponse = await AuthService.updateSession(userAccount2.address);
 
-        const anotherSession = await AuthService.getSession();
-        expect(anotherSession).toEqual({
+        const newSession = await AuthService.getSession();
+        expect(newSession).toEqual({
             ...session,
             address: userAccount2.address,
             lastActive: advancedTime,
         });
+        expect(updateResponse).toEqual(newSession);
 
-        expect(anotherSession.lastActive > session.lastActive).toBe(true);
+        expect(newSession.lastActive > session.lastActive).toBe(true);
+    });
+
+    it('save user info to storage when calling registerAddress', async () => {
+        const {
+            address,
+        } = userAccount;
+
+        const emptyUser = await userModel.get({ address });
+        expect(emptyUser).toBe(null);
+
+        const basicUserInfo = {
+            address,
+            linkedPublicKey: 'linked_public_key',
+        };
+        const unregisteredResponse = await AuthService.registerAddress(basicUserInfo);
+
+        expect(unregisteredResponse).toEqual(basicUserInfo);
+        const unregisteredUser = await userModel.get({ address });
+        expect(unregisteredUser).toEqual(basicUserInfo);
+        expect(await AuthService.getRegisteredUser(address)).toBe(null);
+
+        const registeredUserInfo = {
+            ...basicUserInfo,
+            registeredAt: Date.now(),
+        };
+        const userResponse = await AuthService.registerAddress(registeredUserInfo);
+
+        expect(userResponse).toEqual(registeredUserInfo);
+        const registeredUser = await userModel.get({ address });
+        expect(registeredUser).toEqual(registeredUserInfo);
+        expect(await AuthService.getRegisteredUser(address)).toEqual(registeredUserInfo);
+    });
+
+    it('replace existing user info in storage if register with a new linkedPublicKey or registeredAt', async () => {
+        const {
+            address,
+        } = userAccount;
+        const userInfo = {
+            address,
+            linkedPublicKey: 'linked_public_key',
+            registeredAt: Date.now(),
+        };
+
+        const userResponse = await AuthService.registerAddress(userInfo);
+        expect(userResponse).toEqual(userInfo);
+        expect(await AuthService.getRegisteredUser(address)).toEqual(userInfo);
+
+        const updatedKey = {
+            ...userInfo,
+            linkedPublicKey: 'linked_public_key_2',
+        };
+        await AuthService.registerAddress(updatedKey);
+        expect(await AuthService.getRegisteredUser(address)).toEqual(updatedKey);
+
+        const updatedTime = {
+            ...updatedKey,
+            registeredAt: updatedKey.registeredAt + 1,
+        };
+        await AuthService.registerAddress(updatedTime);
+        expect(await AuthService.getRegisteredUser(address)).toEqual(updatedTime);
+    });
+
+    it('will not replace existing user in storage if linkedPublicKey and registeredAt are still the same', async () => {
+        const setSpy = jest.spyOn(storage, 'set');
+
+        const {
+            address,
+        } = userAccount;
+        const userInfo = {
+            address,
+            linkedPublicKey: 'linked_public_key',
+            registeredAt: Date.now(),
+        };
+        const storageUserInfo = {
+            ...userInfo,
+            lastSynced: '1',
+        };
+
+        await userModel.set(storageUserInfo);
+        expect(setSpy).toHaveBeenCalled();
+        setSpy.mockClear();
+
+        expect(await AuthService.getRegisteredUser(address)).toEqual(storageUserInfo);
+
+        await AuthService.registerAddress(userInfo);
+        expect(await AuthService.getRegisteredUser(address)).toEqual(storageUserInfo);
+
+        await AuthService.registerAddress({
+            ...userInfo,
+            lastSynced: '2',
+        });
+        expect(await AuthService.getRegisteredUser(address)).toEqual(storageUserInfo);
+
+        expect(setSpy).not.toHaveBeenCalled();
+        setSpy.mockClear();
+    });
+
+    it('save domain to storage by calling registerDomain', async () => {
+        const domainName = 'whatever.com';
+
+        const emptyDomain = await AuthService.getRegisteredDomain(domainName);
+        expect(emptyDomain).toBe(null);
+
+        const domainResponse = await AuthService.registerDomain(domainName);
+
+        expect(domainResponse).toEqual({
+            domain: domainName,
+        });
+        const registeredDomain = await AuthService.getRegisteredDomain(domainName);
+        expect(registeredDomain).toEqual({
+            domain: domainName,
+        });
+    });
+
+    it('will not replace exisint domain if it is already in storgae', async () => {
+        const setSpy = jest.spyOn(storage, 'set');
+
+        const domainName = 'whatever.com';
+        const storageDomain = {
+            domain: domainName,
+            assets: [
+                'a1',
+            ],
+        };
+        await domainModel.set(storageDomain);
+
+        expect(setSpy).toHaveBeenCalled();
+        setSpy.mockClear();
+
+        const exisintDomain = await AuthService.getRegisteredDomain(domainName);
+        expect(exisintDomain).toEqual(storageDomain);
+
+        const registeredResponse = await AuthService.registerDomain(domainName);
+        expect(registeredResponse).toEqual(storageDomain);
+        const registeredDomain = await AuthService.getRegisteredDomain(domainName);
+        expect(registeredDomain).toEqual(storageDomain);
+
+        expect(setSpy).not.toHaveBeenCalled();
+        setSpy.mockClear();
     });
 });
