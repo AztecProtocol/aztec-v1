@@ -38,7 +38,7 @@ export default async function syncUserInfo(args, ctx) {
             address: userAddress,
             linkedPublicKey,
             registeredAt: linkedPublicKey === prevLinkedPublicKey
-                ? prevRegisteredAt || 0
+                ? parseInt(prevRegisteredAt, 10) || 0
                 : 0,
         });
     }
