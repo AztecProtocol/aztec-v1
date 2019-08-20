@@ -132,4 +132,21 @@ contract.only('BatchApproval', async (accounts) => {
             expect(aceNote.noteOwner).to.equal(batchApprovalContract.address);
         }
     });
+
+    it('owner of the contract should be able to approve notes that are owned by the contract to be spent by the contract', async () => {
+        const { notes, hashes } = await mintNotes([50,75,100,25,125], alice.publicKey, batchApprovalContract.address);
+        let approvedMintedNotes = [notes[0], notes[1], notes[2]];
+        let nonApprovedMintedNotes = [notes[3], notes[4]];
+
+        const noteHashes = approvedMintedNotes.map(note => note.noteHash);
+        await batchApprovalContract.batchApprove(noteHashes, zkAssetMintableContract.address, batchApprovalContract.address);
+
+        for (let note of approvedMintedNotes) {
+            expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, batchApprovalContract.address)).to.equal(true);
+        }
+
+        for (let note of nonApprovedMintedNotes) {
+            expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, batchApprovalContract.address)).to.equal(false);
+        }
+    });
 });
