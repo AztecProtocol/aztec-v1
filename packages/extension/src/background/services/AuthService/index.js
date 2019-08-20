@@ -157,6 +157,18 @@ const AuthService = {
 
         return user;
     },
+    registerDomain: async (domainName) => {
+        await domainModel.set(
+            {
+                domain: domainName,
+            },
+            {
+                ignoreDuplicate: true,
+            },
+        );
+
+        return domainModel.get({ domain: domainName });
+    },
     logout: async () => remove('session'),
     login: async ({ password, address }) => {
         const keyStore = await get('keyStore') || {};
