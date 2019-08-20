@@ -170,14 +170,14 @@ contract.only('BatchApproval', async (accounts) => {
         }, 'sender does not have approval to spend input note', 'JoinSplit succeeds but notes are not approved');
     });
 
-    // it('the contract shouldn\'t be able to spend notes that it has already spent', async () => {
-    //     const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey,  alice.address);
-    //     await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, batchApprovalContract.address);
-    //     await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-    //     await shouldFail(async () => {
-    //         await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-    //     }, 'input note status is not UNSPENT', 'JoinSplit succeeds but notes should already be spent');
-    // });
+    it('the contract shouldn\'t be able to spend notes that it has already spent', async () => {
+        const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, batchApprovalContract.address);
+        await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, batchApprovalContract.address);
+        await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
+        await shouldFail(async () => {
+            await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
+        }, 'input note status is not UNSPENT', 'JoinSplit succeeds but notes should already be spent');
+    });
 
     // it('owner of the contract should be able to approve notes for spending by another person', async () => {
     //     const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, alice.address);
