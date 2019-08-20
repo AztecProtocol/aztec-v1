@@ -13,6 +13,7 @@ class Aztec {
     constructor() {
         this.enabled = false;
         window.ethereum.on('accountsChanged', async () => {
+            if (!this.enabled) return;
             // Time to reload your interface with accounts[0]!
             await this.enable();
         });
