@@ -179,13 +179,13 @@ contract.only('BatchApproval', async (accounts) => {
         }, 'input note status is not UNSPENT', 'JoinSplit succeeds but notes should already be spent');
     });
 
-    // it('owner of the contract should be able to approve notes for spending by another person', async () => {
-    //     const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, alice.address);
-    //     await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, bob.address);
-    //     for (let note of notes) {
-    //         expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, bob.address)).to.equal(true);
-    //     }
-    // });
+    it('owner of the contract should be able to approve notes for spending by another person', async () => {
+        const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, batchApprovalContract.address);
+        await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, bob.address);
+        for (let note of notes) {
+            expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, bob.address)).to.equal(true);
+        }
+    });
 
     // it('the contract shouldn\'t be able to approve notes for itself to spend that have already been spent', async () => {
     //     const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, alice.address);
