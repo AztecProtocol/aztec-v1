@@ -187,14 +187,14 @@ contract.only('BatchApproval', async (accounts) => {
         }
     });
 
-    // it('the contract shouldn\'t be able to approve notes for itself to spend that have already been spent', async () => {
-    //     const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, alice.address);
-    //     await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, batchApprovalContract.address);
-    //     const result = await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-    //     await shouldFail(async () => {
-    //         await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, batchApprovalContract.address);
-    //     }, 'only unspent notes can be approved', 'approval for this address succeeds but notes should already be spent so it should be impossible to approve them');
-    // });
+    it('the contract shouldn\'t be able to approve notes for itself to spend that have already been spent', async () => {
+        const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, batchApprovalContract.address);
+        await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, batchApprovalContract.address);
+        const result = await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
+        await shouldFail(async () => {
+            await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, batchApprovalContract.address);
+        }, 'only unspent notes can be approved', 'approval for this address succeeds but notes should already be spent so it should be impossible to approve them');
+    });
 
     // it('the contract shouldn\'t be able to approve notes for another address to spend that have already been spent', async () => {
     //     const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, alice.address);
