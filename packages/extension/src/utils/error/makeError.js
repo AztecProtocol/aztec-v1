@@ -20,8 +20,8 @@ export default function makeError(type, errorI18n) {
                 type,
                 key,
                 message,
+                response,
             },
-            response,
         };
     };
 }
