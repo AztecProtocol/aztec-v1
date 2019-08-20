@@ -5,6 +5,7 @@ import { makeExecutableSchema } from 'graphql-tools';
 import {
     dataError,
 } from '~utils/error';
+import errorResponse from './utils/errorResponse';
 import typeDefs from './typeDefs/background';
 import resolvers from './resolvers/background';
 
@@ -31,9 +32,9 @@ const apollo = new ApolloClient({
 
 const formatError = (error) => {
     if (error.graphQLErrors) {
-        return dataError('data.graphql', {
+        return errorResponse(dataError('data.graphql', {
             graphQLErrors: error.graphQLErrors,
-        });
+        }));
     }
     return error;
 };
