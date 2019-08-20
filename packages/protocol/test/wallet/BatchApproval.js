@@ -149,4 +149,11 @@ contract.only('BatchApproval', async (accounts) => {
             expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, batchApprovalContract.address)).to.equal(false);
         }
     });
+
+    it('the contract should be able to spend notes after they have been approved for it to spend', async () => {
+        const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey, batchApprovalContract.address);
+        await batchApprovalContract.batchApprove(hashes, zkAssetMintableContract.address, batchApprovalContract.address);
+        const result = await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
+        expect(result.receipt.status).to.equal(true);
+    });
 });
