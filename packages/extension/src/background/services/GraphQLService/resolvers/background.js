@@ -1,19 +1,19 @@
 import userModel from '~database/models/user';
 import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import {
-    ensureAccount,
-    ensureEntityPermission,
+    ensureKeyvault,
+    ensureDomainPermission,
 } from '../decorators';
 import mergeResolvers from './utils/mergeResolvers';
 import base from './base';
 
 const backgroundResolvers = {
     Query: {
-        subscribe: ensureEntityPermission(async (_, args) => ({
+        subscribe: ensureDomainPermission(async (_, args) => ({
             success: ClientSubscriptionService.grantSubscription(args),
         })),
-        userPermission: ensureAccount(async (_, args) => ({
             account: await userModel.get({ address: args.currentAddress }),
+        userPermission: ensureKeyvault(async (_, args, ctx) => ({
         })),
     },
 };
