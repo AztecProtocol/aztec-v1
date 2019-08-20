@@ -163,12 +163,12 @@ contract.only('BatchApproval', async (accounts) => {
         expect(result.receipt.status).to.equal(true);
     });
 
-    // it('the contract shouldn\'t be able to spend unapproved notes', async() => {
-    //     const { values, notes } = await mintNotes([25,125], alice.publicKey, alice.address);
-    //     await shouldFail(async () => {
-    //         await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-    //     }, 'sender does not have approval to spend input note', 'JoinSplit succeeds but notes are not approved');
-    // });
+    it('the contract shouldn\'t be able to spend unapproved notes', async() => {
+        const { values, notes } = await mintNotes([25,125], alice.publicKey, batchApprovalContract.address);
+        await shouldFail(async () => {
+            await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
+        }, 'sender does not have approval to spend input note', 'JoinSplit succeeds but notes are not approved');
+    });
 
     // it('the contract shouldn\'t be able to spend notes that it has already spent', async () => {
     //     const { values, notes, hashes } = await mintNotes([50,75,100], alice.publicKey,  alice.address);
