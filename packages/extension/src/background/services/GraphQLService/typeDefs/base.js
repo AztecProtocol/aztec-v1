@@ -129,7 +129,7 @@ export default gql`
             domain: String!
         ): AccountApiResponse
         accounts(
-            where: Account_filter
+            where: Account_filter!
             currentAddress: String!
             domain: String!
         ): AccountsApiResponse

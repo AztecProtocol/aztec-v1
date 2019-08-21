@@ -49,13 +49,13 @@ export default {
             }),
         })),
         asset: ensureDomainPermission(async (_, args) => ({
-            asset: await syncAssetInfo(args.id),
+            asset: await syncAssetInfo(args),
         })),
-            note: await syncNoteInfo(args.id, ctx),
         note: ensureDomainPermission(async (_, args, ctx) => ({
+            note: await syncNoteInfo(args, ctx),
         })),
         utilityNote: ensureDomainPermission(async (_, args, ctx) => ({
-            note: await syncUtilityNoteInfo(args.id, ctx),
+            note: await syncUtilityNoteInfo(args, ctx),
         })),
         grantNoteAccessPermission: ensureDomainPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),
