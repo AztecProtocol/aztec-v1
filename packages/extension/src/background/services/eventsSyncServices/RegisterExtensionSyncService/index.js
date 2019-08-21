@@ -25,7 +25,7 @@ const syncEthAddress = async ({
     let lastSyncedBlock = PRODUCTION_BLOCK;
     const registeredExtension = await registerExtension.query(obj => obj.address === obj.address);
 
-    if (registeredExtension && registeredExtension.length > 0) {
+    if (registeredExtension && registeredExtension.length) {
         lastSyncedBlock = registeredExtension[registeredExtension.length - 1].blockNumber + 1;
     }
     

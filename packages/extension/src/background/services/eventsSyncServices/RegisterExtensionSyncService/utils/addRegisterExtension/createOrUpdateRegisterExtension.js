@@ -1,9 +1,17 @@
 import registerExtensionModel from '~background/database/models/registerExtension';
 
 export default async function createOrUpdateRegisterExtension(registerExtension) {
-    console.log("createOrUpdateRegisterExtension(registerExtension): " + JSON.stringify(registerExtension))
-
-    const id = await registerExtensionModel.add(registerExtension);
+    
+    const existingEvents = await registerExtensionModel.query(({address}) => address===registerExtension.address);
+    let id;
+    
+    if(existingEvents.length) {
+        const existingEvent = existingEvents[0];
+        id = existingEvent.id;
+        registerExtensionModel.update(id, registerExtension);
+    } else {
+        id = await registerExtensionModel.add(registerExtension);
+    }
 
     return {
         id
