@@ -1,3 +1,6 @@
+import {
+    permissionError,
+} from '~utils/error';
 import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
@@ -6,7 +9,17 @@ import decodeKeyStore from '~background/utils/decodeKeyStore';
 export default async function syncUserInfo(args, ctx) {
     const {
         currentAddress: userAddress,
+        reset = false,
     } = args;
+
+    const {
+        keyStore,
+        session: {
+            pwDerivedKey,
+        },
+    } = ctx;
+    const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
+    const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
 
     const {
         account,
@@ -23,15 +36,12 @@ export default async function syncUserInfo(args, ctx) {
         linkedPublicKey: prevLinkedPublicKey,
     } = account || {};
 
-    const {
-        keyStore,
-        session: {
-            pwDerivedKey,
-        },
-    } = ctx;
-    const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
-    const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
-    const resetRegisteredAt = linkedPublicKey !== prevLinkedPublicKey;
+    if (prevLinkedPublicKey
+        && linkedPublicKey !== prevLinkedPublicKey
+        && !reset
+    ) {
+        return permissionError('account.duplicated');
+    }
 
     let user = await AuthService.getRegisteredUser(userAddress);
     if (!user
@@ -40,7 +50,7 @@ export default async function syncUserInfo(args, ctx) {
         user = await AuthService.registerAddress({
             address: userAddress,
             linkedPublicKey,
-            registeredAt: resetRegisteredAt
+            registeredAt: !prevRegisteredAt || reset
                 ? 0
                 : parseInt(prevRegisteredAt, 10) || 0,
         });
