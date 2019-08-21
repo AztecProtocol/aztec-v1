@@ -83,6 +83,9 @@ export default async function storyOf(name, cb, extraArgs = {}) {
     }
 
     return {
-        continueWith: async next => next(args, ctx),
+        continueWith: async (next, moreExtraArgs = {}) => next({
+            ...moreExtraArgs,
+            ...args,
+        }, ctx),
     };
 }

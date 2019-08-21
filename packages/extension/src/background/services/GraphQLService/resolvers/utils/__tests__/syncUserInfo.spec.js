@@ -1,6 +1,7 @@
 import {
     registeredUserInfo,
 } from '~helpers/testData';
+import expectErrorResponse from '~helpers/expectErrorResponse';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
@@ -90,13 +91,41 @@ describe('syncUserInfo', () => {
         expect(registerAddressSpy.mock.calls.length).toBe(1);
     });
 
-    it('reset registeredAt in storage if current linkedPublicKey is different than previous one', async () => {
+    it('replace account in storage if current linkedPublicKey is different than previous one', async () => {
+        const ensuredKeyvault = await storyOf('ensureKeyvault');
+
+        const prevUserInfo = {
+            ...registeredUserInfo,
+            registeredAt: registeredUserInfo.registeredAt - 100,
+            linkedPublicKey: 'prev_linked_public_key',
+        };
+        await AuthService.registerAddress(prevUserInfo);
+
+        expect(graphNodeQuerySpy.mock.calls.length).toBe(0);
+        expect(registerAddressSpy.mock.calls.length).toBe(1);
+
+        const prevUser = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        expect(prevUser).toEqual(prevUserInfo);
+
+        const response = await ensuredKeyvault.continueWith(syncUserInfo);
+
+        expect(response.linkedPublicKey).not.toBe(prevUserInfo.linkedPublicKey);
+        expect(response).toEqual(registeredUserInfo);
+
+        expect(graphNodeQuerySpy.mock.calls.length).toBe(1);
+        expect(registerAddressSpy.mock.calls.length).toBe(2);
+
+        const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        expect(user).toEqual(registeredUserInfo);
+    });
+
+    it('return error if current linkedPublicKey is different than the one on chain', async () => {
+        const ensuredKeyvault = await storyOf('ensureKeyvault');
+
         await AuthService.registerAddress(registeredUserInfo);
 
         const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
         expect(user).toEqual(registeredUserInfo);
-
-        const ensuredKeyvault = await storyOf('ensureKeyvault');
 
         expect(graphNodeQuerySpy.mock.calls.length).toBe(0);
         expect(registerAddressSpy.mock.calls.length).toBe(1);
@@ -111,19 +140,51 @@ describe('syncUserInfo', () => {
         expect(response.linkedPublicKey).not.toBe(newLinkedPublicKey);
         decodeLinkedPublicKey.mockImplementation(() => newLinkedPublicKey);
 
-        const retryResponse = await ensuredKeyvault.continueWith(syncUserInfo);
+        await expectErrorResponse(async () => ensuredKeyvault.continueWith(syncUserInfo))
+            .toBe('account.duplicated');
+
+        expect(graphNodeQuerySpy.mock.calls.length).toBe(2);
+        expect(registerAddressSpy.mock.calls.length).toBe(1);
+
+        decodeLinkedPublicKey.mockRestore();
+    });
+
+    it('replace linkedPublicKey and reset registeredAt in storage if reset is true', async () => {
+        const ensuredKeyvault = await storyOf('ensureKeyvault');
+
+        await AuthService.registerAddress(registeredUserInfo);
+
+        const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        expect(user).toEqual(registeredUserInfo);
+
+        expect(graphNodeQuerySpy.mock.calls.length).toBe(0);
+        expect(registerAddressSpy.mock.calls.length).toBe(1);
+
+        const response = await ensuredKeyvault.continueWith(syncUserInfo);
+        expect(response).toEqual(registeredUserInfo);
+
+        expect(graphNodeQuerySpy.mock.calls.length).toBe(1);
+        expect(registerAddressSpy.mock.calls.length).toBe(1);
+
+        const newLinkedPublicKey = 'new_linked_public_key';
+        expect(response.linkedPublicKey).not.toBe(newLinkedPublicKey);
+        decodeLinkedPublicKey.mockImplementation(() => newLinkedPublicKey);
+
+        const retryResponse = await ensuredKeyvault.continueWith(
+            syncUserInfo,
+            {
+                reset: true,
+            },
+        );
 
         expect(retryResponse).toEqual({
-            ...user,
+            ...registeredUserInfo,
             linkedPublicKey: newLinkedPublicKey,
             registeredAt: 0,
         });
 
         expect(graphNodeQuerySpy.mock.calls.length).toBe(2);
         expect(registerAddressSpy.mock.calls.length).toBe(2);
-
-        const emptyUser = await AuthService.getRegisteredUser(registeredUserInfo.address);
-        expect(emptyUser).toBe(null);
 
         decodeLinkedPublicKey.mockRestore();
     });

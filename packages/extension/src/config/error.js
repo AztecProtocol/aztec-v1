@@ -24,6 +24,7 @@ export default {
             publicKey: "Account '%{account}' does not have a public key.",
             publicKeys: '%{count} accounts do not have public keys.',
         },
+        duplicated: 'Your address has been registered with another password.',
         noteAccess: "Account '%{account}' does not have access to note '%{noteId}'",
         incorrect: {
             password: 'Could not decrypt key vault with password.',
