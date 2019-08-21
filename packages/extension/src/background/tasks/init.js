@@ -77,7 +77,6 @@ export default async function init() {
         );
     }
     
-
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),
         syncInterval: await settings('SYNC_INTERVAL'),

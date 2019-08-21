@@ -130,8 +130,6 @@ class SyncManager {
             onError: this.handleFetchError,
         });
 
-        console.log(`newNotes: ${JSON.stringify(newNotes)} `)
-
         const lastNote = newNotes[newNotes.length - 1];
         const nextSynced = lastNote
             ? lastNote.logId

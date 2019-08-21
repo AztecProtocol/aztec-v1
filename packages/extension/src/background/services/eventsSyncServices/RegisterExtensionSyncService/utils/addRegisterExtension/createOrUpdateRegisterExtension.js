@@ -1,8 +1,11 @@
+import registerExtensionModel from '~background/database/models/registerExtension';
+
 export default async function createOrUpdateRegisterExtension(registerExtension) {
-    
-    //TODO: not implemented
-    console.log("Not implemented: add new addRegisterExtension: " + JSON.stringify(registerExtension))
+    console.log("createOrUpdateRegisterExtension(registerExtension): " + JSON.stringify(registerExtension))
+
+    const id = await registerExtensionModel.add(registerExtension);
+
     return {
-        key: 0
+        id
     }
 }
