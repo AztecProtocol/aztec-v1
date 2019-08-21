@@ -8,7 +8,7 @@ import {
  
 export default async function fetchRegisterExtensions({
     address,
-    fromBlock: lastSyncedBlock,
+    fromBlock,
     onError,
 } = {}) {
     if (!address) {
@@ -24,7 +24,7 @@ export default async function fetchRegisterExtensions({
         filter: {
             account: address
         }, 
-        fromBlock: lastSyncedBlock, 
+        fromBlock, 
         toBlock: 'latest'
     }
 
@@ -34,7 +34,7 @@ export default async function fetchRegisterExtensions({
             .events({event})
             .where(options);
 
-        const accounts = data.map(({
+        const events = data.map(({
             blockNumber,
             returnValues: {
                 linkedPublicKey,

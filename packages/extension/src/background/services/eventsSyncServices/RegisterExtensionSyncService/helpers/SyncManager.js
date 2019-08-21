@@ -111,7 +111,7 @@ class SyncManager {
 
         const newRegisterExtensions = await fetchRegisterExtensions({
             address,
-            lastSyncedBlock,
+            fromBlock: lastSyncedBlock,
             onError: this.handleFetchError,
         });
 
