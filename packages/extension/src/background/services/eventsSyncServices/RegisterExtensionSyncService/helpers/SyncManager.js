@@ -8,7 +8,7 @@ import addRegisterExtension from '../utils/addRegisterExtension';
 class SyncManager {
     constructor() {
         this.config = {
-            syncInterval: 10000, // ms
+            syncInterval: 5000, // ms
         };
         this.addresses = new Map();
         this.paused = false;
@@ -114,6 +114,8 @@ class SyncManager {
             lastSyncedBlock,
             onError: this.handleFetchError,
         });
+
+        console.log("Response for events 'registerExtensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensions}))
 
         if (newRegisterExtensions && newRegisterExtensions.length) {
             const lastRegisterExtension = newRegisterExtensions[newRegisterExtensions.length - 1];

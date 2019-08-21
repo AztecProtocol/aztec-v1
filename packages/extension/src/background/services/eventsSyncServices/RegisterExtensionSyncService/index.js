@@ -1,7 +1,7 @@
 import {
     errorLog,
 } from '~utils/log';
-import registerExtension from '../mockIndexDB/registerExtension';
+import registerExtension from '~background/database/models/registerExtension';
 import SyncManager from './helpers/SyncManager';
 
 const manager = new SyncManager();
@@ -23,13 +23,12 @@ const syncEthAddress = async ({
     }
 
     let lastSyncedBlock = PRODUCTION_BLOCK;
-    const registeredExtension = await registerExtension.get({
-        address,
-    });
-    if (registeredExtension) {
-        lastSyncedBlock = registerExtension.lastSyncedBlock + 1;
-    }
+    const registeredExtension = await registerExtension.query(obj => obj.address === obj.address);
 
+    if (registeredExtension && registeredExtension.length > 0) {
+        lastSyncedBlock = registeredExtension[registeredExtension.length - 1].blockNumber + 1;
+    }
+    
     manager.sync({
         address,
         lastSyncedBlock,

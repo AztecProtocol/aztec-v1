@@ -258,7 +258,8 @@ class Web3Service {
             },
             events: (eventName) => {
                 const contract = this.deployed(contractName, contractAddress);
-                console.log("contract address:  " + contract.address)
+                console.log("events from contract address:  " + contract.address)
+
                 if (!contract) {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }

@@ -47,12 +47,12 @@ export default async function validateAccount(_, args, ctx) {
                 ? prevRegisteredAt | 0 // eslint-disable-line no-bitwise
                 : 0,
         });
-    } else {
-        //TODO: Check weather should we start syncing an address if the address has an `RegisterExtension` event
-        RegisterExtensionSyncService.syncEthAddress({
-            address: user.address,
-        })
     }
+
+    //TODO: Check weather should we start syncing an address if the address has an `RegisterExtension` event
+    RegisterExtensionSyncService.syncEthAddress({
+        address: currentAddress,
+    })
 
     if (user.registeredAt) {
         SyncService.syncAccount({

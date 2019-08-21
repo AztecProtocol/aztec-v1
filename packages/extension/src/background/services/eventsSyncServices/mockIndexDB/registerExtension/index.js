@@ -4,7 +4,7 @@ const get = ({address}) => {
         address: address,
         linkedPublicKey: '',
         blockNumber: 0,
-        registeredAt: 134233323,
+        registeredAt: 1,
     }
 }
 
