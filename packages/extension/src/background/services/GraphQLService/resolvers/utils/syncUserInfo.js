@@ -8,38 +8,41 @@ export default async function syncUserInfo(args, ctx) {
         currentAddress: userAddress,
     } = args;
 
+    const {
+        account,
+    } = await GraphNodeService.query(`
+       account(id: "${userAddress}") {
+           address
+           linkedPublicKey
+           registeredAt
+       }
+    `) || {};
+
+    const {
+        registeredAt: prevRegisteredAt,
+        linkedPublicKey: prevLinkedPublicKey,
+    } = account || {};
+
+    const {
+        keyStore,
+        session: {
+            pwDerivedKey,
+        },
+    } = ctx;
+    const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
+    const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
+    const resetRegisteredAt = linkedPublicKey !== prevLinkedPublicKey;
+
     let user = await AuthService.getRegisteredUser(userAddress);
-    if (!user) {
-        const {
-            keyStore,
-            session: {
-                pwDerivedKey,
-            },
-        } = ctx;
-
-        const {
-            account,
-        } = await GraphNodeService.query(`
-           account(id: "${userAddress}") {
-               address
-               linkedPublicKey
-               registeredAt
-           }
-        `) || {};
-
-        const {
-            registeredAt: prevRegisteredAt,
-            linkedPublicKey: prevLinkedPublicKey,
-        } = account || {};
-        const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
-        const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
-
+    if (!user
+        || user.linkedPublicKey !== linkedPublicKey
+    ) {
         user = await AuthService.registerAddress({
             address: userAddress,
             linkedPublicKey,
-            registeredAt: linkedPublicKey === prevLinkedPublicKey
-                ? parseInt(prevRegisteredAt, 10) || 0
-                : 0,
+            registeredAt: resetRegisteredAt
+                ? 0
+                : parseInt(prevRegisteredAt, 10) || 0,
         });
     }
 

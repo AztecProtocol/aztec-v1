@@ -6,7 +6,15 @@ import {
 } from '~utils/error';
 import GraphNodeService from '~background/services/GraphNodeService';
 
-export default async function syncUtilityNoteInfo(noteId) {
+export default async function syncUtilityNoteInfo(args) {
+    const {
+        id: noteId,
+    } = args;
+
+    if (!noteId) {
+        return null;
+    }
+
     const {
         note,
     } = await GraphNodeService.query(`
