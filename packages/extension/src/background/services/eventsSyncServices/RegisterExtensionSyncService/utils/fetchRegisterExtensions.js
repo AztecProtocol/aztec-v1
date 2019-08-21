@@ -36,15 +36,17 @@ export default async function fetchRegisterExtensions({
 
         const accounts = data.map(({
             blockNumber,
-            linkedPublicKey,
-            registeredAt,
+            returnValues: {
+                linkedPublicKey,
+                registeredAt,
+            }
         }) => ({
             address,
             blockNumber,
             linkedPublicKey,
             registeredAt,
         }));
-        return accounts.length > 0 ? accounts[accounts.length - 1] : null
+        return events
     } catch (error) {
         //TODO: Check error handling
         throw error;

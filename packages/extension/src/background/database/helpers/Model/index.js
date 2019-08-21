@@ -1,9 +1,10 @@
 import db from '../../';
 import {
     errorLog
-} from '~utils/log'
-import add from './add'
-import query from './query'
+} from '~utils/log';
+import add from './add';
+import update from './update';
+import query from './query';
 
 /* 
 * Format of config file
@@ -43,6 +44,7 @@ export default function Model(modelConfig) {
 
     return {
         add: (fields) => add(name, fields),
+        update: (id, fields) => update(name, id, fields),
         query: (filterFunc, orderBy) => query(name, {filterFunc, orderBy}),
     }
 }
