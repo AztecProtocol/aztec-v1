@@ -23,7 +23,8 @@ import {
     log,
 } from '../utils/log';
 import {
-    AZTECAccountRegistryConfig
+    AZTECAccountRegistryConfig,
+    ACEConfig,
 } from '../config/contracts';
 
 const {
@@ -260,7 +261,7 @@ export default async function copy({
     * Copy Contracts into background for syncing events
     */
    ensureDirectory(path.join(packagePathsMap.extension, extensionBackgroundContractsFolder));
-   [AZTECAccountRegistryConfig, ]
+   [AZTECAccountRegistryConfig, ACEConfig,]
         .map(c => c.name)
         .map(contractName => ({
             contractName,
