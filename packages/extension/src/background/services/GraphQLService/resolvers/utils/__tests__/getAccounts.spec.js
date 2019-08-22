@@ -48,7 +48,7 @@ describe('getAccounts', () => {
     });
 
     it('throw an error if at least one account is not found on chain', async () => {
-        await expectErrorResponse(async () => storyOf(
+        const errorResponse = await expectErrorResponse(async () => storyOf(
             'ensureDomainPermission',
             getAccounts,
             {
@@ -60,6 +60,10 @@ describe('getAccounts', () => {
                 },
             },
         )).toBe('account.not.linked');
+
+        expect(errorResponse).toMatchObject({
+            invalidAccounts: ['stranger_address'],
+        });
     });
 
     it('throw an error if at least one account has no linkedPublicKey on chain', async () => {
@@ -74,7 +78,7 @@ describe('getAccounts', () => {
             ],
         }));
 
-        await expectErrorResponse(async () => storyOf(
+        const errorResponse = await expectErrorResponse(async () => storyOf(
             'ensureDomainPermission',
             getAccounts,
             {
@@ -86,5 +90,9 @@ describe('getAccounts', () => {
                 },
             },
         )).toBe('account.not.linked');
+
+        expect(errorResponse).toMatchObject({
+            invalidAccounts: ['stranger_address'],
+        });
     });
 });
