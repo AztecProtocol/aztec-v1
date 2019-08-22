@@ -15,6 +15,12 @@ export default function expectErrorResponse(cb) {
             const response = await triggerCallback(cb);
             expect(Object.keys(response)).toEqual(['error']);
             expect(response.error.key).toBe(key);
+
+            const {
+                error,
+            } = response || {};
+
+            return error.response;
         },
     };
 }
