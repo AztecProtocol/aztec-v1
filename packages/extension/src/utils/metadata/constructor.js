@@ -1,55 +1,76 @@
 import config from '~config/metadata';
 import {
-    ADDRESS_LENGTH,
-    VIEWING_KEY_LENGTH,
+    DYNAMIC_VAR_CONFIG_LENGTH,
+    MIN_BYTES_VAR_LENGTH,
 } from '~config/constants';
 import _addAccess from './_addAccess';
 import _getAccess from './_getAccess';
 import toString from './toString';
-
-const arrayValues = [
-    'addresses',
-    'viewingKeys',
-];
 
 export default function constructor(metadataStr) {
     const metadata = {};
     let start = metadataStr.startsWith('0x')
         ? 2
         : 0;
+
+    const lenVars = config.reduce((accum, {
+        startAt,
+    }) => {
+        if (!startAt) {
+            return accum;
+        }
+        return [...accum, startAt];
+    }, []);
+
     config.forEach(({
         name,
         length,
+        startAt,
     }) => {
-        const len = typeof length === 'number'
-            ? length
-            : parseInt(metadata[length], 16);
-        metadata[name] = [
-            arrayValues.indexOf(name) >= 0 ? '' : '0x',
-            metadataStr.substr(start, len),
-        ].join('');
-        start += len;
+        const isDynamic = !!startAt;
+        const isLenVar = lenVars.indexOf(name) >= 0;
+
+        let numberOfVars = 1;
+        if (isDynamic) {
+            numberOfVars = parseInt(metadataStr.substr(start, DYNAMIC_VAR_CONFIG_LENGTH), 10);
+            start += DYNAMIC_VAR_CONFIG_LENGTH;
+        }
+
+        const arr = [];
+        for (let i = 0; i < numberOfVars; i += 1) {
+            let segLen;
+            if (isLenVar) {
+                segLen = length;
+            } else {
+                segLen = length !== undefined
+                    ? Math.max(length, MIN_BYTES_VAR_LENGTH)
+                    : metadataStr.length - start;
+            }
+            let val = metadataStr
+                .substr(
+                    start,
+                    segLen,
+                );
+            if (isLenVar) {
+                val = parseInt(val, 16);
+            } else if (length) {
+                val = val.slice(segLen - (length || 0));
+            }
+            arr.push(`0x${val}`);
+            start += segLen;
+        }
+
+        const isArrayValue = isDynamic && (length !== undefined);
+
+        metadata[name] = isArrayValue
+            ? arr
+            : (arr[0] || '');
     });
 
     const {
-        addresses: addressStr,
-        viewingKeys: viewingKeysStr,
+        addresses,
+        viewingKeys,
     } = metadata;
-    const addresses = [];
-    const viewingKeys = [];
-    const numberOfAccounts = addressStr.length / ADDRESS_LENGTH;
-    for (let i = 0; i < numberOfAccounts; i += 1) {
-        addresses.push(`0x${addressStr.substr(
-            ADDRESS_LENGTH * i,
-            ADDRESS_LENGTH,
-        )}`);
-        viewingKeys.push(`0x${viewingKeysStr.substr(
-            VIEWING_KEY_LENGTH * i,
-            VIEWING_KEY_LENGTH,
-        )}`);
-    }
-    metadata.addresses = addresses;
-    metadata.viewingKeys = viewingKeys;
 
     return {
         ...metadata,
