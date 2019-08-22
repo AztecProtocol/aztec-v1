@@ -3,18 +3,17 @@ import {
 } from '~utils/log';
 import registerExtension from '~background/database/models/registerExtension';
 import SyncManager from './helpers/SyncManager';
+import {
+    START_EVENTS_SYNCING_BLOCK,
+} from '~config/constants';
 
 const manager = new SyncManager();
-
-//TODO: Move this value to constants
-// It means that block should be set after releasing the app into the production
-const PRODUCTION_BLOCK = 0
 
 const syncEthAddress = async ({
     address,
 }) => {
     if (!address) {
-        errorLog("'address' can not be empty in AccountEventSyncService.syncEthAddress()");
+        errorLog("'address' can not be empty in RegisterExtensionSyncService.syncEthAddress()");
         return;
     }
 
@@ -22,7 +21,7 @@ const syncEthAddress = async ({
         return;
     }
 
-    let lastSyncedBlock = PRODUCTION_BLOCK;
+    let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
     const registeredExtension = await registerExtension.query(obj => obj.address === obj.address);
 
     if (registeredExtension && registeredExtension.length) {

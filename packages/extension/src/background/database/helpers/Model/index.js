@@ -5,6 +5,7 @@ import {
 import add from './add';
 import update from './update';
 import query from './query';
+import latest from './latest';
 
 /* 
 * Format of config file
@@ -46,5 +47,6 @@ export default function Model(modelConfig) {
         add: (fields) => add(name, fields),
         update: (id, fields) => update(name, id, fields),
         query: (filterFunc, orderBy) => query(name, {filterFunc, orderBy}),
+        latest: ({byField: orderBy}) => latest(name, orderBy),
     }
 }

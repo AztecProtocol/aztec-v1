@@ -20,7 +20,9 @@ import SyncService from '~background/services/SyncService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import Web3Service from '~background/services/Web3Service';
 import NoteService from '~background/services/NoteService';
-import AZTECAccountRegistryContract from '~background/contracts/AZTECAccountRegistry'
+import NoteRegistrySyncService from '~background/services/eventsSyncServices/NoteRegistrySyncService';
+import AZTECAccountRegistryContract from '~background/contracts/AZTECAccountRegistry';
+import ACE from '~background/contracts/ACE';
 
 
 const configureWeb3Service = async () => {
@@ -30,24 +32,8 @@ const configureWeb3Service = async () => {
         provider,
     })
 
-    //TODO: Check dynamic load files
-    
-    // const contractsNames = [AZTECAccountRegistryConfig].map(c => c.name);
-    // const contractsConfigs = contractsNames
-    //     .map(contractName => 
-    //         `~background/contracts/contracts/${contractName}.json`
-    //     )
-    //     // .filter(isFile)
-    //     .map(path => require(path)) // eslint-disable-line
-
-    // if(contractsNames.length !== contractsConfigs.length) {
-    //     errorLog('Cannot find contract config with specified name');
-    // }
-    // contractsConfigs.forEach(Web3Service.registerContract);
-
-    //TODO: Remove
-    Web3Service.registerContract(AZTECAccountRegistryContract)
-    console.log("Contracts registered successfully");
+    Web3Service.registerContract(AZTECAccountRegistryContract);
+    Web3Service.registerContract(ACE);
 }
 
 export default async function init() {
@@ -88,6 +74,11 @@ export default async function init() {
     });
 
     configureWeb3Service();
+
+    //TODO: Move to right place
+    NoteRegistrySyncService.syncCreateNoteRegistries({
+        networkId: 0,
+    })
 
     NoteService.init();
 }
