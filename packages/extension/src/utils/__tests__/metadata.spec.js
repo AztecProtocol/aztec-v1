@@ -2,19 +2,22 @@ import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
     METADATA_AZTEC_DATA_LENGTH,
-    METADATA_VAR_LEN_LENGTH,
+    MIN_BYTES_VAR_LENGTH,
+    DYNAMIC_VAR_CONFIG_LENGTH,
 } from '~config/constants';
 import metadata, {
     toString,
     addAccess,
 } from '../metadata';
 
-const pad = (val, len, padWith = '0') => `${val}`.padStart(len, padWith);
 const base16 = num => num.toString(16);
+const padVar = (val, padWith = '0') => `${base16(val)}`.padStart(DYNAMIC_VAR_CONFIG_LENGTH, padWith);
+const padOffset = offset => padVar(offset / 2);
+const padValues = (val, valLen) => `${padVar(val.length / valLen)}${val}`;
 
 const aztecData = ''.padEnd(METADATA_AZTEC_DATA_LENGTH, 'a');
 const aztecDataByte = `0x${aztecData}`;
-const appData = ''.padEnd(10, 'd');
+const appData = ''.padEnd(80, 'd');
 const appDataByte = `0x${appData}`;
 const addresses = [];
 const addressBytes = [];
@@ -29,28 +32,34 @@ for (let i = 0; i < numberOfAccounts; i += 1) {
     viewingKeys.push(viewingKey);
     viewingKeyBytes.push(`0x${viewingKey}`);
 }
-const addressesStr = addresses.join('');
+const addressesStr = addresses.map(a => a.padStart(MIN_BYTES_VAR_LENGTH, '0')).join('');
 const viewingKeysStr = viewingKeys.join('');
 
 const numberOfNewAccounts = 2;
 const newAddressBytes = [];
 const newViewingKeyBytes = [];
 for (let i = 0; i < numberOfNewAccounts; i += 1) {
-    newAddressBytes.push('0x'.padEnd(ADDRESS_LENGTH + 2, `adn${i}`));
-    newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cn${i}`));
+    newAddressBytes.push('0x'.padEnd(ADDRESS_LENGTH + 2, `adf${i}`));
+    newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cf${i}`));
 }
+
+const fixedOffset = METADATA_AZTEC_DATA_LENGTH + (DYNAMIC_VAR_CONFIG_LENGTH * 3);
 
 describe('metadata toString', () => {
     it('generate a metadata string from data object', () => {
+        expect(MIN_BYTES_VAR_LENGTH > ADDRESS_LENGTH).toBe(true);
+
+        const segAddresses = padValues(addressesStr, MIN_BYTES_VAR_LENGTH);
+        const segViewingKeys = padValues(viewingKeysStr, VIEWING_KEY_LENGTH);
         const expectedStr = [
             '0x',
-            pad(aztecData, METADATA_AZTEC_DATA_LENGTH),
-            pad(base16(addressesStr.length), METADATA_VAR_LEN_LENGTH),
-            pad(base16(viewingKeysStr.length), METADATA_VAR_LEN_LENGTH),
-            pad(base16(appData.length), METADATA_VAR_LEN_LENGTH),
-            addressesStr,
-            viewingKeysStr,
-            appData,
+            aztecData,
+            padOffset(fixedOffset),
+            padOffset(fixedOffset + segAddresses.length),
+            padOffset(fixedOffset + segAddresses.length + segViewingKeys.length),
+            segAddresses,
+            segViewingKeys,
+            padValues(appData, appData.length),
         ].join('');
 
         expect(expectedStr).toMatch(/^0x[0-9a-f]+$/);
@@ -82,11 +91,13 @@ describe('metadata toString', () => {
     it('allow undefined data in object', () => {
         const expectedStr = [
             '0x',
-            pad(aztecData, METADATA_AZTEC_DATA_LENGTH),
-            pad('0', METADATA_VAR_LEN_LENGTH),
-            pad('0', METADATA_VAR_LEN_LENGTH),
-            pad(base16(appData.length), METADATA_VAR_LEN_LENGTH),
-            appData,
+            aztecData,
+            padOffset(fixedOffset),
+            padOffset(fixedOffset + DYNAMIC_VAR_CONFIG_LENGTH),
+            padOffset(fixedOffset + (DYNAMIC_VAR_CONFIG_LENGTH * 2)),
+            padValues('', MIN_BYTES_VAR_LENGTH),
+            padValues('', VIEWING_KEY_LENGTH),
+            padValues(appData, appData.length),
         ].join('');
 
         expect(toString({

@@ -1,11 +1,5 @@
-import {
-    ONCHAIN_METADATA_AZTEC_DATA_LENGTH,
-} from '~config/constants';
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import * as storage from '~utils/storage';
-import {
-    randomId,
-} from '~utils/random';
 import GraphNodeService from '~background/services/GraphNodeService';
 import noteModel from '~database/models/note';
 import syncUtilityNoteInfo from '../syncUtilityNoteInfo';
@@ -21,7 +15,7 @@ describe('syncUtilityNoteInfo', () => {
     const noteData = {
         id: 'note_id',
         hash: 'note_hash',
-        metadata: '',
+        metadata: 'note_metadata',
         asset: {
             id: 'asset_id',
         },
@@ -30,7 +24,6 @@ describe('syncUtilityNoteInfo', () => {
     const expectedNoteResponse = {
         ...noteData,
         asset: noteData.asset.id,
-        metadata: '',
     };
 
     const querySpy = jest.spyOn(GraphNodeService, 'query')
@@ -84,27 +77,5 @@ describe('syncUtilityNoteInfo', () => {
         )).toBe('utilityNote.not.found.onChain');
 
         expect(querySpy.mock.calls.length).toBe(1);
-    });
-
-    it('remove aztec data from metadata', async () => {
-        const customMetadataLen = 10;
-        const metadata = `0x${randomId(ONCHAIN_METADATA_AZTEC_DATA_LENGTH + customMetadataLen)}`;
-        querySpy.mockImplementationOnce(() => ({
-            note: {
-                ...noteData,
-                metadata,
-            },
-        }));
-
-        const response = await storyOf('ensureDomainPermission', syncUtilityNoteInfo, {
-            id: noteData.id,
-        });
-
-        const expectedMetadata = metadata.slice(ONCHAIN_METADATA_AZTEC_DATA_LENGTH + 2);
-        expect(response).toEqual({
-            ...expectedNoteResponse,
-            metadata: expectedMetadata,
-        });
-        expect(response.metadata.length).toBe(customMetadataLen);
     });
 });

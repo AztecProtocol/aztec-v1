@@ -1,11 +1,19 @@
+import {
+    DYNAMIC_VAR_CONFIG_LENGTH,
+    MIN_BYTES_VAR_LENGTH,
+} from '~config/constants';
 import config from '~config/metadata';
 
+const toConfigVar = num => num.toString(16).padStart(DYNAMIC_VAR_CONFIG_LENGTH, '0');
+const ensureMinVarSize = str => str.padStart(Math.max(str.length, MIN_BYTES_VAR_LENGTH), '0');
+
 export default function toString(metadataObj) {
-    const lenVars = [];
     const metadata = {};
+    let accumOffset = 0;
     config.forEach(({
         name,
         length,
+        startAt,
     }) => {
         let data = '';
         if (metadataObj[name] !== undefined) {
@@ -14,28 +22,27 @@ export default function toString(metadataObj) {
                 : [metadataObj[name]];
             data = dataArr
                 .map(v => `${v}`.replace(/^0x/, ''))
+                .map(ensureMinVarSize)
                 .join('');
         }
-        if (typeof length === 'string') {
-            lenVars.push(length);
-            metadata[length] = data.length;
+
+        if (startAt) {
+            // a character is half a bytes
+            // the total length should always be even
+            metadata[startAt] = toConfigVar(accumOffset / 2);
+
+            const numberOfVars = length !== undefined
+                ? data.length / Math.max(length, MIN_BYTES_VAR_LENGTH)
+                : Math.min(1, data.length);
+            data = `${toConfigVar(numberOfVars)}${data}`;
         }
+
         metadata[name] = data;
+        accumOffset += startAt ? data.length : length;
     });
 
     const str = config
-        .map(({
-            name,
-            length,
-        }) => {
-            const data = lenVars.indexOf(name) >= 0
-                ? metadata[name].toString(16)
-                : metadata[name];
-            const len = typeof length === 'number'
-                ? length
-                : metadata[length];
-            return `${data}`.padStart(len, '0');
-        })
+        .map(({ name }) => metadata[name])
         .join('');
 
     return `0x${str}`;

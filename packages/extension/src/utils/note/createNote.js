@@ -1,4 +1,7 @@
 import aztec from 'aztec.js';
+import {
+    METADATA_AZTEC_DATA_LENGTH,
+} from '~config/constants';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
 import {
     addAccess,
@@ -13,7 +16,7 @@ export default async function createNote(value, publicKey, owner, linkedPublicKe
             address: owner,
             viewingKey: viewingKey.toHexString(),
         });
-        note.setMetaData(newMetaData);
+        note.setMetaData(newMetaData.slice(METADATA_AZTEC_DATA_LENGTH + 2));
     }
 
     return note;

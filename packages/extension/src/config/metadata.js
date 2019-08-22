@@ -1,6 +1,8 @@
 import {
     METADATA_AZTEC_DATA_LENGTH,
-    METADATA_VAR_LEN_LENGTH,
+    DYNAMIC_VAR_CONFIG_LENGTH,
+    ADDRESS_LENGTH,
+    VIEWING_KEY_LENGTH,
 } from './constants';
 
 export default [
@@ -9,27 +11,29 @@ export default [
         length: METADATA_AZTEC_DATA_LENGTH,
     },
     {
-        name: 'addressesLength',
-        length: METADATA_VAR_LEN_LENGTH,
+        name: 'addressesOffset',
+        length: DYNAMIC_VAR_CONFIG_LENGTH,
     },
     {
-        name: 'viewingKeysLength',
-        length: METADATA_VAR_LEN_LENGTH,
+        name: 'viewingKeysOffset',
+        length: DYNAMIC_VAR_CONFIG_LENGTH,
     },
     {
-        name: 'appDataLength',
-        length: METADATA_VAR_LEN_LENGTH,
+        name: 'appDataOffset',
+        length: DYNAMIC_VAR_CONFIG_LENGTH,
     },
     {
         name: 'addresses',
-        length: 'addressesLength',
+        length: ADDRESS_LENGTH,
+        startAt: 'addressesOffset',
     },
     {
         name: 'viewingKeys',
-        length: 'viewingKeysLength',
+        length: VIEWING_KEY_LENGTH,
+        startAt: 'viewingKeysOffset',
     },
     {
         name: 'appData',
-        length: 'appDataLength',
+        startAt: 'appDataOffset',
     },
 ];
