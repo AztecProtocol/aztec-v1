@@ -13,7 +13,7 @@ import metadata, {
 const base16 = num => num.toString(16);
 const padVar = (val, padWith = '0') => `${base16(val)}`.padStart(DYNAMIC_VAR_CONFIG_LENGTH, padWith);
 const padOffset = offset => padVar(offset / 2);
-const padValues = (val, valLen) => `${padVar(val.length / valLen)}${val}`;
+const padValues = (val, valLen) => `${padVar(valLen ? val.length / valLen : 0)}${val}`;
 
 const aztecData = ''.padEnd(METADATA_AZTEC_DATA_LENGTH, 'a');
 const aztecDataByte = `0x${aztecData}`;
@@ -105,6 +105,21 @@ describe('metadata toString', () => {
             appData,
         })).toBe(expectedStr);
     });
+
+    it('allow empty object', () => {
+        const expectedStr = [
+            '0x',
+            ''.padStart(METADATA_AZTEC_DATA_LENGTH, '0'),
+            padOffset(fixedOffset),
+            padOffset(fixedOffset + DYNAMIC_VAR_CONFIG_LENGTH),
+            padOffset(fixedOffset + (DYNAMIC_VAR_CONFIG_LENGTH * 2)),
+            padValues('', MIN_BYTES_VAR_LENGTH),
+            padValues('', VIEWING_KEY_LENGTH),
+            padValues('', 0),
+        ].join('');
+
+        expect(toString({})).toBe(expectedStr);
+    });
 });
 
 describe('metadata constructor', () => {
@@ -137,6 +152,15 @@ describe('metadata constructor', () => {
             addresses: [],
             viewingKeys: [],
             appData: appDataByte,
+        });
+    });
+
+    it('allow empty string', () => {
+        expect(metadata('')).toMatchObject({
+            aztecData: '',
+            addresses: [],
+            viewingKeys: [],
+            appData: '',
         });
     });
 
@@ -338,5 +362,35 @@ describe('addAccess util', () => {
         ]);
 
         expect(newNewMetadata).toBe(newMetadata);
+    });
+
+    it('allow empty metadataStr', () => {
+        const newMetadata = addAccess('', [
+            {
+                address: addressBytes[0],
+                viewingKey: viewingKeyBytes[0],
+            },
+        ]);
+
+        const addressStr = padValues(
+            addresses[0].padStart(MIN_BYTES_VAR_LENGTH, '0'),
+            MIN_BYTES_VAR_LENGTH,
+        );
+        const viewingKeyStr = padValues(
+            viewingKeys[0].padStart(MIN_BYTES_VAR_LENGTH, '0'),
+            VIEWING_KEY_LENGTH,
+        );
+        const expectedStr = [
+            '0x',
+            ''.padStart(METADATA_AZTEC_DATA_LENGTH, '0'),
+            padOffset(fixedOffset),
+            padOffset(fixedOffset + addressStr.length),
+            padOffset(fixedOffset + addressStr.length + viewingKeyStr.length),
+            addressStr,
+            viewingKeyStr,
+            padValues('', 0),
+        ].join('');
+
+        expect(newMetadata).toBe(expectedStr);
     });
 });

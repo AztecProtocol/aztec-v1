@@ -8,6 +8,7 @@ export const REAL_VIEWING_KEY_LENGTH = 138;
 export const VIEWING_KEY_LENGTH = 420;
 
 export const METADATA_AZTEC_DATA_LENGTH = 194;
+export const AZTEC_JS_METADATA_PREFIX_LENGTH = 128;
 
 export const DYNAMIC_VAR_CONFIG_LENGTH = 32;
 export const MIN_BYTES_VAR_LENGTH = 64;
