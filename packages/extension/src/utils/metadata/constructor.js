@@ -56,7 +56,7 @@ export default function constructor(metadataStr) {
             } else if (length) {
                 val = val.slice(segLen - (length || 0));
             }
-            arr.push(`0x${val}`);
+            arr.push(val ? `0x${val}` : '');
             start += segLen;
         }
 

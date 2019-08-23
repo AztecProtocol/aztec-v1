@@ -5,7 +5,7 @@ import {
 import config from '~config/metadata';
 
 const toConfigVar = num => num.toString(16).padStart(DYNAMIC_VAR_CONFIG_LENGTH, '0');
-const ensureMinVarSize = str => str.padStart(Math.max(str.length, MIN_BYTES_VAR_LENGTH), '0');
+const ensureMinVarSize = (str, len) => str.padStart(Math.max(len || str.length, MIN_BYTES_VAR_LENGTH), '0');
 
 export default function toString(metadataObj) {
     const metadata = {};
@@ -16,13 +16,13 @@ export default function toString(metadataObj) {
         startAt,
     }) => {
         let data = '';
-        if (metadataObj[name] !== undefined) {
+        if (metadataObj[name] || (!startAt && length)) {
             const dataArr = Array.isArray(metadataObj[name])
                 ? metadataObj[name]
-                : [metadataObj[name]];
+                : [metadataObj[name] || ''];
             data = dataArr
                 .map(v => `${v}`.replace(/^0x/, ''))
-                .map(ensureMinVarSize)
+                .map(v => ensureMinVarSize(v, length))
                 .join('');
         }
 
