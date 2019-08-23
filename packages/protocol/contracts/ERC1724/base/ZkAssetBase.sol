@@ -16,7 +16,7 @@ import "../../libs/ProofUtils.sol";
  * The ownership values and transfer values are encrypted.
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
+contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     using NoteUtils for bytes;
     using SafeMath for uint256;
     using ProofUtils for uint24;
@@ -43,6 +43,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
     ACE public ace;
     IERC20 public linkedToken;
+
+    struct NoteAccess {
+        mapping(address => bool) access;
+    }
 
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
     mapping(address => bytes32) noteAccess;
@@ -311,7 +315,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */
-    function updateNoteMetaData(bytes32 noteHash, bytes calldata metaData) external {
+    function updateNoteMetaData(bytes32 noteHash, bytes memory metaData) public {
         // Get the note from this assets registry
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
         require(status == 1, "only unspent notes can be approved");
@@ -350,6 +354,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     function logOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
+            // NoteAccess individualNoteAccessStruct = NoteAccess(individualNoteAccessMapping);
+            // noteAccessRegistry[noteHash] = individualNoteAccessStruct;
             emit CreateNote(noteOwner, noteHash, metadata);
         }
     }
