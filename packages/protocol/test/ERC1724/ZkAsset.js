@@ -170,7 +170,7 @@ contract('ZkAsset', (accounts) => {
 
             const customMetadataA = customMetaData;
 
-            // changed the first digit of META_DATA_TEST from 0 to 3
+            // changed the first digit of customMetaData
             const customMetadataB = '0x3' + customMetaData.slice(3);
             const customMetadataArray = [customMetadataA, customMetadataB];
 
@@ -379,7 +379,7 @@ contract('ZkAsset', (accounts) => {
             expect(emittedUpdateMetaData).to.equal(updatedMetaData);
         });
 
-        it('should update the noteAccess mapping with an approved user', async () => {
+        it.skip('should update the noteAccess mapping with an approved user', async () => {
             // create one outputNote, then place other addresses on the approved noteAccess mapping
             const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
             const {
@@ -402,8 +402,8 @@ contract('ZkAsset', (accounts) => {
 
             // for the purposes of the test, assuming that just one address is being approved
             // and it is the first EVM word
-            const addressToApprove = padLeft(randomHex(20), 64);
-            const updatedMetaData = addressToApprove + randomHex(256).slice(2);
+            const addressesToApprove = 'ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0aad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1aad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2a';
+            const updatedMetaData = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00000000000000000000000000000091000000000000000000000000000000dd0000000000000000000000000000036300000000000000000000000000000003ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0aad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1aad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2a00000000000000000000000000000003c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c200000000000000000000000000000001dddddddddd';
             const updatedMetaDataLength = updatedMetaData.length;
 
             const { receipt: updateReceipt } = await zkAssetTest.updateNoteMetaData(
@@ -418,9 +418,10 @@ contract('ZkAsset', (accounts) => {
             const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, updatedMetaDataLength);
             expect(emittedUpdateMetaData).to.equal(updatedMetaData);
 
-            const approvedAddressEvent = updateReceipt.logs.find((l) => l.event === 'ApprovedAddress');
-            const approvedAddress = approvedAddressEvent.args.addressApproved;
-            expect(padLeft(approvedAddress, 64).toLowerCase()).to.equal(addressToApprove);
+            // const approvedAddressEvent = updateReceipt.logs.find((l) => l.event === 'ApprovedAddress');
+            // const approvedAddress = approvedAddressEvent.args.addressApproved;
+            // expect(padLeft(approvedAddress, 64).toLowerCase()).to.equal(addressesToApprove);
+            expect(true).to.equal(false);
         });
     });
 

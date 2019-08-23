@@ -8,23 +8,56 @@ pragma solidity >=0.5.0 <= 0.6.0;
  **/
 
 
-// TODO: this library needs building out for all required operations
-library MetaDataUtils {
-    event MetaData(bytes data);
-     /**
-      * @dev Extract the approved addresses from the metaData
-      * @param metaData - metaData containing addresses according to the schema defined in x
-      */
+contract MetaDataUtils {
 
-    function extractAddresses(bytes memory metaData) internal returns (
-        address addressToApprove
-    ) {
-    // TODO: this function will need to be built out to match the required schema
-    // For testing purposes, it assumes the address to approve is the first EVM word of callData
-    
-        emit MetaData(metaData);
+    /**
+    * @dev Extract the approved addresses from the metaData
+    * @param metaData - metaData containing addresses according to the schema defined in x
+    */
+    function extractAddresses(bytes memory metaData) public returns (bytes32[] memory allAddresses) {
+        /**
+        * Memory map of metaData
+        * 0x00 - 0x20 : length of metaData
+        * 0x20 - 0x81 : ephemeral key
+        * 0x81 - 0xa1 : approved addresses offset
+        * 0xa1 - 0xc1 : encrypted view keys offset
+        * 0xc1 - 0xe1 : app data offset
+        * 0xe1 - L_addresses : approvedAddresses
+        * (0xe1 + L_addresses) - (0xe1 + L_addresses + L_encryptedViewKeys) : encrypted view keys
+        * (0xe1 + L_addresses + L_encryptedViewKeys) - (0xe1 + L_addresses + L_encryptedViewKeys + L_appData) : appData
+        */
+
+        bytes32 numAddresses;
         assembly {
-            addressToApprove := mload(add(metaData, 0x20))
+            numAddresses := mload(add(metaData, 0xe1))
+        }
+
+        allAddresses = new bytes32[](uint256(numAddresses));
+
+        for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
+            bytes32 extractedAddress = extractAddress(metaData, i);
+            allAddresses[i] = extractedAddress;
+        }
+        return allAddresses;
+    }
+
+    /**
+    * @dev Extract a single approved address from the metaData
+    * @param metaData - metaData containing addresses according to the schema defined in x
+    * @param addressPos - indexer for the desired address, the one to be extracted
+    */
+    function extractAddress(bytes memory metaData, uint256 addressPos) public returns (bytes32 desiredAddress) {
+
+        assembly {
+            desiredAddress := mload(
+                add(
+                    add(
+                        metaData,
+                        add(0xe1, 0x20)  // go to the start of addresses, jump over first word
+                    ),
+                    mul(addressPos, 0x20) // jump to the desired address
+                )
+            )
         }
     }
 }
