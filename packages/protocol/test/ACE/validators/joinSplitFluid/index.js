@@ -8,7 +8,7 @@ const sinon = require('sinon');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-const { mockZeroJoinSplitFluidProof } = require('../../../helpers/proof');
+const { FAKE_CRS, mockZeroJoinSplitFluidProof } = require('../../../helpers/proof');
 
 const JoinSplitFluidValidator = artifacts.require('./JoinSplitFluid');
 const JoinSplitFluidValidatorInterface = artifacts.require('./JoinSplitFluidInterface');
@@ -319,6 +319,16 @@ contract('Mint Validator', (accounts) => {
                 truffleAssert.ErrorType.REVERT,
             );
         });
+
+        it('should fail for fake trusted setup public key', async () => {
+            const { currentMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            const proof = new MintProof(currentMintCounterNote, newMintCounterNote, mintedNotes, sender);
+            const data = proof.encodeABI();
+            await truffleAssert.reverts(
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, FAKE_CRS),
+                truffleAssert.ErrorType.REVERT,
+            );
+        });
     });
 });
 
@@ -600,6 +610,16 @@ contract('Burn Validator', (accounts) => {
             const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(
                 joinSplitFluidValidator.validateJoinSplitFluid(data, sender, malformedCRS),
+                truffleAssert.ErrorType.REVERT,
+            );
+        });
+
+        it('should fail for fake trusted setup public key', async () => {
+            const { currentBurnCounterNote, newBurnCounterNote, burnedNotes } = await getDefaultBurnNotes();
+            const proof = new BurnProof(currentBurnCounterNote, newBurnCounterNote, burnedNotes, sender);
+            const data = proof.encodeABI();
+            await truffleAssert.reverts(
+                joinSplitFluidValidator.validateJoinSplitFluid(data, sender, FAKE_CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });

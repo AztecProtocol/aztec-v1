@@ -5,13 +5,17 @@ const { ProofType } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const { keccak256, padLeft } = require('web3-utils');
+const { keccak256, padLeft, randomHex } = require('web3-utils');
 
 // kBar, aBar, gamma.x, gamma., sigma.x, sigma.y
 const zeroNote = Array(6).fill('0'.repeat(64));
 
 // blindingFactor.x, blindingFactor.y
 const zeroBlindingFactors = Array(2).fill('0'.repeat(64));
+
+const fakeT2 = [randomHex(32), randomHex(32), randomHex(32), randomHex(32)];
+
+const FAKE_CRS = [`0x${bn128.H_X.toString(16)}`, `0x${bn128.H_Y.toString(16)}`, ...fakeT2];
 
 const mockZeroProof = () => {
     const zeroProof = {};
@@ -122,6 +126,7 @@ const mockZeroSwapProof = () => {
 };
 
 module.exports = {
+    FAKE_CRS,
     mockZeroDividendProof,
     mockZeroJoinSplitProof,
     mockZeroJoinSplitFluidProof,

@@ -7,7 +7,7 @@ const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-const { mockZeroDividendProof } = require('../../../helpers/proof');
+const { FAKE_CRS, mockZeroDividendProof } = require('../../../helpers/proof');
 
 const Dividend = artifacts.require('./Dividend');
 const DividendInterface = artifacts.require('./DividendInterface');
@@ -361,6 +361,16 @@ contract('Dividend Validator', (accounts) => {
             const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(
                 dividendValidator.validateDividend(data, sender, malformedCRS),
+                truffleAssert.ErrorType.REVERT,
+            );
+        });
+
+        it('should fail for fake trusted setup public key', async () => {
+            const { notionalNote, residualNote, targetNote, za, zb } = await getDefaultNotes();
+            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
+            const data = proof.encodeABI();
+            await truffleAssert.reverts(
+                dividendValidator.validateDividend(data, sender, FAKE_CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });
