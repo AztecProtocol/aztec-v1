@@ -6,6 +6,8 @@ export const userAccount = {
 
 export const userAccount2 = {
     address: '0x0563a36603911daab46a3367d59253badf500bf9',
+    linkedPublicKey: '0x5cf16cd7ec26d46d7119927c822547a040f1a000d41a12adf72393a84712cf9d',
+    spendingPublicKey: '0x969bed11087acdef86d85f60fd099885ba26455fb11be5d2abd39daff12d80d025',
 };
 
 export const registrationData = {
