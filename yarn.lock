@@ -66,12 +66,12 @@
     yargs "^10.0.3"
 
 "@0x/sol-coverage@^3.0.0":
-  version "3.0.8"
-  resolved "https://registry.yarnpkg.com/@0x/sol-coverage/-/sol-coverage-3.0.8.tgz#d5aea54c5f0d5cd6604edf64be039d51a230046d"
-  integrity sha512-FpsfV9fbhwaLUJOeTNdFZTcxA6V00pRQ5+AXOfKcrjs0YXvj5lOOnbekbkUZO/oYQYZilGGg4q+rdp6MeVkSqA==
+  version "3.0.10"
+  resolved "https://registry.yarnpkg.com/@0x/sol-coverage/-/sol-coverage-3.0.10.tgz#32bfa49e47a14dc105230f70d6e51dc3057482c9"
+  integrity sha512-iqgGTv3ykQ4Tt6VP+EpxisHInCWqG/UvWc0+VLybXSLgxKiMAPsneuWkUoypGp9TlvLJAPe6fNMlpzR+jPg5YQ==
   dependencies:
-    "@0x/sol-tracing-utils" "^6.0.15"
-    "@0x/subproviders" "^5.0.0"
+    "@0x/sol-tracing-utils" "^6.0.17"
+    "@0x/subproviders" "^5.0.2"
     "@0x/typescript-typings" "^4.2.4"
     "@types/minimatch" "^3.0.3"
     ethereum-types "^2.1.4"
