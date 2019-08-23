@@ -20,7 +20,7 @@ export default async function demoNote({
     await aztec.enable();
 
 
-    let zkAssetAddress = '0x4AB2e8E15780d244A4513338B48Cc9120Bf3c2fd'; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         ({
@@ -114,6 +114,7 @@ export default async function demoNote({
     const copySmallerNote = await createNote(
         smallerNote.value,
         stranger.publicKey,
+        stranger.address,
     );
     log('Generating range proof to test if smallerNote === copySmallerNote...', {
         copySmallerNote,
