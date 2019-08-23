@@ -6,7 +6,7 @@ const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-const { mockZeroSwapProof } = require('../../../helpers/proof');
+const { FAKE_CRS, mockZeroSwapProof } = require('../../../helpers/proof');
 
 const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
@@ -232,6 +232,13 @@ contract('Swap Validator', (accounts) => {
             const malformedHy = bn128.H_Y.add(new BN(1));
             const bogusCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bogusCRS), truffleAssert.ErrorType.REVERT);
+        });
+
+        it('should fail for using a fake trusted setup public key', async () => {
+            const { inputNotes, outputNotes } = await getDefaultNotes();
+            const proof = new SwapProof(inputNotes, outputNotes, sender);
+            const data = proof.encodeABI();
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, FAKE_CRS), truffleAssert.ErrorType.REVERT);
         });
     });
 });
