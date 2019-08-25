@@ -117,7 +117,7 @@
     loglevel "^1.6.1"
     web3-provider-engine "14.0.6"
 
-"@0x/sol-tracing-utils@^6.0.15", "@0x/sol-tracing-utils@^6.0.16", "@0x/sol-tracing-utils@^6.0.17":
+"@0x/sol-tracing-utils@^6.0.16", "@0x/sol-tracing-utils@^6.0.17":
   version "6.0.17"
   resolved "https://registry.yarnpkg.com/@0x/sol-tracing-utils/-/sol-tracing-utils-6.0.17.tgz#7f40fff63fbe8f0d13fa5dd3c26d42d7767ba9f0"
   integrity sha512-w2IkXMk17B3vPGhkPDAEx0dmySgnosmvf0ipbA43USkKDP71/t0lAAPYirl8P8tpwPE/9RbjwYel0YcpK7lhhQ==
@@ -144,7 +144,7 @@
     solc "^0.5.5"
     solidity-parser-antlr "^0.4.2"
 
-"@0x/subproviders@^5.0.0", "@0x/subproviders@^5.0.1", "@0x/subproviders@^5.0.2":
+"@0x/subproviders@^5.0.1", "@0x/subproviders@^5.0.2":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@0x/subproviders/-/subproviders-5.0.2.tgz#e11d081c45f8d7f379ae100e42ecef38d1e76191"
   integrity sha512-9jAQi/NDChlcAp1VwaVwhxc8TGACWoBx4Pth7sw3cdqBXIBXXMaNm4tgS9dn/p2QKmCRyhUMMy4zupKGr9Ddng==
@@ -16721,7 +16721,6 @@ websocket@1.0.29, websocket@^1.0.28:
 
 "websocket@github:web3-js/WebSocket-Node#polyfill/globalThis":
   version "1.0.29"
-  uid b134a75541b5db59668df81c03e926cd5f325077
   resolved "https://codeload.github.com/web3-js/WebSocket-Node/tar.gz/b134a75541b5db59668df81c03e926cd5f325077"
   dependencies:
     debug "^2.2.0"
