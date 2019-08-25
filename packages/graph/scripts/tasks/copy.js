@@ -25,6 +25,7 @@ import {
 import {
     AZTECAccountRegistryConfig,
     ACEConfig,
+    IZkAssetConfig,
 } from '../config/contracts';
 
 const {
@@ -91,6 +92,18 @@ const retrieveAddresses = (dataSources) => {
     return addresses;
 };
 
+const extractNetworks = (contractPath) => {
+    const contract = require(path.relative( // eslint-disable-line
+        __dirname,
+        contractPath,
+    ));
+    const {
+        networks,
+    } = contract || {};
+
+    return networks
+}
+
 const copyAbi = (contractName, srcContractsPaths, destFilePath) =>
     new Promise((resolve, reject) => {
         let abi;
@@ -138,14 +151,8 @@ const copyContractAddresses = (prevAddresses, srcFolderPaths) =>
         }) => {
             const srcFilePath = srcFolderPaths
                 .map(p => path.join(p, `${name}.json`))
-                .find(isFile);    
-            const contract = require(path.relative( // eslint-disable-line
-                __dirname,
-                srcFilePath,
-            ));
-            const {
-                networks,
-            } = contract || {};
+                .find(isFile);   
+            const networks = extractNetworks(srcFilePath);
             if (!networks) {
                 errorLog(`No networks defined for contract ${name}`);
                 return;
@@ -260,12 +267,16 @@ export default async function copy({
     /*
     * Copy Contracts into background for syncing events
     */
+
    ensureDirectory(path.join(packagePathsMap.extension, extensionBackgroundContractsFolder));
-   [AZTECAccountRegistryConfig, ACEConfig,]
+   [AZTECAccountRegistryConfig, ACEConfig, IZkAssetConfig]
         .map(c => c.name)
         .map(contractName => ({
             contractName,
-            sourcPath: path.join(projectRoot, destBuildFolder, destContractsFolder, `${contractName}.json`)
+            sourcPath: srcContractsPaths
+                .map(p => path.join(p, `${contractName}.json`))
+                .filter(isFile)
+                .find(p => !!extractNetworks(p))
         }))
         .forEach(({contractName, sourcPath}) => 
             promises.push(
@@ -275,7 +286,6 @@ export default async function copy({
                 )
             )
         )
-    
 
     /*
      * graph-cli (v) doesn't work with yarn workspaces
