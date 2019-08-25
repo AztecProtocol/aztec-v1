@@ -233,12 +233,5 @@ contract('Swap Validator', (accounts) => {
             const bogusCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bogusCRS), truffleAssert.ErrorType.REVERT);
         });
-
-        it('should fail for using a fake trusted setup public key', async () => {
-            const { inputNotes, outputNotes } = await getDefaultNotes();
-            const proof = new SwapProof(inputNotes, outputNotes, sender);
-            const data = proof.encodeABI();
-            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, FAKE_CRS), truffleAssert.ErrorType.REVERT);
-        });
     });
 });
