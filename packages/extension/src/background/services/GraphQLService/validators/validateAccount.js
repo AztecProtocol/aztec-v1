@@ -2,6 +2,7 @@ import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import SyncService from '~background/services/SyncService';
 import RegisterExtensionSyncService from '~background/services/eventsSyncServices/RegisterExtensionSyncService';
+import NoteSyncService from '~background/services/eventsSyncServices/NoteSyncService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import decodePrivateKey from '~background/utils/decodePrivateKey';
@@ -53,6 +54,10 @@ export default async function validateAccount(_, args, ctx) {
     RegisterExtensionSyncService.syncEthAddress({
         address: currentAddress,
     })
+    NoteSyncService.syncEthAddress({
+        address: currentAddress,
+    })
+    
 
     if (user.registeredAt) {
         SyncService.syncAccount({
