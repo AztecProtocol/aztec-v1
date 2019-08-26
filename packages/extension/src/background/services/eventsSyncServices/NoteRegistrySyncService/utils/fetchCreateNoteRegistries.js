@@ -4,7 +4,7 @@ import {
 import Web3Service from '~background/services/Web3Service';
 import {
     ACEConfig,
-} from '~config/contracts'
+} from '~background/config/contracts'
  
 export default async function fetchCreateNoteRegistries({
     //TODO: networkId feature is not implemented yet
@@ -34,10 +34,22 @@ export default async function fetchCreateNoteRegistries({
 
         const events = data.map(({
             blockNumber,
-            returnValues
+            returnValues: {
+                registryOwner,
+                registryAddress,
+                scalingFactor,
+                linkedTokenAddress,
+                canAdjustSupply,
+                canConvert,
+            }
         }) => ({
             blockNumber,
-            ...returnValues,
+            registryOwner,
+            registryAddress,
+            scalingFactor,
+            linkedTokenAddress,
+            canAdjustSupply,
+            canConvert,
         }));
         return events
     } catch (error) {

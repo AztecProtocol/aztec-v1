@@ -6,14 +6,10 @@ import {
     onIdle,
 } from '~utils/storage';
 import {
-    errorLog,
-} from '~utils/log';
-// import {
-//     isFile,
-// } from '~background/utils/fs';
-import {
-    AZTECAccountRegistryConfig
-} from '~config/contracts';
+    AZTECAccountRegistryConfig,
+    ACEConfig,
+    IZkAssetConfig,
+} from '../config/contracts';
 import Web3 from 'web3';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
@@ -21,8 +17,7 @@ import GraphNodeService from '~background/services/GraphNodeService';
 import Web3Service from '~background/services/Web3Service';
 import NoteService from '~background/services/NoteService';
 import NoteRegistrySyncService from '~background/services/eventsSyncServices/NoteRegistrySyncService';
-import AZTECAccountRegistryContract from '~background/contracts/AZTECAccountRegistry';
-import ACE from '~background/contracts/ACE';
+
 
 
 const configureWeb3Service = async () => {
@@ -32,8 +27,13 @@ const configureWeb3Service = async () => {
         provider,
     })
 
-    Web3Service.registerContract(AZTECAccountRegistryContract);
-    Web3Service.registerContract(ACE);
+    Web3Service.registerContract(AZTECAccountRegistryConfig.config);
+    Web3Service.registerContract(ACEConfig.config);
+    
+    //TODO: check why it doesn't work
+    // [AZTECAccountRegistryConfig, ACEConfig]
+    //     .map(({config}) => config)
+    //     .forEach(config => Web3Service.registerContract(config))
 }
 
 export default async function init() {

@@ -1,4 +1,5 @@
 import Web3 from 'web3';
+import { eth } from './eth'
 import {
     log,
     warnLog,
@@ -11,6 +12,7 @@ class Web3Service {
         this.contracts = {};
         this.abis = {};
         this.account = null;
+        this.eth = {};
     }
 
     async init({
@@ -27,6 +29,7 @@ class Web3Service {
         }
 
         this.web3 = new Web3(provider);
+        this.eth = eth(this.web3);
 
         if (account) {
             this.account = account;
@@ -258,8 +261,6 @@ class Web3Service {
             },
             events: (eventName) => {
                 const contract = this.deployed(contractName, contractAddress);
-                console.log("events from contract address:  " + contract.address)
-
                 if (!contract) {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }

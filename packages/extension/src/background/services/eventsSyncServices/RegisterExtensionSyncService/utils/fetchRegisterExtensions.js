@@ -4,7 +4,7 @@ import {
 import Web3Service from '~background/services/Web3Service';
 import {
     AZTECAccountRegistryConfig,
-} from '~config/contracts'
+} from '~background/config/contracts'
  
 export default async function fetchRegisterExtensions({
     address,
