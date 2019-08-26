@@ -31,7 +31,7 @@
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^6.0.0",
-    "eslint-loader": "^2.1.2",
+    "eslint-loader": "^3.0.0",
     "eslint-plugin-import": "^2.16.0",
     "eth-sig-util": "^2.3.0",
     "fixpack": "^2.3.1",
