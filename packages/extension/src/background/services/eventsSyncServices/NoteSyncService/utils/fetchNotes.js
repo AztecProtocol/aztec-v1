@@ -24,8 +24,8 @@ export default async function fetchNotes({
         IZkAssetConfig.events.destroyNote,
         IZkAssetConfig.events.updateNoteMetaData,
     ]
-    .map(e => IZkAssetConfig.config.abi.find(({name, type})=> name === e && type === 'event'))
-    .map(abi.encodeEventSignature)
+        .map(e => IZkAssetConfig.config.abi.find(({name, type})=> name === e && type === 'event'))
+        .map(abi.encodeEventSignature)
 
     const ownerTopic = abi.encodeParameter('address', address);
 
