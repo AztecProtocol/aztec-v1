@@ -1,4 +1,5 @@
 import {
+    warnLog,
     errorLog,
 } from '~utils/log';
 import registerExtension from '~background/database/models/registerExtension';
@@ -18,17 +19,19 @@ const syncEthAddress = async ({
     }
 
     if (manager.isInQueue(address)) {
+        warnLog(`${address} address already in the queue RegisterExtensionSyncService.syncEthAddress()`);
         return;
     }
 
-    let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
-    const registeredExtension = await registerExtension.query(obj => obj.address === obj.address);
+    const filterFunc = obj => obj.address === obj.address
+    const registeredExtension = await registerExtension.latest({byField: 'blockNumber', filterFunc})
 
-    if (registeredExtension && registeredExtension.length) {
-        lastSyncedBlock = registeredExtension[registeredExtension.length - 1].blockNumber + 1;
+    let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
+    if (registeredExtension) {
+        lastSyncedBlock = registeredExtension.blockNumber;
     }
-    
-    manager.sync({
+
+    await manager.sync({
         address,
         lastSyncedBlock,
     });
@@ -37,4 +40,5 @@ const syncEthAddress = async ({
 export default {
     set: config => manager.setConfig(config),
     syncEthAddress,
+    manager,
 };

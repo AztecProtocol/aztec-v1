@@ -47,6 +47,6 @@ export default function Model(modelConfig) {
         add: (fields) => add(name, fields),
         update: (id, fields) => update(name, id, fields),
         query: (filterFunc, orderBy) => query(name, {filterFunc, orderBy}),
-        latest: ({byField: orderBy}) => latest(name, orderBy),
+        latest: (options) => latest(name, options),
     }
 }
