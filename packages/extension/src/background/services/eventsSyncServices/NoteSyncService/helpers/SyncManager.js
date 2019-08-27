@@ -126,6 +126,10 @@ class SyncManager {
             onError: this.handleFetchError,
         });
 
+        console.log('--------start---------')
+        console.log(JSON.stringify(createNotes), JSON.stringify(destroyNotes), JSON.stringify(modifyNotes));
+        console.log('--------end---------')
+
         await Promise.all(createNotes.map(addNote))
         await Promise.all(destroyNotes.map(addNote))
         await Promise.all(modifyNotes.map(addNote))

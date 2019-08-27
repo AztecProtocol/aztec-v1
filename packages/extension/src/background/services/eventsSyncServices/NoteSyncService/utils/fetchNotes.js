@@ -38,7 +38,7 @@ export default async function fetchNotes({
         ],
     }
 
-    console.log("options: " + JSON.stringify(options))
+    // console.log("options: " + JSON.stringify(options))
 
     try {
         const rawLogs = await getPastLogs(options);

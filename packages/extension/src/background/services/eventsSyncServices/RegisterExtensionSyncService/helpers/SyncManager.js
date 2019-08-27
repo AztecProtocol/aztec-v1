@@ -2,6 +2,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
+import Web3Service from '../../../Web3Service'
 import fetchRegisterExtensions from '../utils/fetchRegisterExtensions'
 import addRegisterExtension from '../utils/addRegisterExtension';
 
@@ -109,13 +110,20 @@ class SyncManager {
             syncInterval,
         } = this.config;
 
+        const currentBlock = await Web3Service.eth.getBlockNumber();
+        const fromBlock = lastSyncedBlock + 1; 
+        const toBlock = currentBlock;
+
         const newRegisterExtensions = await fetchRegisterExtensions({
             address,
-            fromBlock: lastSyncedBlock,
+            fromBlock,
+            toBlock,
             onError: this.handleFetchError,
         });
 
-        console.log("Response for events 'registerExtensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensions}))
+        if (newRegisterExtensions.length) {
+            console.log("Response for events 'registerExtensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensions}));
+        }
 
         if (newRegisterExtensions && newRegisterExtensions.length) {
             const lastRegisterExtension = newRegisterExtensions[newRegisterExtensions.length - 1];
@@ -125,7 +133,7 @@ class SyncManager {
         const syncReq = setTimeout(() => {
             this.syncRegisterExtensions({
                 ...options,
-                lastSyncedBlock: lastSyncedBlock + 1,
+                lastSyncedBlock: toBlock,
             });
         }, syncInterval);
 
@@ -133,7 +141,7 @@ class SyncManager {
             ...syncAddress,
             syncing: false,
             syncReq,
-            lastSyncedBlock,
+            lastSyncedBlock: toBlock,
         });
     }
 

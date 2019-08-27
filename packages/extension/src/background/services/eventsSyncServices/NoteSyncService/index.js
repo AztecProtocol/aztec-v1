@@ -32,7 +32,7 @@ const syncEthAddress = async ({
         lastSyncedBlock = lastSyncedNote.blockNumber;
         
     } else if (registeredExtension && registeredExtension.length) {
-        lastSyncedBlock = registeredExtension[registeredExtension.length - 1].blockNumber + 1;
+        lastSyncedBlock = registeredExtension[registeredExtension.length - 1].blockNumber;
     }
 
     manager.sync({
