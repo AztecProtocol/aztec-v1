@@ -15,7 +15,7 @@ export default async function fetchCreateNoteRegistries({
     if (networkId === undefined) {
         errorLog("'networkId' cannot be empty");
         return [];
-    }
+    };
 
     const event = {
         eventName: ACEConfig.сreateNoteRegistry,
@@ -24,7 +24,7 @@ export default async function fetchCreateNoteRegistries({
     const options = {
         fromBlock, 
         toBlock: 'latest'
-    }
+    };
 
     try {
         const data = await Web3Service
@@ -51,10 +51,10 @@ export default async function fetchCreateNoteRegistries({
             canAdjustSupply,
             canConvert,
         }));
-        return events
+        return events || [];
+
     } catch (error) {
-        //TODO: Check error handling
-        throw error;
         onError(error);
-    }
+        return [];
+    };
 }

@@ -14,7 +14,7 @@ export default async function fetchRegisterExtensions({
     if (!address) {
         errorLog("'address' cannot be empty");
         return null;
-    }
+    };
 
     const event = {
         eventName: AZTECAccountRegistryConfig.registerExtension,
@@ -26,7 +26,7 @@ export default async function fetchRegisterExtensions({
         }, 
         fromBlock, 
         toBlock: 'latest'
-    }
+    };
 
     try {
         const data = await Web3Service
@@ -46,10 +46,10 @@ export default async function fetchRegisterExtensions({
             linkedPublicKey,
             registeredAt,
         }));
-        return events
+        return events;
+
     } catch (error) {
-        //TODO: Check error handling
-        throw error;
         onError(error);
-    }
+        return [];
+    };
 }
