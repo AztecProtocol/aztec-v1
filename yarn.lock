@@ -15502,10 +15502,10 @@ truffle-assertions@^0.9.1:
     assertion-error "^1.1.0"
     lodash.isequal "^4.5.0"
 
-truffle-hdwallet-provider@1.0.16:
-  version "1.0.16"
-  resolved "https://registry.yarnpkg.com/truffle-hdwallet-provider/-/truffle-hdwallet-provider-1.0.16.tgz#c36955c8e1d74bdfa526a3170d3903f8f0b37b21"
-  integrity sha512-pEmCUZjdRBw8uMfEuuR+BXWMd6TZrcOo/G0V6N48IBzcJ+5YBvR/FjA803l+8ln10X97W2uSR0PaeVc6nxYHKQ==
+truffle-hdwallet-provider@1.0.17:
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/truffle-hdwallet-provider/-/truffle-hdwallet-provider-1.0.17.tgz#fe8edd0d6974eeb31af9959e41525fb19abd74ca"
+  integrity sha512-s6DvSP83jiIAc6TUcpr7Uqnja1+sLGJ8og3X7n41vfyC4OCaKmBtXL5HOHf+SsU3iblOvnbFDgmN6Y1VBL/fsg==
   dependencies:
     any-promise "^1.3.0"
     bindings "^1.3.1"
