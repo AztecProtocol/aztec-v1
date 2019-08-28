@@ -125,11 +125,8 @@ class SyncManager {
             console.log("Response for events 'registerExtensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensions}));
         }
 
-        if (newRegisterExtensions && newRegisterExtensions.length) {
-            const lastRegisterExtension = newRegisterExtensions[newRegisterExtensions.length - 1];
-            await addRegisterExtension(lastRegisterExtension);
-        }
-
+        await Promise.all(newRegisterExtensions.map(addRegisterExtension));
+        
         const syncReq = setTimeout(() => {
             this.syncRegisterExtensions({
                 ...options,

@@ -2,6 +2,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
+import Web3Service from '../../../Web3Service'
 import fetchCreateNoteRegistries from '../utils/fetchCreateNoteRegistries'
 import addCreateNoteRegistry from '../utils/addCreateNoteRegistry';
 import asyncForEach from '~utils/asyncForEach';
@@ -110,22 +111,27 @@ class SyncManager {
             syncInterval,
         } = this.config;
 
+        const currentBlock = await Web3Service.eth.getBlockNumber();
+        const fromBlock = lastSyncedBlock + 1; 
+        const toBlock = currentBlock;
+
         const newCreateNoteRegistries = await fetchCreateNoteRegistries({
             networkId,
-            fromBlock: lastSyncedBlock,
+            fromBlock,
+            toBlock,
             onError: this.handleFetchError,
         });
 
-        console.log("newCreateNoteRegistries: " + JSON.stringify(newCreateNoteRegistries))
-
-        await asyncForEach(newCreateNoteRegistries, async (createNoteRegistry) => {
-            await addCreateNoteRegistry(createNoteRegistry);
-        });
+        if (newCreateNoteRegistries.length) {
+            console.log("newCreateNoteRegistries: " + JSON.stringify(newCreateNoteRegistries))
+        }
+        
+        await Promise.all(newCreateNoteRegistries.map(addCreateNoteRegistry));
 
         const syncReq = setTimeout(() => {
             this.syncCreateNoteRegistry({
                 ...options,
-                lastSyncedBlock: lastSyncedBlock + 1,
+                lastSyncedBlock: toBlock,
             });
         }, syncInterval);
 
@@ -133,7 +139,7 @@ class SyncManager {
             ...syncNetwork,
             syncing: false,
             syncReq,
-            lastSyncedBlock,
+            lastSyncedBlock: toBlock,
         });
     }
 
@@ -150,7 +156,7 @@ class SyncManager {
             };
             this.networks.set(networkId, syncNetwork);
         }
-        return this.syncCreateNoteRegistry({
+        await this.syncCreateNoteRegistry({
             networkId,
             lastSyncedBlock,
         });

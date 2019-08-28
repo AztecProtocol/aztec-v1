@@ -16,7 +16,7 @@ export default async function fetchNotes({
     if (!address) {
         errorLog("'address' cannot be empty in fetchNotes");
         return null;
-    }
+    };
     const { abi, getPastLogs } = Web3Service.eth;
 
     const eventsTopics = [
@@ -25,7 +25,7 @@ export default async function fetchNotes({
         IZkAssetConfig.events.updateNoteMetaData,
     ]
         .map(e => IZkAssetConfig.config.abi.find(({name, type})=> name === e && type === 'event'))
-        .map(abi.encodeEventSignature)
+        .map(abi.encodeEventSignature);
 
     const ownerTopic = abi.encodeParameter('address', address);
 
@@ -36,7 +36,7 @@ export default async function fetchNotes({
             eventsTopics,
             ownerTopic,
         ],
-    }
+    };
 
     try {
         const rawLogs = await getPastLogs(options);
@@ -44,8 +44,7 @@ export default async function fetchNotes({
         return logs;
         
     } catch (error) {
-        //TODO: Check error handling
-        throw error;
         onError(error);
-    }
+        return [];
+    };
 }
