@@ -50,6 +50,12 @@ describe('randomInt', () => {
         const rand2 = randomInt(0);
         expect(rand2).toBe(0);
     });
+
+    it('select a number from 0 to 2 ** 32 if no values are provided', () => {
+        const rand = randomInt();
+        expect(rand >= 0).toBe(true);
+        expect(rand <= 2 ** 32).toBe(true);
+    });
 });
 
 describe('randomInts', () => {
@@ -97,6 +103,11 @@ describe('randomInts', () => {
 
         const rands1 = randomInts(3, -2);
         expect(rands1).toEqual([-2, -1, 0]);
+    });
+
+    it('select numbers from 0 to 2 ** 32 if no boundaries are provided', () => {
+        const rands = randomInts(10);
+        expect(rands.every(v => v >= 0 && v <= 2 ** 32)).toBe(true);
     });
 });
 

@@ -25,9 +25,14 @@ const pick = (count, start, end) => {
     ];
 };
 
-export default function randomInts(count, from, to = null) {
+export default function randomInts(count, from = null, to = null) {
     const pivot = to !== null ? from : 0;
-    const offset = to !== null ? to - from : from;
+    let offset;
+    if (to !== null) {
+        offset = to - from;
+    } else {
+        offset = from !== null ? from : 2 ** 32;
+    }
     const [start, end] = offset >= 0
         ? [pivot, pivot + offset]
         : [pivot + offset, pivot];
