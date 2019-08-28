@@ -7,7 +7,8 @@ export default Model({
         // Primary Key is auto-incremented (++id) | first key is always primary key
         '++id',
         'blockNumber',
-        'registryOwner',
+        // registryOwner is unique (&)
+        '&registryOwner',
         'registryAddress',
         'scalingFactor',
         'linkedTokenAddress',

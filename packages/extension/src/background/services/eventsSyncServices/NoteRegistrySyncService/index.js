@@ -39,4 +39,5 @@ const syncCreateNoteRegistries = async ({
 export default {
     set: config => manager.setConfig(config),
     syncCreateNoteRegistries,
+    manager,
 };
