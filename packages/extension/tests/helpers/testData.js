@@ -1,6 +1,7 @@
 export const userAccount = {
     address: '0x3339c3c842732f4daacf12aed335661cf4eab66b',
     linkedPublicKey: '0xcb7d4f2263555d45d78a18d7a6212461face2868451c40d36e4b31a22f4d3557',
+    linkedPrivateKey: '0x9efc9a183ba13db0d5d2cff78cd533b4655a2a5a7cde782258840a755324969d',
     spendingPublicKey: '0x03c8acc47a845da7b180e71f0c800e1cea70beb8b1df7699eb92df3f2927cc13e9',
 };
 

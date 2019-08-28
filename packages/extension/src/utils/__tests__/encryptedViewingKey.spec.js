@@ -1,29 +1,27 @@
 import { stub } from 'sinon';
 import {
+    userAccount,
+} from '~helpers/testData';
+import {
     REAL_VIEWING_KEY_LENGTH,
     VIEWING_KEY_LENGTH,
 } from '~config/constants';
 import {
     randomId,
 } from '~utils/random';
-import generateTestingKeys from './generateTestingKeys';
 import encryptedViewingKey, {
     fromHexString,
 } from '../encryptedViewingKey';
 import lengthConfig from '../encryptedViewingKey/lengthConfig';
 
+const {
+    linkedPublicKey: publicKey,
+    linkedPrivateKey: privateKey,
+} = userAccount;
+
 describe('encryptedViewingKey', () => {
-    let publicKey;
-    let privateKey;
     let consoleStub;
     let warnings = [];
-
-    beforeAll(async () => {
-        ({
-            publicKey,
-            privateKey,
-        } = await generateTestingKeys());
-    });
 
     beforeEach(() => {
         warnings = [];
