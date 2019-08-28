@@ -1,18 +1,15 @@
 import {
+    userAccount,
+} from '~helpers/testData';
+import {
     encryptMessage,
     decryptMessage,
 } from '../crypto';
-import generateTestingKeys from './generateTestingKeys';
 
-let publicKey;
-let privateKey;
-
-beforeAll(async () => {
-    ({
-        publicKey,
-        privateKey,
-    } = await generateTestingKeys());
-});
+const {
+    linkedPublicKey: publicKey,
+    linkedPrivateKey: privateKey,
+} = userAccount;
 
 describe('encryptMessage', () => {
     it('take publicKey and message and return an EncryptedMessage object', () => {
