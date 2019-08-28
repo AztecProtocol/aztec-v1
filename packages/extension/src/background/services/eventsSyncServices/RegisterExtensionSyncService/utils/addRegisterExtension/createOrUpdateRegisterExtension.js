@@ -1,16 +1,18 @@
 import registerExtensionModel from '~background/database/models/registerExtension';
 
-export default async function createOrUpdateRegisterExtension(registerExtension) {
+export default async function createOrUpdateRegisterExtension(rawRegisterExtension) {
     
-    const existingEvents = await registerExtensionModel.query(({address}) => address===registerExtension.address);
+    const existingRecord = await registerExtensionModel.get({address: rawRegisterExtension.address});
     let id;
     
-    if(existingEvents.length) {
-        const existingEvent = existingEvents[0];
-        id = existingEvent.id;
-        registerExtensionModel.update(id, registerExtension);
-    } else {
-        id = await registerExtensionModel.add(registerExtension);
+    if(!existingRecord) {
+        id = await registerExtensionModel.add(rawRegisterExtension);
+    
+    } else if(existingRecord.linkedPublicKey !== rawRegisterExtension.linkedPublicKey 
+        && existingRecord.blockNumber !== rawRegisterExtension.blockNumber) {
+
+        id = existingRecord.id;
+        registerExtensionModel.update(id, rawRegisterExtension);    
     }
 
     return {

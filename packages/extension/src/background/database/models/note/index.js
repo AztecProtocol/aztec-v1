@@ -4,10 +4,13 @@ export default Model({
     name: 'note',
     version: 1,
     fields: [
+        // Primary Key is auto-incremented (++id) | first key is always primary key
         '++id',
         'owner',
-        'noteHash',
+        // NoteHash is unique (&)
+        '&noteHash',
         'metadata',
         'blockNumber',
+        'status',
     ],
 });

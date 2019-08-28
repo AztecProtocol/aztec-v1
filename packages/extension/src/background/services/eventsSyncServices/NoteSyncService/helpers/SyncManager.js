@@ -3,7 +3,11 @@ import {
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../../Web3Service'
-import addNote from '../utils/addNote';
+import { 
+    addNote,
+    addDestroyNote,
+    updateNote,
+} from '../utils/addNote';
 import fetchNotes from '../utils/fetchNotes';
 
 class SyncManager {
@@ -119,20 +123,20 @@ class SyncManager {
         const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
         const loadNextPortion = currentBlock - fromBlock > precisionDelta;
         
-        const { createNotes, destroyNotes, modifyNotes } = await fetchNotes({
+        const { createNotes, destroyNotes, updateNotes } = await fetchNotes({
             address,
             fromBlock,
             toBlock,
             onError: this.handleFetchError,
         });
 
-        console.log('--------start---------')
-        console.log(JSON.stringify(createNotes), JSON.stringify(destroyNotes), JSON.stringify(modifyNotes));
-        console.log('--------end---------')
+        // console.log('--------start---------')
+        // console.log(JSON.stringify(createNotes), JSON.stringify(destroyNotes), JSON.stringify(updateNotes));
+        // console.log('--------end---------')
 
-        await Promise.all(createNotes.map(addNote))
-        await Promise.all(destroyNotes.map(addNote))
-        await Promise.all(modifyNotes.map(addNote))
+        await Promise.all(createNotes.map(addNote));
+        await Promise.all(destroyNotes.map(addDestroyNote));
+        await Promise.all(updateNotes.map(updateNote));
 
         if (loadNextPortion) {
             await this.syncNotes({

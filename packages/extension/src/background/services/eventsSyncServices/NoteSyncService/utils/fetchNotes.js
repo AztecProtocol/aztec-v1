@@ -14,7 +14,7 @@ export default async function fetchNotes({
     onError,
 } = {}) {
     if (!address) {
-        errorLog("'address' cannot be empty");
+        errorLog("'address' cannot be empty in fetchNotes");
         return null;
     }
     const { abi, getPastLogs } = Web3Service.eth;
@@ -38,11 +38,10 @@ export default async function fetchNotes({
         ],
     }
 
-    // console.log("options: " + JSON.stringify(options))
-
     try {
         const rawLogs = await getPastLogs(options);
-        return await decodeNoteLogs(eventsTopics, rawLogs);
+        const logs = await decodeNoteLogs(eventsTopics, rawLogs);
+        return logs;
         
     } catch (error) {
         //TODO: Check error handling
