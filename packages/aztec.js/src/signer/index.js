@@ -74,7 +74,7 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, p
 /**
  * Construct EIP712 ECDSA signatures over an array of notes for use in calling confidentialTransfer()
  *
- * @method signNotesForConfidentialTransfer
+ * @method signMultipleNotesForConfidentialTransfer
  * @param {string} verifyingContract address of target contract
  * @param {Object[]} noteOwnerAccounts Ethereum accounts of the owners of the notes over which signatures are being created.
  * Included in each account is: address, publicKey, privateKey
@@ -126,6 +126,32 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
     return unformattedSignature;
 };
+
+
+/**
+ * @method compoundSignNotesForBatchApproval
+ *  @param {string} verifyingContract address of target contract
+ * @param {list of strings} noteHashes hashes of the notes being signed
+ * @param {string} spender address of the note spender
+ * @param {string} privateKey the private key of message signer
+ */
+signer.compoundSignNotesForBatchApproval = (verifyingContract, noteHashes, spender, privateKey) => {
+    const domain = signer.generateZKAssetDomainParams(verifyingContract);
+    const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
+    const statuses = []; // fill this array with true, length equalling noteHashes.length
+    for (let i = 0; i < noteHashes.length; i++) {
+        statuses[i] = true;
+    }
+    const message = {
+        noteHashes,
+        spender,
+        statuses,
+    };
+
+    const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
+    const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    return signature;
+}
 
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, for an ACE.sol domain.

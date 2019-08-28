@@ -104,6 +104,9 @@ const JOIN_SPLIT_SIGNATURE_TYPE_HASH = '0xf671f176821d4c6f81e66f9704cdf2c5c12d34
 // keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool status)"
 const NOTE_SIGNATURE_TYPE_HASH = '0x9fe730639297761b7154c4543e5b6d06ca424c8b46480a40d3181296d5c35815';
 
+// keccak256 hash of "MultipleNoteSignature(bytes32[] noteHashes,address spender,bool[] statuses)"
+const MULTIPLE_NOTE_SIGNATURE_TYPE_HASH = '0xac6c4c7554af6f8181ca36827422f45e7802a4cac44686fe59e84f9ede267d61';
+
 constants.eip712 = {
     ACE_DOMAIN_PARAMS: {
         name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
@@ -146,6 +149,18 @@ constants.eip712 = {
         primaryType: 'NoteSignature',
     },
     NOTE_SIGNATURE_TYPE_HASH,
+    MULTIPLE_NOTE_SIGNATURE: {
+        types: {
+            MultipleNoteSignature: [
+                { name: 'noteHashes', type: 'bytes32[]'},
+                { name: 'spender', type: 'address'},
+                { name: 'statuses', type: 'bool[]'},
+            ],
+            EIP712Domain: EIP712_DOMAIN,
+        },
+        primaryType: 'MultipleNoteSignature',
+    },
+    MULTIPLE_NOTE_SIGNATURE_TYPE_HASH,
     ZK_ASSET_DOMAIN_PARAMS: {
         name: 'ZK_ASSET',
         version: '1',
