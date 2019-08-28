@@ -57,9 +57,9 @@ export default function decodeNoteLogs(eventsTopics, rawLogs) {
         .map(decodeDestroyNote)
         .map(noteLog);
 
-    const modifyNotes = (groupedRawLogs[updateNoteMetaDataTopic] || [])
+    const updateNotes = (groupedRawLogs[updateNoteMetaDataTopic] || [])
         .map(decodeUpdateNoteMetaData)
         .map(noteLog);
 
-    return { createNotes, destroyNotes, modifyNotes };
+    return { createNotes, destroyNotes, updateNotes };
 }

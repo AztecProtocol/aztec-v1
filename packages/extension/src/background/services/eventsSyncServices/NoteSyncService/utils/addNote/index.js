@@ -1,5 +1,15 @@
-import createNote from './createNote';
+import createUpdateNote from './createUpdateNote';
+import destroyNote from './destroyNote';
 
-export default async function addNote(note) {
-    return createNote(note);
-}
+export const addNote = async (note) => {
+    return createUpdateNote(note);
+};
+
+export const updateNote = async (note) => {
+    return createUpdateNote(note);
+};
+
+export const addDestroyNote = async (note) => {
+    return destroyNote(note.noteHash);
+};
+

@@ -4,8 +4,10 @@ export default Model({
     name: 'registerExtension',
     version: 1,
     fields: [
+        // Primary Key is auto-incremented (++id) | first key is always primary key
         '++id',
-        'address',
+        // Address is unique (&)
+        '&address',
         'blockNumber',
         'linkedPublicKey',
         'registeredAt',

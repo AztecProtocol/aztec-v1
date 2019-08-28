@@ -2,6 +2,7 @@ import db from '../../';
 import {
     errorLog
 } from '~utils/log';
+import get from './get';
 import add from './add';
 import update from './update';
 import query from './query';
@@ -44,6 +45,7 @@ export default function Model(modelConfig) {
     db.version(version).stores(dexieConfig);
 
     return {
+        get: (fields) => get(name, fields),
         add: (fields) => add(name, fields),
         update: (id, fields) => update(name, id, fields),
         query: (filterFunc, orderBy) => query(name, {filterFunc, orderBy}),

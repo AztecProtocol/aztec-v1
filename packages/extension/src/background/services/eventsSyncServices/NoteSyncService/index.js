@@ -1,7 +1,7 @@
 import {
     errorLog,
 } from '~utils/log';
-// import note from '~background/database/models/registerExtension';
+import note from '~background/database/models/note';
 import registerExtension from '~background/database/models/registerExtension';
 import SyncManager from './helpers/SyncManager';
 import {
@@ -22,17 +22,16 @@ const syncEthAddress = async ({
         return;
     }
 
-    let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
-    
-    //TODO: Implement
-    const lastSyncedNote = null;
-    const registeredExtension = await registerExtension.query(obj => obj.address === obj.address);
+    const ownerFilter = obj => obj.address === obj.address
+    const lastSyncedNote = await note.latest({byField: 'blockNumber', ownerFilter})
+    const registeredExtension = await registerExtension.latest({byField: 'blockNumber', ownerFilter})
 
+    let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
     if (lastSyncedNote) {
         lastSyncedBlock = lastSyncedNote.blockNumber;
         
-    } else if (registeredExtension && registeredExtension.length) {
-        lastSyncedBlock = registeredExtension[registeredExtension.length - 1].blockNumber;
+    } else if (registeredExtension) {
+        lastSyncedBlock = registeredExtension.blockNumber;
     }
 
     manager.sync({
