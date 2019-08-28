@@ -6231,9 +6231,9 @@ eth-sig-util@^1.4.2:
     ethereumjs-util "^5.1.1"
 
 eth-sig-util@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/eth-sig-util/-/eth-sig-util-2.3.0.tgz#c54a6ac8e8796f7e25f59cf436982a930e645231"
-  integrity sha512-ugD1AvaggvKaZDgnS19W5qOfepjGc7qHrt7TrAaL54gJw9SHvgIXJ3r2xOMW30RWJZNP+1GlTOy5oye7yXA4xA==
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/eth-sig-util/-/eth-sig-util-2.4.2.tgz#ab275ffba46c11ce09637216bc0d708071992273"
+  integrity sha512-M4R7FJ2C8xpx5HCWsrusq81yBg0+iMrZhXOnpHbkAsQe3vfmk0a5eGRlTSKgDtE135iktWHV2E/YrVXMul2jKg==
   dependencies:
     buffer "^5.2.1"
     elliptic "^6.4.0"
