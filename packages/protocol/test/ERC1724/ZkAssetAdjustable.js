@@ -55,7 +55,7 @@ const confidentialApprove = async (zkAssetAdjustable, delegateAddress, indexes, 
     );
 };
 
-contract('ZkAssetAdjustable', (accounts) => {
+contract.only('ZkAssetAdjustable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let erc20;
@@ -112,7 +112,7 @@ contract('ZkAssetAdjustable', (accounts) => {
                 aztecAccount,
                 aztecAccount,
             ]);
-            const { receipt: transferReceipt } = await zkAssetAdjustable.confidentialTransfer(
+            const { receipt: transferReceipt } = await zkAssetAdjustable.methods['confidentialTransfer(bytes,bytes)'](
                 withdrawalData,
                 withdrawalSignatures,
             );
@@ -185,7 +185,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             );
             const withdrawalData = withdrawalProof.encodeABI(zkAssetAdjustable.address);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[2], withdrawalData, { from: delegateAddress });
-            const { receipt: transferReceipt } = await zkAssetAdjustable.confidentialTransferFrom(
+            const { receipt: transferReceipt } = await zkAssetAdjustable.methods['confidentialTransferFrom(bytes,bytes)'](
                 JOIN_SPLIT_PROOF,
                 withdrawalProof.eth.output,
                 { from: delegateAddress },
@@ -263,7 +263,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             const withdrawalData = withdrawalProof.encodeABI(zkAssetAdjustable.address);
 
             await ace.validateProof(JOIN_SPLIT_PROOF, delegateAddress, withdrawalData, { from: delegateAddress });
-            const { receipt: transferReceipt } = await zkAssetAdjustable.confidentialTransferFrom(
+            const { receipt: transferReceipt } = await zkAssetAdjustable.methods['confidentialTransferFrom(bytes,bytes)'](
                 JOIN_SPLIT_PROOF,
                 withdrawalProof.eth.output,
                 { from: delegateAddress },
