@@ -3,6 +3,7 @@ import {
     set,
     lock,
 } from '~utils/storage';
+import dataKey from '~utils/dataKey';
 import errorAction from '~database/utils/errorAction';
 import transformDataFromDb from '~database/utils/transformDataFromDb';
 import transformDataForDb from '~database/utils/transformDataForDb';
@@ -13,7 +14,16 @@ export default async function update(data) {
         index,
         dataKeyPattern,
     } = this.config;
-    const id = data[index];
+
+    let id;
+    if (index) {
+        id = data[index];
+    } else if (dataKeyPattern) {
+        id = dataKey(dataKeyPattern, data);
+    } else {
+        ({ id } = data);
+    }
+
     let {
         key,
     } = data;
@@ -32,11 +42,11 @@ export default async function update(data) {
         if (!dataKeyPattern) {
             key = name;
         }
-        const dataKey = fields.key;
+        const keyName = fields.key;
         ({ fields } = fields);
-        subFieldsKey = data[dataKey];
+        subFieldsKey = data[keyName];
         if (!subFieldsKey) {
-            return errorAction(`'${dataKey}' must be presented to update '${name}'.`);
+            return errorAction(`'${keyName}' must be presented to update '${name}'.`);
         }
     }
 

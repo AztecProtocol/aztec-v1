@@ -1,4 +1,6 @@
-import dataKey from '~utils/dataKey';
+import dataKey, {
+    getPrefix,
+} from '~utils/dataKey';
 import {
     get as storageGet,
 } from '~utils/storage';
@@ -7,11 +9,17 @@ import {
 } from '~utils/log';
 import asyncForEach from '~utils/asyncForEach';
 
-const normalLoop = async (get, cb) => {
+const normalLoop = async (get, cb, where) => {
     const data = await get();
     if (!data) return;
 
+    const {
+        idGt,
+    } = where || {};
+
     await asyncForEach(Object.keys(data), async (id) => {
+        if (idGt && id <= idGt) return;
+
         const entry = {
             ...data[id],
             id,
@@ -20,7 +28,7 @@ const normalLoop = async (get, cb) => {
     });
 };
 
-const mapLoog = async (get, config, cb) => {
+const mapLoog = async (get, config, cb, where) => {
     const {
         autoIncrementBy,
         dataKeyPattern,
@@ -29,7 +37,17 @@ const mapLoog = async (get, config, cb) => {
     const total = await storageGet(autoIncrementBy);
     if (!total) return;
 
-    for (let count = 0; count < total; count += 1) {
+    const {
+        idGt,
+    } = where || {};
+    let minCount = 0;
+    if (idGt) {
+        const keyPrefix = getPrefix(dataKeyPattern);
+        const count = idGt.replace(new RegExp(`^${keyPrefix}`), '');
+        minCount = parseInt(count, 10) + 1;
+    }
+
+    for (let count = minCount; count < total; count += 1) {
         const key = dataKey(dataKeyPattern, { count });
         /* eslint-disable no-await-in-loop */
         const data = await get({
@@ -44,7 +62,7 @@ const mapLoog = async (get, config, cb) => {
     }
 };
 
-export default async function each(cb) {
+export default async function each(cb, where = null) {
     const {
         name,
         autoIncrementBy,
@@ -52,13 +70,13 @@ export default async function each(cb) {
     } = this.config;
 
     if (!autoIncrementBy) {
-        await normalLoop(this.get, cb);
+        await normalLoop(this.get, cb, where);
     } else {
         const keyVars = dataKeyPattern.match(/{[a-z]+}/g);
         if (keyVars.some(keyVar => keyVar !== '{count}')) {
             errorLog(`Cannot loop through '${name}' model with dataKeyPattern = ${dataKeyPattern}`);
             return;
         }
-        await mapLoog(this.get, this.config, cb);
+        await mapLoog(this.get, this.config, cb, where);
     }
 }
