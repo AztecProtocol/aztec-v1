@@ -111,7 +111,7 @@ contract('ZkAssetOwnable', (accounts) => {
                 from: accounts[0],
             });
 
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
                 transferOutputNotes,
@@ -169,7 +169,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -219,7 +219,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -268,7 +268,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
 
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
@@ -312,7 +312,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -325,7 +325,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
             const transferSignatures = transferProof.constructSignatures(zkAssetOwnable.address, transferInputOwnerAccounts);
 
-            await zkAssetOwnable.confidentialTransfer(transferData, transferSignatures);
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures);
 
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
@@ -360,7 +360,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
 
             const emptySignature = '0x';
             await truffleAssert.reverts(
@@ -399,7 +399,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -442,7 +442,7 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
                 transferOutputNotes,

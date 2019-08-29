@@ -32,7 +32,8 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         _canAdjustSupply
     ) {
         // register the basic joinSplit as a valid proof
-        proofs[ace.latestEpoch()] = 17; // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
+        // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
+        proofs[ace.latestEpoch()] = 17;
     }
 
     function setProofs(
