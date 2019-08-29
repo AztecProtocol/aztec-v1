@@ -127,7 +127,6 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
     return unformattedSignature;
 };
 
-
 /**
  * @method compoundSignNotesForBatchApproval
  *  @param {string} verifyingContract address of target contract
@@ -138,10 +137,9 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
 signer.compoundSignNotesForBatchApproval = (verifyingContract, noteHashes, spender, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
-    const statuses = []; // fill this array with true, length equalling noteHashes.length
-    for (let i = 0; i < noteHashes.length; i++) {
-        statuses[i] = true;
-    }
+    const statuses = Array(noteHashes.length)
+        .fill()
+        .map(() => true);
     const message = {
         noteHashes,
         spender,
@@ -151,7 +149,7 @@ signer.compoundSignNotesForBatchApproval = (verifyingContract, noteHashes, spend
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
     const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
     return signature;
-}
+};
 
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, for an ACE.sol domain.

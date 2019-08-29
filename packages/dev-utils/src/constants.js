@@ -152,9 +152,9 @@ constants.eip712 = {
     MULTIPLE_NOTE_SIGNATURE: {
         types: {
             MultipleNoteSignature: [
-                { name: 'noteHashes', type: 'bytes32[]'},
-                { name: 'spender', type: 'address'},
-                { name: 'statuses', type: 'bool[]'},
+                { name: 'noteHashes', type: 'bytes32[]' },
+                { name: 'spender', type: 'address' },
+                { name: 'statuses', type: 'bool[]' },
             ],
             EIP712Domain: EIP712_DOMAIN,
         },
