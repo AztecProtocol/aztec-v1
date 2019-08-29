@@ -16,9 +16,7 @@ export default async function fetchRegisterExtensions({
         return null;
     };
 
-    const event = {
-        eventName: AZTECAccountRegistryConfig.registerExtension,
-    };
+    const eventName = AZTECAccountRegistryConfig.events.registerExtension
 
     const options = {
         filter: {
@@ -31,7 +29,7 @@ export default async function fetchRegisterExtensions({
     try {
         const data = await Web3Service
             .useContract(AZTECAccountRegistryConfig.name)
-            .events({event})
+            .events(eventName)
             .where(options);
 
         const events = data.map(({

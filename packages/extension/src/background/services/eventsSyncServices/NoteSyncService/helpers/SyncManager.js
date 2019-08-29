@@ -9,6 +9,7 @@ import {
     updateNote,
 } from '../utils/addNote';
 import fetchNotes from '../utils/fetchNotes';
+import asyncForEach from '~utils/asyncForEach';
 
 class SyncManager {
     constructor() {
@@ -118,38 +119,57 @@ class SyncManager {
             blocksPerRequest,
         } = this.config;
 
-        const fromBlock = lastSyncedBlock + 1;
         const currentBlock = await Web3Service.eth.getBlockNumber();
-        const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
-        const loadNextPortion = currentBlock - fromBlock > precisionDelta;
+        let newLastSyncedBlock = lastSyncedBlock;
         
-        const { createNotes, destroyNotes, updateNotes } = await fetchNotes({
-            address,
-            fromBlock,
-            toBlock,
-            onError: this.handleFetchError,
-        });
+        if(currentBlock > lastSyncedBlock) {
+            const fromBlock = lastSyncedBlock + 1;
+            const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
+            const loadNextPortion = currentBlock - fromBlock > precisionDelta;
 
-        // console.log('--------start---------')
-        // console.log(JSON.stringify(createNotes), JSON.stringify(destroyNotes), JSON.stringify(updateNotes));
-        // console.log('--------end---------')
-
-        await Promise.all(createNotes.map(addNote));
-        await Promise.all(destroyNotes.map(addDestroyNote));
-        await Promise.all(updateNotes.map(updateNote));
-
-        if (loadNextPortion) {
-            await this.syncNotes({
-                ...options,
-                lastSyncedBlock: toBlock,
+            const { createNotes, destroyNotes, updateNotes } = await fetchNotes({
+                address,
+                fromBlock,
+                toBlock,
+                onError: this.handleFetchError,
             });
-            return;
+    
+            console.log('--------start---------')
+            console.log(`address: ${address}`)
+            console.log(`fromBlock: ${fromBlock}, toBlock: ${toBlock}`)
+            console.log(JSON.stringify(createNotes), JSON.stringify(destroyNotes), JSON.stringify(updateNotes));
+            console.log('--------end---------')
+    
+    
+            // save it in serial
+            await asyncForEach(createNotes, async (note) => {
+                await addNote(note);
+            });
+    
+            await asyncForEach(updateNotes, async (note) => {
+                await updateNote(note);
+            });
+    
+            await asyncForEach(destroyNotes, async (note) => {
+                await addDestroyNote(note);
+            });
+            // end
+
+            newLastSyncedBlock = toBlock;
+    
+            if (loadNextPortion) {
+                await this.syncNotes({
+                    ...options,
+                    lastSyncedBlock: newLastSyncedBlock,
+                });
+                return;
+            }
         }
 0 
         const syncReq = setTimeout(() => {
             this.syncNotes({
                 ...options,
-                lastSyncedBlock: toBlock,
+                lastSyncedBlock: newLastSyncedBlock,
             });
         }, syncInterval);
 
@@ -157,7 +177,7 @@ class SyncManager {
             ...syncAddress,
             syncing: false,
             syncReq,
-            lastSyncedBlock: toBlock,
+            lastSyncedBlock: newLastSyncedBlock,
         });
     }
 

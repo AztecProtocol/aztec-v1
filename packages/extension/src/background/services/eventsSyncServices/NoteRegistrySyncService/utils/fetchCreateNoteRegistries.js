@@ -10,6 +10,7 @@ export default async function fetchCreateNoteRegistries({
     //TODO: networkId feature is not implemented yet
     networkId,
     fromBlock,
+    toBlock,
     onError,
 } = {}) {
     if (networkId === undefined) {
@@ -17,19 +18,17 @@ export default async function fetchCreateNoteRegistries({
         return [];
     };
 
-    const event = {
-        eventName: ACEConfig.сreateNoteRegistry,
-    };
+    const eventName = ACEConfig.events.сreateNoteRegistry;
 
     const options = {
         fromBlock, 
-        toBlock: 'latest'
+        toBlock,
     };
 
     try {
         const data = await Web3Service
             .useContract(ACEConfig.name)
-            .events({event})
+            .events(eventName)
             .where(options);
 
         const events = data.map(({

@@ -3,14 +3,14 @@ import destroyNote from './destroyNote';
 
 
 export const addNote = async (note) => {
-    return createUpdateNote(note);
+    return await createUpdateNote(note);
 };
 
 export const updateNote = async (note) => {
-    return createUpdateNote(note);
+    return await createUpdateNote(note);
 };
 
 export const addDestroyNote = async (note) => {
-    return destroyNote(note.noteHash);
+    return await destroyNote(note.noteHash);
 };
 

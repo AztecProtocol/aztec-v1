@@ -20,10 +20,11 @@ export default async function destroyNote(noteHash) {
     }
 
     const updateFields = {
-        status: NOTE_STATUS.DESTROY
+        status: NOTE_STATUS.DESTROYED
     };
     
-    await noteModel.update(existingRecord.id, updateFields);
+    const id = existingRecord.id;
+    await noteModel.update(id, updateFields);
 
     return {
         id
