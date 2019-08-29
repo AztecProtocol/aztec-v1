@@ -80,12 +80,12 @@
     web3-provider-engine "14.0.6"
 
 "@0x/sol-profiler@^3.1.2":
-  version "3.1.11"
-  resolved "https://registry.yarnpkg.com/@0x/sol-profiler/-/sol-profiler-3.1.11.tgz#4953913c216dc373a022a123c538cafeec9b72af"
-  integrity sha512-6qbdqG9Exk5Lu53CBVr8eshhNj/q6DChn6GdYY29RlZ8OxSqubz1vfMMvaF31LoU0XwshnWsZH/PERbrUoiDVQ==
+  version "3.1.12"
+  resolved "https://registry.yarnpkg.com/@0x/sol-profiler/-/sol-profiler-3.1.12.tgz#1c4a8f9838574d7ee6f74f1b0d5cc3ae25196b4c"
+  integrity sha512-3w6fCtYfbEZAtPsbqGvXZ7kPEzKc9bjC4kbVsI0hyyD45KfHjRXSotPLv6qZiD5s/BSRx/NhdNSbYlFj9eF2TA==
   dependencies:
-    "@0x/sol-tracing-utils" "^6.0.16"
-    "@0x/subproviders" "^5.0.1"
+    "@0x/sol-tracing-utils" "^6.0.17"
+    "@0x/subproviders" "^5.0.2"
     "@0x/typescript-typings" "^4.2.4"
     "@0x/utils" "^4.5.0"
     ethereum-types "^2.1.4"
@@ -117,7 +117,7 @@
     loglevel "^1.6.1"
     web3-provider-engine "14.0.6"
 
-"@0x/sol-tracing-utils@^6.0.16", "@0x/sol-tracing-utils@^6.0.17":
+"@0x/sol-tracing-utils@^6.0.17":
   version "6.0.17"
   resolved "https://registry.yarnpkg.com/@0x/sol-tracing-utils/-/sol-tracing-utils-6.0.17.tgz#7f40fff63fbe8f0d13fa5dd3c26d42d7767ba9f0"
   integrity sha512-w2IkXMk17B3vPGhkPDAEx0dmySgnosmvf0ipbA43USkKDP71/t0lAAPYirl8P8tpwPE/9RbjwYel0YcpK7lhhQ==
