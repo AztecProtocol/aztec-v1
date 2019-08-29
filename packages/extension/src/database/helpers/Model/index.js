@@ -96,8 +96,10 @@ const validateConfig = (config) => {
         name,
         autoIncrementBy,
         dataKeyPattern,
+        index,
     } = validated;
     if (dataKeyPattern
+        && index
         && !autoIncrementBy
     ) {
         validated.autoIncrementBy = `${name}Count`;

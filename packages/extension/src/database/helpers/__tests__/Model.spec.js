@@ -884,4 +884,96 @@ describe('Model.each', () => {
 
         expect(errors).toEqual([]);
     });
+
+    it('loop through every entry of nested model data with min id', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: {
+                key: 'id',
+                fields: [
+                    'name',
+                ],
+            },
+        });
+        await pokemonModel.set({
+            id: 'poke0',
+            name: 'pikachu',
+        });
+        await pokemonModel.set({
+            id: 'poke2',
+            name: 'chikorita',
+        });
+        await pokemonModel.set({
+            id: 'poke1',
+            name: 'eevee',
+        });
+
+        const collected = [];
+        await pokemonModel.each(
+            data => collected.push(data),
+            {
+                idGt: 'poke1',
+            },
+        );
+
+        expect(collected).toEqual([
+            {
+                id: 'poke2',
+                name: 'chikorita',
+            },
+        ]);
+
+        expect(errors).toEqual([]);
+    });
+
+    it('loop through data with dataKey mapping and a min id', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            index: 'name',
+            fields: [
+                'name',
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        const collected = [];
+        await pokemonModel.each(
+            (data) => {
+                collected.push(data);
+            },
+            {
+                idGt: 'p:0',
+            },
+        );
+
+        expect(collected).toEqual([
+            {
+                key: 'p:1',
+                id: 'eevee',
+                name: 'eevee',
+                color: 'brown',
+            },
+            {
+                key: 'p:2',
+                id: 'chikorita',
+                name: 'chikorita',
+                color: 'green',
+            },
+        ]);
+
+        expect(errors).toEqual([]);
+    });
 });

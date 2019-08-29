@@ -1,5 +1,6 @@
 import mergeActions from '~database/utils/mergeActions';
 import errorAction from '~database/utils/errorAction';
+import dataKey from '~utils/dataKey';
 import setIdKeyMapping from './setIdKeyMapping';
 import setData from './setData';
 
@@ -17,11 +18,18 @@ export default async function set(
         dataKeyPattern,
         autoIncrementBy,
     } = this.config;
-    const id = data[index];
+
+    let id;
+    if (index) {
+        id = data[index];
+    } else if (dataKeyPattern) {
+        id = dataKey(dataKeyPattern, data);
+    } else {
+        ({ id } = data);
+    }
+
     let key = id;
     let subFieldsKey = '';
-    let res1;
-
     if (!Array.isArray(fields)) {
         key = name;
         subFieldsKey = data[fields.key];
@@ -34,8 +42,11 @@ export default async function set(
     if (!id
         && (dataKeyPattern || !subFieldsKey)
     ) {
-        const requiredKeys = ['id'];
-        if (index && index !== 'id') {
+        const requiredKeys = [];
+        if (!index && dataKeyPattern) {
+            dataKeyPattern.match(/{([^{}]+)}/ig)
+                .forEach(pattern => requiredKeys.push(pattern.substr(1, pattern.length - 2)));
+        } else {
             requiredKeys.push(index);
         }
         const requiredStr = requiredKeys
@@ -44,7 +55,8 @@ export default async function set(
         return errorAction(`${requiredStr} must be presented in ${name} object`);
     }
 
-    if (dataKeyPattern) {
+    let res1;
+    if (autoIncrementBy) {
         res1 = await setIdKeyMapping(
             data,
             {
