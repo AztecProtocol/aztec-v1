@@ -138,7 +138,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
     /**
     * @dev called when a mintable and convertible asset wants to perform an
-            action which putts the zero-knowledge and public
+            action which puts the zero-knowledge and public
             balance out of balance. For example, if minting in zero-knowledge, some
             public tokens need to be added to the pool
             managed by ACE, otherwise any private->public conversion runs the risk of not
