@@ -20,8 +20,8 @@ const {
 
 describe('encryptMessage', () => {
     it('take publicKey and message and return an EncryptedMessage object', () => {
-        const massage = 'my secret';
-        const encrypted = encryptMessage(publicKey, massage);
+        const message = 'my secret';
+        const encrypted = encryptMessage(publicKey, message);
         expect(Object.keys(encrypted).sort()).toEqual([
             'decrypt',
             'export',
@@ -37,6 +37,13 @@ describe('encryptMessage', () => {
 
         const encryptedHex = encrypted.toHexString();
         expect(encryptedHex).toMatch(/^0x[0-9a-f]{1,}$/i);
+    });
+
+    it('not likely to generate two encrypted message with the same input', () => {
+        const message = '0';
+        const encrypted0 = encryptMessage(publicKey, message);
+        const encrypted1 = encryptMessage(publicKey, message);
+        expect(encrypted0.export().ciphertext).not.toBe(encrypted1.export().ciphertext);
     });
 });
 
