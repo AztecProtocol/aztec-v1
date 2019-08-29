@@ -109,7 +109,9 @@ contract('ZkAsset', (accounts) => {
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+                from: accounts[0],
+            });
             expect(receipt.status).to.equal(true);
 
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
@@ -141,7 +143,9 @@ contract('ZkAsset', (accounts) => {
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+                from: accounts[0],
+            });
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
 
@@ -184,7 +188,9 @@ contract('ZkAsset', (accounts) => {
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+                from: accounts[0],
+            });
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
 
@@ -230,7 +236,9 @@ contract('ZkAsset', (accounts) => {
             const withdrawData = withdrawProof.encodeABI(zkAsset.address);
             const withdrawSignatures = withdrawProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
 
-            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](withdrawData, withdrawSignatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](withdrawData, withdrawSignatures, {
+                from: accounts[0],
+            });
             expect(receipt.status).to.equal(true);
         });
 
@@ -269,7 +277,9 @@ contract('ZkAsset', (accounts) => {
 
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
-            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures, {
+                from: accounts[0],
+            });
             expect(receipt.status).to.equal(true);
         });
 
@@ -314,7 +324,9 @@ contract('ZkAsset', (accounts) => {
 
             const transferData = transferProof.encodeABI(JoinSplitValidator.address);
             const transferSignatures = transferProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
-            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures, {
+                from: accounts[0],
+            });
             expect(receipt.status).to.equal(true);
         });
 
@@ -344,7 +356,9 @@ contract('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAssetTest.address, proof.hash, 200, { from: accounts[0] });
-            const { receipt: depositReceipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
+            const { receipt: depositReceipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+                from: accounts[0],
+            });
 
             const updatedMetaData = randomHex(265);
             const updatedMetaDataLength = updatedMetaData.length;
@@ -381,7 +395,9 @@ contract('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAssetTest.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+                from: accounts[0],
+            });
             expect(receipt.status).to.equal(true);
 
             // for the purposes of the test, assuming that just one address is being approved
@@ -563,7 +579,9 @@ contract('ZkAsset', (accounts) => {
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await truffleAssert.reverts(zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, malformedtransferSignatures));
+            await truffleAssert.reverts(
+                zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, malformedtransferSignatures),
+            );
         });
 
         it('should fail if validator address is malformed', async () => {
@@ -606,7 +624,9 @@ contract('ZkAsset', (accounts) => {
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await truffleAssert.reverts(zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, malformedtransferSignatures));
+            await truffleAssert.reverts(
+                zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, malformedtransferSignatures),
+            );
         });
 
         it('should fail if validator address is the joinSplit address', async () => {
@@ -648,7 +668,9 @@ contract('ZkAsset', (accounts) => {
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const malformedtransferSignatures = withdrawalProof.constructSignatures(zkAsset.address, malformedInputNoteOwners);
 
-            await truffleAssert.reverts(zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, malformedtransferSignatures));
+            await truffleAssert.reverts(
+                zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, malformedtransferSignatures),
+            );
         });
 
         it('should fail to update note metaData if msg.sender !== noteOwner or on approved noteAccess mapping', async () => {
