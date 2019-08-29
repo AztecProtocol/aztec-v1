@@ -109,7 +109,7 @@ contract('ZkAsset', (accounts) => {
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
 
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
@@ -141,7 +141,7 @@ contract('ZkAsset', (accounts) => {
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
 
@@ -184,7 +184,7 @@ contract('ZkAsset', (accounts) => {
             const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
             const balancePostTransfer = await erc20.balanceOf(accounts[0]);
             expect(balancePostTransfer.toString()).to.equal(expectedBalancePostTransfer.toString());
 
@@ -213,7 +213,7 @@ contract('ZkAsset', (accounts) => {
             const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, 20, { from: accounts[0] });
-            await zkAsset.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAsset.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
 
             const transferInputNotes = depositOutputNotes;
             const transferInputOwnerAccounts = [aztecAccount];
@@ -230,7 +230,7 @@ contract('ZkAsset', (accounts) => {
             const withdrawData = withdrawProof.encodeABI(zkAsset.address);
             const withdrawSignatures = withdrawProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
 
-            const { receipt } = await zkAsset.confidentialTransfer(withdrawData, withdrawSignatures, { from: accounts[0] });
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](withdrawData, withdrawSignatures, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
         });
 
@@ -344,7 +344,7 @@ contract('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAssetTest.address, proof.hash, 200, { from: accounts[0] });
-            const { receipt: depositReceipt } = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const { receipt: depositReceipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
 
             const updatedMetaData = randomHex(265);
             const updatedMetaDataLength = updatedMetaData.length;
@@ -381,7 +381,7 @@ contract('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAssetTest.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
+            const { receipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
 
             // for the purposes of the test, assuming that just one address is being approved
@@ -670,7 +670,7 @@ contract('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
+            await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
 
             const updatedMetaData = randomHex(265);
             await truffleAssert.reverts(
