@@ -265,27 +265,26 @@ export default async function copy({
     ));
 
     /*
-    * Copy Contracts into background for syncing events
+    * Copy Contracts into background folder for syncing events
     */
-
-   ensureDirectory(path.join(packagePathsMap.extension, extensionBackgroundContractsFolder));
-   [AZTECAccountRegistryConfig, ACEConfig, IZkAssetConfig]
-        .map(c => c.name)
-        .map(contractName => ({
-            contractName,
-            sourcPath: srcContractsPaths
-                .map(p => path.join(p, `${contractName}.json`))
-                .filter(isFile)
-                .find(p => !!extractNetworks(p))
-        }))
-        .forEach(({contractName, sourcPath}) => 
-            promises.push(
-                copyFile(
-                    sourcPath,
-                    path.join(packagePathsMap.extension, extensionBackgroundContractsFolder, `${contractName}.json`),
+    ensureDirectory(path.join(packagePathsMap.extension, extensionBackgroundContractsFolder));
+    [AZTECAccountRegistryConfig, ACEConfig, IZkAssetConfig]
+            .map(c => c.name)
+            .map(contractName => ({
+                contractName,
+                sourcPath: srcContractsPaths
+                    .map(p => path.join(p, `${contractName}.json`))
+                    .filter(isFile)
+                    .find(p => !!extractNetworks(p))
+            }))
+            .forEach(({contractName, sourcPath}) => 
+                promises.push(
+                    copyFile(
+                        sourcPath,
+                        path.join(packagePathsMap.extension, extensionBackgroundContractsFolder, `${contractName}.json`),
+                    )
                 )
             )
-        )
 
     /*
      * graph-cli (v) doesn't work with yarn workspaces

@@ -111,26 +111,32 @@ class SyncManager {
         } = this.config;
 
         const currentBlock = await Web3Service.eth.getBlockNumber();
-        const fromBlock = lastSyncedBlock + 1; 
-        const toBlock = currentBlock;
+        let newLastSyncedBlock = lastSyncedBlock;
 
-        const newRegisterExtensions = await fetchRegisterExtensions({
-            address,
-            fromBlock,
-            toBlock,
-            onError: this.handleFetchError,
-        });
+        if(currentBlock > lastSyncedBlock) {
+            const fromBlock = lastSyncedBlock + 1;
+            const toBlock = currentBlock;
 
-        if (newRegisterExtensions.length) {
-            console.log("Response for events 'registerExtensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensions}));
+            const newRegisterExtensions = await fetchRegisterExtensions({
+                address,
+                fromBlock,
+                toBlock,
+                onError: this.handleFetchError,
+            });
+
+            if (newRegisterExtensions.length) {
+                console.log("Response for events 'registerExtensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensions}));
+            }
+            
+            await Promise.all(newRegisterExtensions.map(addRegisterExtension));
+
+            newLastSyncedBlock = toBlock;
         }
-
-        await Promise.all(newRegisterExtensions.map(addRegisterExtension));
         
         const syncReq = setTimeout(() => {
             this.syncRegisterExtensions({
                 ...options,
-                lastSyncedBlock: toBlock,
+                lastSyncedBlock: newLastSyncedBlock,
             });
         }, syncInterval);
 
@@ -138,7 +144,7 @@ class SyncManager {
             ...syncAddress,
             syncing: false,
             syncReq,
-            lastSyncedBlock: toBlock,
+            lastSyncedBlock: newLastSyncedBlock,
         });
     }
 

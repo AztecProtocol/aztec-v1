@@ -112,26 +112,33 @@ class SyncManager {
         } = this.config;
 
         const currentBlock = await Web3Service.eth.getBlockNumber();
-        const fromBlock = lastSyncedBlock + 1; 
-        const toBlock = currentBlock;
+        let newLastSyncedBlock = lastSyncedBlock;
 
-        const newCreateNoteRegistries = await fetchCreateNoteRegistries({
-            networkId,
-            fromBlock,
-            toBlock,
-            onError: this.handleFetchError,
-        });
+        if(currentBlock > lastSyncedBlock) {
+            const fromBlock = lastSyncedBlock + 1;
+            const toBlock = currentBlock;
 
-        if (newCreateNoteRegistries.length) {
-            console.log("newCreateNoteRegistries: " + JSON.stringify(newCreateNoteRegistries))
+            const newCreateNoteRegistries = await fetchCreateNoteRegistries({
+                networkId,
+                fromBlock,
+                toBlock,
+                onError: this.handleFetchError,
+            });
+    
+            if (newCreateNoteRegistries.length) {
+                console.log("newCreateNoteRegistries: " + JSON.stringify(newCreateNoteRegistries))
+            }
+            
+            await asyncForEach(newCreateNoteRegistries, async (noteRegistry) => {
+                await addCreateNoteRegistry(noteRegistry);
+            })
+            newLastSyncedBlock = toBlock;
         }
-        
-        await Promise.all(newCreateNoteRegistries.map(addCreateNoteRegistry));
 
         const syncReq = setTimeout(() => {
             this.syncCreateNoteRegistry({
                 ...options,
-                lastSyncedBlock: toBlock,
+                lastSyncedBlock: newLastSyncedBlock,
             });
         }, syncInterval);
 
@@ -139,7 +146,7 @@ class SyncManager {
             ...syncNetwork,
             syncing: false,
             syncReq,
-            lastSyncedBlock: toBlock,
+            lastSyncedBlock: newLastSyncedBlock,
         });
     }
 

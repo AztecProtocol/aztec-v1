@@ -22,9 +22,9 @@ const syncEthAddress = async ({
         return;
     }
 
-    const ownerFilter = obj => obj.address === obj.address
-    const lastSyncedNote = await note.latest({byField: 'blockNumber', ownerFilter})
-    const registeredExtension = await registerExtension.latest({byField: 'blockNumber', ownerFilter})
+    const filterFunc = obj => obj.address === obj.address
+    const lastSyncedNote = await note.latest({byField: 'blockNumber', filterFunc})
+    const registeredExtension = await registerExtension.latest({byField: 'blockNumber', filterFunc})
 
     let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
     if (lastSyncedNote) {

@@ -8,7 +8,6 @@ import {
 import {
     AZTECAccountRegistryConfig,
     ACEConfig,
-    IZkAssetConfig,
 } from '../config/contracts';
 import Web3 from 'web3';
 import settings from '~background/utils/settings';
