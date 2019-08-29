@@ -4,8 +4,7 @@ import {
 import {
     warnLog,
 } from '~utils/log';
-import EncryptedMessage from '~utils/crypto/EncryptedMessage';
-import lengthConfig from './lengthConfig';
+import recoverFromHexString from '~utils/crypto/fromHexString';
 import decrypt from './decrypt';
 
 export default function fromHexString(str) {
@@ -15,16 +14,7 @@ export default function fromHexString(str) {
         return null;
     }
 
-    const encryptedData = {};
-    let startAt = 0;
-    Object.keys(lengthConfig)
-        .forEach((key) => {
-            const len = lengthConfig[key];
-            encryptedData[key] = `0x${bytes.slice(startAt, startAt + len)}`;
-            startAt += len;
-        });
-
-    const encrypted = EncryptedMessage(encryptedData);
+    const encrypted = recoverFromHexString(str);
     encrypted.decrypt = privateKey => decrypt(privateKey, encrypted);
 
     return encrypted;

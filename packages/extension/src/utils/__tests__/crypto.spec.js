@@ -2,9 +2,14 @@ import {
     userAccount,
 } from '~helpers/testData';
 import {
+    randomId,
+} from '~utils/random';
+import {
     encryptMessage,
     decryptMessage,
+    fromHexString,
 } from '../crypto';
+import lengthConfig from '../crypto/lengthConfig';
 
 const {
     linkedPublicKey: publicKey,
@@ -54,5 +59,34 @@ describe('decryptMessage', () => {
         const encryptedData = encrypted.export();
         const recovered = decryptMessage(privateKey, encryptedData);
         expect(recovered).toBe(message);
+    });
+});
+
+describe('fromHexString', () => {
+    it('generate an EncryptedMessage object from string', () => {
+        const message = 'my secret';
+        const encrypted = encryptMessage(publicKey, message);
+        const encryptedStr = encrypted.toHexString();
+        const recovered = fromHexString(encryptedStr);
+        expect(recovered.export()).toEqual(encrypted.export());
+    });
+
+    it('return null if the input string does not reach a minimum length', () => {
+        const warnings = [];
+        const warnSpy = jest.spyOn(console, 'warn')
+            .mockImplementation((...message) => warnings.push(message));
+
+        const minLen = Object.values(lengthConfig)
+            .reduce((accum, len) => accum + len, 0);
+
+        const encrypted = fromHexString(randomId(minLen));
+        expect(encrypted.decrypt(privateKey)).toBe('');
+        expect(warnSpy.mock.calls.length).toBe(0);
+
+        const invalid = fromHexString(randomId(minLen - 1));
+        expect(invalid).toBe(null);
+        expect(warnSpy.mock.calls.length).toBe(1);
+
+        warnSpy.mockRestore();
     });
 });
