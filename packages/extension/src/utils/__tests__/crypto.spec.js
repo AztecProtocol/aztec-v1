@@ -7,8 +7,10 @@ import {
 import {
     encryptMessage,
     decryptMessage,
+    batchDecrypt,
     fromHexString,
 } from '../crypto';
+import nacl from '../crypto/nacl';
 import lengthConfig from '../crypto/lengthConfig';
 
 const {
@@ -59,6 +61,21 @@ describe('decryptMessage', () => {
         const encryptedData = encrypted.export();
         const recovered = decryptMessage(privateKey, encryptedData);
         expect(recovered).toBe(message);
+    });
+});
+
+describe('batchDecrypt', () => {
+    it('decrypt multiple EncryptedMessage objects', () => {
+        const fromSecretKeySpy = jest.spyOn(nacl.box.keyPair, 'fromSecretKey');
+        const messages = [
+            'my secret',
+            'my second secret',
+            'my last secret',
+        ];
+        const encryptedData = messages.map(message => encryptMessage(publicKey, message));
+        const recovered = batchDecrypt(privateKey, encryptedData);
+        expect(recovered).toEqual(messages);
+        expect(fromSecretKeySpy).toHaveBeenCalledTimes(1);
     });
 });
 
