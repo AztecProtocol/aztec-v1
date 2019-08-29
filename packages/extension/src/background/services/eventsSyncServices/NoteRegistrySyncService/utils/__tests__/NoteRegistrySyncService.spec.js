@@ -11,6 +11,7 @@ const networkId_1 = '2293';
 describe('LastSyncedBlock', () => {
    
    test('should call SyncManager.sync with default production block and inputed address', async () => {
+      // given
       const syncMock = jest.spyOn(NoteRegistrySyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
@@ -20,8 +21,10 @@ describe('LastSyncedBlock', () => {
          networkId: networkId_1,
       }
       
+      // action
       await NoteRegistrySyncService.syncCreateNoteRegistries(inputs);
 
+      // expectation
       const expectedResult = {
          networkId: networkId_1,
          lastSyncedBlock: START_EVENTS_SYNCING_BLOCK,
@@ -31,6 +34,7 @@ describe('LastSyncedBlock', () => {
    });
 
    test('should call SyncManager.sync with last sycned block and inputed address', async () => {
+      // given
       const syncMock = jest.spyOn(NoteRegistrySyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
@@ -49,8 +53,10 @@ describe('LastSyncedBlock', () => {
          networkId: networkId_1,
       };
       
+      // action
       await NoteRegistrySyncService.syncCreateNoteRegistries(inputs);
 
+      // expectation
       const expectedResult = {
          networkId: networkId_1,
          lastSyncedBlock: latestSyncedExtension.blockNumber,

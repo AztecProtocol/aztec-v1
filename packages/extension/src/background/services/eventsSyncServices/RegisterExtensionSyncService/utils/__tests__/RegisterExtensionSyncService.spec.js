@@ -11,6 +11,7 @@ const userEthAddress_1 = '0x12345678';
 describe('LastSyncedBlock', () => {
    
    test('should call SyncManager.sync with default production block and inputed address', async () => {
+      // given
       const syncMock = jest.spyOn(RegisterExtensionSyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
@@ -20,8 +21,10 @@ describe('LastSyncedBlock', () => {
          address: userEthAddress_1,
       }
       
+      // action
       await RegisterExtensionSyncService.syncEthAddress(inputs);
 
+      // expectation
       const expectedResult = {
          address: userEthAddress_1,
          lastSyncedBlock: START_EVENTS_SYNCING_BLOCK,
@@ -31,6 +34,7 @@ describe('LastSyncedBlock', () => {
    });
 
    test('should call SyncManager.sync with last sycned block and inputed address', async () => {
+      // given
       const syncMock = jest.spyOn(RegisterExtensionSyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
@@ -46,8 +50,10 @@ describe('LastSyncedBlock', () => {
          address: userEthAddress_1,
       };
       
+      // action
       await RegisterExtensionSyncService.syncEthAddress(inputs);
 
+      // expectation
       const expectedResult = {
          address: userEthAddress_1,
          lastSyncedBlock: latestSyncedExtension.blockNumber,
