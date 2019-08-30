@@ -7,7 +7,6 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "@aztec/dev-utils": "^0.12.2",
     "openzeppelin-solidity": "2.3.0"
   },
   "devDependencies": {
