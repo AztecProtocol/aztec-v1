@@ -545,6 +545,10 @@
             "constant": false,
             "inputs": [
                 {
+                    "name": "_proofId",
+                    "type": "uint24"
+                },
+                {
                     "name": "_proofData",
                     "type": "bytes"
                 },
@@ -563,7 +567,25 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_proof",
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_signatures",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialTransfer",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofId",
                     "type": "uint24"
                 },
                 {

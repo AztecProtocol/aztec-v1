@@ -15,6 +15,28 @@
             "type": "function"
         },
         {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofId",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_signatures",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialTransfer",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "constant": true,
             "inputs": [],
             "name": "ZERO_VALUE_NOTE_HASH",
@@ -294,7 +316,7 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_proof",
+                    "name": "_proofId",
                     "type": "uint24"
                 },
                 {
