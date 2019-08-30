@@ -146,9 +146,9 @@ signer.compoundSignNotesForBatchApproval = (verifyingContract, noteHashes, spend
         statuses,
     };
 
-    const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
+    const { encodedTypedData, unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
     const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
-    return signature;
+    return { encodedTypedData, signature };
 };
 
 /**
