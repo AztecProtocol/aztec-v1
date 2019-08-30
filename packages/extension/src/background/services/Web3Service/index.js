@@ -24,10 +24,6 @@ class Web3Service {
             return;
         }
 
-        if (typeof provider.enable === 'function') {
-            await provider.enable();
-        }
-
         this.web3 = new Web3(provider);
         this.eth = eth(this.web3);
 
@@ -265,12 +261,12 @@ class Web3Service {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }
                 return {
-                    where: (options = {filter: {}, fromBlock: 0, toBlock: 'latest'}) => contract.getPastEvents(eventName, {
+                    where: async (options = {filter: {}, fromBlock: 0, toBlock: 'latest'}) => contract.getPastEvents(eventName, {
                         filter: options.filter,
                         fromBlock: options.fromBlock,
                         toBlock: options.toBlock,
                     }),
-                    all: () => contract.getPastEvents('allEvents', {
+                    all: async () => contract.getPastEvents('allEvents', {
                         fromBlock: 0,
                     }),
                 };
