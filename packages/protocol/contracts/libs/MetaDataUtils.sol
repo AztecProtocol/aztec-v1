@@ -1,8 +1,9 @@
 pragma solidity >=0.5.0 <= 0.6.0;
 
 /**
- * @title Library of MetaData manipulation operations
+ * @title MetaDataUtils
  * @author AZTEC
+ * @dev Library of MetaData manipulation operations
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 

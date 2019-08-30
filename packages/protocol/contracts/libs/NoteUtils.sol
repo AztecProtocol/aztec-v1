@@ -6,6 +6,7 @@ pragma solidity >=0.5.0 <0.6.0;
  * @dev NoteUtils is a utility library that extracts user-readable information from AZTEC proof outputs.
  *      Specifically, `bytes proofOutput` objects can be extracted from `bytes proofOutputs`,
  *      `bytes proofOutput` and `bytes note` can be extracted into their constituent components,
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 library NoteUtils {
 

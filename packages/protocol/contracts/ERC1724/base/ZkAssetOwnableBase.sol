@@ -11,7 +11,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  * @author AZTEC
  * @dev A contract which inherits from ZkAsset and includes the definition
  * of the contract owner
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 
 contract ZkAssetOwnableBase is ZkAssetBase, Ownable {

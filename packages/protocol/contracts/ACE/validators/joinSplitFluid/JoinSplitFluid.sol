@@ -5,9 +5,10 @@ import "../../../interfaces/JoinSplitFluidInterface.sol";
 import "../../../libs/LibEIP712.sol";
 
 /**
- * @title Library to validate AZTEC zero-knowledge proofs
+ * @title JoinSplitFluid
  * @author AZTEC
- * @dev Don't include this as an internal library. This contract uses a static memory table to cache
+ * @dev Library to validate AZTEC JoinSplitFluid zero-knowledge proofs
+ * Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
  * The intended use case is to call this externally via `staticcall`.

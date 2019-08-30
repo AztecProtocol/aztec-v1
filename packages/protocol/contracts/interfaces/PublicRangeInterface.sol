@@ -3,8 +3,8 @@ pragma solidity >=0.5.0 <0.6.0;
 /**
  * @title PublicRangeInterface
  * @author AZTEC
- * @dev An interface defining the PublicRangeInterface standard.
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * @dev An interface for the Public Range validator contract
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 interface PublicRangeInterface {
     /* solhint-disable-next-line var-name-mixedcase */
