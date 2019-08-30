@@ -9,6 +9,8 @@ import {
 } from '~config/action';
 
 export const updateActionState = async (action) => {
+    const timestamp = Date.now();
+    action.timestamp = timestamp;
     await actionModel.set(action);
     return action;
 };
@@ -49,7 +51,7 @@ export const handleQuery = async ({
     mutation,
     query,
     domain,
-    variables,
+    args,
     requestId,
 }) => {
     let type = 'query';
@@ -62,12 +64,13 @@ export const handleQuery = async ({
         mutation || query,
         {
             domain,
+            ...args,
         },
     );
 
     const response = await GraphQLService[type]({
         [type]: gql(`${type} {${graphQuery}}`),
-        variables,
+        args,
     });
 
     return {

@@ -30,7 +30,6 @@ class App extends Component {
         actionModel.get({ timestamp: search.get('id') })
             .then((resp) => {
                 this.props.history.push(actionToRouteMap[resp.type]);
-                console.log(actionToRouteMap[resp.type]);
                 setTimeout(() => {
                     this.setState({ action: resp });
                 }, 1000);
