@@ -61,6 +61,8 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
     function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
+        bool result = supportsProof(_proofId);
+        require(result == true, "expected proof to be supported");
         // Check that it's a balanced proof
         (, uint8 category, ) = _proofId.getProofComponents();
 
@@ -109,13 +111,16 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
     * If public value is being transferred out of the ACE, and the minted value is greater than
     * ACE's token balance, then tokens will be minted from the linked ERC20 token using supplementTokens()
     *
-    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * @param _proofId - uint24 variable which acts as a unique identifier for the proof which
     * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
     * transfer instructions for the ACE
     */
-    function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
+    function confidentialTransferFrom(uint24 _proofId, bytes memory _proofOutput) public {
+        bool result = supportsProof(_proofId);
+        require(result == true, "expected proof to be supported");
+
         (bytes memory inputNotes,
         bytes memory outputNotes,
         address publicOwner,
@@ -135,7 +140,7 @@ contract ZkAssetMintableBase is ZkAssetOwnableBase {
         }
 
 
-        ace.updateNoteRegistry(_proof, _proofOutput, msg.sender);
+        ace.updateNoteRegistry(_proofId, _proofOutput, msg.sender);
 
         logInputNotes(inputNotes);
         logOutputNotes(outputNotes);
