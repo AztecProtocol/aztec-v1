@@ -3,9 +3,10 @@ pragma solidity >=0.5.0 <0.6.0;
 import "./SwapABIEncoder.sol";
 
 /**
- * @title Library to validate Swap proofs
+ * @title Swap
  * @author AZTEC
- * @dev Don't include this as an internal library. This contract uses
+ * @dev Library to validate Swap proofs
+ * Don't include this as an internal library. This contract uses
  * a static memory table to cache elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory
  * mutation and undefined behaviour.
