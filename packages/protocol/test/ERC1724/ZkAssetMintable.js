@@ -128,7 +128,11 @@ contract('ZkAssetMintable', (accounts) => {
                 aztecAccount,
                 aztecAccount,
             ]);
-            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransfer(withdrawalData, withdrawalSignatures);
+            const { receipt: transferReceipt } = await zkAssetMintable.methods['confidentialTransfer(bytes,bytes)'](
+                withdrawalData,
+                withdrawalSignatures,
+                { from: accounts[0] },
+            );
 
             const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
             expect(erc20TotalSupplyAfterWithdrawal).to.equal(withdrawalPublicValue * scalingFactor);
@@ -175,6 +179,7 @@ contract('ZkAssetMintable', (accounts) => {
             );
             const withdrawalData = withdrawalProof.encodeABI(zkAssetMintable.address);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[2], withdrawalData, { from: delegateAddress });
+
             const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransferFrom(
                 JOIN_SPLIT_PROOF,
                 withdrawalProof.eth.output,
@@ -228,10 +233,12 @@ contract('ZkAssetMintable', (accounts) => {
             await ace.publicApprove(zkAssetMintable.address, depositProof.hash, depositPublicValue, { from: sender });
 
             await erc20.approve(ace.address, scalingFactor.mul(new BN(depositPublicValue)), { from: sender });
+            const { receipt: depositReceipt } = await zkAssetMintable.methods['confidentialTransfer(bytes,bytes)'](
+                depositData,
+                depositSignatures,
+                { from: accounts[0] },
+            );
 
-            const { receipt: depositReceipt } = await zkAssetMintable.confidentialTransfer(depositData, depositSignatures, {
-                from: sender,
-            });
             expect(depositReceipt.status).to.equal(true);
 
             const intermediateAceBalance = (await erc20.balanceOf(ace.address)).toNumber();

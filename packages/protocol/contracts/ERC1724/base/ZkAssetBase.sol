@@ -19,6 +19,7 @@ import "../../libs/ProofUtils.sol";
 contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
+    using ProofUtils for uint24;
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
@@ -75,7 +76,28 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
             canConvert
         );
     }
-    
+
+    /**
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine.
+    *
+    * Upon successfull verification, it will update note registry state - creating output notes and
+    * destroying input notes.
+    *
+    * @param _proofId - id of proof to be validated. Needs to be a balanced proof.
+    * @param _proofData - bytes variable outputted from a proof verification contract, representing
+    * transfer instructions for the ACE
+    * @param _signatures - array of the ECDSA signatures over all inputNotes
+    */
+    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
+        // Check that it's a balanced proof
+        (, uint8 category, ) = _proofId.getProofComponents();
+
+        require(category == uint8(ProofCategory.BALANCED), "this is not a balanced proof");
+        bytes memory proofOutputs = ace.validateProof(_proofId, msg.sender, _proofData);
+        confidentialTransferInternal(_proofId, proofOutputs, _signatures, _proofData);
+    }
+
     /**
     * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
     * Will submit _proofData to the validateProof() function of the Cryptography Engine.
@@ -85,11 +107,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     *
     * @param _proofData - bytes variable outputted from a proof verification contract, representing
     * transfer instructions for the ACE
-    * @param _signatures - array of the ECDSA signatures over all inputNotes 
+    * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
-        bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
-        confidentialTransferInternal(proofOutputs, _signatures, _proofData);
+        confidentialTransfer(JOIN_SPLIT_PROOF, _proofData, _signatures);
     }
 
     /**
@@ -125,10 +146,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
     /**
     * @dev Perform ECDSA signature validation for a signature over an input note
-    * 
+    *
     * @param _hashStruct - the data to sign in an EIP712 signature
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
-    * @param _signature - ECDSA signature for a particular input note 
+    * @param _signature - ECDSA signature for a particular input note
     */
     function validateSignature(
         bytes32 _hashStruct,
@@ -220,21 +241,22 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     }
 
     /**
-    * @dev Internal method to act on transfer instructions from a successful proof validation. 
+    * @dev Internal method to act on transfer instructions from a successful proof validation.
     * Specifically, it:
     * - extracts the relevant objects from the proofOutput object
     * - validates an EIP712 signature over each input note
     * - updates note registry state
     * - emits events for note creation/destruction
     * - converts or redeems tokens, according to the publicValue
-    * 
-    * @param proofOutputs - transfer instructions from a zero-knowledege proof validator 
+    * @param _proofId - id of proof resulting in _proofData
+    * @param proofOutputs - transfer instructions from a zero-knowledege proof validator
     * contract
     * @param _signatures - ECDSA signatures over a set of input notes
-    * @param _proofData - cryptographic proof data outputted from a proof construction 
+    * @param _proofData - cryptographic proof data outputted from a proof construction
     * operation
     */
     function confidentialTransferInternal(
+        uint24 _proofId,
         bytes memory proofOutputs,
         bytes memory _signatures,
         bytes memory _proofData
@@ -246,16 +268,15 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
         for (uint i = 0; i < proofOutputs.getLength(); i += 1) {
             bytes memory proofOutput = proofOutputs.get(i);
-            ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proofOutput, address(this));
-            
+            ace.updateNoteRegistry(_proofId, proofOutput, address(this));
+
             (bytes memory inputNotes,
             bytes memory outputNotes,
             address publicOwner,
             int256 publicValue) = proofOutput.extractProofOutput();
 
- 
+
             if (inputNotes.getLength() > uint(0)) {
-                
                 for (uint j = 0; j < inputNotes.getLength(); j += 1) {
                     bytes memory _signature = extractSignature(_signatures, j);
 
@@ -263,7 +284,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
                     bytes32 hashStruct = keccak256(abi.encode(
                         JOIN_SPLIT_SIGNATURE_TYPE_HASH,
-                        JOIN_SPLIT_PROOF,
+                        _proofId,
                         noteHash,
                         _challenge,
                         msg.sender
