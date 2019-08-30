@@ -3,8 +3,9 @@ pragma solidity >=0.5.0 <0.6.0;
 import "../../libs/LibEIP712.sol";
 
 /**
- * @title Library of EIP712 utility constants and functions
+ * @title LibEIP712Test
  * @author AZTEC
+ * @dev Library of EIP712 utility constants and functions
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract LibEIP712Test is LibEIP712 {

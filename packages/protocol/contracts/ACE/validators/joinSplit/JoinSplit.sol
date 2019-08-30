@@ -4,9 +4,10 @@ import "./JoinSplitABIEncoder.sol";
 import "../../../interfaces/JoinSplitInterface.sol";
 
 /**
- * @title Library to validate AZTEC zero-knowledge proofs
+ * @title 
  * @author Zachary Williamson, AZTEC
- * @dev Don't include this as an internal library. This contract uses a static memory table to cache
+ * @dev Library to validate AZTEC JoinSplit proofs
+ * Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
  * The intended use case is to call this externally via `staticcall`.

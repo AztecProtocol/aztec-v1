@@ -4,16 +4,17 @@ import "./PublicRangeABIEncoder.sol";
 import "../../../interfaces/PublicRangeInterface.sol";
 
 /**
- * @title Library to validate AZTEC public range zero-knowledge proofs
+ * @title PublicRange
  * @author AZTEC
- * @dev Don't include this as an internal library. This contract uses 
+ * @dev Library to validate AZTEC public range zero-knowledge proofs
+ * Don't include this as an internal library. This contract uses 
  * a static memory table to cache elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory 
  * mutation and undefined behaviour.
  * The intended use case is to call this externally via `staticcall`. External 
  * calls to OptimizedAZTEC can be treated as pure functions as this contract 
  * contains no storage and makes no external calls (other than to precompiles)
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract PublicRange {
 
