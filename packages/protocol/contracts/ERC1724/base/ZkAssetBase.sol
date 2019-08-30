@@ -14,7 +14,7 @@ import "../../libs/ProofUtils.sol";
  * @author AZTEC
  * @dev A contract defining the standard interface and behaviours of a confidential asset.
  * The ownership values and transfer values are encrypted.
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;

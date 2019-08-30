@@ -13,7 +13,7 @@ import "../ERC1724/ZkAssetOwnable.sol";
 /**
  * @title IZkAssetBurnable
  * @author AZTEC
- * @dev A standard defining the ZkAssetBurnable interfac e
+ * @dev A standard defining the ZkAssetBurnable interface
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 
