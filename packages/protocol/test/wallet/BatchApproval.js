@@ -8,6 +8,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const secp256k1 = require('@aztec/secp256k1');
+const typedData = require('@aztec/typed-data');
 
 const ACE = artifacts.require('./ACE.sol');
 const ethUtil = require('ethereumjs-util');
@@ -27,7 +28,7 @@ const {
     proofs: { MINT_PROOF },
 } = devUtils;
 
-const { randomHex } = require('web3-utils');
+const { randomHex, keccak256 } = require('web3-utils');
 
 const { JoinSplitProof, MintProof } = aztec;
 
@@ -233,13 +234,14 @@ contract.only('BatchApproval', async (accounts) => {
     // it('another person should be able to spend notes owned by the contract after approval to spend', async () => {
     // });
 
-    const getExampleNotesConstants = () => {
+    const getExampleNotesConstants = async () => {
         const account = alice;
-        const spender = bob.address;
         const verifyingContract = randomHex(20);
-        const noteHashes = Array(4)
-            .fill()
-            .map(() => randomHex(32));
+        // const noteHashes = Array(4)
+        //     .fill()
+        //     .map(() => randomHex(32));
+        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, batchApprovalContract.address);
+        const spender = account.address;
         const statuses = Array(noteHashes.length)
             .fill()
             .map(() => true);
@@ -248,53 +250,47 @@ contract.only('BatchApproval', async (accounts) => {
             spender,
             statuses,
         };
-        const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
-        const signature = aztec.signer.compoundSignNotesForBatchApproval(
+        const { encodedTypedData, signature } = aztec.signer.compoundSignNotesForBatchApproval(
             verifyingContract,
             noteHashes,
             spender,
             account.privateKey,
         );
-        return { verifyingContract, noteHashes, statuses, spender, message, schema, account, signature };
+        const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
+        const hashStruct = keccak256(`0x${typedData.encodeMessageData(schema.types, schema.primaryType, message)}`);
+
+        return { statuses, account, encodedTypedData, signature, noteHashes, hashStruct };
     };
 
-    it('should output a well formed signature', () => {
-        const { verifyingContract, message, schema, account } = getExampleNotesConstants();
-
-        const domain = aztec.signer.generateACEDomainParams(verifyingContract, constants.eip712.ACE_DOMAIN_PARAMS);
-        const { unformattedSignature } = aztec.signer.signTypedData(domain, schema, message, account.privateKey);
-
-        const expectedLength = 192; // r (64 char), s (64 char), v (64 chars)
-        const expectedNumCharacters = 64; // v, r and s should be 32 bytes
-
-        const r = unformattedSignature.slice(0, 64);
-        const s = unformattedSignature.slice(64, 128);
-        const v = unformattedSignature.slice(128, 192);
-
-        expect(unformattedSignature.length).to.equal(expectedLength);
-        expect(r.length).to.equal(expectedNumCharacters);
-        expect(s.length).to.equal(expectedNumCharacters);
-        expect(v.length).to.equal(expectedNumCharacters);
-    });
-
     it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
-        const { signature } = getExampleNotesConstants();
-
+        const { signature } = await getExampleNotesConstants();
         const v = parseInt(signature.slice(130, 132), 16);
         expect(v).to.be.oneOf([27, 28]);
     });
 
     it('should recover publicKey from signature params', async () => {
-        const { verifyingContract, message, schema, account, signature } = getExampleNotesConstants();
+        const { account, signature, encodedTypedData } = await getExampleNotesConstants();
 
         const r = Buffer.from(signature.slice(2, 66), 'hex');
         const s = Buffer.from(signature.slice(66, 130), 'hex');
         const v = parseInt(signature.slice(130, 132), 16);
 
-        const domain = aztec.signer.generateZKAssetDomainParams(verifyingContract);
-        const { encodedTypedData } = aztec.signer.signTypedData(domain, schema, message, account.privateKey);
         const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
         const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
         expect(publicKeyRecover).to.equal(account.publicKey.slice(4));
+    });
+
+    it('validate signature', async () => {
+        const { signature, account, encodedTypedData, hashStruct, noteHashes } = await getExampleNotesConstants();
+
+        const r = Buffer.from(signature.slice(2, 66), 'hex');
+        const s = Buffer.from(signature.slice(66, 130), 'hex');
+        const v = parseInt(signature.slice(130, 132), 16);
+
+        const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
+        const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
+        expect(publicKeyRecover).to.equal(account.publicKey.slice(4));
+        const result = await batchApprovalContract.validateBatchSignature(hashStruct, noteHashes, signature);
+        expect(result).to.equal(account.address);
     });
 });

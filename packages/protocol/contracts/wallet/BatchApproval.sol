@@ -103,5 +103,36 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
     }
 
 
-    // function verifyBatchSignature() internal view 
+    /**
+    * @dev Perform ECDSA signature validation for a signature over an array of input notes
+    * @param _hashStruct - the data to sign in an EIP712 signature
+    * @param _noteHashes - array of keccak256 hashes of the note array coordinates (gamma and sigma)
+    * @param _signature - ECDSA signature for a particular array of input notes
+    */
+    function validateBatchSignature(
+        bytes32 _hashStruct,
+        bytes32[] memory _noteHashes,
+        bytes memory _signature
+    // ) public view returns(address signer) {
+    ) public view returns(address signer) {
+        // (,,,address noteOwner) = ACE(aceAddress).getNote(address(this), _noteHashes[0]);
+        // address previousNoteOwner = noteOwner;
+        // for (uint j = 1; j < _noteHashes.length; j++) {
+        //     (,,,address noteOwner) = ACE(aceAddress).getNote(address(this), _noteHashes[j]);
+        //     require(noteOwner == previousNoteOwner, "notes are owned by different people");
+        //     previousNoteOwner = noteOwner;
+        // }
+        // address signer;
+        if (_signature.length != 0) {
+            // validate EIP712 signature
+            bytes32 msgHash = hashEIP712Message(_hashStruct);
+            signer = recoverSignature(
+                msgHash,
+                _signature
+            );
+        } else {
+            signer = msg.sender;
+        }
+        // require(signer == noteOwner, "the note owner did not sign this message");
+    }
 }
