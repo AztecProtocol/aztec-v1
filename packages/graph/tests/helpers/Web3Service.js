@@ -212,10 +212,10 @@ class Web3Service {
                 }
 
                 return {
-                    all: () => contract.getPastEvents('allEvents', {
+                    all: async () => contract.getPastEvents('allEvents', {
                         fromBlock: 0,
                     }),
-                    where: (options = {}) => contract.getPastEvents(eventName, {
+                    where: async (options = {}) => contract.getPastEvents(eventName, {
                         filter: options,
                     }),
                 };

@@ -165,20 +165,22 @@ class SyncManager {
                 return;
             }
         }
-0 
-        const syncReq = setTimeout(() => {
-            this.syncNotes({
-                ...options,
+
+        if (process.env.NODE_ENV !== 'test') {
+            const syncReq = setTimeout(() => {
+                this.syncNotes({
+                    ...options,
+                    lastSyncedBlock: newLastSyncedBlock,
+                });
+            }, syncInterval);
+    
+            this.addresses.set(address, {
+                ...syncAddress,
+                syncing: false,
+                syncReq,
                 lastSyncedBlock: newLastSyncedBlock,
             });
-        }, syncInterval);
-
-        this.addresses.set(address, {
-            ...syncAddress,
-            syncing: false,
-            syncReq,
-            lastSyncedBlock: newLastSyncedBlock,
-        });
+        }
     }
 
     async sync({

@@ -34,10 +34,17 @@ const syncEthAddress = async ({
         lastSyncedBlock = registeredExtension.blockNumber;
     }
 
-    manager.sync({
-        address,
-        lastSyncedBlock,
-    });
+    if(process.env.NODE_ENV == 'test') {
+        await manager.sync({
+            address,
+            lastSyncedBlock,
+        });
+    } else {
+        manager.sync({
+            address,
+            lastSyncedBlock,
+        });
+    }
 };
 
 export default {
