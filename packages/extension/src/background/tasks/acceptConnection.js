@@ -1,10 +1,9 @@
 import browser from 'webextension-polyfill';
 import {
-    clientEvent,
     contentSubscribeEvent,
     contentUnsubscribeEvent,
 } from '~config/event';
-import Connection from '../utils/connection.js';
+import Connection from '../utils/connection';
 import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 
 const handleContentScriptSubscription = (data, port) => {
@@ -27,27 +26,14 @@ const handleContentScriptSubscription = (data, port) => {
 };
 
 export default function acceptConnection() {
+    // TODO remove this and make the UI use a port connection once we refactor
     const connection = new Connection();
-
-    browser.runtime.onMessage.addListener(async (msg, sender) => {
-        switch (msg.type) {
-            case clientEvent: {
-                return connection.handleMessage({ data: msg, sender });
-            }
-            case 'UI_CONFIRM': {
-                connection.UiEventSubject.next(msg, sender);
-                break;
-            }
-            case 'UI_REJECTION': {
-                connection.UiEventSubject.next(msg, sender);
-                break;
-            }
-            default:
-        }
-        return null;
+    browser.runtime.onMessage.addListener(async (msg) => {
+        connection.UiResponseSubject.next(msg);
     });
 
     browser.runtime.onConnect.addListener((port) => {
+        connection.registerClient(port);
         port.onMessage.addListener(handleContentScriptSubscription);
     });
 }

@@ -8,7 +8,7 @@ import {
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
 import actionModel from '~database/models/action';
-import ApproveAssetMutatuon from '../../mutations/ApproveDomain';
+import ApproveDomainMutatuon from '../../mutations/ApproveDomain';
 
 import './ApproveDomain.css';
 
@@ -18,7 +18,7 @@ class ApproveAssetForDomain extends Component {
 
     }
 
-    __handleApproveAsset = async (mutation) => {
+    __handleApproveDomain = async (mutation) => {
         const {
             action: {
                 data: {
@@ -26,7 +26,7 @@ class ApproveAssetForDomain extends Component {
                     response: {
                         domain,
                         asset,
-                        currentAddress,
+                        address,
                     },
                 },
             },
@@ -36,11 +36,11 @@ class ApproveAssetForDomain extends Component {
             variables: {
                 domain,
                 asset,
-                address: currentAddress,
+                address,
             },
         });
         browser.runtime.sendMessage({
-            type: 'UI_CONFIRM',
+            type: 'UI_RESPONSE',
             requestId,
             data,
         });
@@ -94,21 +94,21 @@ class ApproveAssetForDomain extends Component {
                     weight="semibold"
                 />
                 <Text
-                    text={`${domain} is requesting the access to ${asset}.`}
+                    text={`${domain} is requesting the access.`}
                     showEllipsis
                     color="label"
                     className="wrap"
                     size="s"
                     weight="light"
                 />
-                <Mutation mutation={ApproveAssetMutatuon}>
+                <Mutation mutation={ApproveDomainMutatuon}>
                     {(mutation, { data }) => (
                         <div>
                             <br />
                             <br />
                             <Button
                                 text="Approve"
-                                onClick={() => this.__handleApproveAsset(mutation)}
+                                onClick={() => this.__handleApproveDomain(mutation)}
                             />
                         </div>
                     )

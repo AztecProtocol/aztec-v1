@@ -1,23 +1,32 @@
 import {
     spy,
-    mock,
+    stub,
+    createStubInstance,
 } from 'sinon';
-import { expect } from 'chai';
+import { marbles } from 'rxjs-marbles/jest';
 
 /* eslint-disable import/first */
-global.chrome = require('sinon-chrome');
 
-import { TestScheduler, hot, cold } from 'rxjs/testing';
 
-const connectionUtils = require('../connectionUtils.js');
+import * as RXJS from 'rxjs';
 
-mock(connectionUtils);
+/* eslint-disable import/first */
+import ApiService from '../../services/ApiService';
+
+import * as connectionUtils from '../connectionUtils';
+
+
 const Connection = require('../connection.js').default;
 
-
 const msg = {
-    requestId: 'd02537dfa0105c1fe9caee5a9ee7495d',
+    domain: 'aztecprotocol.com',
     type: 'aztec-browser-api',
+    query: 'registerExtension',
+    args: {
+        currentAddress: '0x3339c3c842732f4daacf12aed335661cf4eab66b',
+    },
+    requestId: '6c1f5c0479bf64c81a5d810b3d1d034f',
+    clientId: '1bf30e04ad10b6e7c5379bf38a0120b5',
 };
 const sender = {
     id: 'pmokbmjbgjaoloahefjemdoojfbbdnhi',
@@ -47,46 +56,64 @@ const sender = {
         windowId: 1437,
     },
 };
+const domain = {
+    domain: 'aztecprotocol.com',
+    requestId: '6c1f5c0479bf64c81a5d810b3d1d034f',
+    type: 'aztec-browser-api',
+};
 
 
 describe.only('Connection Tests', () => {
-    const testScheduler = new TestScheduler();
     beforeEach(() => {
+        jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     afterEach(() => {
-        // testScheduler.flush();
+        jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
-    it('Should create instance of the Connection Class', () => {
+    it('should register a client and add messages to the message$ stream', () => {
+        // we need to simulate the process of a connection
         const connection = new Connection();
-        expect(connection);
+
+        const listenerSpy = jest.fn();
+        connection.registerClient({
+            onMessage: {
+                addListener: listenerSpy,
+            },
+        });
+        expect(listenerSpy).toHaveBeenCalled();
     });
 
-    it('On receipt of a mesage it should pipe it through the event handlers', async () => {
+
+    it('On receipt of an API mesage it should pipe it through the correct handlers', () => {
+        const apiSpy = jest.spyOn(ApiService, 'run');
+        const addDomainDataSpy = jest.spyOn(connectionUtils, 'addDomainData');
         const connection = new Connection();
-
-        const expected = '-r-d';
-        const expectedGraph = '-g';
-        const expectedMap = {
-            r: {
-                data: msg,
-                sender,
-            },
-            d: 0,
-            g: {
-
-            },
-        };
-
-        const result$ = connection.page$;
-        connection.pageSubject.next({
+        const nextSpy = jest.spyOn(connection.ApiSubject, 'next');
+        connection.MessageSubject.next({
             data: msg,
             sender,
         });
-        console.log(connectionUtils.addDomainData.called);
-        testScheduler.expectObservable(result$).toBe(expected, expectedMap);
-        testScheduler.expectObservable(connection.graphQuery$).toBe(expectedGraph, expectedMap);
-        // expect(connectionUtils.addDomainData.called).to.equal(true);
+
+        expect(addDomainDataSpy).toHaveBeenCalled();
+        expect(nextSpy).toHaveBeenCalled();
+        expect(apiSpy).toHaveBeenCalled();
+    });
+    it.only('On receipt of an ACTION_RESPONSE mesage it should pipe it through the correct handlers', () => {
+        const addDomainDataSpy = jest.spyOn(connectionUtils, 'addDomainData');
+        const connection = new Connection();
+        const nextSpy = jest.spyOn(connection.ActionResponseSubject, 'next');
+        connection.MessageSubject.next({
+            data: {
+                type: 'ACTION_RESPONSE',
+            },
+            sender,
+        });
+
+        expect(addDomainDataSpy).toHaveBeenCalled();
+        expect(nextSpy).toHaveBeenCalled();
     });
 });

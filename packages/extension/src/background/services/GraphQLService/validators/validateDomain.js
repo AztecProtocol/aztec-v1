@@ -13,6 +13,7 @@ export default async function validateDomain(_, args) {
             messageOptions: {
                 domain,
             },
+            ...args,
         });
     }
 
