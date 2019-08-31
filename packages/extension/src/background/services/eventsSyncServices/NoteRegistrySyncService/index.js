@@ -1,7 +1,7 @@
 import {
     errorLog,
 } from '~utils/log';
-import createNoteRegistry from '~background/database/models/createNoteRegistry';
+import Asset from '~background/database/models/asset';
 import SyncManager from './helpers/SyncManager';
 import {
     START_EVENTS_SYNCING_BLOCK,
@@ -24,10 +24,10 @@ const syncCreateNoteRegistries = async ({
     //TODO: Improve this for each network separately
     let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
 
-    const lastSyncedNoteRegistry = await createNoteRegistry.latest({byField: 'blockNumber'})
+    const lastSyncedAsset = await Asset.latest({byField: 'blockNumber'})
 
-    if (lastSyncedNoteRegistry) {
-        lastSyncedBlock = lastSyncedNoteRegistry.blockNumber;
+    if (lastSyncedAsset) {
+        lastSyncedBlock = lastSyncedAsset.blockNumber;
     }
     
     manager.sync({

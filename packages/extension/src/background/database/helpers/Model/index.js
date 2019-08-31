@@ -40,13 +40,17 @@ export default function Model(modelConfig) {
         return;
     }
 
-    const dexieConfig = {}
-    dexieConfig[name] = fields.join(',')
+    // PK is alwais the first element in the schema fields
+    const primaryKey = fields[0];
+    
+    const dexieConfig = {};
+    dexieConfig[name] = fields.join(',');
     db.version(version).stores(dexieConfig);
 
     return {
         get: (fields) => get(name, fields),
         add: (fields) => add(name, fields),
+        put: (fields) => add(name, fields, primaryKey),
         update: (id, fields) => update(name, id, fields),
         query: (filterFunc, orderBy) => query(name, {filterFunc, orderBy}),
         latest: (options) => latest(name, options),

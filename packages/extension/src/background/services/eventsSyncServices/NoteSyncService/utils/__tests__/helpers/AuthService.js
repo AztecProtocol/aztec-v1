@@ -9,7 +9,7 @@ class AuthService {
 
     init(accountIndex = 0) {
         this.accountIndex = accountIndex;
-        //TODO: make it ladable from .env file
+        //TODO: make it loadable from .env file
         const privateKey = '0xb8a23114e720d45005b608f8741639464a341c32c61920bf341b5cbddae7651d';
         const mnemonic = 'system box custom picture wonder across logic love program pyramid position plunge';
         const {

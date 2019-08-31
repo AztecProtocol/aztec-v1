@@ -1,23 +1,23 @@
 import SyncManager from '../../helpers/SyncManager'
 import Web3Service from '~background/services/Web3Service'
-import fetchCreateNoteRegistries from '../fetchCreateNoteRegistries'
+import fetchAssets from '../fetchAssets'
 
 
 jest.mock('~background/services/Web3Service');
-jest.mock('../fetchCreateNoteRegistries');
+jest.mock('../fetchAssets');
 
 const networkId_1 = '2293';
 
 
 describe('Sync Block Number', () => {
    
-   test('should call own syncCreateNoteRegistry method with inputed start block and network id', async () => {
+   test('should call own syncAssets method with inputed start block and network id', async () => {
       // given
       const manager = new SyncManager();
       const lastSyncedBlock = 4434;
 
-      const syncCreateNoteRegistryMock = jest.spyOn(manager, 'syncCreateNoteRegistry');
-      syncCreateNoteRegistryMock.mockImplementation(() => {});
+      const syncAssetsMock = jest.spyOn(manager, 'syncAssets');
+      syncAssetsMock.mockImplementation(() => {});
 
       const inputs = {
          networkId: networkId_1,
@@ -33,7 +33,7 @@ describe('Sync Block Number', () => {
          lastSyncedBlock,
       };
 
-      expect(syncCreateNoteRegistryMock).toHaveBeenCalledWith(expectedResult);
+      expect(syncAssetsMock).toHaveBeenCalledWith(expectedResult);
    });
 
    test('should save lastSyncedBlock into syncManager', async () => {
@@ -45,7 +45,7 @@ describe('Sync Block Number', () => {
       Web3Service.eth = {
          getBlockNumber: () => currentBlock
       };
-      fetchCreateNoteRegistries.mockResolvedValue([]);
+      fetchAssets.mockResolvedValue([]);
 
       const inputs = {
          networkId: networkId_1,
@@ -64,7 +64,7 @@ describe('Sync Block Number', () => {
       expect(stateForNetwork.lastSyncedBlock).toEqual(expectedResult.lastSyncedBlock);
    });
 
-   test('should call "fetchCreateNoteRegistries" with right: fromBlock, fromBlock, networkId', async () => {
+   test('should call "fetchAssets" with right: fromBlock, fromBlock, networkId', async () => {
       // given
       const manager = new SyncManager();
       const lastSyncedBlock = 4434;
@@ -74,7 +74,7 @@ describe('Sync Block Number', () => {
          getBlockNumber: () => currentBlock
       };
 
-      fetchCreateNoteRegistries.mockImplementation(() => []);
+      fetchAssets.mockImplementation(() => []);
 
       const inputs = {
          networkId: networkId_1,
@@ -92,7 +92,7 @@ describe('Sync Block Number', () => {
          onError: manager.handleFetchError,
       };
 
-      expect(fetchCreateNoteRegistries).toHaveBeenCalledWith(expectedResult);
+      expect(fetchAssets).toHaveBeenCalledWith(expectedResult);
    });
 
 });

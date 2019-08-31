@@ -1,14 +1,13 @@
 import Model from './../../helpers/Model';
 
 export default Model({
-    name: 'сreateNoteRegistry',
+    name: 'asset',
     version: 1,
     fields: [
-        // Primary Key is auto-incremented (++id) | first key is always primary key
+        // Primary Key | first key is always primary key
         '++id',
+        'registryOwner',
         'blockNumber',
-        // registryOwner is unique (&)
-        '&registryOwner',
         'registryAddress',
         'scalingFactor',
         'linkedTokenAddress',

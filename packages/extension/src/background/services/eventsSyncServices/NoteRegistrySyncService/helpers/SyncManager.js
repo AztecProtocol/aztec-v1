@@ -3,8 +3,8 @@ import {
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../../Web3Service'
-import fetchCreateNoteRegistries from '../utils/fetchCreateNoteRegistries'
-import addCreateNoteRegistry from '../utils/addCreateNoteRegistry';
+import fetchAssets from '../utils/fetchAssets'
+import addAsset from '../utils/addAsset';
 import asyncForEach from '~utils/asyncForEach';
 
 class SyncManager {
@@ -33,7 +33,7 @@ class SyncManager {
     }
 
     handleFetchError = (error) => {
-        errorLog('Failed to sync CreateNoteRegistry with web3.', error);
+        errorLog('Failed to sync Assets with web3.', error);
         if (process.env.NODE_ENV === 'development') {
             this.paused = true;
         }
@@ -42,7 +42,7 @@ class SyncManager {
     pause = (networkId, prevState = {}) => {
         const syncNetwork = this.networks.get(networkId);
         if (!syncNetwork) {
-            warnLog(`CreateNoteRegistry syncing with networkId: "${networkId}" is not in process.`);
+            warnLog(`Assets syncing with networkId: "${networkId}" is not in process.`);
             return;
         }
 
@@ -55,7 +55,7 @@ class SyncManager {
     resume = (networkId) => {
         const syncNetwork = this.networks.get(networkId);
         if (!syncNetwork) {
-            warnLog(`CreateNoteRegistry syncing with networkId: "${networkId}" is not in process.`);
+            warnLog(`Assets syncing with networkId: "${networkId}" is not in process.`);
             return;
         }
 
@@ -63,7 +63,7 @@ class SyncManager {
             pausedState,
         } = syncNetwork;
         if (!pausedState) {
-            warnLog(`CreateNoteRegistry with networkId: ${networkId} is already running.`);
+            warnLog(`Assets with networkId: ${networkId} is already running.`);
             return;
         }
 
@@ -72,13 +72,13 @@ class SyncManager {
             pausedState: null,
         });
 
-        this.syncCreateNoteRegistry({
+        this.syncAssets({
             ...pausedState,
             networkId,
         });
     };
 
-    async syncCreateNoteRegistry(options) {
+    async syncAssets(options) {
         const {
             networkId,
             lastSyncedBlock,
@@ -118,25 +118,25 @@ class SyncManager {
             const fromBlock = lastSyncedBlock + 1;
             const toBlock = currentBlock;
 
-            const newCreateNoteRegistries = await fetchCreateNoteRegistries({
+            const newAssets = await fetchAssets({
                 networkId,
                 fromBlock,
                 toBlock,
                 onError: this.handleFetchError,
             });
     
-            if (newCreateNoteRegistries.length) {
-                console.log("newCreateNoteRegistries: " + JSON.stringify(newCreateNoteRegistries))
+            if (newAssets.length) {
+                console.log("new Assets: " + JSON.stringify(newAssets))
             }
             
-            await asyncForEach(newCreateNoteRegistries, async (noteRegistry) => {
-                await addCreateNoteRegistry(noteRegistry);
+            await asyncForEach(newAssets, async (noteRegistry) => {
+                await addAsset(noteRegistry);
             })
             newLastSyncedBlock = toBlock;
         }
 
         const syncReq = setTimeout(() => {
-            this.syncCreateNoteRegistry({
+            this.syncAssets({
                 ...options,
                 lastSyncedBlock: newLastSyncedBlock,
             });
@@ -163,7 +163,7 @@ class SyncManager {
             };
             this.networks.set(networkId, syncNetwork);
         }
-        await this.syncCreateNoteRegistry({
+        await this.syncAssets({
             networkId,
             lastSyncedBlock,
         });

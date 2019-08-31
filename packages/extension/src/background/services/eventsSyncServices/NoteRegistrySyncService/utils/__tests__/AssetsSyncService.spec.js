@@ -1,10 +1,10 @@
 import NoteRegistrySyncService from '../../';
-import createNoteRegistry from '~background/database/models/createNoteRegistry';
+import Asset from '~background/database/models/asset';
 import {
    START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
 
-jest.mock('~background/database/models/createNoteRegistry');
+jest.mock('~background/database/models/asset');
 
 const networkId_1 = '2293';
 
@@ -15,7 +15,7 @@ describe('LastSyncedBlock', () => {
       const syncMock = jest.spyOn(NoteRegistrySyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
-      createNoteRegistry.latest.mockResolvedValue(null);
+      Asset.latest.mockResolvedValue(null);
 
       const inputs = {
          networkId: networkId_1,
@@ -47,7 +47,7 @@ describe('LastSyncedBlock', () => {
          canAdjustSupply: false,
          canConvert: false,
       };
-      createNoteRegistry.latest.mockResolvedValue(latestSyncedExtension);
+      Asset.latest.mockResolvedValue(latestSyncedExtension);
 
       const inputs = {
          networkId: networkId_1,

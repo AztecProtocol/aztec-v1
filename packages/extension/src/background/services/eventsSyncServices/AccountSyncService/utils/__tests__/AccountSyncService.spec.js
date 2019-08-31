@@ -44,7 +44,7 @@ describe('LastSyncedBlock', () => {
          linkedPublicKey: 'some key',
          registeredAt: 123,
       };
-      account.latest.mockResolvedValue(latestSyncedExtension);
+      Account.latest.mockResolvedValue(latestSyncedExtension);
 
       const inputs = {
          address: userEthAddress_1,
