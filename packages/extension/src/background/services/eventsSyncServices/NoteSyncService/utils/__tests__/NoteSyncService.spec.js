@@ -14,7 +14,7 @@ import NoteSyncService from '../../';
 import asyncMap from '~utils/asyncMap';
 
 
-jest.setTimeout(50000000);
+jest.setTimeout(500000000);
 
 const { JOIN_SPLIT_PROOF } = devUtils.proofs;
 const {
@@ -36,7 +36,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('ZkAsset', () => {
     const providerUrl = `http://localhost:8545`;
-    const prepopulateEventsCount = 1000;
+    const prepopulateEventsCount = 8000;
     const epoch = 1;
     const category = 1;
     const proofId = 1;
@@ -196,15 +196,15 @@ describe('ZkAsset', () => {
     });
 
     it('create Note entity from CreateNote event', async () => {
-        // const pastEvents = await Web3Service
-        //     .useContract('ZkAssetOwnable')
-        //     .at(zkAssetAddress)
-        //     .events(['CreateNote', 'UpateNote'])
-        //     .where({
-        //         id: sender.address,
-        //     });
+        const pastEvents = await Web3Service
+            .useContract('ZkAssetOwnable')
+            .at(zkAssetAddress)
+            .events(['CreateNote', 'UpateNote'])
+            .where({
+                id: sender.address,
+            });
         
-        // console.log(`Past events count: ${pastEvents.length}`);
+        console.log(`Past events count: ${pastEvents.length}`);
 
         console.log("------------------" * 5);
 
