@@ -1,10 +1,10 @@
-import RegisterExtensionSyncService from '../../';
-import registerExtension from '~background/database/models/registerExtension';
+import AccountSyncService from '../../';
+import Account from '~background/database/models/account';
 import {
    START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
 
-jest.mock('~background/database/models/registerExtension');
+jest.mock('~background/database/models/account');
 
 const userEthAddress_1 = '0x12345678';
 
@@ -12,17 +12,17 @@ describe('LastSyncedBlock', () => {
    
    test('should call SyncManager.sync with default production block and inputed address', async () => {
       // given
-      const syncMock = jest.spyOn(RegisterExtensionSyncService.manager, 'sync');
+      const syncMock = jest.spyOn(AccountSyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
-      registerExtension.latest.mockResolvedValue(null);
+      Account.latest.mockResolvedValue(null);
 
       const inputs = {
          address: userEthAddress_1,
       }
       
       // action
-      await RegisterExtensionSyncService.syncEthAddress(inputs);
+      await AccountSyncService.syncEthAddress(inputs);
 
       // expectation
       const expectedResult = {
@@ -35,7 +35,7 @@ describe('LastSyncedBlock', () => {
 
    test('should call SyncManager.sync with last sycned block and inputed address', async () => {
       // given
-      const syncMock = jest.spyOn(RegisterExtensionSyncService.manager, 'sync');
+      const syncMock = jest.spyOn(AccountSyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
       const latestSyncedExtension = {
@@ -44,14 +44,14 @@ describe('LastSyncedBlock', () => {
          linkedPublicKey: 'some key',
          registeredAt: 123,
       };
-      registerExtension.latest.mockResolvedValue(latestSyncedExtension);
+      account.latest.mockResolvedValue(latestSyncedExtension);
 
       const inputs = {
          address: userEthAddress_1,
       };
       
       // action
-      await RegisterExtensionSyncService.syncEthAddress(inputs);
+      await AccountSyncService.syncEthAddress(inputs);
 
       // expectation
       const expectedResult = {

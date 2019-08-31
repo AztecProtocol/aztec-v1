@@ -6,7 +6,7 @@ import {
     AZTECAccountRegistryConfig,
 } from '~background/config/contracts'
  
-export default async function fetchRegisterExtensions({
+export default async function fetchAccount({
     address,
     fromBlock,
     onError,
