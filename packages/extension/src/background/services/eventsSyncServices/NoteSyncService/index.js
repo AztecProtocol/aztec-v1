@@ -2,7 +2,7 @@ import {
     errorLog,
 } from '~utils/log';
 import note from '~background/database/models/note';
-import registerExtension from '~background/database/models/registerExtension';
+import Account from '~background/database/models/account';
 import SyncManager from './helpers/SyncManager';
 import {
     START_EVENTS_SYNCING_BLOCK,
@@ -24,14 +24,14 @@ const syncEthAddress = async ({
 
     const filterFunc = obj => obj.address === obj.address
     const lastSyncedNote = await note.latest({byField: 'blockNumber', filterFunc})
-    const registeredExtension = await registerExtension.latest({byField: 'blockNumber', filterFunc})
+    const account = await Account.latest({byField: 'blockNumber', filterFunc})
 
     let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
     if (lastSyncedNote) {
         lastSyncedBlock = lastSyncedNote.blockNumber;
         
-    } else if (registeredExtension) {
-        lastSyncedBlock = registeredExtension.blockNumber;
+    } else if (account) {
+        lastSyncedBlock = account.blockNumber;
     }
 
     if(process.env.NODE_ENV == 'test') {

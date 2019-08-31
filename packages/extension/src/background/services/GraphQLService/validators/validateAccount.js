@@ -1,7 +1,7 @@
 import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import SyncService from '~background/services/SyncService';
-import RegisterExtensionSyncService from '~background/services/eventsSyncServices/RegisterExtensionSyncService';
+import AccountSyncService from '~background/services/eventsSyncServices/AccountSyncService';
 import NoteSyncService from '~background/services/eventsSyncServices/NoteSyncService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
@@ -51,7 +51,7 @@ export default async function validateAccount(_, args, ctx) {
     }
 
     //TODO: Check weather should we start syncing an address if the address has an `RegisterExtension` event
-    RegisterExtensionSyncService.syncEthAddress({
+    AccountSyncService.syncEthAddress({
         address: currentAddress,
     })
     NoteSyncService.syncEthAddress({

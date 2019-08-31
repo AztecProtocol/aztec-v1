@@ -3,8 +3,8 @@ import {
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../../Web3Service'
-import fetchRegisterExtensions from '../utils/fetchRegisterExtensions'
-import addRegisterExtension from '../utils/addRegisterExtension';
+import fetchAccount from '../utils/fetchAccount'
+import addAccount from '../utils/addAccount';
 
 class SyncManager {
     constructor() {
@@ -32,7 +32,7 @@ class SyncManager {
     }
 
     handleFetchError = (error) => {
-        errorLog('Failed to sync RegisterExtension with web3.', error);
+        errorLog('Failed to sync Account with web3.', error);
         if (process.env.NODE_ENV === 'development') {
             this.paused = true;
         }
@@ -41,7 +41,7 @@ class SyncManager {
     pause = (address, prevState = {}) => {
         const syncAddress = this.addresses.get(address);
         if (!syncAddress) {
-            warnLog(`RegisterExtension syncing with "${address}" eth address is not in process.`);
+            warnLog(`Account syncing with "${address}" eth address is not in process.`);
             return;
         }
 
@@ -54,7 +54,7 @@ class SyncManager {
     resume = (address) => {
         const syncAddress = this.addresses.get(address);
         if (!syncAddress) {
-            warnLog(`RegisterExtension syncing with "${address}" eth address is not in process.`);
+            warnLog(`Account syncing with "${address}" eth address is not in process.`);
             return;
         }
 
@@ -62,7 +62,7 @@ class SyncManager {
             pausedState,
         } = syncAddress;
         if (!pausedState) {
-            warnLog(`RegisterExtension with ${address} eth address is already running.`);
+            warnLog(`Account with ${address} eth address is already running.`);
             return;
         }
 
@@ -71,13 +71,13 @@ class SyncManager {
             pausedState: null,
         });
 
-        this.syncRegisterExtensions({
+        this.syncAccount({
             ...pausedState,
             address,
         });
     };
 
-    async syncRegisterExtensions(options) {
+    async syncAccount(options) {
         const {
             address,
             lastSyncedBlock,
@@ -117,24 +117,24 @@ class SyncManager {
             const fromBlock = lastSyncedBlock + 1;
             const toBlock = currentBlock;
 
-            const newRegisterExtensions = await fetchRegisterExtensions({
+            const newAccounts = await fetchAccount({
                 address,
                 fromBlock,
                 toBlock,
                 onError: this.handleFetchError,
             });
 
-            if (newRegisterExtensions.length) {
-                console.log("Response for events 'registerExtensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensions}));
+            if (newAccounts.length) {
+                console.log("Response for events 'Register Extensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensionsEvents: newAccounts}));
             }
             
-            await Promise.all(newRegisterExtensions.map(addRegisterExtension));
+            await Promise.all(newAccounts.map(addAccount));
 
             newLastSyncedBlock = toBlock;
         }
         
         const syncReq = setTimeout(() => {
-            this.syncRegisterExtensions({
+            this.syncAccount({
                 ...options,
                 lastSyncedBlock: newLastSyncedBlock,
             });
@@ -161,7 +161,7 @@ class SyncManager {
             };
             this.addresses.set(address, syncAddress);
         }
-        return this.syncRegisterExtensions({
+        return this.syncAccount({
             address,
             lastSyncedBlock,
         });
