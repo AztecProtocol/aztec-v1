@@ -1,5 +1,5 @@
 import assetModel from '~database/models/asset';
-import Note from '~database/models/note';
+import noteModel from '~database/models/note';
 import {
     argsError,
 } from '~utils/error';
@@ -41,7 +41,7 @@ export default async function pickNotesFromBalance(args, ctx) {
 
     const notes = await asyncMap(
         noteKeys,
-        async noteKey => Note.get({ key: noteKey }),
+        async noteKey => noteModel.get({ key: noteKey }),
     );
 
     return notes;
