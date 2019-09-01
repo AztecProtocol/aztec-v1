@@ -1,7 +1,7 @@
 import {
     get,
 } from '~utils/storage';
-import noteModel from '~database/models/note';
+import Note from '~database/models/note';
 import SyncService from '~background/services/SyncService';
 
 export default async function syncNoteInfo(noteId, ctx) {
@@ -11,7 +11,7 @@ export default async function syncNoteInfo(noteId, ctx) {
         },
     } = ctx;
 
-    let note = await noteModel.get({
+    let note = await Note.get({
         id: noteId,
     });
     let userKey;

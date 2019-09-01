@@ -1,15 +1,15 @@
 import Asset from '~background/database/models/asset';
 
-export default async function createOrUpdateAsset(createNoteRegistry) {
+export default async function createOrUpdateAsset(asset) {
     
-    const existingRecord = await Asset.get({registryOwner: createNoteRegistry.registryOwner});
+    const existingRecord = await Asset.get({registryOwner: asset.registryOwner});
 
     let id;
     if(existingRecord) {
         id = existingRecord.id;
-        Asset.update(id, createNoteRegistry);
+        Asset.update(id, asset);
     } else {
-        id = await Asset.add(createNoteRegistry);
+        id = await Asset.add(asset);
     }
 
     return {

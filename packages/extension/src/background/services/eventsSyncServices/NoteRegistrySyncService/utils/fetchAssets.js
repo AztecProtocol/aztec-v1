@@ -6,7 +6,7 @@ import {
     ACEConfig,
 } from '~background/config/contracts'
  
-export default async function fetchCreateNoteRegistries({
+export default async function fetchAssets({
     //TODO: networkId feature is not implemented yet
     networkId,
     fromBlock,

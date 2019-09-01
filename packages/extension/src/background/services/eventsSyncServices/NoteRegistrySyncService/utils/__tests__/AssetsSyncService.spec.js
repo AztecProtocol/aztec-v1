@@ -1,4 +1,4 @@
-import NoteRegistrySyncService from '../../';
+import AssetsSyncService from '../../';
 import Asset from '~background/database/models/asset';
 import {
    START_EVENTS_SYNCING_BLOCK,
@@ -12,7 +12,7 @@ describe('LastSyncedBlock', () => {
    
    test('should call SyncManager.sync with default production block and inputed address', async () => {
       // given
-      const syncMock = jest.spyOn(NoteRegistrySyncService.manager, 'sync');
+      const syncMock = jest.spyOn(AssetsSyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
       Asset.latest.mockResolvedValue(null);
@@ -22,7 +22,7 @@ describe('LastSyncedBlock', () => {
       }
       
       // action
-      await NoteRegistrySyncService.syncCreateNoteRegistries(inputs);
+      await AssetsSyncService.syncCreateNoteRegistries(inputs);
 
       // expectation
       const expectedResult = {
@@ -35,7 +35,7 @@ describe('LastSyncedBlock', () => {
 
    test('should call SyncManager.sync with last sycned block and inputed address', async () => {
       // given
-      const syncMock = jest.spyOn(NoteRegistrySyncService.manager, 'sync');
+      const syncMock = jest.spyOn(AssetsSyncService.manager, 'sync');
       syncMock.mockImplementation(() => {});
 
       const latestSyncedExtension = {
@@ -54,7 +54,7 @@ describe('LastSyncedBlock', () => {
       };
       
       // action
-      await NoteRegistrySyncService.syncCreateNoteRegistries(inputs);
+      await AssetsSyncService.syncCreateNoteRegistries(inputs);
 
       // expectation
       const expectedResult = {
