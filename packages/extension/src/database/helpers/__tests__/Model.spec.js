@@ -1351,3 +1351,95 @@ describe('Model.last', () => {
         expect(errors).toEqual([]);
     });
 });
+
+describe('Model.keyOf', () => {
+    it('get key by id in a model with dataKey mapping', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: [
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            id: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            id: 'pikachu',
+            color: 'yellow',
+        });
+
+        const key = await pokemonModel.keyOf({
+            id: 'pikachu',
+        });
+        expect(key).toBe('p:1');
+    });
+
+    it('get key by index in a model with dataKey mapping', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            index: 'name',
+            fields: [
+                'name',
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+
+        const key = await pokemonModel.keyOf({
+            name: 'pikachu',
+        });
+        expect(key).toBe('p:1');
+    });
+
+    it('accept a string as id', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            index: 'name',
+            fields: [
+                'name',
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+
+        const key = await pokemonModel.keyOf('pikachu');
+        expect(key).toBe('p:1');
+    });
+
+    it('return empty string if key is not found', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            index: 'name',
+            fields: [
+                'name',
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+
+        const key = await pokemonModel.keyOf('pikachu');
+        expect(key).toBe('');
+    });
+});
