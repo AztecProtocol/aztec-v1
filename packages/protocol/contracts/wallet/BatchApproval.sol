@@ -125,7 +125,7 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
         bytes32[] memory _noteHashes,
         bytes memory _signature,
         address _zkAsset
-    ) public notesOwned(_noteHashes, _zkAsset) {
+    ) public view notesOwned(_noteHashes, _zkAsset) {
         address signer;
         if (_signature.length != 0) {
             // validate EIP712 signature
