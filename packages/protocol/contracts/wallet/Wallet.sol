@@ -86,7 +86,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
     }
 
     /**
-     * @notice Validates a Join-Split proof to transfer notes to another addresstwo
+     * @notice Validates a Join-Split proof to transfer notes to another address
      * @author AZTEC
      * @param _proof The proof data to verify
      * @param _zkAsset The address of the zkAsset
