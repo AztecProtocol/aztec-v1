@@ -236,11 +236,10 @@ contract.only('BatchApproval', async (accounts) => {
 
     const getExampleNotesConstants = async () => {
         const account = alice;
-        const verifyingContract = randomHex(20);
-        // const noteHashes = Array(4)
-        //     .fill()
-        //     .map(() => randomHex(32));
-        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, batchApprovalContract.address);
+        const verifyingContract = batchApprovalContract.address;
+        const noteHashes = Array(4)
+            .fill()
+            .map(() => randomHex(32));
         const spender = account.address;
         const statuses = Array(noteHashes.length)
             .fill()
@@ -270,26 +269,16 @@ contract.only('BatchApproval', async (accounts) => {
 
     it('should recover publicKey from signature params', async () => {
         const { account, signature, encodedTypedData } = await getExampleNotesConstants();
-
         const r = Buffer.from(signature.slice(2, 66), 'hex');
         const s = Buffer.from(signature.slice(66, 130), 'hex');
         const v = parseInt(signature.slice(130, 132), 16);
-
         const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
         const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
         expect(publicKeyRecover).to.equal(account.publicKey.slice(4));
     });
 
     it('validate signature', async () => {
-        const { signature, account, encodedTypedData, hashStruct, noteHashes } = await getExampleNotesConstants();
-
-        const r = Buffer.from(signature.slice(2, 66), 'hex');
-        const s = Buffer.from(signature.slice(66, 130), 'hex');
-        const v = parseInt(signature.slice(130, 132), 16);
-
-        const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
-        const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
-        expect(publicKeyRecover).to.equal(account.publicKey.slice(4));
+        const { signature, account, hashStruct, noteHashes } = await getExampleNotesConstants();
         const result = await batchApprovalContract.validateBatchSignature(hashStruct, noteHashes, signature);
         expect(result).to.equal(account.address);
     });

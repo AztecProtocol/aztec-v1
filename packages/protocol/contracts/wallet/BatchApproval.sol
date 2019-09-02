@@ -17,12 +17,24 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     address public aceAddress;
 
+    // EIP712 Domain Name value
+    string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
+
+    // EIP712 Domain Version value
+    string constant internal EIP712_DOMAIN_VERSION = "1";
+
     /**
      * @notice Constructor for this contract, simply saves the address of ACE
      * @param _aceAddress Address of ACE contract for use by this contract
      */
     constructor(address _aceAddress) public Ownable() {
         aceAddress = _aceAddress;
+        EIP712_DOMAIN_HASH = keccak256(abi.encode(
+            EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
+            keccak256(bytes(EIP712_DOMAIN_NAME)),
+            keccak256(bytes(EIP712_DOMAIN_VERSION)),
+            address(this)
+        ));
     }
 
     /**
@@ -113,8 +125,9 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
         bytes32 _hashStruct,
         bytes32[] memory _noteHashes,
         bytes memory _signature
-    // ) public view returns(address signer) {
-    ) public view returns(address signer) {
+    ) public view returns(address) {
+    // ) public view returns (address signer, bytes32 msgHash, address sender) {
+    // ) public view returns (address signer, bytes32 msgHash, address sender) {
         // (,,,address noteOwner) = ACE(aceAddress).getNote(address(this), _noteHashes[0]);
         // address previousNoteOwner = noteOwner;
         // for (uint j = 1; j < _noteHashes.length; j++) {
@@ -126,12 +139,13 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
         if (_signature.length != 0) {
             // validate EIP712 signature
             bytes32 msgHash = hashEIP712Message(_hashStruct);
-            signer = recoverSignature(
+            address signer = recoverSignature(
                 msgHash,
                 _signature
             );
-        } else {
-            signer = msg.sender;
+            return signer;
+        // } else {
+        //     signer = msg.sender;
         }
         // require(signer == noteOwner, "the note owner did not sign this message");
     }
