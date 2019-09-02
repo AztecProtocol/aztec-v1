@@ -30,14 +30,14 @@ export default async function pickNotesFromBalance(args, ctx) {
         });
     }
 
-    const ownerAddress = owner || userAddress;
-
-    const noteKeys = await NoteService.pick({
+    const noteKeys = await NoteService.pick(
+        owner || userAddress,
         assetId,
-        ownerAddress,
-        minSum: amount,
-        numberOfNotes: numberOfNotes || await settings('NUMBER_OF_INPUT_NOTES'),
-    });
+        amount,
+        {
+            numberOfNotes: numberOfNotes || await settings('NUMBER_OF_INPUT_NOTES'),
+        },
+    );
 
     const notes = await asyncMap(
         noteKeys,

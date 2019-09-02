@@ -18,6 +18,7 @@ jest.mock('~utils/encryptedViewingKey', () => ({
         decrypt: jest.fn(),
     })),
 }));
+jest.mock('~background/services/NoteService');
 
 describe('createOrUpdate', () => {
     let set;
