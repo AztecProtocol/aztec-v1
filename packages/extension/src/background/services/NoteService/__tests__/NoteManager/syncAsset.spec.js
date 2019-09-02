@@ -1,7 +1,7 @@
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import syncAssetNoteData from '../../utils/syncAssetNoteData';
 import removeDestroyedNotes from '../../utils/removeDestroyedNotes';

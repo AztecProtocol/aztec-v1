@@ -1,46 +1,39 @@
-import {
-    registeredUserInfo,
-} from '~helpers/testData';
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import syncUserInfo from '../syncUserInfo';
-import storyOf from './helpers/stories';
+import storyOf, {
+    registeredUserInfo,
+} from './helpers/stories';
 
 jest.mock('~background/utils/decodeLinkedPublicKey');
 jest.mock('~utils/storage');
 
-afterEach(() => {
+const {
+    address: userAddress,
+    linkedPublicKey,
+} = registeredUserInfo;
+
+const graphNodeQuerySpy = jest.spyOn(GraphNodeService, 'query');
+
+const registerAddressSpy = jest.spyOn(AuthService, 'registerAddress');
+
+beforeEach(() => {
     storage.reset();
+    graphNodeQuerySpy.mockClear();
+    graphNodeQuerySpy.mockImplementation(() => ({
+        account: registeredUserInfo,
+    }));
+    registerAddressSpy.mockClear();
+    decodeLinkedPublicKey.mockImplementation(() => linkedPublicKey);
 });
 
 describe('syncUserInfo', () => {
-    const graphNodeQuerySpy = jest.spyOn(GraphNodeService, 'query');
-    const registerAddressSpy = jest.spyOn(AuthService, 'registerAddress');
-
-    beforeEach(() => {
-        decodeLinkedPublicKey.mockImplementation(() => registeredUserInfo.linkedPublicKey);
-
-        graphNodeQuerySpy.mockImplementation(() => ({
-            account: registeredUserInfo,
-        }));
-    });
-
-    afterEach(() => {
-        graphNodeQuerySpy.mockClear();
-        registerAddressSpy.mockClear();
-    });
-
-    afterAll(() => {
-        graphNodeQuerySpy.mockRestore();
-        registerAddressSpy.mockRestore();
-    });
-
     it('return existing user info in storage', async () => {
         const ensuredAccount = await storyOf('ensureAccount');
-        const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
         expect(graphNodeQuerySpy.mock.calls.length).toBe(0);
@@ -55,7 +48,7 @@ describe('syncUserInfo', () => {
 
     it('register the address if not found in storage', async () => {
         const ensuredKeyvault = await storyOf('ensureKeyvault');
-        const emptyUser = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        const emptyUser = await AuthService.getRegisteredUser(userAddress);
         expect(emptyUser).toBe(null);
 
         expect(graphNodeQuerySpy.mock.calls.length).toBe(0);
@@ -64,7 +57,7 @@ describe('syncUserInfo', () => {
         const response = await ensuredKeyvault.continueWith(syncUserInfo);
         expect(response).toEqual(registeredUserInfo);
 
-        const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
         expect(graphNodeQuerySpy.mock.calls.length).toBe(1);
@@ -104,7 +97,7 @@ describe('syncUserInfo', () => {
         expect(graphNodeQuerySpy.mock.calls.length).toBe(0);
         expect(registerAddressSpy.mock.calls.length).toBe(1);
 
-        const prevUser = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        const prevUser = await AuthService.getRegisteredUser(userAddress);
         expect(prevUser).toEqual(prevUserInfo);
 
         const response = await ensuredKeyvault.continueWith(syncUserInfo);
@@ -115,7 +108,7 @@ describe('syncUserInfo', () => {
         expect(graphNodeQuerySpy.mock.calls.length).toBe(1);
         expect(registerAddressSpy.mock.calls.length).toBe(2);
 
-        const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
     });
 
@@ -124,7 +117,7 @@ describe('syncUserInfo', () => {
 
         await AuthService.registerAddress(registeredUserInfo);
 
-        const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
         expect(graphNodeQuerySpy.mock.calls.length).toBe(0);
@@ -154,7 +147,7 @@ describe('syncUserInfo', () => {
 
         await AuthService.registerAddress(registeredUserInfo);
 
-        const user = await AuthService.getRegisteredUser(registeredUserInfo.address);
+        const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
         expect(graphNodeQuerySpy.mock.calls.length).toBe(0);

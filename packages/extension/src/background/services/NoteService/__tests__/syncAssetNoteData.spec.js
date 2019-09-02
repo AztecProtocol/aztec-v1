@@ -2,7 +2,7 @@ import notes from '~helpers/testNotes';
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import {
     toCode,
@@ -15,8 +15,6 @@ import noteModel from '~database/models/note';
 import assetModel from '~database/models/asset';
 import addressModel from '~database/models/address';
 import syncAssetNoteData from '../utils/syncAssetNoteData';
-
-jest.setTimeout(10 * 1000);
 
 jest.mock('~utils/storage');
 

@@ -1,9 +1,7 @@
 import {
-    requiredArgs,
+    userAccount,
     registrationData,
-    registeredUserInfo,
-    domainName,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
@@ -16,21 +14,27 @@ import {
 
 jest.mock('~utils/storage');
 
+const domainName = 'whatever.com';
+
+const requiredArgs = {
+    currentAddress: userAccount.address,
+    domain: 'whatever.com',
+};
+
+const registeredUserInfo = {
+    address: userAccount.address,
+    linkedPublicKey: userAccount.linkedPublicKey,
+    registeredAt: Date.now(),
+};
+
 let callback;
 const syncAccountSpy = jest.spyOn(SyncService, 'syncAccount')
     .mockImplementation(() => null);
 
 beforeEach(() => {
+    storage.reset();
     syncAccountSpy.mockClear();
     callback = jest.fn();
-});
-
-afterEach(() => {
-    storage.reset();
-});
-
-afterAll(() => {
-    syncAccountSpy.mockRestore();
 });
 
 const useDecorator = async (

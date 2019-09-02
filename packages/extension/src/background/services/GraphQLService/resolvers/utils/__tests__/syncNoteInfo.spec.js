@@ -1,7 +1,7 @@
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import {
     createNote,
 } from '~utils/note';

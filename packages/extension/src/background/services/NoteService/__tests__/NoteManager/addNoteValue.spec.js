@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import NoteManager from '../../helpers/NoteManager';

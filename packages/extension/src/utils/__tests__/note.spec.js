@@ -1,7 +1,7 @@
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import {
     METADATA_AZTEC_DATA_LENGTH,
     AZTEC_JS_METADATA_PREFIX_LENGTH,

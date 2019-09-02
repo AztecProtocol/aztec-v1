@@ -2,7 +2,7 @@ import expectErrorResponse from '~helpers/expectErrorResponse';
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import * as pickNotes from '../../utils/pickNotes';
 import NoteManager from '../../helpers/NoteManager';
