@@ -8,6 +8,7 @@ import set from './set';
 import update from './update';
 import each from './each';
 import last from './last';
+import keyOf from './keyOf';
 
 const configType = {
     name: {
@@ -140,5 +141,6 @@ export default function Model(config) {
             ...settings,
             get: modelGet,
         }),
+        keyOf: keyOf.bind(settings),
     };
 }
