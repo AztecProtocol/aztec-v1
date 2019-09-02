@@ -51,15 +51,8 @@ contract.only('BatchApproval', async (accounts) => {
 
     const sum = (arrayToSum) => arrayToSum.reduce((a, b) => a + b, 0);
 
-    const createNotesArray = async (publicKey, values, contractAddress) => {
-        const notes = values.map((i) => aztec.note.create(publicKey, i, contractAddress));
-        // eslint-disable-next-line no-return-await
-        return await Promise.all(notes);
-    };
-
     const mintNotes = async (values, ownerPublicKey, fromAddress) => {
-        const notes = await createNotesArray(ownerPublicKey, values, fromAddress);
-
+        const notes = await Promise.all(values.map((i) => aztec.note.create(ownerPublicKey, i, fromAddress)));
         const newMintCounterNote = await aztec.note.create(ownerPublicKey, sum(values));
         const zeroMintCounterNote = await aztec.note.createZeroValueNote();
         const sender = accounts[0];
@@ -70,26 +63,6 @@ contract.only('BatchApproval', async (accounts) => {
         await zkAssetMintableContract.confidentialMint(MINT_PROOF, mintData, { from: sender });
         const noteHashes = notes.map((note) => note.noteHash);
         return { notes, values, noteHashes };
-    };
-
-    const approveAndSpendNotes = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes, buyerNoteHashes) => {
-        const invoice = await aztec.note.create(sellerPublicKey, amount);
-        const change = await aztec.note.create(buyerPublicKey, buyerFunds - amount, batchApprovalContract.address);
-        const sendProof = new JoinSplitProof(
-            buyerNotes,
-            [invoice, change],
-            batchApprovalContract.address,
-            0,
-            batchApprovalContract.address,
-        );
-        const sendProofData = sendProof.encodeABI(zkAssetMintableContract.address);
-        const result = await batchApprovalContract.spendNotes(
-            buyerNoteHashes,
-            sendProofData,
-            zkAssetMintableContract.address,
-            batchApprovalContract.address,
-        );
-        return result;
     };
 
     const spendNotesWithFunctions = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes) => {
@@ -120,6 +93,26 @@ contract.only('BatchApproval', async (accounts) => {
                 throw err;
             }
         }
+    };
+
+    const approveAndSpendNotes = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes, buyerNoteHashes) => {
+        const invoice = await aztec.note.create(sellerPublicKey, amount);
+        const change = await aztec.note.create(buyerPublicKey, buyerFunds - amount, batchApprovalContract.address);
+        const sendProof = new JoinSplitProof(
+            buyerNotes,
+            [invoice, change],
+            batchApprovalContract.address,
+            0,
+            batchApprovalContract.address,
+        );
+        const sendProofData = sendProof.encodeABI(zkAssetMintableContract.address);
+        const result = await batchApprovalContract.spendNotes(
+            buyerNoteHashes,
+            sendProofData,
+            zkAssetMintableContract.address,
+            batchApprovalContract.address,
+        );
+        return result;
     };
 
     it('owner of the contract should be able to mint notes that are owned by the contract', async () => {
@@ -234,39 +227,32 @@ contract.only('BatchApproval', async (accounts) => {
     // it('another person should be able to spend notes owned by the contract after approval to spend', async () => {
     // });
 
-    const getExampleNotesConstants = async () => {
+    it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
         const account = alice;
         const verifyingContract = batchApprovalContract.address;
         const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
         const spender = account.address;
-        const statuses = Array(noteHashes.length)
-            .fill()
-            .map(() => true);
-        const message = {
+        const { signature } = aztec.signer.compoundSignNotesForBatchApproval(
+            verifyingContract,
             noteHashes,
             spender,
-            statuses,
-        };
+            account.privateKey,
+        );
+        const v = parseInt(signature.slice(130, 132), 16);
+        expect(v).to.be.oneOf([27, 28]);
+    });
+
+    it('should recover publicKey from signature params', async () => {
+        const account = alice;
+        const verifyingContract = batchApprovalContract.address;
+        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
+        const spender = account.address;
         const { encodedTypedData, signature } = aztec.signer.compoundSignNotesForBatchApproval(
             verifyingContract,
             noteHashes,
             spender,
             account.privateKey,
         );
-        const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
-        const hashStruct = keccak256(`0x${typedData.encodeMessageData(schema.types, schema.primaryType, message)}`);
-
-        return { statuses, account, encodedTypedData, signature, noteHashes, hashStruct };
-    };
-
-    it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
-        const { signature } = await getExampleNotesConstants();
-        const v = parseInt(signature.slice(130, 132), 16);
-        expect(v).to.be.oneOf([27, 28]);
-    });
-
-    it('should recover publicKey from signature params', async () => {
-        const { account, signature, encodedTypedData } = await getExampleNotesConstants();
         const r = Buffer.from(signature.slice(2, 66), 'hex');
         const s = Buffer.from(signature.slice(66, 130), 'hex');
         const v = parseInt(signature.slice(130, 132), 16);
@@ -276,7 +262,19 @@ contract.only('BatchApproval', async (accounts) => {
     });
 
     it('validate signature', async () => {
-        const { signature, account, hashStruct, noteHashes } = await getExampleNotesConstants();
-        const result = await batchApprovalContract.validateBatchSignature(hashStruct, noteHashes, signature, zkAssetMintableContract.address);
+        const account = alice;
+        const verifyingContract = batchApprovalContract.address;
+        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
+        const spender = account.address;
+        const statuses = Array(noteHashes.length)
+            .fill()
+            .map(() => true);
+        const { signature } = aztec.signer.compoundSignNotesForBatchApproval(
+            verifyingContract,
+            noteHashes,
+            spender,
+            account.privateKey,
+        );
+        await batchApprovalContract.validateBatchSignature(noteHashes, spender, statuses, signature, zkAssetMintableContract.address);
     });
 });

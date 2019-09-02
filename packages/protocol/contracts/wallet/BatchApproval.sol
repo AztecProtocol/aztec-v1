@@ -23,6 +23,14 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
     // EIP712 Domain Version value
     string constant internal EIP712_DOMAIN_VERSION = "1";
 
+    bytes32 constant internal MULTIPLE_NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
+        "MultipleNoteSignature(",
+            "bytes32[] noteHashes,",
+            "address spender,",
+            "bool[] statuses",
+        ")"
+    ));
+
     /**
      * @notice Constructor for this contract, simply saves the address of ACE
      * @param _aceAddress Address of ACE contract for use by this contract
@@ -114,20 +122,27 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
         proofValidation(_proof, _zkAsset, _spenderSender);
     }
 
-    /**
-    * @dev Perform ECDSA signature validation for a signature over an array of input notes
-    * @param _hashStruct - the data to sign in an EIP712 signature
-    * @param _noteHashes - array of keccak256 hashes of the note array coordinates (gamma and sigma)
-    * @param _signature - ECDSA signature for a particular array of input notes
-    */
+    // /**
+    // * @dev Perform ECDSA signature validation for a signature over an array of input notes
+    // * @param _hashStruct - the data to sign in an EIP712 signature
+    // * @param _noteHashes - array of keccak256 hashes of the note array coordinates (gamma and sigma)
+    // * @param _signature - ECDSA signature for a particular array of input notes
+    // */
     function validateBatchSignature(
-        bytes32 _hashStruct,
         bytes32[] memory _noteHashes,
+        address _spender,
+        bool[] memory _statuses,
         bytes memory _signature,
         address _zkAsset
     ) public view notesOwned(_noteHashes, _zkAsset) {
         address signer;
         if (_signature.length != 0) {
+            bytes32 _hashStruct = keccak256(abi.encode(
+                MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
+                keccak256(abi.encode(_noteHashes)),
+                _spender,
+                keccak256(abi.encode(_statuses))
+            ));
             // validate EIP712 signature
             bytes32 msgHash = hashEIP712Message(_hashStruct);
             signer = recoverSignature(
