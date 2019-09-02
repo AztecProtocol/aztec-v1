@@ -27,7 +27,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
         "MultipleNoteSignature(",
             "bytes32[] noteHashes,",
             "address spender,",
-            "bool[] statuses",
+            "bool status",
         ")"
     ));
 
@@ -129,14 +129,15 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
     *                 being approved to spend these notes. Can be
     *                 any person or contract e.g. Bob, a different
     *                 third-party, a contract, this contract itself.
-    * @param _statuses Array of booleans of whether the notes should be able to be spent (likely all true)
+    * @param _status Boolean of whether the notes are being approved
+                     to spend or if approval is being revoked
     * @param _signature ECDSA signature for a particular array of input notes
     * @param _zkAsset The address of the zkAsset
     */
     function batchValidateSignature(
         bytes32[] memory _noteHashes,
         address _spender,
-        bool[] memory _statuses,
+        bool _status,
         bytes memory _signature,
         address _zkAsset
     ) public view notesOwned(_noteHashes, _zkAsset) {
@@ -146,7 +147,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
                 MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
                 keccak256(abi.encode(_noteHashes)),
                 _spender,
-                keccak256(abi.encode(_statuses))
+                _status
             ));
             // validate EIP712 signature
             bytes32 msgHash = hashEIP712Message(_hashStruct);

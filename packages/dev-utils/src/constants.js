@@ -104,8 +104,8 @@ const JOIN_SPLIT_SIGNATURE_TYPE_HASH = '0xf671f176821d4c6f81e66f9704cdf2c5c12d34
 // keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool status)"
 const NOTE_SIGNATURE_TYPE_HASH = '0x9fe730639297761b7154c4543e5b6d06ca424c8b46480a40d3181296d5c35815';
 
-// keccak256 hash of "MultipleNoteSignature(bytes32[] noteHashes,address spender,bool[] statuses)"
-const MULTIPLE_NOTE_SIGNATURE_TYPE_HASH = '0xac6c4c7554af6f8181ca36827422f45e7802a4cac44686fe59e84f9ede267d61';
+// keccak256 hash of "MultipleNoteSignature(bytes32[] noteHashes,address spender,bool status)"
+const MULTIPLE_NOTE_SIGNATURE_TYPE_HASH = '0xe260e9eb9862dff560c3cd719c78af863bff7ceabf065011bf9e0eb0a671675a';
 
 constants.eip712 = {
     ACE_DOMAIN_PARAMS: {
@@ -154,7 +154,7 @@ constants.eip712 = {
             MultipleNoteSignature: [
                 { name: 'noteHashes', type: 'bytes32[]' },
                 { name: 'spender', type: 'address' },
-                { name: 'statuses', type: 'bool[]' },
+                { name: 'status', type: 'bool' },
             ],
             EIP712Domain: EIP712_DOMAIN,
         },

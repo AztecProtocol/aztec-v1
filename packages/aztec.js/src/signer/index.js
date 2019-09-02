@@ -137,13 +137,11 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
 signer.signMultipleNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
-    const statuses = Array(noteHashes.length)
-        .fill()
-        .map(() => true);
+    const status =  true;
     const message = {
         noteHashes,
         spender,
-        statuses,
+        status,
     };
 
     const { encodedTypedData, unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);

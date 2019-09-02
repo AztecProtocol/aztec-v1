@@ -263,15 +263,13 @@ contract.only('Wallet', async (accounts) => {
         const verifyingContract = batchApprovalContract.address;
         const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
         const spender = account.address;
-        const statuses = Array(noteHashes.length)
-            .fill()
-            .map(() => true);
+        const status =  true;
         const { signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
             verifyingContract,
             noteHashes,
             spender,
             account.privateKey,
         );
-        await batchApprovalContract.batchValidateSignature(noteHashes, spender, statuses, signature, zkAssetMintableContract.address);
+        await batchApprovalContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address);
     });
 });
