@@ -5,4 +5,6 @@ export default {
     address: 'd:{count}',
     asset: 'a:{count}',
     assetValue: '{assetKey}v:{value}',
+    userAssets: 'ua:{user}',
+    userAssetNotes: '{user}:{asset}',
 };

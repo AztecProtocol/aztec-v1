@@ -66,19 +66,19 @@ export default async function createOrUpdateNote(note, privateKey) {
         } = validatedNote;
 
         if (isDestroyed(status)) {
-            NoteService.removeNoteValue({
-                assetId,
+            NoteService.removeNoteValue(
                 ownerAddress,
-                noteKey,
+                assetId,
                 value,
-            });
+                noteKey,
+            );
         } else {
-            NoteService.addNoteValue({
-                assetId,
+            NoteService.addNoteValue(
                 ownerAddress,
-                noteKey,
+                assetId,
                 value,
-            });
+                noteKey,
+            );
         }
     }
 

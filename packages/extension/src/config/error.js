@@ -54,7 +54,14 @@ export default {
         },
         pick: {
             sum: 'Asset balance is not enough to generate a note with value %{value}.',
-            count: 'Cannot generate a new note with %{count} notes that sum to %{value}.',
+            minSum: {
+                _: 'Cannot pick %{count} notes whose sum is equal to or larger than %{value}.',
+                1: 'Cannot pick a note whose value is equal to or larger than %{value}.',
+            },
+            count: {
+                _: 'Total number of notes is not enough to pick %{count} notes.',
+                1: 'Total number of notes is not enough to pick a note.',
+            },
         },
     },
     utilityNote: {
