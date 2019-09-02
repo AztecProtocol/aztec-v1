@@ -1,8 +1,8 @@
 /* global artifacts */
-const BatchApproval = artifacts.require('./BatchApproval.sol');
+const Wallet = artifacts.require('./Wallet.sol');
 const ACE = artifacts.require('./ACE.sol');
 
 module.exports = async (deployer) => {
     const aceContract = await ACE.deployed();
-    await deployer.deploy(BatchApproval, aceContract.address);
+    await deployer.deploy(Wallet, aceContract.address);
 };

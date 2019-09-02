@@ -13,7 +13,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  *        user by only needing to approve one transaction.
  * @author AZTEC
  */
-contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
+contract Wallet is Ownable, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     address public aceAddress;
 
@@ -74,7 +74,7 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
      *                 any person or contract e.g. Bob, a different
      *                 third-party, a contract, this contract itself.
      */
-    function batchApprove(
+    function batchConfidentialApprove(
         bytes32[] memory _noteHashes,
         address _zkAsset,
         address _spender
@@ -92,7 +92,7 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
      * @param _zkAsset The address of the zkAsset
      * @param _sender The address sending the proof
      */
-    function proofValidation(
+    function batchConfidentialTransfer(
         bytes memory _proof,
         address _zkAsset,
         address _sender
@@ -118,8 +118,8 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
         address _zkAsset,
         address _spenderSender
     ) public onlyOwner {
-        batchApprove(_noteHashes, _zkAsset, _spenderSender);
-        proofValidation(_proof, _zkAsset, _spenderSender);
+        batchConfidentialApprove(_noteHashes, _zkAsset, _spenderSender);
+        batchConfidentialTransfer(_proof, _zkAsset, _spenderSender);
     }
 
     /**
@@ -133,7 +133,7 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
     * @param _signature ECDSA signature for a particular array of input notes
     * @param _zkAsset The address of the zkAsset
     */
-    function validateBatchSignature(
+    function batchValidateSignature(
         bytes32[] memory _noteHashes,
         address _spender,
         bool[] memory _statuses,
