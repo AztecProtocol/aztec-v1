@@ -229,7 +229,7 @@ contract.only('Wallet', async (accounts) => {
         const verifyingContract = batchApprovalContract.address;
         const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
         const spender = account.address;
-        const { signature } = aztec.signer.compoundSignNotesForWallet(
+        const { signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
             verifyingContract,
             noteHashes,
             spender,
@@ -244,7 +244,7 @@ contract.only('Wallet', async (accounts) => {
         const verifyingContract = batchApprovalContract.address;
         const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
         const spender = account.address;
-        const { encodedTypedData, signature } = aztec.signer.compoundSignNotesForWallet(
+        const { encodedTypedData, signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
             verifyingContract,
             noteHashes,
             spender,
@@ -266,7 +266,7 @@ contract.only('Wallet', async (accounts) => {
         const statuses = Array(noteHashes.length)
             .fill()
             .map(() => true);
-        const { signature } = aztec.signer.compoundSignNotesForWallet(
+        const { signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
             verifyingContract,
             noteHashes,
             spender,

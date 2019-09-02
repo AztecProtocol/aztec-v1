@@ -128,13 +128,13 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
 };
 
 /**
- * @method compoundSignNotesForWallet
+ * @method signMultipleNotesForBatchConfidentialApprove
  *  @param {string} verifyingContract address of target contract
  * @param {list of strings} noteHashes hashes of the notes being signed
  * @param {string} spender address of the note spender
  * @param {string} privateKey the private key of message signer
  */
-signer.compoundSignNotesForWallet = (verifyingContract, noteHashes, spender, privateKey) => {
+signer.signMultipleNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
     const statuses = Array(noteHashes.length)
