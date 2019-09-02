@@ -122,12 +122,17 @@ contract BatchApproval is Ownable, IAZTEC, LibEIP712 {
         proofValidation(_proof, _zkAsset, _spenderSender);
     }
 
-    // /**
-    // * @dev Perform ECDSA signature validation for a signature over an array of input notes
-    // * @param _hashStruct - the data to sign in an EIP712 signature
-    // * @param _noteHashes - array of keccak256 hashes of the note array coordinates (gamma and sigma)
-    // * @param _signature - ECDSA signature for a particular array of input notes
-    // */
+    /**
+    * @dev Perform ECDSA signature validation for a signature over an array of input notes
+    * @param _noteHashes Array of keccak256 hashes of the note array coordinates (gamma and sigma)
+    * @param _spender The address of the person or contract that is
+    *                 being approved to spend these notes. Can be
+    *                 any person or contract e.g. Bob, a different
+    *                 third-party, a contract, this contract itself.
+    * @param _statuses Array of booleans of whether the notes should be able to be spent (likely all true)
+    * @param _signature ECDSA signature for a particular array of input notes
+    * @param _zkAsset The address of the zkAsset
+    */
     function validateBatchSignature(
         bytes32[] memory _noteHashes,
         address _spender,
