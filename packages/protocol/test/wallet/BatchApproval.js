@@ -237,9 +237,7 @@ contract.only('BatchApproval', async (accounts) => {
     const getExampleNotesConstants = async () => {
         const account = alice;
         const verifyingContract = batchApprovalContract.address;
-        const noteHashes = Array(4)
-            .fill()
-            .map(() => randomHex(32));
+        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
         const spender = account.address;
         const statuses = Array(noteHashes.length)
             .fill()
@@ -279,7 +277,6 @@ contract.only('BatchApproval', async (accounts) => {
 
     it('validate signature', async () => {
         const { signature, account, hashStruct, noteHashes } = await getExampleNotesConstants();
-        const result = await batchApprovalContract.validateBatchSignature(hashStruct, noteHashes, signature);
-        expect(result).to.equal(account.address);
+        const result = await batchApprovalContract.validateBatchSignature(hashStruct, noteHashes, signature, zkAssetMintableContract.address);
     });
 });
