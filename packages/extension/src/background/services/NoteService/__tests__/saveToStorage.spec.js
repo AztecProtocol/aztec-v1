@@ -7,7 +7,7 @@ import saveToStorage from '../utils/saveToStorage';
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 

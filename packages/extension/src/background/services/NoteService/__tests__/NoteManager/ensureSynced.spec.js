@@ -27,7 +27,7 @@ describe('NoteManager.ensureSynced', () => {
             'testApi',
             {},
         ]);
-        expect(mockTestApi).toHaveBeenCalledTimes(0);
+        expect(mockTestApi).not.toHaveBeenCalled();
     });
 
     it('will add to queue if the asset is syncing', () => {
@@ -47,7 +47,7 @@ describe('NoteManager.ensureSynced', () => {
                 assetId: 'assetId_0',
             },
         ]);
-        expect(mockTestApi).toHaveBeenCalledTimes(0);
+        expect(mockTestApi).not.toHaveBeenCalled();
     });
 
     it('will trigger api if neither the assetNoteDataMapping or asset is syncing', () => {
@@ -60,7 +60,7 @@ describe('NoteManager.ensureSynced', () => {
         manager.ensureSynced('testApi', {
             assetId: 'assetId_0',
         });
-        expect(waitInQueueSpy).toHaveBeenCalledTimes(0);
+        expect(waitInQueueSpy).not.toHaveBeenCalled();
         expect(mockTestApi).toHaveBeenCalledTimes(1);
         expect(mockTestApi.mock.calls[0]).toEqual([
             {

@@ -156,8 +156,8 @@ describe('mergeWithLatestAsset', () => {
         expect(nodeModelLastSpy.mock.calls[0][0]).toEqual({
             owner: ownerKey,
         });
-        expect(assetModelGetSpy).toHaveBeenCalledTimes(0);
-        expect(syncAssetNoteData).toHaveBeenCalledTimes(0);
+        expect(assetModelGetSpy).not.toHaveBeenCalled();
+        expect(syncAssetNoteData).not.toHaveBeenCalled();
     });
 
     it('return previous assetNoteDataMapping if the asset of the last note is already in it', async () => {
@@ -191,6 +191,6 @@ describe('mergeWithLatestAsset', () => {
         expect(assetModelGetSpy.mock.calls[0][0]).toEqual({
             key: 'assetKey0',
         });
-        expect(syncAssetNoteData).toHaveBeenCalledTimes(0);
+        expect(syncAssetNoteData).not.toHaveBeenCalled();
     });
 });

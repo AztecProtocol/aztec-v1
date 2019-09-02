@@ -6,7 +6,7 @@ import storyOf from './helpers/stories';
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 
@@ -29,7 +29,7 @@ describe('getAccounts', () => {
             accounts,
         }));
 
-    afterEach(() => {
+    beforeEach(() => {
         querySpy.mockClear();
     });
 

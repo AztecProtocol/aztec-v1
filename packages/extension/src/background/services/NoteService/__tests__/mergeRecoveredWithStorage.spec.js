@@ -93,7 +93,7 @@ describe('mergeRecoveredWithStorage', () => {
                 lastSynced: 'n:5',
             },
         });
-        expect(mockSyncAssetNoteData.mock.calls.length).toBe(2);
+        expect(mockSyncAssetNoteData).toHaveBeenCalledTimes(2);
     });
 
     it('will not add the same note value to balance more than once', async () => {
@@ -144,6 +144,6 @@ describe('mergeRecoveredWithStorage', () => {
         );
 
         expect(merged).toEqual({});
-        expect(mockSyncAssetNoteData.mock.calls.length).toBe(0);
+        expect(mockSyncAssetNoteData).not.toHaveBeenCalled();
     });
 });

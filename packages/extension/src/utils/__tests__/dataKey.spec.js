@@ -2,21 +2,13 @@ import dataKey, {
     getPrefix,
 } from '../dataKey';
 
-let consoleSpy;
 let warnings = [];
+const consoleSpy = jest.spyOn(console, 'warn')
+    .mockImplementation(message => warnings.push(message));
 
-beforeAll(() => {
-    consoleSpy = jest.spyOn(console, 'warn')
-        .mockImplementation(message => warnings.push(message));
-});
-
-afterEach(() => {
+beforeEach(() => {
     consoleSpy.mockClear();
     warnings = [];
-});
-
-afterAll(() => {
-    consoleSpy.mockRestore();
 });
 
 describe('dataKey', () => {

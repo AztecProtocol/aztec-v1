@@ -18,7 +18,7 @@ import {
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 
@@ -50,25 +50,27 @@ describe('validateExtension', () => {
 });
 
 describe('validateSession', () => {
-    let now;
     const constantDate = new Date();
+    const nowSpy = jest.spyOn(Date, 'now');
 
     const unitFactorMapping = {
         ms: 1,
         day: 86400000,
     };
+
     const advanceTime = (time, unit = 'ms') => {
         const advancedTime = Date.now() + time * unitFactorMapping[unit];
-        now = jest.spyOn(Date, 'now').mockImplementation(() => advancedTime);
+        nowSpy.mockImplementation(() => advancedTime);
         return advancedTime;
     };
 
     beforeEach(() => {
-        now = jest.spyOn(Date, 'now').mockImplementation(() => constantDate.getTime());
+        nowSpy.mockClear();
+        nowSpy.mockImplementation(() => constantDate.getTime());
     });
 
-    afterEach(() => {
-        now.mockRestore();
+    afterAll(() => {
+        nowSpy.mockRestore();
     });
 
     it('pass and receive session if session is valid', async () => {
@@ -147,8 +149,9 @@ describe('validateAccount', () => {
     let linkedPublicKey;
     let registeredUserInfo;
     let accumContext;
-    let updateSessionSpy;
-    let syncAccountSpy;
+    const updateSessionSpy = jest.spyOn(AuthService, 'updateSession');
+    const syncAccountSpy = jest.spyOn(SyncService, 'syncAccount')
+        .mockImplementation(() => null);
 
     const useAccountValidator = async () => useValidator(
         validateAccount,
@@ -156,7 +159,10 @@ describe('validateAccount', () => {
         accumContext,
     );
 
-    beforeAll(async () => {
+    beforeEach(async () => {
+        updateSessionSpy.mockClear();
+        syncAccountSpy.mockClear();
+
         await AuthService.registerExtension(registrationData);
 
         const keyStore = await AuthService.getKeyStore();
@@ -179,16 +185,6 @@ describe('validateAccount', () => {
             keyStore,
             session,
         };
-
-        updateSessionSpy = jest.spyOn(AuthService, 'updateSession');
-
-        syncAccountSpy = jest.spyOn(SyncService, 'syncAccount')
-            .mockImplementation(() => null);
-    });
-
-    beforeEach(() => {
-        updateSessionSpy.mockClear();
-        syncAccountSpy.mockClear();
     });
 
     afterAll(() => {
@@ -218,7 +214,7 @@ describe('validateAccount', () => {
         await AuthService.registerAddress(registeredUserInfo);
         await useAccountValidator();
 
-        expect(syncAccountSpy.mock.calls.length).toBe(1);
+        expect(syncAccountSpy).toHaveBeenCalledTimes(1);
 
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
         expect(syncAccountSpy.mock.calls[0]).toEqual([

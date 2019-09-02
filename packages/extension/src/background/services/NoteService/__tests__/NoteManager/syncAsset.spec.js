@@ -244,7 +244,7 @@ describe('NoteManager.syncAsset', () => {
                 lastSynced: 'n:8',
             },
         });
-        expect(mockRemoveDestroyedNotes).toHaveBeenCalledTimes(0);
+        expect(mockRemoveDestroyedNotes).not.toHaveBeenCalled();
         expect(flushQueueSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -314,8 +314,8 @@ describe('NoteManager.syncAsset', () => {
                 lastSynced: 'n:5',
             },
         });
-        expect(mockSyncAssetNoteData).toHaveBeenCalledTimes(0);
-        expect(flushQueueSpy).toHaveBeenCalledTimes(0);
+        expect(mockSyncAssetNoteData).not.toHaveBeenCalled();
+        expect(flushQueueSpy).not.toHaveBeenCalled();
 
         expect(warnSpy).toHaveBeenCalledTimes(1);
 

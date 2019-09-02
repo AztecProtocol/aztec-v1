@@ -51,7 +51,7 @@ describe('NoteManager.flushQueue', () => {
         expect(manager.queue.length).toBe(2);
 
         expect(results).toEqual([]);
-        expect(mockTestApi).toHaveBeenCalledTimes(0);
+        expect(mockTestApi).not.toHaveBeenCalled();
 
         await manager.flushQueue();
 
@@ -87,7 +87,7 @@ describe('NoteManager.flushQueue', () => {
         await manager.flushQueue();
 
         expect(results).toEqual([]);
-        expect(mockTestApi).toHaveBeenCalledTimes(0);
+        expect(mockTestApi).not.toHaveBeenCalled();
     });
 
     it('skip callbacks in queue whose asset is still syncing', async () => {
@@ -117,7 +117,7 @@ describe('NoteManager.flushQueue', () => {
         };
 
         expect(results).toEqual([]);
-        expect(mockTestApi).toHaveBeenCalledTimes(0);
+        expect(mockTestApi).not.toHaveBeenCalled();
 
         await manager.flushQueue();
 
