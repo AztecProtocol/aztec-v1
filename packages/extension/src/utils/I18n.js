@@ -51,8 +51,13 @@ export default class I18n {
 
     t(key, options = {}) {
         let phraseKey;
-        if (typeof options === 'number' && this.polyglot.has(`${key}.${options}`)) {
-            phraseKey = `${key}.${options}`;
+        const count = typeof options !== 'object'
+            ? options
+            : options.count;
+        if (typeof count === 'number'
+            && this.polyglot.has(`${key}.${count}`)
+        ) {
+            phraseKey = `${key}.${count}`;
         }
         if (!phraseKey) {
             phraseKey = this.polyglot.has(`${key}._`) ? `${key}._` : key;
