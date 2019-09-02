@@ -3,13 +3,9 @@ import {
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../../Web3Service'
-import { 
-    addNote,
-    addDestroyNote,
-    updateNote,
-} from '../utils/addNote';
 import fetchNotes from '../utils/fetchNotes';
-import asyncForEach from '~utils/asyncForEach';
+import saveNotes from '../utils/saveNotes';
+import associatedNotesWithOwner from '../utils/associatedNotesWithOwner';
 
 class SyncManager {
     constructor() {
@@ -127,34 +123,16 @@ class SyncManager {
             const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
             const loadNextPortion = currentBlock - fromBlock > precisionDelta;
 
-            const { createNotes, destroyNotes, updateNotes } = await fetchNotes({
-                address,
+            let notes = await fetchNotes({
                 fromBlock,
                 toBlock,
                 onError: this.handleFetchError,
             });
-    
-            console.log('--------start---------')
-            console.log(`address: ${address}`)
-            console.log(`fromBlock: ${fromBlock}, toBlock: ${toBlock}`)
-            console.log(JSON.stringify(createNotes), JSON.stringify(destroyNotes), JSON.stringify(updateNotes));
-            console.log('--------end---------')
-    
-    
-            // save it in serial
-            await asyncForEach(createNotes, async (note) => {
-                await addNote(note);
-            });
-    
-            await asyncForEach(updateNotes, async (note) => {
-                await updateNote(note);
-            });
-    
-            await asyncForEach(destroyNotes, async (note) => {
-                await addDestroyNote(note);
-            });
-            // end
 
+            notes = associatedNotesWithOwner(notes, address);
+    
+            await saveNotes(notes);
+            
             newLastSyncedBlock = toBlock;
     
             if (loadNextPortion) {
@@ -166,21 +144,19 @@ class SyncManager {
             }
         }
 
-        if (process.env.NODE_ENV !== 'test') {
-            const syncReq = setTimeout(() => {
-                this.syncNotes({
-                    ...options,
-                    lastSyncedBlock: newLastSyncedBlock,
-                });
-            }, syncInterval);
-    
-            this.addresses.set(address, {
-                ...syncAddress,
-                syncing: false,
-                syncReq,
+        const syncReq = setTimeout(() => {
+            this.syncNotes({
+                ...options,
                 lastSyncedBlock: newLastSyncedBlock,
             });
-        }
+        }, syncInterval);
+
+        this.addresses.set(address, {
+            ...syncAddress,
+            syncing: false,
+            syncReq,
+            lastSyncedBlock: newLastSyncedBlock,
+        });
     }
 
     async sync({
