@@ -7,6 +7,7 @@ import get from './get';
 import set from './set';
 import update from './update';
 import each from './each';
+import last from './last';
 
 const configType = {
     name: {
@@ -132,6 +133,10 @@ export default function Model(config) {
         toStorageData: data => transformDataForDb(fields, data),
         toData: rawData => transformToDbData(fields, rawData),
         each: each.bind({
+            ...settings,
+            get: modelGet,
+        }),
+        last: last.bind({
             ...settings,
             get: modelGet,
         }),

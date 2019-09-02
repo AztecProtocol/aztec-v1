@@ -977,3 +977,377 @@ describe('Model.each', () => {
         expect(errors).toEqual([]);
     });
 });
+
+describe('Model.last', () => {
+    it('find the last entry in nested model data', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: {
+                key: 'name',
+                fields: [
+                    'color',
+                ],
+            },
+        });
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        const lastPokemon = await pokemonModel.last();
+
+        expect(lastPokemon).toEqual({
+            id: 'chikorita',
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('find the last entry in model data with dataKey mapping', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: [
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            id: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            id: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            id: 'chikorita',
+            color: 'green',
+        });
+
+        const lastPokemon = await pokemonModel.last();
+
+        expect(lastPokemon).toEqual({
+            key: 'p:2',
+            color: 'green',
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('find the last entry in model data with dataKey mapping and index', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            index: 'name',
+            fields: [
+                'name',
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            name: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        const lastPokemon = await pokemonModel.last();
+
+        expect(lastPokemon).toEqual({
+            key: 'p:2',
+            id: 'chikorita',
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('find the last entry in nested model data with max id', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: {
+                key: 'id',
+                fields: [
+                    'name',
+                ],
+            },
+        });
+        await pokemonModel.set({
+            id: 'poke0',
+            name: 'pikachu',
+        });
+        await pokemonModel.set({
+            id: 'poke1',
+            name: 'eevee',
+        });
+        await pokemonModel.set({
+            id: 'poke2',
+            name: 'chikorita',
+        });
+
+        const lastPokemon = await pokemonModel.last({
+            idLt: 'poke2',
+        });
+
+        expect(lastPokemon).toEqual({
+            id: 'poke1',
+            name: 'eevee',
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('find the last entry in nested model data with required conditions', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: {
+                key: 'id',
+                fields: [
+                    'name',
+                    'color',
+                    'height',
+                ],
+            },
+        });
+        await pokemonModel.set({
+            id: 'poke0',
+            name: 'pikachu',
+            color: 'yellow',
+            height: 60,
+        });
+        await pokemonModel.set({
+            id: 'poke1',
+            name: 'eevee',
+            color: 'brown',
+            height: 55,
+        });
+        await pokemonModel.set({
+            id: 'poke2',
+            name: 'pikachu',
+            color: 'yellow',
+            height: 80,
+        });
+        await pokemonModel.set({
+            id: 'poke3',
+            name: 'chikorita',
+            color: 'green',
+            height: 60,
+        });
+
+        const lastPokemon = await pokemonModel.last({
+            color: 'yellow',
+            height: 60,
+        });
+
+        expect(lastPokemon).toEqual({
+            id: 'poke0',
+            name: 'pikachu',
+            color: 'yellow',
+            height: 60,
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('return null if no entries in nested model data have the required conditions', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: {
+                key: 'id',
+                fields: [
+                    'name',
+                    'color',
+                ],
+            },
+        });
+        await pokemonModel.set({
+            id: 'poke0',
+            name: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            id: 'poke1',
+            name: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            id: 'poke3',
+            name: 'chikorita',
+            color: 'green',
+        });
+
+        const lastPokemon = await pokemonModel.last({
+            color: 'red',
+        });
+
+        expect(lastPokemon).toBe(null);
+
+        expect(errors).toEqual([]);
+    });
+
+    it('find the last entry in model data with dataKey mapping and max id', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: [
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            id: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            id: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            id: 'chikorita',
+            color: 'green',
+        });
+
+        const lastPokemon = await pokemonModel.last({
+            idLt: 'eevee',
+        });
+
+        expect(lastPokemon).toEqual({
+            key: 'p:0',
+            color: 'yellow',
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('find the last entry in model data with dataKey mapping and max key', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: [
+                'color',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            id: 'pikachu',
+            color: 'yellow',
+        });
+        await pokemonModel.set({
+            id: 'eevee',
+            color: 'brown',
+        });
+        await pokemonModel.set({
+            id: 'chikorita',
+            color: 'green',
+        });
+
+        const lastPokemon = await pokemonModel.last({
+            keyLt: 'p:1',
+        });
+
+        expect(lastPokemon).toEqual({
+            key: 'p:0',
+            color: 'yellow',
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('find the last entry in model data with dataKey mapping and required conditions', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: [
+                'name',
+                'color',
+                'height',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            id: 'poke0',
+            name: 'pikachu',
+            color: 'yellow',
+            height: 50,
+        });
+        await pokemonModel.set({
+            id: 'poke1',
+            name: 'eevee',
+            color: 'brown',
+            height: 40,
+        });
+        await pokemonModel.set({
+            id: 'poke2',
+            name: 'chikorita',
+            color: 'green',
+            height: 40,
+        });
+
+        const lastPokemon = await pokemonModel.last({
+            color: 'brown',
+            height: 40,
+        });
+
+        expect(lastPokemon).toEqual({
+            key: 'p:1',
+            name: 'eevee',
+            color: 'brown',
+            height: 40,
+        });
+
+        expect(errors).toEqual([]);
+    });
+
+    it('return null if no entries in model data with dataKey mapping have the required conditions', async () => {
+        const pokemonModel = Model({
+            name: 'pokemon',
+            fields: [
+                'name',
+                'color',
+                'height',
+            ],
+            dataKeyPattern: 'p:{count}',
+        });
+        await pokemonModel.set({
+            id: 'poke0',
+            name: 'pikachu',
+            color: 'yellow',
+            height: 50,
+        });
+        await pokemonModel.set({
+            id: 'poke1',
+            name: 'eevee',
+            color: 'brown',
+            height: 40,
+        });
+        await pokemonModel.set({
+            id: 'poke2',
+            name: 'chikorita',
+            color: 'green',
+            height: 40,
+        });
+
+        const lastPokemon = await pokemonModel.last({
+            color: 'brown',
+            height: 50,
+        });
+
+        expect(lastPokemon).toBe(null);
+
+        expect(errors).toEqual([]);
+    });
+});
