@@ -5,7 +5,7 @@ const { ProofType } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const { keccak256, padLeft, randomHex } = require('web3-utils');
+const { keccak256, padLeft } = require('web3-utils');
 
 // kBar, aBar, gamma.x, gamma., sigma.x, sigma.y
 const zeroNote = Array(6).fill('0'.repeat(64));
@@ -13,7 +13,14 @@ const zeroNote = Array(6).fill('0'.repeat(64));
 // blindingFactor.x, blindingFactor.y
 const zeroBlindingFactors = Array(2).fill('0'.repeat(64));
 
-const fakeT2 = [randomHex(32), randomHex(32), randomHex(32), randomHex(32)];
+// Fake g2 point generated in a fake trusted setup. Complex numbers rearranged into
+// position expected by libff
+const fakeT2 = [
+    '0x297F1A1DEEF4C8A3709028B95B9C1FDEB4CE09A3113921933D950525D7864716',
+    '0x1241A123193A962F38BD839A4F002F967658A2080E41763FFD20B9A005794F0C',
+    '0xB0254AD2EA7179F031B0C854DD185559417FCFC3AFA5DFBD06565BDACA24C0A',
+    '0x78E97961554D14F31802CF063370F96C3ED42ED2F7EF2F64A6F3C15472580A5',
+];
 
 const FAKE_CRS = [`0x${bn128.H_X.toString(16)}`, `0x${bn128.H_Y.toString(16)}`, ...fakeT2];
 
