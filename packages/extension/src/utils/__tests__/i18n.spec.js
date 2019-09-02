@@ -140,4 +140,36 @@ describe('with variables', () => {
         expect(i18n.t('gift', 2)).toBe('2 gifts');
         expect(i18n.t('gift', 10)).toBe('many gifts');
     });
+
+    it('also use options.count as key to generate string for different counts', () => {
+        const phrases = {
+            gift: {
+                _: 'many gifts for %{name}',
+                0: 'no gifts for %{name}',
+                1: 'a gift for %{name}',
+                2: '2 gifts for %{name}',
+            },
+        };
+        i18n.register(phrases);
+
+        expect(i18n.t('gift', {
+            name: 'Ron',
+        })).toBe('many gifts for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 0,
+        })).toBe('no gifts for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 1,
+        })).toBe('a gift for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 2,
+        })).toBe('2 gifts for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 10,
+        })).toBe('many gifts for Ron');
+    });
 });
