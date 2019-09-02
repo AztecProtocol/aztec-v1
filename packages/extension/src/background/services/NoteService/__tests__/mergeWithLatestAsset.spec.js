@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import addressModel from '~database/models/address';
 import assetModel from '~database/models/asset';

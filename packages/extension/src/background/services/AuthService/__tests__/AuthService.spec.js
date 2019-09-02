@@ -9,7 +9,7 @@ import {
     userAccount,
     userAccount2,
     registrationData,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import AuthService from '..';
 
 jest.mock('~utils/storage');

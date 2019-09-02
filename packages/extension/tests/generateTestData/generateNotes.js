@@ -9,18 +9,16 @@ import {
     createNotes,
     valueOf,
 } from '~utils/note';
-import {
-    userAccount,
-} from '../helpers/testData';
 import prettyPrint from '../utils/prettyPrint';
 
-const {
-    address,
-    linkedPublicKey,
-    spendingPublicKey,
-} = userAccount;
+export default async function generateNotes(userAccount, numberOfNotes = 20) {
+    console.log('Generating notes...');
+    const {
+        address,
+        linkedPublicKey,
+        spendingPublicKey,
+    } = userAccount;
 
-export default async function generateNotes(numberOfNotes = 20) {
     const noteValues = randomInts(numberOfNotes, 1000);
     const aztecNotes = await createNotes(noteValues, spendingPublicKey, address);
     const notes = aztecNotes.map((note) => {
@@ -39,6 +37,7 @@ export default async function generateNotes(numberOfNotes = 20) {
     ].join('\n\n');
     try {
         fs.writeFileSync(dest, `${content.trim()}\n`);
+        console.log(`Successfully generating ${numberOfNotes} notes.`);
     } catch (error) {
         console.log('Failed to generate viewing keys', error);
     }

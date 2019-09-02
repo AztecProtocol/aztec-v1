@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import syncAssetNoteData from '../utils/syncAssetNoteData';
 import mergeRecoveredWithStorage from '../utils/mergeRecoveredWithStorage';

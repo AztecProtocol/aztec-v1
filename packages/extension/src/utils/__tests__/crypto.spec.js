@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import {
     randomId,
 } from '~utils/random';

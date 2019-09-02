@@ -1,7 +1,7 @@
 import { stub } from 'sinon';
 import {
     userAccount,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import {
     REAL_VIEWING_KEY_LENGTH,
     VIEWING_KEY_LENGTH,

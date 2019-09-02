@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import {
     REAL_VIEWING_KEY_LENGTH,
 } from '~config/constants';

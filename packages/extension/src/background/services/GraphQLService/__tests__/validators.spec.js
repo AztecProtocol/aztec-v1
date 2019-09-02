@@ -1,8 +1,7 @@
 import {
     userAccount,
     registrationData,
-    requiredArgs,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
@@ -22,6 +21,11 @@ jest.mock('~utils/storage');
 afterEach(() => {
     storage.reset();
 });
+
+const requiredArgs = {
+    currentAddress: userAccount.address,
+    domain: 'whatever.com',
+};
 
 const useValidator = async (
     validator,

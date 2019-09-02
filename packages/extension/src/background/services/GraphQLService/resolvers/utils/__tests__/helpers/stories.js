@@ -1,12 +1,23 @@
 import {
+    userAccount,
     registrationData,
-    registeredUserInfo,
-    requiredArgs,
-    domainName,
     pwDerivedKey,
-} from '~helpers/testData';
+} from '~helpers/testUsers';
 import AuthService from '~background/services/AuthService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
+
+export const domainName = 'aztecprotocol.com';
+
+export const registeredUserInfo = {
+    address: userAccount.address,
+    linkedPublicKey: userAccount.linkedPublicKey,
+    registeredAt: Date.now(),
+};
+
+const requiredArgs = {
+    currentAddress: userAccount.address,
+    domain: domainName,
+};
 
 const registerExtension = async () => {
     await AuthService.registerExtension(registrationData);
