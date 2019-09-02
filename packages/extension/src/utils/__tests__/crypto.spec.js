@@ -105,11 +105,11 @@ describe('fromHexString', () => {
 
         const encrypted = fromHexString(randomId(minLen));
         expect(encrypted.decrypt(privateKey)).toBe('');
-        expect(warnSpy.mock.calls.length).toBe(0);
+        expect(warnSpy).not.toHaveBeenCalled();
 
         const invalid = fromHexString(randomId(minLen - 1));
         expect(invalid).toBe(null);
-        expect(warnSpy.mock.calls.length).toBe(1);
+        expect(warnSpy).toHaveBeenCalledTimes(1);
 
         warnSpy.mockRestore();
     });

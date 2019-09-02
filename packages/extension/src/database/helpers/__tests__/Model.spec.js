@@ -1,26 +1,18 @@
-import {
-    stub,
-    spy,
-} from 'sinon';
 import Model from '../Model';
 import * as storage from '~utils/storage';
 
 jest.mock('~utils/storage');
 
-let consoleStub;
 let errors = [];
-let set;
+
+const setSpy = jest.spyOn(storage, 'set');
+const mockError = jest.spyOn(console, 'error')
+    .mockImplementation(message => errors.push(message));
 
 beforeEach(() => {
-    consoleStub = stub(console, 'error');
-    consoleStub.callsFake(message => errors.push(message));
-    set = spy(storage, 'set');
-});
-
-afterEach(() => {
     storage.reset();
-    consoleStub.restore();
-    set.restore();
+    setSpy.mockClear();
+    mockError.mockClear();
     errors = [];
 });
 
@@ -115,14 +107,14 @@ describe('Model', () => {
             color: 'yellow',
             height: 120,
         };
+        setSpy.mockClear();
         await carModel.set(car);
-        const firstCallCount = set.callCount;
-        expect(firstCallCount > 0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
         expect(errors.length).toBe(0);
 
+        setSpy.mockClear();
         await carModel.set(car);
-        const secondCallCount = set.callCount;
-        expect(secondCallCount === firstCallCount).toBe(true);
+        expect(setSpy).not.toHaveBeenCalled();
         expect(errors.length).toBe(1);
     });
 
@@ -140,10 +132,11 @@ describe('Model', () => {
             color: 'yellow',
             height: 120,
         };
+        setSpy.mockClear();
         await carModel.set(car);
-        const firstCallCount = set.callCount;
-        expect(firstCallCount > 0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
 
+        setSpy.mockClear();
         const duplicatedInfo = await carModel.set(
             car,
             {
@@ -162,8 +155,7 @@ describe('Model', () => {
             },
             modified: [],
         });
-        const secondCallCount = set.callCount;
-        expect(secondCallCount === firstCallCount).toBe(true);
+        expect(setSpy).not.toHaveBeenCalled();
 
         expect(errors).toEqual([]);
     });
@@ -177,13 +169,13 @@ describe('Model', () => {
             ],
         });
 
+        setSpy.mockClear();
         const originalData = await carModel.set({
             id: 'cc',
             color: 'yellow',
             height: 120,
         });
-        const firstCallCount = set.callCount;
-        expect(firstCallCount > 0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
         expect(originalData).toEqual({
             data: {
                 cc: {
@@ -197,6 +189,7 @@ describe('Model', () => {
             modified: ['cc'],
         });
 
+        setSpy.mockClear();
         const duplicatedInfo = await carModel.set(
             {
                 id: 'cc',
@@ -217,8 +210,7 @@ describe('Model', () => {
             },
             modified: ['cc'],
         });
-        const secondCallCount = set.callCount;
-        expect(secondCallCount > firstCallCount).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
 
         expect(errors).toEqual([]);
     });

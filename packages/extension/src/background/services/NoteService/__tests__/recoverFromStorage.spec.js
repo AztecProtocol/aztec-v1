@@ -7,7 +7,7 @@ import recoverFromStorage from '../utils/recoverFromStorage';
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 

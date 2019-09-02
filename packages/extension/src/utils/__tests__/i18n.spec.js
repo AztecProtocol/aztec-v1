@@ -1,21 +1,16 @@
-import { stub } from 'sinon';
 import I18n from '../I18n';
 
 const i18n = new I18n();
 
 describe('basic usage of i18n', () => {
-    let consoleStub;
     let errors = [];
+    const mockError = jest.spyOn(console, 'error')
+        .mockImplementation(message => errors.push(message));
 
     beforeEach(() => {
-        errors = [];
-        consoleStub = stub(console, 'error');
-        consoleStub.callsFake(message => errors.push(message));
-    });
-
-    afterEach(() => {
-        consoleStub.restore();
+        mockError.mockClear();
         i18n.flush();
+        errors = [];
     });
 
     it('returns the key back when no value of that key is in its phrases', () => {

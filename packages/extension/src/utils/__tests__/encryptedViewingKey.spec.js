@@ -1,4 +1,3 @@
-import { stub } from 'sinon';
 import {
     userAccount,
 } from '~helpers/testUsers';
@@ -20,17 +19,13 @@ const {
 } = userAccount;
 
 describe('encryptedViewingKey', () => {
-    let consoleStub;
     let warnings = [];
+    const warnSpy = jest.spyOn(console, 'warn')
+        .mockImplementation(message => warnings.push(message));
 
     beforeEach(() => {
+        warnSpy.mockClear();
         warnings = [];
-        consoleStub = stub(console, 'warn');
-        consoleStub.callsFake(message => warnings.push(message));
-    });
-
-    afterEach(() => {
-        consoleStub.restore();
     });
 
     const realViewingKey = `0x${randomId(REAL_VIEWING_KEY_LENGTH)}`;

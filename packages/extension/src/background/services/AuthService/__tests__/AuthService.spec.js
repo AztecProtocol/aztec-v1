@@ -14,7 +14,7 @@ import AuthService from '..';
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 

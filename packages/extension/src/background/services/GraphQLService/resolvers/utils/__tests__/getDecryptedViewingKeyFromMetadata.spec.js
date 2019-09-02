@@ -20,7 +20,7 @@ import storyOf from './helpers/stories';
 jest.mock('~utils/storage');
 jest.mock('../decryptViewingKey');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 

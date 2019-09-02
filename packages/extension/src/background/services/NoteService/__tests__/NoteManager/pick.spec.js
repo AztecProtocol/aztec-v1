@@ -71,7 +71,7 @@ describe('NoteManager.pick', () => {
             numberOfNotes: 2,
         })).toBe('note.pick.sum');
 
-        expect(pickNotesSpy).toHaveBeenCalledTimes(0);
+        expect(pickNotesSpy).not.toHaveBeenCalled();
     });
 
     it('throw error if input address is not the same as owner', () => {
@@ -85,7 +85,7 @@ describe('NoteManager.pick', () => {
             numberOfNotes: 1,
         })).toBe('note.pick.sum');
 
-        expect(pickNotesSpy).toHaveBeenCalledTimes(0);
+        expect(pickNotesSpy).not.toHaveBeenCalled();
         expect(warnSpy).toHaveBeenCalledTimes(1);
     });
 });

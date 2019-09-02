@@ -44,13 +44,13 @@ describe('pipe', () => {
             name: 'pikachu',
         });
 
-        expect(getType.mock.calls.length).toBe(1);
+        expect(getType).toHaveBeenCalledTimes(1);
         expect(getType.mock.calls[0][0]).toBe(parent);
         expect(getType.mock.calls[0][1]).toBe(args);
         expect(getType.mock.calls[0][2]).toBe(ctx);
         expect(getType.mock.calls[0][3]).toBe(info);
 
-        expect(getName.mock.calls.length).toBe(1);
+        expect(getName).toHaveBeenCalledTimes(1);
         expect(getName.mock.calls[0][0]).toBe(parent);
         expect(getName.mock.calls[0][1]).toBe(args);
         expect(getName.mock.calls[0][2]).toEqual({
@@ -58,7 +58,7 @@ describe('pipe', () => {
         });
         expect(getName.mock.calls[0][3]).toBe(info);
 
-        expect(getContext.mock.calls.length).toBe(1);
+        expect(getContext).toHaveBeenCalledTimes(1);
         expect(getContext.mock.calls[0][0]).toBe(parent);
         expect(getContext.mock.calls[0][1]).toBe(args);
         expect(getContext.mock.calls[0][2]).toEqual({
@@ -130,8 +130,8 @@ describe('pipe', () => {
         const expectedError = unknownError('wrong input', new Error('wrong input'));
         expect(response).toEqual(errorResponse(expectedError));
 
-        expect(getType.mock.calls.length).toBe(1);
-        expect(getName.mock.calls.length).toBe(0);
+        expect(getType).toHaveBeenCalledTimes(1);
+        expect(getName).not.toHaveBeenCalled();
     });
 
     it('stop piping if receive a result that has error in it', async () => {
@@ -154,7 +154,7 @@ describe('pipe', () => {
             },
         }));
 
-        expect(getType.mock.calls.length).toBe(1);
-        expect(getName.mock.calls.length).toBe(0);
+        expect(getType).toHaveBeenCalledTimes(1);
+        expect(getName).not.toHaveBeenCalled();
     });
 });

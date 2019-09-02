@@ -7,7 +7,7 @@ import storyOf from './helpers/stories';
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 
@@ -31,7 +31,7 @@ describe('syncUtilityNoteInfo', () => {
             note: noteData,
         }));
 
-    afterEach(() => {
+    beforeEach(() => {
         querySpy.mockClear();
     });
 
@@ -51,7 +51,7 @@ describe('syncUtilityNoteInfo', () => {
 
         expect(response).toEqual(expectedNoteResponse);
 
-        expect(querySpy.mock.calls.length).toBe(1);
+        expect(querySpy).toHaveBeenCalledTimes(1);
     });
 
     it('return null if id is empty in args', async () => {
@@ -60,7 +60,7 @@ describe('syncUtilityNoteInfo', () => {
         });
         expect(response).toEqual(null);
 
-        expect(querySpy.mock.calls.length).toBe(0);
+        expect(querySpy).not.toHaveBeenCalled();
     });
 
     it('throw error if note is not found on chain', async () => {
@@ -76,6 +76,6 @@ describe('syncUtilityNoteInfo', () => {
             },
         )).toBe('utilityNote.not.found.onChain');
 
-        expect(querySpy.mock.calls.length).toBe(1);
+        expect(querySpy).toHaveBeenCalledTimes(1);
     });
 });

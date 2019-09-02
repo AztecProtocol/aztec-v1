@@ -1,6 +1,3 @@
-import {
-    spy,
-} from 'sinon';
 import * as storage from '~utils/storage';
 import {
     toCode,
@@ -20,8 +17,14 @@ jest.mock('~utils/encryptedViewingKey', () => ({
 }));
 jest.mock('~background/services/NoteService');
 
-describe('createOrUpdate', () => {
-    let set;
+const setSpy = jest.spyOn(storage, 'set');
+
+beforeEach(() => {
+    storage.reset();
+    setSpy.mockClear();
+});
+
+describe('createOrUpdateNote', () => {
     let numberOfNotes = 0;
 
     const assets = [
@@ -68,12 +71,6 @@ describe('createOrUpdate', () => {
 
     beforeEach(() => {
         numberOfNotes = 0;
-        set = spy(storage, 'set');
-    });
-
-    afterEach(() => {
-        set.restore();
-        storage.reset();
     });
 
     it('set note and assetValue to storage', async () => {
@@ -125,22 +122,20 @@ describe('createOrUpdate', () => {
 
     it('will not call set when adding existing note to storage', async () => {
         await createOrUpdateNote(note, privateKey);
-        const numberOfSet0 = set.callCount;
-        expect(numberOfSet0 > 0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
 
+        setSpy.mockClear();
         await createOrUpdateNote(note, privateKey);
-        const numberOfSet1 = set.callCount;
-        expect(numberOfSet1 === numberOfSet0).toBe(true);
+        expect(setSpy).not.toHaveBeenCalled();
 
+        setSpy.mockClear();
         await createOrUpdateNote(newNote(note), privateKey);
-        const numberOfSet2 = set.callCount;
-        expect(numberOfSet2 === 2 * numberOfSet1).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
     });
 
     it('will update storage if some data is changed in existing note', async () => {
         await createOrUpdateNote(note, privateKey);
-        const numberOfSet0 = set.callCount;
-        expect(numberOfSet0 > 0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
         const savedNote = await noteModel.get({
             hash: note.hash,
         });
@@ -154,9 +149,9 @@ describe('createOrUpdate', () => {
             ...note,
             status: 'DESTROYED',
         };
+        setSpy.mockClear();
         await createOrUpdateNote(updatedNote, privateKey);
-        const numberOfSet1 = set.callCount;
-        expect(numberOfSet1 > numberOfSet0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
 
         const updatedSavedNote = await noteModel.get({
             hash: note.hash,
@@ -169,14 +164,13 @@ describe('createOrUpdate', () => {
 
     it('will not call set if changed data is not stored in model', async () => {
         await createOrUpdateNote(note, privateKey);
-        const numberOfSet0 = set.callCount;
-        expect(numberOfSet0 > 0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
 
+        setSpy.mockClear();
         await createOrUpdateNote({
             ...note,
             whaever: '',
         }, privateKey);
-        const numberOfSet1 = set.callCount;
-        expect(numberOfSet1 === numberOfSet0).toBe(true);
+        expect(setSpy).not.toHaveBeenCalled();
     });
 });

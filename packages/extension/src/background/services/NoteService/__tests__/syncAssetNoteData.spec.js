@@ -16,9 +16,11 @@ import assetModel from '~database/models/asset';
 import addressModel from '~database/models/address';
 import syncAssetNoteData from '../utils/syncAssetNoteData';
 
+jest.setTimeout(10 * 1000);
+
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 

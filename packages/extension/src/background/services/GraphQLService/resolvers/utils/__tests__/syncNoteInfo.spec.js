@@ -14,7 +14,7 @@ import storyOf from './helpers/stories';
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 
@@ -39,12 +39,8 @@ describe('syncNoteInfo', () => {
         };
     });
 
-    afterEach(() => {
+    beforeEach(() => {
         syncNoteSpy.mockClear();
-    });
-
-    afterAll(() => {
-        syncNoteSpy.mockRestore();
     });
 
     it('return existing note info in storage', async () => {
@@ -62,7 +58,7 @@ describe('syncNoteInfo', () => {
             value: noteValue,
         });
 
-        expect(syncNoteSpy.mock.calls.length).toBe(0);
+        expect(syncNoteSpy).not.toHaveBeenCalled();
     });
 
     it('return null if id is empty in args', async () => {
@@ -73,7 +69,7 @@ describe('syncNoteInfo', () => {
         });
         expect(response).toEqual(null);
 
-        expect(syncNoteSpy.mock.calls.length).toBe(0);
+        expect(syncNoteSpy).not.toHaveBeenCalled();
     });
 
     it('get note on chain if not found in storage', async () => {
@@ -85,7 +81,7 @@ describe('syncNoteInfo', () => {
             value: noteValue,
         });
 
-        expect(syncNoteSpy.mock.calls.length).toBe(1);
+        expect(syncNoteSpy).toHaveBeenCalledTimes(1);
     });
 
     it('re-fetch a note from blockchain if the note in storage belongs to other account', async () => {
@@ -102,6 +98,6 @@ describe('syncNoteInfo', () => {
             value: noteValue,
         });
 
-        expect(syncNoteSpy.mock.calls.length).toBe(1);
+        expect(syncNoteSpy).toHaveBeenCalledTimes(1);
     });
 });

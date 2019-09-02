@@ -7,7 +7,7 @@ import storyOf from './helpers/stories';
 
 jest.mock('~utils/storage');
 
-afterEach(() => {
+beforeEach(() => {
     storage.reset();
 });
 
@@ -25,12 +25,8 @@ describe('syncAssetInfo', () => {
             onChainAsset: assetData,
         }));
 
-    afterEach(() => {
+    beforeEach(() => {
         querySpy.mockClear();
-    });
-
-    afterAll(() => {
-        querySpy.mockRestore();
     });
 
     it('return existing asset data in storage', async () => {
@@ -45,7 +41,7 @@ describe('syncAssetInfo', () => {
         });
         expect(response).toEqual(asset);
 
-        expect(querySpy.mock.calls.length).toBe(0);
+        expect(querySpy).not.toHaveBeenCalled();
     });
 
     it('return null if id is empty in args', async () => {
@@ -56,7 +52,7 @@ describe('syncAssetInfo', () => {
         });
         expect(response).toEqual(null);
 
-        expect(querySpy.mock.calls.length).toBe(0);
+        expect(querySpy).not.toHaveBeenCalled();
     });
 
     it('sync asset from blockchain if not found in storage', async () => {
@@ -75,7 +71,7 @@ describe('syncAssetInfo', () => {
         expect(asset).not.toBe(null);
         expect(response).toEqual(asset);
 
-        expect(querySpy.mock.calls.length).toBe(1);
+        expect(querySpy).toHaveBeenCalledTimes(1);
     });
 
     it('throw error if asset is not found in storage and on chain', async () => {
@@ -96,6 +92,6 @@ describe('syncAssetInfo', () => {
         });
         expect(asset).toBe(null);
 
-        expect(querySpy.mock.calls.length).toBe(1);
+        expect(querySpy).toHaveBeenCalledTimes(1);
     });
 });

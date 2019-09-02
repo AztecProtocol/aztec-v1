@@ -58,14 +58,14 @@ describe('NoteManager.safeFind', () => {
         const asset1 = manager.safeFind(userAddress)('assetId_1');
         expect(asset1).toBe(manager.assetNoteDataMapping.assetId_1);
 
-        expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
+        expect(consoleWarnSpy).not.toHaveBeenCalled();
     });
 
     it('return empty assetNoteData if asset is not in assetNoteDataMapping', () => {
         const asset = manager.safeFind(userAddress)('assetId2');
         expect(asset).toEqual(emptyAssetNoteData);
 
-        expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
+        expect(consoleWarnSpy).not.toHaveBeenCalled();
     });
 
     it('will not return asset if input address is not the same as current owner', () => {

@@ -51,7 +51,7 @@ describe('ensureKeyvault', () => {
 
         await useDecorator(ensureKeyvault);
 
-        expect(callback.mock.calls.length).toBe(1);
+        expect(callback).toHaveBeenCalledTimes(1);
 
         const keyStore = await AuthService.getKeyStore();
         const session = await AuthService.getSession();
@@ -64,7 +64,7 @@ describe('ensureKeyvault', () => {
     it('fail if extension is not registered', async () => {
         await expectErrorResponse(async () => useDecorator(ensureKeyvault))
             .toBe('extension.not.registered');
-        expect(callback.mock.calls.length).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
     });
 });
 
@@ -75,8 +75,8 @@ describe('ensureAccount', () => {
 
         await useDecorator(ensureAccount);
 
-        expect(callback.mock.calls.length).toBe(1);
-        expect(syncAccountSpy).toHaveBeenCalled();
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(syncAccountSpy).toHaveBeenCalledTimes(1);
 
         const keyStore = await AuthService.getKeyStore();
         const session = await AuthService.getSession();
@@ -90,7 +90,7 @@ describe('ensureAccount', () => {
     it('fail if both extension and user are not registered', async () => {
         await expectErrorResponse(async () => useDecorator(ensureAccount))
             .toBe('extension.not.registered');
-        expect(callback.mock.calls.length).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
         expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 
@@ -99,7 +99,7 @@ describe('ensureAccount', () => {
 
         await expectErrorResponse(async () => useDecorator(ensureAccount))
             .toBe('extension.not.registered');
-        expect(callback.mock.calls.length).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
         expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 
@@ -108,7 +108,7 @@ describe('ensureAccount', () => {
 
         await expectErrorResponse(async () => useDecorator(ensureAccount))
             .toBe('account.not.linked');
-        expect(callback.mock.calls.length).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
         expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 });
@@ -121,7 +121,7 @@ describe('ensureDomainPermission', () => {
 
         await useDecorator(ensureDomainPermission);
 
-        expect(callback.mock.calls.length).toBe(1);
+        expect(callback).toHaveBeenCalledTimes(1);
 
         const keyStore = await AuthService.getKeyStore();
         const session = await AuthService.getSession();
@@ -137,7 +137,7 @@ describe('ensureDomainPermission', () => {
     it('fail if nothing is registered', async () => {
         await expectErrorResponse(async () => useDecorator(ensureDomainPermission))
             .toBe('extension.not.registered');
-        expect(callback.mock.calls.length).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
     });
 
     it('fail if user is not registered', async () => {
@@ -145,7 +145,7 @@ describe('ensureDomainPermission', () => {
 
         await expectErrorResponse(async () => useDecorator(ensureDomainPermission))
             .toBe('account.not.linked');
-        expect(callback.mock.calls.length).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
     });
 
     it('fail if doamin is not registered', async () => {
@@ -154,6 +154,6 @@ describe('ensureDomainPermission', () => {
 
         await expectErrorResponse(async () => useDecorator(ensureDomainPermission))
             .toBe('domain.not.register');
-        expect(callback.mock.calls.length).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
     });
 });
