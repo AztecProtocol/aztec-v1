@@ -1,6 +1,3 @@
-import {
-    errorLog,
-} from '~utils/log';
 import Web3Service from '~background/services/Web3Service';
 import {
     IZkAssetConfig,
@@ -8,15 +5,10 @@ import {
 import decodeNoteLogs from './decodeNoteLogs'
  
 export default async function fetchNotes({
-    address,
     fromBlock,
     toBlock = 'latest',
     onError,
 } = {}) {
-    if (!address) {
-        errorLog("'address' cannot be empty in fetchNotes");
-        return null;
-    };
     const { abi, getPastLogs } = Web3Service.eth;
 
     const eventsTopics = [
@@ -27,21 +19,17 @@ export default async function fetchNotes({
         .map(e => IZkAssetConfig.config.abi.find(({name, type})=> name === e && type === 'event'))
         .map(abi.encodeEventSignature);
 
-    const ownerTopic = abi.encodeParameter('address', address);
-
     const options = {
         fromBlock, 
         toBlock,
         topics: [
             eventsTopics,
-            ownerTopic,
         ],
     };
 
     try {
         const rawLogs = await getPastLogs(options);
-        const logs = await decodeNoteLogs(eventsTopics, rawLogs);
-        return logs;
+        return decodeNoteLogs(eventsTopics, rawLogs);
         
     } catch (error) {
         onError(error);

@@ -1,5 +1,5 @@
 import createUpdateNote from './createUpdateNote';
-import destroyNote from './destroyNote';
+import destroyNotePerform from './destroyNote';
 import createNoteAccess from './createNoteAccess';
 import parseAddressesFromMetadata from './utils/parseAddressesFromMetadata'
 import parseNoteAccessFromMetadata from './utils/parseNoteAccessFromMetadata'
@@ -49,8 +49,8 @@ export const updateNote = async (note) => {
     return await createUpdateNote(note);
 };
 
-export const addDestroyNote = async (note) => {
-    return await destroyNote(note);
+export const destroyNote = async (note) => {
+    return await destroyNotePerform(note);
 };
 
 
