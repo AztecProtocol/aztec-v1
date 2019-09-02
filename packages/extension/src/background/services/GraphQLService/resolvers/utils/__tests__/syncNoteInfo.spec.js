@@ -1,12 +1,12 @@
+import notes from '~helpers/testNotes';
 import {
     userAccount,
     userAccount2,
 } from '~helpers/testUsers';
-import {
-    createNote,
-} from '~utils/note';
 import * as storage from '~utils/storage';
-import encryptedViewingKey from '~utils/encryptedViewingKey';
+import {
+    randomInt,
+} from '~utils/random';
 import SyncService from '~background/services/SyncService';
 import noteModel from '~database/models/note';
 import syncNoteInfo from '../syncNoteInfo';
@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 describe('syncNoteInfo', () => {
-    const noteValue = 10;
+    let noteValue;
     let noteData;
 
     const syncNoteSpy = jest.spyOn(SyncService, 'syncNote')
@@ -27,21 +27,15 @@ describe('syncNoteInfo', () => {
 
     beforeAll(async () => {
         const {
-            address,
-            linkedPublicKey,
-            spendingPublicKey,
-        } = userAccount;
-        const note = await createNote(noteValue, spendingPublicKey, address);
-        const {
-            noteHash,
-            viewingKey: realViewingKey,
-        } = note.exportNote();
-        const viewingKey = await encryptedViewingKey(linkedPublicKey, realViewingKey);
-
+            hash,
+            viewingKey,
+            value,
+        } = notes[randomInt(0, notes.length - 1)];
+        noteValue = value;
         noteData = {
-            hash: noteHash,
-            viewingKey: viewingKey.toHexString(),
-            owner: address,
+            hash,
+            viewingKey,
+            owner: userAccount.address,
         };
     });
 

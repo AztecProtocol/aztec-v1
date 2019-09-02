@@ -1,14 +1,11 @@
 import {
     userAccount,
 } from '~helpers/testUsers';
+import notes from '~helpers/testNotes';
 import {
-    REAL_VIEWING_KEY_LENGTH,
-} from '~config/constants';
+    randomInt,
+} from '~utils/random';
 import * as storage from '~utils/storage';
-import {
-    createNote,
-} from '~utils/note';
-import encryptedViewingKey from '~utils/encryptedViewingKey';
 import AuthService from '~background/services/AuthService';
 import decryptViewingKey from '../decryptViewingKey';
 import storyOf from './helpers/stories';
@@ -20,31 +17,20 @@ afterEach(() => {
 });
 
 describe('decryptViewingKey', () => {
-    const noteValue = 10;
-    let viewingKey;
+    let note;
 
-    beforeAll(async () => {
-        const {
-            address,
-            linkedPublicKey,
-            spendingPublicKey,
-        } = userAccount;
-        const note = await createNote(noteValue, spendingPublicKey, address);
-        const {
-            viewingKey: realViewingKey,
-        } = note.exportNote();
-        viewingKey = await encryptedViewingKey(linkedPublicKey, realViewingKey)
-            .toHexString();
+    beforeEach(async () => {
+        note = notes[randomInt(0, notes.length - 1)];
     });
 
     it('get credentials from storage to decrypt input viewingKey', async () => {
         await storyOf('ensureDomainPermission');
-        const response = await decryptViewingKey(viewingKey, userAccount.address);
-        expect(response.length).toBe(REAL_VIEWING_KEY_LENGTH + 2);
+        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
+        expect(response).toBe(note.realViewingKey);
     });
 
     it('return empty string if there is no keyStore in storage', async () => {
-        const response = await decryptViewingKey(viewingKey, userAccount.address);
+        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
         expect(response).toBe('');
 
         const keyStore = await AuthService.getKeyStore();
@@ -55,7 +41,7 @@ describe('decryptViewingKey', () => {
         await storyOf('ensureDomainPermission');
         await AuthService.logout();
 
-        const response = await decryptViewingKey(viewingKey, userAccount.address);
+        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
         expect(response).toBe('');
 
         const keyStore = await AuthService.getKeyStore();
@@ -73,7 +59,7 @@ describe('decryptViewingKey', () => {
                 pwDerivedKey: new Uint8Array([0, 1, 2, 3]),
             }));
 
-        const response = await decryptViewingKey(viewingKey, userAccount.address);
+        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
         expect(response).toBe('');
 
         getPwDeriveKeySpy.mockRestore();
