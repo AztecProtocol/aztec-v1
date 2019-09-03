@@ -1,26 +1,39 @@
 /* eslint-disable object-curly-newline */
-/* global artifacts, contract, describe, expect, it: true */
-const { encoder, JoinSplitProof, note } = require('aztec.js');
-const secp256k1 = require('@aztec/secp256k1');
-const truffleAssert = require('truffle-assertions');
-const { padLeft, randomHex } = require('web3-utils');
+/* global artifacts, contract, expect, it: true */
+const { note } = require('aztec.js');
 
 const MetaDataUtils = artifacts.require('./MetaDataUtils');
 const { customMetaData } = note.utils;
-const { publicKey } = secp256k1.generateAccount();
 
 
 contract('MetaDataUtils', async () => {
     let metaDataUtils;
+
     beforeEach(async () => {
-        metaDataUtils = MetaDataUtils.new();
+        metaDataUtils = await MetaDataUtils.new();
     })
 
-    it.only('can extract correct number of addresses', () => {
-        const dummyNoteHash = padLeft(randomHex(32), 64);
-        const numAddresses = 3;
-        const extractedNumAddresses = metaDataUtils.extractAddresses(dummyNoteHash, customMetaData);
-        console.log({ numAddresses });
-        expect(numAddresses).to.equal(extractedNumAddresses);
+    it('should extract single correct address', async () => {
+        const address = [
+            '000000000000000000000000ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0a',
+        ];
+
+        const addressToExtract = 0;
+        const extractedAddress = await metaDataUtils.extractAddress.call(customMetaData, addressToExtract);
+        expect(extractedAddress.slice(2)).to.equal(address[0]);
+    });
+
+    it('should extract several correct addresses', async () => {
+        const addresses = [
+            '000000000000000000000000ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0a',
+            '000000000000000000000000ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1ad1a',
+            '000000000000000000000000ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2ad2a',
+        ];
+
+        const extractedAddresses = await metaDataUtils.extractAddresses.call(customMetaData);
+        expect(extractedAddresses.length).to.equal(3);
+        expect(extractedAddresses[0].slice(2)).to.equal(addresses[0]);
+        expect(extractedAddresses[1].slice(2)).to.equal(addresses[1]);
+        expect(extractedAddresses[2].slice(2)).to.equal(addresses[2]);
     })
 })
