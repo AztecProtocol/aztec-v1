@@ -34,17 +34,11 @@ const syncEthAddress = async ({
         lastSyncedBlock = account.blockNumber;
     }
 
-    if(process.env.NODE_ENV == 'test') {
-        await manager.sync({
-            address,
-            lastSyncedBlock,
-        });
-    } else {
-        manager.sync({
-            address,
-            lastSyncedBlock,
-        });
-    }
+    manager.sync({
+        address,
+        lastSyncedBlock,
+    });
+
 };
 
 export default {

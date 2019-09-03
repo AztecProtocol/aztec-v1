@@ -16,6 +16,13 @@ class Aztec {
             // Time to reload your interface with accounts[0]!
             await this.enable();
         });
+
+        /*
+            MetaMask: MetaMask will soon stop reloading pages on network change.
+            If you rely upon this behavior, add a 'networkChanged' event handler to trigger the reload manually: https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.on(eventname%2C-callback)
+            Set 'ethereum.autoRefreshOnNetworkChange' to 'false' to silence this warning: https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange'
+        */
+        window.ethereum.autoRefreshOnNetworkChange = false;
     }
 
     enable = async ({
