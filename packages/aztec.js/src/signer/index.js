@@ -137,7 +137,7 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
 signer.signMultipleNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
-    const status =  true;
+    const status = true;
     const message = {
         noteHashes,
         spender,

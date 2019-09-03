@@ -73,15 +73,18 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
      *                 being approved to spend these notes. Can be
      *                 any person or contract e.g. Bob, a different
      *                 third-party, a contract, this contract itself.
+     * @param _status Bool representing whether approval is being
+     *                granted (true) or revoked (false)
      */
     function batchConfidentialApprove(
         bytes32[] memory _noteHashes,
         address _zkAsset,
-        address _spender
+        address _spender,
+        bool _status
     ) public onlyOwner notesOwned(_noteHashes, _zkAsset) {
         IZkAsset asset = IZkAsset(_zkAsset);
         for (uint j = 0; j < _noteHashes.length; j++) {
-            asset.confidentialApprove(_noteHashes[j], _spender, true, '');
+            asset.confidentialApprove(_noteHashes[j], _spender, _status, '');
         }
     }
 
@@ -118,7 +121,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
         address _zkAsset,
         address _spenderSender
     ) public onlyOwner {
-        batchConfidentialApprove(_noteHashes, _zkAsset, _spenderSender);
+        batchConfidentialApprove(_noteHashes, _zkAsset, _spenderSender, true);
         batchConfidentialTransfer(_proof, _zkAsset, _spenderSender);
     }
 

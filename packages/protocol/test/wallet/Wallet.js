@@ -8,217 +8,286 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const secp256k1 = require('@aztec/secp256k1');
-const typedData = require('@aztec/typed-data');
 
 const ACE = artifacts.require('./ACE.sol');
 const ethUtil = require('ethereumjs-util');
 
 const ZkAssetMintable = artifacts.require('./ZkAssetMintable.sol');
 const Wallet = artifacts.require('./Wallet.sol');
+const helpers = require('../helpers/wallet');
+const truffleAssert = require('truffle-assertions');
 
-// const JoinSplitFluid = artifacts.require('./JoinSplitFluid.sol');
-// const Swap = artifacts.require('./Swap.sol');
-// const Dividend = artifacts.require('./Dividend.sol');
-// const PrivateRange = artifacts.require('./PrivateRange.sol');
-// const JoinSplit = artifacts.require('./JoinSplit.sol');
-
-const {
-    // proofs: { JOIN_SPLIT_PROOF, MINT_PROOF, SWAP_PROOF, DIVIDEND_PROOF, BURN_PROOF, PRIVATE_RANGE_PROOF },
-    proofs: { MINT_PROOF },
-} = devUtils;
-
-const { JoinSplitProof, MintProof } = aztec;
-
-// const alice = secp256k1.generateAccount();
 // const bob = secp256k1.generateAccount();
 const alice = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_0);
 const bob = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_1);
+const eve = secp256k1.generateAccount(); // attacker
 
 contract.only('Wallet', async (accounts) => {
     let ace;
     let zkAssetMintableContract;
-    let batchApprovalContract;
+    let walletContract;
 
     beforeEach(async () => {
         ace = await ACE.at(ACE.address);
         zkAssetMintableContract = await ZkAssetMintable.new(ace.address, '0x0000000000000000000000000000000000000000', 1, 0, []);
-        batchApprovalContract = await Wallet.new(ace.address, { from: alice.address });
-        expect(await batchApprovalContract.owner()).to.equal(alice.address);
+        walletContract = await Wallet.new(ace.address, { from: alice.address });
+        expect(await walletContract.owner()).to.equal(alice.address);
+        expect(accounts[0]).to.equal(alice.address);
     });
 
-    const sum = (arrayToSum) => arrayToSum.reduce((a, b) => a + b, 0);
-
-    const mintNotes = async (values, ownerPublicKey, fromAddress) => {
-        const notes = await Promise.all(values.map((i) => aztec.note.create(ownerPublicKey, i, fromAddress)));
-        const newMintCounterNote = await aztec.note.create(ownerPublicKey, sum(values));
-        const zeroMintCounterNote = await aztec.note.createZeroValueNote();
-        const sender = accounts[0];
-
-        const mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, notes, sender);
-
-        const mintData = mintProof.encodeABI();
-        await zkAssetMintableContract.confidentialMint(MINT_PROOF, mintData, { from: sender });
-        const noteHashes = notes.map((note) => note.noteHash);
-        return { notes, values, noteHashes };
-    };
-
-    const spendNotesWithFunctions = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes) => {
-        const invoice = await aztec.note.create(sellerPublicKey, amount);
-        const change = await aztec.note.create(buyerPublicKey, buyerFunds - amount, batchApprovalContract.address);
-        const sendProof = new JoinSplitProof(
-            buyerNotes,
-            [invoice, change],
-            batchApprovalContract.address,
-            0,
-            batchApprovalContract.address,
-        );
-        const sendProofData = sendProof.encodeABI(zkAssetMintableContract.address);
-        const result = await batchApprovalContract.batchConfidentialTransfer(
-            sendProofData,
-            zkAssetMintableContract.address,
-            batchApprovalContract.address,
-        );
-        return result;
-    };
-
-    const shouldFail = async (codeToRun, expectedError, unwantedSuccessError) => {
-        try {
-            await codeToRun();
-            throw new Error(unwantedSuccessError);
-        } catch (err) {
-            if (err.reason !== expectedError) {
-                throw err;
-            }
-        }
-    };
-
-    const approveAndSpendNotes = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes, buyerNoteHashes) => {
-        const invoice = await aztec.note.create(sellerPublicKey, amount);
-        const change = await aztec.note.create(buyerPublicKey, buyerFunds - amount, batchApprovalContract.address);
-        const sendProof = new JoinSplitProof(
-            buyerNotes,
-            [invoice, change],
-            batchApprovalContract.address,
-            0,
-            batchApprovalContract.address,
-        );
-        const sendProofData = sendProof.encodeABI(zkAssetMintableContract.address);
-        const result = await batchApprovalContract.spendNotes(
-            buyerNoteHashes,
-            sendProofData,
-            zkAssetMintableContract.address,
-            batchApprovalContract.address,
-        );
-        return result;
-    };
-
     it('owner of the contract should be able to mint notes that are owned by the contract', async () => {
-        const { notes } = await mintNotes([50, 75, 100], alice.publicKey, batchApprovalContract.address);
+        const { notes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
+        );
         notes.map(async (note) => {
             const aceNote = await ace.getNote(zkAssetMintableContract.address, note.noteHash);
             expect(aceNote).to.not.equal(undefined);
-            expect(aceNote.noteOwner).to.equal(batchApprovalContract.address);
+            expect(aceNote.noteOwner).to.equal(walletContract.address);
         });
     });
 
     it('owner of contract can approve notes that are owned by the contract to be spent by the contract', async () => {
-        const { notes } = await mintNotes([50, 75, 100, 25, 125], alice.publicKey, batchApprovalContract.address);
+        const { notes } = await helpers.mintNotes(
+            [50, 75, 100, 25, 125],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
+        );
         const approvedMintedNotes = [notes[0], notes[1], notes[2]];
         const nonApprovedMintedNotes = [notes[3], notes[4]];
 
         const approvedNoteHashes = approvedMintedNotes.map((note) => note.noteHash);
-        await batchApprovalContract.batchConfidentialApprove(
+        await walletContract.batchConfidentialApprove(
             approvedNoteHashes,
             zkAssetMintableContract.address,
-            batchApprovalContract.address,
+            walletContract.address,
+            true,
         );
 
-        approvedMintedNotes.map(async (note) => {
-            expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, batchApprovalContract.address)).to.equal(
-                true,
-            );
-        });
+        let approvedMintedNotesConfidentialApproved = await Promise.all(
+            approvedMintedNotes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
+        );
+        expect(approvedMintedNotesConfidentialApproved).to.deep.equal(
+            approvedMintedNotes.map((i) => true),
+        );
 
-        nonApprovedMintedNotes.map(async (note) => {
-            expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, batchApprovalContract.address)).to.equal(
-                false,
-            );
-        });
+        let nonApprovedMintedNotesConfidentialApproved = await Promise.all(
+            nonApprovedMintedNotes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
+        );
+        expect(nonApprovedMintedNotesConfidentialApproved).to.deep.equal(
+            nonApprovedMintedNotes.map((i) => false),
+        );
+    });
+
+    it('owner of contract can revoke approval of notes that are owned by the contract to be spent by the contract', async () => {
+        const { notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        let notesConfidentialApproved = await Promise.all(
+            notes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
+        );
+        expect(notesConfidentialApproved).to.deep.equal(
+            notes.map((i) => false),
+        );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true);
+        notesConfidentialApproved = await Promise.all(
+            notes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
+        );
+        expect(notesConfidentialApproved).to.deep.equal(
+            notes.map((i) => true),
+        );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, false);
+        notesConfidentialApproved = await Promise.all(
+            notes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
+        );
+        expect(notesConfidentialApproved).to.deep.equal(
+            notes.map((i) => false),
+        );
     });
 
     it('the contract should be able to spend notes after they have been approved for it to spend', async () => {
-        const { values, notes, noteHashes } = await mintNotes([50, 75, 100], alice.publicKey, batchApprovalContract.address);
-        await batchApprovalContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, batchApprovalContract.address);
-        const result = await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
+        const { values, notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true);
+        const result = await helpers.spendNotesWithFunctions(
+            100,
+            bob.publicKey,
+            alice.publicKey,
+            helpers.sum(values),
+            notes,
+            zkAssetMintableContract,
+            walletContract,
+        );
         expect(result.receipt.status).to.equal(true);
     });
 
     it('the contract should be able to approve and spend notes in one call using the spendNotes method', async () => {
-        const { values, notes, noteHashes } = await mintNotes([50, 75, 100], alice.publicKey, batchApprovalContract.address);
-        const result = await approveAndSpendNotes(100, bob.publicKey, alice.publicKey, sum(values), notes, noteHashes);
+        const { values, notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        const result = await helpers.approveAndSpendNotes(
+            100,
+            bob.publicKey,
+            alice.publicKey,
+            helpers.sum(values),
+            notes,
+            noteHashes,
+            zkAssetMintableContract,
+            walletContract,
+        );
         expect(result.receipt.status).to.equal(true);
     });
 
     it("the contract shouldn't be able to spend unapproved notes", async () => {
-        const { values, notes } = await mintNotes([25, 125], alice.publicKey, batchApprovalContract.address);
-        await shouldFail(
-            async () => {
-                await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-            },
-            'sender does not have approval to spend input note',
-            'JoinSplit succeeds but notes are not approved',
+        const { values, notes } = await helpers.mintNotes(
+            [25, 125],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
         );
+        await truffleAssert.reverts(helpers.spendNotesWithFunctions(
+            100,
+            bob.publicKey,
+            alice.publicKey,
+            helpers.sum(values),
+            notes,
+            zkAssetMintableContract,
+            walletContract,
+        ), 'sender does not have approval to spend input note');
+    });
+
+    it("the contract shouldn't be able to spend notes that have had approval revoked", async () => {
+        const { values, notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true);
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, false);
+        await truffleAssert.reverts(helpers.spendNotesWithFunctions(
+            100,
+            bob.publicKey,
+            alice.publicKey,
+            helpers.sum(values),
+            notes,
+            zkAssetMintableContract,
+            walletContract,
+        ), 'sender does not have approval to spend input note');
     });
 
     it("the contract shouldn't be able to spend notes that it has already spent", async () => {
-        const { values, notes, noteHashes } = await mintNotes([50, 75, 100], alice.publicKey, batchApprovalContract.address);
-        await batchApprovalContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, batchApprovalContract.address);
-        await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-        await shouldFail(
-            async () => {
-                await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-            },
-            'input note status is not UNSPENT',
-            'JoinSplit succeeds but notes should already be spent',
+        const { values, notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
         );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true);
+        await helpers.spendNotesWithFunctions(
+            100,
+            bob.publicKey,
+            alice.publicKey,
+            helpers.sum(values),
+            notes,
+            zkAssetMintableContract,
+            walletContract,
+        );
+        await truffleAssert.reverts(
+            helpers.spendNotesWithFunctions(
+                100,
+                bob.publicKey,
+                alice.publicKey,
+                helpers.sum(values),
+                notes,
+                zkAssetMintableContract,
+                walletContract,
+            ),
+            'input note status is not UNSPENT',
+        );
+
     });
 
     it('owner of the contract should be able to approve notes for spending by another person', async () => {
-        const { notes, noteHashes } = await mintNotes([50, 75, 100], alice.publicKey, batchApprovalContract.address);
-        await batchApprovalContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address);
+        const { notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true);
         notes.map(async (note) => {
             expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, bob.address)).to.equal(true);
         });
     });
 
     it("the contract shouldn't be able to approve notes for itself to spend that have already been spent", async () => {
-        const { values, notes, noteHashes } = await mintNotes([50, 75, 100], alice.publicKey, batchApprovalContract.address);
-        await batchApprovalContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, batchApprovalContract.address);
-        await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-        await shouldFail(
-            async () => {
-                await batchApprovalContract.batchConfidentialApprove(
-                    noteHashes,
-                    zkAssetMintableContract.address,
-                    batchApprovalContract.address,
-                );
-            },
-            'only unspent notes can be approved',
-            'approval for this address succeeds but notes should already be spent so it should be impossible to approve them',
+        const { values, notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
         );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true);
+        await helpers.spendNotesWithFunctions(
+            100,
+            bob.publicKey,
+            alice.publicKey,
+            helpers.sum(values),
+            notes,
+            zkAssetMintableContract,
+            walletContract,
+        );
+        await truffleAssert.reverts(walletContract.batchConfidentialApprove(
+            noteHashes,
+            zkAssetMintableContract.address,
+            walletContract.address,
+            true,
+        ), 'only unspent notes can be approved');
     });
 
     it("the contract shouldn't be able to approve notes for another address to spend that have already been spent", async () => {
-        const { values, notes, noteHashes } = await mintNotes([50, 75, 100], alice.publicKey, batchApprovalContract.address);
-        await batchApprovalContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, batchApprovalContract.address);
-        await spendNotesWithFunctions(100, bob.publicKey, alice.publicKey, sum(values), notes);
-        await shouldFail(
-            async () => {
-                await batchApprovalContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address);
-            },
-            'only unspent notes can be approved',
-            'approval for another address succeeds but notes should already be spent so it should be impossible to approve them',
+        const { values, notes, noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            walletContract.address,
+            accounts[0],
+            zkAssetMintableContract,
         );
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true);
+        await helpers.spendNotesWithFunctions(
+            100,
+            bob.publicKey,
+            alice.publicKey,
+            helpers.sum(values),
+            notes,
+            zkAssetMintableContract,
+            walletContract,
+        );
+        await truffleAssert.reverts(walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true), 'only unspent notes can be approved');
     });
 
     // it('another person should be able to spend notes owned by the contract after approval to spend', async () => {
@@ -226,8 +295,14 @@ contract.only('Wallet', async (accounts) => {
 
     it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
         const account = alice;
-        const verifyingContract = batchApprovalContract.address;
-        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
+        const verifyingContract = walletContract.address;
+        const { noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            account.publicKey,
+            verifyingContract,
+            accounts[0],
+            zkAssetMintableContract,
+        );
         const spender = account.address;
         const { signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
             verifyingContract,
@@ -241,9 +316,15 @@ contract.only('Wallet', async (accounts) => {
 
     it('should recover publicKey from signature params', async () => {
         const account = alice;
-        const verifyingContract = batchApprovalContract.address;
-        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
-        const spender = account.address;
+        const verifyingContract = walletContract.address;
+        const { noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            alice.publicKey,
+            verifyingContract,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        const spender = bob.address;
         const { encodedTypedData, signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
             verifyingContract,
             noteHashes,
@@ -258,18 +339,48 @@ contract.only('Wallet', async (accounts) => {
         expect(publicKeyRecover).to.equal(account.publicKey.slice(4));
     });
 
-    it('validate signature', async () => {
+    it('a private key should be able to sign notes for confidential approval and be verified', async () => {
         const account = alice;
-        const verifyingContract = batchApprovalContract.address;
-        const { noteHashes } = await mintNotes([50, 75, 100], account.publicKey, verifyingContract);
+        const verifyingContract = walletContract.address;
+        const { noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            account.publicKey,
+            verifyingContract,
+            accounts[0],
+            zkAssetMintableContract,
+        );
         const spender = account.address;
-        const status =  true;
+        const status = true;
         const { signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
             verifyingContract,
             noteHashes,
             spender,
             account.privateKey,
         );
-        await batchApprovalContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address);
+        await walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address);
     });
+
+    it('signing with another private key should result in the verification failing', async () => {
+        const account = alice;
+        const verifyingContract = walletContract.address;
+        const { noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            account.publicKey,
+            verifyingContract,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        const spender = account.address;
+        const status = true;
+        const { signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
+            verifyingContract,
+            noteHashes,
+            spender,
+            eve.privateKey,
+        );
+
+        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address), 'the contract owner did not sign this message');
+    });
+
+    // TODO: tests on empty notesArray
 });
