@@ -145,22 +145,18 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
         address _zkAsset
     ) public view notesOwned(_noteHashes, _zkAsset) {
         address signer;
-        if (_signature.length != 0) {
-            bytes32 _hashStruct = keccak256(abi.encode(
-                MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
-                keccak256(abi.encode(_noteHashes)),
-                _spender,
-                _status
-            ));
-            // validate EIP712 signature
-            bytes32 msgHash = hashEIP712Message(_hashStruct);
-            signer = recoverSignature(
-                msgHash,
-                _signature
-            );
-        } else {
-            signer = msg.sender;
-        }
+        bytes32 _hashStruct = keccak256(abi.encode(
+            MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
+            keccak256(abi.encode(_noteHashes)),
+            _spender,
+            _status
+        ));
+        // validate EIP712 signature
+        bytes32 msgHash = hashEIP712Message(_hashStruct);
+        signer = recoverSignature(
+            msgHash,
+            _signature
+        );
         require(signer == owner(), "the contract owner did not sign this message");
     }
 }
