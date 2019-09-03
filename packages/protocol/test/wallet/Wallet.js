@@ -16,6 +16,7 @@ const ZkAssetMintable = artifacts.require('./ZkAssetMintable.sol');
 const Wallet = artifacts.require('./Wallet.sol');
 const helpers = require('../helpers/wallet');
 const truffleAssert = require('truffle-assertions');
+const { padLeft, randomHex } = require('web3-utils');
 
 // const bob = secp256k1.generateAccount();
 const alice = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_0);
@@ -380,6 +381,53 @@ contract.only('Wallet', async (accounts) => {
         );
 
         await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address), 'the contract owner did not sign this message');
+    });
+
+    it('signing with a bad signature should result in the verification failing', async () => {
+        const account = alice;
+        const verifyingContract = walletContract.address;
+        const { noteHashes } = await helpers.mintNotes(
+            [50, 75, 100],
+            account.publicKey,
+            verifyingContract,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        const spender = account.address;
+        const status = true;
+        let signature;
+        signature = padLeft(randomHex(132), 132);
+        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address), 'signer address cannot be 0');
+        signature = padLeft(randomHex(234), 321);
+        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address), 'signer address cannot be 0');
+    });
+
+    it.only('validation should fail when the note hashes presented are different', async () => {
+        const account = alice;
+        const verifyingContract = walletContract.address;
+        const { noteHashes } = await helpers.mintNotes(
+            [50, 75, 100, 50, 75, 100],
+            account.publicKey,
+            verifyingContract,
+            accounts[0],
+            zkAssetMintableContract,
+        );
+        const goodNoteHashes = noteHashes.slice(0, 2);
+        const badNoteHashes = noteHashes.slice(3);
+        // const badNoteHashes = Array(3).fill().map(() => padLeft(randomHex(32), '64'));
+        console.log(badNoteHashes);
+        const spender = account.address;
+        const status = true;
+        const { signature } = aztec.signer.signMultipleNotesForBatchConfidentialApprove(
+            verifyingContract,
+            goodNoteHashes,
+            spender,
+            account.privateKey,
+        );
+        await walletContract.batchValidateSignature(badNoteHashes, spender, status, signature, zkAssetMintableContract.address);
+        // await walletContract.batchValidateSignature(noteHashes.concat(badNoteHashes[0]), spender, status, signature, zkAssetMintableContract.address);
+        // await walletContract.batchValidateSignature([], spender, status, signature, zkAssetMintableContract.address);
+        // await walletContract.batchValidateSignature([0,1,2], spender, status, signature, zkAssetMintableContract.address);
     });
 
     // TODO: tests on empty notesArray
