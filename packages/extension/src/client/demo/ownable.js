@@ -25,7 +25,7 @@ export default async function demoOwnable({
     } = Web3Service.account;
 
 
-    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = '0xeF54077e2CC474271d6De8C696b1fF0301a2eD80'; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {

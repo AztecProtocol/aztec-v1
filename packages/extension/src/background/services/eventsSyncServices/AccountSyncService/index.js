@@ -31,6 +31,11 @@ const syncEthAddress = async ({
         lastSyncedBlock = account.blockNumber;
     }
 
+    console.log(`Params for sync account: ${JSON.stringify({
+        address,
+        lastSyncedBlock,
+    })}`);
+
     await manager.sync({
         address,
         lastSyncedBlock,
