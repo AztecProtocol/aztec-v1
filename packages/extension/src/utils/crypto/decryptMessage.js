@@ -1,13 +1,18 @@
 import nacl from './nacl';
-import fromHexString from './fromHexString';
+import toUint8Array from './toUint8Array';
 import {
     errorLog,
 } from '~utils/log';
 
 export default function decryptMessage(privateKey, encryptedData) {
+    if (typeof encryptedData === 'string') {
+        errorLog('Please provide an EncryptedMessage object as the second parameter.');
+        return '';
+    }
+    const privateKeyHash = privateKey.replace(/^0x/, '');
     let output;
     try {
-        const privateKeyBase64 = Buffer.from(privateKey, 'hex').toString('base64');
+        const privateKeyBase64 = Buffer.from(privateKeyHash, 'hex').toString('base64');
         const privateKeyUint8Array = nacl.util.decodeBase64(privateKeyBase64);
         const recieverEncryptionPrivateKey = nacl
             .box
@@ -18,9 +23,9 @@ export default function decryptMessage(privateKey, encryptedData) {
         const encryptedMessage = 'export' in encryptedData
             ? encryptedData.export()
             : encryptedData;
-        const nonce = fromHexString(encryptedMessage.nonce);
-        const ciphertext = fromHexString(encryptedMessage.ciphertext);
-        const ephemPublicKey = fromHexString(encryptedMessage.ephemPublicKey);
+        const nonce = toUint8Array(encryptedMessage.nonce);
+        const ciphertext = toUint8Array(encryptedMessage.ciphertext);
+        const ephemPublicKey = toUint8Array(encryptedMessage.ephemPublicKey);
 
         const decryptedMessage = nacl.box.open(
             ciphertext,

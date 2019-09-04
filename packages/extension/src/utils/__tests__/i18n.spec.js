@@ -1,21 +1,16 @@
-import { stub } from 'sinon';
 import I18n from '../I18n';
 
 const i18n = new I18n();
 
 describe('basic usage of i18n', () => {
-    let consoleStub;
     let errors = [];
+    const mockError = jest.spyOn(console, 'error')
+        .mockImplementation(message => errors.push(message));
 
     beforeEach(() => {
-        errors = [];
-        consoleStub = stub(console, 'error');
-        consoleStub.callsFake(message => errors.push(message));
-    });
-
-    afterEach(() => {
-        consoleStub.restore();
+        mockError.mockClear();
         i18n.flush();
+        errors = [];
     });
 
     it('returns the key back when no value of that key is in its phrases', () => {
@@ -139,5 +134,37 @@ describe('with variables', () => {
         expect(i18n.t('gift', 1)).toBe('a gift');
         expect(i18n.t('gift', 2)).toBe('2 gifts');
         expect(i18n.t('gift', 10)).toBe('many gifts');
+    });
+
+    it('also use options.count as key to generate string for different counts', () => {
+        const phrases = {
+            gift: {
+                _: 'many gifts for %{name}',
+                0: 'no gifts for %{name}',
+                1: 'a gift for %{name}',
+                2: '2 gifts for %{name}',
+            },
+        };
+        i18n.register(phrases);
+
+        expect(i18n.t('gift', {
+            name: 'Ron',
+        })).toBe('many gifts for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 0,
+        })).toBe('no gifts for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 1,
+        })).toBe('a gift for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 2,
+        })).toBe('2 gifts for Ron');
+        expect(i18n.t('gift', {
+            name: 'Ron',
+            count: 10,
+        })).toBe('many gifts for Ron');
     });
 });

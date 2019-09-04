@@ -1,20 +1,17 @@
-import { stub } from 'sinon';
-import dataKey from '../dataKey';
+import dataKey, {
+    getPrefix,
+} from '../dataKey';
+
+let warnings = [];
+const consoleSpy = jest.spyOn(console, 'warn')
+    .mockImplementation(message => warnings.push(message));
+
+beforeEach(() => {
+    consoleSpy.mockClear();
+    warnings = [];
+});
 
 describe('dataKey', () => {
-    let consoleStub;
-    let warnings = [];
-
-    beforeEach(() => {
-        consoleStub = stub(console, 'warn');
-        consoleStub.callsFake(message => warnings.push(message));
-    });
-
-    afterEach(() => {
-        consoleStub.restore();
-        warnings = [];
-    });
-
     it('return a key for storage using pattern defined in config/dataKey', () => {
         expect(dataKey(
             'asset',
@@ -112,5 +109,27 @@ describe('dataKey', () => {
             },
         )).toBe('item_{id}_abc');
         expect(warnings.length).toBe(2);
+    });
+});
+
+describe('getPrefix', () => {
+    it('get prefix of a dataKey from pattern defined in config/dataKey', () => {
+        expect(getPrefix('note')).toBe('n:');
+        expect(getPrefix('asset')).toBe('a:');
+    });
+
+    it('get prefix from a custom pattern', () => {
+        expect(getPrefix('note{noteId}')).toBe('note');
+        expect(getPrefix('asset:{userId}{assetId}')).toBe('asset:');
+    });
+
+    it('cannot get prefix from a pattern with fixed symbol in the middle', () => {
+        expect(getPrefix('note{noteId}:{count}')).toBe('');
+        expect(getPrefix('asset:{userId}a')).toBe('');
+    });
+
+    it('cannot get prefix from a pattern without fixed symbol at the beginning', () => {
+        expect(getPrefix('{noteId}a{count}')).toBe('');
+        expect(getPrefix('{noteId}a')).toBe('');
     });
 });

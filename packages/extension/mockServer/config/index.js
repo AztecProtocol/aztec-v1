@@ -3,7 +3,7 @@ import {
     USER_PUBLIC_KEY_LENGTH,
     VIEWING_KEY_LENGTH,
     METADATA_AZTEC_DATA_LENGTH,
-    METADATA_VAR_LEN_LENGTH,
+    DYNAMIC_VAR_CONFIG_LENGTH,
 } from '../../src/config/constants';
 
 export const numberOfAccount = 10;
@@ -25,5 +25,5 @@ export {
     USER_PUBLIC_KEY_LENGTH,
     VIEWING_KEY_LENGTH,
     METADATA_AZTEC_DATA_LENGTH,
-    METADATA_VAR_LEN_LENGTH,
+    DYNAMIC_VAR_CONFIG_LENGTH,
 };

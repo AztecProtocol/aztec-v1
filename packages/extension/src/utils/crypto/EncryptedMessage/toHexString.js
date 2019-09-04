@@ -6,8 +6,8 @@ export default function toHexString(encryptedData) {
     } = encryptedData;
 
     return [
-        ciphertext,
+        nonce,
         ephemPublicKey.slice(2),
-        nonce.slice(2),
+        ciphertext.slice(2),
     ].join('');
 }

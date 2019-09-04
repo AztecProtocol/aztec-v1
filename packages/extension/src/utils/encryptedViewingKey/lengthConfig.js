@@ -1,5 +1,6 @@
+import lengthConfig from '../crypto/lengthConfig';
+
 export default {
+    ...lengthConfig,
     ciphertext: 308,
-    ephemPublicKey: 64,
-    nonce: 48,
 };

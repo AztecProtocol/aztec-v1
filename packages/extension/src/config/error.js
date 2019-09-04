@@ -24,6 +24,7 @@ export default {
             publicKey: "Account '%{account}' does not have a public key.",
             publicKeys: '%{count} accounts do not have public keys.',
         },
+        duplicated: 'Your address has been registered with another password.',
         noteAccess: "Account '%{account}' does not have access to note '%{noteId}'",
         incorrect: {
             password: 'Could not decrypt key vault with password.',
@@ -53,7 +54,14 @@ export default {
         },
         pick: {
             sum: 'Asset balance is not enough to generate a note with value %{value}.',
-            count: 'Cannot generate a new note with %{count} notes that sum to %{value}.',
+            minSum: {
+                _: 'Cannot pick %{count} notes whose sum is equal to or larger than %{value}.',
+                1: 'Cannot pick a note whose value is equal to or larger than %{value}.',
+            },
+            count: {
+                _: 'Total number of notes is not enough to pick %{count} notes.',
+                1: 'Total number of notes is not enough to pick a note.',
+            },
         },
     },
     utilityNote: {

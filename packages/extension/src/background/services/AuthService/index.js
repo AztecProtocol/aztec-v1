@@ -75,7 +75,16 @@ const AuthService = {
             session,
         });
 
-        return session;
+        const {
+            pwDerivedKey,
+        } = session;
+
+        return {
+            ...session,
+            pwDerivedKey: pwDerivedKey
+                ? new Uint8Array(Object.values(JSON.parse(pwDerivedKey)))
+                : '',
+        };
     },
     registerExtension: async ({
         password,
@@ -142,20 +151,32 @@ const AuthService = {
             || user.registeredAt !== registeredAt
         ) {
             user = {
+                ...user,
                 address,
                 linkedPublicKey,
                 registeredAt,
             };
 
-            await userModel.set(
-                user,
-                {
-                    forceReplace: true,
-                },
-            );
+            if (!user) {
+                await userModel.set(user);
+            } else {
+                await userModel.update(user);
+            }
         }
 
         return user;
+    },
+    registerDomain: async (domainName) => {
+        await domainModel.set(
+            {
+                domain: domainName,
+            },
+            {
+                ignoreDuplicate: true,
+            },
+        );
+
+        return domainModel.get({ domain: domainName });
     },
     logout: async () => remove('session'),
     login: async ({ password, address }) => {

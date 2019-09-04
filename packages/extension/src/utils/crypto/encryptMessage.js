@@ -2,7 +2,7 @@ import {
     errorLog,
 } from '~utils/log';
 import nacl from './nacl';
-import fromHexString from './fromHexString';
+import toUint8Array from './toUint8Array';
 import toHexString from './toHexString';
 import EncryptedMessage from './EncryptedMessage';
 
@@ -11,7 +11,7 @@ export default function encryptMessage(publicKey, messsage) {
     let pubKeyUInt8Array;
 
     try {
-        pubKeyUInt8Array = fromHexString(publicKey);
+        pubKeyUInt8Array = toUint8Array(publicKey);
     } catch (error) {
         errorLog('Bad public key', error);
         return null;
