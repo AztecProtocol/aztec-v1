@@ -18,11 +18,18 @@ const helpers = require('../helpers/wallet');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-// const alice = secp256k1.generateAccount();
-// const bob = secp256k1.generateAccount();
+const bip39 = require('bip39');
+const hdkey = require('ethereumjs-wallet/hdkey');
 
-const alice = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_0);
-const bob = secp256k1.accountFromPrivateKey(process.env.GANACHE_TESTING_ACCOUNT_1);
+// set MNEMONIC in packages/protocol/.env, packages/protocol/scripts/test.js will automatically start ganache using it
+const mnemonic = process.env.MNEMONIC;
+const seed = bip39.mnemonicToSeed(mnemonic);
+const hdwallet = hdkey.fromMasterSeed(seed);
+const aliceWallet = hdwallet.derivePath("m/44'/60'/0'/0/0").getWallet();
+const bobWallet = hdwallet.derivePath("m/44'/60'/0'/0/1").getWallet();
+
+const alice = secp256k1.accountFromPrivateKey(aliceWallet.getPrivateKeyString());
+const bob = secp256k1.accountFromPrivateKey(bobWallet.getPrivateKeyString());
 const eve = secp256k1.generateAccount(); // attacker
 
 contract.only('Wallet', async (accounts) => {
@@ -35,8 +42,9 @@ contract.only('Wallet', async (accounts) => {
         zkAssetMintableContract = await ZkAssetMintable.new(ace.address, '0x0000000000000000000000000000000000000000', 1, 0, []);
         walletContract = await Wallet.new(ace.address, { from: accounts[0] });
         await walletContract.transferOwnership(alice.address);
-        expect(await walletContract.owner()).to.equal(alice.address);
-        // expect(accounts[0]).to.equal(alice.address);
+        expect((await walletContract.owner())).to.equal(alice.address);
+        expect(accounts[0]).to.equal(alice.address);
+        expect(accounts[1]).to.equal(bob.address);
     });
 
     it('owner of the contract should be able to mint notes that are owned by the contract', async () => {
@@ -430,7 +438,7 @@ contract.only('Wallet', async (accounts) => {
         await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address), 'signer address cannot be 0');
     });
 
-    it.only('validation should fail when the note hashes presented are different', async () => {
+    it('validation should fail when the note hashes presented are different', async () => {
         const account = alice;
         const spender = account.address;
         const verifyingContract = walletContract.address;

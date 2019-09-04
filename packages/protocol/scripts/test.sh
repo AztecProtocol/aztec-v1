@@ -20,7 +20,27 @@ ganache_running() {
 }
 
 start_ganache() {
-  ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" > /dev/null &
+  file_name=".env"
+  if [ -f $file_name ]; then
+    export ENV_EXISTS=1
+  else
+    export ENV_EXISTS=0
+    cp ".env.example" ".env"
+    echo "Temporarily copied .env.example to .env"
+  fi
+  while read line; do
+    # if [[ $line != \#* ]]; then          # (don't export comments)
+    # if [[ $line == INFURA_API_KEY=* ]] | [[ $line == MNEMONIC=* ]] || [[ $line == PRIVATE_KEY=* ]]; then
+    if [[ $line == MNEMONIC=* ]]; then
+      export "$line"
+    fi
+  done <<< "$(cat .env)"
+
+  if [[ -z "$MNEMONIC" ]]; then
+    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" > /dev/null &
+  else
+    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" -m="$MNEMONIC" > /dev/null &
+  fi
 
   ganache_pid=$!
 
@@ -50,7 +70,7 @@ fi
 
 if [ "$MODE" = "coverage" ]; then
   ./node_modules/.bin/istanbul report html lcov
-  
+
   if [ "$CI" = true ]; then
     cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
   fi
@@ -58,10 +78,15 @@ fi
 
 if [ "$MODE" = "profile" ]; then
   ./node_modules/.bin/istanbul report html lcov
-  
+
   if [ "$CI" = true ]; then
     cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
   fi
+fi
+
+if [ $ENV_EXISTS -eq 0 ]; then
+  rm ".env"
+  echo "Deleted added .env"
 fi
 
 
