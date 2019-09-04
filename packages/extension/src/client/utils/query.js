@@ -1,4 +1,8 @@
 import insertVariablesToGql from '~utils/insertVariablesToGql';
+import {
+    clientEvent,
+} from '~config/event';
+import toLowerCaseAddress from '~utils/address';
 import Web3Service from '../services/Web3Service';
 import postToContentScript from './postToContentScript';
 import ApiError from './ApiError';
@@ -16,7 +20,7 @@ const handleResponse = (response) => {
     return response;
 };
 
-export default async function query(queryStr) {
+export default async function query({ type, args }) {
     /* TODO
      * error {
      *      type
@@ -33,12 +37,12 @@ export default async function query(queryStr) {
 
     return postToContentScript(
         {
-            query: insertVariablesToGql(
-                queryStr,
-                {
-                    currentAddress: address.toLowerCase() || '',
-                },
-            ),
+            type: clientEvent,
+            query: type,
+            args: {
+                ...args,
+                currentAddress: toLowerCaseAddress(address),
+            },
         },
         handleResponse,
     );

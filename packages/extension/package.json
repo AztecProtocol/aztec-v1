@@ -85,6 +85,7 @@
         "eslint-import-resolver-alias": "^1.1.2",
         "eslint-plugin-jsx-a11y": "^6.2.3",
         "eslint-plugin-react": "^7.14.2",
+        "jest-marbles": "^2.4.1",
         "mocha": "^6.1.4",
         "node-fetch": "^2.6.0",
         "remove-flow-types-loader": "^1.1.0",

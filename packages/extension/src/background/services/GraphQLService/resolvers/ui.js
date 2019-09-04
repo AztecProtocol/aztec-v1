@@ -22,15 +22,15 @@ const uiResolvers = {
         login: ensureAccount(async (_, args) => ({
             session: await AuthService.login(args),
         })),
-        // TODO: call registerDomain from UI
-        approveAssetForDomain: ensureAccount(async (_, args) => {
-            await AuthService.enableAssetForDomain(args);
+        registerDomain: ensureAccount(async (_, args) => {
+            await AuthService.registerDomain(args.domain);
             return {
-                asset: await assetModel.get({
-                    address: args.asset,
-                }),
+                success: true,
             };
         }),
+        createProof,
+        sendTransaction,
+        approveERC20,
     },
 };
 

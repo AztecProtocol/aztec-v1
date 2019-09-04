@@ -5,7 +5,7 @@ import {
 export default function postToClientScript(requestId, response) {
     window.postMessage({
         type: contentEvent,
-        responseId: requestId,
+        requestId,
         response,
     }, '*');
 }

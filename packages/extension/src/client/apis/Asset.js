@@ -32,25 +32,10 @@ export default class Asset {
     }
 
     refresh = async () => {
-        const {
-            assetResponse,
-        } = await query(`
-            assetResponse: asset(id: "${this.id}") {
-                asset {
-                    address
-                    linkedTokenAddress
-                    scalingFactor
-                    canAdjustSupply
-                    canConvert
-                }
-                error {
-                    type
-                    key
-                    message
-                    response
-                }
-            }
-        `) || {};
+        const { assetResponse } = await query({
+            type: 'asset',
+            args: { id: this.id },
+        }) || {};
 
         const {
             asset,
@@ -65,19 +50,10 @@ export default class Asset {
     async balance() {
         const {
             assetResponse,
-        } = await query(`
-            assetResponse: asset(id: "${this.id}") {
-                asset {
-                    balance
-                }
-                error {
-                    type
-                    key
-                    message
-                    response
-                }
-            }
-        `) || {};
+        } = await query({
+            type: 'asset',
+            args: { id: this.id },
+        }) || {};
 
         const {
             asset,
@@ -233,6 +209,36 @@ export default class Asset {
             sender,
             numberOfInputNotes,
             numberOfOutputNotes,
+        },
+    );
+
+    /**
+     *
+     * Swap
+     *
+     * - swap               object containing the notes to be swapped
+     *       makerBid                   Note Hash of the makers bid
+     *       takerBid                   Note Hash of the takers bid
+     *       takerAsk                   Note Hash of the takers ask
+     *       makerAsk                   Note Hash of the makers ask
+     *
+     * - options
+     *       sender (Address):          The proof sender.
+     *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
+     *                                  Will use extension's or user's setting if undefined.
+     *       numberOfOutputNotes (Int): Number of new notes for each transaction.
+     *                                  Unless numberOfOutputNotes is defined in that transaction.
+     *
+     * @returns ([Notes!])
+     */
+    swap = async (swap, {
+        sender = '',
+    } = {}) => proofFactory(
+        'swap',
+        {
+            assetAddress: this.address,
+            swap,
+            sender,
         },
     );
 
