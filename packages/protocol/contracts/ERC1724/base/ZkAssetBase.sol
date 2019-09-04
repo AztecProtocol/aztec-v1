@@ -333,6 +333,57 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     }
 
     /**
+    * @dev Revoke note viewing access for all previously approved addresses
+    * @param noteHash - hash of the note for which previously approved addresses are being removed
+    */
+    function disapproveAddresses(bytes32 noteHash) internal {
+        // Wipe the noteAccess mapping for this particular noteHash
+        for (uint256 i = 0; i < approvedAddresses[noteHash].length; i += 1) {
+            noteAccess[noteHash][approvedAddresses[i]] = false;
+        }
+    }
+
+    /**
+    * @dev Add approved addresses to a noteAccess mapping and to the global collection of addresses that
+    * have been approved
+    * @param metaData - metaData of a note, which contains addresses to be approved
+    * @param noteHash - hash of an AZTEC note, a unique identifier
+    */
+    function approveAddresses(bytes memory metaData, bytes32 noteHash) internal {
+        // Extract the addresses to be approved, from the note metaData
+        address[] memory extractedAddresses = extractAddresses(metaData);
+
+        // Grant approval
+        for (uint256 i = 0; i < extractedAddresses.length; i += 1) {
+            address recoveredAddress = extractedAddresses[i];
+            noteAccess[noteHash][recoveredAddress] = true;
+            approvedAddresses.push(recoveredAddress);
+            emit ApprovedAddress(recoveredAddress, noteHash, address(this));
+        }
+    }
+
+        // if (canAdjustSupply == true) {
+        //     if ((confidentialTotalMinted != noteHash || confidentialTotalBurned != noteHash) ){
+        //         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
+        //         require(status == 1, "only unspent notes can be approved");
+        //         require(
+        //             noteAccess[noteHash] & msg.sender == true || noteOwner == msg.sender,
+        //             'caller does not have permission to update metaData'
+        //         );  
+        //         emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
+        //     }
+        // } else {
+        //     ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
+        //     require(status == 1, "only unspent notes can be approved");  
+        //     require(
+        //         noteAccess[noteHash][msg.sender] == true || noteOwner == msg.sender,
+        //         'caller does not have permission to update metaData'
+        //     );  
+        //     emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
+        // }       
+   
+
+    /**
     * @dev Emit events for all input notes, which represent notes being destroyed
     * and removed from the note registry
     *
@@ -354,9 +405,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     function logOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
-            // NoteAccess individualNoteAccessStruct = NoteAccess(individualNoteAccessMapping);
-            // noteAccessRegistry[noteHash] = individualNoteAccessStruct;
             emit CreateNote(noteOwner, noteHash, metadata);
+            // approveAddresses(metadata, noteHash);
         }
     }
 }
