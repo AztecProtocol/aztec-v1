@@ -9,6 +9,7 @@ import Login from './pages/Login/index.jsx';
 import Home from './pages/Home/index.jsx';
 import Register from './pages/Register/index.jsx';
 import ApproveAsset from './pages/ApproveAsset/index.jsx';
+import Deposit from './pages/Deposit/index.jsx';
 
 import actionModel from '~database/models/action';
 
@@ -17,6 +18,7 @@ const actionToRouteMap = {
     'ui.register.extension': '/register',
     'ui.asset.approve': '/approveAsset',
     'ui.account.login': '/login',
+    'ui.asset.deposit': '/deposit',
 
 };
 
@@ -65,6 +67,10 @@ class App extends Component {
                     <Route
                         path="/approveAsset"
                         render={() => (<ApproveAsset action={this.state.action} />)}
+                    />
+                    <Route
+                        path="/deposit"
+                        render={() => (<Deposit action={this.state.action} />)}
                     />
 
                 </Block>

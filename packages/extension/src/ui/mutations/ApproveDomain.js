@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
 export default gql`
-  mutation registerDomain($domain: String! $address: String!) {
-    registerDomain(domain: $domain, currentAddress: $address) {
+  mutation registerDomain($domain: String! $currentAddress: String!) {
+    registerDomain(domain: $domain, currentAddress: $currentAddress) {
         success
     }
   }

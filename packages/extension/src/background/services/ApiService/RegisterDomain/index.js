@@ -4,7 +4,7 @@ import AuthService from '../../AuthService';
 const registerDomain = async (query, connection) => {
     const registeredDomain = await AuthService.getRegisteredDomain(query.domain);
 
-    if (!registerDomain) {
+    if (!registeredDomain) {
         connection.UiActionSubject.next({
             type: 'ui.asset.approve',
             requestId: query.requestId,
@@ -12,7 +12,7 @@ const registerDomain = async (query, connection) => {
             data: {
                 response: {
                     domain: query.domain,
-                    ...account,
+                    ...query.args,
                 },
                 requestId: query.requestId,
             },

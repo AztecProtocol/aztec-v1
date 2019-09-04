@@ -10,10 +10,10 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import actionModel from '~database/models/action';
 import ApproveDomainMutatuon from '../../mutations/ApproveDomain';
 
-import './ApproveDomain.css';
+import './Deposit.css';
 
 
-class ApproveAssetForDomain extends Component {
+class Deposit extends Component {
     state ={
 
     }
@@ -23,20 +23,13 @@ class ApproveAssetForDomain extends Component {
             action: {
                 data: {
                     requestId,
-                    response: {
-                        domain,
-                        asset,
-                        currentAddress,
-                    },
+                    response,
                 },
             },
         } = this.props;
 
         const data = await mutation({
             variables: {
-                domain,
-                asset,
-                currentAddress,
             },
         });
         browser.runtime.sendMessage({
@@ -65,17 +58,10 @@ class ApproveAssetForDomain extends Component {
             );
         }
 
-        // we want to always render a router depending on the page we want to handle the url
-        // we then render a react router and parse the query string for handling actions.
-        // the extension ui will have a different flow
-
         const {
             action: {
                 data: {
-                    response: {
-                        domain,
-                        asset,
-                    },
+                    response,
                 },
             },
         } = this.props;
@@ -88,36 +74,18 @@ class ApproveAssetForDomain extends Component {
             >
 
                 <Text
-                    text="The page is requesting access to your AZTEC assets"
+                    text="Deposit Proof"
                     size="l"
                     color="primary"
                     weight="semibold"
                 />
-                <Text
-                    text={`${domain} is requesting the access.`}
-                    showEllipsis
-                    color="label"
-                    className="wrap"
-                    size="s"
-                    weight="light"
+                <Button
+                    text="Generate"
+                    onClick={() => this.__handleApproveDomain(mutation)}
                 />
-                <Mutation mutation={ApproveDomainMutatuon}>
-                    {(mutation, { data }) => (
-                        <div>
-                            <br />
-                            <br />
-                            <Button
-                                text="Approve"
-                                onClick={() => this.__handleApproveDomain(mutation)}
-                            />
-                        </div>
-                    )
-                    }
-
-                </Mutation>
             </Block>
         );
     }
 }
 
-export default ApproveAssetForDomain;
+export default Deposit;

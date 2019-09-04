@@ -21,7 +21,6 @@ const handleResponse = (response) => {
 };
 
 export default async function query({ type, args }) {
-    console.log(type, args, arguments);
     /* TODO
      * error {
      *      type

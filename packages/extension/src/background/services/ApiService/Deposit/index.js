@@ -21,6 +21,7 @@ const validateDepositProof = async (query, connection) => {
             numberOfOutputNotes = 2,
         },
     } = query;
+    console.log(query.args);
     const fromAddress = address(from);
 
     if (from && !fromAddress) {
@@ -36,14 +37,15 @@ const validateDepositProof = async (query, connection) => {
         });
     }
 
-    const noteOwners = await transactions.map(async transaction => validateExtensionAccount(transaction.owner));
+    // const noteOwners = await transactions.map(async transaction => validateExtensionAccount(transaction.owner));
+    // const validatedAccount = await validateExtensionAccount(from);
 
-    return notewOwners;
+    // return validatedAccount;
 };
 
 const depositProofUi = (query, connection) => async (notesOwners) => {
     connection.UiActionSubject.next({
-        type: 'ui.deposit',
+        type: 'ui.asset.deposit',
         requestId: query.requestId,
         clientId: query.clientId,
         data: {

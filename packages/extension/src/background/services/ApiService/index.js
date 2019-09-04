@@ -8,7 +8,7 @@ class API {
     constructor() {
         this.registerExtension = registerExtension;
         this.registerDomain = registerDomain;
-        this.createAndSendDeposit = createAndSendDeposit;
+        this.createAndSendDepositProof = createAndSendDeposit;
         this.asset = asset;
     }
 
