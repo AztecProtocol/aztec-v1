@@ -11,8 +11,5 @@ module.exports = {
     // Under this mode, files are automatically strict and less likely to pollute global scope.
     sourceType: 'unambiguous',
     presets: ['@babel/preset-env'],
-    plugins: [
-        '@babel/plugin-transform-runtime',
-        '@babel/plugin-proposal-object-rest-spread',
-    ],
+    plugins: ['@babel/plugin-transform-runtime', '@babel/plugin-proposal-object-rest-spread'],
 };

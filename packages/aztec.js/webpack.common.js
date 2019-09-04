@@ -24,7 +24,7 @@ module.exports = {
     },
     plugins: [
         new webpack.DefinePlugin({
-            'regeneratorRuntime': 'var unusedRegeneratorRuntime',
+            regeneratorRuntime: 'var unusedRegeneratorRuntime',
         }),
     ],
     output: {
