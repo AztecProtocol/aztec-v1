@@ -51,8 +51,8 @@ export default {
         asset: ensureDomainPermission(async (_, args) => ({
             asset: await syncAssetInfo(args.id),
         })),
-            note: await syncNoteInfo(args.id, ctx),
         note: ensureDomainPermission(async (_, args, ctx) => ({
+            note: await syncNoteInfo(args, ctx),
         })),
         utilityNote: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncUtilityNoteInfo(args.id, ctx),
