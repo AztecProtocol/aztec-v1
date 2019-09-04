@@ -40,6 +40,19 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
 };
 
 /**
+ * Generate EIP712 domain parameters for Wallet.sol
+ * @method generateWalletDomainParams
+ * @param {string} verifyingContract address of target contract
+ * @returns {Object} EIP712 Domain type object
+ */
+signer.generateWalletDomainParams = (verifyingContract) => {
+    return {
+        ...constants.eip712.WALLET_DOMAIN_PARAMS,
+        verifyingContract,
+    };
+};
+
+/**
  * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a
  * ZkAsset. The ZkAsset.confidentialApprove() method must be called when granting note spending permission
  * to a third party and is required in order for ZkAsset.confidentialTransferFrom() to be successful.
@@ -135,7 +148,7 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
  * @param {string} privateKey the private key of message signer
  */
 signer.signMultipleNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, privateKey) => {
-    const domain = signer.generateZKAssetDomainParams(verifyingContract);
+    const domain = signer.generateWalletDomainParams(verifyingContract);
     const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
     const status = true;
     const message = {

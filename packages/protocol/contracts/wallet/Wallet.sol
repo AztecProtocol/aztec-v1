@@ -18,7 +18,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
     address public aceAddress;
 
     // EIP712 Domain Name value
-    string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
+    string constant internal EIP712_DOMAIN_NAME = "WALLET";
 
     // EIP712 Domain Version value
     string constant internal EIP712_DOMAIN_VERSION = "1";

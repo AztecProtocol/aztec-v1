@@ -161,6 +161,10 @@ constants.eip712 = {
         primaryType: 'MultipleNoteSignature',
     },
     MULTIPLE_NOTE_SIGNATURE_TYPE_HASH,
+    WALLET_DOMAIN_PARAMS: {
+        name: 'WALLET',
+        version: '1',
+    },
     ZK_ASSET_DOMAIN_PARAMS: {
         name: 'ZK_ASSET',
         version: '1',
