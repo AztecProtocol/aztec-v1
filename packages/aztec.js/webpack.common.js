@@ -1,7 +1,8 @@
+const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-    entry: ['@babel/polyfill', './src/index.js'],
+    entry: ['./src/index.js'],
     module: {
         rules: [
             {
@@ -21,6 +22,11 @@ module.exports = {
             },
         ],
     },
+    plugins: [
+        new webpack.DefinePlugin({
+            'regeneratorRuntime': 'var unusedRegeneratorRuntime',
+        }),
+    ],
     output: {
         path: path.resolve(__dirname, 'dist'),
         library: 'aztec.js',
