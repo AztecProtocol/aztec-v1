@@ -22,6 +22,7 @@ const uiResolvers = {
         login: ensureAccount(async (_, args) => ({
             session: await AuthService.login(args),
         })),
+        // TODO: call registerDomain from UI
         approveAssetForDomain: ensureAccount(async (_, args) => {
             await AuthService.enableAssetForDomain(args);
             return {

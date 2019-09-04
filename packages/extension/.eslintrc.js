@@ -19,6 +19,7 @@ module.exports = {
                     ['~background', path.resolve(__dirname, './src/background')],
                     ['~content', path.resolve(__dirname, './src/content')],
                     ['~client', path.resolve(__dirname, './src/client')],
+                    ['~helpers', path.resolve(__dirname, './tests/helpers')],
                 ],
                 extensions: ['.js'],
             },

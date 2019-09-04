@@ -8,8 +8,18 @@ export default async function decryptViewingKey(viewingKey, ownerAddress) {
     const keyStore = await AuthService.getKeyStore();
     const {
         pwDerivedKey,
-    } = await AuthService.getSession(ownerAddress);
-    const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
+    } = await AuthService.getSession(ownerAddress) || {};
+    if (!keyStore || !pwDerivedKey) {
+        return '';
+    }
 
-    return fromHexString(viewingKey).decrypt(privateKey);
+    let decryptedViewingKey;
+    try {
+        const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
+        decryptedViewingKey = fromHexString(viewingKey).decrypt(privateKey);
+    } catch (e) {
+        return '';
+    }
+
+    return decryptedViewingKey;
 }

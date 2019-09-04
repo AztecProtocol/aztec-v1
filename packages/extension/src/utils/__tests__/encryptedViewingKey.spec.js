@@ -1,4 +1,6 @@
-import { stub } from 'sinon';
+import {
+    userAccount,
+} from '~helpers/testUsers';
 import {
     REAL_VIEWING_KEY_LENGTH,
     VIEWING_KEY_LENGTH,
@@ -6,33 +8,24 @@ import {
 import {
     randomId,
 } from '~utils/random';
-import generateTestingKeys from './generateTestingKeys';
 import encryptedViewingKey, {
     fromHexString,
 } from '../encryptedViewingKey';
 import lengthConfig from '../encryptedViewingKey/lengthConfig';
 
-describe('encryptedViewingKey', () => {
-    let publicKey;
-    let privateKey;
-    let consoleStub;
-    let warnings = [];
+const {
+    linkedPublicKey: publicKey,
+    linkedPrivateKey: privateKey,
+} = userAccount;
 
-    beforeAll(async () => {
-        ({
-            publicKey,
-            privateKey,
-        } = await generateTestingKeys());
-    });
+describe('encryptedViewingKey', () => {
+    let warnings = [];
+    const warnSpy = jest.spyOn(console, 'warn')
+        .mockImplementation(message => warnings.push(message));
 
     beforeEach(() => {
+        warnSpy.mockClear();
         warnings = [];
-        consoleStub = stub(console, 'warn');
-        consoleStub.callsFake(message => warnings.push(message));
-    });
-
-    afterEach(() => {
-        consoleStub.restore();
     });
 
     const realViewingKey = `0x${randomId(REAL_VIEWING_KEY_LENGTH)}`;

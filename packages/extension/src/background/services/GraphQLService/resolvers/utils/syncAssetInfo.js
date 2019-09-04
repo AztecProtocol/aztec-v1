@@ -4,7 +4,15 @@ import {
     argsError,
 } from '~utils/error';
 
-export default async function syncAssetInfo(address) {
+export default async function syncAssetInfo(args) {
+    const {
+        id: address,
+    } = args;
+
+    if (!address) {
+        return null;
+    }
+
     let asset = await assetModel.get({
         address,
     });

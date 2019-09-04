@@ -24,6 +24,6 @@ export const unknownError = (message, response) => ({
         type: 'UNKNOWN',
         key: message,
         message,
+        response,
     },
-    response,
 });

@@ -1,23 +1,16 @@
-import {
-    spy,
-} from 'sinon';
 import * as storage from '~utils/storage';
 import createOrUpdateAsset from '../addNote/createOrUpdateAsset';
 
+const setSpy = jest.spyOn(storage, 'set');
+
 jest.mock('~utils/storage');
 
-describe('createOrUpdate', () => {
-    let set;
+beforeEach(() => {
+    storage.reset();
+    setSpy.mockClear();
+});
 
-    beforeEach(() => {
-        set = spy(storage, 'set');
-    });
-
-    afterEach(() => {
-        set.restore();
-        storage.reset();
-    });
-
+describe('createOrUpdateAsset', () => {
     const assets = [
         {
             address: '0xabc',
@@ -87,15 +80,14 @@ describe('createOrUpdate', () => {
 
     it('will not call set when adding existing asset to storage', async () => {
         await createOrUpdateAsset(assets[0]);
-        const numberOfSet0 = set.callCount;
-        expect(numberOfSet0 > 0).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
 
+        setSpy.mockClear();
         await createOrUpdateAsset(assets[0]);
-        const numberOfSet1 = set.callCount;
-        expect(numberOfSet1 === numberOfSet0).toBe(true);
+        expect(setSpy).not.toHaveBeenCalled();
 
+        setSpy.mockClear();
         await createOrUpdateAsset(assets[1]);
-        const numberOfSet2 = set.callCount;
-        expect(numberOfSet2 === 2 * numberOfSet1).toBe(true);
+        expect(setSpy).toHaveBeenCalled();
     });
 });

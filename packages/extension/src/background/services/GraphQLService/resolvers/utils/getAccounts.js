@@ -34,12 +34,14 @@ export default async function getAccounts(args) {
         variables,
     }) || {};
 
-    const registeredAccount = accounts || [];
-    if (registeredAccount.length !== addresses.length) {
-        const invalidAccounts = addresses
-            .filter(addr => !registeredAccount.find(a => a.address === addr));
+    const onChainAccounts = accounts || [];
+    const invalidAccounts = addresses
+        .filter((addr) => {
+            const account = onChainAccounts.find(a => a.address === addr);
+            return !account || !account.linkedPublicKey;
+        });
+    if (invalidAccounts.length > 0) {
         throw argsError('account.not.linked', {
-            registeredAccount,
             invalidAccounts,
         });
     }

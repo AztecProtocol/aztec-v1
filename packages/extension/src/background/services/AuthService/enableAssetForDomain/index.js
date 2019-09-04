@@ -1,9 +1,13 @@
+import {
+    warnLog,
+} from '~utils/log';
 import domainModel from '~database/models/domain';
 
 export default async function enableAssetForDomain({
     domain,
     asset: assetAddress,
 }) {
+    warnLog("'enableAssetForDomain' is deprecated. Use AuthService.registerDomain instead.");
     const {
         data,
         modified,

@@ -44,7 +44,9 @@
         "react-router-dom": "^5.0.1",
         "remove-flow-types-loader": "^1.1.0",
         "rxjs": "^6.5.2",
+        "rxjs-marbles": "^5.0.2",
         "scrypt-async": "^2.0.1",
+        "sinon-chrome": "^3.0.1",
         "svg-sprite-loader": "^4.1.6",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
@@ -55,6 +57,7 @@
     },
     "scripts": {
         "build:dev": "webpack --config webpack.dev.js",
+        "generate:testData": "babel-node ./tests/generateTestData",
         "lint": "eslint ./ --color",
         "test": "jest ./src",
         "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",

@@ -1,7 +1,7 @@
 export default function errorResponse(error) {
     const {
         response,
-    } = error;
+    } = error.error;
 
     return {
         error: {

@@ -6,8 +6,7 @@ import {
     fromCode,
 } from '~utils/noteStatus';
 import {
-    ensureUserPermission,
-    ensureEntityPermission,
+    ensureDomainPermission,
 } from '../decorators';
 import getUserSpendingPublicKey from './utils/getUserSpendingPublicKey';
 import getAccounts from './utils/getAccounts';
@@ -44,30 +43,30 @@ export default {
         asset: ({ asset }) => asset && assetModel.get({ id: asset }),
     },
     Query: {
-        user: ensureUserPermission(async (_, args) => ({
+        user: ensureDomainPermission(async (_, args) => ({
             account: await userModel.get({
                 id: (args.id || args.currentAddress).toLowerCase(),
             }),
         })),
-        asset: ensureEntityPermission(async (_, args) => ({
-            asset: await syncAssetInfo(args.id),
+        asset: ensureDomainPermission(async (_, args) => ({
+            asset: await syncAssetInfo(args),
         })),
-        note: ensureEntityPermission(async (_, args, ctx) => ({
-            note: await syncNoteInfo(args.id, ctx),
+        note: ensureDomainPermission(async (_, args, ctx) => ({
+            note: await syncNoteInfo(args, ctx),
         })),
-        utilityNote: ensureUserPermission(async (_, args, ctx) => ({
-            note: await syncUtilityNoteInfo(args.id, ctx),
+        utilityNote: ensureDomainPermission(async (_, args, ctx) => ({
+            note: await syncUtilityNoteInfo(args, ctx),
         })),
-        grantNoteAccessPermission: ensureEntityPermission(async (_, args, ctx) => ({
+        grantNoteAccessPermission: ensureDomainPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),
         })),
-        pickNotesFromBalance: ensureEntityPermission(async (_, args, ctx) => ({
+        pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
         })),
-        account: ensureUserPermission(async (_, args) => ({
+        account: ensureDomainPermission(async (_, args) => ({
             account: await userModel.get({ address: args.currentAddress }),
         })),
-        accounts: ensureUserPermission(async (_, args) => ({
+        accounts: ensureDomainPermission(async (_, args) => ({
             accounts: await getAccounts(args),
         })),
     },
