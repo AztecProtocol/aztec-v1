@@ -3,7 +3,6 @@ import registerDomain from './RegisterDomain';
 import createAndSendDeposit from './Deposit';
 import asset from './Asset';
 
-
 class API {
     constructor() {
         this.registerExtension = registerExtension;

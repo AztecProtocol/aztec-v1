@@ -21,7 +21,6 @@ const validateDepositProof = async (query, connection) => {
             numberOfOutputNotes = 2,
         },
     } = query;
-    console.log(query.args);
     const fromAddress = address(from);
 
     if (from && !fromAddress) {
@@ -36,11 +35,6 @@ const validateDepositProof = async (query, connection) => {
             address: to,
         });
     }
-
-    // const noteOwners = await transactions.map(async transaction => validateExtensionAccount(transaction.owner));
-    // const validatedAccount = await validateExtensionAccount(from);
-
-    // return validatedAccount;
 };
 
 const depositProofUi = (query, connection) => async (notesOwners) => {
@@ -52,42 +46,15 @@ const depositProofUi = (query, connection) => async (notesOwners) => {
             ...query.args,
         },
     });
+
     return await filterStream('UI_RESPONSE', query.requestId, connection.UiResponseSubject.asObservable());
-    // we now no the UI has pressed next
+    // we now know the UI has pressed next
 };
 
-// const constructDepositProof = (query, connection) => async (noteOwners) => {
-//     // we need to construct the notes and the proof
-//     // TODO change create notes to accept note owners
-//     const amount = transactions.reduce((value, tx) => value + tx.amount, 0);
-//     const noteValues = Array.isArray(amount)
-//         ? amount
-//         : randomSumArray(amount, numberOfOutputNotes);
-//     const notes = await createNotes(
-//         noteValues,
-//         spendingPublicKey,
-//         noteOwners,
-//     );
-// };
-
-// const approveACEToSpendERC20 = (query, connection) => async (depositProof) => {
-//     // we need to
-// };
-
-// const publicApprove = (query, connection) => async (depositProof) => {
-//     // we need to validate the resultant note owners
-// };
-
-// const sendDepositProof = (query, connection) => async (depositProof) => {
-//     // we need to validate the resultant note owners
-// };
 
 const createAndSendDepositProof = async (query, connection) => {
     await validateDepositProof(query, connection)
         .then(depositProofUi(query, connection));
-    // .then(approveACEToSpendERC20(query, connection))
-    // .then(publicApprove(query, connection))
-    // .then(sendDepositProof(query, connection));
 };
 
 

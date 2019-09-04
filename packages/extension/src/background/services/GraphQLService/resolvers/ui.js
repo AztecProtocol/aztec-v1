@@ -28,6 +28,9 @@ const uiResolvers = {
                 success: true,
             };
         }),
+        createProof,
+        sendTransaction,
+        approveERC20,
     },
 };
 
