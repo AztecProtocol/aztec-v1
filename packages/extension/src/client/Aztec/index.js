@@ -1,13 +1,28 @@
 /* eslint-disable import/no-unresolved */
+import {
+    mergeMap,
+    map,
+    filter,
+    tap,
+} from 'rxjs/operators';
+import {
+    Subject,
+    from,
+} from 'rxjs';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
 import ZkAssetTemplate from '../../../build/contracts/ZkAssetTemplate';
 import ACE from '../../../build/protocol/ACE';
 import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
+import {
+    actionEvent,
+} from '~config/event';
 /* eslint-enable */
 import assetFactory from '../apis/assetFactory';
 import noteFactory from '../apis/noteFactory';
-import ensureExtensionEnabled from '../auth';
+import { ensureExtensionInstalled, ensureDomainRegistered } from '../auth';
 import Web3Service from '../services/Web3Service';
+import EIP712Service from '../services/EIP712Service';
+
 
 class Aztec {
     constructor() {
@@ -17,6 +32,28 @@ class Aztec {
             // Time to reload your interface with accounts[0]!
             await this.enable();
         });
+        this.setupStreams();
+    }
+
+    setupStreams() {
+        // here we need to enable the subscription to await metamask actions from the extension
+        this.contentScriptSubject = new Subject();
+        this.contentScript$ = this.contentScriptSubject.asObservable();
+
+        window.addEventListener('message', (data) => {
+            this.contentScriptSubject.next(data);
+        });
+
+        this.contentScript$.pipe(
+            filter(({ data: { type } }) => type === actionEvent),
+            mergeMap(data => from(EIP712Service(data))),
+            tap(data => window.postMessage({
+                type: 'ACTION_RESPONSE',
+                requestId: data.requestId,
+                signature: data.signature,
+            }, '*')),
+            // respond to content script
+        ).subscribe();
     }
 
     enable = async ({
@@ -33,12 +70,16 @@ class Aztec {
         });
 
         const {
-            error,
-        } = await ensureExtensionEnabled();
+            error: registerExtensionError,
+        } = await ensureExtensionInstalled();
 
-        if (error) {
+        if (registerExtensionError) {
             throw new Error(error);
         }
+
+        const {
+            error: ensureDomainRegisteredError,
+        } = await ensureDomainRegistered();
 
         this.enabled = true;
 

@@ -7,6 +7,8 @@ import {
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
 import GraphNodeService from '~background/services/GraphNodeService';
+import Web3Service from '~client/services/Web3Service';
+import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
 import NoteService from '~background/services/NoteService';
 
 export default async function init() {
@@ -35,6 +37,12 @@ export default async function init() {
         );
     }
 
+    // this will eventually be passed in from the config
+    await Web3Service.init({
+        provider: 'http://localhost:8545',
+    });
+    // load the contracts
+    Web3Service.registerContract(AZTECAccountRegistry);
 
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),

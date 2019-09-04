@@ -1,5 +1,4 @@
 import {
-    clientEvent,
     contentEvent,
 } from '~config/event';
 import {
@@ -13,12 +12,11 @@ export default async function postToContentScript(data, cb) {
         const responseHandler = async (event) => {
             const {
                 type,
-                responseId,
                 response,
             } = event.data || {};
 
             if (type === contentEvent
-                && responseId === requestId
+                && event.data.requestId === requestId
             ) {
                 window.removeEventListener('message', responseHandler, false);
                 const result = cb
@@ -32,7 +30,6 @@ export default async function postToContentScript(data, cb) {
 
         window.postMessage({
             ...data,
-            type: clientEvent,
             requestId,
         }, '*');
     });

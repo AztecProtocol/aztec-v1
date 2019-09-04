@@ -34,11 +34,10 @@ const uiTypes = gql`
             linkedPublicKey: String!
             registeredAt: BigInt
         ): UserAccountApiResponse
-        approveAssetForDomain(
+        registerDomain(
             domain: String!
-            asset: String!
             currentAddress: String!
-        ): AssetApiResponse
+        ): SubscriptionApiResponse 
     }
 `;
 

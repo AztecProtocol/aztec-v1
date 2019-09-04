@@ -10,6 +10,9 @@ import proveMint from './mint/prove';
 import sendMint from './mint/send';
 import proveBurn from './burn/prove';
 import sendBurn from './burn/send';
+import proveSwap from './swap/prove';
+import approveSwap from './swap/approve';
+import sendSwap from './swap/send';
 import provePrivateRange from './privateRange/prove';
 import yieldNotes from './utils/yieldNotes';
 import makeProofFactory from './utils/makeProofFactory';
@@ -42,6 +45,12 @@ const send = data => ({
     export: () => data.proof,
 });
 
+const swap = data => ({
+    approve: async () => approveSwap(data),
+    send: async () => yieldNotes(sendSwap, data),
+    export: () => data.proof,
+});
+
 const createNoteFromBalance = data => ({
     approve: async () => approveCreateNoteFromBalance(data),
     send: async () => yieldNotes(sendCreateNoteFromBalance, data),
@@ -60,6 +69,7 @@ const proveMapping = {
     burn: proveBurn,
     createNoteFromBalance: proveCreateNoteFromBalance,
     privateRange: provePrivateRange,
+    swap: proveSwap,
 };
 
 const proofResultMapping = {
@@ -70,6 +80,7 @@ const proofResultMapping = {
     burn,
     createNoteFromBalance,
     privateRange,
+    swap,
 };
 
 const proofFactory = makeProofFactory(proveMapping, proofResultMapping);

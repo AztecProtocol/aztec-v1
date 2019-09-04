@@ -26,11 +26,11 @@ class RegisterExtension extends Component {
                 salt: 'salt',
                 domain: window.location.host,
                 seedPhrase: this.state.seedPhrase,
-                address: this.props.action.data.response.currentAddress,
+                address: this.props.action.data.response.address,
             },
         });
         browser.runtime.sendMessage({
-            type: 'UI_CONFIRM',
+            type: 'UI_RESPONSE',
             requestId: this.props.action.data.requestId,
             data,
         });
