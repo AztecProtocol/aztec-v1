@@ -13,8 +13,9 @@ contract MetaDataUtils {
     /**
     * @dev Extract the approved addresses from the metaData
     * @param metaData - metaData containing addresses according to the schema defined in x
+    * @return extractedAddresses - array of addresses extracted from the note metaData
     */
-    function extractAddresses(bytes memory metaData) public returns (bytes32[] memory allAddresses) {
+    function extractAddresses(bytes memory metaData) public returns (address[] memory extractedAddresses) {
         /**
         * Memory map of metaData
         * 0x00 - 0x20 : length of metaData
@@ -32,21 +33,22 @@ contract MetaDataUtils {
             numAddresses := mload(add(metaData, 0xe1))
         }
 
-        allAddresses = new bytes32[](uint256(numAddresses));
+        extractedAddresses = new address[](uint256(numAddresses));
 
         for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
-            bytes32 extractedAddress = extractAddress(metaData, i);
-            allAddresses[i] = extractedAddress;
+            address extractedAddress = extractAddress(metaData, i);
+            extractedAddresses[i] = extractedAddress;
         }
-        return allAddresses;
+        return extractedAddresses;
     }
 
     /**
     * @dev Extract a single approved address from the metaData
     * @param metaData - metaData containing addresses according to the schema defined in x
     * @param addressPos - indexer for the desired address, the one to be extracted
+    * @return desiredAddress - extracted address specified by the inputs to this function
     */
-    function extractAddress(bytes memory metaData, uint256 addressPos) public returns (bytes32 desiredAddress) {
+    function extractAddress(bytes memory metaData, uint256 addressPos) public returns (address desiredAddress) {
 
         assembly {
             desiredAddress := mload(
