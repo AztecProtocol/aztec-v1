@@ -7,29 +7,19 @@ import {
 import {
     mergeMap,
     tap,
-    filter,
     map,
 } from 'rxjs/operators';
 import {
-    errorToActionMap,
-} from '~config/action';
-import {
     clientEvent,
-    contentSubscribeEvent,
-    contentUnsubscribeEvent,
+    actionEvent,
 } from '~config/event';
-import {
-    dataError,
-} from '~utils/error';
 import {
     updateActionState,
     openPopup,
     addDomainData,
-    generateResponseError,
 } from './connectionUtils';
 
 import ApiService from '../services/ApiService';
-
 
 class Connection {
     constructor() {
@@ -42,9 +32,7 @@ class Connection {
         this.actionResponse$ = this.ActionResponseSubject.asObservable();
 
         this.MessageSubject = new Subject();
-
         this.ApiSubject = new Subject();
-
 
         this.ClientResponseSubject = new Subject();
         this.clientResponse$ = this.ClientResponseSubject.asObservable();
@@ -57,10 +45,16 @@ class Connection {
         // 2. trigger the UI popup
 
         this.ui$.pipe(
-            tap(console.log),
             mergeMap(action => from(updateActionState(action))),
             map(openPopup), // we can extend this to automatically close the window after a timeout
         ).subscribe();
+
+        // we need to setup a stream that relays messages to the UI
+        this.message$.pipe(
+            // we filter the stream here
+            filter(({type}=> type === actionEvent)),
+            
+        )
 
         // send the messages to the client
         merge(this.clientResponse$, this.clientAction$).pipe(
@@ -90,6 +84,10 @@ class Connection {
                         this.UiActionSubject.next(data);
                         break;
                     }
+                    case actionEvent: {
+                        this.ClientActionSubject.next(data);
+                        break;
+                    }
                     default: {
                         break;
                     }
@@ -98,12 +96,9 @@ class Connection {
         );
         this.message$.subscribe();
 
-
         this.api$ = this.ApiSubject.asObservable().pipe(
-            tap(console.log),
             mergeMap(data => from(ApiService.run(data, this))),
             tap((data) => {
-                console.log(data);
                 this.ClientResponseSubject.next({
                     ...data,
                     type: 'CLIENT_RESPONSE',
