@@ -9,13 +9,13 @@ pragma solidity >=0.5.0 <= 0.6.0;
 
 
 contract MetaDataUtils {
-
     /**
-    * @dev Extract the approved addresses from the metaData
+    * @dev Extract a single approved address from the metaData
     * @param metaData - metaData containing addresses according to the schema defined in x
-    * @return extractedAddresses - array of addresses extracted from the note metaData
+    * @param addressPos - indexer for the desired address, the one to be extracted
+    * @return desiredAddress - extracted address specified by the inputs to this function
     */
-    function extractAddresses(bytes memory metaData) public returns (address[] memory extractedAddresses) {
+    function extractAddress(bytes memory metaData, uint256 addressPos) public returns (address desiredAddress) {
         /**
         * Memory map of metaData
         * 0x00 - 0x20 : length of metaData
@@ -27,29 +27,6 @@ contract MetaDataUtils {
         * (0xe1 + L_addresses) - (0xe1 + L_addresses + L_encryptedViewKeys) : encrypted view keys
         * (0xe1 + L_addresses + L_encryptedViewKeys) - (0xe1 + L_addresses + L_encryptedViewKeys + L_appData) : appData
         */
-
-        bytes32 numAddresses;
-        assembly {
-            numAddresses := mload(add(metaData, 0xe1))
-        }
-
-        extractedAddresses = new address[](uint256(numAddresses));
-
-        for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
-            address extractedAddress = extractAddress(metaData, i);
-            extractedAddresses[i] = extractedAddress;
-        }
-        return extractedAddresses;
-    }
-
-    /**
-    * @dev Extract a single approved address from the metaData
-    * @param metaData - metaData containing addresses according to the schema defined in x
-    * @param addressPos - indexer for the desired address, the one to be extracted
-    * @return desiredAddress - extracted address specified by the inputs to this function
-    */
-    function extractAddress(bytes memory metaData, uint256 addressPos) public returns (address desiredAddress) {
-
         assembly {
             desiredAddress := mload(
                 add(
