@@ -1,5 +1,6 @@
 const aztec = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
+
 const {
     // proofs: { JOIN_SPLIT_PROOF, MINT_PROOF, SWAP_PROOF, DIVIDEND_PROOF, BURN_PROOF, PRIVATE_RANGE_PROOF },
     proofs: { MINT_PROOF },
@@ -21,7 +22,16 @@ const mintNotes = async (values, ownerPublicKey, fromAddress, sender, zkAsset) =
     return { notes, values, noteHashes };
 };
 
-const spendNotesWithFunctions = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes, zkAsset, wallet, sender) => {
+const spendNotesWithFunctions = async (
+    amount,
+    sellerPublicKey,
+    buyerPublicKey,
+    buyerFunds,
+    buyerNotes,
+    zkAsset,
+    wallet,
+    sender,
+) => {
     const invoice = await aztec.note.create(sellerPublicKey, amount);
     const change = await aztec.note.create(buyerPublicKey, buyerFunds - amount, wallet.address);
     const sendProof = new JoinSplitProof(buyerNotes, [invoice, change], wallet.address, 0, wallet.address);

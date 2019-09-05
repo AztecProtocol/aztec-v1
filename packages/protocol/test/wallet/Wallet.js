@@ -1,7 +1,5 @@
 /* global artifacts, contract, expect, it: true */
 
-const devUtils = require('@aztec/dev-utils');
-
 const aztec = require('aztec.js');
 const dotenv = require('dotenv');
 
@@ -14,12 +12,12 @@ const ethUtil = require('ethereumjs-util');
 
 const ZkAssetMintable = artifacts.require('./ZkAssetMintable.sol');
 const Wallet = artifacts.require('./Wallet.sol');
-const helpers = require('../helpers/wallet');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
 const bip39 = require('bip39');
 const hdkey = require('ethereumjs-wallet/hdkey');
+const helpers = require('../helpers/wallet');
 
 // set MNEMONIC in packages/protocol/.env, packages/protocol/scripts/test.js will automatically start ganache using it
 const mnemonic = process.env.MNEMONIC;
@@ -33,7 +31,6 @@ const alice = secp256k1.accountFromPrivateKey(aliceWallet.getPrivateKeyString())
 const bob = secp256k1.accountFromPrivateKey(bobWallet.getPrivateKeyString());
 const eve = secp256k1.generateAccount(); // attacker
 
-
 contract.only('Wallet', async (accounts) => {
     let ace;
     let zkAssetMintableContract;
@@ -44,7 +41,7 @@ contract.only('Wallet', async (accounts) => {
         zkAssetMintableContract = await ZkAssetMintable.new(ace.address, '0x0000000000000000000000000000000000000000', 1, 0, []);
         walletContract = await Wallet.new(ace.address);
         await walletContract.transferOwnership(alice.address);
-        expect((await walletContract.owner())).to.equal(alice.address);
+        expect(await walletContract.owner()).to.equal(alice.address);
         expect(accounts[0]).to.equal(alice.address);
         expect(accounts[1]).to.equal(bob.address);
     });
@@ -83,21 +80,21 @@ contract.only('Wallet', async (accounts) => {
             zkAssetMintableContract.address,
             walletContract.address,
             true,
-            { from: sender }
+            { from: sender },
         );
-        let approvedMintedNotesConfidentialApproved = await Promise.all(
-            approvedMintedNotes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
+        const approvedMintedNotesConfidentialApproved = await Promise.all(
+            approvedMintedNotes.map((note) =>
+                zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address),
+            ),
         );
-        expect(approvedMintedNotesConfidentialApproved).to.deep.equal(
-            approvedMintedNotes.map((i) => true),
-        );
+        expect(approvedMintedNotesConfidentialApproved).to.deep.equal(approvedMintedNotes.map(() => true));
 
-        let nonApprovedMintedNotesConfidentialApproved = await Promise.all(
-            nonApprovedMintedNotes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
+        const nonApprovedMintedNotesConfidentialApproved = await Promise.all(
+            nonApprovedMintedNotes.map((note) =>
+                zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address),
+            ),
         );
-        expect(nonApprovedMintedNotesConfidentialApproved).to.deep.equal(
-            nonApprovedMintedNotes.map((i) => false),
-        );
+        expect(nonApprovedMintedNotesConfidentialApproved).to.deep.equal(nonApprovedMintedNotes.map(() => false));
     });
 
     it('owner of contract can revoke approval of notes that are owned by the contract to be spent by the contract', async () => {
@@ -112,23 +109,25 @@ contract.only('Wallet', async (accounts) => {
         let notesConfidentialApproved = await Promise.all(
             notes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
         );
-        expect(notesConfidentialApproved).to.deep.equal(
-            notes.map((i) => false),
-        );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, { from: sender });
+        expect(notesConfidentialApproved).to.deep.equal(notes.map(() => false));
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+            from: sender,
+        });
         notesConfidentialApproved = await Promise.all(
             notes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
         );
-        expect(notesConfidentialApproved).to.deep.equal(
-            notes.map((i) => true),
+        expect(notesConfidentialApproved).to.deep.equal(notes.map(() => true));
+        await walletContract.batchConfidentialApprove(
+            noteHashes,
+            zkAssetMintableContract.address,
+            walletContract.address,
+            false,
+            { from: sender },
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, false, { from: sender });
         notesConfidentialApproved = await Promise.all(
             notes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
         );
-        expect(notesConfidentialApproved).to.deep.equal(
-            notes.map((i) => false),
-        );
+        expect(notesConfidentialApproved).to.deep.equal(notes.map(() => false));
     });
 
     it('the contract should be able to spend notes after they have been approved for it to spend', async () => {
@@ -140,7 +139,9 @@ contract.only('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, { from: sender });
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+            from: sender,
+        });
         const result = await helpers.spendNotesWithFunctions(
             100,
             bob.publicKey,
@@ -186,16 +187,19 @@ contract.only('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await truffleAssert.reverts(helpers.spendNotesWithFunctions(
-            100,
-            bob.publicKey,
-            alice.publicKey,
-            helpers.sum(values),
-            notes,
-            zkAssetMintableContract,
-            walletContract,
-            sender,
-        ), 'sender does not have approval to spend input note');
+        await truffleAssert.reverts(
+            helpers.spendNotesWithFunctions(
+                100,
+                bob.publicKey,
+                alice.publicKey,
+                helpers.sum(values),
+                notes,
+                zkAssetMintableContract,
+                walletContract,
+                sender,
+            ),
+            'sender does not have approval to spend input note',
+        );
     });
 
     it("the contract shouldn't be able to spend notes that have had approval revoked", async () => {
@@ -207,18 +211,29 @@ contract.only('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, { from: sender });
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, false, { from: sender });
-        await truffleAssert.reverts(helpers.spendNotesWithFunctions(
-            100,
-            bob.publicKey,
-            alice.publicKey,
-            helpers.sum(values),
-            notes,
-            zkAssetMintableContract,
-            walletContract,
-            sender,
-        ), 'sender does not have approval to spend input note');
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+            from: sender,
+        });
+        await walletContract.batchConfidentialApprove(
+            noteHashes,
+            zkAssetMintableContract.address,
+            walletContract.address,
+            false,
+            { from: sender },
+        );
+        await truffleAssert.reverts(
+            helpers.spendNotesWithFunctions(
+                100,
+                bob.publicKey,
+                alice.publicKey,
+                helpers.sum(values),
+                notes,
+                zkAssetMintableContract,
+                walletContract,
+                sender,
+            ),
+            'sender does not have approval to spend input note',
+        );
     });
 
     it("the contract shouldn't be able to spend notes that it has already spent", async () => {
@@ -230,7 +245,9 @@ contract.only('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, { from: sender });
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+            from: sender,
+        });
         await helpers.spendNotesWithFunctions(
             100,
             bob.publicKey,
@@ -254,7 +271,6 @@ contract.only('Wallet', async (accounts) => {
             ),
             'input note status is not UNSPENT',
         );
-
     });
 
     it('owner of the contract should be able to approve notes for spending by another person', async () => {
@@ -266,7 +282,9 @@ contract.only('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true, { from: sender });
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true, {
+            from: sender,
+        });
         notes.map(async (note) => {
             expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, bob.address)).to.equal(true);
         });
@@ -281,7 +299,9 @@ contract.only('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, { from: sender });
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+            from: sender,
+        });
         await helpers.spendNotesWithFunctions(
             100,
             bob.publicKey,
@@ -292,13 +312,12 @@ contract.only('Wallet', async (accounts) => {
             walletContract,
             sender,
         );
-        await truffleAssert.reverts(walletContract.batchConfidentialApprove(
-            noteHashes,
-            zkAssetMintableContract.address,
-            walletContract.address,
-            true,
-            { from: sender }
-        ), 'only unspent notes can be approved');
+        await truffleAssert.reverts(
+            walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+                from: sender,
+            }),
+            'only unspent notes can be approved',
+        );
     });
 
     it("the contract shouldn't be able to approve notes for another address to spend that have already been spent", async () => {
@@ -310,7 +329,9 @@ contract.only('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, { from: sender });
+        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+            from: sender,
+        });
         await helpers.spendNotesWithFunctions(
             100,
             bob.publicKey,
@@ -321,7 +342,12 @@ contract.only('Wallet', async (accounts) => {
             walletContract,
             sender,
         );
-        await truffleAssert.reverts(walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true, { from: sender }), 'only unspent notes can be approved');
+        await truffleAssert.reverts(
+            walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true, {
+                from: sender,
+            }),
+            'only unspent notes can be approved',
+        );
     });
 
     // it('another person should be able to spend notes owned by the contract after approval to spend', async () => {
@@ -344,7 +370,7 @@ contract.only('Wallet', async (accounts) => {
             noteHashes,
             spender,
             account.privateKey,
-            { from: sender }
+            { from: sender },
         );
         const v = parseInt(signature.slice(130, 132), 16);
         expect(v).to.be.oneOf([27, 28]);
@@ -367,7 +393,7 @@ contract.only('Wallet', async (accounts) => {
             noteHashes,
             spender,
             account.privateKey,
-            { from: sender }
+            { from: sender },
         );
         const r = Buffer.from(signature.slice(2, 66), 'hex');
         const s = Buffer.from(signature.slice(66, 130), 'hex');
@@ -395,9 +421,11 @@ contract.only('Wallet', async (accounts) => {
             noteHashes,
             spender,
             account.privateKey,
-            { from: sender }
+            { from: sender },
         );
-        await walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, { from: sender });
+        await walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, {
+            from: sender,
+        });
     });
 
     it('signing with another private key should result in the verification failing', async () => {
@@ -418,10 +446,15 @@ contract.only('Wallet', async (accounts) => {
             noteHashes,
             spender,
             eve.privateKey,
-            { from: sender }
+            { from: sender },
         );
 
-        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'the contract owner did not sign this message');
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, {
+                from: sender,
+            }),
+            'the contract owner did not sign this message',
+        );
     });
 
     it('signing with a bad or empty signature should result in the verification failing', async () => {
@@ -442,16 +475,36 @@ contract.only('Wallet', async (accounts) => {
             noteHashes,
             spender,
             eve.privateKey,
-            { from: sender }
+            { from: sender },
         );
         signature = signature.slice(0, signature.length - 7).concat('aaaaaa');
-        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'signer address cannot be 0');
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, {
+                from: sender,
+            }),
+            'signer address cannot be 0',
+        );
         signature = padLeft(randomHex(132), 132);
-        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'signer address cannot be 0');
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, {
+                from: sender,
+            }),
+            'signer address cannot be 0',
+        );
         signature = padLeft(randomHex(234), 321);
-        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'signer address cannot be 0');
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, {
+                from: sender,
+            }),
+            'signer address cannot be 0',
+        );
         signature = '0x';
-        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'signer address cannot be 0');
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature(noteHashes, spender, status, signature, zkAssetMintableContract.address, {
+                from: sender,
+            }),
+            'signer address cannot be 0',
+        );
     });
 
     it('validation should fail when the note hashes presented are different', async () => {
@@ -475,13 +528,32 @@ contract.only('Wallet', async (accounts) => {
             goodNoteHashes,
             spender,
             account.privateKey,
-            { from: sender }
+            { from: sender },
         );
-        await truffleAssert.reverts(walletContract.batchValidateSignature(badNoteHashes, spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'the contract owner did not sign this message');
-        await truffleAssert.reverts(walletContract.batchValidateSignature(noteHashes.concat(badNoteHashes[0]), spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'the contract owner did not sign this message');
-        await truffleAssert.reverts(walletContract.batchValidateSignature([], spender, status, signature, zkAssetMintableContract.address, { from: sender }), 'the contract owner did not sign this message');
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature(badNoteHashes, spender, status, signature, zkAssetMintableContract.address, {
+                from: sender,
+            }),
+            'the contract owner did not sign this message',
+        );
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature(
+                noteHashes.concat(badNoteHashes[0]),
+                spender,
+                status,
+                signature,
+                zkAssetMintableContract.address,
+                { from: sender },
+            ),
+            'the contract owner did not sign this message',
+        );
+        await truffleAssert.reverts(
+            walletContract.batchValidateSignature([], spender, status, signature, zkAssetMintableContract.address, {
+                from: sender,
+            }),
+            'the contract owner did not sign this message',
+        );
     });
-
 
     // TODO: tests on empty notesArray
 });
