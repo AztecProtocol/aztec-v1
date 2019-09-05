@@ -49,7 +49,9 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     }
 
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
-    mapping(address => bytes32) noteAccess;
+    mapping(bytes32 => uint256) public metaDataTimeLog;
+    mapping(bytes32 => mapping(bytes32 => uint256)) public noteAccess;
+
 
     constructor(
         address _aceAddress,
@@ -320,45 +322,67 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
         require(status == 1, "only unspent notes can be approved");
 
+        // Permissioning check
+        bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
+
         require(
-            noteAccess[msg.sender] == noteHash || noteOwner == msg.sender,
+            noteAccess[noteHash][addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender,
             'caller does not have permission to update metaData'
         );
 
-        address addressToApprove = MetaDataUtils.extractAddresses(metaData);
-        noteAccess[addressToApprove] = noteHash;
+        // Approve the addresses in the note metaData
+        approveAddresses(metaData, noteHash);
 
-        emit ApprovedAddress(addressToApprove, noteHash);
+        // Set the metaDataTimeLog to the latest block time
+        setMetaDataTimeLog(noteHash);
+
         emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
     }
 
     /**
-    * @dev Revoke note viewing access for all previously approved addresses
-    * @param noteHash - hash of the note for which previously approved addresses are being removed
+    * @dev Set the metaDataTimeLog mapping
+    * @param noteHash - hash of a note, used as a unique identifier for the note
     */
-    function disapproveAddresses(bytes32 noteHash) internal {
-        // Wipe the noteAccess mapping for this particular noteHash
-        for (uint256 i = 0; i < approvedAddresses[noteHash].length; i += 1) {
-            noteAccess[noteHash][approvedAddresses[i]] = false;
-        }
+    function setMetaDataTimeLog(bytes32 noteHash) internal {
+        metaDataTimeLog[noteHash] = block.timestamp;
     }
 
     /**
     * @dev Add approved addresses to a noteAccess mapping and to the global collection of addresses that
     * have been approved
     * @param metaData - metaData of a note, which contains addresses to be approved
-    * @param noteHash - hash of an AZTEC note, a unique identifier
+    * @param noteHash - hash of an AZTEC note, a unique identifier of the note
     */
     function approveAddresses(bytes memory metaData, bytes32 noteHash) internal {
-        // Extract the addresses to be approved, from the note metaData
-        address[] memory extractedAddresses = extractAddresses(metaData);
+        /**
+        * Memory map of metaData
+        * 0x00 - 0x20 : length of metaData
+        * 0x20 - 0x81 : ephemeral key
+        * 0x81 - 0xa1 : approved addresses offset
+        * 0xa1 - 0xc1 : encrypted view keys offset
+        * 0xc1 - 0xe1 : app data offset
+        * 0xe1 - L_addresses : approvedAddresses
+        * (0xe1 + L_addresses) - (0xe1 + L_addresses + L_encryptedViewKeys) : encrypted view keys
+        * (0xe1 + L_addresses + L_encryptedViewKeys) - (0xe1 + L_addresses + L_encryptedViewKeys + L_appData) : appData
+        */
 
-        // Grant approval
-        for (uint256 i = 0; i < extractedAddresses.length; i += 1) {
-            address recoveredAddress = extractedAddresses[i];
-            noteAccess[noteHash][recoveredAddress] = true;
-            approvedAddresses.push(recoveredAddress);
-            emit ApprovedAddress(recoveredAddress, noteHash, address(this));
+        bytes32 metaDataLength;
+        bytes32 numAddresses;
+        assembly {
+            metaDataLength := mload(metaData)
+            numAddresses := mload(add(metaData, 0xe1))
+        }
+
+        // if customData has been set, approve the relevant addresses
+        if (uint256(metaDataLength) > 0x61) {
+            address[] memory extractedAddresses = new address[](uint256(numAddresses));
+
+            for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
+                address extractedAddress = extractAddress(metaData, i);
+                bytes32 addressID = keccak256(abi.encodePacked(extractedAddress, noteHash));
+                noteAccess[noteHash][addressID] = block.timestamp;
+                emit ApprovedAddress(extractedAddress, noteHash, address(this));
+            }
         }
     }
 
@@ -404,9 +428,11 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     */
     function logOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
-            (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
-            emit CreateNote(noteOwner, noteHash, metadata);
-            // approveAddresses(metadata, noteHash);
+            (address noteOwner, bytes32 noteHash, bytes memory metaData) = outputNotes.get(i).extractNote();
+            setMetaDataTimeLog(noteHash);
+            // need to check length of metadata
+            approveAddresses(metaData, noteHash);
+            emit CreateNote(noteOwner, noteHash, metaData);
         }
     }
 }
