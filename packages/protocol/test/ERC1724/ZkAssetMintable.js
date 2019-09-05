@@ -17,7 +17,7 @@ const ZkAssetMintable = artifacts.require('./ZkAssetMintable');
 
 const helpers = require('../helpers/ERC1724');
 
-const { customMetaData } = note.utils;
+const { customMetaData } = helpers;
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
@@ -291,7 +291,7 @@ contract('ZkAssetMintable', (accounts) => {
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const ephemeral = newMintCounterNote.metaData.slice(2);
 
-            newMintCounterNote.setMetaData(customMetaData);
+            newMintCounterNote.setMetaData(customMetaData.data);
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
@@ -302,7 +302,7 @@ contract('ZkAssetMintable', (accounts) => {
             const emittedEphemeral = event.args.metaData.slice(130, 196);
             const emittedCustomData = event.args.metaData.slice(196, 752);
             expect(emittedEphemeral).to.equal(ephemeral);
-            expect(emittedCustomData).to.equal(customMetaData.slice(2));
+            expect(emittedCustomData).to.equal(customMetaData.data.slice(2));
         });
     });
 

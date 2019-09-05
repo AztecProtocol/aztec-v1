@@ -320,13 +320,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     function updateNoteMetaData(bytes32 noteHash, bytes memory metaData) public {
         // Get the note from this assets registry
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
-        require(status == 1, "only unspent notes can be approved");
 
-        // Permissioning check
         bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
-
         require(
-            noteAccess[noteHash][addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender,
+            noteAccess[noteHash][addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender && status == 1,
             'caller does not have permission to update metaData'
         );
 
@@ -384,27 +381,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
                 emit ApprovedAddress(extractedAddress, noteHash, address(this));
             }
         }
-    }
-
-        // if (canAdjustSupply == true) {
-        //     if ((confidentialTotalMinted != noteHash || confidentialTotalBurned != noteHash) ){
-        //         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
-        //         require(status == 1, "only unspent notes can be approved");
-        //         require(
-        //             noteAccess[noteHash] & msg.sender == true || noteOwner == msg.sender,
-        //             'caller does not have permission to update metaData'
-        //         );  
-        //         emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
-        //     }
-        // } else {
-        //     ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
-        //     require(status == 1, "only unspent notes can be approved");  
-        //     require(
-        //         noteAccess[noteHash][msg.sender] == true || noteOwner == msg.sender,
-        //         'caller does not have permission to update metaData'
-        //     );  
-        //     emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
-        // }       
+    }   
    
 
     /**

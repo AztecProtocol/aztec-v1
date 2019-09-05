@@ -28,7 +28,8 @@ contract ZkAssetTest is ZkAsset {
     */
     function updateNoteMetaData(bytes32 noteHash, bytes memory metaData) public {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
-        (, , bytes32 confidentialTotalMinted, bytes32 confidentialTotalBurned, , , , bool canAdjustSupply) = ace.getRegistry(address(this));
+        (, , bytes32 confidentialTotalMinted,
+        bytes32 confidentialTotalBurned, , , , bool canAdjustSupply) = ace.getRegistry(address(this));
 
         // Permissioning check
         bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
