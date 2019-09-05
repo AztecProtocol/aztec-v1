@@ -20,7 +20,7 @@ ganache_running() {
 }
 
 start_ganache() {
-  if [[ -z "$WALLET_MNEMONIC" ]]; then
+  if [[ -z "$TEST_MNEMONIC" ]]; then
     file_name=".env"
     if [ -f $file_name ]; then
       export ENV_EXISTS=1
@@ -31,15 +31,15 @@ start_ganache() {
     fi
     while read line; do
       # if [[ $line != \#* ]]; then          # (don't export comments)
-      if [[ $line == WALLET_MNEMONIC=* ]]; then
+      if [[ $line == TEST_MNEMONIC=* ]]; then
         export "$line"
       fi
     done <<< "$(cat .env)"
   fi
-  if [[ -z "$WALLET_MNEMONIC" ]]; then
+  if [[ -z "$TEST_MNEMONIC" ]]; then
     ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" > /dev/null &
   else
-    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" -m="$WALLET_MNEMONIC" > /dev/null &
+    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" -m="$TEST_MNEMONIC" > /dev/null &
   fi
 
   ganache_pid=$!

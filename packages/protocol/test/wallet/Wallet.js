@@ -19,8 +19,8 @@ const bip39 = require('bip39');
 const hdkey = require('ethereumjs-wallet/hdkey');
 const helpers = require('../helpers/wallet');
 
-// set MNEMONIC in packages/protocol/.env, packages/protocol/scripts/test.js will automatically start ganache using it
-const mnemonic = process.env.WALLET_MNEMONIC;
+// set TEST_MNEMONIC in packages/protocol/.env, packages/protocol/scripts/test.js will automatically start ganache using it
+const mnemonic = process.env.TEST_MNEMONIC;
 
 const seed = bip39.mnemonicToSeed(mnemonic);
 const hdwallet = hdkey.fromMasterSeed(seed);

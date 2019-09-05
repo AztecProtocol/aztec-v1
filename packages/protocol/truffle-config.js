@@ -73,7 +73,7 @@ switch (process.env.MODE) {
 }
 
 let ganacheSubprovider = {};
-ganacheSubprovider = new GanacheSubprovider({mnemonic: process.env.WALLET_MNEMONIC});
+ganacheSubprovider = new GanacheSubprovider({ mnemonic: process.env.TEST_MNEMONIC });
 provider.addProvider(ganacheSubprovider);
 
 provider.start((err) => {
