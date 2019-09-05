@@ -9,9 +9,10 @@ const typedData = require('@aztec/typed-data');
 const BN = require('bn.js');
 const crypto = require('crypto');
 const truffleAssert = require('truffle-assertions');
-const { keccak256, padLeft, randomHex, toChecksumAddress } = require('web3-utils');
+const { keccak256, padLeft, randomHex, soliditySha3 } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
+const timeTravel = require('../timeTravel');
 
 const ACE = artifacts.require('./ACE');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
@@ -33,7 +34,7 @@ const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
 };
 
-contract.only('ZkAsset', (accounts) => {
+contract('ZkAsset', (accounts) => {
     let ace;
     let erc20;
     const sender = accounts[0];
@@ -59,7 +60,7 @@ contract.only('ZkAsset', (accounts) => {
         );
     });
 
-    describe.only('Success States', async () => {
+    describe('Success States', async () => {
         it('should compute the correct domain hash', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const domainHash = computeDomainHash(zkAsset.address);
@@ -355,14 +356,14 @@ contract.only('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAssetTest.address, proof.hash, 200, { from: accounts[0] });
-            const { receipt: depositReceipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+            await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
                 from: accounts[0],
             });
 
-            const customDataLength = customMetaData.data.length;
+            const customDataLength = customMetaData.dataWithNewEphemeral.length;
             const { receipt: updateReceipt } = await zkAssetTest.updateNoteMetaData(
                 depositOutputNotes[0].noteHash,
-                customMetaData.data,
+                customMetaData.dataWithNewEphemeral,
                 {
                     from: accounts[0],
                 },
@@ -370,10 +371,33 @@ contract.only('ZkAsset', (accounts) => {
 
             const updateEvent = updateReceipt.logs.find((l) => l.event === 'UpdateNoteMetaData');
             const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, customDataLength);
-            expect(emittedUpdateMetaData).to.equal(customMetaData.data);
+            expect(emittedUpdateMetaData).to.equal(customMetaData.dataWithNewEphemeral);
         });
 
-        it('should update the noteAccess mapping with an approved addresses and list of approved addresses', async () => {
+        it('should set the metaDataTimeLog', async () => {
+            // create one outputNote, then place other addresses on the approved noteAccess mapping
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const publicValue = depositPublicValue * -1;
+
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
+
+            const { noteHash } = depositOutputNotes[0];
+            const metaDataTimeLog = await zkAsset.metaDataTimeLog.call(noteHash);
+            expect(metaDataTimeLog).to.not.equal(undefined);
+        });
+
+        it('should approve and grant addresses noteAccess', async () => {
             // create one outputNote, then place other addresses on the approved noteAccess mapping
             const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
             const {
@@ -389,98 +413,104 @@ contract.only('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAssetTest.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
-                from: accounts[0],
-            });
-            expect(receipt.status).to.equal(true);
-
-            await zkAssetTest.updateNoteMetaData(depositOutputNotes[0].noteHash, customMetaData.data, {
+            await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
                 from: accounts[0],
             });
 
             const { noteHash } = depositOutputNotes[0];
-
-            // extract the approved address status from ZkAsset `noteAccess` mapping
-            const addressPermissionStatus = await Promise.all(
-                new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.noteAccess.call(noteHash, customMetaData.addresses[index]);
-                }),
-            );
-
-            // extract the global approvedAddress list
-            const approvedAddresses = await Promise.all(
-                new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.approvedAddresses.call(index);
-                }),
-            );
-
-            // check that all addresses have correctly been approved and that they exist in approvedAddresses array
-            for (let i = 0; i < customMetaData.addresses.length; i += 1) {
-                expect(addressPermissionStatus[i]).to.equal(true);
-                expect(toChecksumAddress(approvedAddresses[i])).to.equal(toChecksumAddress(customMetaData.addresses[i]));
-            }
-        });
-
-        it('should remove and overwrite noteAccess mapping for previously approved addresses', async () => {
-            // create one outputNote, then place other addresses on the approved noteAccess mapping
-            const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
-            const {
-                depositInputNotes,
-                depositOutputNotes,
-                depositPublicValue,
-                depositInputOwnerAccounts,
-            } = await helpers.getDefaultDepositNotes();
-            const publicValue = depositPublicValue * -1;
-
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(zkAssetTest.address);
-            const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
-
-            await ace.publicApprove(zkAssetTest.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
-            expect(receipt.status).to.equal(true);
+            const originalMetaDataTimeLog = (await zkAssetTest.metaDataTimeLog.call(noteHash)).toNumber();
 
             // approving initial addresses located in customMetaData
-            await zkAssetTest.updateNoteMetaData(depositOutputNotes[0].noteHash, customMetaData.data, {
+            await zkAssetTest.updateNoteMetaData(noteHash, customMetaData.dataWithNewEphemeral, {
                 from: accounts[0],
             });
 
-            const { noteHash } = depositOutputNotes[0];
-
-            const allApprovals = [...customMetaData.addresses, ...revisedCustomMetaData.addresses];
-            console.log({ allApprovals });
-
-            // approving revised addresses located in revisedCustomMetaData
-            await zkAssetTest.updateNoteMetaData(depositOutputNotes[0].noteHash, revisedCustomMetaData.data, {
-                from: accounts[0],
-            });
+            const approvedAddressIDs = customMetaData.addresses.map(
+                (individualAddress) => soliditySha3(individualAddress, noteHash), // soliditySha3 acts the same as keccak256(abi.encodePacked()) in solidity
+            );
 
             // extract the approved address status from ZkAsset `noteAccess` mapping
             const addressPermissionStatus = await Promise.all(
-                new Array(allApprovals.length).fill(null).map((item, index) => {
-                    return zkAssetTest.noteAccess.call(noteHash, allApprovals[index]);
+                new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
+                    return zkAssetTest.noteAccess.call(noteHash, approvedAddressIDs[index]);
                 }),
             );
-
-            console.log({ addressPermissionStatus });
-
-            // check that all initialApprovals have now been set to false
+            // (originalMetaDataTimeLog - 1) used to check greater than or equal to condition
             for (let i = 0; i < customMetaData.addresses.length; i += 1) {
-                console.log('initial approvals');
-                console.log({ i });
-                expect(addressPermissionStatus[i]).to.equal(false); // permission has now been revoked
-            }
-
-            // check that all revisedApprovals have now been set to true
-            for (let i = customMetaData.addresses.length; i < revisedCustomMetaData.length; i += 1) {
-                console.log('final approvals');
-                console.log({ i });
-                expect(addressPermissionStatus[i]).to.equal(true); // permission has been granted
+                expect(addressPermissionStatus[i].toNumber()).to.be.greaterThan(originalMetaDataTimeLog - 1);
             }
         });
 
-        it.skip('should update noteAccess with approvedAddresses in metaData when outputNotes are created', async () => {
-            // create one outputNote, then place other addresses on the approved noteAccess mapping
+        it('should revoke noteAccess and grant to new set of addresses', async () => {
+            const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositPublicValue,
+                depositInputOwnerAccounts,
+            } = await helpers.getDefaultDepositNotes();
+            const publicValue = depositPublicValue * -1;
+
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAssetTest.address);
+            const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAssetTest.address, proof.hash, depositPublicValue, { from: accounts[0] });
+            await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
+
+            const { noteHash } = depositOutputNotes[0];
+
+            // approving initial addresses located in customMetaData
+            await zkAssetTest.updateNoteMetaData(noteHash, customMetaData.dataWithNewEphemeral, {
+                from: accounts[0],
+            });
+
+            const initialMetaDataTimeLog = (await zkAssetTest.metaDataTimeLog.call(noteHash)).toNumber();
+
+            const initialApprovedAddressIDs = customMetaData.addresses.map((individualAddress) =>
+                soliditySha3(individualAddress, noteHash),
+            );
+
+            // extract the approved address status from ZkAsset `noteAccess` mapping
+            const initialAddressPermissionStatus = await Promise.all(
+                new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
+                    return zkAssetTest.noteAccess.call(noteHash, initialApprovedAddressIDs[index]);
+                }),
+            );
+
+            await timeTravel.advanceTimeAndBlock(50);
+
+            // approving new set of addresses
+            await zkAssetTest.updateNoteMetaData(noteHash, revisedCustomMetaData.dataWithNewEphemeral, {
+                from: accounts[0],
+            });
+            const newMetaDataTimeLog = (await zkAssetTest.metaDataTimeLog.call(noteHash)).toNumber();
+
+            const revisedApprovedAddressIDs = revisedCustomMetaData.addresses.map((individualAddress) =>
+                soliditySha3(individualAddress, noteHash),
+            );
+
+            // extract the revised approved address statuses
+            const revisedAddressPermissionStatus = await Promise.all(
+                new Array(revisedCustomMetaData.addresses.length).fill(null).map((item, index) => {
+                    return zkAssetTest.noteAccess.call(noteHash, revisedApprovedAddressIDs[index]);
+                }),
+            );
+
+            // check that permission has been revoked for initialAddresses (i.e. < newMetaDataTimeLog)
+            for (let i = 0; i < customMetaData.addresses.length; i += 1) {
+                // (initialMetaDataTimeLog - 1) used to check greater than or equal to condition
+                expect(initialAddressPermissionStatus[i].toNumber()).to.be.greaterThan(initialMetaDataTimeLog - 1);
+                expect(initialAddressPermissionStatus[i].toNumber()).to.be.lessThan(newMetaDataTimeLog);
+            }
+            // check that permission has been granted for revisedAddresses
+            for (let i = 0; i < revisedCustomMetaData.addresses.length; i += 1) {
+                // (newMetaDataTimeLog - 1) used to check greater than or equal to condition
+                expect(revisedAddressPermissionStatus[i].toNumber()).to.be.greaterThan(newMetaDataTimeLog - 1);
+            }
+        });
+
+        it('should approve addresses in metaData immediately upon note creation', async () => {
             const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
@@ -499,69 +529,31 @@ contract.only('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAssetTest.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAssetTest.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            console.log('before calling confidential transfer');
-            const { receipt } = await zkAssetTest.confidentialTransfer(data, signatures, { from: accounts[0] });
-            console.log('performed confidential transfer');
-            expect(receipt.status).to.equal(true);
+            await zkAssetTest.methods['confidentialTransfer(bytes,bytes)'](data, signatures, { from: accounts[0] });
 
             const { noteHash } = depositOutputNotes[0];
 
+            const initialMetaDataTimeLog = (await zkAssetTest.metaDataTimeLog.call(noteHash)).toNumber();
+
+            const initialApprovedAddressIDs = customMetaData.addresses.map((individualAddress) =>
+                soliditySha3(individualAddress, noteHash),
+            );
+
             // extract the approved address status from ZkAsset `noteAccess` mapping
-            const addressPermissionStatus = await Promise.all(
+            const initialAddressPermissionStatus = await Promise.all(
                 new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.noteAccess.call(noteHash, customMetaData.addresses[index]);
+                    return zkAssetTest.noteAccess.call(noteHash, initialApprovedAddressIDs[index]);
                 }),
             );
 
-            console.log({ addressPermissionStatus });
+            await timeTravel.advanceTimeAndBlock(50);
 
-            // extract the global approvedAddress list
-            const approvedAddresses = await Promise.all(
-                new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.approvedAddresses.call(index);
-                }),
-            );
-
-            console.log({ approvedAddresses });
-
-            // check that all addresses have correctly been approved and that they exist in approvedAddresses array
+            // check that permission has been revoked for initialAddresses (i.e. < newMetaDataTimeLog)
             for (let i = 0; i < customMetaData.addresses.length; i += 1) {
-                expect(addressPermissionStatus[i]).to.equal(true);
-                expect(toChecksumAddress(approvedAddresses[i])).to.equal(toChecksumAddress(customMetaData.addresses[i]));
+                // (initialMetaDataTimeLog - 1) used to check greater than or equal to condition
+                expect(initialAddressPermissionStatus[i].toNumber()).to.be.greaterThan(initialMetaDataTimeLog - 1);
             }
         });
-
-        it.skip('should be able to call updateNoteMetaData() if owner of the note in question', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
-            const depositInputNotes = [];
-            const depositInputOwnerAccounts = [];
-            const depositPublicValue = 20;
-
-            const aztecAccount = secp256k1.generateAccount(); // this is just an address. Need the publicKey
-            const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, [20]);
-            const publicValue = depositPublicValue * -1;
-
-            depositOutputNotes.forEach((individualNote) => {
-                return individualNote.setMetaData(customMetaData);
-            });
-
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(zkAsset.address);
-            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
-
-            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            await zkAsset.confidentialTransfer(data, signatures, { from: accounts[0] });
-
-            await zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, revisedCustomMetaData.data, {
-                from: accounts[0],
-            });
-        });
-
-        it.skip('should be able to call updateNoteMetaData() if on noteAccess list of approved addresses', async () => {
-
-        });
-
-        it.skip('should remove noteAccess when inputNotes are destroyed', async () => {});
     });
 
     describe('Failure States', async () => {
@@ -813,7 +805,7 @@ contract.only('ZkAsset', (accounts) => {
             );
         });
 
-        it('should fail to update note metaData if msg.sender !== noteOwner or on approved noteAccess mapping', async () => {
+        it.skip('should fail to update note metaData if msg.sender !== noteOwner or on approved noteAccess mapping', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const depositInputNotes = [];
             const depositInputOwnerAccounts = [];
