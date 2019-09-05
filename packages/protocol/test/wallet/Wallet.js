@@ -31,7 +31,7 @@ const alice = secp256k1.accountFromPrivateKey(aliceWallet.getPrivateKeyString())
 const bob = secp256k1.accountFromPrivateKey(bobWallet.getPrivateKeyString());
 const eve = secp256k1.generateAccount(); // attacker
 
-contract.only('Wallet', async (accounts) => {
+contract('Wallet', async (accounts) => {
     let ace;
     let zkAssetMintableContract;
     let walletContract;
