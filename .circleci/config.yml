@@ -2,6 +2,8 @@ version: 2.0
 
 jobs:
     tmptest:
+        docker:
+            - image: circleci/node:10.15.3
         steps:
             - run:
                 name: "mnemonic in quotes"
