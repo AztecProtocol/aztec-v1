@@ -7,7 +7,7 @@ jobs:
         steps:
             - run:
                 name: "mnemonic in quotes"
-                command: echo "$MNEMONIC"
+                command: echo \"$MNEMONIC\"
             - run:
                 name: "mnemonic no quotes"
                 command: echo $MNEMONIC
