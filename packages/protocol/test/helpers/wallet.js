@@ -21,12 +21,12 @@ const mintNotes = async (values, ownerPublicKey, fromAddress, sender, zkAsset) =
     return { notes, values, noteHashes };
 };
 
-const spendNotesWithFunctions = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes, zkAsset, wallet) => {
+const spendNotesWithFunctions = async (amount, sellerPublicKey, buyerPublicKey, buyerFunds, buyerNotes, zkAsset, wallet, sender) => {
     const invoice = await aztec.note.create(sellerPublicKey, amount);
     const change = await aztec.note.create(buyerPublicKey, buyerFunds - amount, wallet.address);
     const sendProof = new JoinSplitProof(buyerNotes, [invoice, change], wallet.address, 0, wallet.address);
     const sendProofData = sendProof.encodeABI(zkAsset.address);
-    const result = await wallet.batchConfidentialTransfer(sendProofData, zkAsset.address, wallet.address);
+    const result = await wallet.batchConfidentialTransfer(sendProofData, zkAsset.address, wallet.address, { from: sender });
     return result;
 };
 
@@ -39,12 +39,13 @@ const approveAndSpendNotes = async (
     buyerNoteHashes,
     zkAsset,
     wallet,
+    sender,
 ) => {
     const invoice = await aztec.note.create(sellerPublicKey, amount);
     const change = await aztec.note.create(buyerPublicKey, buyerFunds - amount, wallet.address);
     const sendProof = new JoinSplitProof(buyerNotes, [invoice, change], wallet.address, 0, wallet.address);
     const sendProofData = sendProof.encodeABI(zkAsset.address);
-    const result = await wallet.spendNotes(buyerNoteHashes, sendProofData, zkAsset.address, wallet.address);
+    const result = await wallet.spendNotes(buyerNoteHashes, sendProofData, zkAsset.address, wallet.address, { from: sender });
     return result;
 };
 
