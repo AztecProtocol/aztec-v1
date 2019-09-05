@@ -20,22 +20,23 @@ ganache_running() {
 }
 
 start_ganache() {
-  file_name=".env"
-  if [ -f $file_name ]; then
-    export ENV_EXISTS=1
-  else
-    export ENV_EXISTS=0
-    cp ".env.example" ".env"
-    echo "Temporarily copied .env.example to .env"
-  fi
-  while read line; do
-    # if [[ $line != \#* ]]; then          # (don't export comments)
-    # if [[ $line == INFURA_API_KEY=* ]] | [[ $line == MNEMONIC=* ]] || [[ $line == PRIVATE_KEY=* ]]; then
-    if [[ $line == MNEMONIC=* ]]; then
-      export "$line"
+  if [[ -z "$MNEMONIC" ]]; then
+    file_name=".env"
+    if [ -f $file_name ]; then
+      export ENV_EXISTS=1
+    else
+      export ENV_EXISTS=0
+      cp ".env.example" ".env"
+      echo "Temporarily copied .env.example to .env"
     fi
-  done <<< "$(cat .env)"
-
+    while read line; do
+      # if [[ $line != \#* ]]; then          # (don't export comments)
+      # if [[ $line == INFURA_API_KEY=* ]] | [[ $line == MNEMONIC=* ]] || [[ $line == PRIVATE_KEY=* ]]; then
+      if [[ $line == MNEMONIC=* ]]; then
+        export "$line"
+      fi
+    done <<< "$(cat .env)"
+  fi
   if [[ -z "$MNEMONIC" ]]; then
     ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" > /dev/null &
   else
