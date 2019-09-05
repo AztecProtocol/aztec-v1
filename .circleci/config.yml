@@ -1,16 +1,6 @@
 version: 2.0
 
 jobs:
-    tmptest:
-        docker:
-            - image: circleci/node:10.15.3
-        steps:
-            - run:
-                name: "mnemonic in quotes"
-                command: echo \"$MNEMONIC\"
-            - run:
-                name: "mnemonic no quotes"
-                command: echo $MNEMONIC
     build:
         working_directory: ~/repo
         docker:
@@ -51,8 +41,7 @@ jobs:
         docker:
             - image: circleci/node:10.15.3
             - image: trufflesuite/ganache-cli:v6.4.1
-              command: |
-                ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m=\"$WALLET_MNEMONIC\"
+              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m='$WALLET_MNEMONIC'
         steps:
             - restore_cache:
                 keys:
@@ -127,10 +116,6 @@ workflows:
     version: 2
     main:
         jobs:
-            - tmptest:
-                filters:
-                    branches:
-                        ignore: gh-pages
             - build:
                 filters:
                     branches:
