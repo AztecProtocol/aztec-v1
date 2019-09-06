@@ -1,6 +1,14 @@
 version: 2.0
 
 jobs:
+    envvartest:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+        steps:
+             -run:
+                name: "env variable test"
+                command: "echo $TEST_MNEMONIC"
     build:
         working_directory: ~/repo
         docker:
@@ -117,50 +125,54 @@ workflows:
     version: 2
     main:
         jobs:
-            - build:
+            - envvartest:
                 filters:
                     branches:
                         ignore: gh-pages
-            - lint:
-                requires:
-                    - build
-                filters:
-                    branches:
-                        ignore: gh-pages
-            - test:
-                requires:
-                    - build
-                filters:
-                    branches:
-                        ignore: gh-pages
-            - artifacts:
-                requires:
-                    - lint
-                    - test
-                filters:
-                    branches:
-                        only:
-                            - develop
-            - coverage:
-                requires:
-                    - lint
-                    - test
-                filters:
-                    branches:
-                        ignore: gh-pages
-            - docs:
-                requires:
-                    - lint
-                    - test
-                filters:
-                    branches:
-                        only:
-                            - develop
-            - release:
-                requires:
-                    - lint
-                    - test
-                filters:
-                    branches:
-                        only:
-                            - master
+            # - build:
+            #     filters:
+            #         branches:
+            #             ignore: gh-pages
+            # - lint:
+            #     requires:
+            #         - build
+            #     filters:
+            #         branches:
+            #             ignore: gh-pages
+            # - test:
+            #     requires:
+            #         - build
+            #     filters:
+            #         branches:
+            #             ignore: gh-pages
+            # - artifacts:
+            #     requires:
+            #         - lint
+            #         - test
+            #     filters:
+            #         branches:
+            #             only:
+            #                 - develop
+            # - coverage:
+            #     requires:
+            #         - lint
+            #         - test
+            #     filters:
+            #         branches:
+            #             ignore: gh-pages
+            # - docs:
+            #     requires:
+            #         - lint
+            #         - test
+            #     filters:
+            #         branches:
+            #             only:
+            #                 - develop
+            # - release:
+            #     requires:
+            #         - lint
+            #         - test
+            #     filters:
+            #         branches:
+            #             only:
+            #                 - master
