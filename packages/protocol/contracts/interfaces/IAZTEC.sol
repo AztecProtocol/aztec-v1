@@ -30,6 +30,10 @@ contract IAZTEC {
     // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
     uint24 public constant PRIVATE_RANGE_PROOF = 66562;
 
+    // proofEpoch = 1 | proofCategory = 4 | proofId = 3
+    // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
+    uint24 public constant PUBLIC_RANGE_PROOF = 66563;
+
     // proofEpoch = 1 | proofCategory = 4 | proofId = 1
     // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
     uint24 public constant DIVIDEND_PROOF = 66561;
