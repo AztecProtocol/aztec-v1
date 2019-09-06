@@ -2,13 +2,15 @@ version: 2.0
 
 jobs:
     envvartest:
-        working_directory: ~/repo
         docker:
             - image: circleci/node:10.15.3
         steps:
              -run:
                 name: "env variable test"
                 command: "echo $TEST_MNEMONIC"
+            -run:
+                name: "env variable test noquotes"
+                command: echo $TEST_MNEMONIC
     build:
         working_directory: ~/repo
         docker:
