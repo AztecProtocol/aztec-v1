@@ -1,22 +1,13 @@
-import asyncForEach from '~utils/asyncForEach';
 import { 
-    addNote,
-    updateNote,
-    destroyNote,
-} from './addNote';
+    createBulkNotes,
+    updateBulkNotes,
+    destroyBulkNotes,
+} from './note';
 
 
-export default async function saveNotes({ createNotes, destroyNotes, updateNotes }) {
+export default async function saveNotes({ createNotes, updateNotes, destroyNotes }) {
     // save it in serial
-    await asyncForEach(createNotes, async (note) => {
-        await addNote(note);
-    });
-
-    await asyncForEach(updateNotes, async (note) => {
-        await updateNote(note);
-    });
-
-    await asyncForEach(destroyNotes, async (note) => {
-        await destroyNote(note);
-    });
+    await createBulkNotes(createNotes);
+    await updateBulkNotes(updateNotes);
+    await destroyBulkNotes(destroyNotes);
 }

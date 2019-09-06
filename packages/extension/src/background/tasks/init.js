@@ -1,5 +1,4 @@
 /* global chrome */
-import path from 'path';
 import {
     get,
     set,
@@ -16,7 +15,7 @@ import GraphNodeService from '~background/services/GraphNodeService';
 import Web3Service from '~background/services/Web3Service';
 import NoteService from '~background/services/NoteService';
 import NoteRegistrySyncService from '~background/services/eventsSyncServices/NoteRegistrySyncService';
-
+// import { runLoadingEventsTest } from './syncTest'
 
 
 const configureWeb3Service = async () => {
@@ -28,16 +27,14 @@ const configureWeb3Service = async () => {
 
     Web3Service.registerContract(AZTECAccountRegistryConfig.config);
     Web3Service.registerContract(ACEConfig.config);
-    
-    //TODO: check why it doesn't work
-    // [AZTECAccountRegistryConfig, ACEConfig]
-    //     .map(({config}) => config)
-    //     .forEach(config => Web3Service.registerContract(config))
 }
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
         // chrome.storage.local.clear();
+
+        // comment it
+        // await runLoadingEventsTest();
 
         await set({
             // __graphNode: 'http://localhost:4000/',

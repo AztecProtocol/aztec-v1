@@ -46,8 +46,8 @@ const noteLog = (decodedLog) => {
 export default function decodeNoteLogs(eventsTopics, rawLogs) {
     const [ createNoteTopic, destroyNoteTopic, updateNoteMetaDataTopic ] = eventsTopics;
 
-    const minedRawLogs = rawLogs.filter(log => log.type === 'mined');
-    const groupedRawLogs = groupBy(minedRawLogs, l => l.topics[0]);
+    const onlyMinedLogs = rawLogs.filter(({ blockNumber }) => !!blockNumber);
+    const groupedRawLogs = groupBy(onlyMinedLogs, l => l.topics[0]);
     
     const createNotes = (groupedRawLogs[createNoteTopic] || [])
         .map(decodeCreateNote)

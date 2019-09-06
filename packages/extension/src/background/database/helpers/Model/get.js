@@ -1,5 +1,5 @@
 import db from '../../'
 
-export default async function get(modelName, params) {
-    return await db[modelName].get(params);
+export default async function get(modelName, primaryKeyValue) {
+    return await db[modelName].get(primaryKeyValue);
 }

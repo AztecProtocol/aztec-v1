@@ -27,24 +27,13 @@ jest.setTimeout(500000000);
 const { JOIN_SPLIT_PROOF } = devUtils.proofs;
 const {
     note,
-    encoder,
     JoinSplitProof,
     ProofUtils,
 } = aztec;
-const {
-    outputCoder,
-} = encoder;
-
-// const METADATA_AZTEC_DATA_LENGTH = 194;
-// const METADATA_VAR_LEN_LENGTH = 32;
-// const METADATA_ADDRESS_LENGTH = 40;
-// const METADATA_VIEWING_KEY_LENGTH = 420;
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('ZkAsset', () => {
     const providerUrl = `http://localhost:8545`;
-    const prepopulateEventsCount = 10000;
+    const prepopulateEventsCount = 340;
     const epoch = 1;
     const category = 1;
     const proofId = 1;
@@ -76,7 +65,6 @@ describe('ZkAsset', () => {
         Web3Service.registerContract(ACE);
 
         sender = Web3Service.account;
-        return;
 
         const { createNotes, destroyNotes, updateNotes } = await fetchNotes({
             fromBlock: 1,
