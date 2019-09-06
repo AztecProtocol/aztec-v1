@@ -79,9 +79,9 @@ contract('Wallet', async (accounts) => {
         const approvedNoteHashes = approvedMintedNotes.map((note) => note.noteHash);
         await walletContract.batchConfidentialApprove(
             approvedNoteHashes,
-            zkAssetMintableContract.address,
             walletContract.address,
             true,
+            zkAssetMintableContract.address,
             { from: sender },
         );
         const approvedMintedNotesConfidentialApproved = await Promise.all(
@@ -112,7 +112,7 @@ contract('Wallet', async (accounts) => {
             notes.map((note) => zkAssetMintableContract.confidentialApproved(note.noteHash, walletContract.address)),
         );
         expect(notesConfidentialApproved).to.deep.equal(notes.map(() => false));
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+        await walletContract.batchConfidentialApprove(noteHashes, walletContract.address, true, zkAssetMintableContract.address, {
             from: sender,
         });
         notesConfidentialApproved = await Promise.all(
@@ -121,9 +121,9 @@ contract('Wallet', async (accounts) => {
         expect(notesConfidentialApproved).to.deep.equal(notes.map(() => true));
         await walletContract.batchConfidentialApprove(
             noteHashes,
-            zkAssetMintableContract.address,
             walletContract.address,
             false,
+            zkAssetMintableContract.address,
             { from: sender },
         );
         notesConfidentialApproved = await Promise.all(
@@ -141,7 +141,7 @@ contract('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+        await walletContract.batchConfidentialApprove(noteHashes, walletContract.address, true, zkAssetMintableContract.address, {
             from: sender,
         });
         const result = await helpers.spendNotesWithFunctions(
@@ -213,14 +213,14 @@ contract('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+        await walletContract.batchConfidentialApprove(noteHashes, walletContract.address, true, zkAssetMintableContract.address, {
             from: sender,
         });
         await walletContract.batchConfidentialApprove(
             noteHashes,
-            zkAssetMintableContract.address,
             walletContract.address,
             false,
+            zkAssetMintableContract.address,
             { from: sender },
         );
         await truffleAssert.reverts(
@@ -247,7 +247,7 @@ contract('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+        await walletContract.batchConfidentialApprove(noteHashes, walletContract.address, true, zkAssetMintableContract.address, {
             from: sender,
         });
         await helpers.spendNotesWithFunctions(
@@ -284,7 +284,7 @@ contract('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true, {
+        await walletContract.batchConfidentialApprove(noteHashes, bob.address, true, zkAssetMintableContract.address, {
             from: sender,
         });
         await Promise.all(
@@ -303,7 +303,7 @@ contract('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+        await walletContract.batchConfidentialApprove(noteHashes, walletContract.address, true, zkAssetMintableContract.address, {
             from: sender,
         });
         await helpers.spendNotesWithFunctions(
@@ -317,7 +317,7 @@ contract('Wallet', async (accounts) => {
             sender,
         );
         await truffleAssert.reverts(
-            walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+            walletContract.batchConfidentialApprove(noteHashes, walletContract.address, true, zkAssetMintableContract.address, {
                 from: sender,
             }),
             'only unspent notes can be approved',
@@ -333,7 +333,7 @@ contract('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, walletContract.address, true, {
+        await walletContract.batchConfidentialApprove(noteHashes, walletContract.address, true, zkAssetMintableContract.address, {
             from: sender,
         });
         await helpers.spendNotesWithFunctions(
@@ -347,7 +347,7 @@ contract('Wallet', async (accounts) => {
             sender,
         );
         await truffleAssert.reverts(
-            walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true, {
+            walletContract.batchConfidentialApprove(noteHashes, bob.address, true, zkAssetMintableContract.address, {
                 from: sender,
             }),
             'only unspent notes can be approved',

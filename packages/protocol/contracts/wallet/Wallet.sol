@@ -68,13 +68,13 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
      * @author AZTEC
      * @param _noteHashes An array of hashes of notes (that must be owned
      *                    by this contract) to to be approved for spending
-     * @param _zkAsset The address of the zkAsset that minted these notes
      * @param _spender The address of the person or contract that is
      *                 being approved to spend these notes. Can be
      *                 any person or contract e.g. Bob, a different
      *                 third-party, a contract, this contract itself.
      * @param _status Bool representing whether approval is being
      *                granted (true) or revoked (false)
+     * @param _zkAsset The address of the zkAsset that minted these notes
      */
     function batchConfidentialApprove(
         bytes32[] memory _noteHashes,
