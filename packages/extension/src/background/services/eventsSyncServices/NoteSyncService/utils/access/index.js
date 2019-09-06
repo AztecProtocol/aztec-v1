@@ -1,11 +1,13 @@
-import performCreateBulkNotesAccesses from './createBulkNotesAccesses';
+import performCreateBulkNoteAccess from './createBulkNoteAccess';
 import Note from '~background/database/models/note';
+import metadata from '~utils/metadata';
+import asyncFlatMap from '~utils/asyncFlatMap'
 
 import {
     errorLog
 } from '~utils/log'
 
-const acessesFromMetadata = async ({
+const acessesFromMetadata = ({
     metadata: metadataStr, 
     noteHash,
     blockNumber,
@@ -22,20 +24,20 @@ const acessesFromMetadata = async ({
     
     for (let i = 0; i < metadataObj.addresses.length; i += 1) {
         const {address, viewingKey} = metadataObj.getAccess(metadataObj.addresses[i]);
-        
+
         let prevViewingKey;
 
         if(prevMetadataObj) {
-            ({viewingKey: prevViewingKey} = prevMetadataObj.getAccess(metadataObj.addresses[i]));
+            ({viewingKey: prevViewingKey} = prevMetadataObj.getAccess(metadataObj.addresses[i]) || {});
         }
      
-        if (viewingKey !== prevViewingKey) {
+        if (viewingKey !== prevViewingKey) {          
             noteAccesses.push({
-                noteHash,
-                account: address,
-                viewingKey,
-                blockNumber,
-            });
+                    noteHash,
+                    account: address,
+                    viewingKey,
+                    blockNumber,
+                });
         }
     }
     return noteAccesses;
@@ -44,19 +46,20 @@ const acessesFromMetadata = async ({
 
 /* Create */
 
-export const createBulkNotesAccessesFromNotes = async (rawNotes) => {
+export const createBulkNoteAccessFromNotes = async (rawNotes) => {
+
     const accesses = rawNotes.flatMap(note => acessesFromMetadata(note));
-    return performCreateBulkNotesAccesses(accesses);
+    return performCreateBulkNoteAccess(accesses);
 };
 
 /* Update */
 
 export const updateBulkNoteAccessFromNotes = async (rawNotes) => {
 
-    const accesses = rawNotes.flatMap(async note => {
-        const prevNote = await Note.get(noteHash);
+    const accesses = await asyncFlatMap(rawNotes, async (note) => {
+        const prevNote = await Note.get(note.noteHash);
         return acessesFromMetadata(note, prevNote);
     });
     
-    return performCreateBulkNotesAccesses(accesses);
+    return performCreateBulkNoteAccess(accesses);
 };
