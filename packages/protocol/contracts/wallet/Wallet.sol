@@ -56,7 +56,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
             // (uint8 status, , , address noteOwner) = ACE(aceAddress).getNote(_zkAsset, _noteHashes[i]);
             // require(status == uint8(NoteStatus.UNSPENT));
             (, , , address noteOwner) = ACE(aceAddress).getNote(_zkAsset, _noteHashes[i]);
-            require(noteOwner == address(this), "Contract does not own this note.");
+            require(noteOwner == address(this), "contract does not own this note.");
         }
         _;
     }
