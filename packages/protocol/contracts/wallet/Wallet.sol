@@ -123,7 +123,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
         address _zkAsset,
         address _spenderSender
     ) public onlyOwner {
-        batchConfidentialApprove(_noteHashes, _zkAsset, _spenderSender, true);
+        batchConfidentialApprove(_noteHashes, _spenderSender, true, _zkAsset);
         batchConfidentialTransfer(_proof, _zkAsset, _spenderSender);
     }
 
