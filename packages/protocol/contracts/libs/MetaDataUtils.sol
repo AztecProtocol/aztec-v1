@@ -17,7 +17,7 @@ contract MetaDataUtils {
     */
     function extractAddress(bytes memory metaData, uint256 addressPos) public returns (address desiredAddress) {
         /**
-        * Memory map of metaData
+        * Memory map of metaData. This is the ABI encoding of metaData, supplied by the client
         * 0x00 - 0x20 : length of metaData
         * 0x20 - 0x81 : ephemeral key
         * 0x81 - 0xa1 : approved addresses offset

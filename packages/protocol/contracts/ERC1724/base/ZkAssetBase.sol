@@ -44,13 +44,9 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     ACE public ace;
     IERC20 public linkedToken;
 
-    struct NoteAccess {
-        mapping(address => bool) access;
-    }
-
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
     mapping(bytes32 => uint256) public metaDataTimeLog;
-    mapping(bytes32 => mapping(bytes32 => uint256)) public noteAccess;
+    mapping(bytes32 => uint256) public noteAccess;
 
 
     constructor(
@@ -323,7 +319,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
         require(
-            noteAccess[noteHash][addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender && status == 1,
+            noteAccess[addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender && status == 1,
             'caller does not have permission to update metaData'
         );
 
@@ -377,8 +373,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
                 address extractedAddress = extractAddress(metaData, i);
                 bytes32 addressID = keccak256(abi.encodePacked(extractedAddress, noteHash));
-                noteAccess[noteHash][addressID] = block.timestamp;
-                emit ApprovedAddress(extractedAddress, noteHash, address(this));
+                noteAccess[addressID] = block.timestamp;
             }
         }
     }   

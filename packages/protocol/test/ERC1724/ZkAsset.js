@@ -432,7 +432,7 @@ contract('ZkAsset', (accounts) => {
             // extract the approved address status from ZkAsset `noteAccess` mapping
             const addressPermissionStatus = await Promise.all(
                 new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.noteAccess.call(noteHash, approvedAddressIDs[index]);
+                    return zkAssetTest.noteAccess.call(approvedAddressIDs[index]);
                 }),
             );
             // (originalMetaDataTimeLog - 1) used to check greater than or equal to condition
@@ -474,7 +474,7 @@ contract('ZkAsset', (accounts) => {
             // extract the approved address status from ZkAsset `noteAccess` mapping
             const initialAddressPermissionStatus = await Promise.all(
                 new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.noteAccess.call(noteHash, initialApprovedAddressIDs[index]);
+                    return zkAssetTest.noteAccess.call(initialApprovedAddressIDs[index]);
                 }),
             );
 
@@ -493,7 +493,7 @@ contract('ZkAsset', (accounts) => {
             // extract the revised approved address statuses
             const revisedAddressPermissionStatus = await Promise.all(
                 new Array(revisedCustomMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.noteAccess.call(noteHash, revisedApprovedAddressIDs[index]);
+                    return zkAssetTest.noteAccess.call(revisedApprovedAddressIDs[index]);
                 }),
             );
 
@@ -542,7 +542,7 @@ contract('ZkAsset', (accounts) => {
             // extract the approved address status from ZkAsset `noteAccess` mapping
             const initialAddressPermissionStatus = await Promise.all(
                 new Array(customMetaData.addresses.length).fill(null).map((item, index) => {
-                    return zkAssetTest.noteAccess.call(noteHash, initialApprovedAddressIDs[index]);
+                    return zkAssetTest.noteAccess.call(initialApprovedAddressIDs[index]);
                 }),
             );
 
