@@ -8,7 +8,7 @@ jobs:
              -run:
                 name: "env variable test"
                 command: "echo $TEST_MNEMONIC"
-            -run:
+            - run:
                 name: "env variable test noquotes"
                 command: echo $TEST_MNEMONIC
     # build:
