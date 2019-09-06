@@ -7,10 +7,10 @@ jobs:
         steps:
             - run:
                 name: "env variable test"
-                command: "echo $TEST_MNEMONIC"
+                command: "echo \"$TEST_MNEMONIC\""
             - run:
                 name: "env variable test noquotes"
-                command: echo $TEST_MNEMONIC
+                command: echo \"$TEST_MNEMONIC\"
     # build:
     #     working_directory: ~/repo
     #     docker:
