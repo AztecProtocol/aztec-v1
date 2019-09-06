@@ -1,13 +1,6 @@
 version: 2.0
 
 jobs:
-    # envvartest:
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #     steps:
-    #         - run:
-    #             name: "env variable test"
-    #             command: "echo \"$TEST_MNEMONIC\""
     build:
         working_directory: ~/repo
         docker:
@@ -124,10 +117,6 @@ workflows:
     version: 2
     main:
         jobs:
-            # - envvartest:
-            #     filters:
-            #         branches:
-            #             ignore: gh-pages
             - build:
                 filters:
                     branches:

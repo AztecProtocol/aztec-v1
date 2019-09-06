@@ -558,6 +558,4 @@ contract('Wallet', async (accounts) => {
             'the contract owner did not sign this message',
         );
     });
-
-    // TODO: tests on empty notesArray
 });
