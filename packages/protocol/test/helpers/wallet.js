@@ -2,7 +2,6 @@ const aztec = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 
 const {
-    // proofs: { JOIN_SPLIT_PROOF, MINT_PROOF, SWAP_PROOF, DIVIDEND_PROOF, BURN_PROOF, PRIVATE_RANGE_PROOF },
     proofs: { MINT_PROOF },
 } = devUtils;
 const { JoinSplitProof, MintProof } = aztec;

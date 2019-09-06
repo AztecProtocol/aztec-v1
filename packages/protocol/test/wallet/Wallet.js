@@ -354,9 +354,6 @@ contract('Wallet', async (accounts) => {
         );
     });
 
-    // it('another person should be able to spend notes owned by the contract after approval to spend', async () => {
-    // });
-
     it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
         const sender = alice.address;
         const account = alice;

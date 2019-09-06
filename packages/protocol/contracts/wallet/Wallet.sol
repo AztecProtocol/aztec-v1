@@ -32,7 +32,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
     ));
 
     /**
-     * @notice Constructor for this contract, simply saves the address of ACE
+     * @notice Constructor for this contract, simply saves the address of ACE and the domain hash
      * @param _aceAddress Address of ACE contract for use by this contract
      */
     constructor(address _aceAddress) public Ownable() {
@@ -78,9 +78,9 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
      */
     function batchConfidentialApprove(
         bytes32[] memory _noteHashes,
-        address _zkAsset,
         address _spender,
-        bool _status
+        bool _status,
+        address _zkAsset
     ) public onlyOwner notesOwned(_noteHashes, _zkAsset) {
         IZkAsset asset = IZkAsset(_zkAsset);
         for (uint j = 0; j < _noteHashes.length; j++) {
@@ -105,15 +105,17 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
         asset.confidentialTransferFrom(JOIN_SPLIT_PROOF, _proofOutputs.get(0));
     }
 
+
+    // TODO: decide whether this function neccesary
     /**
-     * @notice Approves notes and validates a Join-Split proof to transfer notes to another addresstwo
+     * @notice Approves notes and validates a Join-Split proof to transfer notes to another address
      * @author AZTEC
      * @param _noteHashes An array of hashes of notes (that
                           must be owned by this contract) to
                           to be approved for spending
      * @param _proof The proof data to verify
      * @param _zkAsset The address of the zkAsset
-     * @param _spenderSender The address sending the proof
+     * @param _spenderSender The address sending the proof (also the address that is spending the notes)
      */
     function spendNotes(
         bytes32[] memory _noteHashes,
@@ -144,7 +146,6 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
         bytes memory _signature,
         address _zkAsset
     ) public view notesOwned(_noteHashes, _zkAsset) {
-        address signer;
         bytes32 _hashStruct = keccak256(abi.encode(
             MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
             keccak256(abi.encode(_noteHashes)),
@@ -153,7 +154,7 @@ contract Wallet is Ownable, IAZTEC, LibEIP712 {
         ));
         // validate EIP712 signature
         bytes32 msgHash = hashEIP712Message(_hashStruct);
-        signer = recoverSignature(
+        address signer = recoverSignature(
             msgHash,
             _signature
         );

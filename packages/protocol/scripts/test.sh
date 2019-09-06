@@ -20,6 +20,7 @@ ganache_running() {
 }
 
 start_ganache() {
+  # Slightly hacky, there may be more elegant way of starting ganache with environment variable mnemonic
   if [[ -z "$TEST_MNEMONIC" ]]; then
     file_name=".env"
     if [ -f $file_name ]; then
@@ -30,7 +31,6 @@ start_ganache() {
       echo "Temporarily copied .env.example to .env"
     fi
     while read line; do
-      # if [[ $line != \#* ]]; then          # (don't export comments)
       if [[ $line == TEST_MNEMONIC=* ]]; then
         export "$line"
       fi

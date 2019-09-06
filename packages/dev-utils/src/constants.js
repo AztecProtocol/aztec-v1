@@ -101,11 +101,11 @@ const EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = '0x91ab3d17e3a50a9d89e63fd30b92be7f5
 // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
 const JOIN_SPLIT_SIGNATURE_TYPE_HASH = '0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462';
 
-// keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool status)"
-const NOTE_SIGNATURE_TYPE_HASH = '0x9fe730639297761b7154c4543e5b6d06ca424c8b46480a40d3181296d5c35815';
-
 // keccak256 hash of "MultipleNoteSignature(bytes32[] noteHashes,address spender,bool status)"
 const MULTIPLE_NOTE_SIGNATURE_TYPE_HASH = '0xe260e9eb9862dff560c3cd719c78af863bff7ceabf065011bf9e0eb0a671675a';
+
+// keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool status)"
+const NOTE_SIGNATURE_TYPE_HASH = '0x9fe730639297761b7154c4543e5b6d06ca424c8b46480a40d3181296d5c35815';
 
 constants.eip712 = {
     ACE_DOMAIN_PARAMS: {
@@ -137,18 +137,6 @@ constants.eip712 = {
         primaryType: 'JoinSplitSignature',
     },
     JOIN_SPLIT_SIGNATURE_TYPE_HASH,
-    NOTE_SIGNATURE: {
-        types: {
-            NoteSignature: [
-                { name: 'noteHash', type: 'bytes32' },
-                { name: 'spender', type: 'address' },
-                { name: 'status', type: 'bool' },
-            ],
-            EIP712Domain: EIP712_DOMAIN,
-        },
-        primaryType: 'NoteSignature',
-    },
-    NOTE_SIGNATURE_TYPE_HASH,
     MULTIPLE_NOTE_SIGNATURE: {
         types: {
             MultipleNoteSignature: [
@@ -161,6 +149,18 @@ constants.eip712 = {
         primaryType: 'MultipleNoteSignature',
     },
     MULTIPLE_NOTE_SIGNATURE_TYPE_HASH,
+    NOTE_SIGNATURE: {
+        types: {
+            NoteSignature: [
+                { name: 'noteHash', type: 'bytes32' },
+                { name: 'spender', type: 'address' },
+                { name: 'status', type: 'bool' },
+            ],
+            EIP712Domain: EIP712_DOMAIN,
+        },
+        primaryType: 'NoteSignature',
+    },
+    NOTE_SIGNATURE_TYPE_HASH,
     WALLET_DOMAIN_PARAMS: {
         name: 'WALLET',
         version: '1',
