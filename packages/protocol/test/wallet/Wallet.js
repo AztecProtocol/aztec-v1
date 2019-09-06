@@ -55,11 +55,13 @@ contract('Wallet', async (accounts) => {
             sender,
             zkAssetMintableContract,
         );
-        await Promise.all(notes.map(async (note) => {
-            const aceNote = await ace.getNote(zkAssetMintableContract.address, note.noteHash, { from: sender });
-            expect(aceNote).to.not.equal(undefined);
-            expect(aceNote.noteOwner).to.equal(walletContract.address);
-        }));
+        await Promise.all(
+            notes.map(async (note) => {
+                const aceNote = await ace.getNote(zkAssetMintableContract.address, note.noteHash, { from: sender });
+                expect(aceNote).to.not.equal(undefined);
+                expect(aceNote.noteOwner).to.equal(walletContract.address);
+            }),
+        );
     });
 
     it('owner of contract can approve notes that are owned by the contract to be spent by the contract', async () => {
@@ -285,9 +287,11 @@ contract('Wallet', async (accounts) => {
         await walletContract.batchConfidentialApprove(noteHashes, zkAssetMintableContract.address, bob.address, true, {
             from: sender,
         });
-        await Promise.all(notes.map(async (note) => {
-            expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, bob.address)).to.equal(true);
-        }));
+        await Promise.all(
+            notes.map(async (note) => {
+                expect(await zkAssetMintableContract.confidentialApproved(note.noteHash, bob.address)).to.equal(true);
+            }),
+        );
     });
 
     it("the contract shouldn't be able to approve notes for itself to spend that have already been spent", async () => {
