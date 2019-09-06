@@ -1,24 +1,26 @@
-import parseAddressesFromMetadata from './addNote/utils/parseAddressesFromMetadata';
+import metadata from '~utils/metadata';
 
-const filter = (ownerAddress) => {
-    let addresses;
-    return ({owner, metadata}) => {
-        if (owner === ownerAddress) return true;
-        addresses = parseAddressesFromMetadata(metadata);
-        return addresses.includes(ownerAddress);
-    } 
-}  
+const notesOnly = (notes) => {
+    return {
+        hasAccess: (address) => notes.filter(hasAccess(address))
+    }
+}
+
+const hasAccess = (address) => {
+    return ({owner, metadata: metadataStr}) => owner === address || !!metadata(metadataStr).getAccess(address)
+}
+
 
 export default function associatedNotesWithOwner({
         createNotes,
         updateNotes,
         destroyNotes,
     }, 
-    ownerAddress) {
-    
+    address) {
+        
     return {
-        createNotes: createNotes.filter(filter(ownerAddress)), 
-        updateNotes: updateNotes.filter(filter(ownerAddress)),
-        destroyNotes: destroyNotes.filter(filter(ownerAddress)), 
+        createNotes: notesOnly(createNotes).hasAccess(address),
+        updateNotes: notesOnly(updateNotes).hasAccess(address),
+        destroyNotes: notesOnly(destroyNotes).hasAccess(address),
     }
 }

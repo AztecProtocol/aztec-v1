@@ -12,3 +12,5 @@ export const AZTEC_JS_METADATA_PREFIX_LENGTH = 128;
 
 export const DYNAMIC_VAR_CONFIG_LENGTH = 64;
 export const MIN_BYTES_VAR_LENGTH = 64;
+
+export const START_EVENTS_SYNCING_BLOCK = 0;

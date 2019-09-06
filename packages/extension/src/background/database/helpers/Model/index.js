@@ -2,11 +2,20 @@ import db from '../../';
 import {
     errorLog
 } from '~utils/log';
-import get from './get';
+
+// add
 import add from './add';
-import update from './update';
+import bulkAdd from './bulkAdd';
+
+// update
+import put from './put';
+import bulkPut from './bulkPut';
+
+// retrieve
+import get from './get';
 import query from './query';
 import latest from './latest';
+
 
 /* 
 * Format of config file
@@ -39,20 +48,18 @@ export default function Model(modelConfig) {
         errorLog(`Cannot define new indexDb "${name}" model, as "fields" value is not array or it is empty`);
         return;
     }
-
-    // PK is alwais the first element in the schema fields
-    const primaryKey = fields[0];
     
     const dexieConfig = {};
     dexieConfig[name] = fields.join(',');
     db.version(version).stores(dexieConfig);
 
     return {
+        add: (item) => add(name, item),
+        bulkAdd: (items) => bulkAdd(name, items),
+        put: (items) => put(name, items),
+        bulkPut: (items) => bulkPut(name, items),
         get: (fields) => get(name, fields),
-        add: (fields) => add(name, fields),
-        put: (fields) => add(name, fields, primaryKey),
-        update: (id, fields) => update(name, id, fields),
-        query: (filterFunc, orderBy) => query(name, {filterFunc, orderBy}),
+        query: () => query(name),
         latest: (options) => latest(name, options),
     }
 }
