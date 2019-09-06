@@ -1,180 +1,177 @@
 version: 2.0
 
 jobs:
-    envvartest:
+    # envvartest:
+    #     docker:
+    #         - image: circleci/node:10.15.3
+    #     steps:
+    #         - run:
+    #             name: "env variable test"
+    #             command: "echo \"$TEST_MNEMONIC\""
+    build:
+        working_directory: ~/repo
         docker:
             - image: circleci/node:10.15.3
         steps:
+            - checkout
             - run:
-                name: "env variable test"
-                command: "echo \"$TEST_MNEMONIC\""
+                name: "Update NPM"
+                command: sudo npm install -g npm@6.9.0
             - run:
-                name: "env variable test noquotes"
-                command: echo \"$TEST_MNEMONIC\"
-    # build:
-    #     working_directory: ~/repo
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #     steps:
-    #         - checkout
-    #         - run:
-    #             name: "Update NPM"
-    #             command: sudo npm install -g npm@6.9.0
-    #         - run:
-    #             name: "Install Yarn"
-    #             command: sudo npm install -g yarn@1.15.2
-    #         - run:
-    #             name: "Install Dependencies"
-    #             command: yarn install
-    #         - run:
-    #             name: "Build Packages"
-    #             command: yarn build
-    #         - save_cache:
-    #             key: repo-{{ .Environment.CIRCLE_SHA1 }}
-    #             paths:
-    #                 - ~/repo
-    # lint:
-    #     working_directory: ~/repo
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #     steps:
-    #         - restore_cache:
-    #             keys:
-    #                 - repo-{{ .Environment.CIRCLE_SHA1 }}
-    #         - run:
-    #             name: "Lint Packages"
-    #             command: |
-    #                 yarn prettier:ci
-    #                 yarn lint
-    # test:
-    #     working_directory: ~/repo
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #         - image: trufflesuite/ganache-cli:v6.4.1
-    #           command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m="install flat case put sweet learn refuse early benefit giraffe polar issue"
+                name: "Install Yarn"
+                command: sudo npm install -g yarn@1.15.2
+            - run:
+                name: "Install Dependencies"
+                command: yarn install
+            - run:
+                name: "Build Packages"
+                command: yarn build
+            - save_cache:
+                key: repo-{{ .Environment.CIRCLE_SHA1 }}
+                paths:
+                    - ~/repo
+    lint:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Lint Packages"
+                command: |
+                    yarn prettier:ci
+                    yarn lint
+    test:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+            - image: trufflesuite/ganache-cli:v6.4.1
+              command: "ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m=\"$TEST_MNEMONIC\""
                   
-    #     steps:
-    #         - restore_cache:
-    #             keys:
-    #                 - repo-{{ .Environment.CIRCLE_SHA1 }}
-    #         - run:
-    #             name: "Test Packages"
-    #             command: yarn test
-    # artifacts:
-    #     working_directory: ~/repo
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #         - image: trufflesuite/ganache-cli:v6.4.1
-    #           command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
-    #     steps:
-    #         - restore_cache:
-    #             keys:
-    #                 - repo-{{ .Environment.CIRCLE_SHA1 }}
-    #         - run:
-    #             name: "Orchestrate Artifacts"
-    #             command: yarn script:orchestrate:artifacts
-    # coverage:
-    #     working_directory: ~/repo
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #         - image: trufflesuite/ganache-cli:v6.4.1
-    #           command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m="install flat case put sweet learn refuse early benefit giraffe polar issue"
-    #     steps:
-    #         - restore_cache:
-    #             keys:
-    #                 - repo-{{ .Environment.CIRCLE_SHA1 }}
-    #         - run:
-    #             name: "Cover Packages"
-    #             command: PKG=@aztec/protocol yarn coverage
-    # docs:
-    #     working_directory: ~/repo
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #     steps:
-    #         - restore_cache:
-    #             keys:
-    #                 - repo-{{ .Environment.CIRCLE_SHA1 }}
-    #         - run:
-    #             name: "Build Docs"
-    #             command: yarn build:docs
-    #         - run:
-    #             name: "Prepare Git"
-    #             command: |
-    #                 git remote add docs https://$GH_TOKEN@github.com/AztecProtocol/AZTEC.git
-    #                 git config credential.helper "cache --timeout=120"
-    #                 git config user.email $AZTEC_BOT_EMAIL
-    #                 git config user.name $AZTEC_BOT_NAME
-    #         - run:
-    #             name: "Publish Docs"
-    #             command: yarn publish:docs
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Test Packages"
+                command: yarn test
+    artifacts:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+            - image: trufflesuite/ganache-cli:v6.4.1
+              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Orchestrate Artifacts"
+                command: yarn script:orchestrate:artifacts
+    coverage:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+            - image: trufflesuite/ganache-cli:v6.4.1
+              command: "ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m=\"$TEST_MNEMONIC\""
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Cover Packages"
+                command: PKG=@aztec/protocol yarn coverage
+    docs:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Build Docs"
+                command: yarn build:docs
+            - run:
+                name: "Prepare Git"
+                command: |
+                    git remote add docs https://$GH_TOKEN@github.com/AztecProtocol/AZTEC.git
+                    git config credential.helper "cache --timeout=120"
+                    git config user.email $AZTEC_BOT_EMAIL
+                    git config user.name $AZTEC_BOT_NAME
+            - run:
+                name: "Publish Docs"
+                command: yarn publish:docs
 
-    # release:
-    #     working_directory: ~/repo
-    #     docker:
-    #         - image: circleci/node:10.15.3
-    #     steps:
-    #         - restore_cache:
-    #             keys:
-    #                 - repo-{{ .Environment.CIRCLE_SHA1 }}
-    #         - run:
-    #             name: "Build Packages for Production"
-    #             command: yarn build:prod
-    #         - run: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-    #         - run:
-    #             name: "Release Packages"
-    #             command: yarn script:publish
+    release:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "Build Packages for Production"
+                command: yarn build:prod
+            - run: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+            - run:
+                name: "Release Packages"
+                command: yarn script:publish
 workflows:
     version: 2
     main:
         jobs:
-            - envvartest:
+            # - envvartest:
+            #     filters:
+            #         branches:
+            #             ignore: gh-pages
+            - build:
                 filters:
                     branches:
                         ignore: gh-pages
-            # - build:
-            #     filters:
-            #         branches:
-            #             ignore: gh-pages
-            # - lint:
-            #     requires:
-            #         - build
-            #     filters:
-            #         branches:
-            #             ignore: gh-pages
-            # - test:
-            #     requires:
-            #         - build
-            #     filters:
-            #         branches:
-            #             ignore: gh-pages
-            # - artifacts:
-            #     requires:
-            #         - lint
-            #         - test
-            #     filters:
-            #         branches:
-            #             only:
-            #                 - develop
-            # - coverage:
-            #     requires:
-            #         - lint
-            #         - test
-            #     filters:
-            #         branches:
-            #             ignore: gh-pages
-            # - docs:
-            #     requires:
-            #         - lint
-            #         - test
-            #     filters:
-            #         branches:
-            #             only:
-            #                 - develop
-            # - release:
-            #     requires:
-            #         - lint
-            #         - test
-            #     filters:
-            #         branches:
-            #             only:
-            #                 - master
+            - lint:
+                requires:
+                    - build
+                filters:
+                    branches:
+                        ignore: gh-pages
+            - test:
+                requires:
+                    - build
+                filters:
+                    branches:
+                        ignore: gh-pages
+            - artifacts:
+                requires:
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - develop
+            - coverage:
+                requires:
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        ignore: gh-pages
+            - docs:
+                requires:
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - develop
+            - release:
+                requires:
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - master
