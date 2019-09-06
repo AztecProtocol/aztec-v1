@@ -5,7 +5,7 @@ jobs:
         docker:
             - image: circleci/node:10.15.3
         steps:
-             -run:
+            - run:
                 name: "env variable test"
                 command: "echo $TEST_MNEMONIC"
             - run:
