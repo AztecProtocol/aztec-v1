@@ -319,7 +319,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
         require(
-            noteAccess[addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender && status == 1,
+            (noteAccess[addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender) && status == 1,
             'caller does not have permission to update metaData'
         );
 
