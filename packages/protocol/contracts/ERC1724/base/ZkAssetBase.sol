@@ -402,7 +402,6 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
             (address noteOwner, bytes32 noteHash, bytes memory metaData) = outputNotes.get(i).extractNote();
             setMetaDataTimeLog(noteHash);
-            // need to check length of metadata
             approveAddresses(metaData, noteHash);
             emit CreateNote(noteOwner, noteHash, metaData);
         }

@@ -18,6 +18,8 @@ contract MetaDataUtils {
     function extractAddress(bytes memory metaData, uint256 addressPos) public returns (address desiredAddress) {
         /**
         * Memory map of metaData. This is the ABI encoding of metaData, supplied by the client
+        * The first word of any dynamic bytes array within this map, is the number of discrete elements in that 
+        * bytes array. e.g. first word at 0xe1 is the number of approvedAddresses
         * 0x00 - 0x20 : length of metaData
         * 0x20 - 0x81 : ephemeral key
         * 0x81 - 0xa1 : approved addresses offset
@@ -27,7 +29,10 @@ contract MetaDataUtils {
         * (0xe1 + L_addresses) - (0xe1 + L_addresses + L_encryptedViewKeys) : encrypted view keys
         * (0xe1 + L_addresses + L_encryptedViewKeys) - (0xe1 + L_addresses + L_encryptedViewKeys + L_appData) : appData
         */
+
+        uint256 numAddresses;
         assembly {
+            numAddresses := mload(add(metaData, 0x20))
             desiredAddress := mload(
                 add(
                     add(
@@ -38,5 +43,10 @@ contract MetaDataUtils {
                 )
             )
         }
+
+        require(
+            addressPos < numAddresses, 
+            'addressPos out of bounds - addressPos must be less than the number of addresses to be approved'
+        );
     }
 }

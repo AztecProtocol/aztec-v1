@@ -365,8 +365,88 @@ contract('ZkAsset', (accounts) => {
             expect(metaDataTimeLog).to.not.equal(undefined);
         });
 
+        it('should allow noteOwner to call updateNoteMetaData()', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const depositInputNotes = [];
+            const depositInputOwnerAccounts = [];
+            const depositPublicValue = 20;
+
+            const noteOwnerWallet = hdwallet.derivePath("m/44'/60'/0'/0/0").getWallet();
+            const noteOwnerAccount = secp256k1.accountFromPrivateKey(noteOwnerWallet.getPrivateKeyString());
+
+            const depositOutputNotes = await helpers.getNotesForAccount(noteOwnerAccount, [20]);
+            const publicValue = depositPublicValue * -1;
+
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
+            await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+                from: accounts[0],
+            });
+
+            const customDataLength = customMetaData.dataWithNewEphemeral.length;
+            const { receipt: updateReceipt } = await zkAsset.updateNoteMetaData(
+                depositOutputNotes[0].noteHash,
+                customMetaData.dataWithNewEphemeral,
+                {
+                    from: noteOwnerAccount.address,
+                },
+            );
+
+            const updateEvent = updateReceipt.logs.find((l) => l.event === 'UpdateNoteMetaData');
+            const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, customDataLength);
+            expect(emittedUpdateMetaData).to.equal(customMetaData.dataWithNewEphemeral);
+        });
+
+        it('noteOwner should approve an address and enable approved address to call updateNoteMetaData()', async () => {
+            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
+            const depositInputNotes = [];
+            const depositInputOwnerAccounts = [];
+            const depositPublicValue = 20;
+
+            const noteOwnerWallet = hdwallet.derivePath("m/44'/60'/0'/0/0").getWallet();
+            const noteOwnerAccount = secp256k1.accountFromPrivateKey(noteOwnerWallet.getPrivateKeyString());
+
+            const addressApprovedWallet = hdwallet.derivePath("m/44'/60'/0'/0/1").getWallet();
+            const approvedAddressAccount = secp256k1.accountFromPrivateKey(addressApprovedWallet.getPrivateKeyString());
+
+            const depositOutputNotes = await helpers.getNotesForAccount(noteOwnerAccount, [20]);
+            const publicValue = depositPublicValue * -1;
+
+            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(zkAsset.address);
+            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+
+            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
+            await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
+                from: accounts[0],
+            });
+
+            await zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, customMetaData.dataWithNewEphemeral, {
+                from: noteOwnerAccount.address,
+            });
+
+            // Call the updateNoteMetaData() function with an address that should have been approved
+            const revisedCustomDataLength = revisedCustomMetaData.dataWithNewEphemeral.length;
+            const { receipt: updateReceipt } = await zkAsset.updateNoteMetaData(
+                depositOutputNotes[0].noteHash,
+                revisedCustomMetaData.dataWithNewEphemeral,
+                {
+                    from: approvedAddressAccount.address,
+                },
+            );
+
+            const updateEvent = updateReceipt.logs.find((l) => l.event === 'UpdateNoteMetaData');
+            const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, revisedCustomDataLength);
+            expect(emittedUpdateMetaData).to.equal(revisedCustomMetaData.dataWithNewEphemeral);
+        });
+
         it('should approve and grant addresses noteAccess', async () => {
             // create one outputNote, then place other addresses on the approved noteAccess mapping
+            // zkAssetTest removes the explicit permission check - used to thoroughly test the
+            // mapping which the permissioning check is based on
             const zkAssetTest = await ZkAssetTest.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
@@ -521,84 +601,6 @@ contract('ZkAsset', (accounts) => {
                 // (initialMetaDataTimeLog - 1) used to check greater than or equal to condition
                 expect(initialAddressPermissionStatus[i].toNumber()).to.be.greaterThan(initialMetaDataTimeLog - 1);
             }
-        });
-
-        it('should update the metadata of a note when ZkAsset.updateNoteMetaData() called with noteOwner', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
-            const depositInputNotes = [];
-            const depositInputOwnerAccounts = [];
-            const depositPublicValue = 20;
-
-            const noteOwnerWallet = hdwallet.derivePath("m/44'/60'/0'/0/0").getWallet();
-            const noteOwnerAccount = secp256k1.accountFromPrivateKey(noteOwnerWallet.getPrivateKeyString());
-
-            const depositOutputNotes = await helpers.getNotesForAccount(noteOwnerAccount, [20]);
-            const publicValue = depositPublicValue * -1;
-
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(zkAsset.address);
-            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
-
-            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
-                from: accounts[0],
-            });
-
-            const customDataLength = customMetaData.dataWithNewEphemeral.length;
-            const { receipt: updateReceipt } = await zkAsset.updateNoteMetaData(
-                depositOutputNotes[0].noteHash,
-                customMetaData.dataWithNewEphemeral,
-                {
-                    from: noteOwnerAccount.address,
-                },
-            );
-
-            const updateEvent = updateReceipt.logs.find((l) => l.event === 'UpdateNoteMetaData');
-            const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, customDataLength);
-            expect(emittedUpdateMetaData).to.equal(customMetaData.dataWithNewEphemeral);
-        });
-
-        it('should update the metadata of a note when an address is approved', async () => {
-            const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
-            const depositInputNotes = [];
-            const depositInputOwnerAccounts = [];
-            const depositPublicValue = 20;
-
-            const noteOwnerWallet = hdwallet.derivePath("m/44'/60'/0'/0/0").getWallet();
-            const noteOwnerAccount = secp256k1.accountFromPrivateKey(noteOwnerWallet.getPrivateKeyString());
-
-            const addressApprovedWallet = hdwallet.derivePath("m/44'/60'/0'/0/1").getWallet();
-            const approvedAddressAccount = secp256k1.accountFromPrivateKey(addressApprovedWallet.getPrivateKeyString());
-
-            const depositOutputNotes = await helpers.getNotesForAccount(noteOwnerAccount, [20]);
-            const publicValue = depositPublicValue * -1;
-
-            const proof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
-            const data = proof.encodeABI(zkAsset.address);
-            const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
-
-            await ace.publicApprove(zkAsset.address, proof.hash, 200, { from: accounts[0] });
-            await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
-                from: accounts[0],
-            });
-
-            await zkAsset.updateNoteMetaData(depositOutputNotes[0].noteHash, customMetaData.dataWithNewEphemeral, {
-                from: noteOwnerAccount.address,
-            });
-
-            // Call the updateNoteMetaData() function with an address that should have been approved
-            const revisedCustomDataLength = revisedCustomMetaData.dataWithNewEphemeral.length;
-            const { receipt: updateReceipt } = await zkAsset.updateNoteMetaData(
-                depositOutputNotes[0].noteHash,
-                revisedCustomMetaData.dataWithNewEphemeral,
-                {
-                    from: approvedAddressAccount.address,
-                },
-            );
-
-            const updateEvent = updateReceipt.logs.find((l) => l.event === 'UpdateNoteMetaData');
-            const emittedUpdateMetaData = updateEvent.args.metadata.slice(0, revisedCustomDataLength);
-            expect(emittedUpdateMetaData).to.equal(revisedCustomMetaData.dataWithNewEphemeral);
         });
     });
 

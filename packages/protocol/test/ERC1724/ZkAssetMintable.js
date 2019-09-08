@@ -300,7 +300,7 @@ contract('ZkAssetMintable', (accounts) => {
             // Crucial check, confirm that the event contains the expected metaData
             const event = receipt.logs.find((l) => l.event === 'UpdateTotalMinted');
             const emittedEphemeral = event.args.metaData.slice(130, 196);
-            const emittedCustomData = event.args.metaData.slice(196, 752);
+            const emittedCustomData = event.args.metaData.slice(196, 196 + customMetaData.data.length);
             expect(emittedEphemeral).to.equal(ephemeral);
             expect(emittedCustomData).to.equal(customMetaData.data.slice(2));
         });

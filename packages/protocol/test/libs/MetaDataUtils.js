@@ -14,10 +14,9 @@ contract('MetaDataUtils', async () => {
     });
 
     it('should extract a correct address', async () => {
-        const address = ['ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0ad0a'];
-
+        const address = customMetaData.addresses[0];
         const addressToExtract = 0;
         const extractedAddress = await metaDataUtils.extractAddress.call(customMetaData.dataWithNewEphemeral, addressToExtract);
-        expect(toChecksumAddress(extractedAddress.slice(2))).to.equal(toChecksumAddress(address[0]));
+        expect(toChecksumAddress(extractedAddress.slice(2))).to.equal(toChecksumAddress(address));
     });
 });
