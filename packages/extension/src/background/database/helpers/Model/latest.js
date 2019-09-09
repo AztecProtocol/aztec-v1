@@ -1,16 +1,19 @@
 import db from '../../'
 
-export default async function latest(modelName, {orderBy, filterFunc}) {
-    let objs;
-    if (filterFunc) {
-        objs = await db[modelName].orderBy(orderBy).filter(filterFunc).toArray();
-    } else {
-        objs = await db[modelName].orderBy(orderBy).toArray();
+export default async function latest(modelName, {orderBy, filterOptions}) {
+    let collectionRaw = db[modelName]
+    
+    const keys = Object.keys(filterOptions);
+    
+    const collection = keys.reduce((acum, key) => acum.where(key).equalsIgnoreCase(filterOptions[key]), collectionRaw);
+    
+    if(keys.length) {
+        const items = await collection.sortBy(orderBy);
+        if (items.length) {
+            return items[0];
+        }
+        return null;
     }
 
-    if(objs && objs.length) {
-        return objs[objs.length - 1];
-    }
-    
-    return  null;
+    return collection.orderBy(orderBy).last();
 }
