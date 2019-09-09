@@ -20,22 +20,26 @@ contract ZkAssetTest is ZkAsset {
         _scalingFactor
     ) {
     } 
+
     /**
     * @dev Update the metadata of a note that already exists in storage. 
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */
-    function updateNoteMetaData(bytes32 noteHash, bytes calldata metaData) external {
-        // Get the note from this assets registry
+    function updateNoteMetaData(bytes32 noteHash, bytes memory metaData) public {
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
-        require(status == 1, "only unspent notes can be approved");
 
-        // extract the approved addresses
-        // using MetaDataUtils for bytes;
-        address addressToApprove = MetaDataUtils.extractAddresses(metaData);
-        noteAccess[addressToApprove] = noteHash;
+        // Permissioning check
+        bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
 
-        emit ApprovedAddress(addressToApprove, noteHash);
+
+        // Approve the addresses in the note metaData
+        approveAddresses(metaData, noteHash);
+
+        // Set the metaDatatTimeLog to the latest block time
+        setMetaDataTimeLog(noteHash);
+
         emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
     }
+
 }

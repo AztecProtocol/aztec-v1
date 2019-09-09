@@ -16,7 +16,7 @@ import "../../libs/ProofUtils.sol";
  * The ownership values and transfer values are encrypted.
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
+contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     using NoteUtils for bytes;
     using SafeMath for uint256;
     using ProofUtils for uint24;
@@ -45,7 +45,9 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     IERC20 public linkedToken;
 
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
-    mapping(address => bytes32) noteAccess;
+    mapping(bytes32 => uint256) public metaDataTimeLog;
+    mapping(bytes32 => uint256) public noteAccess;
+
 
     constructor(
         address _aceAddress,
@@ -311,22 +313,71 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */
-    function updateNoteMetaData(bytes32 noteHash, bytes calldata metaData) external {
+    function updateNoteMetaData(bytes32 noteHash, bytes memory metaData) public {
         // Get the note from this assets registry
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
-        require(status == 1, "only unspent notes can be approved");
 
+        bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
         require(
-            noteAccess[msg.sender] == noteHash || noteOwner == msg.sender,
+            (noteAccess[addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender) && status == 1,
             'caller does not have permission to update metaData'
         );
 
-        address addressToApprove = MetaDataUtils.extractAddresses(metaData);
-        noteAccess[addressToApprove] = noteHash;
+        // Approve the addresses in the note metaData
+        approveAddresses(metaData, noteHash);
 
-        emit ApprovedAddress(addressToApprove, noteHash);
+        // Set the metaDataTimeLog to the latest block time
+        setMetaDataTimeLog(noteHash);
+
         emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
     }
+
+    /**
+    * @dev Set the metaDataTimeLog mapping
+    * @param noteHash - hash of a note, used as a unique identifier for the note
+    */
+    function setMetaDataTimeLog(bytes32 noteHash) internal {
+        metaDataTimeLog[noteHash] = block.timestamp;
+    }
+
+    /**
+    * @dev Add approved addresses to a noteAccess mapping and to the global collection of addresses that
+    * have been approved
+    * @param metaData - metaData of a note, which contains addresses to be approved
+    * @param noteHash - hash of an AZTEC note, a unique identifier of the note
+    */
+    function approveAddresses(bytes memory metaData, bytes32 noteHash) internal {
+        /**
+        * Memory map of metaData
+        * 0x00 - 0x20 : length of metaData
+        * 0x20 - 0x81 : ephemeral key
+        * 0x81 - 0xa1 : approved addresses offset
+        * 0xa1 - 0xc1 : encrypted view keys offset
+        * 0xc1 - 0xe1 : app data offset
+        * 0xe1 - L_addresses : approvedAddresses
+        * (0xe1 + L_addresses) - (0xe1 + L_addresses + L_encryptedViewKeys) : encrypted view keys
+        * (0xe1 + L_addresses + L_encryptedViewKeys) - (0xe1 + L_addresses + L_encryptedViewKeys + L_appData) : appData
+        */
+
+        bytes32 metaDataLength;
+        bytes32 numAddresses;
+        assembly {
+            metaDataLength := mload(metaData)
+            numAddresses := mload(add(metaData, 0xe1))
+        }
+
+        // if customData has been set, approve the relevant addresses
+        if (uint256(metaDataLength) > 0x61) {
+            address[] memory extractedAddresses = new address[](uint256(numAddresses));
+
+            for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
+                address extractedAddress = extractAddress(metaData, i);
+                bytes32 addressID = keccak256(abi.encodePacked(extractedAddress, noteHash));
+                noteAccess[addressID] = block.timestamp;
+            }
+        }
+    }   
+   
 
     /**
     * @dev Emit events for all input notes, which represent notes being destroyed
@@ -349,8 +400,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     */
     function logOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
-            (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
-            emit CreateNote(noteOwner, noteHash, metadata);
+            (address noteOwner, bytes32 noteHash, bytes memory metaData) = outputNotes.get(i).extractNote();
+            setMetaDataTimeLog(noteHash);
+            approveAddresses(metaData, noteHash);
+            emit CreateNote(noteOwner, noteHash, metaData);
         }
     }
 }

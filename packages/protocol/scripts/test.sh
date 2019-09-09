@@ -20,8 +20,26 @@ ganache_running() {
 }
 
 start_ganache() {
-  ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" > /dev/null &
-
+  if [[ -z "$TEST_MNEMONIC" ]]; then
+    file_name=".env"
+    if [ -f $file_name ]; then
+      export ENV_EXISTS=1
+    else
+      export ENV_EXISTS=0
+      cp ".env.example" ".env"
+      echo "Temporarily copied .env.example to .env"
+    fi
+    while read line; do
+      if [[ $line == TEST_MNEMONIC=* ]]; then
+        export "$line"
+      fi
+    done <<< "$(cat .env)"
+  fi
+  if [[ -z "$TEST_MNEMONIC" ]]; then
+    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" > /dev/null &
+  else
+    ./node_modules/.bin/ganache-cli --networkId 1234 --gasLimit 0xfffffffffff --port "$ganache_port" -m="$TEST_MNEMONIC" > /dev/null &
+  fi
   ganache_pid=$!
 
   echo "Waiting for ganache to launch on port "$ganache_port"..."
@@ -62,6 +80,12 @@ if [ "$MODE" = "profile" ]; then
   if [ "$CI" = true ]; then
     cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
   fi
+fi
+
+
+if [ $ENV_EXISTS -eq 0 ]; then
+  rm ".env"
+  echo "Deleted added .env"
 fi
 
 

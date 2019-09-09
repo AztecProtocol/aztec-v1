@@ -8,7 +8,7 @@ const BN = require('bn.js');
 const { padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
-const { customMetaData } = note.utils;
+const { customMetaData } = require('../helpers/ERC1724');
 const { generateFactoryId } = require('../helpers/Factory');
 
 const ACE = artifacts.require('./ACE');
@@ -159,7 +159,7 @@ contract('ACE', (accounts) => {
                 const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
 
                 outputNotes.forEach((individualNote) => {
-                    return individualNote.setMetaData(customMetaData);
+                    return individualNote.setMetaData(customMetaData.data);
                 });
 
                 const proofWithNoteMetaData = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
