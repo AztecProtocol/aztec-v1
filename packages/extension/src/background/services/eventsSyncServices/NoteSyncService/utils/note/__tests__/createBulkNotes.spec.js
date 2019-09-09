@@ -2,7 +2,9 @@ import {
     createBulkNotes,
 } from '../';
 import Note from '~background/database/models/note';
-import db from '~background/database';
+import {
+    clearDB
+} from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
@@ -24,7 +26,7 @@ describe('createBulkNotes', () => {
     ];
 
     afterEach(async () => {
-        db.clearDb();
+        clearDB();
     });
 
     it('should insert two unique notes with right fields', async () => {

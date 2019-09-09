@@ -7,7 +7,9 @@ import {
 } from '../../note/index';
 import NoteAccess from '~background/database/models/noteAccess';
 import Note from '~background/database/models/note';
-import db from '~background/database';
+import {
+    clearDB
+} from '~background/database';
 import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
@@ -97,7 +99,7 @@ describe('createBulkNotes', () => {
     ];
 
     afterEach(async () => {
-        db.clearDb();
+        clearDB();
     });
 
     it('should insert note accesses with right fields', async () => {

@@ -4,7 +4,9 @@ import {
     destroyBulkNotes,
 } from '../';
 import Note from '~background/database/models/note';
-import db from '~background/database';
+import {
+    clearDB
+} from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
@@ -26,7 +28,7 @@ describe('updateBulkNotes', () => {
     ];
 
     afterEach(async () => {
-        db.clearDb();
+        clearDB();
     });
 
     it('should insert two unique notes with right fields', async () => {
@@ -101,7 +103,7 @@ describe('destroyBulkNotes', () => {
     ];
 
     afterEach(async () => {
-        db.clearDb();
+        clearDB();
     });
 
     it(`should change status of notes to ${NOTE_STATUS.DESTROYED}`, async () => {

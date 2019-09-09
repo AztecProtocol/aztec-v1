@@ -1,5 +1,5 @@
 import Dexie from 'dexie';
-import clearDb from './utils/clearDb'
+import clearDBUtil from './utils/clearDB'
 
 if (process.env.NODE_ENV === 'test') {
     Dexie.dependencies.indexedDB = require('fake-indexeddb');
@@ -8,6 +8,7 @@ if (process.env.NODE_ENV === 'test') {
 
 const db = new Dexie('aztec_events_sync');
 
-db.clearDb = clearDb;
-
 export default db;
+
+// Utils
+export const clearDB = clearDBUtil;
