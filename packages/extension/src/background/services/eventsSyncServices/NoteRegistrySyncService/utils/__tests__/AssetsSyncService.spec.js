@@ -20,7 +20,7 @@ describe('LastSyncedBlock', () => {
       const inputs = {
          networkId: networkId_1,
       }
-      
+
       // action
       await AssetsSyncService.syncCreateNoteRegistries(inputs);
 

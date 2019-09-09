@@ -60,6 +60,6 @@ export default function Model(modelConfig) {
         bulkPut: (items) => bulkPut(name, items),
         get: (fields) => get(name, fields),
         query: () => query(name),
-        latest: (options) => latest(name, options),
+        latest: ({orderBy = 'blockNumber', filterOptions = {}} = {orderBy: 'blockNumber', filterOptions: {}}) => latest(name, {orderBy, filterOptions}),
     }
 }
