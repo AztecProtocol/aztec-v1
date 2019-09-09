@@ -12,7 +12,7 @@ const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
 Swap.abi = SwapInterface.abi;
 
-const { customMetaData } = note.utils;
+const { customMetaData } = require('../../../helpers/ERC1724');
 
 const Keccak = keccak;
 const maker = secp256k1.generateAccount();
@@ -81,7 +81,7 @@ contract('Swap Validator', (accounts) => {
 
         it('should validate proof when customMetaData set', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
-            inputNotes[1].setMetaData(customMetaData);
+            inputNotes[1].setMetaData(customMetaData.data);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.challenge = proof.challenge.add(bn128.groupModulus);
             proof.constructOutputs();

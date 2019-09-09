@@ -9,7 +9,7 @@ const { keccak256, padLeft } = require('web3-utils');
 
 const SwapABIEncoderTest = artifacts.require('./SwapABIEncoderTest');
 
-const { customMetaData } = note.utils;
+const { customMetaData } = require('../../../helpers/ERC1724');
 
 const maker = secp256k1.generateAccount();
 const publicOwner = constants.addresses.ZERO_ADDRESS;
@@ -51,8 +51,8 @@ contract('Swap Validator ABI Encoder', (accounts) => {
     describe('Success States', () => {
         it('should encode the output of a Swap proof', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
-            inputNotes[1].setMetaData(note.utils.customMetaData);
-            outputNotes[0].setMetaData(note.utils.customMetaData);
+            inputNotes[1].setMetaData(customMetaData.data);
+            outputNotes[0].setMetaData(customMetaData.data);
 
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
@@ -104,9 +104,9 @@ contract('Swap Validator ABI Encoder', (accounts) => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
 
             // Set metaData for > 2 notes
-            outputNotes[0].setMetaData(customMetaData);
-            outputNotes[1].setMetaData(customMetaData);
-            inputNotes[1].setMetaData(customMetaData);
+            outputNotes[0].setMetaData(customMetaData.data);
+            outputNotes[1].setMetaData(customMetaData.data);
+            inputNotes[1].setMetaData(customMetaData.data);
 
             const proof = new SwapProof(inputNotes, outputNotes, sender);
 
