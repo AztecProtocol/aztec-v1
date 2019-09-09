@@ -4,7 +4,9 @@ import {
     destroyNote,
 } from '../';
 import Note from '~background/database/models/note';
-import db from '~background/database';
+import {
+    clearDB
+} from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
@@ -18,7 +20,7 @@ describe('updateNote', () => {
     };
 
     afterEach(async () => {
-        db.clearDb();
+        clearDB();
     });
 
     it('should insert new note with right fields', async () => {
@@ -79,7 +81,7 @@ describe('destroyNote', () => {
     };
 
     afterEach(async () => {
-        db.clearDb();
+        clearDB();
     });
 
     it(`should change status of note to ${NOTE_STATUS.DESTROYED}`, async () => {

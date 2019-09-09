@@ -2,7 +2,9 @@ import {
     createNote,
 } from '../';
 import Note from '~background/database/models/note';
-import db from '~background/database';
+import {
+    clearDB
+} from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
@@ -16,7 +18,7 @@ describe('createNote', () => {
     };
 
     afterEach(async () => {
-        db.clearDb();
+        clearDB();
     });
 
     it('should insert new note with right fields', async () => {

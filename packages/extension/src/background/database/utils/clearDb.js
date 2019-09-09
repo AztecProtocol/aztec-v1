@@ -1,6 +1,6 @@
 import db from '../'
 
-export default function clearDb() {
+export default function clearDB() {
     db.tables.forEach(function (table) {
         table.clear();
     });

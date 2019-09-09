@@ -4,7 +4,9 @@ import {
 } from '~utils/log';
 import Web3Service from '../../../Web3Service'
 import fetchAssets from '../utils/fetchAssets'
-import addAsset from '../utils/addAsset';
+import {
+    createBulkAssets
+} from '../utils/asset';
 import asyncForEach from '~utils/asyncForEach';
 
 class SyncManager {
@@ -129,9 +131,8 @@ class SyncManager {
                 console.log("new Assets: " + JSON.stringify(newAssets))
             }
             
-            await asyncForEach(newAssets, async (noteRegistry) => {
-                await addAsset(noteRegistry);
-            })
+            await createBulkAssets(newAssets);
+
             newLastSyncedBlock = toBlock;
         }
 
