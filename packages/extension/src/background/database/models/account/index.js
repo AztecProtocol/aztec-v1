@@ -6,8 +6,7 @@ export default Model({
     fields: [
         // Primary Key | first key is always primary key
         'address',
-        'blockNumber',
         'linkedPublicKey',
-        'registeredAt',
+        'blockNumber',
     ],
 });

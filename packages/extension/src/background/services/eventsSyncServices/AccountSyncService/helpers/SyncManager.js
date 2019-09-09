@@ -4,7 +4,7 @@ import {
 } from '~utils/log';
 import Web3Service from '../../../Web3Service'
 import fetchAccount from '../utils/fetchAccount'
-import addAccount from '../utils/addAccount';
+import { createBulkAccounts } from '../utils/account';
 
 class SyncManager {
     constructor() {
@@ -128,7 +128,7 @@ class SyncManager {
                 console.log("Response for events 'Register Extensions': " + JSON.stringify({address, lastSyncedBlock, newRegisterExtensionsEvents: newAccounts}));
             }
             
-            await Promise.all(newAccounts.map(addAccount));
+            await createBulkAccounts(newAccounts);
 
             newLastSyncedBlock = toBlock;
         }
