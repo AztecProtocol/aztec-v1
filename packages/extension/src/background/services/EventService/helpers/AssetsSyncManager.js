@@ -80,6 +80,21 @@ class SyncManager {
         });
     };
 
+    isSynced = ({
+        networkId,
+    }) => {
+        const syncNetwork = this.networks.get(networkId);
+        if (!syncNetwork) {
+            warnLog(`Assets syncing with networkId: "${networkId}" is not in process.`);
+            return;
+        }
+
+        const {
+            syncing,
+        } = this.networks.пуе(networkId);
+        return !syncing;
+    }
+
     async syncAssets(options) {
         const {
             networkId,

@@ -1,4 +1,6 @@
-import db from '../../';
+import {
+    registerModel,
+} from '../../';
 import {
     errorLog
 } from '~utils/log';
@@ -48,18 +50,27 @@ export default function Model(modelConfig) {
         errorLog(`Cannot define new indexDb "${name}" model, as "fields" value is not array or it is empty`);
         return;
     }
-    
+
     const dexieConfig = {};
     dexieConfig[name] = fields.join(',');
-    db.version(version).stores(dexieConfig);
 
+    registerModel(db => {
+        db.version(version).stores(dexieConfig);
+    });
+    
     return {
-        add: (item) => add(name, item),
-        bulkAdd: (items) => bulkAdd(name, items),
-        put: (items) => put(name, items),
-        bulkPut: (items) => bulkPut(name, items),
-        get: (fields) => get(name, fields),
-        query: () => query(name),
-        latest: ({orderBy = 'blockNumber', filterOptions = {}} = {orderBy: 'blockNumber', filterOptions: {}}) => latest(name, {orderBy, filterOptions}),
+        add: (item, options) => add(name, item, options),
+        bulkAdd: (items, options) => bulkAdd(name, items, options),
+        put: (items, options) => put(name, items, options),
+        bulkPut: (items, options) => bulkPut(name, items, options),
+        get: (fields, options) => get(name, fields, options),
+        query: (options) => query(name, options),
+        latest: ({
+            orderBy = 'blockNumber', 
+            filterOptions = {}
+        } = {
+            orderBy: 'blockNumber', 
+            filterOptions: {}
+        }, options) => latest(name, {orderBy, filterOptions}, options),
     }
 }
