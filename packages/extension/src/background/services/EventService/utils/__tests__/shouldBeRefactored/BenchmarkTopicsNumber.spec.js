@@ -129,7 +129,7 @@ describe('ZkAsset', () => {
     });
 
 
-    it(`check limits: ${countFilterNoteHashTopics} noteHash topics`, async () => {
+    it.skip(`check limits: ${countFilterNoteHashTopics} noteHash topics`, async () => {
         // given
         const {
             options,
@@ -147,7 +147,7 @@ describe('ZkAsset', () => {
         expect(rawLogs.length).toEqual(countFilterNoteHashTopics);
     });
 
-    it(`check loading all logs without filtering topics`, async () => {
+    it.skip(`check loading all logs without filtering topics`, async () => {
         // given
         const {
             options,

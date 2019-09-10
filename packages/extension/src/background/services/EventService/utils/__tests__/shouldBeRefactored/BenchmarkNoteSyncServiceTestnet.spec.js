@@ -2,8 +2,8 @@ import Web3 from 'web3';
 import AuthService from './helpers/AuthService';
 /* eslint-enable */
 import Web3Service from '~background/services/Web3Service';
-import decodeNoteLogs from '../decodeNoteLogs';
-import associatedNotesWithOwner from '../associatedNotesWithOwner';
+import decodeNoteLogs from '../helpers/decodeNoteLogs';
+import associatedNotesWithOwner from '../helpers/associatedNotesWithOwner';
 import saveNotes from '../saveNotes';
 import {
     IZkAssetConfig,
@@ -109,7 +109,7 @@ describe('ZkAsset', () => {
     });
 
 
-    it(`check how does it take to fetch ${prepopulateEventsCount} events, filter by owner and store into faked db`, async () => {
+    it.skip(`check how does it take to fetch ${prepopulateEventsCount} events, filter by owner and store into faked db`, async () => {
         // given
         const options = optionsForAllEvents(assetEventsEmitterAddress);
         const eventsTopics = options.topics[0];

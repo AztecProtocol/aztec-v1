@@ -2,9 +2,17 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '../../../Web3Service'
+import Web3Service from '../../Web3Service'
 import fetchNotes from '../utils/fetchNotes';
 import saveNotes from '../utils/saveNotes';
+
+/* See more details about limitation
+ * https://infura.io/docs/ethereum/json-rpc/eth_getLogs
+*/
+const infuraLimitError =  {
+    'code': -32005,
+    'message': 'query returned more than 10000 results',
+}
 
 class SyncManager {
     constructor() {
@@ -131,16 +139,16 @@ class SyncManager {
                 toBlock,
             });
 
-            if (error && error.code === 'xxx') {
+            if(groupedNotes) {
+                await saveNotes(groupedNotes);
+                newLastSyncedBlock = toBlock;
+
+            } else if (error && error.code === infuraLimitError.code) {
                 newLastSyncedBlock = parseInt(fromBlock + toBlock / 2);
                 shouldLoadNextPortion = true;
 
-            } else if (error) {
-                this.handleFetchError(error);
-
             } else {
-                await saveNotes(groupedNotes);
-                newLastSyncedBlock = toBlock;
+                this.handleFetchError(error);
             }
 
             if (shouldLoadNextPortion) {

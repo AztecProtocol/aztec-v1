@@ -1,3 +1,4 @@
+import EventService from './';
 import {
     errorLog,
 } from '~utils/log';
@@ -8,13 +9,14 @@ import AssetsSyncManager from './helpers/AssetsSyncManager';
 import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
+import fetchAccount from './utils/fetchAccount';
 
 
 const notesSyncManager = new NotesSyncManager();
 const assetsSyncManager = new AssetsSyncManager();
 
 
-const syncAssets = ({
+const syncAssets = async ({
     networkId = 0,
 }) => {
     if (networkId === undefined) {
@@ -41,7 +43,7 @@ const syncAssets = ({
     });
 };
 
-const syncNotesForAddress = async ({
+const syncNotes = async ({
     address,
     networkId = 0
 }) => {
@@ -57,7 +59,7 @@ const syncNotesForAddress = async ({
     const {
         error, 
         account,
-    } = fetchAztecAccount(address);
+    } = await EventService.fetchAztecAccount(address);
 
     if (error) {
         errorLog(`Error syncing address: ${address}. Error: ${error.errorMessage}.`);
@@ -89,7 +91,7 @@ const syncNotesForAddress = async ({
 
 };
 
-const getLatestMetaData = ({
+const getLatestMetaData = async ({
     noteHash, 
     networkId = 0,
 }) => {
@@ -130,7 +132,10 @@ export default {
         assetsSyncManager.setConfig(config);
     },
     syncAssets,
-    syncEthAddress,
+    syncNotes,
     getLatestMetaData,
     fetchAztecAccount,
+    
+    notesSyncManager,
+    assetsSyncManager,
 };

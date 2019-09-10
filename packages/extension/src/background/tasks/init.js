@@ -14,7 +14,6 @@ import SyncService from '~background/services/SyncService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import Web3Service from '~background/services/Web3Service';
 import NoteService from '~background/services/NoteService';
-import NoteRegistrySyncService from '~background/services/eventsSyncServices/NoteRegistrySyncService';
 // import { runLoadingEventsTest } from './syncTest'
 
 
@@ -71,10 +70,6 @@ export default async function init() {
 
     configureWeb3Service();
 
-    //TODO: Move to right place
-    NoteRegistrySyncService.syncCreateNoteRegistries({
-        networkId: 0,
-    })
 
     NoteService.init();
 }

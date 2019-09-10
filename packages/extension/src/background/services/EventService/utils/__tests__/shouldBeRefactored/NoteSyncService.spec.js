@@ -210,7 +210,7 @@ describe('ZkAsset', () => {
     });
 
 
-    it(`check how does it take to fetch ${prepopulateEventsCount} events, filter by owner and store into faked db`, async () => {
+    it.skip(`check how does it take to fetch ${prepopulateEventsCount} events, filter by owner and store into faked db`, async () => {
         // given
         const { abi, getPastLogs } = Web3Service.eth;
 
