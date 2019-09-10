@@ -6,12 +6,12 @@ import {
     AZTECAccountRegistryConfig,
 } from '~background/config/contracts'
  
-export default async function fetchAccount({
+export const fetchAccount = async({
     address,
-} = {}) {
+} = {}) => {
     if (!address) {
         errorLog("'address' cannot be empty");
-        return null;
+        return { error: null, account: null };
     };
 
     const eventName = AZTECAccountRegistryConfig.events.registerExtension
@@ -42,9 +42,12 @@ export default async function fetchAccount({
             linkedPublicKey,
             registeredAt,
         }));
-        return { error: null, accounts };
+
+        const account = accounts.length ? accounts[accounts.length - 1] : null;
+
+        return { error: null, account: account };
 
     } catch (error) {
-        return { error, accounts: null}
+        return { error, account: null}
     };
 }

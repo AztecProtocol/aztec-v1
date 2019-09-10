@@ -2,14 +2,19 @@ import EventService from './';
 import {
     errorLog,
 } from '~utils/log';
-import Note from '~background/database/models/note';
-import Account from '~background/database/models/account';
 import NotesSyncManager from './helpers/NotesSyncManager';
 import AssetsSyncManager from './helpers/AssetsSyncManager';
 import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
-import fetchAccount from './utils/fetchAccount';
+import { 
+    fetchAccount,
+} from './utils/fetchAccount';
+import {
+    createAccount,
+} from './utils/account'
+import Note from '~background/database/models/note';
+import Account from '~background/database/models/account';
 
 
 const notesSyncManager = new NotesSyncManager();
@@ -113,14 +118,16 @@ const fetchAztecAccount = async ({
 
     const {
         error,
-        accounts: newAccounts,
+        account: newAccount,
     } = await fetchAccount({
         address
     });
 
-    if (newAccounts.length) {
-        await createBulkAccounts(newAccounts);
-        return { error, account: Account.latest(options) };
+    if (newAccount) {
+        await createAccount(newAccount);
+        const latestAccount = await Account.latest(options);
+        
+        return { error: null, account: latestAccount };
     }
 
     return { error,  account: null };

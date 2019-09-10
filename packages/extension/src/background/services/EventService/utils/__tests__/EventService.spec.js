@@ -4,8 +4,10 @@ import Account from '~background/database/models/account';
 import {
    NOTE_STATUS,
 } from '~background/config/constants'
-
-jest.mock('~background/database/models/account');
+import * as fetchAccountModule from '../fetchAccount';
+import {
+   clearDB
+} from '~background/database';
 
 
 describe('LastSyncedBlock', () => {
@@ -103,6 +105,10 @@ describe('fetchAztecAccount', () => {
       blockNumber: 234,
    };
 
+   afterEach(async () => {
+      clearDB();
+   });
+
    it('should return latest account which stored in the db', async () => {
       // given
       const accountLatestMock = jest.spyOn(Account, 'latest');
@@ -118,6 +124,26 @@ describe('fetchAztecAccount', () => {
       expect(account).toEqual(account_1);
 
       accountLatestMock.mockRestore();
-   })
+   });
+
+   it('should return latest account which stored in the db', async () => {
+      // given
+      const fetchAccountMock = jest.spyOn(fetchAccountModule, 'fetchAccount');
+      fetchAccountMock.mockResolvedValue({
+         error: null,
+         account: account_1,
+      });
+
+      // action
+      const { error, account } = await EventService.fetchAztecAccount({
+         address: account_1.address,
+      });
+
+      // expectation
+      expect(error).toBeNull();
+      expect(account).toEqual(account_1);
+
+      fetchAccountMock.mockRestore();
+   });
 
 });
