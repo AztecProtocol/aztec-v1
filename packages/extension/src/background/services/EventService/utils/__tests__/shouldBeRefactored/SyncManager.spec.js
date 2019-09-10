@@ -11,7 +11,7 @@ const networkId_1 = '2293';
 
 describe('Sync Block Number', () => {
    
-   test('should call own syncAssets method with inputed start block and network id', async () => {
+   it.skip('should call own syncAssets method with inputed start block and network id', async () => {
       // given
       const manager = new SyncManager();
       const lastSyncedBlock = 4434;
@@ -36,7 +36,7 @@ describe('Sync Block Number', () => {
       expect(syncAssetsMock).toHaveBeenCalledWith(expectedResult);
    });
 
-   test('should save lastSyncedBlock into syncManager', async () => {
+   it.skip('should save lastSyncedBlock into syncManager', async () => {
       // given
       const manager = new SyncManager();
       const lastSyncedBlock = 4434;
@@ -64,7 +64,7 @@ describe('Sync Block Number', () => {
       expect(stateForNetwork.lastSyncedBlock).toEqual(expectedResult.lastSyncedBlock);
    });
 
-   test('should call "fetchAssets" with right: fromBlock, fromBlock, networkId', async () => {
+   it.skip('should call "fetchAssets" with right: fromBlock, fromBlock, networkId', async () => {
       // given
       const manager = new SyncManager();
       const lastSyncedBlock = 4434;

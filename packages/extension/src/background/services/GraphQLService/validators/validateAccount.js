@@ -3,8 +3,7 @@ import {
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
-import AccountSyncService from '~background/services/eventsSyncServices/AccountSyncService';
-import NoteSyncService from '~background/services/eventsSyncServices/NoteSyncService';
+import EventService from '~background/services/EventService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodePrivateKey from '~background/utils/decodePrivateKey';
 
@@ -38,13 +37,12 @@ export default async function validateAccount(_, args, ctx) {
         privateKey: decodePrivateKey(decodedKeyStore, pwDerivedKey),
     });
 
+    console.log(`NoteSyncService.ForAddress: ${currentAddress}`);
+    
     //TODO: Check weather should we start syncing an address if the address has an `RegisterExtension` event
-    AccountSyncService.syncEthAddress({
+    await NoteSyncService.syncNotes({
         address: currentAddress,
-    })
-    NoteSyncService.syncEthAddress({
-        address: currentAddress,
-    })
+    });
 
     const newSession = await AuthService.updateSession(currentAddress);
 

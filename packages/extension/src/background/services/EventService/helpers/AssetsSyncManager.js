@@ -2,12 +2,12 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '../../../Web3Service'
+import Web3Service from '../../Web3Service'
 import fetchAssets from '../utils/fetchAssets'
 import {
     createBulkAssets
 } from '../utils/asset';
-import asyncForEach from '~utils/asyncForEach';
+
 
 class SyncManager {
     constructor() {
