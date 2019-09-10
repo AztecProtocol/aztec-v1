@@ -161,6 +161,29 @@
         },
         {
             "constant": false,
+            "inputs": [
+                {
+                    "name": "metaData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "addressPos",
+                    "type": "uint256"
+                }
+            ],
+            "name": "extractAddress",
+            "outputs": [
+                {
+                    "name": "desiredAddress",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
             "inputs": [],
             "name": "renounceOwnership",
             "outputs": [],
@@ -218,6 +241,25 @@
                 {
                     "name": "",
                     "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "noteAccess",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
                 }
             ],
             "payable": false,
@@ -296,6 +338,25 @@
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "metaDataTimeLog",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
             "type": "function"
         },
         {
@@ -450,23 +511,6 @@
                 }
             ],
             "name": "CreateZkAsset",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "name": "addressApproved",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "noteHash",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "ApprovedAddress",
             "type": "event"
         },
         {
