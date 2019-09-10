@@ -10,5 +10,6 @@ export default Model({
         'metadata',
         'blockNumber',
         'status',
+        'asset', // address
     ],
 });

@@ -1,14 +1,44 @@
 import Dexie from 'dexie';
-import clearDBUtil from './utils/clearDB'
+import clearDBModule from './utils/clearDB';
 
 if (process.env.NODE_ENV === 'test') {
     Dexie.dependencies.indexedDB = require('fake-indexeddb');
     Dexie.dependencies.IDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange');
 }
 
-const db = new Dexie('aztec_events_sync');
+const dbs = new Map();
+const registerModelsCallbacks = [];
 
-export default db;
+const ensureDB = (networkId) => {
+    if (!dbs.get(networkId)) {
+        const db = new Dexie(`aztec_network_${networkId}`);
+        
+        dbs.set(networkId, db);
 
-// Utils
-export const clearDB = clearDBUtil;
+        registerModelsCallbacks.forEach(registerCallback => {
+            registerCallback(db);
+        });
+    }
+};
+
+const getDB = (networkId) => {
+    ensureDB(networkId);
+    
+    return dbs.get(networkId);
+};
+
+const storedNetworks = () => {
+    return Object.keys(bss);
+};
+
+const registerModel = (registerCallback) => {
+    registerModelsCallbacks.push(registerCallback);
+};
+
+
+export default {
+    getDB,
+    storedNetworks,
+    registerModel,
+    clearDB: clearDBModule,
+};

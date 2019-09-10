@@ -1,7 +1,9 @@
-import db from '../../'
+import {
+    getDB,
+} from '../../';
 
-export default async function add(modelName, item) {
-    const id = await db[modelName].add(item);
+export default async function add(modelName, item, { networkId }) {
+    const id = await getDB(networkId)[modelName].add(item);
     
     return {
         id
