@@ -3,8 +3,12 @@ import {
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../Web3Service'
-import fetchNotes from '../utils/fetchNotes';
-import saveNotes from '../utils/saveNotes';
+import {
+    fetchNotes
+} from '../utils/fetchNotes';
+import {
+    saveNotes
+} from '../utils/saveNotes';
 
 /* See more details about limitation
  * https://infura.io/docs/ethereum/json-rpc/eth_getLogs
