@@ -6,14 +6,14 @@ if (process.env.NODE_ENV === 'test') {
     Dexie.dependencies.IDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange');
 }
 
-const dbs = new Map();
+const dbs = {};
 const registerModelsCallbacks = [];
 
 const ensureDB = (networkId) => {
-    if (!dbs.get(networkId)) {
+    if (!dbs[networkId]) {
         const db = new Dexie(`aztec_network_${networkId}`);
         
-        dbs.set(networkId, db);
+        dbs[networkId] = db;
 
         registerModelsCallbacks.forEach(registerCallback => {
             registerCallback(db);
@@ -24,8 +24,7 @@ const ensureDB = (networkId) => {
 
 export const getDB = (networkId) => {
     ensureDB(networkId);
-    
-    return dbs.get(networkId);
+    return dbs[networkId];
 };
 
 export const storedNetworks = () => {

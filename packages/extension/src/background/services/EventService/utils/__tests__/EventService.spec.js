@@ -200,6 +200,8 @@ describe('fetchLatestNote', () => {
       },
   ];
 
+  const networkId = 1;
+
    afterEach(() => {
       clearDB();
    });
@@ -238,7 +240,7 @@ describe('fetchLatestNote', () => {
       fetchNotesMocked.mockRestore();
    });
 
-   it.only('should call fetchNotes with synced assets if assetAddress wasnt passes as input param', async () => {
+   it('should call fetchNotes with synced assets if assetAddress wasnt passes as input param', async () => {
       // given
       const isSyncedMocked = jest.spyOn(EventService.assetsSyncManager, 'isSynced');
       isSyncedMocked.mockResolvedValue(true);
@@ -254,7 +256,7 @@ describe('fetchLatestNote', () => {
          },
       }));
 
-      await Asset.bulkAdd(rawAssets);
+      await Asset.bulkAdd(rawAssets, {networkId});
 
       await EventService.fetchLatestNote({
          noteHash: note_1.noteHash,

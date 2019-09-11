@@ -2,7 +2,7 @@ import {
     getDB,
 } from '../../';
 
-export default async function latest(modelName, { orderBy, filterOptions }, { networkId }) {
+export default async function latest(modelName, { networkId }, { orderBy, filterOptions }) {
     let collectionRaw = getDB(networkId)[modelName];
     
     const keys = Object.keys(filterOptions);
