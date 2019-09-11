@@ -1,12 +1,12 @@
 # Lines starting with '#' are comments.
 # Each line is a file pattern followed by one or more owners.
 
-.circleci                       @PaulRBerg
-packages/aztec.js               @zac-williamson @PaulRBerg @thomas-waite
-packages/contract-addresses     @PaulRBerg
-packages/contract-artifacts     @PaulRBerg
-packages/dev-utils              @PaulRBerg @thomas-waite
-packages/monorepo-scripts       @PaulRBerg
-packages/protocol               @zac-williamson @PaulRBerg @thomas-waite
+.circleci                       @thomas-waite
+packages/aztec.js               @zac-williamson @thomas-waite @ArnSch
+packages/contract-addresses     @thomas-waite
+packages/contract-artifacts     @thomas-waite
+packages/dev-utils              @thomas-waite
+packages/monorepo-scripts       @thoma-waite
+packages/protocol               @zac-williamson @thomas-waite @ArnSch
 packages/huff                   @zac-williamson
 packages/weierstrudel           @zac-williamson
