@@ -21,24 +21,20 @@ const ensureDB = (networkId) => {
     }
 };
 
-const getDB = (networkId) => {
+
+export const getDB = (networkId) => {
     ensureDB(networkId);
     
     return dbs.get(networkId);
 };
 
-const storedNetworks = () => {
-    return Object.keys(bss);
+export const storedNetworks = () => {
+    return Object.keys(dbs);
 };
 
-const registerModel = (registerCallback) => {
+export const registerModel = (registerCallback) => {
     registerModelsCallbacks.push(registerCallback);
 };
 
+export const clearDB = clearDBModule;
 
-export default {
-    getDB,
-    storedNetworks,
-    registerModel,
-    clearDB: clearDBModule,
-};
