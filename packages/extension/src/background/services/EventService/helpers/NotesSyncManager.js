@@ -25,8 +25,35 @@ class SyncManager {
             blocksPerRequest: 45000, // ~ per week (~6000 per day)
             precisionDelta: 10 // 
         };
-        this.addresses = new Map();
+        this.networks = new Map(); 
+        // this.addresses = new Map();
         this.paused = false;
+    };
+
+    _ensureSyncOptions(networkId) {
+        const addresses = this.networks.get(networkId);
+        if(!addresses) {
+            this.networks.set(networkId, new Map());
+        }
+    }
+
+    getSyncOptions(networkId) {
+        this._ensureSyncOptions();
+        const addresses = this.networks.get(networkId);
+        return {
+            forAddress: (address) => {
+                return addresses.get(address);
+            },
+        }
+    };
+
+    setSyncOptions(options, networkId) {
+        this._ensureSyncOptions();
+        return {
+            toAddress: (address) => {
+                this.networks.get(networkId).set(address, options);
+            },
+        }
     };
 
     setConfig(config) {
@@ -38,8 +65,8 @@ class SyncManager {
             });
     };
 
-    isInQueue(address) {
-        const syncAddress = this.addresses.get(address);
+    isInQueue(address, networkId) {
+        const syncAddress = this.getSyncOptions(networkId).forAddress(address);
         return !!(syncAddress
             && (syncAddress.syncing || syncAddress.syncReq)
         );
@@ -53,20 +80,20 @@ class SyncManager {
     };
 
     pause = (address, prevState = {}) => {
-        const syncAddress = this.addresses.get(address);
+        const { networkId } = prevState;
+        const syncAddress = this.getSyncOptions(networkId).forAddress(address);
         if (!syncAddress) {
             warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
             return;
         }
-
-        this.addresses.set(address, {
+        this.setSyncOptions({
             ...syncAddress,
             pausedState: prevState,
-        });
+        }, networkId).toAddress(address);
     };
 
-    resume = (address) => {
-        const syncAddress = this.addresses.get(address);
+    resume = (address, networkId) => {
+        const syncAddress = this.getSyncOptions(networkId).forAddress(address);
         if (!syncAddress) {
             warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
             return;
@@ -79,11 +106,11 @@ class SyncManager {
             warnLog(`NotesSyncManager with ${address} eth address is already running.`);
             return;
         }
-
-        this.addresses.set(address, {
+        
+        this.setSyncOptions({
             ...syncAddress,
             pausedState: null,
-        });
+        }, networkId).toAddress(address);
 
         this.syncNotes({
             ...pausedState,
@@ -95,9 +122,11 @@ class SyncManager {
         const {
             address,
             lastSyncedBlock,
+            networkId,
         } = options;
 
-        const syncAddress = this.addresses.get(address);
+        const syncAddress = this.getSyncOptions(networkId).forAddress(address);
+
         if (syncAddress.pausedState) {
             return;
         }
@@ -106,11 +135,11 @@ class SyncManager {
             return;
         }
 
-        this.addresses.set(address, {
+        this.setSyncOptions({
             ...syncAddress,
             syncing: true,
             syncReq: null,
-        });
+        }, networkId).toAddress(address);
 
         const {
             syncReq: prevSyncReq,
@@ -141,10 +170,11 @@ class SyncManager {
                 owner: address,
                 fromBlock,
                 toBlock,
+                networkId,
             });
 
-            if(groupedNotes) {
-                await saveNotes(groupedNotes);
+            if(!groupedNotes.isEmpty()) {
+                await saveNotes(groupedNotes, networkId);
                 newLastSyncedBlock = toBlock;
 
             } else if (error && error.code === infuraLimitError.code) {
@@ -171,30 +201,33 @@ class SyncManager {
             });
         }, syncInterval);
 
-        this.addresses.set(address, {
+        this.setSyncOptions({
             ...syncAddress,
             syncing: false,
             syncReq,
             lastSyncedBlock: newLastSyncedBlock,
-        });
+        }, networkId).toAddress(address);
     };
 
     async sync({
         address,
         lastSyncedBlock,
+        networkId,
     }) {
-        let syncAddress = this.addresses.get(address);
+        let syncAddress = this.getSyncOptions(networkId).forAddress(address);
+        
         if (!syncAddress) {
             syncAddress = {
                 syncing: false,
                 syncReq: null,
                 lastSyncedBlock,
             };
-            this.addresses.set(address, syncAddress);
+            this.setSyncOptions(syncAddress, networkId).toAddress(address);
         }
         return this.syncNotes({
             address,
             lastSyncedBlock,
+            networkId,
         });
     };
 }

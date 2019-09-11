@@ -1,22 +1,19 @@
-import {
-    errorLog,
-} from '~utils/log';
 import Web3Service from '~background/services/Web3Service';
 import {
     ACEConfig,
 } from '~background/config/contracts'
  
-export default async function fetchAssets({
-    //TODO: networkId feature is not implemented yet
+export const fetchAssets = async ({
+    fromBlock = 'earliest',
+    toBlock = 'latest',
     networkId,
-    fromBlock,
-    toBlock,
-    onError,
-} = {}) {
-    if (networkId === undefined) {
-        errorLog("'networkId' cannot be empty");
-        return [];
-    };
+} = {}) => {
+    if (!networkId) {
+        return {
+            error: new Error("'networkId' cannot be empty in fetchAssets"),
+            assets: null,
+        };
+    }
 
     const eventName = ACEConfig.events.сreateNoteRegistry;
 
@@ -26,12 +23,13 @@ export default async function fetchAssets({
     };
 
     try {
+        //TODO: Add possibility to load form different networks
         const data = await Web3Service
             .useContract(ACEConfig.name)
             .events(eventName)
             .where(options);
 
-        const events = data.map(({
+        const assets = data.map(({
             blockNumber,
             returnValues: {
                 registryOwner,
@@ -50,10 +48,17 @@ export default async function fetchAssets({
             canAdjustSupply,
             canConvert,
         }));
-        return events || [];
+
+        return { 
+            error: null,
+            assets,
+        };
 
     } catch (error) {
-        onError(error);
-        return [];
+
+        return { 
+            error: error,
+            assets: null
+        };
     };
 }

@@ -3,7 +3,9 @@ import {
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../Web3Service'
-import fetchAssets from '../utils/fetchAssets'
+import {
+    fetchAssets,
+} from '../utils/fetchAssets'
 import {
     createBulkAssets
 } from '../utils/asset';
@@ -135,20 +137,22 @@ class SyncManager {
             const fromBlock = lastSyncedBlock + 1;
             const toBlock = currentBlock;
 
-            const newAssets = await fetchAssets({
-                networkId,
+            const {
+                error,
+                assets: newAssets,
+            } = await fetchAssets({
                 fromBlock,
                 toBlock,
-                onError: this.handleFetchError,
+                networkId,
             });
     
-            if (newAssets.length) {
-                console.log("new Assets: " + JSON.stringify(newAssets))
-            }
-            
-            await createBulkAssets(newAssets);
+            if (error) {
+                this.handleFetchError(error);
 
-            newLastSyncedBlock = toBlock;
+            } else {
+                await createBulkAssets(newAssets);
+                newLastSyncedBlock = toBlock;
+            }
         }
 
         const syncReq = setTimeout(() => {
