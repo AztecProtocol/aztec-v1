@@ -7,56 +7,56 @@ import { NOTE_STATUS } from '~background/config/constants';
 
 /* Create */
 
-export const createNote = async (rawNote) => {
+export const createNote = async (rawNote, networkId) => {
     const note = {
         ...rawNote,
         status: NOTE_STATUS.CREATED,
     }
-    return performCreateNote(note);
+    return performCreateNote(note, networkId);
 };
 
-export const createBulkNotes = async (rawNotes) => {
+export const createBulkNotes = async (rawNotes, networkId) => {
     const notes = rawNotes.map(rawNote => ({
         ...rawNote,
         status: NOTE_STATUS.CREATED,
     }));
-    return performCreateBulkNotes(notes);
+    return performCreateBulkNotes(notes, networkId);
 };
 
 /* Update */
 
-export const updateNote = async (rawNote) => {
+export const updateNote = async (rawNote, networkId) => {
     const note = {
         ...rawNote,
         status: NOTE_STATUS.CREATED,
     }
-    return performUpdateNote(note);
+    return performUpdateNote(note, networkId);
 };
 
-export const updateBulkNotes = async (rawNotes) => {
+export const updateBulkNotes = async (rawNotes, networkId) => {
     const notes = rawNotes.map(rawNote => ({
         ...rawNote,
         status: NOTE_STATUS.CREATED,
     }));
-    return performUpdateBulkNotes(notes);
+    return performUpdateBulkNotes(notes, networkId);
 };
 
 /* Destroy */
 
-export const destroyNote = async (rawNote) => {
+export const destroyNote = async (rawNote, networkId) => {
     const note = {
         ...rawNote,
         status: NOTE_STATUS.DESTROYED,
     };
-    return performUpdateNote(note);
+    return performUpdateNote(note, networkId);
 };
 
-export const destroyBulkNotes = async (rawNotes) => {
+export const destroyBulkNotes = async (rawNotes, networkId) => {
     const notes = rawNotes.map((rawNote) => ({
         ...rawNote,
         status: NOTE_STATUS.DESTROYED,
     }));
-    return performUpdateBulkNotes(notes);
+    return performUpdateBulkNotes(notes, networkId);
 };
 
 

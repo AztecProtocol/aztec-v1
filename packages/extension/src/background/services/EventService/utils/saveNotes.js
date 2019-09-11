@@ -5,9 +5,9 @@ import {
 } from './note';
 
 
-export const saveNotes = async ({ createNotes, updateNotes, destroyNotes }) => {
+export const saveNotes = async ({ createNotes, updateNotes, destroyNotes }, networkId) => {
     // save it in serial
-    await createBulkNotes(createNotes);
-    await updateBulkNotes(updateNotes);
-    await destroyBulkNotes(destroyNotes);
+    await createBulkNotes(createNotes, networkId);
+    await updateBulkNotes(updateNotes, networkId);
+    await destroyBulkNotes(destroyNotes, networkId);
 }
