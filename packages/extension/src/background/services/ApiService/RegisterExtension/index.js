@@ -3,12 +3,14 @@ import address from '~utils/address';
 import validateUserPermission from '../utils/validateUserPermision';
 import AuthService from '~background/services/AuthService';
 import Web3Service from '~client/services/Web3Service';
+import TransactionSendingService from '../../TransactionSendingService';
 import {
     actionEvent,
 } from '~config/event';
 
 
 const registerExtensionUi = async (query, connection) => {
+    console.log('registerUI ', { query });
     const {
         account,
     } = query;
@@ -30,7 +32,6 @@ const registerExtensionUi = async (query, connection) => {
 
 const signMetaMaskTransaction = (query, connection) => async () => {
     const { userPermission: { account = {} } } = await validateUserPermission(query);
-
     if (account && !account.registeredAt) {
         connection.ClientActionSubject.next({
             type: actionEvent,
@@ -64,6 +65,7 @@ const sendRegisterTx = (query, connection) => async ({ signature }) => {
 };
 
 const registerAccount = (query, connection) => async () => {
+    console.log('register', query);
     const { userPermission: { account = {} } } = await validateUserPermission(query);
     return { ...query, response: account };
 };

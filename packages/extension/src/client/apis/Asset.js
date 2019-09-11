@@ -155,7 +155,7 @@ export default class Asset {
      *
      * @returns ([Notes!])
      */
-    deposit = async (amount, {
+    deposit = async (transactions, {
         from = '',
         sender = '',
         numberOfOutputNotes = 2,
@@ -163,7 +163,7 @@ export default class Asset {
         'deposit',
         {
             assetAddress: this.address,
-            amount,
+            transactions,
             from,
             sender,
             numberOfOutputNotes,

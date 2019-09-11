@@ -8,6 +8,7 @@ import {
     mergeMap,
     tap,
     map,
+    filter,
 } from 'rxjs/operators';
 import {
     clientEvent,
@@ -20,6 +21,7 @@ import {
 } from './connectionUtils';
 
 import ApiService from '../services/ApiService';
+import ClientActionService from '../services/ClientActionService';
 
 class Connection {
     constructor() {
@@ -49,12 +51,6 @@ class Connection {
             map(openPopup), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
-        // we need to setup a stream that relays messages to the UI
-        this.message$.pipe(
-            // we filter the stream here
-            filter(({type}=> type === actionEvent)),
-            
-        )
 
         // send the messages to the client
         merge(this.clientResponse$, this.clientAction$).pipe(
@@ -94,10 +90,24 @@ class Connection {
                 }
             }),
         );
+
         this.message$.subscribe();
+        // we need to setup a stream that relays messages to the client and back to the UI
+        this.MessageSubject.asObservable().pipe(
+            // we filter the stream here
+            filter(({ type }) => type === actionEvent),
+            mergeMap(data => from(ClientActionService.triggerClientAction(data))),
+            tap(({ clientId, ...rest }) => {
+                this.connections[clientId].postMessage({
+                    ...rest,
+                    clientId,
+                });
+            }),
+
+        ).subscribe();
 
         this.api$ = this.ApiSubject.asObservable().pipe(
-            mergeMap(data => from(ApiService.run(data, this))),
+            mergeMap(data => from(ApiService.clientApi(data, this))),
             tap((data) => {
                 this.ClientResponseSubject.next({
                     ...data,

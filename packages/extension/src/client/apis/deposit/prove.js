@@ -1,22 +1,16 @@
 import query from '~client/utils/query';
 
 export default async function proveDeposit({
-    amount,
+    transactions,
     from,
     sender,
     numberOfOutputNotes,
 }) {
-    console.log({
-
-        amount,
-        from,
-        sender,
-        numberOfOutputNotes,
-    });
     const data = await query({
-        type: 'createAndSendDepositProof',
+        type: 'constructProof',
         args: {
-            amount,
+            proofType: 'DEPOSIT_PROOF',
+            transactions,
             from,
             sender,
             numberOfOutputNotes,

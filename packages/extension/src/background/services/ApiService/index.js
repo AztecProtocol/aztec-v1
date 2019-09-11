@@ -1,17 +1,18 @@
 import registerExtension from './RegisterExtension';
 import registerDomain from './RegisterDomain';
-import createAndSendDeposit from './Deposit';
+import prove from './Prove';
 import asset from './Asset';
 
 class API {
     constructor() {
         this.registerExtension = registerExtension;
         this.registerDomain = registerDomain;
-        this.createAndSendDepositProof = createAndSendDeposit;
         this.asset = asset;
+        this.constructProof = prove;
     }
 
-    run({ query, ...rest }, connection) {
+
+    clientApi({ query, ...rest }, connection) {
         return this[query](rest, connection);
     }
 }
