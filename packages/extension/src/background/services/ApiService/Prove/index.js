@@ -10,10 +10,18 @@ import proofValidation from './proofValidation';
 const validateProof = async (query) => {
     // we need to validate the resultant note owners
     const {
-        args,
-        type 
+        args: {
+            proofType,
+            ...data
+        },
     } = query;
-    const validatedProofInputs = validateProof(type, args):
+
+    const validatedProofInputs = proofValidation(proofType, data);
+    if (validatedProofInputs === true) {
+        return data;
+    }
+
+    throw new Error(validatedProofInputs);
 };
 
 const proofUi = (query, connection) => async () => {
@@ -31,10 +39,10 @@ const proofUi = (query, connection) => async () => {
 };
 
 
-const createAndSendProof = async (query, connection) => {
+const triggerProofUi = async (query, connection) => {
     await validateProof(query, connection)
         .then(proofUi(query, connection));
 };
 
 
-export default createAndSendProof;
+export default triggerProofUi;

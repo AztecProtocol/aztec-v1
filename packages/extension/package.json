@@ -30,6 +30,7 @@
         "graphql-tag": "^2.10.1",
         "graphql-tools": "^4.0.4",
         "jest": "^24.8.0",
+        "jsonschema": "^1.2.4",
         "lodash": "^4.17.14",
         "mini-css-extract-plugin": "^0.8.0",
         "node-fetch": "^2.6.0",

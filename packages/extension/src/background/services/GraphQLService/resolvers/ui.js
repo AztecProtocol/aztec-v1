@@ -28,9 +28,10 @@ const uiResolvers = {
                 success: true,
             };
         }),
-        createProof,
-        sendTransaction,
-        approveERC20,
+        // TODO
+        // createProof,
+        // sendTransaction,
+        // approveERC20,
     },
 };
 
