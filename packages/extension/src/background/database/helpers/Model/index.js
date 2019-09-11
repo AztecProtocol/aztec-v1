@@ -59,18 +59,22 @@ export default function Model(modelConfig) {
     });
     
     return {
+        // mutations
         add: (item, options) => add(name, item, options),
         bulkAdd: (items, options) => bulkAdd(name, items, options),
         put: (items, options) => put(name, items, options),
         bulkPut: (items, options) => bulkPut(name, items, options),
-        get: (fields, options) => get(name, fields, options),
+        
+        // query
+        get: (options, fields) => get(name, options, fields),
         query: (options) => query(name, options),
-        latest: ({
+        latest: (options,
+        {
             orderBy = 'blockNumber', 
             filterOptions = {}
         } = {
             orderBy: 'blockNumber', 
             filterOptions: {}
-        }, options) => latest(name, {orderBy, filterOptions}, options),
+        }) => latest(name, options, {orderBy, filterOptions}),
     }
 }
