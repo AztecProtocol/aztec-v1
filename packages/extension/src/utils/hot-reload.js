@@ -1,54 +1,59 @@
+import browser from 'webextension-polyfill';
 /*
  * https://github.com/xpl/crx-hotreload
  */
 
-const filesInDirectory = dir => new Promise (resolve =>
+const excludes = [
+    /^\./,
+    /^ui$/,
+    /ui\.css/,
+    /bundle\.ui\./,
+];
 
-    dir.createReader ().readEntries (entries =>
+const filesInDirectory = dir => new Promise((resolve) => {
+    dir
+        .createReader()
+        .readEntries(async (entries) => {
+            const readFilePromises = entries
+                .filter(e => !excludes.some(p => e.name.match(p)))
+                .map((e) => {
+                    if (e.isDirectory) {
+                        return filesInDirectory(e);
+                    }
+                    return new Promise(resolveFile => e.file(resolveFile));
+                });
+            const files = await Promise.all(readFilePromises);
+            resolve([].concat(...files));
+        });
+});
 
-        Promise.all (entries.filter (e => e.name[0] !== '.').map (e =>
+const timestampForFilesInDirectory = dir => filesInDirectory(dir)
+    .then(files => files.map(f => `${f.name}${f.lastModifiedDate}`).join());
 
-            e.isDirectory
-                ? filesInDirectory (e)
-                : new Promise (resolve => e.file (resolve))
-        ))
-        .then (files => [].concat (...files))
-        .then (resolve)
-    )
-)
+const reload = async () => {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
 
-const timestampForFilesInDirectory = dir =>
-        filesInDirectory (dir).then (files =>
-            files.map (f => f.name + f.lastModifiedDate).join ())
+    if (tabs[0]) {
+        console.log('tabs', tabs);
+        browser.tabs.reload(tabs[0].id);
+    }
 
-const reload = () => {
-
-    chrome.tabs.query ({ active: true, currentWindow: true }, tabs => { // NB: see https://github.com/xpl/crx-hotreload/issues/5
-
-        if (tabs[0]) { chrome.tabs.reload (tabs[0].id) }
-
-        chrome.runtime.reload ()
-    })
-}
+    browser.runtime.reload();
+};
 
 const watchChanges = (dir, lastTimestamp) => {
-
-    timestampForFilesInDirectory (dir).then (timestamp => {
+    timestampForFilesInDirectory(dir).then((timestamp) => {
         if (!lastTimestamp || (lastTimestamp === timestamp)) {
-
-            setTimeout (() => watchChanges (dir, timestamp), 1000) // retry after 1s
-
+            setTimeout(() => watchChanges(dir, timestamp), 1000);
         } else {
-            reload ()
+            reload();
         }
-    })
+    });
+};
 
-}
-
-chrome.management.getSelf (self => {
-
-    if (self.installType === 'development') {
-
-        chrome.runtime.getPackageDirectoryEntry (dir => watchChanges (dir))
-    }
-})
+browser.management.getSelf()
+    .then((self) => {
+        if (self.installType === 'development') {
+            browser.runtime.getPackageDirectoryEntry(dir => watchChanges(dir));
+        }
+    });
