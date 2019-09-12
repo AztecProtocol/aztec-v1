@@ -15,7 +15,7 @@ export const fetchAccount = async({
         };
     };
 
-    if (!networkId) {
+    if (!networkId && networkId !== 0) {
         return {
             error: new Error("'networkId' cannot be empty in fetchAccount"),
             account: null,
@@ -33,8 +33,7 @@ export const fetchAccount = async({
     };
 
     try {
-        //TODO: Add possibility to load form different networks
-        const data = await Web3Service
+        const data = await Web3Service(networkId)
             .useContract(AZTECAccountRegistryConfig.name)
             .events(eventName)
             .where(options);
@@ -43,13 +42,11 @@ export const fetchAccount = async({
             blockNumber,
             returnValues: {
                 linkedPublicKey,
-                registeredAt,
             }
         }) => ({
             address,
             blockNumber,
             linkedPublicKey,
-            registeredAt,
         }));
 
         const account = accounts.length ? accounts[accounts.length - 1] : null;

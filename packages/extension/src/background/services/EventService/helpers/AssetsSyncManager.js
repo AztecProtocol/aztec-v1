@@ -93,7 +93,7 @@ class SyncManager {
 
         const {
             syncing,
-        } = this.networks.пуе(networkId);
+        } = this.networks.get(networkId);
         return !syncing;
     }
 
@@ -130,7 +130,7 @@ class SyncManager {
             syncInterval,
         } = this.config;
 
-        const currentBlock = await Web3Service.eth.getBlockNumber();
+        const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
         let newLastSyncedBlock = lastSyncedBlock;
 
         if(currentBlock > lastSyncedBlock) {
@@ -150,7 +150,7 @@ class SyncManager {
                 this.handleFetchError(error);
 
             } else {
-                await createBulkAssets(newAssets);
+                await createBulkAssets(newAssets, networkId);
                 newLastSyncedBlock = toBlock;
             }
         }
@@ -171,8 +171,8 @@ class SyncManager {
     }
 
     async sync({
-        networkId,
         lastSyncedBlock,
+        networkId,
     }) {
         let syncNetwork = this.networks.get(networkId);
         if (!syncNetwork) {
@@ -184,8 +184,8 @@ class SyncManager {
             this.networks.set(networkId, syncNetwork);
         }
         await this.syncAssets({
-            networkId,
             lastSyncedBlock,
+            networkId,
         });
     }
 }

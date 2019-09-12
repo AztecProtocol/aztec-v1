@@ -5,8 +5,9 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
+import Web3ServiceFactory from './factory';
 
-class Web3Service {
+export class Web3Service {
     constructor() {
         this.web3 = null;
         this.contracts = {};
@@ -284,4 +285,7 @@ class Web3Service {
     }
 }
 
-export default new Web3Service();
+
+export default function create(networkId) {
+    return Web3ServiceFactory.create(networkId);
+}

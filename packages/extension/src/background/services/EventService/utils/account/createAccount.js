@@ -1,6 +1,6 @@
 import Account from '~background/database/models/account';
 
 
-export default async function createAccount(account) {
-    return Account.add(account);
+export default async function createAccount(account, networkId) {
+    return Account.add(account, {networkId});
 }

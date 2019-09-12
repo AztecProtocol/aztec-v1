@@ -8,24 +8,32 @@ import {
     AZTECAccountRegistryConfig,
     ACEConfig,
 } from '../config/contracts';
-import Web3 from 'web3';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
 import GraphNodeService from '~background/services/GraphNodeService';
-import Web3Service from '~background/services/Web3Service';
 import NoteService from '~background/services/NoteService';
+import Web3ServiceFactory from '~background/services/Web3Service/factory';
+import EventService from '~background/services/EventService';
 // import { runLoadingEventsTest } from './syncTest'
 
 
 const configureWeb3Service = async () => {
-    const providerUrl = await get('__providerUrl');
-    const provider = new Web3.providers.HttpProvider(providerUrl)
-    Web3Service.init({
-        provider,
-    })
+    const providerUrlGanache = await get('__providerUrlGanache');
+    
+    const contractsConfigs = [
+        AZTECAccountRegistryConfig.config,
+        ACEConfig.config,
+    ];
 
-    Web3Service.registerContract(AZTECAccountRegistryConfig.config);
-    Web3Service.registerContract(ACEConfig.config);
+    const networksConfigs = [
+        {
+            title: 'ganache',
+            networkId: 0,
+            providerUrl: providerUrlGanache,
+            contractsConfigs: contractsConfigs,
+        }
+    ];
+    Web3ServiceFactory.setConfigs(networksConfigs);
 }
 
 export default async function init() {
@@ -38,7 +46,7 @@ export default async function init() {
         await set({
             // __graphNode: 'http://localhost:4000/',
             __graphNode: 'http://127.0.0.1:8000/subgraphs/name/aztec/note-management',
-            __providerUrl: 'http://localhost:8545',
+            __providerUrlGanache: 'http://localhost:8545',
         });
 
         onIdle(
@@ -70,6 +78,19 @@ export default async function init() {
 
     configureWeb3Service();
 
-
     NoteService.init();
+
+    // await testSync();
+}
+
+
+const testSync = async (address = '0x0563a36603911daaB46A3367d59253BaDF500bF9', networkId=0) => {
+    await EventService.syncNotes({
+        address,
+        networkId,
+    });
+
+    await EventService.syncAssets({
+        networkId,
+    });
 }

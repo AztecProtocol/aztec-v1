@@ -23,8 +23,8 @@ export const IZkAssetConfig = {
     name: 'IZkAsset',
     events: {
         createNote: 'CreateNote',
-        destroyNote: 'DestroyNote',
         updateNoteMetaData: 'UpdateNoteMetaData',
+        destroyNote: 'DestroyNote',
     },
     config: IZkAsset,
 }

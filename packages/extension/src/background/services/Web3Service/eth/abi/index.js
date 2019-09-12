@@ -7,5 +7,5 @@ export const abi = (web3) => ({
     },
     decodeLog: (inputs, hexString, topics) => {
         return web3.eth.abi.decodeLog(inputs, hexString, topics)
-    }
+    },
 })

@@ -46,20 +46,20 @@ const acessesFromMetadata = ({
 
 /* Create */
 
-export const createBulkNoteAccessFromNotes = async (rawNotes) => {
+export const createBulkNoteAccessFromNotes = async (rawNotes, networkId) => {
 
     const accesses = rawNotes.flatMap(note => acessesFromMetadata(note));
-    return performCreateBulkNoteAccess(accesses);
+    return performCreateBulkNoteAccess(accesses, networkId);
 };
 
 /* Update */
 
-export const updateBulkNoteAccessFromNotes = async (rawNotes) => {
+export const updateBulkNoteAccessFromNotes = async (rawNotes, networkId) => {
 
     const accesses = await asyncFlatMap(rawNotes, async (note) => {
         const prevNote = await Note.get(note.noteHash);
         return acessesFromMetadata(note, prevNote);
     });
     
-    return performCreateBulkNoteAccess(accesses);
+    return performCreateBulkNoteAccess(accesses, networkId);
 };

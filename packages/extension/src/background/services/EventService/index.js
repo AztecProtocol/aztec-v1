@@ -2,8 +2,8 @@ import EventService from './';
 import {
     errorLog,
 } from '~utils/log';
-import NotesSyncManager from './helpers/NotesSyncManager';
 import AssetsSyncManager from './helpers/AssetsSyncManager';
+import NotesSyncManagerFactory from './helpers/NotesSyncManager/factory';
 import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
@@ -21,14 +21,13 @@ import Account from '~background/database/models/account';
 import Asset from '~background/database/models/asset';
 
 
-const notesSyncManager = new NotesSyncManager();
 const assetsSyncManager = new AssetsSyncManager();
 
 
 const syncAssets = async ({
-    networkId = 0,
+    networkId,
 }) => {
-    if (networkId === undefined) {
+    if (!networkId && networkId !== 0) {
         errorLog("'networkId' can not be empty in EventService.syncAssets()");
         return;
     }
@@ -37,7 +36,7 @@ const syncAssets = async ({
         return;
     }
 
-    const lastSyncedAsset = await Asset.latest(null, {networkId})
+    const lastSyncedAsset = await Asset.latest({networkId})
 
     //TODO: Improve this for each network separately
     let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
@@ -61,6 +60,13 @@ const syncNotes = async ({
         return;
     }
 
+    if (!networkId && networkId !== 0) {
+        errorLog(`'networkId' can not be ${networkId} in EventService.syncEthAddress()`);
+        return;
+    }
+
+    const notesSyncManager = NotesSyncManagerFactory.create(networkId);
+
     if (notesSyncManager.isInQueue(address)) {
         return;
     }
@@ -68,10 +74,13 @@ const syncNotes = async ({
     const {
         error, 
         account,
-    } = await EventService.fetchAztecAccount(address);
+    } = await EventService.fetchAztecAccount({
+        address, 
+        networkId,
+    });
 
     if (error) {
-        errorLog(`Error syncing address: ${address}. Error: ${error.errorMessage}.`);
+        errorLog(`Error syncing address: ${address}. Error: ${error}.`);
         return;
     }
     
@@ -81,9 +90,11 @@ const syncNotes = async ({
     }
 
     const options = {
-        filterOptions: { address },
+        filterOptions: { 
+            owner: address,
+        },
     };
-    const lastSyncedNote = await Note.latest(options, {networkId});
+    const lastSyncedNote = await Note.latest({networkId}, options);
 
     let lastSyncedBlock;
     if (lastSyncedNote) {
@@ -96,6 +107,7 @@ const syncNotes = async ({
     notesSyncManager.sync({
         address,
         lastSyncedBlock,
+        networkId,
     });
 
 };
@@ -103,7 +115,7 @@ const syncNotes = async ({
 const fetchLatestNote = async ({
     noteHash,
     assetAddress,
-    networkId = 0,
+    networkId,
 }) => {
 
     let fromAssets;
@@ -153,13 +165,14 @@ const fetchLatestNote = async ({
 
 const fetchAztecAccount = async ({
     address, 
-    networkId = 0
+    networkId,
 }) => {
     const options = {
         filterOptions: { address },
     };
 
-    const account = await Account.latest(options, {networkId});
+    const account = await Account.latest({networkId}, options);
+
     if (account) {
         return { 
             error: null, 
@@ -171,12 +184,13 @@ const fetchAztecAccount = async ({
         error,
         account: newAccount,
     } = await fetchAccount({
-        address
+        address,
+        networkId,
     });
 
     if (newAccount) {
-        await createAccount(newAccount);
-        const latestAccount = await Account.latest(options, {networkId});
+        await createAccount(newAccount, networkId);
+        const latestAccount = await Account.latest({networkId}, options);
         
         return { 
             error: null, 
@@ -199,7 +213,6 @@ export default {
     syncNotes,
     fetchLatestNote,
     fetchAztecAccount,
-    
-    notesSyncManager,
+    // notesSyncManager,
     assetsSyncManager,
 };
