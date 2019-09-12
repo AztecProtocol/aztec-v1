@@ -8,6 +8,9 @@ import {
     AZTECAccountRegistryConfig,
     ACEConfig,
 } from '../config/contracts';
+import {
+    infuraProviderConfig,
+} from '../config/infura';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
 import GraphNodeService from '~background/services/GraphNodeService';
@@ -17,21 +20,31 @@ import EventService from '~background/services/EventService';
 // import { runLoadingEventsTest } from './syncTest'
 
 
+
 const configureWeb3Service = async () => {
     const providerUrlGanache = await get('__providerUrlGanache');
+    const infuraProjectId = await get('__infuraProjectId');
     
     const contractsConfigs = [
         AZTECAccountRegistryConfig.config,
         ACEConfig.config,
     ];
 
+    const infuraNetworks = ['mainnet', 'ropsten', 'rinkeby', 'goerli', 'kovan']
+        .map((networkName) => infuraProviderConfig(networkName, infuraProjectId))
+        .map(config => ({
+            ...config,
+            contractsConfigs,
+        }));
+
     const networksConfigs = [
         {
-            title: 'ganache',
+            title: 'Ganache',
             networkId: 0,
             providerUrl: providerUrlGanache,
-            contractsConfigs: contractsConfigs,
-        }
+            contractsConfigs,
+        },
+        ...infuraNetworks,
     ];
     Web3ServiceFactory.setConfigs(networksConfigs);
 }
@@ -47,6 +60,7 @@ export default async function init() {
             // __graphNode: 'http://localhost:4000/',
             __graphNode: 'http://127.0.0.1:8000/subgraphs/name/aztec/note-management',
             __providerUrlGanache: 'http://localhost:8545',
+            __infuraProjectId: '',
         });
 
         onIdle(
@@ -79,18 +93,4 @@ export default async function init() {
     configureWeb3Service();
 
     NoteService.init();
-
-    // await testSync();
-}
-
-
-const testSync = async (address = '0x0563a36603911daaB46A3367d59253BaDF500bF9', networkId=0) => {
-    await EventService.syncNotes({
-        address,
-        networkId,
-    });
-
-    await EventService.syncAssets({
-        networkId,
-    });
 }
