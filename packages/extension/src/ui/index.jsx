@@ -1,13 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {
+    HashRouter as Router,
+} from 'react-router-dom';
 import ApolloClient from 'apollo-client';
 import { ApolloProvider } from 'react-apollo';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
-import { HashRouter as Router } from 'react-router-dom';
 import typeDefs from '~background/services/GraphQLService/typeDefs/ui';
 import resolvers from '~background/services/GraphQLService/resolvers/ui';
+import './styles/guacamole.css';
+import './styles/_reset.scss';
 import App from './App';
 
 const schema = makeExecutableSchema({

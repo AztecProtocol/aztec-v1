@@ -1,77 +1,110 @@
-import React, { Component } from 'react';
+import React, {
+    PureComponent,
+} from 'react';
 import {
-    Block,
-} from '@aztec/guacamole-ui';
-import { Route, withRouter } from 'react-router-dom';
-import '@aztec/guacamole-ui/dist/styles/guacamole.css';
-
-import Login from './pages/Login/index.jsx';
-import Home from './pages/Home/index.jsx';
-import Register from './pages/Register/index.jsx';
-import ApproveAsset from './pages/ApproveAsset/index.jsx';
-
+    Switch,
+} from 'react-router-dom';
+import Route from '~uiRoute';
 import actionModel from '~database/models/action';
+import i18n from './helpers/i18n';
+import router from './helpers/router';
+import getPathsFromRouteConfig from './utils/getPathsFromRouteConfig';
+import ActionService from './services/ActionService';
+import Loading from './views/Loading';
+import routes from './config/routes';
 
-const actionToRouteMap = {
+class App extends PureComponent {
+    constructor(props) {
+        super(props);
 
-    'ui.register.extension': '/register',
-    'ui.asset.approve': '/approveAsset',
-    'ui.account.login': '/login',
+        this.state = {
+            initialAction: null,
+        };
+    }
 
-};
+    componentWillMount(locale = 'en') {
+        const phrases = require(`./locales/${locale}`).default; // eslint-disable-line global-require, import/no-dynamic-require
+        i18n.setLocale(locale);
+        i18n.register(phrases);
 
-class App extends Component {
-    state ={
-
+        const paths = getPathsFromRouteConfig(routes);
+        router.register(paths);
     }
 
     componentDidMount() {
-        const search = new URLSearchParams(window.location.search);
-        actionModel.get({ timestamp: search.get('id') })
-            .then((resp) => {
-                this.props.history.push(actionToRouteMap[resp.type]);
-                console.log(actionToRouteMap[resp.type]);
-                setTimeout(() => {
-                    this.setState({ action: resp });
-                }, 1000);
-            });
+        ActionService.openConnection();
+        this.loadInitialAction();
+    }
+
+    async loadInitialAction() {
+        const action = await actionModel.get();
+        this.setState({
+            initialAction: action || {},
+        });
+    }
+
+    renderRoutes(config, pathPrefix = '') {
+        const routeNodes = [];
+        let defaultRoute;
+        const {
+            initialAction,
+        } = this.state;
+
+        Object.keys(config).forEach((name) => {
+            const {
+                Component,
+                View,
+                path: subPath,
+                routes: childRoutes,
+            } = config[name];
+            const path = `${pathPrefix}/${subPath || ''}`;
+
+            if (childRoutes) {
+                const childRouteNodes = this.renderRoutes(childRoutes, path);
+                routeNodes.push(...childRouteNodes);
+            }
+
+            if (Component
+                || (View && process.env.NODE_ENV === 'development')
+            ) {
+                const routeNode = (
+                    <Route
+                        key={path}
+                        path={path}
+                        action={initialAction}
+                        Component={Component || View}
+                    />
+                );
+
+                if (name === '_') {
+                    defaultRoute = routeNode;
+                } else {
+                    routeNodes.push(routeNode);
+                }
+            }
+        });
+        if (defaultRoute) {
+            routeNodes.push(defaultRoute);
+        }
+
+        return routeNodes;
     }
 
     render() {
+        const {
+            initialAction,
+        } = this.state;
+
+        if (!initialAction) {
+            return <Loading />;
+        }
+
         return (
-            <div className="App">
-                <Block
-                    background="primary"
-                    stretch
-                    padding="0"
-                    align="center"
-                    style={{
-                        background: 'linear-gradient(115deg, #808DFF 0%, #9FC4FF 100%, #7174FF 100%)',
-                    }}
-                >
-                    <Route
-                        path="/"
-                        render={props => (<Home action={this.state.action} />)}
-
-
-                    />
-                    <Route
-                        path="/login"
-                        render={() => (<Login action={this.state.action} />)}
-                    />
-                    <Route
-                        path="/register"
-                        render={() => (<Register action={this.state.action} />)}
-                    />
-                    <Route
-                        path="/approveAsset"
-                        render={() => (<ApproveAsset action={this.state.action} />)}
-                    />
-
-                </Block>
-
-            </div>
+            <Switch>
+                {this.renderRoutes(routes)}
+            </Switch>
         );
     }
 }
-export default withRouter(App);
+
+export default App;
