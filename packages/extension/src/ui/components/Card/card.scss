@@ -1,0 +1,197 @@
+@import '../../styles/variables';
+
+$card-background: map-get($color-map, 'white');
+$deco-width: map-get($spacing-map, 's');
+$card-shadow: 0 1px 5px 0 $default-shadow-color;
+$card-radius: map-get($rounded-corner-map, 'xs');
+$card-spacing-h: map-get($spacing-map, 'xl');
+$card-spacing-v: map-get($spacing-map, 'xl');
+
+.card {
+    text-align: left;
+}
+
+.card-h {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+
+.content,
+.stub {
+  position: relative;
+  padding: $card-spacing-v $card-spacing-h;
+  background: $card-background;
+  box-shadow: $card-shadow;
+}
+
+.modal {
+  .content,
+  .stub {
+    box-shadow: $card-shadow;
+  }
+}
+
+.card-v {
+  .content {
+    padding-bottom: $card-spacing-v - $deco-width;
+    border-radius: $card-radius $card-radius 0 0;
+  }
+
+  .stub {
+    margin-top: $deco-width * 2 + 1;
+    padding-top: $card-spacing-v - $deco-width;
+    border-radius: 0 0 $card-radius $card-radius;
+  }
+}
+
+.card-h {
+  .content {
+    display: inline-block;
+    width: 73%;
+    width: calc(75% - #{$deco-width});
+    padding-right: $card-spacing-h - $deco-width;
+    margin-right: $deco-width * 2 + 1;
+    border-radius: $card-radius 0 0 $card-radius;
+  }
+
+  .stub {
+    display: inline-block;
+    width: 25%;
+    width: calc(25% - #{$deco-width});
+    padding-left: $card-spacing-h - $deco-width;
+    border-radius: 0 $card-radius $card-radius 0;
+  }
+}
+
+%spot {
+  position: absolute;
+  display: block;
+  width: $deco-width * 2;
+  height: $deco-width * 2;
+  border-radius: $deco-width;
+  background: transparent;
+  box-shadow: 0 0 0 $deco-width $card-background, 0 1px 3px $default-shadow-color inset;
+}
+
+.spot-left {
+  @extend %spot;
+  left: -$deco-width;
+}
+
+.spot-right {
+  @extend %spot;
+  right: -$deco-width;
+}
+
+.spot-top {
+  @extend %spot;
+  top: -$deco-width;
+}
+
+.spot-bottom {
+  @extend %spot;
+  bottom: -$deco-width;
+}
+
+%deco-v {
+  position: absolute;
+  left: 0;
+  height: $deco-width;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(to right,
+    transparent $deco-width * 2,
+    $card-background $deco-width * 2,
+    $card-background calc(100% - #{$deco-width}),
+    transparent calc(100% - #{$deco-width}));
+}
+
+%deco-h {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: $deco-width;
+  overflow: hidden;
+  background: linear-gradient(to bottom,
+    transparent $deco-width * 2,
+    $card-background $deco-width * 2,
+    $card-background calc(100% - #{$deco-width}),
+    transparent calc(100% - #{$deco-width}));
+
+  .spot-top {
+    &:after {
+      content: "";
+      display: block;
+      position: absolute;
+      top: $deco-width / 2 * 5;
+      width: $deco-width * 2;
+      height: $deco-width;
+      background: $card-background;
+    }
+  }
+
+  .spot-bottom {
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      bottom: $deco-width / 2 * 5;
+      width: $deco-width * 2;
+      height: $deco-width;
+      background: $card-background;
+    }
+  }
+}
+
+.deco-bottom {
+  @extend %deco-v;
+  bottom: -($deco-width + 1);
+  height: $deco-width + 1;
+
+  &:after {
+    content: '';
+    position: absolute;
+    left: $card-spacing-h;
+    right: $card-spacing-h;
+    bottom: 0;
+    height: 1px;
+    border-bottom: 1px dashed $default-border-color;
+  }
+}
+
+.deco-top {
+  @extend %deco-v;
+  top: -$deco-width;
+
+  .spot-left,
+  .spot-right {
+    top: -$deco-width;
+  }
+}
+
+.deco-right {
+  @extend %deco-h;
+  width: $deco-width + 1;
+  right: -($deco-width + 1);
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: $deco-width;
+    bottom: $deco-width;
+    right: 0;
+    width: 1px;
+    border-right: 1px dashed $default-border-color;
+  }
+}
+
+.deco-left {
+  @extend %deco-h;
+  left: -$deco-width;
+
+  .spot-top,
+  .spot-bottom {
+    left: -$deco-width;
+  }
+}

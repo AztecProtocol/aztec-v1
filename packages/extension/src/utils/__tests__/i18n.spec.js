@@ -1,6 +1,10 @@
 import I18n from '../I18n';
 
-const i18n = new I18n();
+let i18n;
+
+beforeEach(() => {
+    i18n = new I18n();
+});
 
 describe('basic usage of i18n', () => {
     let errors = [];
@@ -9,7 +13,6 @@ describe('basic usage of i18n', () => {
 
     beforeEach(() => {
         mockError.mockClear();
-        i18n.flush();
         errors = [];
     });
 
@@ -166,5 +169,30 @@ describe('with variables', () => {
             name: 'Ron',
             count: 10,
         })).toBe('many gifts for Ron');
+    });
+});
+
+describe('extra locale-specific methods', () => {
+    it('change a number to ordinal', () => {
+        expect(i18n.ordinal(0)).toBe('0th');
+        expect(i18n.ordinal(1)).toBe('1st');
+        expect(i18n.ordinal(2)).toBe('2nd');
+        expect(i18n.ordinal(3)).toBe('3rd');
+        expect(i18n.ordinal(4)).toBe('4th');
+        expect(i18n.ordinal(10)).toBe('10th');
+        expect(i18n.ordinal(11)).toBe('11th');
+        expect(i18n.ordinal(12)).toBe('12th');
+        expect(i18n.ordinal(13)).toBe('13th');
+        expect(i18n.ordinal(14)).toBe('14th');
+        expect(i18n.ordinal(20)).toBe('20th');
+        expect(i18n.ordinal(21)).toBe('21st');
+        expect(i18n.ordinal(22)).toBe('22nd');
+        expect(i18n.ordinal(23)).toBe('23rd');
+        expect(i18n.ordinal(24)).toBe('24th');
+        expect(i18n.ordinal(100)).toBe('100th');
+        expect(i18n.ordinal(101)).toBe('101st');
+        expect(i18n.ordinal(102)).toBe('102nd');
+        expect(i18n.ordinal(103)).toBe('103rd');
+        expect(i18n.ordinal(104)).toBe('104th');
     });
 });

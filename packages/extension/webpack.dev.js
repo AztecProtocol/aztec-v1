@@ -5,7 +5,10 @@ module.exports = {
     mode: 'development',
     devtool: 'cheap-module-source-map',
     entry: {
-        background: './src/background',
+        background: [
+            './src/utils/hot-reload',
+            './src/background',
+        ],
         'graphql-inspector': './src/background/services/GraphQLService/inspector',
         content: './src/content',
         client: './src/client',
@@ -29,14 +32,40 @@ module.exports = {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
                 use: ['babel-loader'],
-                // options: {
-                //     presets: ['@babel/env'],
-                // },
             },
             {
                 test: /\.mjs$/,
                 include: /node_modules/,
                 type: 'javascript/auto',
+            },
+            {
+                test: /\.(sa|sc)ss$/,
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                    },
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true,
+                            importLoaders: 2,
+                        },
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            // eslint-disable-next-line global-require
+                            plugins: () => [require('autoprefixer')],
+                            sourceMap: true,
+                        },
+                    },
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                        },
+                    },
+                ],
             },
             {
                 test: /\.css$/,
@@ -50,6 +79,9 @@ module.exports = {
             {
                 test: /\.(png|woff|woff2|eot|ttf)$/,
                 loader: 'file-loader?limit=100000',
+                options: {
+                    outputPath: 'ui',
+                },
             },
             {
                 test: /\.svg$/,

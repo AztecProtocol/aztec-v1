@@ -1,0 +1,15 @@
+@import './variables';
+
+:global(#app) {
+    width: 100%;
+    height: 100%;
+
+    &:global(.default-popup) {
+        width: $popup-width;
+        height: $popup-height;
+    }
+}
+
+:global(.text-code) {
+    font-family: $code-font-family;
+}

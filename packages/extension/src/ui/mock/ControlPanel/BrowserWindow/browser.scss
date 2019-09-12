@@ -1,0 +1,52 @@
+@import '../../../styles/guacamole-vars';
+
+$dark-shadow-color: map-get($color-map, 'grey-darker');
+$head-height: map-get($spacing-map, 'xl') - 2;
+$button-size: $head-height / 2;
+
+.holder {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 24px 0 $dark-shadow-color, 0 6px 8px -4px $dark-shadow-color;
+  background: map-get($color-map, 'white');
+}
+
+.head {
+  position: absolute;
+  width: 100%;
+  height: $head-height;
+  padding: ($head-height - $button-size) / 2 map-get($spacing-map, 'xs');
+  background: map-get($color-map, 'grey-darker');
+  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.3) inset;
+  line-height: 0;
+}
+
+%button {
+  display: inline-block;
+  margin: 0 $button-size / 3;
+  width: $button-size;
+  height: $button-size;
+  border-radius: 100%;
+}
+
+.button-red {
+  @extend %button;
+  background: map-get($color-map, 'red');
+}
+
+.button-yellow {
+  @extend %button;
+  background: map-get($color-map, 'yellow');
+}
+
+.button-green {
+  @extend %button;
+  background: map-get($color-map, 'green');
+}
+
+.body {
+  padding-top: $head-height;
+  width: 100%;
+  height: 100%;
+}
