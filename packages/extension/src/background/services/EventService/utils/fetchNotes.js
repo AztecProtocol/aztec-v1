@@ -11,8 +11,9 @@ export const fetchNotes = async ({
     fromBlock,
     fromAssets = [],
     toBlock = 'latest',
+    networkId,
 } = {}) => {
-    const { abi, getPastLogs } = Web3Service.eth;
+    const { abi, getPastLogs } = Web3Service(networkId).eth;
 
     const eventsTopics = [
         IZkAssetConfig.events.createNote,
@@ -26,7 +27,7 @@ export const fetchNotes = async ({
     const noteTopics = noteHash ? abi.encodeParameter('bytes32', noteHash) : [];
 
     const options = {
-        fromBlock, 
+        fromBlock,
         toBlock,
         address: fromAssets,
         topics: [
@@ -38,6 +39,7 @@ export const fetchNotes = async ({
 
     try {
         const rawLogs = await getPastLogs(options);
+        console.log(`rawLogs: ${JSON.stringify(rawLogs)}`)
         const groupedNotes = decodeNoteLogs(eventsTopics, rawLogs);
         
         return {

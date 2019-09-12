@@ -5,27 +5,27 @@ import {
 import groupBy from '~utils/groupBy';
 
 
-const decodeCreateNote = (rawLog) => {
-    const inputs = findInputsFromAbi(IZkAssetConfig.events.createNote);
-    return decodeLog(inputs, rawLog);
-}
-
-const decodeDestroyNote = (rawLog) => {
-    const inputs = findInputsFromAbi(IZkAssetConfig.events.createNote);
-    return decodeLog(inputs, rawLog);
-}
-
-const decodeUpdateNoteMetaData = (rawLog) => {
-    const inputs = findInputsFromAbi(IZkAssetConfig.events.createNote);
-    return decodeLog(inputs, rawLog);
-}
+const decodeLog = (rawLog, networkId) => ({
+    createNote: () => {
+        const inputs = findInputsFromAbi(IZkAssetConfig.events.createNote);
+        return decode(inputs, rawLog, networkId);
+    },
+    updateNoteMetaData: () => {
+        const inputs = findInputsFromAbi(IZkAssetConfig.events.updateNoteMetaData);
+        return decode(inputs, rawLog, networkId);
+    },
+    destroyNote: () => {
+        const inputs = findInputsFromAbi(IZkAssetConfig.events.destroyNote);
+        return decode(inputs, rawLog, networkId);
+    },
+});
 
 const findInputsFromAbi = (eventName) => {
     return IZkAssetConfig.config.abi.find(({name, type})=> name === eventName && type === 'event').inputs;
 }
 
-const decodeLog = (inputs, rawLog) => {
-    const { abi } = Web3Service.eth;
+const decode = (inputs, rawLog, networkId) => {
+    const { abi } = Web3Service(networkId).eth;
     const decoded = {
         ...abi.decodeLog(inputs, rawLog.data, rawLog.topics),
         blockNumber: rawLog.blockNumber,
@@ -39,26 +39,26 @@ const noteLog = (decodedLog) => {
         noteHash: decodedLog.noteHash,
         metadata: decodedLog.metadata,
         blockNumber: decodedLog.blockNumber,
-    }
+    };
 }
 
 
-export default function decodeNoteLogs(eventsTopics, rawLogs) {
+export default function decodeNoteLogs(eventsTopics, rawLogs, networkId) {
     const [ createNoteTopic, destroyNoteTopic, updateNoteMetaDataTopic ] = eventsTopics;
 
-    const onlyMinedLogs = rawLogs.filter(({ blockNumber }) => !!blockNumber);
+    const onlyMinedLogs = rawLogs.filter(({ blockNumber, type }) => !!blockNumber || type === 'mined' );
     const groupedRawLogs = groupBy(onlyMinedLogs, l => l.topics[0]);
     
     const createNotes = (groupedRawLogs[createNoteTopic] || [])
-        .map(decodeCreateNote)
+        .map(log => decodeLog(log, networkId).createNote())
         .map(noteLog);
 
     const destroyNotes = (groupedRawLogs[destroyNoteTopic] || [])
-        .map(decodeDestroyNote)
+        .map(log => decodeLog(log, networkId).updateNoteMetaData())
         .map(noteLog);
 
     const updateNotes = (groupedRawLogs[updateNoteMetaDataTopic] || [])
-        .map(decodeUpdateNoteMetaData)
+        .map(log => decodeLog(log, networkId).destroyNote())
         .map(noteLog);
     
     return { 

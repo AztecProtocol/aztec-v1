@@ -8,7 +8,7 @@ export const fetchAssets = async ({
     toBlock = 'latest',
     networkId,
 } = {}) => {
-    if (!networkId) {
+    if (!networkId && networkId !== 0) {
         return {
             error: new Error("'networkId' cannot be empty in fetchAssets"),
             assets: null,
@@ -23,8 +23,7 @@ export const fetchAssets = async ({
     };
 
     try {
-        //TODO: Add possibility to load form different networks
-        const data = await Web3Service
+        const data = await Web3Service(networkId)
             .useContract(ACEConfig.name)
             .events(eventName)
             .where(options);

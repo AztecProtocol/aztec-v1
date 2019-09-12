@@ -88,4 +88,27 @@ describe('lates', () => {
         expect(accountExpected).toEqual(rawAccountBlock_3);
     });
 
+
+    it('should retrive last item with filtering by address', async () => {
+        // given
+        const account = {
+
+        };
+        await Account.add(account, {networkId});
+
+        const accounts = await Account.query({networkId: 0}).toArray();
+        expect(accounts.length).toEqual(1);
+
+        // expected
+        const accountExpected = await Account.latest({ 
+            networkId 
+        },
+        {
+            filterOptions: {
+                address: rawAccountBlock_3.address
+            }
+        });
+        expect(accountExpected).toEqual(rawAccountBlock_3);
+    });
+
 })

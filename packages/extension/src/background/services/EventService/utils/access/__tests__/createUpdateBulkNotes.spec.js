@@ -60,6 +60,7 @@ describe('createBulkNotes', () => {
         owner: '0x123',
         metadata: metadataStr,
         blockNumber: 1,
+        asset: '0x542'
     };
 
     const expectedAccesses = [
@@ -98,20 +99,22 @@ describe('createBulkNotes', () => {
         },
     ];
 
+    const networkId = 0;
+
     afterEach(async () => {
         clearDB();
     });
 
     it('should insert note accesses with right fields', async () => {
         // given
-        const notesAcccessBefore = await NoteAccess.query().toArray();
+        const notesAcccessBefore = await NoteAccess.query({networkId}).toArray();
         expect(notesAcccessBefore.length).toEqual(0);
 
         // action
-        await createBulkNoteAccessFromNotes([rawNote]);
+        await createBulkNoteAccessFromNotes([rawNote], networkId);
 
         // expected
-        const notesAcccessAfter = await NoteAccess.query().toArray();
+        const notesAcccessAfter = await NoteAccess.query({networkId}).toArray();
 
         expect(notesAcccessAfter.length).toEqual(expectedAccesses.length);
         expect(notesAcccessAfter[0]).toMatchObject(expectedAccesses[0]);
@@ -121,10 +124,10 @@ describe('createBulkNotes', () => {
 
     it('should update note access with 2 new access with right fields', async () => {
         // given
-        await createNote(rawNote);
-        await createBulkNoteAccessFromNotes([rawNote]);
-        const notesBefore = await Note.query().toArray();
-        const notesAcccessBefore = await NoteAccess.query().toArray();
+        await createNote(rawNote, networkId);
+        await createBulkNoteAccessFromNotes([rawNote], networkId);
+        const notesBefore = await Note.query({networkId}).toArray();
+        const notesAcccessBefore = await NoteAccess.query({networkId}).toArray();
         expect(notesBefore.length).toEqual(notesBefore.length);
         expect(notesAcccessBefore.length).toEqual(expectedAccesses.length);
 
@@ -145,10 +148,10 @@ describe('createBulkNotes', () => {
         };
 
         // action
-        await updateBulkNoteAccessFromNotes([newRawNote]);
+        await updateBulkNoteAccessFromNotes([newRawNote], networkId);
 
         // expected
-        const notesAcccessAfter = await NoteAccess.query().toArray();
+        const notesAcccessAfter = await NoteAccess.query({networkId}).toArray();
 
         expect(notesAcccessAfter.length).toEqual(expectedNewAccesses.length + expectedAccesses.length);
         expect(notesAcccessAfter[0]).toMatchObject(expectedAccesses[0]);
