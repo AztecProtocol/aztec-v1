@@ -22,11 +22,12 @@ class SyncManager {
     constructor() {
         this.config = {
             syncInterval: 5000, // ms
-            blocksPerRequest: 45000, // ~ per week (~6000 per day)
-            precisionDelta: 10 // 
+            blocksPerRequest: 180000, // ~ per month (~6000 per day)
+            precisionDelta: 10 //
         };
         this.addresses = new Map();
         this.paused = false;
+        this.progressSubscriber = null;
     };
 
     setConfig(config) {
@@ -63,6 +64,29 @@ class SyncManager {
             ...syncAddress,
             pausedState: prevState,
         });
+    };
+
+    syncProgress = async(address) => {
+        const syncAddress = this.addresses.get(address);
+        if (!syncAddress) {
+            warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
+            return;
+        }
+        const {
+            lastSyncedBlock,
+            networkId,
+        } = syncAddress;
+
+        const blocks = await Web3Service(networkId).eth.getBlockNumber();
+        
+        return {
+            blocks, 
+            lastSyncedBlock,
+        };
+    };
+
+    setProgressCallback = (callback) => {
+        this.progressSubscriber = callback;
     };
 
     resume = (address) => {
@@ -145,11 +169,16 @@ class SyncManager {
                 networkId,
             });
 
-            console.log(`currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock}`)
+            // console.log(`currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock}`)
 
             if(groupedNotes) {
                 await saveNotes(groupedNotes, networkId);
                 newLastSyncedBlock = toBlock;
+
+                !this.progressSubscriber || this.progressSubscriber({
+                    blocks: currentBlock,
+                    lastSyncedBlock: newLastSyncedBlock,
+                });
 
             } else if (error && error.code === infuraLimitError.code) {
                 this.config = {
@@ -163,6 +192,11 @@ class SyncManager {
             }
 
             if (shouldLoadNextPortion) {
+                this.addresses.set(address, {
+                    ...syncAddress,
+                    lastSyncedBlock: newLastSyncedBlock,
+                });
+
                 await this.syncNotes({
                     ...options,
                     lastSyncedBlock: newLastSyncedBlock,
