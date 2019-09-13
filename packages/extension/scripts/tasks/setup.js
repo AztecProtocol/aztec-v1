@@ -3,22 +3,18 @@ import {
 } from 'terminal-kit';
 import chalk from 'chalk';
 import ganacheInstance from '../instances/ganacheInstance';
-import dockerInstance from '../instances/dockerInstance';
 import {
     log,
     successLog,
     warnLog,
-    errorLog,
 } from '../utils/log';
-import taskPromise from '../utils/taskPromise';
 import pipeTasks, {
     log as logTask,
 } from '../utils/pipeTasks';
 import stopProcesses from '../utils/stopProcesses';
 import deployContracts from './deployContracts';
 import copy from './copy';
-import graph from './graph';
-import resetdb from './resetdb';
+
 
 export default function setup({
     onStart,
@@ -104,40 +100,19 @@ export default function setup({
         warnLog('Something went wrong');
         log('');
         log(`Please fix the above error and then run ${chalk.cyan('yarn rebuild')} in another terminal window.`);
-        log(`Or run ${chalk.cyan('yarn graph')} if the error is caused by the graph.`);
         log('');
     };
 
-    const doCloseDocker = makeCloseChildProcessCallback('docker');
-
+    
     runningProcesses.ganache = ganacheInstance({
         onClose: makeCloseChildProcessCallback('ganache'),
         onError: handleError,
     }).next(async () => {
-        try {
-            await taskPromise(resetdb);
-        } catch (error) {
-            errorLog('Failed to reset database', error);
-            handleClose();
-            return null;
-        }
-
-        runningProcesses.docker = dockerInstance({
-            onClose: (code) => {
-                if (code === null) return;
-                doCloseDocker();
-            },
-            onError: handleError,
-        });
-
-        return runningProcesses.docker;
-    }).next(() => {
         pipeTasks(
             [
                 deployContracts,
                 logTask('Successfully deployed contracts to ganache.'),
                 copy,
-                graph,
             ],
             {
                 onError: handleBuildError,

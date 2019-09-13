@@ -1,5 +1,4 @@
 import path from 'path';
-import graphNodeConfig from '../../config/graphNode';
 import {
     isDirectory,
     isFile,
@@ -8,10 +7,6 @@ import {
 const projectRoot = path.resolve(__dirname, '../../');
 const highestLevel = 2;
 
-const {
-    manifest: manifestFilename,
-} = graphNodeConfig;
-const manifestPath = path.join(projectRoot, manifestFilename);
 
 const prettyPath = composedPath =>
     composedPath.replace(/\/{1,}/g, '/');
@@ -50,7 +45,6 @@ const locatePackage = (name) => {
 const locateFile = name => locateModule(name, true);
 
 export {
-    manifestPath,
     prettyPath,
     projectRoot,
     locateModule,
