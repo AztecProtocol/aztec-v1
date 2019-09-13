@@ -16,8 +16,10 @@ class SyncManager {
         this.config = {
             syncInterval: 5000, // ms
         };
+        this.syncConfig = undefined;
         this.networks = new Map();
         this.paused = false;
+        this.progressSubscriber = null;
     }
 
     setConfig(config) {
@@ -29,13 +31,6 @@ class SyncManager {
             });
     }
 
-    isInQueue(networkId) {
-        const syncNetwork = this.networks.get(networkId);
-        return !!(syncNetwork
-            && (syncNetwork.syncing || syncNetwork.syncReq)
-        );
-    }
-
     handleFetchError = (error) => {
         errorLog('Failed to sync Assets with web3.', error);
         if (process.env.NODE_ENV === 'development') {
@@ -43,84 +38,100 @@ class SyncManager {
         }
     };
 
-    pause = (networkId, prevState = {}) => {
-        const syncNetwork = this.networks.get(networkId);
-        if (!syncNetwork) {
-            warnLog(`Assets syncing with networkId: "${networkId}" is not in process.`);
+    pause = (prevState = {}) => {
+        if (!this.syncConfig) {
+            warnLog(`Assets syncing with is not in process.`);
             return;
         }
 
-        this.networks.set(networkId, {
+        this.syncConfig = {
             ...syncNetwork,
             pausedState: prevState,
-        });
+        };
     };
 
-    resume = (networkId) => {
-        const syncNetwork = this.networks.get(networkId);
-        if (!syncNetwork) {
-            warnLog(`Assets syncing with networkId: "${networkId}" is not in process.`);
+    syncProgress = async() => {
+        if (!this.syncConfig) {
+            warnLog(`Assets syncing is not in process.`);
+            return;
+        }
+
+        const blocks = await Web3Service(networkId).eth.getBlockNumber();
+        const {
+            lastSyncedBlock,
+        } = this.syncConfig;
+
+        return {
+            blocks, 
+            lastSyncedBlock,
+        };
+    };
+
+    setProgressCallback = (callback) => {
+        this.progressSubscriber = callback;
+    };
+
+    resume = () => {
+        if (!this.syncConfig) {
+            warnLog(`Assets syncing is not in process.`);
             return;
         }
 
         const {
             pausedState,
-        } = syncNetwork;
+        } = this.syncConfig;
         if (!pausedState) {
-            warnLog(`Assets with networkId: ${networkId} is already running.`);
+            warnLog(`Assets syncing is already running.`);
             return;
         }
 
-        this.networks.set(networkId, {
+        this.syncConfig = {
             ...syncNetwork,
             pausedState: null,
-        });
+        };
 
         this.syncAssets({
             ...pausedState,
-            networkId,
         });
     };
 
     isSynced = ({
         networkId,
     }) => {
-        const syncNetwork = this.networks.get(networkId);
-        if (!syncNetwork) {
-            warnLog(`Assets syncing with networkId: "${networkId}" is not in process.`);
+        if (!this.syncConfig) {
+            warnLog(`Assets syncing is not in process.`);
             return;
         }
 
         const {
             syncing,
-        } = this.networks.get(networkId);
+        } = this.syncConfig;
         return !syncing;
     }
 
     async syncAssets(options) {
         const {
-            networkId,
             lastSyncedBlock,
         } = options;
 
-        const syncNetwork = this.networks.get(networkId);
-        if (syncNetwork.pausedState) {
+        if (this.syncConfig.pausedState) {
             return;
         }
         if (this.paused) {
-            this.pause(networkId, options);
+            this.pause(options);
             return;
         }
 
-        this.networks.set(networkId, {
+        this.syncConfig = {
             ...syncNetwork,
             syncing: true,
             syncReq: null,
-        });
+        };
 
         const {
             syncReq: prevSyncReq,
-        } = syncNetwork;
+            networkId,
+        } = this.syncConfig;
 
         if (prevSyncReq) {
             clearTimeout(prevSyncReq);
@@ -152,6 +163,11 @@ class SyncManager {
             } else {
                 await createBulkAssets(newAssets, networkId);
                 newLastSyncedBlock = toBlock;
+
+                !this.progressSubscriber || this.progressSubscriber({
+                    blocks: currentBlock, 
+                    lastSyncedBlock: newLastSyncedBlock,
+                });
             }
         }
 
@@ -162,30 +178,28 @@ class SyncManager {
             });
         }, syncInterval);
 
-        this.networks.set(networkId, {
+        this.syncConfig = {
             ...syncNetwork,
             syncing: false,
             syncReq,
             lastSyncedBlock: newLastSyncedBlock,
-        });
+        };
     }
 
     async sync({
         lastSyncedBlock,
         networkId,
     }) {
-        let syncNetwork = this.networks.get(networkId);
-        if (!syncNetwork) {
-            syncNetwork = {
+        if (!this.syncConfig) {
+            this.syncConfig = {
                 syncing: false,
                 syncReq: null,
                 lastSyncedBlock,
+                networkId,
             };
-            this.networks.set(networkId, syncNetwork);
         }
         await this.syncAssets({
             lastSyncedBlock,
-            networkId,
         });
     }
 }

@@ -16,7 +16,6 @@ import SyncService from '~background/services/SyncService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import NoteService from '~background/services/NoteService';
 import Web3ServiceFactory from '~background/services/Web3Service/factory';
-import EventService from '~background/services/EventService';
 // import { runLoadingEventsTest } from './syncTest'
 
 
@@ -30,23 +29,24 @@ const configureWeb3Service = async () => {
         ACEConfig.config,
     ];
 
-    const infuraNetworks = ['mainnet', 'ropsten', 'rinkeby', 'goerli', 'kovan']
+    const infuraNetworksConfigs = ['mainnet', 'ropsten', 'rinkeby', 'goerli', 'kovan']
         .map((networkName) => infuraProviderConfig(networkName, infuraProjectId))
         .map(config => ({
             ...config,
             contractsConfigs,
         }));
 
-    const networksConfigs = [
-        {
-            title: 'Ganache',
-            networkId: 0,
-            providerUrl: providerUrlGanache,
-            contractsConfigs,
-        },
-        ...infuraNetworks,
-    ];
-    Web3ServiceFactory.setConfigs(networksConfigs);
+    const ganacheNetworkConfig = {
+        title: 'Ganache',
+        networkId: 0,
+        providerUrl: providerUrlGanache,
+        contractsConfigs,
+    };
+    
+    Web3ServiceFactory.setConfigs([
+        ...[ganacheNetworkConfig],
+        ...infuraNetworksConfigs,
+    ]);
 }
 
 export default async function init() {

@@ -2,8 +2,8 @@ import EventService from './';
 import {
     errorLog,
 } from '~utils/log';
-import AssetsSyncManager from './helpers/AssetsSyncManager';
 import NotesSyncManagerFactory from './helpers/NotesSyncManager/factory';
+import AssetsSyncManagerFactory from './helpers/AssetsSyncManager/factory';
 import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
@@ -21,8 +21,13 @@ import Account from '~background/database/models/account';
 import Asset from '~background/database/models/asset';
 
 
-const assetsSyncManager = new AssetsSyncManager();
+const notesSyncManager = (networkId) => {
+    return NotesSyncManagerFactory.create(networkId);
+};
 
+const assetsSyncManager = (networkId) => {
+    return AssetsSyncManagerFactory.create(networkId);
+}
 
 const syncAssets = async ({
     networkId,
@@ -31,8 +36,9 @@ const syncAssets = async ({
         errorLog("'networkId' can not be empty in EventService.syncAssets()");
         return;
     }
+    const manager = assetsSyncManager(networkId)
 
-    if (assetsSyncManager.isInQueue(networkId)) {
+    if (manager.isInQueue(networkId)) {
         return;
     }
 
@@ -45,7 +51,7 @@ const syncAssets = async ({
         lastSyncedBlock = lastSyncedAsset.blockNumber;
     }
     
-    assetsSyncManager.sync({
+    manager.sync({
         lastSyncedBlock,
         networkId,
     });
@@ -65,9 +71,9 @@ const syncNotes = async ({
         return;
     }
 
-    const notesSyncManager = NotesSyncManagerFactory.create(networkId);
+    const manager = notesSyncManager(networkId);
 
-    if (notesSyncManager.isInQueue(address)) {
+    if (manager.isInQueue(address)) {
         return;
     }
 
@@ -104,7 +110,7 @@ const syncNotes = async ({
         lastSyncedBlock = account.blockNumber;
     }
 
-    notesSyncManager.sync({
+    manager.sync({
         address,
         lastSyncedBlock,
         networkId,
@@ -122,7 +128,7 @@ const fetchLatestNote = async ({
     if (assetAddress) {
         fromAssets = [assetAddress];
 
-    } else if(!assetsSyncManager.isSynced(networkId)) {
+    } else if(!AssetsSyncManager.isSynced(networkId)) {
         return {
             error: new Error(`Error: assets are not synced for networkId: ${networkId}`),
             note: null,
@@ -206,13 +212,13 @@ const fetchAztecAccount = async ({
 
 export default {
     set: config => {
-        notesSyncManager.setConfig(config);
-        assetsSyncManager.setConfig(config);
+        // notesSyncManager.setConfig(config);
+        // AssetsSyncManager.setConfig(config);
     },
     syncAssets,
     syncNotes,
     fetchLatestNote,
     fetchAztecAccount,
-    // notesSyncManager,
+    notesSyncManager,
     assetsSyncManager,
 };
