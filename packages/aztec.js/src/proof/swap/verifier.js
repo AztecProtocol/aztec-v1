@@ -24,20 +24,34 @@ class SwapVerifier extends Verifier {
         challengeResponse.appendBN(this.proof.sender.slice(2));
         challengeResponse.data = [...challengeResponse.data, ...rollingHash.data];
 
+        let reducer = bn128.zeroBnRed;
         this.data.forEach((note, i) => {
+            let aBar;
             let kBar;
-            const { aBar, gamma, sigma } = note;
+            let c;
+            const { gamma, sigma } = note;
 
-            if (i <= 1) {
+            if (i === 0) {
                 kBar = note.kBar;
-            } else {
-                kBar = this.data[i - 2].kBar;
+                aBar = note.aBar;
+                c = this.challenge;
+            }
+
+            if (i > 0) {
+                reducer = rollingHash.redKeccak();
+                kBar = note.kBar.redMul(reducer);
+                aBar = note.aBar.redMul(reducer);
+
+                if (i > 1) {
+                    kBar = this.data[i - 2].kBar.redMul(reducer);
+                }
+                c = this.challenge.redMul(reducer);
             }
 
             const B = gamma
                 .mul(kBar)
                 .add(bn128.h.mul(aBar))
-                .add(sigma.mul(this.challenge).neg());
+                .add(sigma.mul(c).neg());
 
             if (B.isInfinity()) {
                 challengeResponse.appendBN(ZERO_BN);
