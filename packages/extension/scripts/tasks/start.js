@@ -33,22 +33,13 @@ export default function start({
     const showHints = () => {
         log('\n');
         log('\n');
-        log('  See GraphQL explorer in the following url:\n');
-        log(`    ${chalk.cyan('http://127.0.0.1:8000/subgraphs/name/aztec/note-management/')}`);
-        log('\n');
         log('  Run the following commands in another terminal window:\n');
         log(`    ${chalk.cyan('yarn test:run')}          - run all the tests using this setup.`);
-        log(`    ${chalk.cyan('yarn rebuild')}           - migrate contracts, copy files, and deploy graph node.`);
+        log(`    ${chalk.cyan('yarn rebuild:contracts')} - migrate contracts and copy files`);
         log('\n');
         log('    Sub-tasks of rebuild:');
         log(`    ${chalk.magenta('yarn deploy:contracts')}  - migrate contracts.`);
-        log(`    ${chalk.magenta('yarn copy')}              - copy contracts, abis, and addresses to this package and subgraph.yarm.`);
-        log(`    ${chalk.magenta('yarn graph')}             - generate, create, and deploy graph node.`);
-        log('\n');
-        log('    Sub-tasks of graph:');
-        log(`    ${chalk.magenta('yarn graph codegen')}     - generate types from schema and abis.`);
-        log(`    ${chalk.magenta('yarn graph create')}      - create subgraph.`);
-        log(`    ${chalk.magenta('yarn graph deploy')}      - compile and deploy subgraph.`);
+        log(`    ${chalk.magenta('yarn copy:contracts')}    - copy contracts, abis, and addresses to this package.`);
         log('\n');
         log('    To test a specific file:');
         log(`    ${chalk.magenta('jest [FILE_NAME]')}`);
@@ -61,7 +52,7 @@ export default function start({
     const handleStart = () => {
         log('\n');
         log('\n');
-        log(`${chalk.green('✔')} Contracts were deployed, graph-node is running, birds are chirping, everything is perfect!`);
+        log(`${chalk.green('✔')} Contracts were deployed, artifacts moved, birds are chirping, everything is perfect!`);
         log('  Next, you can...');
         showHints();
     };
