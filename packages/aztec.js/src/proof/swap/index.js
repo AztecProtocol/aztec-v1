@@ -42,16 +42,29 @@ class SwapProof extends Proof {
                 };
             });
 
+        let xbk;
+        let xba;
+        let reducer = bn128.zeroBnRed; // "x" in the white paper
         this.blindingFactors = this.notes.map(({ gamma }, i) => {
             let { bk } = blindingScalars[i];
             const { ba } = blindingScalars[i];
 
-            // Taker notes
-            if (i > 1) {
-                bk = blindingScalars[i - 2].bk;
+            if (i === 0) {
+                xbk = bk;
+                xba = ba;
             }
 
-            const B = gamma.mul(bk).add(bn128.h.mul(ba));
+            if (i > 0) {
+                reducer = this.rollingHash.redKeccak();
+
+                if (i > 1) {
+                    bk = blindingScalars[i - 2].bk;
+                }
+
+                xbk = bk.redMul(reducer);
+                xba = ba.redMul(reducer);
+            }
+            const B = gamma.mul(xbk).add(bn128.h.mul(xba));
             return { B, ba, bk };
         });
     }
