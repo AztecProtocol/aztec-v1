@@ -24,7 +24,7 @@ const requiredArgs = {
 const registeredUserInfo = {
     address: userAccount.address,
     linkedPublicKey: userAccount.linkedPublicKey,
-    registeredAt: Date.now(),
+    blockNumber: Date.now(),
 };
 
 let callback;

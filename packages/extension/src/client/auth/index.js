@@ -14,7 +14,7 @@ export default async function ensureExtensionInstalled() {
         });
     }
 
-    if (account && account.registeredAt) {
+    if (account && account.blockNumber) {
         return account;
     }
 

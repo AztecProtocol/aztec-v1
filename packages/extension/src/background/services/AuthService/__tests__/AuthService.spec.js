@@ -87,7 +87,7 @@ describe('AuthService getters', () => {
         });
     });
 
-    it('get registered user in storage only when registeredAt is not empty', async () => {
+    it('get registered user in storage only when blockNumber is not empty', async () => {
         const emptyUser = await AuthService.getRegisteredUser();
         expect(emptyUser).toBe(null);
 
@@ -104,14 +104,14 @@ describe('AuthService getters', () => {
 
         await userModel.update({
             address,
-            registeredAt: 123,
+            blockNumber: 123,
         });
 
         const user = await AuthService.getRegisteredUser(address);
         expect(user).toEqual({
             address,
             linkedPublicKey: 'linked_public_key',
-            registeredAt: 123,
+            blockNumber: 123,
         });
     });
 
@@ -333,7 +333,7 @@ describe('AuthService setters', () => {
 
         const registeredUserInfo = {
             ...basicUserInfo,
-            registeredAt: Date.now(),
+            blockNumber: Date.now(),
         };
         const userResponse = await AuthService.registerAddress(registeredUserInfo);
 
@@ -343,14 +343,14 @@ describe('AuthService setters', () => {
         expect(await AuthService.getRegisteredUser(address)).toEqual(registeredUserInfo);
     });
 
-    it('replace existing user info in storage if register with a new linkedPublicKey or registeredAt', async () => {
+    it('replace existing user info in storage if register with a new linkedPublicKey or blockNumber', async () => {
         const {
             address,
         } = userAccount;
         const userInfo = {
             address,
             linkedPublicKey: 'linked_public_key',
-            registeredAt: Date.now(),
+            blockNumber: Date.now(),
         };
 
         const userResponse = await AuthService.registerAddress(userInfo);
@@ -366,13 +366,13 @@ describe('AuthService setters', () => {
 
         const updatedTime = {
             ...updatedKey,
-            registeredAt: updatedKey.registeredAt + 1,
+            blockNumber: updatedKey.blockNumber + 1,
         };
         await AuthService.registerAddress(updatedTime);
         expect(await AuthService.getRegisteredUser(address)).toEqual(updatedTime);
     });
 
-    it('will not replace existing user in storage if linkedPublicKey and registeredAt are still the same', async () => {
+    it('will not replace existing user in storage if linkedPublicKey and blockNumber are still the same', async () => {
         const setSpy = jest.spyOn(storage, 'set');
 
         const {
@@ -381,7 +381,7 @@ describe('AuthService setters', () => {
         const userInfo = {
             address,
             linkedPublicKey: 'linked_public_key',
-            registeredAt: Date.now(),
+            blockNumber: Date.now(),
         };
         const storageUserInfo = {
             ...userInfo,
