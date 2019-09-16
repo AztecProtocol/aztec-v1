@@ -90,7 +90,7 @@ class SyncManager {
             address,
             privateKey,
             lastSynced = '',
-            registeredAt = 0,
+            blockNumber = 0,
         } = options;
 
         const account = this.accounts.get(address);
@@ -124,7 +124,7 @@ class SyncManager {
 
         const newNotes = await fetchNoteFromServer({
             lastSynced,
-            registeredAt,
+            blockNumber,
             account: address,
             numberOfNotes: notesPerRequest,
             onError: this.handleFetchError,
@@ -174,7 +174,7 @@ class SyncManager {
         address,
         privateKey,
         lastSynced,
-        registeredAt,
+        blockNumber,
     }) {
         let account = this.accounts.get(address);
         if (!account) {
@@ -182,7 +182,7 @@ class SyncManager {
                 syncing: false,
                 syncReq: null,
                 privateKey,
-                registeredAt,
+                blockNumber,
             };
             this.accounts.set(address, account);
         }
@@ -190,7 +190,7 @@ class SyncManager {
             address,
             privateKey,
             lastSynced,
-            registeredAt,
+            blockNumber,
         });
     }
 

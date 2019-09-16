@@ -11,7 +11,7 @@ export const domainName = 'aztecprotocol.com';
 export const registeredUserInfo = {
     address: userAccount.address,
     linkedPublicKey: userAccount.linkedPublicKey,
-    registeredAt: Date.now(),
+    blockNumber: Date.now(),
 };
 
 const requiredArgs = {

@@ -8,7 +8,7 @@ export default async function validateUserPermission() {
             account {
                 linkedPublicKey
                 address
-                registeredAt
+                blockNumber
             }
             error {
                 type

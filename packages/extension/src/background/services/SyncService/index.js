@@ -33,10 +33,10 @@ const syncAccount = async ({
 
     const {
         lastSynced,
-        registeredAt,
+        blockNumber,
     } = user;
 
-    if (!registeredAt) {
+    if (!blockNumber) {
         errorLog(`Account '${address}' is not registered.`);
         return;
     }
@@ -45,7 +45,7 @@ const syncAccount = async ({
         address,
         privateKey,
         lastSynced,
-        registeredAt,
+        blockNumber,
     });
 };
 

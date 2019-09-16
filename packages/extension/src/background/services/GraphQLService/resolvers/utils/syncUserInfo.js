@@ -5,6 +5,7 @@ import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
+import StorageService from '~background/services/StorageService'
 
 export default async function syncUserInfo(args, ctx) {
     const {
@@ -17,22 +18,16 @@ export default async function syncUserInfo(args, ctx) {
         session: {
             pwDerivedKey,
         },
+        //TODO: remove default value,
+        networkId = 0,
     } = ctx;
     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
     const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
 
-    const {
-        account,
-    } = await GraphNodeService.query(`
-       account(id: "${userAddress}") {
-           address
-           linkedPublicKey
-           registeredAt
-       }
-    `) || {};
+    const account = StorageService.query.account({networkId}, userAddress);
 
     const {
-        registeredAt: prevRegisteredAt,
+        blockNumber: prevBlockNumber,
         linkedPublicKey: prevLinkedPublicKey,
     } = account || {};
 
@@ -50,9 +45,9 @@ export default async function syncUserInfo(args, ctx) {
         user = await AuthService.registerAddress({
             address: userAddress,
             linkedPublicKey,
-            registeredAt: !prevRegisteredAt || reset
+            blockNumber: !prevBlockNumber || reset
                 ? 0
-                : parseInt(prevRegisteredAt, 10) || 0,
+                : parseInt(prevBlockNumber, 10) || 0,
         });
     }
 

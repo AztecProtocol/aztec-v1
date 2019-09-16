@@ -178,7 +178,7 @@ describe('validateAccount', () => {
         registeredUserInfo = {
             address: userAccount.address,
             linkedPublicKey,
-            registeredAt: Date.now(),
+            blockNumber: Date.now(),
         };
 
         accumContext = {
@@ -225,10 +225,10 @@ describe('validateAccount', () => {
         ]);
     });
 
-    it('fail if registeredAt is empty', async () => {
+    it('fail if blockNumber is empty', async () => {
         const userInfo = {
             ...registeredUserInfo,
-            registeredAt: 0,
+            blockNumber: 0,
         };
         await AuthService.registerAddress(userInfo);
 

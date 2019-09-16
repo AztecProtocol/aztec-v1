@@ -35,7 +35,7 @@ export default gql`
         spendingPublicKey: String
         linkedPublicKey: String
         lastSynced: String
-        registeredAt: BigInt
+        blockNumber: BigInt
     }
     type Asset {
         id: ID!
