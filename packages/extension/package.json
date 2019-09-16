@@ -21,6 +21,7 @@
         "bitcore-mnemonic": "^8.3.4",
         "bluebird": "^3.5.5",
         "commitizen": "^3.1.1",
+        "detect-port": "^1.3.0",
         "dexie": "^2.0.4",
         "dotenv": "^8.0.0",
         "eth-sig-util": "^2.2.0",
@@ -31,6 +32,7 @@
         "graphql-tag": "^2.10.1",
         "graphql-tools": "^4.0.4",
         "jest": "^24.8.0",
+        "kill-port": "^1.5.2",
         "lodash": "^4.17.14",
         "mini-css-extract-plugin": "^0.8.0",
         "node-fetch": "^2.6.0",
@@ -48,6 +50,7 @@
         "scrypt-async": "^2.0.1",
         "sinon-chrome": "^3.0.1",
         "svg-sprite-loader": "^4.1.6",
+        "terminal-kit": "^1.31.3",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
         "web3": "1.2.0",
@@ -90,11 +93,11 @@
         "eslint-plugin-jsx-a11y": "^6.2.3",
         "eslint-plugin-react": "^7.14.2",
         "fake-indexeddb": "^2.1.1",
+        "ganache-cli": "^6.4.3",
         "mocha": "^6.1.4",
         "node-fetch": "^2.6.0",
         "remove-flow-types-loader": "^1.1.0",
         "sinon": "^7.0.0",
-        "ganache-cli": "^6.4.3",
         "sinon-chrome": "^3.0.1"
     }
 }
