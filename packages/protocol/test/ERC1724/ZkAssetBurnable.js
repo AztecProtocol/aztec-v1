@@ -186,7 +186,6 @@ contract('ZkAssetBurnable', (accounts) => {
                 value: totalFee,
             });
             expect(burnReceipt.status).to.equal(true);
-
         });
     });
 

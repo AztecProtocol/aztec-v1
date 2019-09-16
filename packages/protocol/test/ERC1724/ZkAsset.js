@@ -155,7 +155,7 @@ contract('ZkAsset', (accounts) => {
             const signatures = proof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
 
             await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: accounts[0] });
-            const { receipt } = await zkAsset.confidentialTransfer(data, signatures, {
+            const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](data, signatures, {
                 from: accounts[0],
                 value: totalFee,
             });
