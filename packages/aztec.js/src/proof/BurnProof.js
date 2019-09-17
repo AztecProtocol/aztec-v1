@@ -4,7 +4,7 @@ const BurnProof66305 = require('./epoch0/BURN/burn');
 
 const { AztecError } = errors;
 
-function ProofExport(...args) {
+function BurnProof(...args) {
     if (!this.epochNum) {
         this.epochNum = 1; // default epochNumber
     }
@@ -21,10 +21,10 @@ function ProofExport(...args) {
     }
 }
 
-ProofExport.epoch = function(epochNum) {
+BurnProof.epoch = function(epochNum) {
     return (...args) => {
-        return ProofExport.bind({ epochNum })(...args);
+        return BurnProof.bind({ epochNum })(...args);
     };
 };
 
-module.exports = ProofExport;
+module.exports = BurnProof;

@@ -195,5 +195,4 @@ class JoinSplitProof65793 extends Proof {
 //     return ProofSuper;
 // }
 
-
 module.exports = JoinSplitProof65793;
