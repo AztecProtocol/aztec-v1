@@ -2,41 +2,42 @@
 
 $dot-radius: map-get($spacing-map, 'm');
 $edge-height: $dot-radius * 3;
-$card-background: map-get($color-map, 'white');
-$card-radius: map-get($rounded-corner-map, 's');
-$card-spacing-h: map-get($spacing-map, 'xl');
-$card-spacing-v: map-get($spacing-map, 'xl');
+$ticket-background: map-get($color-map, 'white');
+$ticket-radius: map-get($rounded-corner-map, 's');
+$ticket-spacing-h: map-get($spacing-map, 'xl');
+$ticket-spacing-v: map-get($spacing-map, 'xl');
 $border-color: rgb(242, 242, 242);
+$ticket-shadow-color: rgba(0, 0, 0, 0.2);
 
-.card {
+.ticket {
   position: relative;
   text-align: left;
 }
 
 .edges {
   position: relative;
-  padding: $card-spacing-v 0;
+  padding: $ticket-spacing-v 0;
 
   &:before, &:after {
     content: '';
     position: absolute;
     width: 100%;
-    height: $card-spacing-v;
-    background: $card-background;
+    height: $ticket-spacing-v;
+    background: $ticket-background;
     border-left: 1px solid $border-color;
     border-right: 1px solid $border-color;
   }
 
   &:before {
     top: 0;
-    border-radius: $card-radius $card-radius 0 0;
-    box-shadow: 0px -1px 2px -1px $default-shadow-color;
+    border-radius: $ticket-radius $ticket-radius 0 0;
+    box-shadow: 0px -1px 2px -1px $ticket-shadow-color;
   }
 
   &:after {
     bottom: 0;
-    border-radius: 0 0 $card-radius $card-radius;
-    box-shadow: 0px 3px 3px -2px $default-shadow-color;
+    border-radius: 0 0 $ticket-radius $ticket-radius;
+    box-shadow: 0px 3px 3px -2px $ticket-shadow-color;
   }
 }
 
@@ -47,27 +48,27 @@ $border-color: rgb(242, 242, 242);
 
 .content {
   position: absolute;
-  top: $card-spacing-v;
-  right: $dot-radius + $card-spacing-h;
-  bottom: $card-spacing-v;
-  left: $dot-radius + $card-spacing-h;
+  top: $ticket-spacing-v;
+  right: $dot-radius + $ticket-spacing-h;
+  bottom: $ticket-spacing-v;
+  left: $dot-radius + $ticket-spacing-h;
 }
 
 .header {
-  margin-bottom: $card-spacing-v;
-  padding-bottom: $card-spacing-v;
+  margin-bottom: $ticket-spacing-v;
+  padding-bottom: $ticket-spacing-v;
   border-bottom: 1px dashed $default-border-color;
 }
 
 .footer {
-  margin-top: $card-spacing-v;
-  padding-top: $card-spacing-v;
+  margin-top: $ticket-spacing-v;
+  padding-top: $ticket-spacing-v;
   border-top: 1px dashed $default-border-color;
 }
 
 .space {
   height: ($edge-height - $dot-radius * 2) / 2;
-  background: $card-background;
+  background: $ticket-background;
   border-left: 1px solid $border-color;
   border-right: 1px solid $border-color;
 }
@@ -80,8 +81,8 @@ $border-color: rgb(242, 242, 242);
   overflow: hidden;
   background: linear-gradient(to right,
     transparent $dot-radius,
-    $card-background $dot-radius,
-    $card-background calc(100% - #{$dot-radius}),
+    $ticket-background $dot-radius,
+    $ticket-background calc(100% - #{$dot-radius}),
     transparent calc(100% - #{$dot-radius}));
 }
 
@@ -92,7 +93,7 @@ $border-color: rgb(242, 242, 242);
   height: $dot-radius * 2;
   border-radius: $dot-radius;
   background: transparent;
-  box-shadow: 0 0 0 $dot-radius $card-background, 0 1px 3px $default-shadow-color inset;
+  box-shadow: 0 0 0 $dot-radius $ticket-background, 0 1px 3px $ticket-shadow-color inset;
 }
 
 .spot-left {

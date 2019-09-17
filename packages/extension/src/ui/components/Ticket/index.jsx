@@ -30,7 +30,7 @@ const Ticket = ({
         <div
             className={classnames(
                 className,
-                styles.card,
+                styles.ticket,
             )}
         >
             <div className={styles.edges}>

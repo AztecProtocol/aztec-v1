@@ -10,6 +10,7 @@ module.exports = {
             'primary-light': 'rgba(137, 139, 246, 0.7)',
             'primary-lighter': 'rgba(137, 139, 246, 0.45)',
             'primary-lightest': 'rgb(244, 245, 254)',
+            'white-lightest': 'rgba(255, 255, 255, 0.15)',
         },
         defaultTextColor: '#221635',
         defaultLabelColor: '#ABA4B6',

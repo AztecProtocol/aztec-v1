@@ -1,7 +1,10 @@
-import Register from '~ui/views/controllers/Register';
 import Home from '~ui/views/Home';
+import Register from '~ui/views/controllers/Register';
 import BackupKeys from '~ui/views/BackupKeys';
 import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
+import Account from '~ui/views/controllers/Account';
+import Assets from '~ui/views/Assets';
+import Asset from '~ui/views/Asset';
 import Restore from '~ui/views/Restore';
 import RegisterAddress from '~ui/views/RegisterAddress';
 import Deposit from '~ui/views/Deposit';
@@ -27,15 +30,29 @@ export default {
                 path: 'confirm',
                 View: ConfirmBackupKeys,
             },
+            restore: {
+                path: 'restore-account',
+                Component: Restore,
+            },
             address: {
                 path: 'address',
                 Component: RegisterAddress,
             },
         },
     },
-    restore: {
-        path: 'restore-account',
-        Component: Restore,
+    account: {
+        path: 'account',
+        Component: Account,
+        routes: {
+            assets: {
+                path: 'assets',
+                View: Assets,
+            },
+            asset: {
+                path: 'asset',
+                View: Asset,
+            },
+        },
     },
     deposit: {
         path: 'deposit',

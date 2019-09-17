@@ -114,7 +114,7 @@ const Deposit = ({
 
 Deposit.propTypes = {
     asset: PropTypes.shape({
-        name: PropTypes.string.isRequired,
+        code: PropTypes.string.isRequired,
         address: PropTypes.string.isRequired,
     }).isRequired,
     fromAddress: PropTypes.string.isRequired,
