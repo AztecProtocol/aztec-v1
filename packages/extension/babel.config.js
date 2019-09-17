@@ -27,7 +27,6 @@ module.exports = {
                     '~content': './src/content',
                     '~client': './src/client',
                     '~ui': './src/ui',
-                    '~uiRoute$': './src/ui/components/Route',
                     'aztec.js': path.resolve(__dirname, '../aztec.js/src'),
                 },
             },

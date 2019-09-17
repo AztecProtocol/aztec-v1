@@ -21,6 +21,7 @@ module.exports = {
                     ['~client', path.resolve(__dirname, './src/client')],
                     ['~ui', path.resolve(__dirname, './src/ui')],
                     ['~uiRoute', path.resolve(__dirname, './src/ui/components/Route')],
+                    ['~uiApis', path.resolve(__dirname, './src/ui/apis')],
                     ['~helpers', path.resolve(__dirname, './tests/helpers')],
                 ],
                 extensions: ['.js', '.jsx'],
