@@ -1,12 +1,12 @@
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 
-const Keccak = require('../../keccak');
-const Verifier = require('../verifier');
+const Keccak = require('../../../../keccak');
+const Verifier = require('../../../verifier');
 
 const { ZERO_BN } = constants;
 
-class JoinSplitVerifier extends Verifier {
+class JoinSplitVerifier65793 extends Verifier {
     extractData() {
         this.data = [];
         const dataLength = this.proof.data.length;
@@ -106,4 +106,4 @@ class JoinSplitVerifier extends Verifier {
     }
 }
 
-module.exports = JoinSplitVerifier;
+module.exports = JoinSplitVerifier65793;

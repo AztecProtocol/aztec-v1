@@ -1,19 +1,17 @@
-const BurnProof = require('./joinSplitFluid/burn');
-const DividendProof = require('./dividend');
-const JoinSplitProof = require('./joinSplit');
-const JoinSplitProofFluid = require('./joinSplitFluid');
-const MintProof = require('./joinSplitFluid/mint');
+const BurnProof = require('./BurnProof');
+const DividendProof = require('./DividendProof');
+const JoinSplitProof = require('./JoinSplitProof');
+const MintProof = require('./MintProof');
 const { Proof, ProofType } = require('./proof');
 const ProofUtils = require('./utils');
-const PrivateRangeProof = require('./privateRange');
-const PublicRangeProof = require('./publicRange');
-const SwapProof = require('./swap');
+const PrivateRangeProof = require('./PrivateRangeProof');
+const PublicRangeProof = require('./PublicRangeProof');
+const SwapProof = require('./SwapProof');
 
 module.exports = {
     BurnProof,
     DividendProof,
     JoinSplitProof,
-    JoinSplitProofFluid,
     MintProof,
     PrivateRangeProof,
     Proof,

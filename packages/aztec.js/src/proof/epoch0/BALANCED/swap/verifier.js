@@ -2,12 +2,12 @@
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 
-const Keccak = require('../../keccak');
-const Verifier = require('../verifier');
+const Keccak = require('../../../../keccak');
+const Verifier = require('../../../verifier');
 
 const { ZERO_BN } = constants;
 
-class SwapVerifier extends Verifier {
+class SwapVerifier65794 extends Verifier {
     verifyProof() {
         const dataLength = this.proof.data.length;
         if (dataLength < 4) {
@@ -76,4 +76,4 @@ class SwapVerifier extends Verifier {
     }
 }
 
-module.exports = SwapVerifier;
+module.exports = SwapVerifier65794;

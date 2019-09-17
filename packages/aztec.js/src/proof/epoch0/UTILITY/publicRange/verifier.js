@@ -1,39 +1,42 @@
 /* eslint-disable prefer-destructuring */
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
+const BN = require('bn.js');
 
-const Keccak = require('../../keccak');
-const Verifier = require('../verifier');
+const Keccak = require('../../../../keccak');
+const Verifier = require('../../../verifier');
 
 const { ZERO_BN } = constants;
 
-class PrivateRangeVerifier extends Verifier {
+class PublicRangeVerifier66563 extends Verifier {
     verifyProof() {
         const dataLength = this.proof.data.length;
-        if (dataLength < 3) {
+        if (dataLength < 2) {
             this.errors.push(errors.codes.INCORRECT_NOTE_NUMBER);
         }
 
         const challengeResponse = new Keccak();
         challengeResponse.appendBN(this.proof.sender.slice(2));
-        challengeResponse.appendBN(this.proof.publicValue);
-        challengeResponse.appendBN(this.proof.publicOwner.slice(2));
+        challengeResponse.appendBN(new BN(this.proof.publicComparison));
+        challengeResponse.appendBN(new BN(this.proof.publicValue));
+        challengeResponse.appendBN(new BN(this.proof.publicOwner.slice(2), 16));
 
         const rollingHash = new Keccak();
         this.data.forEach((item) => {
             rollingHash.appendPoint(item.gamma);
             rollingHash.appendPoint(item.sigma);
         });
-        challengeResponse.data.push(...rollingHash.data);
 
-        let reducer;
-        let challengeX;
-        this.data.forEach((item, i) => {
-            const { gamma, sigma } = item;
-            const { kBar, aBar } = item;
-            let B;
+        challengeResponse.data = [...challengeResponse.data, ...rollingHash.data];
+
+        let B;
+        this.data.forEach((note, i) => {
+            let kBar;
+            const { aBar, gamma, sigma } = note;
 
             if (i === 0) {
+                kBar = note.kBar;
+
                 B = gamma
                     .mul(kBar)
                     .add(bn128.h.mul(aBar))
@@ -41,22 +44,25 @@ class PrivateRangeVerifier extends Verifier {
             }
 
             if (i === 1) {
-                reducer = rollingHash.redKeccak();
-                const kBarX = kBar.redMul(reducer);
-                const aBarX = aBar.redMul(reducer);
-                challengeX = this.challenge.redMul(reducer);
+                const reducer = rollingHash.redKeccak();
+                let kBarX;
+                const firstTerm = this.data[0].kBar;
+                const secondTerm = this.challenge.mul(this.proof.publicComparison);
+                kBar = firstTerm.sub(secondTerm);
 
-                B = gamma
-                    .mul(kBarX)
-                    .add(bn128.h.mul(aBarX))
-                    .add(sigma.mul(challengeX).neg());
-            }
+                // multiplication in reduction context only works for positive numbers
+                // So, have to check if kBar is negative and if it is, negate it (to make positive),
+                // perform the operation and then negate back
 
-            if (i === 2) {
-                reducer = rollingHash.redKeccak();
-                const kBarX = this.data[0].kBar.redSub(this.data[1].kBar).redMul(reducer);
+                if (kBar < 0) {
+                    kBar = kBar.neg();
+                    kBarX = kBar.redMul(reducer).neg();
+                } else {
+                    kBarX = kBar.redMul(reducer);
+                }
+
+                const challengeX = this.challenge.redMul(reducer);
                 const aBarX = aBar.redMul(reducer);
-                challengeX = this.challenge.redMul(reducer);
 
                 B = gamma
                     .mul(kBarX)
@@ -70,7 +76,7 @@ class PrivateRangeVerifier extends Verifier {
                 this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
             } else {
                 challengeResponse.appendPoint(B);
-                if (B.x.fromRed().eq(ZERO_BN) && B.y.fromRed().eq(ZERO_BN)) {
+                if (B.x.fromRed().eq(bn128.zeroBnRed) && B.y.fromRed().eq(bn128.zeroBnRed)) {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }
@@ -87,4 +93,4 @@ class PrivateRangeVerifier extends Verifier {
     }
 }
 
-module.exports = PrivateRangeVerifier;
+module.exports = PublicRangeVerifier66563;

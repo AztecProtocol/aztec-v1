@@ -3,12 +3,12 @@ const { proofs } = require('@aztec/dev-utils');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../../encoder');
-const { Proof, ProofType } = require('../proof');
-const ProofUtils = require('../utils');
-const signer = require('../../signer');
+const { inputCoder, outputCoder } = require('../../../../encoder');
+const { Proof, ProofType } = require('../../../proof');
+const ProofUtils = require('../../../utils');
+const signer = require('../../../../signer');
 
-class JoinSplitProof extends Proof {
+class JoinSplitProof65793 extends Proof {
     /**
      * Constructs a joinSplit proof. This is the standard AZTEC zero-knowledge proof that can be used
      * to convert ERC20 tokens into AZTEC notes and vice versa. It can also be used to transfer notes.
@@ -185,4 +185,15 @@ class JoinSplitProof extends Proof {
     }
 }
 
-module.exports = JoinSplitProof;
+// function joinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner) {
+//     class ProofSuper extends JoinSplitProof {
+//         constructor() {
+//             super(inputNotes, outputNotes, sender, publicValue, publicOwner);
+//         }
+//     }
+
+//     return ProofSuper;
+// }
+
+
+module.exports = JoinSplitProof65793;
