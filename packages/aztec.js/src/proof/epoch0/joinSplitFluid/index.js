@@ -4,8 +4,8 @@ const { keccak256 } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../../encoder');
 const JoinSplitProof = require('../BALANCED/joinSplit');
-const { ProofType } = require('../../proof');
-const ProofUtils = require('../../utils');
+const { ProofType } = require('../proof');
+const ProofUtils = require('../utils');
 
 const { AztecError } = errors;
 

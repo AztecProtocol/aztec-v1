@@ -3,7 +3,7 @@ const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
 
 const Keccak = require('../../../../keccak');
-const Verifier = require('../../../verifier');
+const Verifier = require('../../../epoch0/verifier');
 
 const { ZERO_BN } = constants;
 

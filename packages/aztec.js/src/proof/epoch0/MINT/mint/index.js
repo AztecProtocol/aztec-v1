@@ -1,5 +1,5 @@
 const JoinSplitFluidProof = require('../../joinSplitFluid');
-const { ProofType } = require('../../../proof');
+const { ProofType } = require('../../proof');
 
 class MintProof66049 extends JoinSplitFluidProof {
     /**

@@ -1,4 +1,4 @@
-const JoinSplitFluidVerifier = require('../../../verifier');
+const JoinSplitFluidVerifier = require('../../../epoch0/verifier');
 
 class BurnVerifier66305 extends JoinSplitFluidVerifier {}
 

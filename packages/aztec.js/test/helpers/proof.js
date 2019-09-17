@@ -2,7 +2,7 @@ const bn128 = require('@aztec/bn128');
 const BN = require('bn.js');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
-const { ProofType } = require('../../src/proof/proof');
+const { ProofType } = require('../../src/proof/epoch0/proof');
 
 // kBar, aBar, gamma.x, gamma., sigma.x, sigma.y
 const zeroNote = Array(6).fill('0'.repeat(64));

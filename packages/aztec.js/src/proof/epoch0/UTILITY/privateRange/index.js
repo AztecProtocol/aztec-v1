@@ -5,8 +5,8 @@ const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../../../encoder');
-const { Proof, ProofType } = require('../../../proof');
-const ProofUtils = require('../../../utils');
+const { Proof, ProofType } = require('../../proof');
+const ProofUtils = require('../../utils');
 
 const { AztecError } = errors;
 
