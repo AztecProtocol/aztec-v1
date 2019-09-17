@@ -4,13 +4,13 @@ const BN = require('bn.js');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../../encoder');
-const { Proof, ProofType } = require('../proof');
-const ProofUtils = require('../utils');
+const { inputCoder, outputCoder } = require('../../../../encoder');
+const { Proof, ProofType } = require('../../../proof');
+const ProofUtils = require('../../../utils');
 
 const { AztecError } = errors;
 
-class DividendProof extends Proof {
+class DividendProof66561 extends Proof {
     /**
      * Constructs a Dividend proof. It is assumed that it is in the prover's interest for `targetNote` to be
      * as large as possible. What we are actually checking, is that `targetNote` <= (`zb` / `za`) * `notionalNote`.
@@ -146,4 +146,4 @@ class DividendProof extends Proof {
     }
 }
 
-module.exports = DividendProof;
+module.exports = DividendProof66561;

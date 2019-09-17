@@ -1,7 +1,7 @@
-const JoinSplitFluidProof = require('../index');
-const { ProofType } = require('../../proof');
+const JoinSplitFluidProof = require('../../joinSplitFluid');
+const { ProofType } = require('../../../proof');
 
-class MintProof extends JoinSplitFluidProof {
+class MintProof66049 extends JoinSplitFluidProof {
     /**
      * Construct a mint proof. A mint proof artificially creates AZTEC notes, without a transfer of public ERC20 tokens.
      * It keeps track of the total number of AZTEC notes minted using the variables `currentTotalValueNote`
@@ -21,4 +21,4 @@ class MintProof extends JoinSplitFluidProof {
     }
 }
 
-module.exports = MintProof;
+module.exports = MintProof66049;

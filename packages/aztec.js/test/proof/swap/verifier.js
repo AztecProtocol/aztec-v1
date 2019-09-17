@@ -8,7 +8,7 @@ const { padLeft, padRight, randomHex } = require('web3-utils');
 const { mockNoteSet, randomNoteValue } = require('../../helpers/note');
 const { mockZeroSwapProof } = require('../../helpers/proof');
 const { Proof, SwapProof } = require('../../../src/proof');
-const SwapVerifier = require('../../../src/proof/swap/verifier');
+const SwapVerifier = require('../../../src/proof/epoch0/BALANCED/swap/verifier');
 
 describe('Swap Proof Verifier', () => {
     const sender = randomHex(20);

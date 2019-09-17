@@ -1,8 +1,8 @@
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
-const JoinSplitVerifier = require('../joinSplit/verifier');
+const JoinSplitVerifier = require('../BALANCED/joinSplit/verifier');
 
-const Keccak = require('../../keccak');
+const Keccak = require('../../../keccak');
 
 const { ZERO_BN } = constants;
 

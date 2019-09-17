@@ -1,7 +1,7 @@
-const JoinSplitFluidProof = require('../index');
-const { ProofType } = require('../../proof');
+const JoinSplitFluidProof = require('../../joinSplitFluid');
+const { ProofType } = require('../../../proof');
 
-class BurnProof extends JoinSplitFluidProof {
+class BurnProof66305 extends JoinSplitFluidProof {
     /**
      * Construct a burn proof. A burn proof artificially destroys AZTEC notes, without a transfer of public ERC20 tokens.
      * It keeps track of the total number of AZTEC notes burned using the variables `currentTotalValueNote`
@@ -21,4 +21,4 @@ class BurnProof extends JoinSplitFluidProof {
     }
 }
 
-module.exports = BurnProof;
+module.exports = BurnProof66305;

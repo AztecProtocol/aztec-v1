@@ -7,7 +7,7 @@ const { padLeft, randomHex } = require('web3-utils');
 const sinon = require('sinon');
 
 const { DividendProof } = require('../../../src/proof');
-const DividendVerifier = require('../../../src/proof/dividend/verifier');
+const DividendVerifier = require('../../../src/proof/epoch0/UTILITY/dividend/verifier');
 const note = require('../../../src/note');
 const { Proof } = require('../../../src/proof');
 

@@ -5,13 +5,13 @@ const BN = require('bn.js');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../../encoder');
-const { Proof, ProofType } = require('../proof');
-const ProofUtils = require('../utils');
+const { inputCoder, outputCoder } = require('../../../../encoder');
+const { Proof, ProofType } = require('../../../proof');
+const ProofUtils = require('../../../utils');
 
 const { AztecError } = errors;
 
-class SwapProof extends Proof {
+class SwapProof65794 extends Proof {
     constructor(inputNotes, outputNotes, sender) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
@@ -157,4 +157,4 @@ class SwapProof extends Proof {
     }
 }
 
-module.exports = SwapProof;
+module.exports = SwapProof65794;

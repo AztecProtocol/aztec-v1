@@ -4,13 +4,13 @@ const BN = require('bn.js');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft, randomHex } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../../encoder');
-const { Proof, ProofType } = require('../proof');
-const ProofUtils = require('../utils');
+const { inputCoder, outputCoder } = require('../../../../encoder');
+const { Proof, ProofType } = require('../../../proof');
+const ProofUtils = require('../../../utils');
 
 const { AztecError } = errors;
 
-class PrivateRangeProof extends Proof {
+class PrivateRangeProof66562 extends Proof {
     /**
     Constructs a private range proof - proving that the value of one AZTEC note, the originalNote, is greater than 
     the value of a second AZTEC note, the comparisonNote. The balancing relationship satisfied is:
@@ -184,4 +184,4 @@ class PrivateRangeProof extends Proof {
     }
 }
 
-module.exports = PrivateRangeProof;
+module.exports = PrivateRangeProof66562;

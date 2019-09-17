@@ -4,14 +4,14 @@ const BN = require('bn.js');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../../encoder');
+const { inputCoder, outputCoder } = require('../../../../encoder');
 const helpers = require('./helpers');
-const { Proof, ProofType } = require('../proof');
-const ProofUtils = require('../utils');
+const { Proof, ProofType } = require('../../../proof');
+const ProofUtils = require('../../../utils');
 
 const { AztecError } = errors;
 
-class PublicRangeProof extends Proof {
+class PublicRangeProof66563 extends Proof {
     /**
      * Constructs a public range proof that a note is greater than or equal to, or less than or
      * equal to a public integer. Control of whether a > or < proof is constructed is determined
@@ -203,4 +203,4 @@ class PublicRangeProof extends Proof {
     }
 }
 
-module.exports = PublicRangeProof;
+module.exports = PublicRangeProof66563;

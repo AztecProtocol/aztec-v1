@@ -1,63 +1,68 @@
 /* eslint-disable prefer-destructuring */
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
 
-const Keccak = require('../../keccak');
-const Verifier = require('../verifier');
+const Keccak = require('../../../../keccak');
+const Verifier = require('../../../verifier');
 
-const { K_MAX, ZERO_BN } = constants;
+const { ZERO_BN } = constants;
 
-class DividendVerifier extends Verifier {
+class PrivateRangeVerifier66562 extends Verifier {
     verifyProof() {
         const dataLength = this.proof.data.length;
         if (dataLength < 3) {
             this.errors.push(errors.codes.INCORRECT_NOTE_NUMBER);
         }
 
-        const kMaxBN = new BN(K_MAX);
-        if (this.proof.za.gte(kMaxBN)) {
-            this.errors.push(errors.codes.ZA_TOO_BIG);
-        }
-        if (this.proof.zb.gte(kMaxBN)) {
-            this.errors.push(errors.codes.ZB_TOO_BIG);
-        }
-
         const challengeResponse = new Keccak();
         challengeResponse.appendBN(this.proof.sender.slice(2));
-        challengeResponse.appendBN(this.proof.za);
-        challengeResponse.appendBN(this.proof.zb);
+        challengeResponse.appendBN(this.proof.publicValue);
+        challengeResponse.appendBN(this.proof.publicOwner.slice(2));
 
         const rollingHash = new Keccak();
         this.data.forEach((item) => {
             rollingHash.appendPoint(item.gamma);
             rollingHash.appendPoint(item.sigma);
         });
-
         challengeResponse.data.push(...rollingHash.data);
 
-        let reducer = rollingHash.redKeccak(); // "x" in the white paper
+        let reducer;
+        let challengeX;
         this.data.forEach((item, i) => {
-            const { aBar, gamma, sigma } = item;
-            let challengeX = this.challenge.mul(reducer);
-            let kBar = item.kBar;
+            const { gamma, sigma } = item;
+            const { kBar, aBar } = item;
+            let B;
 
-            // Notional and target notes
-            if (i === 2) {
-                challengeX = this.challenge.redMul(reducer);
-                const zaRed = this.proof.za.toRed(bn128.groupReduction);
-                const zbRed = this.proof.zb.toRed(bn128.groupReduction);
-
-                // kBar_3 = (z_b)(kBar_1) - (z_a)(kBar_2)
-                kBar = zbRed.redMul(this.data[0].kBar).redSub(zaRed.redMul(this.data[1].kBar));
+            if (i === 0) {
+                B = gamma
+                    .mul(kBar)
+                    .add(bn128.h.mul(aBar))
+                    .add(sigma.mul(this.challenge).neg());
             }
 
-            const kBarX = kBar.redMul(reducer); // xbk = bk*x
-            const aBarX = aBar.redMul(reducer); // xba = ba*x
-            const B = gamma
-                .mul(kBarX)
-                .add(bn128.h.mul(aBarX))
-                .add(sigma.mul(challengeX).neg());
+            if (i === 1) {
+                reducer = rollingHash.redKeccak();
+                const kBarX = kBar.redMul(reducer);
+                const aBarX = aBar.redMul(reducer);
+                challengeX = this.challenge.redMul(reducer);
+
+                B = gamma
+                    .mul(kBarX)
+                    .add(bn128.h.mul(aBarX))
+                    .add(sigma.mul(challengeX).neg());
+            }
+
+            if (i === 2) {
+                reducer = rollingHash.redKeccak();
+                const kBarX = this.data[0].kBar.redSub(this.data[1].kBar).redMul(reducer);
+                const aBarX = aBar.redMul(reducer);
+                challengeX = this.challenge.redMul(reducer);
+
+                B = gamma
+                    .mul(kBarX)
+                    .add(bn128.h.mul(aBarX))
+                    .add(sigma.mul(challengeX).neg());
+            }
 
             if (B.isInfinity()) {
                 challengeResponse.appendBN(ZERO_BN);
@@ -69,7 +74,6 @@ class DividendVerifier extends Verifier {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }
-            reducer = rollingHash.redKeccak();
         });
 
         if (
@@ -83,4 +87,4 @@ class DividendVerifier extends Verifier {
     }
 }
 
-module.exports = DividendVerifier;
+module.exports = PrivateRangeVerifier66562;

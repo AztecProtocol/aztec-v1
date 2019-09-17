@@ -2,10 +2,10 @@ const { constants, errors, proofs } = require('@aztec/dev-utils');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256 } = require('web3-utils');
 
-const { inputCoder, outputCoder } = require('../../encoder');
-const JoinSplitProof = require('../joinSplit');
-const { ProofType } = require('../proof');
-const ProofUtils = require('../utils');
+const { inputCoder, outputCoder } = require('../../../encoder');
+const JoinSplitProof = require('../BALANCED/joinSplit');
+const { ProofType } = require('../../proof');
+const ProofUtils = require('../../utils');
 
 const { AztecError } = errors;
 
