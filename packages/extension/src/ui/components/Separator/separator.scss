@@ -1,0 +1,24 @@
+@import '../../styles/variables';
+
+.separator {
+  display: flex;
+  align-items: center;
+}
+
+%line {
+  flex: 1 1 auto;
+  height: 1px;
+  background: map-get($color-map, 'white-lighter');
+}
+
+$line-spacing: map-get($spacing-map, 'l');
+
+.line-left {
+  @extend %line;
+  margin-right: $line-spacing;
+}
+
+.line-right {
+  @extend %line;
+  margin-left: $line-spacing;
+}

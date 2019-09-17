@@ -2,7 +2,7 @@
 
 @keyframes bgShimmer {
   0% {
-    background-color: rgba($bg-gradient-primary, 0.3);
+    background-color: rgba($bg-gradient-primary, 0.5);
     background-position: 100% 100%;
   }
   100% {
@@ -38,13 +38,6 @@
 
 .white {
   @extend %button;
-  border-color: map-get($color-map, 'white') !important;
-  background: map-get($color-map, 'white') !important;
-  font-weight: 600;
-
-  &.outlined {
-    background: none;
-  }
 }
 
 .primary {

@@ -11,4 +11,8 @@ export default {
         sign: 'Please sign the transaction',
     },
     success: 'Transaction completed!',
+    history: {
+        _: 'Transaction History',
+        empty: 'You have no transactions.',
+    },
 };

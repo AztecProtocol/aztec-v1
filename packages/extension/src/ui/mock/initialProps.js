@@ -1,18 +1,11 @@
-const dummyFunc = () => {};
+import {
+    seedPhrase,
+    addresses,
+    assets,
+    pastTransactions,
+} from './data';
 
-const seedPhrase = 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle';
-const addresses = [
-    '0x3339C3c842732F4DAaCf12aed335661cf4eab66b',
-    '0x0563a36603911daaB46A3367d59253BaDF500bF9',
-];
-const assets = [
-    {
-        name: 'Dai',
-        code: 'DAI',
-        address: '0x',
-        balance: 0,
-    },
-];
+const dummyFunc = () => {};
 
 export default {
     '/register': {
@@ -33,11 +26,19 @@ export default {
         currentStep: 0,
         goNext: dummyFunc,
     },
-    '/assets': {
-        assets,
-    },
-    '/restore-account': {
+    '/register/restore-account': {
         goNext: dummyFunc,
+    },
+    '/account/assets': {
+        assets,
+        pastTransactions: pastTransactions.slice(0, 2),
+    },
+    '/account/asset': {
+        ...assets[0],
+        prev: '/account',
+        pastTransactions: pastTransactions
+            .filter(({ asset }) => asset.code === assets[0].code)
+            .slice(0, 2),
     },
     '/deposit': {
         asset: assets[0],

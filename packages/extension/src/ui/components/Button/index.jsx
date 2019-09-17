@@ -10,20 +10,23 @@ const CustomButton = ({
     className,
     theme,
     outlined,
+    rounded,
     disabled,
     ...props
 }) => (
     <Button
         className={classnames(
             className,
-            styles[theme],
             {
+                [styles[theme]]: theme === 'primary',
                 [styles.outlined]: outlined,
                 [styles.disabled]: disabled,
             },
         )}
-        rounded
+        theme={theme}
+        rounded={rounded}
         disabled={disabled}
+        outlined={outlined}
         {...props}
     />
 );
@@ -35,6 +38,7 @@ CustomButton.propTypes = {
         'white',
     ]),
     outlined: PropTypes.bool,
+    rounded: PropTypes.bool,
     disabled: PropTypes.bool,
 };
 
@@ -42,6 +46,7 @@ CustomButton.defaultProps = {
     className: '',
     theme: 'primary',
     outlined: false,
+    rounded: true,
     disabled: false,
 };
 

@@ -29,7 +29,7 @@ class MockRoute extends PureComponent {
         const {
             prev,
             next,
-            ...initialAction
+            ...props
         } = initialProps[path] || {};
         const handleGoBack = prev
             ? () => history.push(prev)
@@ -44,7 +44,7 @@ class MockRoute extends PureComponent {
                 goNext={handleGoNext}
                 goToPage={this.goToPage}
                 {...params}
-                {...initialAction}
+                {...props}
             />
         );
     };

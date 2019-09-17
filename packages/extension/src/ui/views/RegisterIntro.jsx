@@ -43,7 +43,7 @@ const Intro = ({
             onSubmit={goNext}
             footerLink={{
                 text: i18n.t('register.restore.fromSeedPhrase'),
-                href: router.u('register.backup'),
+                href: router.u('register.restore'),
             }}
         >
             {descriptionNodes}
