@@ -6,8 +6,8 @@ const { keccak256, padLeft } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../../../encoder');
 const helpers = require('./helpers');
-const { Proof, ProofType } = require('../../../proof');
-const ProofUtils = require('../../../utils');
+const { Proof, ProofType } = require('../../proof');
+const ProofUtils = require('../../utils');
 
 const { AztecError } = errors;
 

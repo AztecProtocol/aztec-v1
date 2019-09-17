@@ -4,8 +4,8 @@ const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../../../encoder');
-const { Proof, ProofType } = require('../../../proof');
-const ProofUtils = require('../../../utils');
+const { Proof, ProofType } = require('../../proof');
+const ProofUtils = require('../../utils');
 const signer = require('../../../../signer');
 
 class JoinSplitProof65793 extends Proof {

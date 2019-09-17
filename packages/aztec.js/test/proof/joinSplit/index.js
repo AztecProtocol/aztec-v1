@@ -8,7 +8,7 @@ const { randomHex } = require('web3-utils');
 
 const { JoinSplitProof } = require('../../../src/proof');
 const { mockNoteSet, randomNoteValue } = require('../../helpers/note');
-const ProofUtils = require('../../../src/proof/utils');
+const ProofUtils = require('../../../src/proof/epoch0/utils');
 const { validateElement, validateScalar } = require('../../helpers/bn128');
 
 const { K_MAX } = constants;

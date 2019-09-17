@@ -4,7 +4,7 @@ const BN = require('bn.js');
 const { Enum } = require('enumify');
 const { padLeft } = require('web3-utils');
 
-const Keccak = require('../keccak');
+const Keccak = require('../../keccak');
 const ProofUtils = require('./utils');
 const types = require('./types');
 
