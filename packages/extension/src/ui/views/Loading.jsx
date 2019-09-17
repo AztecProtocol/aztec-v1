@@ -1,25 +1,47 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
     FlexBox,
-    SVG,
+    Block,
+    Text,
 } from '@aztec/guacamole-ui';
 import Popup from '~ui/components/Popup';
-import logoGlyph from '~ui/images/logo-white.svg';
+import Logo from '~ui/components/Logo';
 
-const Loading = () => (
+const Loading = ({
+    message,
+}) => (
     <Popup>
         <FlexBox
+            direction="column"
             valign="center"
             align="center"
             stretch
         >
-            <SVG
-                glyph={logoGlyph}
-                width={150}
-                height={42.5}
-            />
+            <Block bottom={message ? 'l' : ''}>
+                <Logo
+                    spin
+                />
+            </Block>
+            {!!message && (
+                <Block top="xxl">
+                    <Text
+                        text={message}
+                        size="xs"
+                        color="white-light"
+                    />
+                </Block>
+            )}
         </FlexBox>
     </Popup>
 );
+
+Loading.propTypes = {
+    message: PropTypes.string,
+};
+
+Loading.defaultProps = {
+    message: '',
+};
 
 export default Loading;

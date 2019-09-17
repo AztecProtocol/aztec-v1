@@ -1,23 +1,30 @@
 import React from 'react';
 import {
     FlexBox,
-    SVG,
+    Block,
+    Text,
 } from '@aztec/guacamole-ui';
 import Popup from '~ui/components/Popup';
-import logoGlyph from '~ui/images/logo-white.svg';
+import Logo from '~ui/components/Logo';
 
 const Home = () => (
     <Popup>
         <FlexBox
+            direction="column"
             valign="center"
             align="center"
             stretch
         >
-            <SVG
-                glyph={logoGlyph}
-                width={150}
-                height={42.5}
-            />
+            <Block bottom="l">
+                <Logo spin />
+            </Block>
+            <Block top="xxl">
+                <Text
+                    text="hiding your balances..."
+                    size="xs"
+                    color="white-light"
+                />
+            </Block>
         </FlexBox>
     </Popup>
 );

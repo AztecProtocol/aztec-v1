@@ -1,4 +1,5 @@
 import Home from '~ui/views/Home';
+import Loading from '~ui/views/Loading';
 import Register from '~ui/views/controllers/Register';
 import BackupKeys from '~ui/views/BackupKeys';
 import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
@@ -17,6 +18,10 @@ import Send from '~ui/views/Send';
 export default {
     _: {
         Component: Home,
+    },
+    loading: {
+        path: 'loading',
+        View: Loading,
     },
     register: {
         path: 'register',
