@@ -11,10 +11,9 @@ describe('query', () => {
 
     const networkId = 453;
 
-    it.only('should call query for account with right params', async () => {
+    it('should call query for account with right params', async () => {
         // given
         const accountQueryMock = jest.spyOn(StorageService.query, 'account')
-            // .mockImplementation((options, address) => (rawAccount));
 
         // action
         await StorageService.query.account(networkId, rawAccount.address);
