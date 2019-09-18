@@ -1,8 +1,7 @@
-import React, {
-    PureComponent,
-} from 'react';
+import React from 'react';
 import { KeyStore } from '~utils/keyvault';
 import ActionService from '~ui/services/ActionService';
+import CombinedViews from '~ui/views/handlers/CombinedViews';
 import Intro from '../RegisterIntro';
 import BackupKeys from '../BackupKeys';
 import ConfirmBackupKeys from '../ConfirmBackupKeys';
@@ -13,88 +12,56 @@ const Steps = [
     ConfirmBackupKeys,
 ];
 
-class Register extends PureComponent {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            step: 0,
-            seedPhrase: '',
-        };
+const handleGoBack = (step, prevData) => {
+    let data = prevData;
+    switch (step) {
+        case 0: {
+            data = { ...data };
+            delete data.seedPhrase;
+            break;
+        }
+        default:
     }
 
-    handleGoBack = () => {
-        const {
-            step,
-        } = this.state;
-        const nextState = {};
-        switch (step) {
-            case 0: {
-                nextState.seedPhrase = '';
-                break;
-            }
-            default:
+    return data;
+};
+
+const handleGoNext = (step, prevData) => {
+    let data = prevData;
+    switch (step) {
+        case 0: {
+            data = {
+                ...data,
+                seedPhrase: KeyStore.generateRandomSeed(Date.now().toString()),
+            };
+            break;
         }
-
-        this.setState({
-            ...nextState,
-            step: step - 1,
-        });
-    };
-
-    handleGoNext = (childState = {}) => {
-        const {
-            step,
-        } = this.state;
-        const nextState = { ...childState };
-        switch (step) {
-            case 0: {
-                const seedPhrase = KeyStore.generateRandomSeed(Date.now().toString());
-                nextState.seedPhrase = seedPhrase;
-                break;
-            }
-            default:
-        }
-
-        if (step === Steps.length - 1) {
-            this.doRegister();
-            return;
-        }
-
-        this.setState({
-            ...nextState,
-            step: step + 1,
-        });
-    };
-
-    handleResponse = (response) => {
-        console.log('Register handleResponse', response);
-    };
-
-    doRegister() {
-        const {
-            seedPhrase,
-        } = this.state;
-        ActionService
-            .post('register', { seedPhrase })
-            .onReceiveResponse(this.handleResponse);
+        default:
     }
 
-    render() {
-        const {
-            step,
-            seedPhrase,
-        } = this.state;
-        const Step = Steps[step];
+    return data;
+};
 
-        return (
-            <Step
-                seedPhrase={seedPhrase}
-                goBack={step > 0 ? this.handleGoBack : null}
-                goNext={this.handleGoNext}
-            />
-        );
-    }
-}
+const handleResponse = (response) => {
+    console.log('Register successfully!', response);
+};
+
+const doRegister = (data) => {
+    const {
+        seedPhrase,
+    } = data;
+    ActionService
+        .post('register', { seedPhrase })
+        .onReceiveResponse(handleResponse);
+};
+
+const Register = () => (
+    <CombinedViews
+        Steps={Steps}
+        onGoBack={handleGoBack}
+        onGoNext={handleGoNext}
+        onExit={doRegister}
+    />
+);
 
 export default Register;
