@@ -1,5 +1,10 @@
 @import '../../styles/variables';
 
+$separator-theme-color-map: (
+    'white': $default-border-color,
+    'primary': map-get($color-map, 'white-lighter'),
+);
+
 .separator {
   display: flex;
   align-items: center;
@@ -8,7 +13,6 @@
 %line {
   flex: 1 1 auto;
   height: 1px;
-  background: map-get($color-map, 'white-lighter');
 }
 
 $line-spacing: map-get($spacing-map, 'l');
@@ -21,4 +25,12 @@ $line-spacing: map-get($spacing-map, 'l');
 .line-right {
   @extend %line;
   margin-left: $line-spacing;
+}
+
+@each $theme, $color in $separator-theme-color-map {
+  .theme-#{$theme} {
+    .line-left, .line-right {
+      background: $color;
+    }
+  }
 }
