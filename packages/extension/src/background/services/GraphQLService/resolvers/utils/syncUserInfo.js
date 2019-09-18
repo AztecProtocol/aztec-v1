@@ -40,21 +40,12 @@ export default async function syncUserInfo(args, ctx) {
         && linkedPublicKey !== prevLinkedPublicKey
         && !reset
     ) {
+        // TODO
+        // we need to show different UI saying the account is registered, please restore from seed phrase
         return permissionError('account.duplicated');
     }
 
-    let user = await AuthService.getRegisteredUser(userAddress);
-    if (!user
-        || user.linkedPublicKey !== linkedPublicKey
-    ) {
-        user = await AuthService.registerAddress({
-            address: userAddress,
-            linkedPublicKey,
-            registeredAt: !prevRegisteredAt || reset
-                ? 0
-                : parseInt(prevRegisteredAt, 10) || 0,
-        });
-    }
+    const user = await AuthService.getRegisteredUser(userAddress);
 
     return user;
 }

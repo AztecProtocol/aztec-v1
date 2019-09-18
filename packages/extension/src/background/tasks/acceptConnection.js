@@ -26,11 +26,7 @@ const handleContentScriptSubscription = (data, port) => {
 };
 
 export default function acceptConnection() {
-    // TODO remove this and make the UI use a port connection once we refactor
     const connection = new Connection();
-    browser.runtime.onMessage.addListener(async (msg) => {
-        connection.UiResponseSubject.next(msg);
-    });
 
     browser.runtime.onConnect.addListener((port) => {
         connection.registerClient(port);

@@ -7,6 +7,8 @@ export default Model({
         fields: [
             'type',
             'data',
+            'requestId',
+            'clientId',
         ],
     },
 });

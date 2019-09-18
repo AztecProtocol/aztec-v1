@@ -3,17 +3,21 @@ import psl from 'psl';
 import gql from 'graphql-tag';
 import insertVariablesToGql from '~utils/insertVariablesToGql';
 import actionModel from '~database/models/action';
-import GraphQLService from '../services/GraphQLService';
-import {
+import GraphQLService from '../services/GraphQLService'; import {
     errorToActionMap,
 } from '~config/action';
 
 export const updateActionState = async (action) => {
     const timestamp = Date.now();
-    action.timestamp = timestamp;
-    await actionModel.set(action);
-    return action;
+    const newAction = {
+        ...action,
+        timestamp,
+    };
+    await actionModel.set(newAction);
+    return newAction;
 };
+
+
 export const openPopup = ({ timestamp }) => {
     const popupURL = browser.extension.getURL('pages/popup.html');
     const { width, height } = window.screen;
@@ -28,7 +32,9 @@ export const openPopup = ({ timestamp }) => {
     });
 };
 
-export const addDomainData = ({ data, sender }) => {
+export const addDomainData = ({
+    data, sender, senderId, requestId,
+}) => {
     const {
         url,
     } = sender;
@@ -41,17 +47,23 @@ export const addDomainData = ({ data, sender }) => {
         } = psl.parse(url.replace(/^https?:\/\//, '').split('/')[0]));
     }
 
+    const extension = !!url.match(/(extension:)+/);
     return {
         domain,
-        ...data,
+        extension,
+        senderId,
+        requestId,
+        data,
     };
 };
 
 export const handleQuery = async ({
-    mutation,
-    query,
     domain,
-    args,
+    data: {
+        args,
+    } = {},
+    query,
+    mutation,
     requestId,
 }) => {
     let type = 'query';
@@ -100,7 +112,7 @@ export const generateResponseCode = ({ response }, uiError, timeout) => {
     return 500;
 };
 
-export const generateResponseError = ({ response, requestId }, uiError, timeout) => {
+export const generateResponseError = ({ response, requestId }) => {
     const queryName = Object.keys(response)
         .find(name => !!response[name].error);
     const errorData = queryName ? response[queryName].error : false;

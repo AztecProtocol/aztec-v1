@@ -1,12 +1,10 @@
 import {
     filter,
-    timeout,
-    tap,
     take,
 } from 'rxjs/operators';
 
 const filterStream = (type, requestId, stream$) => stream$.pipe(
-    filter(data => data.type === type && data.requestId === requestId),
+    filter(({ data, requestId: reqId }) => data.type === type && reqId === requestId),
     take(1),
     // timeout(15000),
 ).toPromise();

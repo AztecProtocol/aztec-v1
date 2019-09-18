@@ -1,5 +1,4 @@
 import filterStream from '~utils/filterStream';
-import address from '~utils/address';
 import {
     dataError,
 } from '~utils/error';
@@ -10,23 +9,24 @@ import proofValidation from './proofValidation';
 const validateProof = async (query) => {
     // we need to validate the resultant note owners
     const {
-        args: {
-            proofType,
-            ...data
+        data: {
+            args: {
+                proofType,
+                ...data
+            },
         },
     } = query;
 
     const validatedProofInputs = proofValidation(proofType, data);
-    if (validatedProofInputs === true) {
+    if (!(validatedProofInputs instanceof Error)) {
         return data;
     }
-
     throw new Error(validatedProofInputs);
 };
 
 const proofUi = (query, connection) => async () => {
     connection.UiActionSubject.next({
-        type: 'ui.proof',
+        type: 'ui.asset.prove',
         requestId: query.requestId,
         clientId: query.clientId,
         data: {
@@ -34,7 +34,7 @@ const proofUi = (query, connection) => async () => {
         },
     });
 
-    return filterStream('UI_RESPONSE', query.requestId, connection.UiResponseSubject.asObservable());
+    return filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
     // we now know the UI has completed
 };
 

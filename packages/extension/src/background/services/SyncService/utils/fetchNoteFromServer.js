@@ -79,7 +79,7 @@ export default async function fetchNoteFromServer({
         where.note = noteId;
     }
     if (registeredAt) {
-        where.timestamp_gte = registeredAt;
+        where.timestamp_gte = parseInt(registeredAt / 10000);
     }
     const variables = {
         first: numberOfNotes,

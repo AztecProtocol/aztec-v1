@@ -17,12 +17,9 @@ const registerDomain = async (query, connection) => {
                 requestId: query.requestId,
             },
         });
-        return filterStream('UI_RESPONSE', query.requestId, connection.UiResponseSubject.asObservable());
+        return filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
     }
     return registeredDomain;
-    // else {
-    //     throw
-    // }
 };
 
 

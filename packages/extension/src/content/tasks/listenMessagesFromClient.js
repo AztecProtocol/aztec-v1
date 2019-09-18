@@ -49,8 +49,6 @@ export default function listenMessagesFromClient() {
     // here we handle messages from the client page
     source$.pipe(
         filter(({ data }) => data.type === clientEvent),
-        map(({ data }) => ({ data: { ...data, clientId } })),
-        // we need to send the mesasge to the clientId port
         // and wait for a response that has a matching requestId
         tap(event => backgroundPort.postMessage(event.data)),
         mergeMap(event => from(filterStream('CLIENT_RESPONSE', event.data.requestId, background$))),
