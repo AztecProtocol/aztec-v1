@@ -13,19 +13,13 @@ $core-border-radius: 4px;
 @keyframes iconBaseRotation {
   0% {
     transform: rotate(0deg) scale(1);
-    filter: blur(0px);
   }
   26% {
     opacity: 0.9;
-    filter: blur(0px);
   }
   30% {
     transform: rotate(180deg) scale(1.4);
-    filter: blur(2px);
     opacity: 0.85;
-  }
-  34% {
-    filter: blur(0px);
   }
   40% {
     opacity: 0.9;
@@ -33,12 +27,10 @@ $core-border-radius: 4px;
   60% {
     transform: rotate(360deg) scale(1);
     opacity: 1;
-    filter: blur(0px);
   }
   100% {
     transform: rotate(360deg) scale(1);
     opacity: 1;
-    filter: blur(0px);
   }
 }
 
