@@ -12,8 +12,9 @@ class API {
     }
 
 
-    clientApi({ query, ...rest }, connection) {
-        return this[query](rest, connection);
+    clientApi(request, connection) {
+        const { data: { query } } = request;
+        return this[query](request, connection);
     }
 }
 

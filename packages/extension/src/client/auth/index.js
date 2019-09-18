@@ -6,9 +6,7 @@ export const ensureExtensionInstalled = async () => {
     const account = await registerExtension() || {};
 
     if (!account) {
-        throw new ApiError('account.not.registered', {
-            error,
-        });
+        throw new ApiError('account.not.registered');
     }
 
     if (account && account.registeredAt) {
@@ -17,12 +15,10 @@ export const ensureExtensionInstalled = async () => {
 };
 
 export const ensureDomainRegistered = async () => {
-    const response = await registerDomain() || {};
+    const response = await registerDomain();
 
     if (!response) {
-        throw new ApiError('domain.not.registered', {
-            error,
-        });
+        throw new ApiError('domain.not.registered');
     }
 
     return response;

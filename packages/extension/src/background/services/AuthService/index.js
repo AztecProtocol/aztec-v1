@@ -92,13 +92,21 @@ const AuthService = {
         address,
         seedPhrase,
     }) => {
+        let keyStore = await get('keyStore');
+        let user = await userModel.get({
+            address,
+        });
+
+        if (keyStore) {
+            return user;
+        }
         const { pwDerivedKey } = await KeyStore.generateDerivedKey({
             password,
             salt,
         });
         const mnemonic = seedPhrase;
 
-        const keyStore = new KeyStore({
+        keyStore = new KeyStore({
             pwDerivedKey,
             salt,
             mnemonic,
@@ -119,9 +127,6 @@ const AuthService = {
 
         const linkedPublicKey = keyStore.privacyKeys.publicKey;
 
-        let user = await userModel.get({
-            address,
-        });
         if (!user
             || user.linkedPublicKey !== linkedPublicKey
         ) {

@@ -2,14 +2,13 @@ import { handleQuery } from '../../../utils/connectionUtils';
 
 export default async function asset(query) {
     const {
-        args: { id, currentAddress },
+        data,
         domain,
     } = query;
     const {
         response,
     } = await handleQuery({
-        query: `
-        assetResponse: asset(id: "${id}", currentAddress: "${currentAddress}") {
+        query: `assetResponse: asset {
             asset {
                 address
                 linkedTokenAddress
@@ -25,6 +24,7 @@ export default async function asset(query) {
             }
         }
     `,
+        data,
         domain,
     });
 

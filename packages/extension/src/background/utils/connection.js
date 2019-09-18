@@ -1,7 +1,6 @@
 import {
     from,
     Subject,
-    BehaviorSubject,
     merge,
 } from 'rxjs';
 import {
@@ -13,6 +12,7 @@ import {
 import {
     clientEvent,
     actionEvent,
+    sendTransactionEvent,
 } from '~config/event';
 import {
     updateActionState,
@@ -22,25 +22,46 @@ import {
 
 import ApiService from '../services/ApiService';
 import ClientActionService from '../services/ClientActionService';
+import TransactionSendingService from '../services/TransactionSendingService';
 
 class Connection {
     constructor() {
+        this.MessageSubject = new Subject();
+
         this.UiActionSubject = new Subject();
         this.ui$ = this.UiActionSubject.asObservable();
-        this.UiResponseSubject = new BehaviorSubject(false);
-        this.uiResponse$ = this.UiResponseSubject.asObservable();
-
-        this.ActionResponseSubject = new Subject();
-        this.actionResponse$ = this.ActionResponseSubject.asObservable();
-
-        this.MessageSubject = new Subject();
-        this.ApiSubject = new Subject();
 
         this.ClientResponseSubject = new Subject();
         this.clientResponse$ = this.ClientResponseSubject.asObservable();
 
         this.ClientActionSubject = new Subject();
         this.clientAction$ = this.ClientActionSubject.asObservable();
+
+
+        // send the messages to the client
+        merge(this.clientAction$, this.clientResponse$).pipe(
+            // map(withConnectionIds),
+            tap(({ webClientId, ...rest }) => {
+                this.connections[webClientId].postMessage({
+                    ...rest,
+                });
+            }),
+        ).subscribe();
+
+        this.message$ = this.MessageSubject.asObservable().pipe(
+            // here we need to filter the events int to types
+            map(addDomainData),
+            map(this.withConnectionIds),
+        );
+        // message the UI
+        this.message$.pipe(
+            filter(({ data }) => data.type === 'ACTION_RESPONSE'),
+            tap(({ uiClientId, ...rest }) => {
+                this.connections[uiClientId].postMessage({
+                    ...rest,
+                });
+            }),
+        ).subscribe();
 
         // this stream of events does the following
         // 1. save the action state to the storage so it can be loaded by the UI thread
@@ -51,80 +72,87 @@ class Connection {
             map(openPopup), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
-
-        // send the messages to the client
-        merge(this.clientResponse$, this.clientAction$).pipe(
-            tap(({ clientId, ...rest }) => {
-                console.log(this.connections, clientId, rest);
-                this.connections[clientId].postMessage({
-                    ...rest,
-                    clientId,
-                });
-            }),
-        ).subscribe();
-
-        this.message$ = this.MessageSubject.asObservable().pipe(
-            // here we need to filter the events int to types
-            map(addDomainData),
-            tap((data) => {
-                switch (data.type) {
-                    case clientEvent: {
-                        this.ApiSubject.next(data);
-                        break;
-                    }
-                    case 'ACTION_RESPONSE': {
-                        this.ActionResponseSubject.next(data);
-                        break;
-                    }
-                    case 'UI_ACTION': {
-                        this.UiActionSubject.next(data);
-                        break;
-                    }
-                    case actionEvent: {
-                        this.ClientActionSubject.next(data);
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }),
-        );
-
-        this.message$.subscribe();
+        // this.message$.subscribe();
         // we need to setup a stream that relays messages to the client and back to the UI
-        this.MessageSubject.asObservable().pipe(
+        this.message$.pipe(
             // we filter the stream here
-            filter(({ type }) => type === actionEvent),
-            mergeMap(data => from(ClientActionService.triggerClientAction(data))),
-            tap(({ clientId, ...rest }) => {
-                this.connections[clientId].postMessage({
+            filter(({ data }) => data.type === actionEvent),
+            mergeMap(data => from(ClientActionService.triggerClientAction(data, this)())),
+            tap(({ uiClientId, ...rest }) => {
+                this.connections[uiClientId].postMessage({
                     ...rest,
-                    clientId,
                 });
             }),
-
         ).subscribe();
 
-        this.api$ = this.ApiSubject.asObservable().pipe(
+        this.message$.pipe(
+            filter(({ data }) => data.type === sendTransactionEvent),
+            mergeMap(data => from(TransactionSendingService.sendTransaction(data))),
+            tap(({ uiClientId, ...rest }) => {
+                this.connections[uiClientId].postMessage({
+                    ...rest,
+                });
+            }),
+        ).subscribe();
+
+        this.api$ = this.message$.pipe(
+            filter(({ data }) => data.type === clientEvent),
             mergeMap(data => from(ApiService.clientApi(data, this))),
             tap((data) => {
                 this.ClientResponseSubject.next({
                     ...data,
-                    type: 'CLIENT_RESPONSE',
+                    data: {
+                        response: data.response,
+                        type: 'CLIENT_RESPONSE',
+                    },
                 });
             }),
         );
+
         this.api$.subscribe();
 
         this.connections = {};
+        this.requests = {};
+    }
+
+    withConnectionIds = ({
+        requestId,
+        senderId,
+        extension,
+        data,
+        ...rest
+    }) => {
+        const {
+            uiClientId,
+            webClientId,
+        } = this.requests[requestId] || {};
+
+        this.requests[requestId] = {
+            uiClientId: extension ? senderId : uiClientId,
+            webClientId: !extension ? senderId : webClientId,
+        };
+
+        // TODO clear these out when the request is finished or after a timeout
+
+        return {
+            data,
+            requestId,
+            ...rest,
+            ...this.requests[requestId],
+        };
     }
 
     registerClient = (client) => {
         this.connections[client.name] = client;
-        client.onMessage.addListener((msg, sender) => {
+        this.connections[client.name].requests = {};
+        client.onMessage.addListener(({
+            requestId,
+            ...data
+        }, sender) => {
             this.MessageSubject.next({
-                data: msg,
+                data,
+                senderId: client.name,
+                requestId,
                 sender: sender.sender,
             });
         });

@@ -21,7 +21,7 @@ import assetFactory from '../apis/assetFactory';
 import noteFactory from '../apis/noteFactory';
 import { ensureExtensionInstalled, ensureDomainRegistered } from '../auth';
 import Web3Service from '../services/Web3Service';
-import EIP712Service from '../services/EIP712Service';
+import MetaMaskService from '../services/MetaMaskService';
 
 
 class Aztec {
@@ -46,7 +46,7 @@ class Aztec {
 
         this.contentScript$.pipe(
             filter(({ data: { type } }) => type === actionEvent),
-            mergeMap(data => from(EIP712Service(data))),
+            mergeMap(data => from(MetaMaskService(data))),
             tap(data => window.postMessage({
                 type: 'ACTION_RESPONSE',
                 requestId: data.requestId,

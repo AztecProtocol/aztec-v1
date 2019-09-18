@@ -4,10 +4,10 @@ export default async function validateUserPermission(data) {
     const { response } = await handleQuery({
         ...data,
         query: `userPermission {
-                    account {
+                    account { 
                         linkedPublicKey
-                        address
                         registeredAt
+                        address
                     }
                     error {
                         type

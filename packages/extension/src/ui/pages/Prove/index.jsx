@@ -5,19 +5,18 @@ import {
     Button,
     Text,
 } from '@aztec/guacamole-ui';
-import { BrowserRouter as Route, Link } from 'react-router-dom';
 
 import ExtensionApi from '../../services/ExtensionApiService';
 
-import './ApproveDomain.css';
+import './Prove.css';
 
 
-class ApproveAssetForDomain extends Component {
+class Prove extends Component {
     state ={
 
     }
 
-    approveDomain = async () => {
+    prove = async () => {
         const {
             action: {
                 data: {
@@ -29,7 +28,6 @@ class ApproveAssetForDomain extends Component {
             },
             address,
         } = this.props;
-        console.log(this.props);
         await ExtensionApi.auth.approveDomain({
             domain,
             address,
@@ -51,21 +49,6 @@ class ApproveAssetForDomain extends Component {
                 </Block>
             );
         }
-
-        // we want to always render a router depending on the page we want to handle the url
-        // we then render a react router and parse the query string for handling actions.
-        // the extension ui will have a different flow
-
-        const {
-            action: {
-                data: {
-                    response: {
-                        domain,
-                        asset,
-                    },
-                },
-            },
-        } = this.props;
         return (
             <Block
                 stretch
@@ -74,25 +57,19 @@ class ApproveAssetForDomain extends Component {
                 background="white"
             >
 
-                <Text
-                    text="The page is requesting access to your AZTEC assets"
-                    size="l"
-                    color="primary"
-                    weight="semibold"
-                />
-                <Text
-                    text={`${domain} is requesting the access.`}
-                    showEllipsis
-                    color="label"
-                    className="wrap"
-                    size="s"
-                    weight="light"
-                />
                 <div>
                     <br />
                     <br />
                     <Button
-                        text="Approve"
+                        text="Approve ERC20"
+                        onClick={() => this.approveDomain()}
+                    />
+                </div>
+                <div>
+                    <br />
+                    <br />
+                    <Button
+                        text="Prove"
                         onClick={() => this.approveDomain()}
                     />
                 </div>
@@ -101,4 +78,4 @@ class ApproveAssetForDomain extends Component {
     }
 }
 
-export default ApproveAssetForDomain;
+export default Prove;

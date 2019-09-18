@@ -14,14 +14,12 @@ const proofSchemaMap = {
 
 export default (proofType, data) => {
     if (!proofType || !proofSchemaMap[proofType]) {
-        throw new Error('Proof Type is not defined');
+        return new Error('Proof Type is not defined');
     }
-    console.log(data);
     const result = v.validate(data, proofSchemaMap[proofType]);
-    console.log(result);
 
     if (!result.valid) {
-        return result.errors;
+        return new Error(result.errors);
     }
 
     return data;

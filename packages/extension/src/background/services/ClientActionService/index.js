@@ -4,19 +4,26 @@ import {
 } from '~config/event';
 
 const triggerClientAction = (query, connection) => async () => {
-    connection.ClientActionSubject.next({
-        type: actionEvent,
-        clientId: query.clientId,
-        requestId: query.requestId,
+    const {
         data: {
-            action: query.args.action,
+            data,
+        },
+        requestId,
+        ...rest
+    } = query;
+    connection.ClientActionSubject.next({
+        ...rest,
+        type: actionEvent,
+        requestId,
+        data: {
+            action: data.action,
             response: {
-                ...query.args,
+                ...data.response,
             },
-            requestId: query.requestId,
+            requestId,
         },
     });
-    return filterStream('ACTION_RESPONSE', query.requestId, connection.ActionResponseSubject.asObservable());
+    return filterStream('ACTION_RESPONSE', requestId, connection.message$);
 };
 
 export default {

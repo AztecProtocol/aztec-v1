@@ -1,67 +1,127 @@
 import React, { Component } from 'react';
-
-import browser from 'webextension-polyfill';
+import PropTypes from 'prop-types';
 import {
-    Loader, Block, Button, Text,
+    Loader, Block, Button,
 } from '@aztec/guacamole-ui';
-import { Route, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import ExtensionApi from '../../services/ExtensionApiService';
 
 import { KeyStore } from '~utils/keyvault';
-
-import Step1 from './step1.jsx';
-import Step2 from './step2.jsx';
-import Step3 from './step3.jsx';
-import Restore from './restore.jsx';
 
 
 class RegisterExtension extends Component {
     state ={
     }
 
+    async linkAccountToMetaMask() {
+        const {
+            action: {
+                clientId,
+                requestId,
+                data: {
+                    response: {
+                        address,
+                    },
+                },
+            },
+        } = this.props;
+        const {
+            account,
+        } = this.state;
+        const {
+            data: {
+                signature,
+            },
+        } = await ExtensionApi.auth.linkAccountToMetaMask({
+            account: {
+                ...account,
+                address,
+            },
+            requestId,
+            clientId,
+        });
+        this.setState({
+            signature,
+        });
+    }
 
-    __handleStep3Click = (mutation, password) => async () => {
-        const data = await mutation({
-            variables: {
-                password,
-                salt: 'salt',
-                domain: window.location.host,
-                seedPhrase: this.state.seedPhrase,
-                address: this.props.action.data.response.address,
+    async createKeyVault() {
+        const seedPhrase = KeyStore.generateRandomSeed(Date.now().toString());
+        // here we are going to use the resolvers to create the key vault
+        const {
+            action: {
+                data: {
+                    response: {
+                        address,
+                    },
+                },
+            },
+        } = this.props;
+        const {
+            password = 'test',
+        } = this.state;
+
+        const account = await ExtensionApi.auth.createKeyVault({
+            address,
+            password,
+            seedPhrase,
+        });
+
+        this.setState({
+            account: {
+                ...account,
+                address,
             },
         });
-        browser.runtime.sendMessage({
-            type: 'UI_RESPONSE',
-            requestId: this.props.action.data.requestId,
-            data,
+    }
+
+    async sendTransaction() {
+        const {
+            account: {
+                address,
+                linkedPublicKey,
+            },
+            signature,
+        } = this.state;
+        const {
+            action: {
+                clientId,
+                requestId,
+            },
+        } = this.props;
+        await ExtensionApi.auth.sendRegisterTransaction({
+            params: {
+                address,
+                linkedPublicKey,
+                signature,
+            },
+            requestId,
+            clientId,
+
         });
-        setTimeout(() => {
-            window.close();
-        }, 1000);
-    };
-
-    __handleStep2Click() {
-        this.props.history.push('/register/step3');
     }
 
-    __handleRestoreClick() {
-        console.log('here');
-        this.props.history.push('/register/restore');
+    async registerAccount() {
+        const {
+            account: {
+                address,
+                linkedPublicKey,
+            },
+            signature,
+        } = this.state;
+        await ExtensionApi.auth.registerAccount({
+            address,
+            linkedPublicKey,
+            signature,
+        });
     }
 
-    __updateSeedPhrase(seedPhrase) {
-        this.setState({ seedPhrase });
-        this.props.history.push('/register/step2');
-    }
-
-    __handleStep1Click() {
-        const seedPhrase = KeyStore.generateRandomSeed(Date.now().toString());
-
-        this.setState({ seedPhrase });
-        this.props.history.push('/register/step2');
-    }
 
     render() {
-        if (!this.props.action) {
+        const {
+            action,
+        } = this.props;
+        if (!action) {
             return (
                 <Block style={{
                     background: 'linear-gradient(115deg, #808DFF 0%, #9FC4FF 100%, #7174FF 100%)',
@@ -84,40 +144,41 @@ class RegisterExtension extends Component {
                 background="white"
                 stretch
                 padding="m"
-                align="center"
             >
-                <Route
-                    path="/register"
-                    exact
-                    render={() => (
-                        <Step1
-                            onClick={() => this.__handleStep1Click()}
-                            restoreClick={() => this.__handleRestoreClick()}
-                        />
-                    )}
+                <Button
+                    text="Create Key Vault"
+                    onClick={() => this.createKeyVault()}
                 />
-                <Route
-                    path="/register/restore"
-                    exact
-                    render={() => (
-                        <Restore
-                            updateSeedPhrase={seedPhrase => this.__updateSeedPhrase(seedPhrase)}
-                        />
-                    )}
+
+                <br />
+                <br />
+                <Button
+                    text="Link account to MetaMask"
+                    onClick={() => this.linkAccountToMetaMask()}
                 />
-                <Route
-                    path="/register/step2"
-                    exact
-                    render={p => (<Step2 onClick={() => this.__handleStep2Click()} seedPhrase={this.state.seedPhrase} />)}
+                <br />
+                <br />
+                <Button
+                    text="Send Transaction"
+                    onClick={() => this.sendTransaction()}
                 />
-                <Route
-                    path="/register/step3"
-                    exact
-                    render={() => (<Step3 onClick={this.__handleStep3Click} />)}
+                <br />
+                <br />
+                <Button
+                    text="Register Account"
+                    onClick={() => this.registerAccount()}
                 />
             </Block>
         );
     }
 }
+
+RegisterExtension.defaultProps = {
+    action: false,
+};
+
+RegisterExtension.propTypes = {
+    action: PropTypes.any,
+};
 
 export default withRouter(RegisterExtension);
