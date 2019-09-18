@@ -18,6 +18,7 @@ const TransactionHistorySummary = ({
     <Offset bottom="xs">
         <Block padding="s 0">
             <Separator
+                theme="primary"
                 title={i18n.t('transaction.history')}
             />
         </Block>

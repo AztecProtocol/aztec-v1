@@ -1,4 +1,5 @@
 export default {
+    _: 'Asset',
     deposit: 'Deposit',
     send: 'Send',
     list: {

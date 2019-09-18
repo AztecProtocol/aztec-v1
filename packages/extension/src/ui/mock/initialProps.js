@@ -3,6 +3,7 @@ import {
     addresses,
     assets,
     domains,
+    notes,
     pastTransactions,
 } from './data';
 
@@ -45,6 +46,13 @@ export default {
         pastTransactions: pastTransactions
             .filter(({ asset }) => asset.code === assets[0].code)
             .slice(0, 2),
+    },
+    '/note-access': {
+        note: notes[0],
+        accounts: addresses.map(address => ({
+            address,
+        })),
+        goNext: dummyFunc,
     },
     '/deposit': {
         asset: assets[0],

@@ -9,6 +9,7 @@ import Assets from '~ui/views/Assets';
 import Asset from '~ui/views/Asset';
 import Restore from '~ui/views/Restore';
 import RegisterAddress from '~ui/views/RegisterAddress';
+import NoteAccess from '~ui/views/NoteAccess';
 import Deposit from '~ui/views/Deposit';
 import Send from '~ui/views/Send';
 
@@ -63,6 +64,10 @@ export default {
                 View: Asset,
             },
         },
+    },
+    noteAccess: {
+        path: 'note-access',
+        Component: NoteAccess,
     },
     deposit: {
         path: 'deposit',
