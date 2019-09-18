@@ -1,5 +1,6 @@
 import {
     randomId,
+    randomInt,
 } from '~utils/random';
 import compoundLogo from './images/compound.png';
 
@@ -9,6 +10,8 @@ export const seedPhrase = 'oyster lemon tornado cat hamster basic similar vote p
 
 export const addresses = [
     '0x3339C3c842732F4DAaCf12aed335661cf4eab66b',
+    randomAddress(),
+    randomAddress(),
     randomAddress(),
 ];
 

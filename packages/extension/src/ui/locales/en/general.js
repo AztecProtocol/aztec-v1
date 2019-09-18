@@ -16,4 +16,11 @@ export default {
             },
         },
     },
+    show: {
+        more: {
+            count: {
+                _: 'show %{smart_count} more',
+            },
+        },
+    },
 };
