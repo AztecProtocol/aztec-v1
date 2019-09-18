@@ -9,4 +9,11 @@ export default {
     },
     copied: 'Copied!',
     close: 'Close',
+    and: {
+        more: {
+            count: {
+                _: 'and %{smart_count} more',
+            },
+        },
+    },
 };

@@ -2,6 +2,7 @@ import {
     seedPhrase,
     addresses,
     assets,
+    domains,
     pastTransactions,
 } from './data';
 
@@ -27,6 +28,11 @@ export default {
         goNext: dummyFunc,
     },
     '/register/restore-account': {
+        goNext: dummyFunc,
+    },
+    '/register/domain': {
+        domain: domains[0],
+        assets: assets.slice(0, 10),
         goNext: dummyFunc,
     },
     '/account/assets': {
