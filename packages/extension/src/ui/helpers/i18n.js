@@ -18,7 +18,7 @@ class UII18n extends I18n {
             warnLog(`Asset name is not defined for '${code}'.`);
         }
 
-        return name || '';
+        return name || assetCode;
     }
 }
 

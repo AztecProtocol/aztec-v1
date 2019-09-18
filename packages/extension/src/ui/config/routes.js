@@ -3,6 +3,7 @@ import Loading from '~ui/views/Loading';
 import Register from '~ui/views/controllers/Register';
 import BackupKeys from '~ui/views/BackupKeys';
 import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
+import DomainPermission from '~ui/views/DomainPermission';
 import Account from '~ui/views/controllers/Account';
 import Assets from '~ui/views/Assets';
 import Asset from '~ui/views/Asset';
@@ -42,6 +43,10 @@ export default {
             address: {
                 path: 'address',
                 Component: RegisterAddress,
+            },
+            domain: {
+                path: 'domain',
+                Component: DomainPermission,
             },
         },
     },

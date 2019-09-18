@@ -41,7 +41,7 @@ const Assets = ({
                         />
                     </Block>
                 )}
-                {assets.map(asset => (
+                {assets.slice(0, 3).map(asset => (
                     <Block
                         key={asset.code}
                         padding="s 0"

@@ -1,25 +1,60 @@
+import {
+    randomId,
+} from '~utils/random';
+import compoundLogo from './images/compound.png';
+
+const randomAddress = () => `0x${randomId(40)}`;
+
 export const seedPhrase = 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle';
 
 export const addresses = [
     '0x3339C3c842732F4DAaCf12aed335661cf4eab66b',
-    '0x0563a36603911daaB46A3367d59253BaDF500bF9',
+    randomAddress(),
 ];
 
 export const assets = [
     {
         code: 'dai',
-        address: '0x',
+        address: randomAddress(),
         balance: 0.51232,
     },
     {
         code: 'usdc',
-        address: '0x',
+        address: randomAddress(),
         balance: 2832.21,
     },
     {
         code: 'cc',
-        address: '0x',
+        address: randomAddress(),
         balance: 0,
+    },
+    {
+        code: 'da',
+        address: randomAddress(),
+        balance: 0,
+    },
+    {
+        code: 'ec',
+        address: randomAddress(),
+        balance: 0,
+    },
+    {
+        code: 'ffc',
+        address: randomAddress(),
+        balance: 0,
+    },
+    {
+        code: 'ica',
+        address: randomAddress(),
+        balance: 0,
+    },
+];
+
+export const domains = [
+    {
+        name: 'Compound Finance',
+        iconSrc: compoundLogo,
+        url: 'https://compound.finance/',
     },
 ];
 
