@@ -10,6 +10,7 @@ import i18n from '~ui/helpers/i18n';
 import Popup from '~ui/components/Popup';
 import AssetSummaryLink from '~ui/components/AssetSummaryLink';
 import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
+import InplacePopup from '~ui/components/InplacePopup';
 
 const Assets = ({
     assets,
@@ -41,17 +42,19 @@ const Assets = ({
                         />
                     </Block>
                 )}
-                {assets.slice(0, 3).map(asset => (
-                    <Block
-                        key={asset.code}
-                        padding="s 0"
-                    >
+                <InplacePopup
+                    theme="primary"
+                    items={assets}
+                    renderItem={asset => (
                         <AssetSummaryLink
                             {...asset}
                             onClick={onClickAsset ? () => onClickAsset(asset) : onClickAsset}
                         />
-                    </Block>
-                ))}
+                    )}
+                    itemMargin="s 0"
+                    margin="s m"
+                    numberOfVisibleItems={3}
+                />
             </Offset>
             <TransactionHistorySummary
                 transactions={pastTransactions}
