@@ -9,9 +9,10 @@ import {
 import i18n from '~ui/helpers/i18n';
 import {
     name,
+    icon,
     formatValue,
 } from '~ui/utils/asset';
-import AssetIcon from '~ui/components/AssetIcon';
+import ProfileIcon from '~ui/components/ProfileIcon';
 import Button from '~ui/components/Button';
 
 const AssetSummary = ({
@@ -25,8 +26,9 @@ const AssetSummary = ({
         background="white-lightest"
         borderRadius="xs"
     >
-        <AssetIcon
-            code={code}
+        <ProfileIcon
+            src={icon(code)}
+            alt={code}
             size="l"
         />
         <Block top="m">

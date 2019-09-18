@@ -7,7 +7,10 @@ import {
     Block,
     Icon,
 } from '@aztec/guacamole-ui';
-import AssetIcon from '~ui/components/AssetIcon';
+import {
+    icon,
+} from '~ui/utils/asset';
+import ProfileIcon from '~ui/components/ProfileIcon';
 import styles from './link.scss';
 
 const SummaryLink = ({
@@ -29,8 +32,10 @@ const SummaryLink = ({
                 className="flex-fixed"
                 padding="s"
             >
-                <AssetIcon
-                    code={assetCode}
+                <ProfileIcon
+                    src={icon(assetCode)}
+                    alt={assetCode}
+                    size="s"
                 />
             </Block>
             <div className={classnames('flex-free-expand', styles.content)}>
