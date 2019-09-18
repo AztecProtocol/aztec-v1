@@ -10,6 +10,7 @@ import {
 import {
     formatValue,
 } from '~ui/utils/asset';
+import formatAddress from '~ui/utils/formatAddress';
 import SummaryLink from '~ui/components/SummaryLink';
 import styles from './link.scss';
 
@@ -60,7 +61,7 @@ const TransactionHistoryLink = ({
                 <Block right="m">
                     <Text
                         className="text-code"
-                        text={`(${address.substr(0, 6)}...${address.substr(-4)})`}
+                        text={`(${formatAddress(address, 6, 4)})`}
                         size="xxs"
                         color="white-light"
                     />

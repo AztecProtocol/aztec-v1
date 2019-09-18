@@ -6,6 +6,7 @@ import {
     Text,
     Icon,
 } from '@aztec/guacamole-ui';
+import formatAddress from '~ui/utils/formatAddress';
 
 const AddressRow = ({
     className,
@@ -14,36 +15,32 @@ const AddressRow = ({
     iconColor,
     prefixLength,
     suffixLength,
-}) => {
-    const shortAddr = `${address.substr(0, prefixLength)}...${address.substr(-suffixLength)}`;
-
-    return (
-        <FlexBox
-            className={className}
-            nowrap
+}) => (
+    <FlexBox
+        className={className}
+        nowrap
+    >
+        <Block
+            className="flex-fixed"
+            right="s"
         >
-            <Block
-                className="flex-fixed"
-                right="s"
-            >
-                <Icon
-                    name={iconName}
-                    color={iconColor}
-                    size="m"
-                />
-            </Block>
-            <div className="flex-free-expand">
-                <Text
-                    className="text-code"
-                    text={shortAddr}
-                    size="xxs"
-                    color="grey-dark"
-                    showEllipsis
-                />
-            </div>
-        </FlexBox>
-    );
-};
+            <Icon
+                name={iconName}
+                color={iconColor}
+                size="m"
+            />
+        </Block>
+        <div className="flex-free-expand">
+            <Text
+                className="text-code"
+                text={formatAddress(address, prefixLength, suffixLength)}
+                size="xxs"
+                color="grey-dark"
+                showEllipsis
+            />
+        </div>
+    </FlexBox>
+);
 
 AddressRow.propTypes = {
     className: PropTypes.string,
