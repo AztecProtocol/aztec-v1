@@ -7,15 +7,15 @@ const { ProofType } = require('./epoch0/proof');
  * Export the JoinSplitProof for a default epoch
  *
  * @method JoinSplitProof
- * @param  {...any} args - rest parameter representing all
- * @returns An instance of the default JoinSplitProof with the passed parameters
+ * @param  {...any} args - rest parameter representing the proof inputs
+ * @returns A JoinSplitProof construction for the default epoch
  */
 function JoinSplitProof(...args) {
     return proofHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.JOIN_SPLIT.name, ...args);
 }
 
 /**
- * Export a JoinSplitProof for a given epoch number
+ * Export the JoinSplitProof for a given epoch number
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a JoinSplitProof is to be returned

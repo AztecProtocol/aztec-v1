@@ -7,15 +7,15 @@ const { ProofType } = require('./epoch0/proof');
  * Export the DividendProof for a default epoch
  *
  * @method DividendProof
- * @param  {...any} args - rest parameter representing all
- * @returns An instance of the default DividendProof with the passed parameters
+ * @param  {...any} args - rest parameter representing the proof inputs
+ * @returns A DividendProof construction for the default epoch
  */
 function DividendProof(...args) {
     return proofHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.DIVIDEND.name, ...args);
 }
 
 /**
- * Export a DividendProof for a given epoch number
+ * Export the DividendProof for a given epoch number
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a DividendProof is to be returned

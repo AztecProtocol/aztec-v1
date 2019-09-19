@@ -7,15 +7,15 @@ const { ProofType } = require('./epoch0/proof');
  * Export the PrivateRangeProof for a default epoch
  *
  * @method PrivateRangeProof
- * @param  {...any} args - rest parameter representing all
- * @returns An instance of the default PrivateRangeProof with the passed parameters
+ * @param  {...any} args - rest parameter representing the proof inputs
+ * @returns A PrivateRangeProof construction for the default epoch
  */
 function PrivateRangeProof(...args) {
     return proofHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.PRIVATE_RANGE.name, ...args);
 }
 
 /**
- * Export a PrivateRangeProof for a given epoch number
+ * Export the PrivateRangeProof for a given epoch number
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a PrivateRangeProof is to be returned
