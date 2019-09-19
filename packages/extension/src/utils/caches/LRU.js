@@ -1,12 +1,11 @@
 import CacheManager from './helpers/CacheManager';
 
-export default class LFUCache {
+export default class LRUCache {
     constructor(capacity) {
         this.cache = new CacheManager(capacity);
     }
 
     add(key, value) {
-        if (value === undefined) return;
         this.cache.add(key, value);
         this.cache.highestPriority(key);
     }

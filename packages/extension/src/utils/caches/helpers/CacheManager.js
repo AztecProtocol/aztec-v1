@@ -11,15 +11,15 @@ export default class CacheManager {
     }
 
     increasePriority(key) {
-        const idx = this.priorityQueue.findIndex(key);
+        const idx = this.priorityQueue.indexOf(key);
         const nextKey = this.priorityQueue[idx + 1];
         if (idx >= 0 && nextKey) {
-            this.priorityQueue.splice(idx, 2, [nextKey, key]);
+            this.priorityQueue.splice(idx, 2, nextKey, key);
         }
     }
 
     highestPriority(key) {
-        const idx = this.priorityQueue.findIndex(key);
+        const idx = this.priorityQueue.indexOf(key);
         if (idx >= 0
             && idx !== this.priorityQueue.length - 1
         ) {
@@ -29,20 +29,31 @@ export default class CacheManager {
     }
 
     add(key, value) {
-        this.cache[key] = value;
-        if (this.priorityQueue.length === this.capacity) {
-            this.priorityQueue.shift();
+        if (value === undefined) {
+            this.remove(key);
+            return;
         }
-        this.priorityQueue.push(key);
+        if (!(key in this.cache)) {
+            if (this.priorityQueue.length === this.capacity) {
+                const toDelete = this.priorityQueue.shift();
+                delete this.cache[toDelete];
+            }
+            this.priorityQueue.push(key);
+        }
+        this.cache[key] = value;
     }
 
     get(key) {
         return this.cache[key];
     }
 
+    getTop() {
+        return this.priorityQueue[this.priorityQueue.length - 1];
+    }
+
     remove(key) {
         delete this.cache[key];
-        const idx = this.priorityQueue.findIndex(key);
+        const idx = this.priorityQueue.indexOf(key);
         if (idx >= 0) {
             this.priorityQueue.splice(idx, 1);
         }
