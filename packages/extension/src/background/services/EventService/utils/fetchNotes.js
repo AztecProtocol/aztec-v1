@@ -2,17 +2,17 @@ import Web3Service from '~background/services/Web3Service';
 import {
     IZkAssetConfig,
 } from '~background/config/contracts';
-import decodeNoteLogs from './helpers/decodeNoteLogs'
- 
+import decodeNoteLogs from './helpers/decodeNoteLogs';
 
-export const fetchNotes = async ({
+
+export default async function fetchNotes({
     owner,
     noteHash,
     fromBlock,
     fromAssets = [],
     toBlock = 'latest',
     networkId,
-} = {}) => {
+} = {}) {
     const { abi, getPastLogs } = Web3Service(networkId).eth;
 
     const eventsTopics = [
@@ -20,7 +20,7 @@ export const fetchNotes = async ({
         IZkAssetConfig.events.destroyNote,
         IZkAssetConfig.events.updateNoteMetaData,
     ]
-        .map(e => IZkAssetConfig.config.abi.find(({name, type})=> name === e && type === 'event'))
+        .map(e => IZkAssetConfig.config.abi.find(({ name, type }) => name === e && type === 'event'))
         .map(abi.encodeEventSignature);
 
     const ownerTopics = owner ? abi.encodeParameter('address', owner) : [];
@@ -39,19 +39,17 @@ export const fetchNotes = async ({
 
     try {
         const rawLogs = await getPastLogs(options);
-        console.log(`rawLogs: ${JSON.stringify(rawLogs)}`)
+        console.log(`rawLogs: ${JSON.stringify(rawLogs)}`);
         const groupedNotes = decodeNoteLogs(eventsTopics, rawLogs);
-        
+
         return {
             error: null,
-            groupedNotes
+            groupedNotes,
         };
-
     } catch (error) {
-        
-        return { 
+        return {
             error,
-            groupedNotes: null
+            groupedNotes: null,
         };
-    };
+    }
 }

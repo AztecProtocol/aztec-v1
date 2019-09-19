@@ -9,6 +9,7 @@ const manager = new SyncManager();
 const syncAccount = async ({
     address,
     privateKey,
+    networkId,
 }) => {
     if (!address) {
         errorLog("'address' can not be empty in SyncService.syncAccount()");
@@ -17,6 +18,10 @@ const syncAccount = async ({
     if (!privateKey) {
         errorLog("'privateKey' can not be empty in SyncService.syncAccount()");
         return;
+    }
+    if (!networkId && networkId !== 0) {
+        errorLog("'networkId' can not be empty in SyncService.syncAccount()");
+        return null;
     }
 
     if (manager.isInQueue(address)) {
@@ -46,12 +51,14 @@ const syncAccount = async ({
         privateKey,
         lastSynced,
         blockNumber,
+        networkId,
     });
 };
 
 const syncNote = async ({
     address,
     noteId,
+    networkId,
 }) => {
     if (!address) {
         errorLog("'address' can not be empty in SyncService.syncNote()");
@@ -59,6 +66,10 @@ const syncNote = async ({
     }
     if (!noteId) {
         errorLog("'noteId' can not be empty in SyncService.syncNote()");
+        return null;
+    }
+    if (!networkId && networkId !== 0) {
+        errorLog("'networkId' can not be empty in SyncService.syncNote()");
         return null;
     }
 
@@ -70,6 +81,7 @@ const syncNote = async ({
     return manager.syncNote({
         address,
         noteId,
+        networkId,
     });
 };
 

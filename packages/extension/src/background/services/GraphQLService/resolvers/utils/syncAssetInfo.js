@@ -9,6 +9,8 @@ export default async function syncAssetInfo(args) {
         id: address,
     } = args;
 
+    console.log(`------ Asset syncAssetInfo: ${address}`);
+
     if (!address) {
         return null;
     }

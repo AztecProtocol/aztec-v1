@@ -5,10 +5,11 @@ export default Model({
     version: 1,
     fields: [
         // Primary Key | first key is always primary key
-        '++id',
+        'id', // `${account}_${asset}`
         'noteHash',
         'account',
         'viewingKey',
         'blockNumber',
+        'asset',
     ],
 });

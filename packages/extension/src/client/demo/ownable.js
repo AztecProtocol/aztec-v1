@@ -55,8 +55,8 @@ export default async function demoOwnable({
         );
     }
 
-
     const asset = await aztec.asset(zkAssetAddress);
+
     log(asset);
     if (!asset.isValid()) {
         log('Asset is not valid.');
@@ -68,9 +68,7 @@ export default async function demoOwnable({
         log(`Asset balance = ${await asset.balance()}`);
     };
 
-
     await logBalance();
-
 
     const depositAmount = randomInt(1, 50);
 

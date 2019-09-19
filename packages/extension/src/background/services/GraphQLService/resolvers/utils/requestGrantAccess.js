@@ -21,6 +21,8 @@ export default async function requestGrantAccess(args, ctx) {
         address: userAddress,
     } = ctx;
 
+    console.log(`------ Account requestGrantAccess`);
+
     const addressList = [];
     for (let i = 0; i < address.length; i += ADDRESS_LENGTH) {
         addressList.push(address.substr(i, ADDRESS_LENGTH));

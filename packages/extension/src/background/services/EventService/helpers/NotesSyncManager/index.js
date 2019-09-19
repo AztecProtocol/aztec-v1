@@ -3,32 +3,33 @@ import {
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../../Web3Service'
-import {
-    fetchNotes
-} from '../../utils/fetchNotes';
+import fetchNotes from '../../utils/fetchNotes';
 import {
     saveNotes
 } from '../../utils/saveNotes';
+import AssetsSyncManagerFactory from '../AssetsSyncManager/factory';
 
 /* See more details about limitation
  * https://infura.io/docs/ethereum/json-rpc/eth_getLogs
 */
-const infuraLimitError =  {
-    'code': -32005,
-    'message': 'query returned more than 10000 results',
-}
-    
+const infuraLimitError = {
+    code: -32005,
+    message: 'query returned more than 10000 results',
+};
+
+const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId);
+
 class SyncManager {
     constructor() {
         this.config = {
             syncInterval: 5000, // ms
             blocksPerRequest: 180000, // ~ per month (~6000 per day)
-            precisionDelta: 10 //
+            precisionDelta: 10, //
         };
         this.addresses = new Map();
         this.paused = false;
         this.progressSubscriber = null;
-    };
+    }
 
     setConfig(config) {
         Object.keys(this.config)
@@ -37,14 +38,14 @@ class SyncManager {
                     this.config[key] = config[key];
                 }
             });
-    };
+    }
 
     isInQueue(address) {
         const syncAddress = this.addresses.get(address);
         return !!(syncAddress
             && (syncAddress.syncing || syncAddress.syncReq)
         );
-    };
+    }
 
     handleFetchError = (error) => {
         errorLog('Failed to sync CreateNote / UpdateMetadata / DestroyNote with web3.', error);
@@ -66,7 +67,7 @@ class SyncManager {
         });
     };
 
-    syncProgress = async(address) => {
+    syncProgress = async (address) => {
         const syncAddress = this.addresses.get(address);
         if (!syncAddress) {
             warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
@@ -78,11 +79,11 @@ class SyncManager {
         } = syncAddress;
 
         const blocks = await Web3Service(networkId).eth.getBlockNumber();
-        
+
         return {
             blocks, 
             lastSyncedBlock,
-        };
+        }
     };
 
     setProgressCallback = (callback) => {
@@ -151,17 +152,21 @@ class SyncManager {
             blocksPerRequest,
         } = this.config;
 
-        const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
+        const assetsManager = assetsSyncManager(networkId);
+        const currentBlock = assetsManager.lastSyncedBlock();
+
+        console.log(`NotesSyncManager - currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock}`);
+
         let newLastSyncedBlock = lastSyncedBlock;
 
-        if(currentBlock > lastSyncedBlock) {
+        if (currentBlock > lastSyncedBlock) {
             const fromBlock = lastSyncedBlock + 1;
             const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
             let shouldLoadNextPortion = currentBlock - fromBlock > precisionDelta;
 
-            const { 
-                error, 
-                groupedNotes 
+            const {
+                error,
+                groupedNotes,
             } = await fetchNotes({
                 owner: address,
                 fromBlock,
@@ -169,24 +174,22 @@ class SyncManager {
                 networkId,
             });
 
-            // console.log(`currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock}`)
-
-            if(groupedNotes) {
+            if (groupedNotes) {
                 await saveNotes(groupedNotes, networkId);
                 newLastSyncedBlock = toBlock;
 
-                !this.progressSubscriber || this.progressSubscriber({
-                    blocks: currentBlock,
-                    lastSyncedBlock: newLastSyncedBlock,
-                });
-
+                if (this.progressSubscriber) {
+                    this.progressSubscriber({
+                        blocks: currentBlock,
+                        lastSyncedBlock: newLastSyncedBlock,
+                    });
+                }
             } else if (error && error.code === infuraLimitError.code) {
                 this.config = {
                     ...this.config,
                     blocksPerRequest: blocksPerRequest / 2,
                 };
                 shouldLoadNextPortion = true;
-
             } else {
                 this.handleFetchError(error);
             }
@@ -218,7 +221,7 @@ class SyncManager {
             syncReq,
             lastSyncedBlock: newLastSyncedBlock,
         });
-    };
+    }
 
     async sync({
         address,
@@ -240,7 +243,7 @@ class SyncManager {
             lastSyncedBlock,
             networkId,
         });
-    };
+    }
 }
 
 export default SyncManager;

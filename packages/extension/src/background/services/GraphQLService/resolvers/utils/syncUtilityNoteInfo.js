@@ -8,6 +8,8 @@ export default async function syncUtilityNoteInfo(args) {
         id: noteId,
     } = args;
 
+    console.log(`------ Note syncUtilityNoteInfo`);
+
     if (!noteId) {
         return null;
     }
