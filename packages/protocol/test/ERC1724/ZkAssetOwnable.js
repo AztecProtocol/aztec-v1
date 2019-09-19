@@ -1,11 +1,13 @@
 /* global artifacts, expect, web3, contract, it:true */
-const { JoinSplitProof, signer } = require('aztec.js');
+const { JoinSplitProof, note, signer } = require('aztec.js');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },
 } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
+const { randomHex } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
 const { generateFactoryId } = require('../helpers/Factory');
@@ -36,12 +38,14 @@ contract('ZkAssetOwnable', (accounts) => {
     const newFactoryId = generateFactoryId(2, 1, 1);
 
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
+        const spenderApproval = true;
         await Promise.all(
             indexes.map((i) => {
                 const signature = signer.signNoteForConfidentialApprove(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
+                    spenderApproval,
                     aztecAccounts[i].privateKey,
                 );
                 // eslint-disable-next-line no-await-in-loop
@@ -241,6 +245,101 @@ contract('ZkAssetOwnable', (accounts) => {
 
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
+        });
+
+        it('should revoke confidentialApprove() permission granting', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const testNote1 = await note.create(publicKey, 10);
+            const testNote2 = await note.create(publicKey, 30);
+            const spenderAddress = randomHex(20);
+
+            // Create some notes in the assets note registry
+            const inputNotes = [];
+            const outputNotes = [testNote1, testNote2];
+            const publicValue = -40;
+
+            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const signatures = [];
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, publicValue, { from: sender });
+
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
+                from: sender,
+            });
+
+            let spenderApproval = true;
+            const approvalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote1.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+
+            // Grant permission
+            await zkAssetOwnable.confidentialApprove(testNote1.noteHash, spenderAddress, spenderApproval, approvalSignature);
+            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote1.noteHash, spenderAddress);
+            expect(loggedApprovalStatus).to.equal(true);
+
+            spenderApproval = false;
+            const revokeApprovalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote1.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+            // Revoke permission
+            await zkAssetOwnable.confidentialApprove(
+                testNote1.noteHash,
+                spenderAddress,
+                spenderApproval,
+                revokeApprovalSignature,
+            );
+            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote2.noteHash, spenderAddress);
+            expect(loggedRevokedStatus).to.equal(false);
+        });
+
+        it('should revoke confidentialApprove() permission granting', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const testNote1 = await note.create(publicKey, 10);
+            const testNote2 = await note.create(publicKey, 30);
+            const spenderAddress = randomHex(20);
+
+            // Create some notes in the assets note registry
+            const inputNotes = [];
+            const outputNotes = [testNote1, testNote2];
+            const publicValue = -40;
+
+            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const signatures = [];
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, publicValue, { from: sender });
+
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
+                from: sender,
+            });
+
+            const signature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote1.noteHash,
+                spenderAddress,
+                privateKey,
+            );
+
+            // Grant permission
+            let spenderApproval = true;
+            await zkAssetOwnable.confidentialApprove(testNote1.noteHash, spenderAddress, spenderApproval, signature);
+            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote1.noteHash, spenderAddress);
+            expect(loggedApprovalStatus).to.equal(true);
+
+            // Revoke permission
+            spenderApproval = false;
+            await zkAssetOwnable.confidentialApprove(testNote1.noteHash, spenderAddress, spenderApproval, signature);
+            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote2.noteHash, spenderAddress);
+            expect(loggedRevokedStatus).to.equal(false);
         });
     });
 

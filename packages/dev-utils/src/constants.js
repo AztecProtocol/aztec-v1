@@ -139,7 +139,7 @@ constants.eip712 = {
             NoteSignature: [
                 { name: 'noteHash', type: 'bytes32' },
                 { name: 'spender', type: 'address' },
-                { name: 'status', type: 'bool' },
+                { name: 'spenderApproval', type: 'bool' },
             ],
             EIP712Domain: EIP712_DOMAIN,
         },
