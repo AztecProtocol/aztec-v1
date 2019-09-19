@@ -15,6 +15,7 @@ import bulkPut from './bulkPut';
 
 // retrieve
 import get from './get';
+import bulkGet from './bulkGet';
 import query from './query';
 import latest from './latest';
 
@@ -67,6 +68,7 @@ export default function Model(modelConfig) {
         
         // query
         get: (options, fields) => get(name, options, fields),
+        bulkGet: (options, keys) => bulkGet(name, options, keys),
         query: (options) => query(name, options),
         latest: (options,
         {

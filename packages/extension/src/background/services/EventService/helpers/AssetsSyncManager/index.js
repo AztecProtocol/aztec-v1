@@ -2,13 +2,13 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '../../Web3Service'
+import Web3Service from '../../../Web3Service'
 import {
     fetchAssets,
-} from '../utils/fetchAssets'
+} from '../../utils/fetchAssets'
 import {
     createBulkAssets
-} from '../utils/asset';
+} from '../../utils/asset';
 
 
 class SyncManager {
@@ -45,10 +45,17 @@ class SyncManager {
         }
 
         this.syncConfig = {
-            ...syncNetwork,
+            ...this.syncConfig,
             pausedState: prevState,
         };
     };
+
+    isInProcess() {
+        const config = this.syncConfig;
+        return !!(config
+            && (config.syncing || config.syncReq)
+        );
+    }
 
     syncProgress = async() => {
         if (!this.syncConfig) {
@@ -65,6 +72,19 @@ class SyncManager {
             blocks, 
             lastSyncedBlock,
         };
+    };
+
+    lastSyncedBlock = () => {
+        if (!this.syncConfig) {
+            warnLog(`Assets syncing is not in process.`);
+            return 0;
+        }
+
+        const {
+            lastSyncedBlock,
+        } = this.syncConfig;
+
+        return lastSyncedBlock;
     };
 
     setProgressCallback = (callback) => {
@@ -86,7 +106,7 @@ class SyncManager {
         }
 
         this.syncConfig = {
-            ...syncNetwork,
+            ...this.syncConfig,
             pausedState: null,
         };
 
@@ -95,9 +115,7 @@ class SyncManager {
         });
     };
 
-    isSynced = ({
-        networkId,
-    }) => {
+    isSynced = () => {
         if (!this.syncConfig) {
             warnLog(`Assets syncing is not in process.`);
             return;
@@ -123,7 +141,7 @@ class SyncManager {
         }
 
         this.syncConfig = {
-            ...syncNetwork,
+            ...this.syncConfig,
             syncing: true,
             syncReq: null,
         };
@@ -179,7 +197,7 @@ class SyncManager {
         }, syncInterval);
 
         this.syncConfig = {
-            ...syncNetwork,
+            ...this.syncConfig,
             syncing: false,
             syncReq,
             lastSyncedBlock: newLastSyncedBlock,

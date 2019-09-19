@@ -2,10 +2,9 @@ import {
     permissionError,
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
-import GraphNodeService from '~background/services/GraphNodeService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
-import StorageService from '~background/services/StorageService'
+import EventService from '~background/services/EventService'
 
 export default async function syncUserInfo(args, ctx) {
     const {
@@ -24,7 +23,15 @@ export default async function syncUserInfo(args, ctx) {
     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
     const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
 
-    const account = StorageService.query.account({networkId}, userAddress);
+    const {
+        error, 
+        account,
+    } = await EventService.fetchAztecAccount({
+        address: userAddress, 
+        networkId,
+    });
+
+    console.log(`account in syncUserInfo: ${JSON.stringify(account)}`)
 
     const {
         blockNumber: prevBlockNumber,

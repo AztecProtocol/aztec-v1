@@ -4,9 +4,10 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import fetchNoteFromServer from '../utils/fetchNoteFromServer';
+import fetchNotesFromIndexedDB from '../utils/fetchNotesFromIndexedDB';
 import addNote from '../utils/addNote';
 import validateNoteData from '../utils/validateNoteData';
+
 
 class SyncManager {
     constructor() {
@@ -89,8 +90,8 @@ class SyncManager {
         const {
             address,
             privateKey,
-            lastSynced = '',
-            blockNumber = 0,
+            lastSynced = 0,
+            networkId,
         } = options;
 
         const account = this.accounts.get(address);
@@ -122,17 +123,16 @@ class SyncManager {
             keepAll,
         } = this.config;
 
-        const newNotes = await fetchNoteFromServer({
+        const newNotes = await fetchNotesFromIndexedDB({
             lastSynced,
-            blockNumber,
             account: address,
-            numberOfNotes: notesPerRequest,
             onError: this.handleFetchError,
+            networkId,
         });
 
         const lastNote = newNotes[newNotes.length - 1];
         const nextSynced = lastNote
-            ? lastNote.logId
+            ? lastNote.blockNumber
             : lastSynced;
 
         if (newNotes.length) {
@@ -174,7 +174,7 @@ class SyncManager {
         address,
         privateKey,
         lastSynced,
-        blockNumber,
+        networkId,
     }) {
         let account = this.accounts.get(address);
         if (!account) {
@@ -182,7 +182,6 @@ class SyncManager {
                 syncing: false,
                 syncReq: null,
                 privateKey,
-                blockNumber,
             };
             this.accounts.set(address, account);
         }
@@ -190,18 +189,20 @@ class SyncManager {
             address,
             privateKey,
             lastSynced,
-            blockNumber,
+            networkId,
         });
     }
 
     async syncNote({
         address,
         noteId,
+        networkId,
     }) {
-        const [rawNote] = await fetchNoteFromServer({
+        const [rawNote] = await fetchNotesFromIndexedDB({
             account: address,
             noteId,
             numberOfNotes: 1,
+            networkId,
         }) || [];
         if (!rawNote) {
             return null;

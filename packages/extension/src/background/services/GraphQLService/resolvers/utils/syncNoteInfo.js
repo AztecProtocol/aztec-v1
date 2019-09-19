@@ -20,6 +20,8 @@ export default async function syncNoteInfo(args, ctx) {
         id: noteId,
     } = args;
 
+    console.log(`------ Account syncNoteInfo: ${noteId}`);
+
     if (!noteId) {
         return null;
     }

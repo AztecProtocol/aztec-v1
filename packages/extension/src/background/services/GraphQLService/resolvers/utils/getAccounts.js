@@ -12,7 +12,8 @@ export default async function getAccounts(args) {
         },
     } = args;
 
-    console.log(`addresses to fetch with qraphQl: ${JSON.stringify(addresses)}`);
+    console.log(`------ Account getAccounts`);
+
     const queryStr = `
         query ($accountCount: Int!, $accountFilter: Account_filter!) {
             accounts(first: $accountCount, where: $accountFilter) {
