@@ -5,19 +5,19 @@ import {
 import {
     randomId,
 } from '~utils/random';
-import LFU from '~utils/caches/LFU';
+import LRU from '~utils/caches/LRU';
 
 class ActionManager {
     constructor({
         portName = 'aztec-ui-action',
         queryName = 'aztec-extension-client-query',
-        maxActiveResponses = 20,
+        maxActiveResponses = 50,
     } = {}) {
         this.port = null;
         this.portName = portName;
         this.queryName = queryName;
         this.callbacks = {};
-        this.portResponses = new LFU(maxActiveResponses);
+        this.portResponses = new LRU(maxActiveResponses);
     }
 
     openConnection() {
