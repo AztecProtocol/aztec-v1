@@ -8,7 +8,7 @@ proofHandler.catalog = proofCatalog;
  * Export the default epoch version of an AZTEC proof construction method
  *
  * @method exportProof
- * @param {string} proofSelector - proof type to be exported
+ * @param {string} proofSelector - proof type (e.g. JOIN_SPLIT, MINT etc.) to be exported
  * @param args - rest parameter representing the inputs to a particular proof construction
  * @returns An instance of the selected AZTEC proof
  */

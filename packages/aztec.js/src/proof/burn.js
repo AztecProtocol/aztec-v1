@@ -7,15 +7,15 @@ const { ProofType } = require('./epoch0/proof');
  * Export the BurnProof for a default epoch
  *
  * @method BurnProof
- * @param  {...any} args - rest parameter representing all
- * @returns An instance of the default BurnProof with the passed parameters
+ * @param  {...any} args - rest parameter representing the proof inputs
+ * @returns A BurnProof construction for the default epoch
  */
 function BurnProof(...args) {
     return proofHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.BURN.name, ...args);
 }
 
 /**
- * Export a BurnProof for a given epoch number
+ * Export the BurnProof for a given epoch number
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a BurnProof is to be returned

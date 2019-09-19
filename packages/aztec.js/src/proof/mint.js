@@ -7,15 +7,15 @@ const { ProofType } = require('./epoch0/proof');
  * Export the MintProof for a default epoch
  *
  * @method MintProof
- * @param  {...any} args - rest parameter representing all
- * @returns An instance of the default MintProof with the passed parameters
+ * @param  {...any} args - rest parameter representing proof inputs
+ * @returns A MintProof construction for the default epoch
  */
 function MintProof(...args) {
     return proofHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.MINT.name, ...args);
 }
 
 /**
- * Export a MintProof for a given epoch number
+ * Export the MintProof for a given epoch number
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a MintProof is to be returned
