@@ -53,17 +53,18 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
  * @param {string} verifyingContract address of target contract
  * @param {string} noteHash noteHash of the note being signed
  * @param {string} spender address of the note spender
+ * @param {bool} spenderApproval boolean determining whether the spender is being granted approval
+ * or revoked
  * @param {string} privateKey the private key of message signer
  * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
  */
-signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, privateKey) => {
+signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, spenderApproval, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.NOTE_SIGNATURE;
-    const status = true;
     const message = {
         noteHash,
         spender,
-        status,
+        spenderApproval,
     };
 
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
