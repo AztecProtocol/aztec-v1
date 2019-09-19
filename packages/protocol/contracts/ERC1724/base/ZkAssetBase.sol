@@ -122,7 +122,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     *
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
     * @param _spender - address being approved to spend the note
-    * @param _status - defines whether the _spender address is being approved to spend the
+    * @param _spenderApproval - defines whether the _spender address is being approved to spend the
     * note, or if permission is being revoked
     * @param _signature - ECDSA signature from the note owner that validates the
     * confidentialApprove() instruction
@@ -130,7 +130,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
-        bool _status,
+        bool _spenderApproval,
         bytes memory _signature
     ) public {
         ( uint8 status, , , ) = ace.getNote(address(this), _noteHash);
@@ -143,7 +143,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         ));
 
         validateSignature(_hashStruct, _noteHash, _signature);
-        confidentialApproved[_noteHash][_spender] = _status;
+        confidentialApproved[_noteHash][_spender] = _spenderApproval;
     }
 
     /**
