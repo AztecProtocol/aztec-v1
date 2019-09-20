@@ -249,14 +249,13 @@ contract('ZkAssetOwnable', (accounts) => {
 
         it('should revoke confidentialApprove() permission granting', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
-            const testNote1 = await note.create(publicKey, 10);
-            const testNote2 = await note.create(publicKey, 30);
+            const testNote = await note.create(publicKey, 10);
             const spenderAddress = randomHex(20);
 
             // Create some notes in the assets note registry
             const inputNotes = [];
-            const outputNotes = [testNote1, testNote2];
-            const publicValue = -40;
+            const outputNotes = [testNote];
+            const publicValue = -10;
 
             const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const signatures = [];
@@ -271,74 +270,28 @@ contract('ZkAssetOwnable', (accounts) => {
             let spenderApproval = true;
             const approvalSignature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
-                testNote1.noteHash,
+                testNote.noteHash,
                 spenderAddress,
                 spenderApproval,
                 privateKey,
             );
 
             // Grant permission
-            await zkAssetOwnable.confidentialApprove(testNote1.noteHash, spenderAddress, spenderApproval, approvalSignature);
-            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote1.noteHash, spenderAddress);
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature);
+            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
             expect(loggedApprovalStatus).to.equal(true);
 
             spenderApproval = false;
             const revokeApprovalSignature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
-                testNote1.noteHash,
+                testNote.noteHash,
                 spenderAddress,
                 spenderApproval,
                 privateKey,
             );
             // Revoke permission
-            await zkAssetOwnable.confidentialApprove(
-                testNote1.noteHash,
-                spenderAddress,
-                spenderApproval,
-                revokeApprovalSignature,
-            );
-            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote2.noteHash, spenderAddress);
-            expect(loggedRevokedStatus).to.equal(false);
-        });
-
-        it('should revoke confidentialApprove() permission granting', async () => {
-            const { publicKey, privateKey } = secp256k1.generateAccount();
-            const testNote1 = await note.create(publicKey, 10);
-            const testNote2 = await note.create(publicKey, 30);
-            const spenderAddress = randomHex(20);
-
-            // Create some notes in the assets note registry
-            const inputNotes = [];
-            const outputNotes = [testNote1, testNote2];
-            const publicValue = -40;
-
-            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
-            const signatures = [];
-            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
-
-            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, publicValue, { from: sender });
-
-            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
-                from: sender,
-            });
-
-            const signature = signer.signNoteForConfidentialApprove(
-                zkAssetOwnable.address,
-                testNote1.noteHash,
-                spenderAddress,
-                privateKey,
-            );
-
-            // Grant permission
-            let spenderApproval = true;
-            await zkAssetOwnable.confidentialApprove(testNote1.noteHash, spenderAddress, spenderApproval, signature);
-            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote1.noteHash, spenderAddress);
-            expect(loggedApprovalStatus).to.equal(true);
-
-            // Revoke permission
-            spenderApproval = false;
-            await zkAssetOwnable.confidentialApprove(testNote1.noteHash, spenderAddress, spenderApproval, signature);
-            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote2.noteHash, spenderAddress);
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, revokeApprovalSignature);
+            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
             expect(loggedRevokedStatus).to.equal(false);
         });
     });
@@ -377,10 +330,12 @@ contract('ZkAssetOwnable', (accounts) => {
                 from: accounts[0],
             });
 
+            const spenderApproval = true;
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
+                spenderApproval,
                 ownerAccounts[0].privateKey,
             );
             await truffleAssert.reverts(
@@ -436,10 +391,12 @@ contract('ZkAssetOwnable', (accounts) => {
 
             await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures);
 
+            const spenderApproval = true;
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
                 transferInputNotes[0].noteHash,
                 zkAssetOwnableTest.address,
+                spenderApproval,
                 ownerAccounts[0].privateKey,
             );
             await truffleAssert.reverts(
@@ -573,6 +530,62 @@ contract('ZkAssetOwnable', (accounts) => {
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output),
                 'sender does not have approval to spend input note',
+            );
+        });
+
+        it('should fail to perform a replay attack, by using a previous signature in confidentialApprove()', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const testNote = await note.create(publicKey, 10);
+            const spenderAddress = randomHex(20);
+
+            // Create some notes in the assets note registry
+            const inputNotes = [];
+            const outputNotes = [testNote];
+            const publicValue = -10;
+
+            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const signatures = [];
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, publicValue, { from: sender });
+
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
+                from: sender,
+            });
+
+            let spenderApproval = true;
+            const approvalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+
+            // Grant permission
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature);
+            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
+            expect(loggedApprovalStatus).to.equal(true);
+
+            spenderApproval = false;
+            const revokeApprovalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+
+            // Revoke permission
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, revokeApprovalSignature);
+            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
+            expect(loggedRevokedStatus).to.equal(false);
+
+            // Attempt replay attack - take the previously used grant permission sig, and use to reverse the revoke permission action
+            spenderApproval = true;
+            await truffleAssert.reverts(
+                zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature),
+                'signature has already been used',
             );
         });
     });
