@@ -4,14 +4,14 @@ import React, {
 import {
     Switch,
 } from 'react-router-dom';
-import Route from '~uiRoute';
 import actionModel from '~database/models/action';
 import i18n from './helpers/i18n';
 import router from './helpers/router';
 import getPathsFromRouteConfig from './utils/getPathsFromRouteConfig';
-import ActionService from './services/ActionService';
 import Loading from './views/Loading';
 import routes from './config/routes';
+import Route from '~uiModules/components/Route';
+import ActionService from '~uiModules/services/ActionService';
 
 class App extends PureComponent {
     constructor(props) {

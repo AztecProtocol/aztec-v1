@@ -9,7 +9,7 @@ import {
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import AddressRow from '~ui/components/AddressRow';
-import apis from '~uiApis';
+import apis from '~uiModules/apis';
 import Transaction from './handlers/Transaction';
 
 const steps = [

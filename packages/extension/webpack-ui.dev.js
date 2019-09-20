@@ -13,8 +13,7 @@ module.exports = {
         extensions: ['mjs', '.js', '.jsx', '.json'],
         alias: {
             'webextension-polyfill': path.resolve(__dirname, './src/ui/mock/browser'),
-            '~uiApis$': path.resolve(__dirname, './src/ui/mock/apis'),
-            '~uiRoute$': path.resolve(__dirname, './src/ui/mock/Route'),
+            '~uiModules': path.resolve(__dirname, './src/ui/mock'),
         },
     },
     output: {
