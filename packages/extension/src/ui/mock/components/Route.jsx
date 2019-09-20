@@ -3,28 +3,20 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import {
-    withRouter,
     Route,
 } from 'react-router-dom';
 import initialProps from '../initialProps';
 
 class MockRoute extends PureComponent {
-    goToPage = (pageUrl) => {
-        const {
-            history,
-        } = this.props;
-        history.push(pageUrl);
-    };
-
     renderComponent = () => {
         const {
             path,
             action,
-            history,
             Component,
+            goToPage,
         } = this.props;
         const {
-            params,
+            data,
         } = action || {};
         const {
             prev,
@@ -32,19 +24,19 @@ class MockRoute extends PureComponent {
             ...props
         } = initialProps[path] || {};
         const handleGoBack = prev
-            ? () => history.push(prev)
+            ? () => goToPage(prev)
             : null;
         const handleGoNext = next
-            ? () => history.push(next)
+            ? () => goToPage(next)
             : null;
 
         return (
             <Component
                 goBack={handleGoBack}
                 goNext={handleGoNext}
-                goToPage={this.goToPage}
-                {...params}
+                goToPage={goToPage}
                 {...props}
+                {...data}
             />
         );
     };
@@ -66,16 +58,15 @@ class MockRoute extends PureComponent {
 MockRoute.propTypes = {
     path: PropTypes.string.isRequired,
     action: PropTypes.shape({
-        path: PropTypes.string,
+        key: PropTypes.string.isRequired,
+        data: PropTypes.object,
     }),
     Component: PropTypes.func.isRequired,
-    history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-    }).isRequired,
+    goToPage: PropTypes.func.isRequired,
 };
 
 MockRoute.defaultProps = {
     action: null,
 };
 
-export default withRouter(MockRoute);
+export default MockRoute;

@@ -17,8 +17,7 @@ module.exports = {
     resolve: {
         extensions: ['mjs', '.js', '.jsx', '.json'],
         alias: {
-            '~uiApis$': path.resolve(__dirname, './src/ui/apis'),
-            '~uiRoute$': path.resolve(__dirname, './src/ui/components/Route'),
+            '~uiModules': path.resolve(__dirname, './src/ui'),
         },
     },
     output: {
