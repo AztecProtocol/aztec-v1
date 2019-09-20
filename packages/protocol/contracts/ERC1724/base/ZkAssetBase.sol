@@ -47,6 +47,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
     mapping(bytes32 => uint256) public metaDataTimeLog;
     mapping(bytes32 => uint256) public noteAccess;
+    mapping(bytes32 => bool) public signatureLog;
 
 
     constructor(
@@ -135,6 +136,11 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     ) public {
         ( uint8 status, , , ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
+
+        bytes32 signatureHash = keccak256(abi.encodePacked(_signature));
+        require(signatureLog[signatureHash] != true, "signature has already been used");
+        signatureLog[signatureHash] = true;
+
         bytes32 _hashStruct = keccak256(abi.encode(
                 NOTE_SIGNATURE_TYPEHASH,
                 _noteHash,
