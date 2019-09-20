@@ -12,8 +12,8 @@ module.exports = {
             'primary-lightest': 'rgb(244, 245, 254)',
             'white-lightest': 'rgba(255, 255, 255, 0.15)',
         },
-        defaultTextColor: '#221635',
-        defaultLabelColor: '#ABA4B6',
-        defaultLinkColor: '#808DFF',
+        // defaultTextColor: '#221635',
+        // defaultLabelColor: '#ABA4B6',
+        defaultLinkColorName: 'primary',
     },
 };

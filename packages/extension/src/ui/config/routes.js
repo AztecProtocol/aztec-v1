@@ -1,10 +1,11 @@
 import Home from '~ui/views/Home';
 import Loading from '~ui/views/Loading';
-import Register from '~ui/views/controllers/Register';
+import Welcome from '~ui/views/Welcome';
+import Register from '~ui/views/pages/Register';
 import BackupKeys from '~ui/views/BackupKeys';
 import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
 import DomainPermission from '~ui/views/DomainPermission';
-import Account from '~ui/views/controllers/Account';
+import Account from '~ui/views/pages/Account';
 import Assets from '~ui/views/Assets';
 import Asset from '~ui/views/Asset';
 import Restore from '~ui/views/Restore';
@@ -25,6 +26,10 @@ export default {
         path: 'loading',
         View: Loading,
     },
+    welcome: {
+        path: 'welcome',
+        Component: Welcome,
+    },
     register: {
         path: 'register',
         Component: Register,
@@ -36,10 +41,6 @@ export default {
             confirm: {
                 path: 'confirm',
                 View: ConfirmBackupKeys,
-            },
-            restore: {
-                path: 'restore-account',
-                Component: Restore,
             },
             address: {
                 path: 'address',
@@ -55,6 +56,10 @@ export default {
         path: 'account',
         Component: Account,
         routes: {
+            restore: {
+                path: 'restore',
+                Component: Restore,
+            },
             assets: {
                 path: 'assets',
                 View: Assets,

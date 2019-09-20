@@ -58,9 +58,9 @@ class Restore extends PureComponent {
 
         let errorKey;
         if (!phrases.length) {
-            errorKey = 'register.restore.error.seedPhrase.empty';
+            errorKey = 'account.restore.error.seedPhrase.empty';
         } else if (phrases.length !== 12) {
-            errorKey = 'register.restore.error.seedPhrase';
+            errorKey = 'account.restore.error.seedPhrase';
         }
 
         if (errorKey) {
@@ -86,17 +86,17 @@ class Restore extends PureComponent {
         return (
             <Popup
                 theme="white"
-                title={i18n.t('register.restore.title')}
-                description={i18n.t('register.restore.description')}
+                title={i18n.t('account.restore.title')}
+                description={i18n.t('account.restore.description')}
                 leftIconName={goBack ? 'chevron_left' : 'close'}
                 onClickLeftIcon={goBack || onClose}
-                submitButtonText={i18n.t('register.restore.confirm')}
+                submitButtonText={i18n.t('account.restore.confirm')}
                 onSubmit={this.handleSubmit}
             >
                 <Block align="left">
                     <TextInput
                         value={seedPhrase}
-                        placeholder={i18n.t('register.restore.input.seedPhrase.placeholder')}
+                        placeholder={i18n.t('account.restore.input.seedPhrase.placeholder')}
                         onChange={this.handleChangePhrase}
                     />
                 </Block>

@@ -11,12 +11,18 @@ class CustomRoute extends PureComponent {
         const {
             action,
             Component,
+            goToPage,
         } = this.props;
         const {
-            params,
+            data,
         } = action || {};
 
-        return <Component {...params} />;
+        return (
+            <Component
+                {...data}
+                goToPage={goToPage}
+            />
+        );
     };
 
     render() {
@@ -39,6 +45,7 @@ CustomRoute.propTypes = {
         path: PropTypes.string,
     }),
     Component: PropTypes.func.isRequired,
+    goToPage: PropTypes.func.isRequired,
 };
 
 CustomRoute.defaultProps = {

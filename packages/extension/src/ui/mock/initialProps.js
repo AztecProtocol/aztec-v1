@@ -28,12 +28,12 @@ export default {
         currentStep: 0,
         goNext: dummyFunc,
     },
-    '/register/restore-account': {
-        goNext: dummyFunc,
-    },
     '/register/domain': {
         domain: domains[0],
         assets: assets.slice(0, 10),
+        goNext: dummyFunc,
+    },
+    '/account/restore': {
         goNext: dummyFunc,
     },
     '/account/assets': {

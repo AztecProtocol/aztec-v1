@@ -42,8 +42,8 @@ const Intro = ({
             submitButtonText={i18n.t('register.create.keys')}
             onSubmit={goNext}
             footerLink={{
-                text: i18n.t('register.restore.fromSeedPhrase'),
-                href: router.u('register.restore'),
+                text: i18n.t('account.restore.fromSeedPhrase'),
+                href: router.u('account.restore'),
             }}
         >
             {descriptionNodes}

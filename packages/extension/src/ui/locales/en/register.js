@@ -24,23 +24,6 @@ export default {
         },
         complete: 'Backup complete',
     },
-    restore: {
-        fromSeedPhrase: 'Restore from seed phrase',
-        title: 'Recover from seed phrase',
-        description: '',
-        input: {
-            seedPhrase: {
-                placeholder: 'Enter seed phrase...',
-            },
-        },
-        confirm: 'Recover Account',
-        error: {
-            seedPhrase: {
-                _: 'Incorrect seed phrase format.',
-                empty: 'Please enter your seed phrase.',
-            },
-        },
-    },
     address: {
         title: 'Register Ethereum Address with AZTEC',
         description: 'The Ethereum address you are currently using has not been configured to use AZTEC.',
