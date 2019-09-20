@@ -32,6 +32,7 @@ class Transaction extends PureComponent {
             data: initialData,
             pending: true,
             loading: false,
+            error: null,
         };
     }
 
@@ -123,7 +124,19 @@ class Transaction extends PureComponent {
 
     handleResponse = (response) => {
         console.log(response);
-        this.goToNextTask(response);
+        const {
+            error,
+            ...data
+        } = response;
+
+        if (error) {
+            this.setState({
+                error,
+            });
+            return;
+        }
+
+        this.goToNextTask(data);
     };
 
     handleTransactionComplete = () => {
@@ -145,6 +158,7 @@ class Transaction extends PureComponent {
         const {
             currentStep,
             loading,
+            error,
         } = this.state;
 
         return (
@@ -152,6 +166,7 @@ class Transaction extends PureComponent {
                 steps={steps}
                 currentStep={currentStep}
                 loading={loading}
+                error={(error && error.key) || ''}
             />
         );
     }
@@ -214,7 +229,7 @@ class Transaction extends PureComponent {
             ticketHeader,
         } = this.props;
         const {
-            errorKey,
+            error,
         } = this.state;
 
         let ticketHeaderNode = ticketHeader;
@@ -237,10 +252,10 @@ class Transaction extends PureComponent {
                 >
                     {this.renderSteps()}
                 </Ticket>
-                {!!errorKey && (
+                {!!error && (
                     <Block top="s">
                         <Text
-                            text={i18n.t(errorKey)}
+                            text={error.message || i18n.t(error.key, error.response)}
                             color="red"
                             size="xxs"
                         />
