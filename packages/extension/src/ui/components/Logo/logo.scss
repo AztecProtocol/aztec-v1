@@ -87,6 +87,7 @@ $core-border-radius: 4px;
   .size-#{$key} {
     width: $size;
     height: $size;
+    margin: ($size * 1.414 - $size) / 2;
   }
 }
 

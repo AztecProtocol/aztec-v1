@@ -4,7 +4,7 @@ import React, {
 import PropTypes from 'prop-types';
 import Assets from '~ui/views/Assets';
 import Asset from '~ui/views/Asset';
-import apis from '~uiApis';
+import apis from '~uiModules/apis';
 
 class Account extends PureComponent {
     constructor(props) {
