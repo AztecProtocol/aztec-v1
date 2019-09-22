@@ -28,7 +28,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         "NoteSignature(",
             "bytes32 noteHash,",
             "address spender,",
-            "bool status",
+            "bool spenderApproval",
         ")"
     ));
     
@@ -47,6 +47,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
     mapping(bytes32 => uint256) public metaDataTimeLog;
     mapping(bytes32 => uint256) public noteAccess;
+    mapping(bytes32 => bool) public signatureLog;
 
 
     constructor(
@@ -122,7 +123,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     *
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
     * @param _spender - address being approved to spend the note
-    * @param _status - defines whether the _spender address is being approved to spend the
+    * @param _spenderApproval - defines whether the _spender address is being approved to spend the
     * note, or if permission is being revoked
     * @param _signature - ECDSA signature from the note owner that validates the
     * confidentialApprove() instruction
@@ -130,20 +131,25 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
-        bool _status,
+        bool _spenderApproval,
         bytes memory _signature
     ) public {
         ( uint8 status, , , ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
+
+        bytes32 signatureHash = keccak256(abi.encodePacked(_signature));
+        require(signatureLog[signatureHash] != true, "signature has already been used");
+        signatureLog[signatureHash] = true;
+
         bytes32 _hashStruct = keccak256(abi.encode(
                 NOTE_SIGNATURE_TYPEHASH,
                 _noteHash,
                 _spender,
-                status
+                _spenderApproval
         ));
 
         validateSignature(_hashStruct, _noteHash, _signature);
-        confidentialApproved[_noteHash][_spender] = _status;
+        confidentialApproved[_noteHash][_spender] = _spenderApproval;
     }
 
     /**
