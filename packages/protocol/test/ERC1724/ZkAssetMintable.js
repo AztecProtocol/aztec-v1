@@ -43,12 +43,14 @@ const getCustomMintNotes = async (newMintCounterValue, mintedNoteValues) => {
 };
 
 const confidentialApprove = async (zkAssetMintable, delegateAddress, indexes, notes, ownerAccount) => {
+    const spenderApproval = true;
     await Promise.all(
         indexes.map((i) => {
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetMintable.address,
                 notes[i].noteHash,
                 delegateAddress,
+                spenderApproval,
                 ownerAccount.privateKey,
             );
             // eslint-disable-next-line no-await-in-loop

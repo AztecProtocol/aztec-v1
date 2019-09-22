@@ -112,11 +112,18 @@ describe('Signer', () => {
         it('signNoteForConfidentialApprove() should produce a well formed `v` ECDSA parameter', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const spender = randomHex(20);
+            const spenderApproval = true;
             const verifyingContract = randomHex(20);
             const testNoteValue = 10;
             const testNote = await note.create(publicKey, testNoteValue);
 
-            const signature = signer.signNoteForConfidentialApprove(verifyingContract, testNote.noteHash, spender, privateKey);
+            const signature = signer.signNoteForConfidentialApprove(
+                verifyingContract,
+                testNote.noteHash,
+                spender,
+                spenderApproval,
+                privateKey,
+            );
             const v = parseInt(signature.slice(130, 132), 16);
             expect(v).to.be.oneOf([27, 28]);
         });
@@ -125,10 +132,17 @@ describe('Signer', () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
+            const spenderApproval = true;
             const testNoteValue = 10;
             const testNote = await note.create(publicKey, testNoteValue);
 
-            const signature = signer.signNoteForConfidentialApprove(verifyingContract, testNote.noteHash, spender, privateKey);
+            const signature = signer.signNoteForConfidentialApprove(
+                verifyingContract,
+                testNote.noteHash,
+                spender,
+                spenderApproval,
+                privateKey,
+            );
 
             const r = Buffer.from(signature.slice(2, 66), 'hex');
             const s = Buffer.from(signature.slice(66, 130), 'hex');
@@ -139,7 +153,7 @@ describe('Signer', () => {
             const message = {
                 noteHash: testNote.noteHash,
                 spender,
-                status: true,
+                spenderApproval,
             };
             const { encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
             const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
@@ -151,6 +165,7 @@ describe('Signer', () => {
         it('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
+            const spenderApproval = true;
             const verifyingContract = randomHex(20);
             const testNoteValue = 10;
             const testNote = await note.create(aztecAccount.publicKey, testNoteValue);
@@ -165,7 +180,7 @@ describe('Signer', () => {
                     NoteSignature: [
                         { name: 'noteHash', type: 'bytes32' },
                         { name: 'spender', type: 'address' },
-                        { name: 'status', type: 'bool' },
+                        { name: 'spenderApproval', type: 'bool' },
                     ],
                     EIP712Domain: [
                         { name: 'name', type: 'string' },
@@ -177,7 +192,7 @@ describe('Signer', () => {
                 message: {
                     noteHash: testNote.noteHash,
                     spender,
-                    status: true,
+                    spenderApproval,
                 },
             };
 
@@ -185,6 +200,7 @@ describe('Signer', () => {
                 verifyingContract,
                 testNote.noteHash,
                 spender,
+                spenderApproval,
                 aztecAccount.privateKey,
             );
 
