@@ -1,14 +1,14 @@
-import { 
+import {
     createBulkNoteAccessFromNotes,
     updateBulkNoteAccessFromNotes,
-} from '../';
+} from '..';
 import {
     createNote,
 } from '../../note/index';
 import NoteAccess from '~background/database/models/noteAccess';
 import Note from '~background/database/models/note';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 import {
     ADDRESS_LENGTH,
@@ -44,9 +44,7 @@ for (let i = 0; i < numberOfNewAccounts; i += 1) {
 }
 
 
-
 describe('createBulkNotes', () => {
-
     const obj = {
         aztecData,
         addresses,
@@ -107,14 +105,14 @@ describe('createBulkNotes', () => {
 
     it('should insert note accesses with right fields', async () => {
         // given
-        const notesAcccessBefore = await NoteAccess.query({networkId}).toArray();
+        const notesAcccessBefore = await NoteAccess.query({ networkId }).toArray();
         expect(notesAcccessBefore.length).toEqual(0);
 
         // action
         await createBulkNoteAccessFromNotes([rawNote], networkId);
 
         // expected
-        const notesAcccessAfter = await NoteAccess.query({networkId}).toArray();
+        const notesAcccessAfter = await NoteAccess.query({ networkId }).toArray();
 
         expect(notesAcccessAfter.length).toEqual(expectedAccesses.length);
         expect(notesAcccessAfter[0]).toMatchObject(expectedAccesses[0]);
@@ -126,8 +124,8 @@ describe('createBulkNotes', () => {
         // given
         await createNote(rawNote, networkId);
         await createBulkNoteAccessFromNotes([rawNote], networkId);
-        const notesBefore = await Note.query({networkId}).toArray();
-        const notesAcccessBefore = await NoteAccess.query({networkId}).toArray();
+        const notesBefore = await Note.query({ networkId }).toArray();
+        const notesAcccessBefore = await NoteAccess.query({ networkId }).toArray();
         expect(notesBefore.length).toEqual(notesBefore.length);
         expect(notesAcccessBefore.length).toEqual(expectedAccesses.length);
 
@@ -151,7 +149,7 @@ describe('createBulkNotes', () => {
         await updateBulkNoteAccessFromNotes([newRawNote], networkId);
 
         // expected
-        const notesAcccessAfter = await NoteAccess.query({networkId}).toArray();
+        const notesAcccessAfter = await NoteAccess.query({ networkId }).toArray();
 
         expect(notesAcccessAfter.length).toEqual(expectedNewAccesses.length + expectedAccesses.length);
         expect(notesAcccessAfter[0]).toMatchObject(expectedAccesses[0]);
@@ -161,5 +159,4 @@ describe('createBulkNotes', () => {
         expect(notesAcccessAfter[3]).toMatchObject(expectedNewAccesses[0]);
         expect(notesAcccessAfter[4]).toMatchObject(expectedNewAccesses[1]);
     });
-
 });

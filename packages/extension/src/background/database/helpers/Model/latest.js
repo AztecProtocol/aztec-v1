@@ -1,21 +1,17 @@
 import {
     getDB,
-} from '../../';
+} from '../..';
 
 export default async function latest(modelName, { networkId }, { orderBy, filterOptions }) {
-    let collectionRaw = getDB(networkId)[modelName];
-    
+    const table = getDB(networkId)[modelName];
     const keys = Object.keys(filterOptions);
-    
-    const collection = keys.reduce((acum, key) => acum.where(key).equalsIgnoreCase(filterOptions[key]), collectionRaw);
-    
-    if(keys.length) {
-        const items = await collection.sortBy(orderBy);
-        if (items.length) {
-            return items[0];
-        }
-        return null;
+
+    if (keys.length > 0) {
+        const collection = await keys.reduce((acum, key) => acum.where(key)
+            .equalsIgnoreCase(filterOptions[key]), table).sortBy(orderBy);
+
+        return collection[collection.length - 1];
     }
 
-    return collection.orderBy(orderBy).last();
+    return table.orderBy(orderBy).last();
 }

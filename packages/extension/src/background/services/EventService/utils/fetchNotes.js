@@ -9,7 +9,7 @@ export default async function fetchNotes({
     owner,
     noteHash,
     fromBlock,
-    fromAssets = [],
+    fromAssets = null,
     toBlock = 'latest',
     networkId,
 } = {}) {
@@ -23,8 +23,8 @@ export default async function fetchNotes({
         .map(e => IZkAssetConfig.config.abi.find(({ name, type }) => name === e && type === 'event'))
         .map(abi.encodeEventSignature);
 
-    const ownerTopics = owner ? abi.encodeParameter('address', owner) : [];
-    const noteTopics = noteHash ? abi.encodeParameter('bytes32', noteHash) : [];
+    const ownerTopics = owner ? abi.encodeParameter('address', owner) : null;
+    const noteTopics = noteHash ? abi.encodeParameter('bytes32', noteHash) : null;
 
     const options = {
         fromBlock,
@@ -39,8 +39,7 @@ export default async function fetchNotes({
 
     try {
         const rawLogs = await getPastLogs(options);
-        console.log(`rawLogs: ${JSON.stringify(rawLogs)}`);
-        const groupedNotes = decodeNoteLogs(eventsTopics, rawLogs);
+        const groupedNotes = decodeNoteLogs(eventsTopics, rawLogs, networkId);
 
         return {
             error: null,

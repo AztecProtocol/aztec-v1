@@ -6,18 +6,18 @@ import IZkAsset from '~background/contracts/IZkAsset';
 export const AZTECAccountRegistryConfig = {
     name: 'AZTECAccountRegistry',
     events: {
-        registerExtension: 'RegisterExtension'
+        registerExtension: 'RegisterExtension',
     },
     config: AZTECAccountRegistryContract,
-}
+};
 
 export const ACEConfig = {
     name: 'ACE',
     events: {
-        сreateNoteRegistry: 'CreateNoteRegistry'
+        сreateNoteRegistry: 'CreateNoteRegistry',
     },
     config: ACE,
-}
+};
 
 export const IZkAssetConfig = {
     name: 'IZkAsset',
@@ -27,4 +27,4 @@ export const IZkAssetConfig = {
         destroyNote: 'DestroyNote',
     },
     config: IZkAsset,
-}
+};

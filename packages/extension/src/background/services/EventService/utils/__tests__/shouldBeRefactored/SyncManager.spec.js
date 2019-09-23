@@ -1,8 +1,6 @@
-import SyncManager from '../../helpers/SyncManager'
-import Web3Service from '~background/services/Web3Service'
-import {
-   fetchAssets
-} from '../fetchAssets'
+import SyncManager from '../../helpers/SyncManager';
+import Web3Service from '~background/services/Web3Service';
+import fetchAsset from '../fetchAssets';
 
 
 jest.mock('~background/services/Web3Service');

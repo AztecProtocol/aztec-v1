@@ -19,18 +19,17 @@ import Web3ServiceFactory from '~background/services/Web3Service/factory';
 // import { runLoadingEventsTest } from './syncTest'
 
 
-
 const configureWeb3Service = async () => {
     const providerUrlGanache = await get('__providerUrlGanache');
     const infuraProjectId = await get('__infuraProjectId');
-    
+
     const contractsConfigs = [
         AZTECAccountRegistryConfig.config,
         ACEConfig.config,
     ];
 
     const infuraNetworksConfigs = ['mainnet', 'ropsten', 'rinkeby', 'goerli', 'kovan']
-        .map((networkName) => infuraProviderConfig(networkName, infuraProjectId))
+        .map(networkName => infuraProviderConfig(networkName, infuraProjectId))
         .map(config => ({
             ...config,
             contractsConfigs,
@@ -42,12 +41,12 @@ const configureWeb3Service = async () => {
         providerUrl: providerUrlGanache,
         contractsConfigs,
     };
-    
+
     Web3ServiceFactory.setConfigs([
         ...[ganacheNetworkConfig],
         ...infuraNetworksConfigs,
     ]);
-}
+};
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
@@ -79,7 +78,7 @@ export default async function init() {
             },
         );
     }
-    
+
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),
         syncInterval: await settings('SYNC_INTERVAL'),

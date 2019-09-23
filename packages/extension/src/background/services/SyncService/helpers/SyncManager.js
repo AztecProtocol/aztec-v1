@@ -4,6 +4,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
+import fetchNoteFromIndexedDB from '../utils/fetchNoteFromIndexedDB';
 import fetchNotesFromIndexedDB from '../utils/fetchNotesFromIndexedDB';
 import addNote from '../utils/addNote';
 import validateNoteData from '../utils/validateNoteData';
@@ -198,10 +199,9 @@ class SyncManager {
         noteId,
         networkId,
     }) {
-        const [rawNote] = await fetchNotesFromIndexedDB({
+        const [rawNote] = await fetchNoteFromIndexedDB({
             account: address,
             noteId,
-            numberOfNotes: 1,
             networkId,
         }) || [];
         if (!rawNote) {

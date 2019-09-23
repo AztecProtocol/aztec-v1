@@ -21,7 +21,7 @@ const syncAccount = async ({
     }
     if (!networkId && networkId !== 0) {
         errorLog("'networkId' can not be empty in SyncService.syncAccount()");
-        return null;
+        return;
     }
 
     if (manager.isInQueue(address)) {
@@ -55,7 +55,7 @@ const syncAccount = async ({
     });
 };
 
-const syncNote = async ({
+const syncNote = ({
     address,
     noteId,
     networkId,
