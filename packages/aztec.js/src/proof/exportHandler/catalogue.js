@@ -9,7 +9,7 @@ const SwapProof65794 = require('../proofs/BALANCED/epoch0/swap');
 const catalogue = {};
 
 /*
- * Default epoch number for which proof construction methods are exported
+ * Default epoch numbers for each proof construction method
  */
 catalogue.defaultProofEpochNums = {
     BURN: 1,
