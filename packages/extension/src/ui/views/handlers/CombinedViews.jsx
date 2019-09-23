@@ -26,12 +26,17 @@ class CombinedViews extends PureComponent {
             step,
             data: prevData,
         } = this.state;
-        const data = !onGoBack
-            ? prevData
-            : onGoBack(step, prevData);
+        let data = prevData;
+        let stepOffset = 1;
+        if (onGoBack) {
+            ({
+                stepOffset = 1,
+                ...data
+            } = onGoBack(step, prevData));
+        }
 
         this.setState({
-            step: step - 1,
+            step: step - stepOffset,
             data,
         });
     };
@@ -56,12 +61,16 @@ class CombinedViews extends PureComponent {
             return;
         }
 
+        let stepOffset = 1;
         if (onGoNext) {
-            data = onGoNext(step, data);
+            ({
+                stepOffset = 1,
+                ...data
+            } = onGoNext(step, data));
         }
 
         this.setState({
-            step: step + 1,
+            step: step + stepOffset,
             data,
         });
     };

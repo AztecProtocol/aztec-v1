@@ -15,9 +15,16 @@ const Steps = [
 const handleGoBack = (step, prevData) => {
     let data = prevData;
     switch (step) {
-        case 0: {
+        case 1: {
             data = { ...data };
             delete data.seedPhrase;
+            break;
+        }
+        case 3: {
+            data = {
+                ...data,
+                stepOffset: 2,
+            };
             break;
         }
         default:

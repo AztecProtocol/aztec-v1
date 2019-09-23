@@ -36,6 +36,15 @@ class Transaction extends PureComponent {
         };
     }
 
+    componentDidMount() {
+        const {
+            autoStart,
+        } = this.props;
+        if (autoStart) {
+            this.goToNextTask();
+        }
+    }
+
     getTask() {
         const {
             steps,
@@ -291,6 +300,7 @@ Transaction.propTypes = {
     goNext: PropTypes.func,
     goBack: PropTypes.func,
     onClose: PropTypes.func,
+    autoStart: PropTypes.bool,
     autoCloseTimeout: PropTypes.number,
 };
 
@@ -307,6 +317,7 @@ Transaction.defaultProps = {
     goNext: null,
     goBack: null,
     onClose: null,
+    autoStart: false,
     autoCloseTimeout: 2000,
 };
 
