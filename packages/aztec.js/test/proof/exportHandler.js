@@ -8,6 +8,7 @@ const helpers = require('../../src/proof/exportHandler/helpers');
 const JoinSplitProof65793 = require('../../src/proof/proofs/BALANCED/epoch0/joinSplit');
 const { JoinSplitProof, proofHandler } = require('../../src/proof');
 const note = require('../../src/note');
+const ProofType = require('../../src/proof/base/types');
 
 const { publicKey } = secp256k1.generateAccount();
 
@@ -62,12 +63,12 @@ describe('Export handler', () => {
             proofHandler.catalogue.versions = trueLocalEpochProofVersions;
         });
 
-        it('should set a default epoch number and then create a proof with this epoch number', () => {
+        it('should set a default epoch number for joinSplit, create a proof with this epoch, other defaults constant', () => {
             const latestEpochStub = sinon.stub(helpers, 'validateEpochNum').callsFake(() => {
                 return 2;
             });
 
-            expect(proofHandler.catalogue.defaultEpochNum).to.equal(1);
+            expect(proofHandler.catalogue.defaultProofEpochNums[ProofType.JOIN_SPLIT.name]).to.equal(1);
 
             class MockProof {
                 constructor() {
@@ -90,7 +91,13 @@ describe('Export handler', () => {
             new JoinSplitProof.epoch(2, true)(inputNotes, outputNotes, sender, publicValue, publicOwner);
 
             // Check that the default proof epoch has been set to 2
-            expect(proofHandler.catalogue.defaultEpochNum).to.equal(2);
+            expect(proofHandler.catalogue.defaultProofEpochNums[ProofType.JOIN_SPLIT.name]).to.equal(2);
+
+            // Check that default proof epochs of other proofs have not changed
+            const typesWithoutJoinSplit = ['BURN', 'DIVIDEND', 'MINT', 'PRIVATE_RANGE', 'PUBLIC_RANGE', 'SWAP'];
+            typesWithoutJoinSplit.forEach((type) => {
+                expect(proofHandler.catalogue.defaultProofEpochNums[type]).to.equal(1);
+            });
 
             const mockProofResult = new JoinSplitProof();
             expect(mockProofResult.mock).to.equal('mockProof');
@@ -99,7 +106,7 @@ describe('Export handler', () => {
 
             // Reset proofHandler variables back to defaults
             proofHandler.catalogue.versions = trueLocalEpochProofVersions;
-            proofHandler.catalogue.defaultEpochNum = 1;
+            proofHandler.catalogue.defaultProofEpochNums[ProofType.JOIN_SPLIT.name] = 1;
         });
     });
 
