@@ -9,6 +9,7 @@ import Account from '~ui/views/pages/Account';
 import Assets from '~ui/views/Assets';
 import Asset from '~ui/views/Asset';
 import Restore from '~ui/views/Restore';
+import Login from '~ui/views/Login';
 import RegisterAddress from '~ui/views/RegisterAddress';
 import NoteAccess from '~ui/views/NoteAccess';
 import Deposit from '~ui/views/Deposit';
@@ -59,6 +60,10 @@ export default {
             restore: {
                 path: 'restore',
                 Component: Restore,
+            },
+            login: {
+                path: 'login',
+                Component: Login,
             },
             assets: {
                 path: 'assets',
