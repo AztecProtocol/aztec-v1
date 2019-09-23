@@ -11,11 +11,20 @@ export default {
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non dictum mauris.',
         placeholder: '',
     },
+    password: {
+        weak: 'Weak',
+        fair: 'Fair',
+        good: 'Good',
+        strong: 'Strong',
+        error: {
+            empty: 'Please enter your password.',
+        },
+    },
     restore: {
         _: 'Restore account',
         fromSeedPhrase: 'Restore from seed phrase',
         title: 'Recover from seed phrase',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non dictum mauris.',
         input: {
             seedPhrase: {
                 placeholder: 'Enter seed phrase...',

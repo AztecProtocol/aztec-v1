@@ -24,6 +24,10 @@ export default {
         prev: 'register.backup',
         next: 'register.password',
     },
+    'register.password': {
+        prev: 'register.confirm',
+        next: 'register.address',
+    },
     'register.address': {
         address: addresses[0],
         goNext: dummyFunc,

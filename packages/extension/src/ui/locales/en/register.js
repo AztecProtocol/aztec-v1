@@ -9,7 +9,14 @@ export default {
         },
     },
     create: {
-        keys: 'Create keys',
+        keys: 'Create Keys',
+        password: {
+            _: 'Create Password',
+            title: 'Create password',
+            description: 'Donec ut maximus sapien. You will need this password to login.',
+            placeholder: 'Enter your password',
+        },
+        account: 'Create Account',
     },
     backup: {
         title: 'Backup your seed phrase',
@@ -23,6 +30,13 @@ export default {
             },
         },
         complete: 'Backup complete',
+    },
+    extension: {
+        description: 'Last step! Link your address with your extension account.',
+        step: {
+            send: 'Create Extension Account',
+            completed: 'Account Created',
+        },
     },
     address: {
         title: 'Register Ethereum Address with AZTEC',
