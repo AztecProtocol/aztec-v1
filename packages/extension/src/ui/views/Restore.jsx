@@ -29,7 +29,7 @@ class Restore extends PureComponent {
     }
 
     handleResponse = (response) => {
-        console.log(response);
+        console.log('Restore successfully!', response);
         const {
             goNext,
         } = this.props;
@@ -39,7 +39,6 @@ class Restore extends PureComponent {
     handleSubmit = () => {
         if (!this.validateSeedPhrase()) return;
 
-        console.log('handleSubmit');
         const {
             seedPhrase,
         } = this.state;
@@ -95,6 +94,8 @@ class Restore extends PureComponent {
             >
                 <Block align="left">
                     <TextInput
+                        type="textarea"
+                        rows={3}
                         value={seedPhrase}
                         placeholder={i18n.t('account.restore.input.seedPhrase.placeholder')}
                         onChange={this.handleChangePhrase}
