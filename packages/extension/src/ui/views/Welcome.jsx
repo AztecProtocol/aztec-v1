@@ -21,45 +21,47 @@ const Welcome = ({
     <Popup theme="primary">
         <FlexBox
             direction="column"
-            align="center"
+            align="space-between"
             valign="center"
             stretch
         >
-            <Logo />
-            <Block padding="xl 0">
-                <Text
-                    text={i18n.t('account.create.title')}
-                    size="l"
-                />
+            <Block top="xxl">
+                <Logo />
+                <Block padding="xl 0">
+                    <Text
+                        text={i18n.t('account.create.title')}
+                        size="l"
+                    />
+                </Block>
+                <Block padding="m 0">
+                    <Text
+                        text={i18n.t('account.create.description')}
+                        size="s"
+                    />
+                </Block>
+                <Block padding="m 0">
+                    <Button
+                        theme="white"
+                        text={i18n.t('account.create')}
+                        size="l"
+                        onClick={() => {
+                            if (window.location === startUrl) {
+                                goToPage('register');
+                            } else {
+                                browser.tabs.create({ url: startUrl });
+                            }
+                        }}
+                        outlined
+                    />
+                </Block>
             </Block>
-            <Block padding="m 0">
-                <Text
-                    text={i18n.t('account.create.description')}
-                    size="s"
-                />
-            </Block>
-            <Block padding="m 0">
-                <Button
-                    theme="white"
-                    text={i18n.t('account.create')}
-                    size="l"
-                    onClick={() => {
-                        if (window.location === startUrl) {
-                            goToPage('register');
-                        } else {
-                            browser.tabs.create({ url: startUrl });
-                        }
-                    }}
-                    outlined
-                />
-            </Block>
-            <Block top="l">
+            <div>
                 <Text
                     text={i18n.t('account.create.already')}
                     size="xxs"
                     color="white-light"
                 />
-                <Block top="xs">
+                <Block top="xxs">
                     <TextButton
                         theme="underline"
                         text={i18n.t('account.restore')}
@@ -68,7 +70,7 @@ const Welcome = ({
                         onClick={() => goToPage('account.restore')}
                     />
                 </Block>
-            </Block>
+            </div>
         </FlexBox>
     </Popup>
 );

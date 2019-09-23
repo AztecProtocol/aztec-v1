@@ -32,6 +32,7 @@ const Assets = ({
             direction="column"
             align="space-between"
             stretch
+            nowrap
         >
             <Offset margin="s 0">
                 {!isLoadingAssets && !assets.length && (
