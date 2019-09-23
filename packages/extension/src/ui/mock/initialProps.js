@@ -10,57 +10,60 @@ import {
 const dummyFunc = () => {};
 
 export default {
-    '/register': {
-        next: '/register/backup',
-    },
-    '/register/backup': {
-        seedPhrase: 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle',
-        prev: '/register',
-        next: '/register/confirm',
-    },
-    '/register/confirm': {
-        seedPhrase,
-        prev: '/register/backup',
-        next: '/register',
-    },
-    '/register/address': {
+    register: {
         address: addresses[0],
-        currentStep: 0,
+        next: 'register.backup',
+    },
+    'register.backup': {
+        seedPhrase: 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle',
+        prev: 'register',
+        next: 'register.confirm',
+    },
+    'register.confirm': {
+        seedPhrase,
+        prev: 'register.backup',
+        next: 'register.password',
+    },
+    'register.address': {
+        address: addresses[0],
         goNext: dummyFunc,
     },
-    '/register/domain': {
+    'register.domain': {
         domain: domains[0],
         assets: assets.slice(0, 10),
         goNext: dummyFunc,
     },
-    '/account/restore': {
+    'account.restore': {
         goNext: dummyFunc,
     },
-    '/account/assets': {
+    'account.login': {
+        goNext: dummyFunc,
+    },
+    'account.assets': {
         assets,
         pastTransactions: pastTransactions.slice(0, 2),
     },
-    '/account/asset': {
+    'account.asset': {
         ...assets[0],
-        prev: '/account',
+        prev: 'account',
         pastTransactions: pastTransactions
             .filter(({ asset }) => asset.code === assets[0].code)
             .slice(0, 2),
     },
-    '/note-access': {
+    noteAccess: {
         note: notes[0],
         accounts: addresses.map(address => ({
             address,
         })),
         goNext: dummyFunc,
     },
-    '/deposit': {
+    deposit: {
         asset: assets[0],
         fromAddress: addresses[0],
         toAddresses: addresses.slice(1),
         amount: 500,
     },
-    '/send': {
+    send: {
         asset: assets[0],
         fromAddress: addresses[0],
         toAddresses: addresses.slice(1),

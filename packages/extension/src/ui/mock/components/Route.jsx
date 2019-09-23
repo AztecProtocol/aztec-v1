@@ -10,7 +10,7 @@ import initialProps from '../initialProps';
 class MockRoute extends PureComponent {
     renderComponent = () => {
         const {
-            path,
+            name,
             action,
             Component,
             goToPage,
@@ -22,7 +22,7 @@ class MockRoute extends PureComponent {
             prev,
             next,
             ...props
-        } = initialProps[path] || {};
+        } = initialProps[name] || {};
         const handleGoBack = prev
             ? () => goToPage(prev)
             : null;
@@ -57,6 +57,7 @@ class MockRoute extends PureComponent {
 
 MockRoute.propTypes = {
     path: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
     action: PropTypes.shape({
         key: PropTypes.string.isRequired,
         data: PropTypes.object,
