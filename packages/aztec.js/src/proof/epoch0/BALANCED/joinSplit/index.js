@@ -185,14 +185,4 @@ class JoinSplitProof65793 extends Proof {
     }
 }
 
-// function joinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner) {
-//     class ProofSuper extends JoinSplitProof {
-//         constructor() {
-//             super(inputNotes, outputNotes, sender, publicValue, publicOwner);
-//         }
-//     }
-
-//     return ProofSuper;
-// }
-
 module.exports = JoinSplitProof65793;

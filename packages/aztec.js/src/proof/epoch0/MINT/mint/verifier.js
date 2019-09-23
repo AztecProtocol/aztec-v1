@@ -1,4 +1,4 @@
-const JoinSplitFluidVerifier = require('../../../epoch0/verifier');
+const JoinSplitFluidVerifier = require('../../joinSplitFluid/verifier');
 
 class MintVerifier66049 extends JoinSplitFluidVerifier {}
 
