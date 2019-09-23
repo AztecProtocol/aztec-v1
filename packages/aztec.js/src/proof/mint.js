@@ -27,7 +27,7 @@ MintProof.epoch = function(epochNum, setDefaultEpoch = false) {
     helpers.validateEpochNum(epochNum);
 
     if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(epochNum);
+        exportHandler.setDefaultEpoch(ProofType.MINT.name, epochNum);
     }
 
     return (...args) => {

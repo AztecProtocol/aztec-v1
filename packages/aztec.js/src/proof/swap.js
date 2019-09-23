@@ -27,7 +27,7 @@ SwapProof.epoch = function(epochNum, setDefaultEpoch = false) {
     helpers.validateEpochNum(epochNum);
 
     if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(epochNum);
+        exportHandler.setDefaultEpoch(ProofType.SWAP.name, epochNum);
     }
 
     return (...args) => {

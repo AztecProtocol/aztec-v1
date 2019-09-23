@@ -26,7 +26,7 @@ BurnProof.epoch = function(epochNum, setDefaultEpoch = false) {
     exportHandler.helpers.validateEpochNum(epochNum);
 
     if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(epochNum);
+        exportHandler.setDefaultEpoch(ProofType.BURN.name, epochNum);
     }
 
     return (...args) => {

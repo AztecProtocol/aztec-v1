@@ -27,7 +27,7 @@ DividendProof.epoch = function(epochNum, setDefaultEpoch = false) {
     helpers.validateEpochNum(epochNum);
 
     if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(epochNum);
+        exportHandler.setDefaultEpoch(ProofType.DIVIDEND.name, epochNum);
     }
 
     return (...args) => {
