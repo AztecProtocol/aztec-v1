@@ -2,10 +2,11 @@ const BurnProof = require('./burn');
 const DividendProof = require('./dividend');
 const JoinSplitProof = require('./joinSplit');
 const MintProof = require('./mint');
-const { Proof, ProofType } = require('./epoch0/proof');
-const ProofUtils = require('./epoch0/utils');
+const Proof = require('./base/epoch0/proof');
+const ProofType = require('./base/types');
+const ProofUtils = require('./base/epoch0/utils');
 const PrivateRangeProof = require('./privateRange');
-const proofHandler = require('./proofHandler');
+const proofHandler = require('./exportHandler');
 const PublicRangeProof = require('./publicRange');
 const SwapProof = require('./swap');
 

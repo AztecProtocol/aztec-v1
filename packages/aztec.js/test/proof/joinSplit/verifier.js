@@ -8,9 +8,9 @@ const { padLeft, randomHex } = require('web3-utils');
 
 const { balancedPublicValues, mockNoteSet, randomNoteValue } = require('../../helpers/note');
 const { JoinSplitProof, Proof } = require('../../../src/proof');
-const JoinSplitVerifier = require('../../../src/proof/epoch0/BALANCED/joinSplit/verifier');
+const JoinSplitVerifier = require('../../../src/proof/proofs/BALANCED/epoch0/joinSplit/verifier');
 const { mockZeroJoinSplitProof } = require('../../helpers/proof');
-const ProofUtils = require('../../../src/proof/epoch0/utils');
+const ProofUtils = require('../../../src/proof/base/epoch0/utils');
 
 describe('Join-Split Proof Verifier', () => {
     const sender = randomHex(20);
