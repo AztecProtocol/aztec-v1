@@ -111,24 +111,32 @@ class App extends PureComponent {
         });
     }
 
-    renderRoutes(config, pathPrefix = '') {
+    renderRoutes(config, parent = {}) {
         const routeNodes = [];
         let defaultRoute;
         const {
             initialAction,
         } = this.state;
 
-        Object.keys(config).forEach((name) => {
+        Object.keys(config).forEach((subName) => {
             const {
                 Component,
                 View,
                 path: subPath,
                 routes: childRoutes,
-            } = config[name];
-            const path = `${pathPrefix}/${subPath || ''}`;
+            } = config[subName];
+            const {
+                path: parentPath,
+                name: parentName,
+            } = parent;
+            const path = `${parentPath || ''}/${subPath || subName || ''}`.replace(/\/{2,}/g, '/');
+            const name = parentName ? `${parentName}.${subName}` : subName;
 
             if (childRoutes) {
-                const childRouteNodes = this.renderRoutes(childRoutes, path);
+                const childRouteNodes = this.renderRoutes(childRoutes, {
+                    path,
+                    name,
+                });
                 routeNodes.push(...childRouteNodes);
             }
 
@@ -138,6 +146,7 @@ class App extends PureComponent {
                 const routeNode = (
                     <Route
                         key={path}
+                        name={name}
                         path={path}
                         action={initialAction}
                         goToPage={this.goToPage}
