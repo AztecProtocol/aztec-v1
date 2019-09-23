@@ -1,15 +1,20 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { KeyStore } from '~utils/keyvault';
 import ActionService from '~ui/services/ActionService';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 import Intro from '../RegisterIntro';
 import BackupKeys from '../BackupKeys';
 import ConfirmBackupKeys from '../ConfirmBackupKeys';
+import CreatePassword from '../CreatePassword';
+import RegisterAddress from '../RegisterAddress';
 
 const Steps = [
     Intro,
     BackupKeys,
     ConfirmBackupKeys,
+    CreatePassword,
+    RegisterAddress,
 ];
 
 const handleGoBack = (step, prevData) => {
@@ -54,21 +59,25 @@ const handleResponse = (response) => {
 };
 
 const doRegister = (data) => {
-    const {
-        seedPhrase,
-    } = data;
     ActionService
-        .post('register', { seedPhrase })
+        .post('register', data)
         .onReceiveResponse(handleResponse);
 };
 
-const Register = () => (
+const Register = ({
+    address,
+}) => (
     <CombinedViews
         Steps={Steps}
+        initialData={{ address }}
         onGoBack={handleGoBack}
         onGoNext={handleGoNext}
         onExit={doRegister}
     />
 );
+
+Register.propTypes = {
+    address: PropTypes.string.isRequired,
+};
 
 export default Register;

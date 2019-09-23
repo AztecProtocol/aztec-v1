@@ -4,6 +4,7 @@ import Welcome from '~ui/views/Welcome';
 import Register from '~ui/views/pages/Register';
 import BackupKeys from '~ui/views/BackupKeys';
 import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
+import CreatePassword from '~ui/views/CreatePassword';
 import DomainPermission from '~ui/views/DomainPermission';
 import Account from '~ui/views/pages/Account';
 import Assets from '~ui/views/Assets';
@@ -42,6 +43,10 @@ export default {
             confirm: {
                 path: 'confirm',
                 View: ConfirmBackupKeys,
+            },
+            password: {
+                path: 'password',
+                View: CreatePassword,
             },
             address: {
                 path: 'address',
