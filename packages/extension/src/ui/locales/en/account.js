@@ -7,6 +7,9 @@ export default {
     },
     login: {
         _: 'Login',
+        title: 'Login with password',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non dictum mauris.',
+        placeholder: '',
     },
     restore: {
         _: 'Restore account',
