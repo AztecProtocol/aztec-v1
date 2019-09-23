@@ -27,7 +27,7 @@ PrivateRangeProof.epoch = function(epochNum, setDefaultEpoch = false) {
     helpers.validateEpochNum(epochNum);
 
     if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(epochNum);
+        exportHandler.setDefaultEpoch(ProofType.PRIVATE_RANGE.name, epochNum);
     }
 
     return (...args) => {

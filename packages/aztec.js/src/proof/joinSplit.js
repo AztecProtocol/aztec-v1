@@ -26,7 +26,7 @@ JoinSplitProof.epoch = function(epochNum, setDefaultEpoch = false) {
     exportHandler.helpers.validateEpochNum(epochNum);
 
     if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(epochNum);
+        exportHandler.setDefaultEpoch(ProofType.JOIN_SPLIT.name, epochNum);
     }
 
     return (...args) => {

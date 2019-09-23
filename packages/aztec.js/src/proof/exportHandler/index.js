@@ -16,7 +16,7 @@ exportHandler.helpers = helpers;
  */
 exportHandler.exportProof = function(proofSelector, ...args) {
     if (!this.epochNum) {
-        this.epochNum = exportHandler.catalogue.defaultEpochNum;
+        this.epochNum = exportHandler.catalogue.defaultProofEpochNums[proofSelector];
     }
     const Proof = exportHandler.catalogue.versions[proofSelector][this.epochNum];
     return new Proof(...args);
@@ -28,8 +28,8 @@ exportHandler.exportProof = function(proofSelector, ...args) {
  * @method setDefaultEpoch
  * @param defaultEpochNum - user specified default epoch number
  */
-exportHandler.setDefaultEpoch = (defaultEpochNum) => {
-    exportHandler.catalogue.defaultEpochNum = defaultEpochNum;
+exportHandler.setDefaultEpoch = (proofSelector, defaultEpochNum) => {
+    exportHandler.catalogue.defaultProofEpochNums[proofSelector] = defaultEpochNum;
 };
 
 module.exports = exportHandler;

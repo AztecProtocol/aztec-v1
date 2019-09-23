@@ -11,7 +11,15 @@ const catalogue = {};
 /*
  * Default epoch number for which proof construction methods are exported
  */
-catalogue.defaultEpochNum = 1;
+catalogue.defaultProofEpochNums = {
+    BURN: 1,
+    DIVIDEND: 1,
+    JOIN_SPLIT: 1,
+    MINT: 1,
+    PRIVATE_RANGE: 1,
+    PUBLIC_RANGE: 1,
+    SWAP: 1,
+};
 
 /*
  * Latest proof epoch
