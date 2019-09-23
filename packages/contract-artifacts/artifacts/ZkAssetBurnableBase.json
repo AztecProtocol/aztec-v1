@@ -70,6 +70,25 @@
                 {
                     "name": "",
                     "type": "bytes32"
+                }
+            ],
+            "name": "signatureLog",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
                 },
                 {
                     "name": "",
@@ -99,7 +118,7 @@
                     "type": "address"
                 },
                 {
-                    "name": "_status",
+                    "name": "_spenderApproval",
                     "type": "bool"
                 },
                 {
