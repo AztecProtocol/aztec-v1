@@ -6,7 +6,7 @@ const { randomHex } = require('web3-utils');
 const sinon = require('sinon');
 
 const { PrivateRangeProof } = require('../../../src/proof');
-const PrivateRangeVerifier = require('../../../src/proof/epoch0/UTILITY/privateRange/verifier');
+const PrivateRangeVerifier = require('../../../src/proof/proofs/UTILITY/epoch0/privateRange/verifier');
 const note = require('../../../src/note');
 const { Proof } = require('../../../src/proof');
 

@@ -8,7 +8,7 @@ const { padLeft, randomHex } = require('web3-utils');
 
 const note = require('../../../src/note');
 const { PublicRangeProof } = require('../../../src/proof');
-const PublicRangeVerifier = require('../../../src/proof/epoch0/UTILITY/publicRange/verifier');
+const PublicRangeVerifier = require('../../../src/proof/proofs/UTILITY/epoch0/publicRange/verifier');
 const { Proof } = require('../../../src/proof');
 
 describe('Public range proof verifier', () => {
