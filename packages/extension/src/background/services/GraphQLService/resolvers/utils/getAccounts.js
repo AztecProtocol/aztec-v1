@@ -1,9 +1,10 @@
-import GraphNodeService from '~background/services/GraphNodeService';
 import {
     argsError,
 } from '~utils/error';
+import EventService from '~background/services/EventService';
 
-export default async function getAccounts(args) {
+
+export default async function getAccounts(args, ctx = {}) {
     const {
         where: {
             address_in: addresses,
@@ -12,29 +13,26 @@ export default async function getAccounts(args) {
         },
     } = args;
 
-    console.log(`------ Account getAccounts`);
-
-    const queryStr = `
-        query ($accountCount: Int!, $accountFilter: Account_filter!) {
-            accounts(first: $accountCount, where: $accountFilter) {
-                id
-                address
-                linkedPublicKey
-            }
-        }
-    `;
-    const variables = {
-        accountCount: addresses.length,
-        accountFilter: {
-            address_in: addresses,
-        },
-    };
     const {
-        accounts,
-    } = await GraphNodeService.query({
-        query: queryStr,
-        variables,
-    }) || {};
+        // TODO: remove default value, when it will be passed here.
+        networkId = 0,
+    } = ctx;
+
+    const promises = [];
+    addresses.forEach((address) => {
+        const accountPromise = EventService.fetchAztecAccount({
+            address,
+            networkId,
+        });
+        promises.push(accountPromise);
+    });
+
+    const accounts = Promise.all(promises);
+    accounts.map(({ error, account: { address, linkedPublicKey } }) => ({
+        id: address,
+        address,
+        linkedPublicKey,
+    }));
 
     const onChainAccounts = accounts || [];
     const invalidAccounts = addresses

@@ -2,11 +2,10 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '../../../Web3Service'
+import Web3Service from '../../../Web3Service';
 import fetchNotes from '../../utils/fetchNotes';
-import {
-    saveNotes
-} from '../../utils/saveNotes';
+import saveNotes from '../../utils/saveNotes';
+import saveNotesAccess from '../../utils/saveNotesAccess';
 import AssetsSyncManagerFactory from '../AssetsSyncManager/factory';
 
 /* See more details about limitation
@@ -71,7 +70,7 @@ class SyncManager {
         const syncAddress = this.addresses.get(address);
         if (!syncAddress) {
             warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
-            return;
+            return null;
         }
         const {
             lastSyncedBlock,
@@ -81,9 +80,9 @@ class SyncManager {
         const blocks = await Web3Service(networkId).eth.getBlockNumber();
 
         return {
-            blocks, 
+            blocks,
             lastSyncedBlock,
-        }
+        };
     };
 
     setProgressCallback = (callback) => {
@@ -175,7 +174,12 @@ class SyncManager {
             });
 
             if (groupedNotes) {
-                await saveNotes(groupedNotes, networkId);
+                const promises = [
+                    saveNotes(groupedNotes, networkId),
+                    saveNotesAccess(groupedNotes, networkId),
+                ];
+                await Promise.all(promises);
+
                 newLastSyncedBlock = toBlock;
 
                 if (this.progressSubscriber) {

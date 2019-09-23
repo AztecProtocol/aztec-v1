@@ -5,11 +5,11 @@ import {
 } from './note';
 
 
-export const saveNotes = async ({
+export default async function saveNotes({
     createNotes,
     updateNotes,
     destroyNotes,
-}, networkId) => {
+}, networkId) {
     // save it in serial
     await createBulkNotes(createNotes, networkId);
     await updateBulkNotes(updateNotes, networkId);

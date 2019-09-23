@@ -8,8 +8,8 @@ import {
 
 
 class Web3ServiceFactory {
-
     _web3ServicesByNetworks = {};
+
     _networksConfigs = {};
 
     _ensureWeb3Service = (networkId) => {
@@ -27,13 +27,13 @@ class Web3ServiceFactory {
         } = config;
 
         const service = new Web3Service();
-        const provider = new Web3.providers.HttpProvider(providerUrl)
+        const provider = new Web3.providers.HttpProvider(providerUrl);
         service.init({
             provider,
         });
         for (let i = 0; i < contractsConfigs.length; i++) {
-            const config = contractsConfigs[i];
-            service.registerContract(config);
+            const contractConfig = contractsConfigs[i];
+            service.registerContract(contractConfig);
         }
         this._web3ServicesByNetworks[networkId] = service;
     };
@@ -56,7 +56,7 @@ class Web3ServiceFactory {
                 networkId,
                 providerUrl,
             } = networksConfigs[i];
-            
+
             if (!title || (!networkId && networkId !== 0) || !providerUrl) {
                 errorLog(`Network Config must consist of title, networkId and providerUrl fields. Was provided: ${JSON.stringify(networksConfigs[i])}`);
                 return;
@@ -78,7 +78,6 @@ class Web3ServiceFactory {
         this._ensureWeb3Service(networkId);
         return this._web3ServicesByNetworks[networkId];
     }
-
 }
 
 export default new Web3ServiceFactory();

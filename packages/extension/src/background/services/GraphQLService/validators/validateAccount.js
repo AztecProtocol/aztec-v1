@@ -12,8 +12,6 @@ export default async function validateAccount(_, args, ctx) {
         currentAddress,
     } = args;
 
-    console.log(`validateAccount: ${JSON.stringify(currentAddress)}`);
-
     const user = await AuthService.getRegisteredUser(currentAddress);
     if (!user) {
         return permissionError('account.not.linked');
@@ -22,7 +20,7 @@ export default async function validateAccount(_, args, ctx) {
     const {
         keyStore,
         session,
-        //TODO: remove default value,
+        // TODO: remove default value,
         networkId = 0,
     } = ctx;
     const {
@@ -46,7 +44,7 @@ export default async function validateAccount(_, args, ctx) {
         privateKey: decodePrivateKey(decodedKeyStore, pwDerivedKey),
         networkId,
     });
-    
+
     const newSession = await AuthService.updateSession(currentAddress);
 
     return {

@@ -4,7 +4,7 @@ import {
 import AuthService from '~background/services/AuthService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
-import EventService from '~background/services/EventService'
+import EventService from '~background/services/EventService';
 
 export default async function syncUserInfo(args, ctx) {
     const {
@@ -17,7 +17,7 @@ export default async function syncUserInfo(args, ctx) {
         session: {
             pwDerivedKey,
         },
-        //TODO: remove default value,
+        // TODO: remove default value, when it will be passed here.
         networkId = 0,
     } = ctx;
     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
@@ -27,11 +27,9 @@ export default async function syncUserInfo(args, ctx) {
         error, 
         account,
     } = await EventService.fetchAztecAccount({
-        address: userAddress, 
+        address: userAddress,
         networkId,
     });
-
-    console.log(`account in syncUserInfo: ${JSON.stringify(account)}`)
 
     const {
         blockNumber: prevBlockNumber,

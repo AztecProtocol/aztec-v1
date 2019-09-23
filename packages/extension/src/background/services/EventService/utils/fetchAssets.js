@@ -1,13 +1,15 @@
 import Web3Service from '~background/services/Web3Service';
 import {
     ACEConfig,
-} from '~background/config/contracts'
- 
-export const fetchAssets = async ({
+} from '~background/config/contracts';
+
+
+export default async function fetchAssets({
     fromBlock = 'earliest',
     toBlock = 'latest',
+    assetAddress = null,
     networkId,
-} = {}) => {
+} = {}) {
     if (!networkId && networkId !== 0) {
         return {
             error: new Error("'networkId' cannot be empty in fetchAssets"),
@@ -18,9 +20,15 @@ export const fetchAssets = async ({
     const eventName = ACEConfig.events.сreateNoteRegistry;
 
     const options = {
-        fromBlock, 
+        fromBlock,
         toBlock,
     };
+
+    if (assetAddress) {
+        options.filter = {
+            registryOwner: assetAddress,
+        };
+    }
 
     try {
         const data = await Web3Service(networkId)
@@ -37,7 +45,7 @@ export const fetchAssets = async ({
                 linkedTokenAddress,
                 canAdjustSupply,
                 canConvert,
-            }
+            },
         }) => ({
             blockNumber,
             registryOwner,
@@ -48,16 +56,14 @@ export const fetchAssets = async ({
             canConvert,
         }));
 
-        return { 
+        return {
             error: null,
             assets,
         };
-
     } catch (error) {
-
-        return { 
-            error: error,
-            assets: null
+        return {
+            error,
+            assets: null,
         };
-    };
+    }
 }

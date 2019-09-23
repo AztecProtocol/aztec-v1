@@ -43,6 +43,7 @@ export default {
     query: async (query) => {
         try {
             const response = await apollo.query(query);
+            // console.log(`Query apollo: ${JSON.stringify(query)}, --- response: ${JSON.stringify(response)}`);
             const {
                 data,
             } = response || {};

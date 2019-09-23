@@ -1,4 +1,4 @@
-import Model from './../../helpers/Model';
+import Model from '../../helpers/Model';
 
 export default Model({
     name: 'note',

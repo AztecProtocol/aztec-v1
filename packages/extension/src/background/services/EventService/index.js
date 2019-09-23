@@ -7,12 +7,11 @@ import AssetsSyncManagerFactory from './helpers/AssetsSyncManager/factory';
 import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
-import { 
+import {
     fetchAccount,
 } from './utils/fetchAccount';
-import {
-    fetchNotes,
-} from './utils/fetchNotes';
+import fetchAssets from './utils/fetchAssets';
+import fetchNotes from './utils/fetchNotes';
 import {
     createAccount,
 } from './utils/account';
@@ -36,8 +35,6 @@ const syncAssets = async ({
     if (manager.isInProcess()) {
         return;
     }
-
-    console.log(`Runned syncAssets ${networkId}`);
 
     const lastSyncedAsset = await Asset.latest({ networkId });
 
@@ -101,6 +98,7 @@ const syncNotes = async ({
             owner: address,
         },
     };
+
     const lastSyncedNote = await Note.latest({ networkId }, options);
 
     let lastSyncedBlock;
@@ -170,11 +168,7 @@ const fetchAztecAccount = async ({
     address,
     networkId,
 }) => {
-    const options = {
-        filterOptions: { address },
-    };
-
-    const account = await Account.latest({ networkId }, options);
+    const account = await Account.get({ networkId }, address);
 
     if (account) {
         return {
@@ -191,11 +185,9 @@ const fetchAztecAccount = async ({
         networkId,
     });
 
-    console.log(`Loaded account: ${JSON.stringify(newAccount)}`);
-
     if (newAccount) {
         await createAccount(newAccount, networkId);
-        const latestAccount = await Account.latest({ networkId }, options);
+        const latestAccount = await Account.get({ networkId }, address);
 
         return {
             error: null,
@@ -209,11 +201,49 @@ const fetchAztecAccount = async ({
     };
 };
 
+const fetchAsset = async ({
+    address,
+    networkId,
+}) => {
+    const options = {
+        filterOptions: {
+            registryOwner: address,
+        },
+    };
+
+    console.log(`------------ 0 --- ${address}, ${networkId}`);
+    const asset = await Asset.get({ networkId }, address);
+    console.log(`------------ 1 ---`);
+
+    if (asset) {
+        return {
+            error: null,
+            asset,
+        };
+    }
+
+    const {
+        error,
+        assets,
+    } = await fetchAssets({
+        assetAddress: address,
+        networkId,
+    });
+
+    console.log(`Loaded assets: ${JSON.stringify(assets)}`);
+
+    return {
+        error,
+        asset: assets ? assets[assets.length - 1] : null,
+    };
+};
+
 export default {
     syncAssets,
     syncNotes,
     fetchLatestNote,
     fetchAztecAccount,
+    fetchAsset,
     notesSyncManager,
     assetsSyncManager,
 };

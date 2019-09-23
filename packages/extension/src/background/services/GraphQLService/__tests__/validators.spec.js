@@ -15,6 +15,7 @@ import {
     validateAccount,
     validateDomain,
 } from '../validators';
+import configureFactory from '~background/services/Web3Service/__tests__/helpers/configureFactory';
 
 jest.mock('~utils/storage');
 
@@ -159,6 +160,10 @@ describe('validateAccount', () => {
         accumContext,
     );
 
+    beforeAll(() => {
+        configureFactory();
+    });
+
     beforeEach(async () => {
         updateSessionSpy.mockClear();
         syncAccountSpy.mockClear();
@@ -217,7 +222,7 @@ describe('validateAccount', () => {
         expect(syncAccountSpy).toHaveBeenCalledTimes(1);
 
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        expect(syncAccountSpy.mock.calls[0]).toEqual([
+        expect(syncAccountSpy.mock.calls[0]).toMatchObject([
             {
                 address: registeredUserInfo.address,
                 privateKey,
