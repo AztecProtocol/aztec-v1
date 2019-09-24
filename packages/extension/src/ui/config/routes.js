@@ -12,7 +12,9 @@ import Asset from '~ui/views/Asset';
 import Restore from '~ui/views/Restore';
 import Login from '~ui/views/Login';
 import RegisterAddress from '~ui/views/RegisterAddress';
-import NoteAccess from '~ui/views/NoteAccess';
+import NoteAccess from '~ui/views/pages/NoteAccess';
+import ConfirmNoteAccess from '~ui/views/ConfirmNoteAccess';
+import GrantNoteAccess from '~ui/views/GrantNoteAccess';
 import Deposit from '~ui/views/Deposit';
 import Send from '~ui/views/Send';
 
@@ -83,6 +85,16 @@ export default {
     noteAccess: {
         path: 'note-access',
         Component: NoteAccess,
+        routes: {
+            confirm: {
+                path: 'confirm',
+                View: ConfirmNoteAccess,
+            },
+            grant: {
+                path: 'grant',
+                View: GrantNoteAccess,
+            },
+        },
     },
     deposit: {
         path: 'deposit',

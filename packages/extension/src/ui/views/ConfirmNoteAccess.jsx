@@ -20,7 +20,7 @@ import ProfileIcon from '~ui/components/ProfileIcon';
 import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
 
-const NoteAccess = ({
+const ConfirmNoteAccess = ({
     note,
     accounts,
     goNext,
@@ -103,7 +103,7 @@ const NoteAccess = ({
     );
 };
 
-NoteAccess.propTypes = {
+ConfirmNoteAccess.propTypes = {
     note: PropTypes.shape({
         hash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
@@ -120,9 +120,9 @@ NoteAccess.propTypes = {
     onClose: PropTypes.func,
 };
 
-NoteAccess.defaultProps = {
+ConfirmNoteAccess.defaultProps = {
     goBack: null,
     onClose: null,
 };
 
-export default NoteAccess;
+export default ConfirmNoteAccess;

@@ -61,6 +61,20 @@ export default {
         })),
         goNext: dummyFunc,
     },
+    'noteAccess.confirm': {
+        note: notes[0],
+        accounts: addresses.map(address => ({
+            address,
+        })),
+        goNext: dummyFunc,
+    },
+    'noteAccess.grant': {
+        note: notes[0],
+        accounts: addresses.map(address => ({
+            address,
+        })),
+        goNext: dummyFunc,
+    },
     deposit: {
         asset: assets[0],
         fromAddress: addresses[0],
