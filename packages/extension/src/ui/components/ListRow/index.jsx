@@ -10,7 +10,7 @@ const ListRow = ({
     title,
     content,
 }) => (
-    <Block padding="xxs 0">
+    <Block padding="xs 0">
         <FlexBox
             valign="center"
             nowrap

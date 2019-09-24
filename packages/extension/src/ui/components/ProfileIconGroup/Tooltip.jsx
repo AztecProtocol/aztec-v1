@@ -5,15 +5,16 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
+import styles from './tooltip.scss';
 
 const Tooltip = ({
     items,
     numberOfVisibleItems,
 }) => (
-    <div>
-        {items.slice(0, numberOfVisibleItems).map(item => (
+    <div className={styles.tooltip}>
+        {items.slice(0, numberOfVisibleItems).map((item, i) => (
             <Block
-                key={item}
+                key={`${item}_${+i}`}
                 padding="xxs"
             >
                 <Text
