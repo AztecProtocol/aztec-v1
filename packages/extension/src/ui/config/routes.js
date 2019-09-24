@@ -13,10 +13,12 @@ import Restore from '~ui/views/Restore';
 import Login from '~ui/views/Login';
 import RegisterAddress from '~ui/views/RegisterAddress';
 import NoteAccess from '~ui/views/pages/NoteAccess';
-import Send from '~ui/views/Send';
 import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
 import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
 import DepositTransaction from '~ui/views/DepositTransaction';
+import Send from '~ui/views/pages/Send';
+import SendConfirm from '~ui/views/SendConfirm';
+import SendTransaction from '~ui/views/SendTransaction';
 
 /*
  * Component can be rendered from background script and by clicking extension icon
@@ -103,5 +105,15 @@ export default {
     send: {
         path: 'send',
         Component: Send,
+        routes: {
+            confirm: {
+                path: 'confirm',
+                View: SendConfirm,
+            },
+            grant: {
+                path: 'grant',
+                View: SendTransaction,
+            },
+        },
     },
 };
