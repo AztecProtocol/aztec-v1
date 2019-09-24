@@ -1,33 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import numeral from 'numeral';
 import {
     Block,
-    FlexBox,
     Text,
-    Icon,
 } from '@aztec/guacamole-ui';
+import {
+    icon,
+    formatValue,
+} from '~ui/utils/asset';
+import formatAddress from '~ui/utils/formatAddress';
 import i18n from '~ui/helpers/i18n';
-import AddressRow from '~ui/components/AddressRow';
-import AssetRow from '~ui/components/AssetRow';
 import apis from '~uiModules/apis';
-import Transaction from './handlers/Transaction';
+import Transaction from '~ui/views/handlers/Transaction';
+import Connection from '~ui/components/Connection';
 
 const steps = [
-    {
-        titleKey: 'deposit.step.approve.erc20',
-        tasks: [
-            {
-                name: 'approve-erc20',
-                run: apis.mock,
-            },
-        ],
-    },
     {
         titleKey: 'transaction.step.create.proof',
         tasks: [
             {
-                name: 'generate-proof',
+                name: 'proof',
                 run: apis.mock,
             },
         ],
@@ -36,6 +28,7 @@ const steps = [
         titleKey: 'transaction.step.approve',
         tasks: [
             {
+                type: 'sign',
                 name: 'approve',
                 run: apis.mock,
             },
@@ -50,55 +43,58 @@ const steps = [
             },
         ],
     },
+    {
+        titleKey: 'transaction.step.confirmed',
+    },
 ];
 
-const Deposit = ({
+const DepositTransaction = ({
     asset,
+    user,
     amount,
-    fromAddress,
     initialStep,
     initialTask,
+    autoStart,
     goNext,
     goBack,
     onClose,
 }) => {
+    const {
+        code,
+        address: assetAddress,
+    } = asset;
+
     const ticketHeader = (
         <div>
-            <FlexBox
-                valign="center"
-            >
-                <Block right="m">
-                    <Icon
-                        name="reply"
-                        size="l"
-                        color="primary"
-                        flipHorizontal
-                    />
-                </Block>
+            <Block bottom="s">
                 <Text
-                    text={numeral(amount).format('0,0')}
+                    text={formatValue(code, amount)}
                     size="m"
-                    weight="semibold"
                     color="primary"
-                />
-            </FlexBox>
-            <Block top="s">
-                <AssetRow
-                    {...asset}
-                    size="xxs"
+                    weight="semibold"
                 />
             </Block>
-            <Block top="s">
-                <AddressRow
-                    address={fromAddress}
-                    size="xxs"
-                />
-            </Block>
+            <Connection
+                theme="white"
+                from={{
+                    type: 'user',
+                    description: formatAddress(user.address, 6, 4),
+                }}
+                to={{
+                    type: 'asset',
+                    src: icon(code),
+                    alt: code,
+                    description: formatAddress(assetAddress, 6, 4),
+                }}
+                size="s"
+                actionIconName="double_arrow"
+            />
         </div>
     );
 
     const initialData = {
         asset,
+        user,
         amount,
     };
 
@@ -106,13 +102,15 @@ const Deposit = ({
         <Transaction
             title={i18n.t('deposit.transaction')}
             description={i18n.t('deposit.transaction.description')}
-            ticketHeader={ticketHeader}
+            content={ticketHeader}
+            ticketHeight={3}
             steps={steps}
             initialStep={initialStep}
             initialTask={initialTask}
             initialData={initialData}
             submitButtonText={i18n.t('proof.create')}
             successMessage={i18n.t('transaction.success')}
+            autoStart={autoStart}
             goNext={goNext}
             goBack={goBack}
             onClose={onClose}
@@ -120,27 +118,30 @@ const Deposit = ({
     );
 };
 
-Deposit.propTypes = {
+DepositTransaction.propTypes = {
     asset: PropTypes.shape({
         code: PropTypes.string.isRequired,
         address: PropTypes.string.isRequired,
     }).isRequired,
-    fromAddress: PropTypes.string.isRequired,
-    // toAddresses: PropTypes.arrayOf(PropTypes.string).isRequired,
+    user: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    }).isRequired,
     amount: PropTypes.number.isRequired,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
+    autoStart: PropTypes.bool,
     goNext: PropTypes.func,
     goBack: PropTypes.func,
     onClose: PropTypes.func,
 };
 
-Deposit.defaultProps = {
+DepositTransaction.defaultProps = {
     initialStep: -1,
     initialTask: 0,
+    autoStart: false,
     goNext: null,
     goBack: null,
     onClose: null,
 };
 
-export default Deposit;
+export default DepositTransaction;

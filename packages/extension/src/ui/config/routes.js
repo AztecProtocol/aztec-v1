@@ -13,10 +13,10 @@ import Restore from '~ui/views/Restore';
 import Login from '~ui/views/Login';
 import RegisterAddress from '~ui/views/RegisterAddress';
 import NoteAccess from '~ui/views/pages/NoteAccess';
-import ConfirmNoteAccess from '~ui/views/ConfirmNoteAccess';
-import GrantNoteAccess from '~ui/views/GrantNoteAccess';
-import Deposit from '~ui/views/Deposit';
 import Send from '~ui/views/Send';
+import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
+import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
+import DepositTransaction from '~ui/views/DepositTransaction';
 
 /*
  * Component can be rendered from background script and by clicking extension icon
@@ -82,23 +82,23 @@ export default {
             },
         },
     },
+    deposit: {
+        path: 'deposit',
+        Component: DepositTransaction,
+    },
     noteAccess: {
         path: 'note-access',
         Component: NoteAccess,
         routes: {
             confirm: {
                 path: 'confirm',
-                View: ConfirmNoteAccess,
+                View: NoteAccessConfirm,
             },
             grant: {
                 path: 'grant',
-                View: GrantNoteAccess,
+                View: NoteAccessTransaction,
             },
         },
-    },
-    deposit: {
-        path: 'deposit',
-        Component: Deposit,
     },
     send: {
         path: 'send',
