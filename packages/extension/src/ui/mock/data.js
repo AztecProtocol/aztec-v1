@@ -4,15 +4,21 @@ import {
 } from '~utils/random';
 import compoundLogo from './images/compound.png';
 
+const generate = (count, generator) => {
+    const data = [];
+    for (let i = 0; i < count; i += 1) {
+        data.push(generator());
+    }
+    return data;
+};
+
 const randomAddress = () => `0x${randomId(40)}`;
 
 export const seedPhrase = 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle';
 
 export const addresses = [
     '0x3339C3c842732F4DAaCf12aed335661cf4eab66b',
-    randomAddress(),
-    randomAddress(),
-    randomAddress(),
+    ...generate(3, randomAddress),
 ];
 
 export const assets = [
@@ -104,3 +110,10 @@ export const pastTransactions = [
         timestamp: Date.now() - 45 * 24 * 60 * 60 * 1000,
     },
 ];
+
+export const sendTransactions = generate(3, () => ({
+    amount: randomInt(1, 100),
+    account: {
+        address: addresses[randomInt(1, addresses.length - 1)],
+    },
+}));

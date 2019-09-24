@@ -8,6 +8,7 @@ import {
     domains,
     notes,
     pastTransactions,
+    sendTransactions,
 } from './data';
 
 const dummyFunc = () => {};
@@ -88,8 +89,26 @@ export default {
     },
     send: {
         asset: assets[0],
-        fromAddress: addresses[0],
-        toAddresses: addresses.slice(1),
-        amount: 500,
+        user: {
+            address: addresses[0],
+        },
+        transactions: sendTransactions,
+        goNext: dummyFunc,
+    },
+    'send.confirm': {
+        asset: assets[0],
+        user: {
+            address: addresses[0],
+        },
+        transactions: sendTransactions,
+        goNext: dummyFunc,
+    },
+    'send.grant': {
+        asset: assets[0],
+        user: {
+            address: addresses[0],
+        },
+        transactions: sendTransactions,
+        goNext: dummyFunc,
     },
 };
