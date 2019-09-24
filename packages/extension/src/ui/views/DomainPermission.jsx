@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import {
     Block,
     Text,
-    AvatarGroup,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import {
@@ -14,6 +13,7 @@ import formatAddress from '~ui/utils/formatAddress';
 import Popup from '~ui/components/Popup';
 import Ticket from '~ui/components/Ticket';
 import InfoRow from '~ui/components/InfoRow';
+import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
 const DomainPermission = ({
     domain,
@@ -28,54 +28,21 @@ const DomainPermission = ({
         iconSrc,
     } = domain;
     const [firstAsset] = assets;
-    const avatars = [];
+    const icons = [];
+    let moreItems;
     if (assets.length > 1) {
         const maxAvatars = 3;
-        const maxAvatarList = 2;
-        const tooltipBackground = 'grey-dark';
         assets.slice(0, maxAvatars).forEach(({
             code,
         }) => {
-            avatars.push({
+            icons.push({
                 src: icon(code),
                 alt: code.length > 2 ? code[0] : code,
                 tooltip: name(code),
-                tooltipBackground,
             });
         });
         if (assets.length > maxAvatars) {
-            const tooltipNode = (
-                <div>
-                    {assets.slice(maxAvatars, maxAvatars + maxAvatarList).map(({
-                        code,
-                    }) => (
-                        <Block
-                            key={code}
-                            padding="xxs"
-                        >
-                            <Text
-                                text={name(code)}
-                                size="xxs"
-                            />
-                        </Block>
-                    ))}
-                    {(assets.length > maxAvatars + maxAvatarList) && (
-                        <Block padding="xxs">
-                            <Text
-                                text={i18n.t('and.more.count', assets.length - (maxAvatars + maxAvatarList))}
-                                size="xxs"
-                                color="white-lighter"
-                            />
-                        </Block>
-                    )}
-                </div>
-            );
-            avatars.push({
-                alt: `+${assets.length - maxAvatars}`,
-                background: 'grey-lightest',
-                tooltip: tooltipNode,
-                tooltipBackground,
-            });
+            moreItems = assets.slice(maxAvatars).map(({ code }) => name(code));
         }
     }
 
@@ -110,8 +77,11 @@ const DomainPermission = ({
                             />
                         )}
                         {assets.length > 1 && (
-                            <AvatarGroup
-                                avatars={avatars}
+                            <ProfileIconGroup
+                                theme="white"
+                                size="s"
+                                icons={icons}
+                                moreItems={moreItems}
                             />
                         )}
                     </Block>

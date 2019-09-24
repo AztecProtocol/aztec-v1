@@ -1,53 +1,67 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    Block,
     Avatar,
 } from '@aztec/guacamole-ui';
 import {
     avatarSizesMap,
 } from '~ui/styles/guacamole-vars';
 
-const themeStyleMapping = {
-    light: {
+export const themeStyleMapping = {
+    primary: {
+        background: 'transparent',
         iconBackground: 'white-lighter',
         color: 'white',
+        tooltipBackground: 'white-light',
     },
     white: {
-        iconBackground: 'white',
-        color: 'label',
+        background: 'white',
+        iconBackground: 'grey-lighter',
+        color: 'grey',
+        tooltipBackground: 'grey-dark',
+    },
+};
+
+export const typeIconMapping = {
+    asset: {
+        name: 'blur_on',
+    },
+    user: {
+        name: 'person',
     },
 };
 
 const ProfileIcon = ({
     className,
     theme,
+    type,
     src,
     alt,
     size,
 }) => {
     const style = themeStyleMapping[theme];
+    const {
+        name: iconName,
+    } = typeIconMapping[type] || {};
+
     return (
-        <Block
+        <Avatar
             className={className}
+            src={src}
+            alt={alt}
+            iconName={iconName}
+            size={size}
+            shape="circular"
             layer={1}
-            borderRadius="circular"
-            inline
-        >
-            <Avatar
-                {...style}
-                src={src}
-                alt={alt}
-                size={size}
-                shape="circular"
-            />
-        </Block>
+            {...style}
+        />
     );
 };
 
 ProfileIcon.propTypes = {
     className: PropTypes.string,
-    theme: PropTypes.oneOf(['light', 'white']),
+    theme: PropTypes.oneOf(Object.keys(themeStyleMapping)),
+    type: PropTypes.oneOf(['', 'asset', 'user']),
     src: PropTypes.string,
     alt: PropTypes.string,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
@@ -55,7 +69,8 @@ ProfileIcon.propTypes = {
 
 ProfileIcon.defaultProps = {
     className: '',
-    theme: 'light',
+    theme: 'primary',
+    type: '',
     src: '',
     alt: '',
     size: 'm',
