@@ -9,6 +9,7 @@ import {
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import AddressRow from '~ui/components/AddressRow';
+import AssetRow from '~ui/components/AssetRow';
 import apis from '~uiModules/apis';
 import Transaction from './handlers/Transaction';
 
@@ -82,8 +83,15 @@ const Deposit = ({
                 />
             </FlexBox>
             <Block top="s">
+                <AssetRow
+                    {...asset}
+                    size="xxs"
+                />
+            </Block>
+            <Block top="s">
                 <AddressRow
                     address={fromAddress}
+                    size="xxs"
                 />
             </Block>
         </div>

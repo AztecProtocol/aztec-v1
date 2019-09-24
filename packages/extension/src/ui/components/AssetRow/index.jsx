@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    FlexBox,
     Block,
+    FlexBox,
     Text,
 } from '@aztec/guacamole-ui';
 import {
@@ -11,28 +11,25 @@ import {
     textColorNames,
     defaultLabelColorName,
 } from '~ui/styles/guacamole-vars';
+import {
+    name,
+    icon,
+} from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
 import ProfileIcon from '~ui/components/ProfileIcon';
+import {
+    spacingMapping,
+} from '~ui/components/AddressRow';
 
-export const spacingMapping = {
-    xxs: 's',
-    xs: 's',
-    s: 'm',
-    m: 'm',
-    l: 'l',
-    xl: 'l',
-    xxl: 'l',
-};
-
-const AddressRow = ({
+const AssetRow = ({
     className,
     size,
     textSize,
+    code,
     address,
     prefixLength,
     suffixLength,
     color,
-    inline,
 }) => (
     <FlexBox
         className={className}
@@ -40,45 +37,47 @@ const AddressRow = ({
         nowrap
     >
         <ProfileIcon
-            className="flex-fixed"
-            theme="white"
-            type="user"
+            src={icon(code)}
             size={size}
-            inline={inline}
         />
-        <Block
-            className="flex-free-expand"
-            left={spacingMapping[size]}
-        >
-            <Text
-                className="text-code"
-                text={formatAddress(address, prefixLength, suffixLength)}
-                size={textSize || size}
-                color={color}
-            />
+        <Block left={spacingMapping[size]}>
+            <FlexBox valign="center" nowrap>
+                <Text
+                    text={name(code)}
+                    size={textSize || size}
+                    color={color}
+                />
+                <Block left="xxs">
+                    <Text
+                        className="text-code"
+                        text={`(${formatAddress(address, prefixLength, suffixLength)})`}
+                        size={textSize || size}
+                        color={color}
+                    />
+                </Block>
+            </FlexBox>
         </Block>
     </FlexBox>
 );
 
-AddressRow.propTypes = {
+AssetRow.propTypes = {
     className: PropTypes.string,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
     textSize: PropTypes.oneOf(['', 'inherit', ...fontSizeKeys]),
+    code: PropTypes.string.isRequired,
     address: PropTypes.string.isRequired,
     prefixLength: PropTypes.number,
     suffixLength: PropTypes.number,
     color: PropTypes.oneOf(textColorNames),
-    inline: PropTypes.bool,
 };
 
-AddressRow.defaultProps = {
+AssetRow.defaultProps = {
     className: '',
     size: 's',
     textSize: '',
     prefixLength: 6,
     suffixLength: 4,
     color: defaultLabelColorName,
-    inline: false,
 };
 
-export default AddressRow;
+export default AssetRow;

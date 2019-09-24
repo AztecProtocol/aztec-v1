@@ -2,13 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Block,
-    FlexBox,
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import {
-    name,
-    icon,
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
@@ -16,7 +13,7 @@ import Popup from '~ui/components/Popup';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
 import AddressRow from '~ui/components/AddressRow';
-import ProfileIcon from '~ui/components/ProfileIcon';
+import AssetRow from '~ui/components/AssetRow';
 import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
 
@@ -38,17 +35,14 @@ const ConfirmNoteAccess = ({
     } = asset;
 
     const assetInfoNode = (
-        <FlexBox valign="center" nowrap>
-            <ProfileIcon
-                src={icon(code)}
-                size="xs"
-            />
-            <Block left="xs">
-                <Text
-                    text={`${name(code)} (${formatAddress(assetAddress)})`}
-                />
-            </Block>
-        </FlexBox>
+        <AssetRow
+            size="xs"
+            textSize="inherit"
+            code={code}
+            address={assetAddress}
+            prefixLength={6}
+            suffixLength={4}
+        />
     );
 
     return (
@@ -84,7 +78,16 @@ const ConfirmNoteAccess = ({
                         <InplacePopup
                             theme="white"
                             items={accounts}
-                            renderItem={({ address }) => <AddressRow address={address} />}
+                            renderItem={({ address }) => (
+                                <AddressRow
+                                    address={address}
+                                    size="xs"
+                                    textSize="xxs"
+                                    prefixLength={18}
+                                    suffixLength={10}
+                                    inline
+                                />
+                            )}
                             itemMargin="xs 0"
                             margin="xs m"
                             numberOfVisibleItems={2}

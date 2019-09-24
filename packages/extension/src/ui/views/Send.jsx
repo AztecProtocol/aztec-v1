@@ -78,6 +78,9 @@ const Send = ({
             <Block top="s">
                 <AddressRow
                     address={fromAddress}
+                    size="xs"
+                    prefixLength={10}
+                    suffixLength={8}
                 />
             </Block>
         </div>

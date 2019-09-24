@@ -80,6 +80,9 @@ const RegisterAddress = ({
             <Block padding="xs 0">
                 <AddressRow
                     address={address}
+                    size="xs"
+                    prefixLength={10}
+                    suffixLength={8}
                 />
             </Block>
         </div>
