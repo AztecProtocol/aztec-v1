@@ -44,16 +44,19 @@ const Connection = ({
             )}
         >
             <FlexBox valign="center">
-                <div className={styles.colLeft}>
+                <Block
+                    className={styles.colLeft}
+                    right="s"
+                >
                     {fromTitle && (
                         <Text
-                            size="xxs"
+                            size="xs"
                             color="label"
                         >
                             {fromTitle}
                         </Text>
                     )}
-                </div>
+                </Block>
                 <FlexBox
                     align="center"
                     valign="center"
@@ -63,30 +66,50 @@ const Connection = ({
                         size={size}
                         {...fromIcon}
                     />
-                    <Block padding="s">
-                        <Icon
-                            name={actionIconName}
-                            color={actionIconColor}
-                            size={size}
-                        />
-                    </Block>
+                    <FlexBox valign="center">
+                        <Block padding="xs">
+                            <Icon
+                                name="more_horiz"
+                                color="grey-lighter"
+                                size="xs"
+                            />
+                        </Block>
+                        <Block padding="xs">
+                            <Icon
+                                name={actionIconName}
+                                color={actionIconColor}
+                                size={size}
+                            />
+                        </Block>
+                        <Block padding="xs">
+                            <Icon
+                                name="more_horiz"
+                                color="grey-lighter"
+                                size="xs"
+                            />
+                        </Block>
+                    </FlexBox>
                     <ProfileIconGroup
+                        className={styles.iconGroupRight}
                         theme={theme}
                         size={size}
                         icons={toIcons}
                         moreItems={moreItems}
                     />
                 </FlexBox>
-                <div className={styles.colRight}>
+                <Block
+                    className={styles.colRight}
+                    left="s"
+                >
                     {toTitle && (
                         <Text
-                            size="xxs"
+                            size="xs"
                             color="label"
                         >
                             {toTitle}
                         </Text>
                     )}
-                </div>
+                </Block>
             </FlexBox>
             {!!(fromDesc || toDesc) && (
                 <Block top="s">

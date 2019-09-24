@@ -184,43 +184,53 @@ class Transaction extends PureComponent {
         const {
             submitButtonText,
             successMessage,
+            autoStart,
         } = this.props;
         const {
             pending,
             loading,
         } = this.state;
         const task = this.getTask();
-
-        if (!task && !pending) {
-            return (
-                <Block bottom="s">
-                    <Text
-                        text={successMessage}
-                        size="xs"
-                        weight="semibold"
-                        color="primary"
-                    />
-                </Block>
-            );
-        }
-
         const {
             type,
             loadingMessage,
         } = task || {};
 
-        let text = submitButtonText;
-        if (loading) {
+        let text;
+        let textColor;
+        if (!task && !pending) {
+            text = successMessage;
+            textColor = 'primary';
+        } else if (loading) {
             if (loadingMessage) {
                 text = loadingMessage;
+                textColor = 'label';
             } else if (type === 'sign') {
                 text = i18n.t('transaction.waiting.sign');
+                textColor = 'orange';
             }
+        }
+
+        if (text) {
+            return (
+                <Block bottom="s">
+                    <Text
+                        text={text}
+                        color={textColor}
+                        size="xs"
+                        weight="semibold"
+                    />
+                </Block>
+            );
+        }
+
+        if (autoStart) {
+            return null;
         }
 
         return (
             <Button
-                text={text}
+                text={submitButtonText}
                 onClick={this.goToNextTask}
                 disabled={!pending}
             />
@@ -231,6 +241,7 @@ class Transaction extends PureComponent {
         const {
             title,
             description,
+            content,
             ticketHeight,
             goBack,
             onClose,
@@ -255,6 +266,13 @@ class Transaction extends PureComponent {
                 onClickLeftIcon={goBack || onClose}
                 submitButton={this.renderSubmitButton()}
             >
+                {!!content && (
+                    <Block
+                        bottom="l"
+                    >
+                        {content}
+                    </Block>
+                )}
                 <Ticket
                     header={ticketHeaderNode}
                     height={ticketHeight}
@@ -278,6 +296,7 @@ class Transaction extends PureComponent {
 Transaction.propTypes = {
     title: PropTypes.string.isRequired,
     description: PropTypes.string,
+    content: PropTypes.node,
     steps: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string,
         titleKey: PropTypes.string,
@@ -306,6 +325,7 @@ Transaction.propTypes = {
 
 Transaction.defaultProps = {
     description: '',
+    content: null,
     successMessage: '',
     ticketHeight: 6,
     initialStep: -1,
