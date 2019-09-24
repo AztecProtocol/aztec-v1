@@ -9,6 +9,9 @@ import note from './note';
 import proof from './proof';
 import deposit from './deposit';
 import send from './send';
+import withdraw from './withdraw';
+import mint from './mint';
+import burn from './burn';
 
 export default merge(
     general,
@@ -22,5 +25,8 @@ export default merge(
         proof,
         deposit,
         send,
+        withdraw,
+        mint,
+        burn,
     },
 );

@@ -29,19 +29,17 @@ const renderRouteNodes = (config, pathPrefix) => Object.keys(config).map((name) 
     return (
         <Block
             key={name}
-            padding="m"
+            padding={pathPrefix ? 'xs s' : 's'}
             hasBorderBottom={!pathPrefix}
         >
             <TextButton
                 text={formatName(name)}
                 href={path}
                 Link={Link}
+                size="xxs"
             />
             {!!childRouteNodes && (
-                <Block
-                    top="s"
-                    left="l"
-                >
+                <Block left="l">
                     {childRouteNodes}
                 </Block>
             )}
