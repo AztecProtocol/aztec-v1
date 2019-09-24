@@ -43,7 +43,7 @@ export default async function createNote(value, publicKey, owner, access) {
             };
         });
         const newMetaData = addAccess('', noteAccess);
-        const customData = newMetaData.slice(METADATA_AZTEC_DATA_LENGTH + 2);
+        const customData = newMetaData.slice(METADATA_AZTEC_DATA_LENGTH);
         note.setMetaData(customData);
     }
 

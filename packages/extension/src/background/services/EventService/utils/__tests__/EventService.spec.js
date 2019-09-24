@@ -8,7 +8,7 @@ import {
 import * as fetchAccountModule from '../fetchAccount';
 import * as fetchNotesModule from '../fetchNotes';
 import {
-   clearDB
+   clearDB,
 } from '~background/database';
 
 

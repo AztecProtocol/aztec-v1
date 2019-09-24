@@ -27,15 +27,24 @@ const findInputsFromAbi = eventName => IZkAssetConfig.config.abi.find(({ name, t
 const decodeLog = (rawLog, networkId) => ({
     createNote: () => {
         const inputs = findInputsFromAbi(IZkAssetConfig.events.createNote);
-        return decode(inputs, rawLog, networkId);
+        return {
+            ...decode(inputs, rawLog, networkId),
+            asset: rawLog.address,
+        };
     },
     updateNoteMetaData: () => {
         const inputs = findInputsFromAbi(IZkAssetConfig.events.updateNoteMetaData);
-        return decode(inputs, rawLog, networkId);
+        return {
+            ...decode(inputs, rawLog, networkId),
+            asset: rawLog.address,
+        };
     },
     destroyNote: () => {
         const inputs = findInputsFromAbi(IZkAssetConfig.events.destroyNote);
-        return decode(inputs, rawLog, networkId);
+        return {
+            ...decode(inputs, rawLog, networkId),
+            asset: rawLog.address,
+        };
     },
 });
 
@@ -44,6 +53,7 @@ const noteLog = decodedLog => ({
     noteHash: decodedLog.noteHash,
     metadata: decodedLog.metadata,
     blockNumber: decodedLog.blockNumber,
+    asset: decodedLog.asset,
 });
 
 

@@ -1,15 +1,14 @@
 import Asset from '~background/database/models/asset';
-import Note from '~background/database/models/note';
-import NoteAccess from '~background/database/models/noteAccess';
 import EventService from '~background/services/EventService';
 import {
     errorLog,
 } from '~utils/log';
+import metadata from '~utils/metadata';
 
 
-const packNote = (note, noteAccess, asset) => ({
+const packNote = (note, asset, noteAccess) => ({
     account: {
-        address: note.owner,
+        address: noteAccess.address,
     },
     viewingKey: noteAccess.viewingKey,
     note: {
@@ -29,34 +28,43 @@ const packNote = (note, noteAccess, asset) => ({
 });
 
 
-export default async function fetchNoteFromIndexedDB({
-    account,
-    noteHash,
-    networkId,
-}) {
+export default async function fetchNoteFromIndexedDB(options) {
+    const {
+        noteId: noteHash,
+        account,
+        networkId,
+    } = options;
+
     if (!account) {
         errorLog("'account' cannot be empty");
         return [];
     }
 
-    console.log(`before fetchLatestNote noteHash: ${JSON.stringify(noteHash)}, account: ${account}, networkId: ${networkId}`);
-
     const {
         error,
-        onChainNote,
+        note: onChainNote,
     } = await EventService.fetchLatestNote({
         noteHash,
         networkId,
     });
 
-    console.log(`fetched latest Note: ${JSON.stringify(onChainNote)}`);
+    console.log(`onChainNote.asset: ${JSON.stringify(onChainNote)}`);
 
-    // TODO: Extract NoteAccesses
-    const noteAccesses = [];
-    
-    // if (onChainNote) {
-    //     const asset = await Asset.get({ networkId }, onChainNote.asset);
-    // }
+    let noteAccesses = [];
+    if (onChainNote) {
+        const asset = await Asset.get({ networkId }, { registryOwner: onChainNote.asset });
+        const {
+            addresses,
+            viewingKeys,
+        } = metadata(onChainNote.metadata);
+
+        noteAccesses = addresses.map((address, index) => ({
+            address,
+            viewingKey: viewingKeys[index],
+        })).map(noteAccess => packNote(onChainNote, asset, noteAccess));
+    }
+
+    console.log(`fetched latest Note: ${JSON.stringify(onChainNote)}, \n error: ${JSON.stringify(error)} \n noteAccesses: ${JSON.stringify(noteAccesses)}`);
 
     return noteAccesses.map(({
         note,
