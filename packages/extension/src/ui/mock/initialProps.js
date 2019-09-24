@@ -111,4 +111,28 @@ export default {
         transactions: sendTransactions,
         goNext: dummyFunc,
     },
+    withdraw: {
+        asset: assets[0],
+        user: {
+            address: addresses[0],
+        },
+        amount: randomInt(1, 1000),
+        goNext: dummyFunc,
+    },
+    mint: {
+        asset: assets[0],
+        user: {
+            address: addresses[0],
+        },
+        amount: randomInt(1, 1000),
+        goNext: dummyFunc,
+    },
+    burn: {
+        asset: assets[0],
+        user: {
+            address: addresses[0],
+        },
+        amount: randomInt(1, 1000),
+        goNext: dummyFunc,
+    },
 };

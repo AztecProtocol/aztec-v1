@@ -19,6 +19,9 @@ import DepositTransaction from '~ui/views/DepositTransaction';
 import Send from '~ui/views/pages/Send';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
+import WithdrawTransaction from '~ui/views/WithdrawTransaction';
+import MintTransaction from '~ui/views/MintTransaction';
+import BurnTransaction from '~ui/views/BurnTransaction';
 
 /*
  * Component can be rendered from background script and by clicking extension icon
@@ -87,6 +90,18 @@ export default {
     deposit: {
         path: 'deposit',
         Component: DepositTransaction,
+    },
+    withdraw: {
+        path: 'withdraw',
+        Component: WithdrawTransaction,
+    },
+    mint: {
+        path: 'mint',
+        Component: MintTransaction,
+    },
+    burn: {
+        path: 'burn',
+        Component: BurnTransaction,
     },
     noteAccess: {
         path: 'note-access',
