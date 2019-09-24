@@ -8,7 +8,7 @@ export default {
         confirmed: 'Transaction Confirmed',
     },
     waiting: {
-        sign: 'Please sign the transaction',
+        sign: 'Please sign the transaction in MetaMask',
     },
     success: 'Transaction completed!',
     history: {

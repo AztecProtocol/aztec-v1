@@ -1,4 +1,7 @@
 import {
+    randomInt,
+} from '~utils/random';
+import {
     seedPhrase,
     addresses,
     assets,
@@ -77,9 +80,11 @@ export default {
     },
     deposit: {
         asset: assets[0],
-        fromAddress: addresses[0],
-        toAddresses: addresses.slice(1),
-        amount: 500,
+        user: {
+            address: addresses[0],
+        },
+        amount: randomInt(1, 1000),
+        goNext: dummyFunc,
     },
     send: {
         asset: assets[0],

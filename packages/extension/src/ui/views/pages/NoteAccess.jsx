@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
-import ConfirmNoteAccess from '~ui/views/ConfirmNoteAccess';
-import GrantNoteAccess from '~ui/views/GrantNoteAccess';
+import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
+import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
 
 const Steps = [
-    ConfirmNoteAccess,
-    GrantNoteAccess,
+    NoteAccessConfirm,
+    NoteAccessTransaction,
 ];
 
 const handleGoNext = (step, prevData) => {

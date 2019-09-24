@@ -42,7 +42,7 @@ const steps = [
     },
 ];
 
-const GrantNoteAccess = ({
+const NoteAccessTransaction = ({
     note,
     accounts,
     initialStep,
@@ -77,6 +77,7 @@ const GrantNoteAccess = ({
                 moreItems,
             }}
             size="s"
+            actionIconName="policy"
         />
     );
 
@@ -88,7 +89,8 @@ const GrantNoteAccess = ({
     return (
         <Transaction
             title={i18n.t('note.access.grant.title')}
-            ticketHeader={ticketHeader}
+            content={ticketHeader}
+            ticketHeight={3}
             steps={steps}
             initialStep={initialStep}
             initialTask={initialTask}
@@ -103,7 +105,7 @@ const GrantNoteAccess = ({
     );
 };
 
-GrantNoteAccess.propTypes = {
+NoteAccessTransaction.propTypes = {
     note: PropTypes.shape({
         hash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
@@ -123,7 +125,7 @@ GrantNoteAccess.propTypes = {
     onClose: PropTypes.func,
 };
 
-GrantNoteAccess.defaultProps = {
+NoteAccessTransaction.defaultProps = {
     initialStep: -1,
     initialTask: 0,
     autoStart: false,
@@ -131,4 +133,4 @@ GrantNoteAccess.defaultProps = {
     onClose: null,
 };
 
-export default GrantNoteAccess;
+export default NoteAccessTransaction;
