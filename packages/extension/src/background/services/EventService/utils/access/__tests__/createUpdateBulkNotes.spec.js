@@ -58,7 +58,7 @@ describe('createBulkNotes', () => {
         owner: '0x123',
         metadata: metadataStr,
         blockNumber: 1,
-        asset: '0x542'
+        asset: '0x542',
     };
 
     const expectedAccesses = [

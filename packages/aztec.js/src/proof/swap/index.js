@@ -125,9 +125,8 @@ class SwapProof extends Proof {
         const encodedParams = [
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners([...this.inputNoteOwners, ...this.outputNoteOwners]),
-            inputCoder.encodeMetaData(this.outputNotes),
+            inputCoder.encodeMetaData([this.outputNotes[0], this.inputNotes[1]]),
         ];
-
         const length = 1 + encodedParams.length + 1;
         const offsets = ProofUtils.getOffsets(length, encodedParams);
         const abiEncodedParams = [this.challengeHex.slice(2), ...offsets, ...encodedParams];

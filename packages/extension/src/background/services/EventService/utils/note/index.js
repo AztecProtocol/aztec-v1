@@ -11,7 +11,7 @@ export const createNote = async (rawNote, networkId) => {
     const note = {
         ...rawNote,
         status: NOTE_STATUS.CREATED,
-    }
+    };
     return performCreateNote(note, networkId);
 };
 
@@ -29,7 +29,7 @@ export const updateNote = async (rawNote, networkId) => {
     const note = {
         ...rawNote,
         status: NOTE_STATUS.CREATED,
-    }
+    };
     return performUpdateNote(note, networkId);
 };
 
@@ -52,11 +52,9 @@ export const destroyNote = async (rawNote, networkId) => {
 };
 
 export const destroyBulkNotes = async (rawNotes, networkId) => {
-    const notes = rawNotes.map((rawNote) => ({
+    const notes = rawNotes.map(rawNote => ({
         ...rawNote,
         status: NOTE_STATUS.DESTROYED,
     }));
     return performUpdateBulkNotes(notes, networkId);
 };
-
-

@@ -1,6 +1,7 @@
 import Asset from '~background/database/models/asset';
 import Note from '~background/database/models/note';
 import NoteAccess from '~background/database/models/noteAccess';
+import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId';
 import {
     errorLog,
 } from '~utils/log';
@@ -47,31 +48,25 @@ export default async function fetchNotesFromIndexedDB({
     };
 
     const notes = await Note.query(networkOptions).where('blockNumber').above(lastSynced).toArray();
-
     const assetsKeys = notes.map(({ asset }) => asset);
-    const noteAccessKeys = assetsKeys.map(assetKey => `${assetKey}_${account}`);
+    const noteAccessKeys = assetsKeys.map(assetAddress => getNoteAccessId(account, assetAddress));
 
     // Since v3.0.0-alpha.8
     // const assets = await Asset.bulkGet(networkOptions, assetsKeys);
     // const acesses = await NoteAccess.bulkGet(networkOptions, noteAccessKeys);
 
-    const data = [];
+    const noteLogs = [];
     for (let i = 0; i < notes.length; i += 1) {
         const note = notes[i];
         const assetKey = assetsKeys[i];
         const noteAccessKey = noteAccessKeys[i];
 
-        // TODO: Why assetKey && noteAccessKey is null for owner in demo scripts?
         if (assetKey && noteAccessKey) {
-            const asset = await Asset.get(networkOptions, assetKey); // eslint-disable-line no-await-in-loop
+            const asset = await Asset.get(networkOptions, { registryOwner: assetKey }); // eslint-disable-line no-await-in-loop
             const acess = await NoteAccess.get(networkOptions, noteAccessKey); // eslint-disable-line no-await-in-loop
-            data.push(packNote(note, acess, asset));
+            noteLogs.push(packNote(note, acess, asset));
         }
     }
-
-    const {
-        noteLogs = [],
-    } = data || {};
 
     return noteLogs.map(({
         noteAccess: {

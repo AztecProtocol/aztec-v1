@@ -6,7 +6,7 @@ export default Model({
     version: 1,
     fields: [
         // Primary Key | first key is always primary key
-        'id', // `${account}_${asset}`
+        'id', // Use getNoteAccessId to generate id
         'noteHash',
         'account',
         'viewingKey',
