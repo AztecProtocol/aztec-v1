@@ -1,0 +1,17 @@
+@import '../../styles/variables';
+
+@each $key, $size in $avatar-sizes-map {
+  .size-#{$key} {
+    .colLeft, .colRight {
+      width: calc(50% - #{$size * 1.5});
+    }
+
+    .contentLeft, .contentRight {
+      width: calc(50% - #{$size * 0.5});
+    }
+  }
+}
+
+.colLeft, .contentLeft {
+  text-align: right;
+}

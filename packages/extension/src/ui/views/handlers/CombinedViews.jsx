@@ -57,7 +57,9 @@ class CombinedViews extends PureComponent {
         };
 
         if (step === Steps.length - 1) {
-            onExit(data);
+            if (onExit) {
+                onExit(data);
+            }
             return;
         }
 
@@ -105,7 +107,7 @@ CombinedViews.propTypes = {
     Steps: PropTypes.arrayOf(PropTypes.func).isRequired,
     onGoBack: PropTypes.func,
     onGoNext: PropTypes.func,
-    onExit: PropTypes.func.isRequired,
+    onExit: PropTypes.func,
 };
 
 CombinedViews.defaultProps = {
@@ -113,6 +115,7 @@ CombinedViews.defaultProps = {
     initialData: {},
     onGoBack: null,
     onGoNext: null,
+    onExit: null,
 };
 
 export default CombinedViews;

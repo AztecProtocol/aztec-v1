@@ -12,6 +12,7 @@ $panel-width: 320px;
 .section-panel {
     width: $panel-width;
     height: 100%;
+    overflow: auto;
 }
 
 .extension-window {
