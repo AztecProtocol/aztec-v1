@@ -9,5 +9,6 @@ export default Model({
         'address',
         'linkedPublicKey',
         'blockNumber',
+        'spendingPublicKey',
     ],
 });

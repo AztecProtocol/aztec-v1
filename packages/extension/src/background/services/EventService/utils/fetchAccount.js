@@ -42,11 +42,13 @@ export const fetchAccount = async ({
             blockNumber,
             returnValues: {
                 linkedPublicKey,
+                spendingPublicKey,
             },
         }) => ({
             address,
             blockNumber,
             linkedPublicKey,
+            spendingPublicKey,
         }));
 
         const account = accounts.length ? accounts[accounts.length - 1] : null;
