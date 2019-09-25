@@ -1,6 +1,7 @@
 /* eslint-disable prefer-destructuring */
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
+const BN = require('bn.js');
 
 const Keccak = require('../../keccak');
 const Verifier = require('../verifier');
@@ -24,7 +25,7 @@ class SwapVerifier extends Verifier {
         challengeResponse.appendBN(this.proof.sender.slice(2));
         challengeResponse.data = [...challengeResponse.data, ...rollingHash.data];
 
-        let reducer = bn128.zeroBnRed;
+        const reducer = rollingHash.redKeccak();
         this.data.forEach((note, i) => {
             let aBar;
             let kBar;
@@ -38,14 +39,14 @@ class SwapVerifier extends Verifier {
             }
 
             if (i > 0) {
-                reducer = rollingHash.redKeccak();
-                kBar = note.kBar.redMul(reducer);
-                aBar = note.aBar.redMul(reducer);
+                const x = reducer.redPow(new BN(i + 1));
+                kBar = note.kBar.redMul(x);
+                aBar = note.aBar.redMul(x);
 
                 if (i > 1) {
-                    kBar = this.data[i - 2].kBar.redMul(reducer);
+                    kBar = this.data[i - 2].kBar.redMul(x);
                 }
-                c = this.challenge.redMul(reducer);
+                c = this.challenge.redMul(x);
             }
 
             const B = gamma

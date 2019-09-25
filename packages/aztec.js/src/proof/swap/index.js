@@ -44,7 +44,7 @@ class SwapProof extends Proof {
 
         let xbk;
         let xba;
-        let reducer = bn128.zeroBnRed; // "x" in the white paper
+        const reducer = this.rollingHash.redKeccak(); // "x" in the white paper
         this.blindingFactors = this.notes.map(({ gamma }, i) => {
             let { bk } = blindingScalars[i];
             const { ba } = blindingScalars[i];
@@ -55,14 +55,14 @@ class SwapProof extends Proof {
             }
 
             if (i > 0) {
-                reducer = this.rollingHash.redKeccak();
+                const x = reducer.redPow(new BN(i + 1));
 
                 if (i > 1) {
                     bk = blindingScalars[i - 2].bk;
                 }
 
-                xbk = bk.redMul(reducer);
-                xba = ba.redMul(reducer);
+                xbk = bk.redMul(x);
+                xba = ba.redMul(x);
             }
             const B = gamma.mul(xbk).add(bn128.h.mul(xba));
             return { B, ba, bk };
