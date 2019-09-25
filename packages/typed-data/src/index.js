@@ -36,9 +36,7 @@ signer.encodeMessageData = function encodeMessageData(types, primaryType, messag
         if (type.includes('[')) {
             return `${acc}${sliceKeccak256(AbiCoder.encodeParameter(type, message[name]))}`;
         }
-        return `${acc}${AbiCoder
-            .encodeParameters([type], [message[name]])
-            .slice(2)}`;
+        return `${acc}${AbiCoder.encodeParameters([type], [message[name]]).slice(2)}`;
     }, sliceKeccak256(signer.encodeStruct(primaryType, types)));
 };
 
