@@ -30,6 +30,7 @@ class PublicRangeVerifier extends Verifier {
         challengeResponse.data = [...challengeResponse.data, ...rollingHash.data];
 
         let B;
+        const reducer = rollingHash.redKeccak();
         this.data.forEach((note, i) => {
             let kBar;
             const { aBar, gamma, sigma } = note;
@@ -44,11 +45,11 @@ class PublicRangeVerifier extends Verifier {
             }
 
             if (i === 1) {
-                const reducer = rollingHash.redKeccak();
                 let kBarX;
                 const firstTerm = this.data[0].kBar;
                 const secondTerm = this.challenge.mul(this.proof.publicComparison);
                 kBar = firstTerm.sub(secondTerm);
+                const x = reducer.redPow(new BN(i + 1));
 
                 // multiplication in reduction context only works for positive numbers
                 // So, have to check if kBar is negative and if it is, negate it (to make positive),
@@ -56,13 +57,13 @@ class PublicRangeVerifier extends Verifier {
 
                 if (kBar < 0) {
                     kBar = kBar.neg();
-                    kBarX = kBar.redMul(reducer).neg();
+                    kBarX = kBar.redMul(x).neg();
                 } else {
-                    kBarX = kBar.redMul(reducer);
+                    kBarX = kBar.redMul(x);
                 }
 
-                const challengeX = this.challenge.redMul(reducer);
-                const aBarX = aBar.redMul(reducer);
+                const challengeX = this.challenge.redMul(x);
+                const aBarX = aBar.redMul(x);
 
                 B = gamma
                     .mul(kBarX)
