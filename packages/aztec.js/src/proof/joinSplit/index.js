@@ -43,7 +43,7 @@ class JoinSplitProof extends Proof {
                 B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             } else {
                 // Get next iteration of our rolling hash
-                const x =  reducer.redPow(new BN(i + 1));
+                const x = reducer.redPow(new BN(i + 1));
                 const xbk = bk.redMul(x);
                 const xba = ba.redMul(x);
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
