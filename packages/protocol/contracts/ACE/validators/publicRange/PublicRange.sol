@@ -105,6 +105,8 @@ contract PublicRange {
                 ///////////////////////////  CALCULATE BLINDING FACTORS  /////////////////////////////////////
                 */
 
+                let x := 1
+
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
                     // Get the calldata index of this note and associated parameters
@@ -133,14 +135,15 @@ contract PublicRange {
                     // Check this commitment is well formed
                     validateCommitment(noteIndex, k, a)
 
+                    x := mulmod(x, mload(0x00), gen_order) // x is the kecca hash of the input commitments
+
                     if gt(i, 0) {
                         // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-                        let x := mod(mload(0x00), gen_order) // x is the kecca hash of the input commitments
                         k := mulmod(k, x, gen_order) // kx
                         a := mulmod(a, x, gen_order) // ax
                         c := mulmod(challenge, x, gen_order) // cx
                     }
-                    
+
                     // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
                     // Memory map:
                     // 0x20: \gamma_iX
