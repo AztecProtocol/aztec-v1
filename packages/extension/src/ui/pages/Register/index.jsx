@@ -30,7 +30,10 @@ class RegisterExtension extends Component {
         } = this.state;
         const {
             data: {
-                signature,
+                response: {
+                    signature,
+                    publicKey: spendingPublicKey,
+                },
             },
         } = await ExtensionApi.auth.linkAccountToMetaMask({
             account: {
@@ -40,8 +43,10 @@ class RegisterExtension extends Component {
             requestId,
             clientId,
         });
+        console.log(spendingPublicKey);
         this.setState({
             signature,
+            spendingPublicKey,
         });
     }
 
@@ -82,6 +87,7 @@ class RegisterExtension extends Component {
                 linkedPublicKey,
             },
             signature,
+            spendingPublicKey,
         } = this.state;
         const {
             action: {
@@ -94,6 +100,7 @@ class RegisterExtension extends Component {
                 address,
                 linkedPublicKey,
                 signature,
+                spendingPublicKey,
             },
             requestId,
             clientId,

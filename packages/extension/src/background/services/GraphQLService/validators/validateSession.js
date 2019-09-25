@@ -23,6 +23,7 @@ export default async function validateSession(_, args) {
         if (session) {
             await AuthService.logout();
         }
+
         return permissionError('account.not.login', {
             messageOptions: { account: currentAddress },
             currentAddress,

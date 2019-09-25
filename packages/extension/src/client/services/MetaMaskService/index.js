@@ -1,3 +1,5 @@
+import ethSigUtil from 'eth-sig-util';
+import { utils } from 'web3';
 import Web3Service from '../Web3Service';
 import registerExtension from './registerExtension';
 
@@ -19,21 +21,32 @@ export default async ({ data }) => {
                 params: [address, eip712Data],
                 from: address,
             });
+            const publicKey = ethSigUtil.extractPublicKey({
+                data: eip712Data,
+                sig: result,
+            });
+
             return {
                 ...data,
-                signature: result,
+                response: {
+                    signature: result,
+                    publicKey: utils.keccak256(publicKey),
+                },
             };
-            break;
         }
         case 'metamask.ace.publicApprove': {
             // we only need to do this if the proof sender is the user
+            // TODO the wallet contract or any contract will be responsible for this
             const {
                 response: {
-                    assetAddress,
-                    proofHash,
-                    amount,
+                    response: {
+                        assetAddress,
+                        amount,
+                        proofHash,
+                    },
                 },
             } = data;
+
             await Web3Service
                 .useContract('ACE')
                 .method('publicApprove')
@@ -42,23 +55,27 @@ export default async ({ data }) => {
                     proofHash,
                     amount,
                 );
-            break;
-        }
-        case 'metamask.eip712.signNotes': {
-
-            // we have a choice do this as a loop, use the wallet contract, or ammend confidential approve
-
-            eip712Data = signNote(data);
-            method = 'eth_signTypedData_v3';
-            const { result } = await Web3Service.sendAsync({
-                method,
-                params: [address, eip712Data],
-                from: address,
-            });
             return {
                 ...data,
-                signature: result,
+                response: {
+                    success: true,
+                },
             };
+        }
+        case 'metamask.eip712.signNotes': {
+            // we have a choice do this as a loop, use the wallet contract, or ammend confidential approve
+
+            // eip712Data = signNote(data);
+            // method = 'eth_signTypedData_v3';
+            // const { result } = await Web3Service.sendAsync({
+            //     method,
+            //     params: [address, eip712Data],
+            //     from: address,
+            // });
+            // return {
+            //     ...data,
+            //     signature: result,
+            // };
         }
         default: {
             break;

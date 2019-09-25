@@ -4,11 +4,14 @@ const sendTransaction = async (data) => {
     const {
         data: {
             data: {
-                contract, method, params,
+                contract,
+                method,
+                params,
+                contractAddress,
             },
         },
     } = data;
-    const receipt = await Web3Service.useContract(contract)
+    const receipt = await Web3Service.useContract(contract, contractAddress)
         .method(method)
         .send(...params);
     return {

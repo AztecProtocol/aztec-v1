@@ -30,7 +30,7 @@ const proofUi = (query, connection) => async () => {
         requestId: query.requestId,
         clientId: query.clientId,
         data: {
-            ...query.args,
+            ...query.data.args,
         },
     });
 

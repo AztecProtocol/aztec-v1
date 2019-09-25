@@ -79,6 +79,7 @@ export default async function validateAccount(accountAddress = '', isUser = fals
         }
     `);
 
+
     const {
         accounts = [],
     } = accountsResponse || {};

@@ -98,7 +98,7 @@ export default async function demoOwnable({
 
     await deposit(asset, [{
         amount: depositAmount,
-        recipient: userAddress,
+        to: userAddress,
     }], {
         from: userAddress,
         sender: userAddress,

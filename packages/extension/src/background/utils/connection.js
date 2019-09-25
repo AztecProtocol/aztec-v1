@@ -20,9 +20,12 @@ import {
     addDomainData,
 } from './connectionUtils';
 
+import graphQueryMap from '../../ui/queries';
+
 import ApiService from '../services/ApiService';
 import ClientActionService from '../services/ClientActionService';
 import TransactionSendingService from '../services/TransactionSendingService';
+import GraphQLService from '../services/GraphQLService';
 
 class Connection {
     constructor() {
@@ -31,12 +34,14 @@ class Connection {
         this.UiActionSubject = new Subject();
         this.ui$ = this.UiActionSubject.asObservable();
 
+        this.GraphSubject = new Subject();
+        this.graph$ = this.GraphSubject.asObservable();
+
         this.ClientResponseSubject = new Subject();
         this.clientResponse$ = this.ClientResponseSubject.asObservable();
 
         this.ClientActionSubject = new Subject();
         this.clientAction$ = this.ClientActionSubject.asObservable();
-
 
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
@@ -91,6 +96,38 @@ class Connection {
             tap(({ uiClientId, ...rest }) => {
                 this.connections[uiClientId].postMessage({
                     ...rest,
+                });
+            }),
+        ).subscribe();
+
+        this.message$.pipe(
+            filter(({ data }) => data.type === 'UI_QUERY_REQUEST'),
+            mergeMap((data) => {
+                const {
+                    data: {
+                        data: {
+                            query,
+                            args,
+                        },
+                    },
+                } = data;
+                return from((async () => {
+                    const response = await GraphQLService.query({
+                        variables: args,
+                        query: graphQueryMap[query],
+                    });
+                    console.log(response);
+                    return {
+                        ...data,
+                        response,
+                    };
+                })());
+            }),
+            tap(({ uiClientId, ...rest }) => {
+                console.log(uiClientId, rest);
+                this.connections[uiClientId].postMessage({
+                    ...rest,
+                    type: 'UI_QUERY_RESPONSE',
                 });
             }),
         ).subscribe();

@@ -3,7 +3,8 @@ import psl from 'psl';
 import gql from 'graphql-tag';
 import insertVariablesToGql from '~utils/insertVariablesToGql';
 import actionModel from '~database/models/action';
-import GraphQLService from '../services/GraphQLService'; import {
+import GraphQLService from '../services/GraphQLService';
+import {
     errorToActionMap,
 } from '~config/action';
 

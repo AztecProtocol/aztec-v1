@@ -78,9 +78,9 @@ export default async function fetchNoteFromServer({
     if (noteId) {
         where.note = noteId;
     }
-    if (registeredAt) {
-        where.timestamp_gte = parseInt(registeredAt / 10000);
-    }
+    // if (registeredAt) {
+    //     where.timestamp_gte = parseInt(registeredAt);
+    // }
     const variables = {
         first: numberOfNotes,
         where,
@@ -92,6 +92,7 @@ export default async function fetchNoteFromServer({
         variables,
         onError,
     });
+    console.log(data);
 
     const {
         noteLogs = [],

@@ -27,7 +27,13 @@ const registerExtensionUi = async (query, connection) => {
 
 
 const registerExtension = async (query, connection) => {
-    const response = await validateUserPermission(query);
+    const {
+        data: { args },
+    } = query;
+    const response = await validateUserPermission({
+        ...args,
+        domain: window.location.host,
+    });
     const { userPermission: { account = {} } } = response;
     if (account && account.registeredAt) {
         return {

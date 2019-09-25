@@ -7,6 +7,7 @@ export default gql`
             linkedPublicKey
             registeredAt
         }
+        error
     }
   }
 `;

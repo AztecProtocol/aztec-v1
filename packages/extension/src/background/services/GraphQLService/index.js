@@ -2,10 +2,10 @@ import ApolloClient from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
-import {
-    dataError,
-} from '~utils/error';
-import errorResponse from './utils/errorResponse';
+// import {
+//     dataError,
+// } from '~utils/error';
+// import errorResponse from './utils/errorResponse';
 import typeDefs from './typeDefs/background';
 import resolvers from './resolvers/background';
 
@@ -14,54 +14,49 @@ const schema = makeExecutableSchema({
     resolvers,
 });
 
-const apollo = new ApolloClient({
-    link: new SchemaLink({ schema }),
-    cache: new InMemoryCache({
-        addTypename: false,
-    }),
-    defaultOptions: {
-        query: {
-            fetchPolicy: 'no-cache',
-        },
-        watchQuery: {
-            fetchPolicy: 'no-cache',
-        },
-    },
-    connectToDevTools: true,
-});
 
-const formatError = (error) => {
-    if (error.graphQLErrors) {
-        return errorResponse(dataError('data.graphql', {
-            graphQLErrors: error.graphQLErrors,
-        }));
+// const formatError = (error) => {
+//     if (error.graphQLErrors) {
+//         return errorResponse(dataError('data.graphql', {
+//             graphQLErrors: error.graphQLErrors,
+//         }));
+//     }
+//     return error;
+// };
+//
+class GraphQLService {
+    constructor(connection) {
+        this.apollo = new ApolloClient({
+            link: new SchemaLink({ schema }),
+            cache: new InMemoryCache({
+                addTypename: false,
+            }),
+            defaultOptions: {
+                query: {
+                    fetchPolicy: 'no-cache',
+                },
+                watchQuery: {
+                    fetchPolicy: 'no-cache',
+                },
+            },
+            connectToDevTools: true,
+        });
     }
-    return error;
-};
 
-export default {
-    query: async (query) => {
-        try {
-            const response = await apollo.query(query);
-            const {
-                data,
-            } = response || {};
+    query(req) {
+        return this.apollo.query({
+            ...req,
+            context: this.context,
+        });
+    }
 
-            return data;
-        } catch (e) {
-            return formatError(e, query);
-        }
-    },
-    mutation: async (mutation) => {
-        try {
-            const response = await apollo.mutate(mutation);
-            const {
-                data,
-            } = response || {};
+    mutate(req) {
+        return this.apollo.mutate({
+            ...req,
+            context: this.context,
+        });
+    }
+}
 
-            return data;
-        } catch (e) {
-            return formatError(e, mutation);
-        }
-    },
-};
+
+export default new GraphQLService();
