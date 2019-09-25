@@ -109,6 +109,7 @@ contract Dividend {
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1.
                 // This adds some minor alterations
+                let x := 1
                 for { let i := 0 } lt(i, 3) { i := add(i, 0x01) } {
 
                     // Get the calldata index of this note - call data location of start of note
@@ -137,6 +138,7 @@ contract Dividend {
                     let k
                     let a := calldataload(add(noteIndex, 0x20))
                     let c := challenge
+                    x := mulmod(x, mload(0x00), gen_order)
 
                     switch gt(i, 1)
                     case 1 { // output note
@@ -166,13 +168,10 @@ contract Dividend {
                     validateCommitment(noteIndex, k, a)
 
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
-                    let x := mod(mload(0x00), gen_order) // x is the kecca hash of the input commitments
                     k := mulmod(k, x, gen_order) // kx
                     a := mulmod(a, x, gen_order) // ax
                     c := mulmod(challenge, x, gen_order) // cx
                     // calculate x_{j+1}
-                    mstore(0x00, keccak256(0x00, 0x20)) // rehashing the kecca hash, for use in the next x
-
 
 
 

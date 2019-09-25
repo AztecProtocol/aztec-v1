@@ -47,7 +47,7 @@ class DividendProof extends Proof {
                 };
             });
 
-        let reducer = this.rollingHash.redKeccak(); // "x" in the white paper
+        const reducer = this.rollingHash.redKeccak(); // "x" in the white paper
         this.blindingFactors = this.notes.map((note, i) => {
             let { bk } = blindingScalars[i];
             const { ba } = blindingScalars[i];
@@ -59,11 +59,10 @@ class DividendProof extends Proof {
                 // bk_3 = (z_b)(bk_1) - (z_a)(bk_2)
                 bk = zbRed.redMul(blindingScalars[0].bk).redSub(zaRed.redMul(blindingScalars[1].bk));
             }
-
-            const xbk = bk.redMul(reducer); // xbk = bk*x
-            const xba = ba.redMul(reducer); // xba = ba*x
+            const x = reducer.redPow(new BN(i + 1));
+            const xbk = bk.redMul(x); // xbk = bk*x
+            const xba = ba.redMul(x); // xba = ba*x
             const B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
-            reducer = this.rollingHash.redKeccak().redPow(new BN(i));
             return { B, bk, ba };
         });
     }
