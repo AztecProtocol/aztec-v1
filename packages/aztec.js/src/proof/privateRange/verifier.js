@@ -1,5 +1,6 @@
 /* eslint-disable prefer-destructuring */
 const bn128 = require('@aztec/bn128');
+const BN = require('bn.js');
 const { constants, errors } = require('@aztec/dev-utils');
 
 const Keccak = require('../../keccak');
@@ -26,7 +27,7 @@ class PrivateRangeVerifier extends Verifier {
         });
         challengeResponse.data.push(...rollingHash.data);
 
-        let reducer;
+        const reducer = rollingHash.redKeccak();
         let challengeX;
         this.data.forEach((item, i) => {
             const { gamma, sigma } = item;
@@ -41,10 +42,10 @@ class PrivateRangeVerifier extends Verifier {
             }
 
             if (i === 1) {
-                reducer = rollingHash.redKeccak();
-                const kBarX = kBar.redMul(reducer);
-                const aBarX = aBar.redMul(reducer);
-                challengeX = this.challenge.redMul(reducer);
+                const x = reducer.redPow(new BN(i + 1));
+                const kBarX = kBar.redMul(x);
+                const aBarX = aBar.redMul(x);
+                challengeX = this.challenge.redMul(x);
 
                 B = gamma
                     .mul(kBarX)
@@ -53,10 +54,10 @@ class PrivateRangeVerifier extends Verifier {
             }
 
             if (i === 2) {
-                reducer = rollingHash.redKeccak();
-                const kBarX = this.data[0].kBar.redSub(this.data[1].kBar).redMul(reducer);
-                const aBarX = aBar.redMul(reducer);
-                challengeX = this.challenge.redMul(reducer);
+                const x = reducer.redPow(new BN(i + 1));
+                const kBarX = this.data[0].kBar.redSub(this.data[1].kBar).redMul(x);
+                const aBarX = aBar.redMul(x);
+                challengeX = this.challenge.redMul(x);
 
                 B = gamma
                     .mul(kBarX)

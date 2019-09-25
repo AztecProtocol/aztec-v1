@@ -70,9 +70,7 @@ contract PrivateRange {
                 hashCommitments(notes, n)
                 let b := add(0x300, mul(n, 0x80))
 
-                // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
-                // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
-                //  which adds some minor alterations
+                let x := 1
 
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
@@ -114,7 +112,7 @@ contract PrivateRange {
                                     gen_order,
                                     calldataload(sub(noteIndex, 0xc0))), // k_2x§
                                 gen_order)
-                    } 
+                    }
                     case 0 {
                         k := calldataload(noteIndex)
                     }
@@ -122,15 +120,13 @@ contract PrivateRange {
                     // Check this commitment is well formed...
                     validateCommitment(noteIndex, k, a)
 
+                    x := mulmod(x, mload(0x00), gen_order)
+
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
                     if i {
-                        let x := mod(mload(0x00), gen_order)
                         k := mulmod(k, x, gen_order)
                         a := mulmod(a, x, gen_order)
                         c := mulmod(challenge, x, gen_order)
-
-                        // calculate x_{j+1}
-                        mstore(0x00, keccak256(0x00, 0x20))
                     }
 
                     // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i

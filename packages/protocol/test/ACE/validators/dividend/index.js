@@ -34,7 +34,7 @@ const getDefaultNotes = async () => {
     return { notionalNote, residualNote, targetNote, za, zb };
 };
 
-contract.only('Dividend Validator', (accounts) => {
+contract('Dividend Validator', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {

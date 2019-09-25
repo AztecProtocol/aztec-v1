@@ -75,7 +75,7 @@ class PrivateRangeProof extends Proof {
 
         let B;
 
-        let reducer;
+        const reducer = this.rollingHash.redKeccak();
         this.blindingFactors = this.notes.map((note, i) => {
             let { bk } = blindingScalars[i];
             const { ba } = blindingScalars[i];
@@ -85,18 +85,18 @@ class PrivateRangeProof extends Proof {
             }
 
             if (i === 1) {
-                reducer = this.rollingHash.redKeccak().redPow(new BN(i));
-                const xbk = bk.redMul(reducer);
-                const xba = ba.redMul(reducer);
+                const x = reducer.redPow(new BN(i + 1));
+                const xbk = bk.redMul(x);
+                const xba = ba.redMul(x);
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             }
 
             if (i === 2) {
-                reducer = this.rollingHash.redKeccak().redPow(new BN(i));
+                const x = reducer.redPow(new BN(i + 1));
                 bk = blindingScalars[0].bk.redSub(blindingScalars[1].bk);
 
-                const xbk = bk.redMul(reducer);
-                const xba = ba.redMul(reducer);
+                const xbk = bk.redMul(x);
+                const xba = ba.redMul(x);
 
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             }
