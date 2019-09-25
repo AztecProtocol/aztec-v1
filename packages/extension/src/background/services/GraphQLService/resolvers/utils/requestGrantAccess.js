@@ -11,6 +11,35 @@ import {
 import {
     argsError,
 } from '~utils/error';
+import EventService from '~background/services/EventService';
+import NoteAccess from '~background/database/models/noteAccess';
+import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId';
+
+
+const packExistingAccesses = usersAddresses => usersAddresses.map(rawAddress => ({
+    account: {
+        address: rawAddress,
+    },
+}));
+
+const packUserAccess = (userAccess, note) => ({
+    userAccess: {
+        note: {
+            metadata: note.metadata,
+            asset: {
+                id: note.asset,
+            },
+        },
+        viewingKey: userAccess.viewingKey,
+    },
+});
+
+const packSharedAccounts = accounts => accounts.map(account => ({
+    sharedAccounts: {
+        address: account.address,
+        publicKey: account.linkedPublicKey,
+    },
+}));
 
 export default async function requestGrantAccess(args, ctx) {
     const {
@@ -19,6 +48,8 @@ export default async function requestGrantAccess(args, ctx) {
     } = args;
     const {
         address: userAddress,
+        // TODO: remove default value, when it will be passed here.
+        networkId = 0,
     } = ctx;
 
     console.log('------ Account requestGrantAccess');
@@ -28,52 +59,24 @@ export default async function requestGrantAccess(args, ctx) {
         addressList.push(address.substr(i, ADDRESS_LENGTH));
     }
 
-    const queryStr = `
-        query (
-            $userAccessesWhere: NoteAccess_filter
-            $noteAccessesWhere: NoteAccess_filter
-            $accountsWhere: Account_filter
-        ) {
-            userAccess: noteAccesses(first: 1, where: $userAccessesWhere) {
-                note {
-                    metadata
-                    asset {
-                        id
-                    }
-                }
-                viewingKey
-            }
-            existingAccesses: noteAccesses(first: ${addressList.length}, where: $noteAccessesWhere) {
-                account {
-                    address
-                }
-            }
-            sharedAccounts: accounts(first: ${addressList.length}, where: $accountsWhere) {
-                address
-                publicKey
-            }
-        }
-    `;
-    const variables = {
-        userAccessesWhere: {
-            account: userAddress,
-        },
-        noteAccessesWhere: {
-            note: noteId,
-            account_in: addressList,
-        },
-        accountsWhere: {
-            address_in: addressList,
-        },
-    };
+    const addressListPromises = addressList.map(rawAddress => EventService.fetchAztecAccount({
+        address: rawAddress,
+        networkId,
+    }));
+    const sahredAccounts = await Promise.all(addressListPromises);
+    const sharedAccounts = packSharedAccounts(sahredAccounts.map(({ account }) => account));
+
+    const userNoteAccess = NoteAccess.get({ networkId }, getNoteAccessId(userAddress, noteId));
     const {
-        userAccess,
-        existingAccesses,
-        sharedAccounts,
-    } = await GraphNodeService.query({
-        query: queryStr,
-        variables,
-    }) || {};
+        note,
+    } = await EventService.fetchLatestNote({
+        noteHash: noteId,
+        networkId,
+    });
+    const userAccess = packUserAccess(userNoteAccess, note);
+
+    const existingAccesses = packExistingAccesses(addressList);
+
 
     if (!userAccess || !userAccess.length) {
         throw argsError('account.noteAccess', {
@@ -179,3 +182,58 @@ export default async function requestGrantAccess(args, ctx) {
         asset: assetId,
     };
 }
+
+    // const queryStr = `
+    //     query (
+    //         $userAccessesWhere: NoteAccess_filter
+    //         $noteAccessesWhere: NoteAccess_filter
+    //         $accountsWhere: Account_filter
+    //     ) {
+    //         userAccess: noteAccesses(first: 1, where: $userAccessesWhere) {
+    //             note {
+    //                 metadata
+    //                 asset {
+    //                     id
+    //                 }
+    //             }
+    //             viewingKey
+    //         }
+    //         existingAccesses: noteAccesses(first: ${addressList.length}, where: $noteAccessesWhere) {
+    //             account {
+    //                 address
+    //             }
+    //         }
+    //         sharedAccounts: accounts(first: ${addressList.length}, where: $accountsWhere) {
+    //             address
+    //             publicKey
+    //         }
+    //     }
+    // `;
+    // const {
+    //     error, 
+    //     account,
+    // } = await EventService.fetchAztecAccount({
+    //     address: userAddress,
+    //     networkId,
+    // });
+    
+    // const variables = {
+    //     userAccessesWhere: {
+    //         account: userAddress,
+    //     },
+    //     noteAccessesWhere: {
+    //         note: noteId,
+    //         account_in: addressList,
+    //     },
+    //     accountsWhere: {
+    //         address_in: addressList,
+    //     },
+    // };
+    // const {
+    //     userAccess,
+    //     existingAccesses,
+    //     sharedAccounts,
+    // } = await GraphNodeService.query({
+    //     query: queryStr,
+    //     variables,
+    // }) || {};
