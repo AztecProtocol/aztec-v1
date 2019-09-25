@@ -213,7 +213,7 @@ class SyncManager {
         } = this.accounts.get(address);
 
         if (this.config.keepAll
-            || rawNote.owner.address === address
+            || rawNote.owner.address.toLowerCase() === address.toLowerCase()
         ) {
             const newNote = await addNote(rawNote, privateKey);
             return newNote.data;
