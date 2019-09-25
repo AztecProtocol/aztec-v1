@@ -14,8 +14,6 @@ export default async function syncUtilityNoteInfo(args, ctx = {}) {
         networkId = 0,
     } = ctx;
 
-    console.log(`------ Note syncUtilityNoteInfo`);
-
     if (!noteHash) {
         return null;
     }

@@ -56,8 +56,6 @@ export default async function init() {
         // await runLoadingEventsTest();
 
         await set({
-            // __graphNode: 'http://localhost:4000/',
-            __graphNode: 'http://127.0.0.1:8000/subgraphs/name/aztec/note-management',
             __providerUrlGanache: 'http://localhost:8545',
             __infuraProjectId: '',
         });

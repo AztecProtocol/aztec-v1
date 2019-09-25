@@ -1,60 +1,19 @@
-import performCreateNote from './createNote';
-import performCreateBulkNotes from './createBulkNotes';
-import performUpdateNote from './updateNote';
-import performUpdateBulkNotes from './updateBulkNotes';
-import { NOTE_STATUS } from '~background/config/constants';
-
-
-/* Create */
-
-export const createNote = async (rawNote, networkId) => {
-    const note = {
-        ...rawNote,
-        status: NOTE_STATUS.CREATED,
-    };
-    return performCreateNote(note, networkId);
-};
-
-export const createBulkNotes = async (rawNotes, networkId) => {
-    const notes = rawNotes.map(rawNote => ({
-        ...rawNote,
-        status: NOTE_STATUS.CREATED,
-    }));
-    return performCreateBulkNotes(notes, networkId);
-};
-
-/* Update */
-
-export const updateNote = async (rawNote, networkId) => {
-    const note = {
-        ...rawNote,
-        status: NOTE_STATUS.CREATED,
-    };
-    return performUpdateNote(note, networkId);
-};
-
-export const updateBulkNotes = async (rawNotes, networkId) => {
-    const notes = rawNotes.map(rawNote => ({
-        ...rawNote,
-        status: NOTE_STATUS.CREATED,
-    }));
-    return performUpdateBulkNotes(notes, networkId);
-};
+import createNote from './createNote';
+import createBulkNotes from './createBulkNotes';
+import updateNote from './updateNote';
+import updateBulkNotes from './updateBulkNotes';
 
 /* Destroy */
 
-export const destroyNote = async (rawNote, networkId) => {
-    const note = {
-        ...rawNote,
-        status: NOTE_STATUS.DESTROYED,
-    };
-    return performUpdateNote(note, networkId);
-};
+const destroyNote = updateNote;
+const destroyBulkNotes = updateBulkNotes;
 
-export const destroyBulkNotes = async (rawNotes, networkId) => {
-    const notes = rawNotes.map(rawNote => ({
-        ...rawNote,
-        status: NOTE_STATUS.DESTROYED,
-    }));
-    return performUpdateBulkNotes(notes, networkId);
+
+export {
+    createNote,
+    createBulkNotes,
+    updateNote,
+    updateBulkNotes,
+    destroyNote,
+    destroyBulkNotes,
 };

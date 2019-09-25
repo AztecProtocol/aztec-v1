@@ -3,6 +3,7 @@ import {
     IZkAssetConfig,
 } from '~background/config/contracts';
 import groupBy from '~utils/groupBy';
+import { NOTE_STATUS } from '~background/config/constants';
 
 
 const decode = (inputs, rawLog, networkId) => {
@@ -30,6 +31,7 @@ const decodeLog = (rawLog, networkId) => ({
         return {
             ...decode(inputs, rawLog, networkId),
             asset: rawLog.address,
+            status: NOTE_STATUS.CREATED,
         };
     },
     updateNoteMetaData: () => {
@@ -37,6 +39,7 @@ const decodeLog = (rawLog, networkId) => ({
         return {
             ...decode(inputs, rawLog, networkId),
             asset: rawLog.address,
+            status: NOTE_STATUS.CREATED,
         };
     },
     destroyNote: () => {
@@ -44,6 +47,7 @@ const decodeLog = (rawLog, networkId) => ({
         return {
             ...decode(inputs, rawLog, networkId),
             asset: rawLog.address,
+            status: NOTE_STATUS.DESTROYED,
         };
     },
 });
@@ -54,6 +58,7 @@ const noteLog = decodedLog => ({
     metadata: decodedLog.metadata,
     blockNumber: decodedLog.blockNumber,
     asset: decodedLog.asset,
+    status: decodedLog.status,
 });
 
 

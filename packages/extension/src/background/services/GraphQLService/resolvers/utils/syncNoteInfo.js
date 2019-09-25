@@ -52,7 +52,6 @@ export default async function syncNoteInfo(args, ctx) {
             noteId,
             networkId,
         });
-        console.log(`EventService.syncNote after: ${JSON.stringify(note)}`);
     }
 
     if (!note) {

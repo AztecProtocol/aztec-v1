@@ -48,8 +48,6 @@ export default async function fetchNoteFromIndexedDB(options) {
         networkId,
     });
 
-    console.log(`onChainNote.asset: ${JSON.stringify(onChainNote)}`);
-
     let noteAccesses = [];
     if (onChainNote) {
         const asset = await Asset.get({ networkId }, { registryOwner: onChainNote.asset });
@@ -64,8 +62,6 @@ export default async function fetchNoteFromIndexedDB(options) {
         })).map(noteAccess => packNote(onChainNote, asset, noteAccess));
     }
 
-    console.log(`fetched latest Note: ${JSON.stringify(onChainNote)}, \n error: ${JSON.stringify(error)} \n noteAccesses: ${JSON.stringify(noteAccesses)}`);
-
     return noteAccesses.map(({
         note,
         ...rest
@@ -73,56 +69,4 @@ export default async function fetchNoteFromIndexedDB(options) {
         ...rest,
         ...note,
     }));
-}
 
-// export default async function fetchNoteFromServer({
-//     account,
-//     noteId = '',
-//     lastSynced = '',
-//     blockNumber = 0,
-//     numberOfNotes = 1,
-//     excludes = [],
-//     onError,
-// } = {}) {
-//     if (!account) {
-//         errorLog("'account' cannot be empty");
-//         return [];
-//     }
-
-//     const query =  `
-//             query($first: Int!, $where: NoteAccess_filter, $orderBy: NoteAccess_orderBy) {
-//                 noteAccesses(first: $first, where: $where, orderBy: $orderBy, orderDirection: "desc") {
-//                     account {
-//                         address
-//                     }
-//                     viewingKey
-//                     note {
-//                         hash
-//                         asset {
-//                             address
-//                             linkedTokenAddress
-//                             scalingFactor
-//                             canAdjustSupply
-//                             canConvert
-//                         }
-//                         owner {
-//                             address
-//                         }
-//                         status
-//                     }
-//                 }
-//             }
-//         `;
-
-//     const where = {
-//         account,
-//         id_gt: lastSynced,
-//         id_not_in: excludes,
-//         where.note = noteId;
-//     };
-
-
-//     const {
-//         noteLogs = [],
-//         noteAccesses = [],
-//     } = data || {};

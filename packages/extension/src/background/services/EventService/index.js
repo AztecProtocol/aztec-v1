@@ -205,15 +205,7 @@ const fetchAsset = async ({
     address,
     networkId,
 }) => {
-    const options = {
-        filterOptions: {
-            registryOwner: address,
-        },
-    };
-
-    console.log(`------------ 0 --- ${address}, ${networkId}`);
     const asset = await Asset.get({ networkId }, address);
-    console.log(`------------ 1 ---`);
 
     if (asset) {
         return {
@@ -229,8 +221,6 @@ const fetchAsset = async ({
         assetAddress: address,
         networkId,
     });
-
-    console.log(`Loaded assets: ${JSON.stringify(assets)}`);
 
     return {
         error,
