@@ -581,7 +581,8 @@ contract('ZkAssetOwnable', (accounts) => {
             const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
             expect(loggedRevokedStatus).to.equal(false);
 
-            // Attempt replay attack - take the previously used grant permission sig, and use to reverse the revoke permission action
+            // Attempt replay attack - take the previously used grant permission sig,
+            // and use to reverse the revoke permission action
             spenderApproval = true;
             await truffleAssert.reverts(
                 zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature),
