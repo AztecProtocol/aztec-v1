@@ -1,23 +1,27 @@
-import browser from 'webextension-polyfill';
-import { Subject } from 'rxjs';
 import ApolloClient from 'apollo-client';
-
+import aztec from 'aztec.js';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
+import {
+    createNotes,
+} from '~utils/note';
 import {
     actionEvent,
     sendTransactionEvent,
 } from '~config/event';
 
-import { randomId } from '~utils/random';
+import address from '~utils/address';
+import { randomSumArray } from '~utils/random';
 import filterStream from '~utils/filterStream';
-import typeDefs from '~background/services/GraphQLService/typeDefs/ui';
-import resolvers from '~background/services/GraphQLService/resolvers/ui';
 import RegisterExtensionMutation from '../../mutations/RegisterExtension';
 import RegisterAccountMutation from '../../mutations/RegisterAccount';
 import ApproveDomainMutatuon from '../../mutations/ApproveDomain';
-
+import createNoteFromBalance from './createNoteFromBalance';
+import ClientConnection from '../ClientConnectionService';
+import validateExtensionAccount from './utils/validateExtensionAccount';
+import typeDefs from '../../../background/services/GraphQLService/typeDefs/ui';
+import resolvers from '../../../background/services/GraphQLService/resolvers/ui';
 
 const schema = makeExecutableSchema({
     typeDefs,
@@ -42,24 +46,10 @@ const apollo = new ApolloClient({
 
 class ExtensionApi {
     constructor() {
-        this.clientId = randomId();
-        this.backgroundPort = browser.runtime.connect({
-            name: this.clientId,
-        });
-
-        this.backgroundSubject = new Subject();
-        this.background$ = this.backgroundSubject.asObservable();
-        // this.background$.pipe(
-        // ).subscribe();
-
-        this.backgroundPort.onMessage.addListener((msg) => {
-            this.backgroundSubject.next(msg);
-        });
-
         this.auth = {
             createKeyVault: async ({
                 seedPhrase,
-                address,
+                address: userAddress,
                 password = 'test',
                 salt = 'salty',
                 domain = window.location.origin,
@@ -68,12 +58,13 @@ class ExtensionApi {
                     mutation: RegisterExtensionMutation,
                     variables: {
                         seedPhrase,
-                        address,
+                        address: userAddress,
                         salt,
                         password,
                         domain,
                     },
                 });
+
                 const {
                     data: {
                         registerExtension: {
@@ -88,7 +79,7 @@ class ExtensionApi {
                 account,
                 ...rest
             }) => {
-                this.backgroundPort.postMessage({
+                ClientConnection.backgroundPort.postMessage({
                     type: actionEvent,
                     requestId,
                     data: {
@@ -100,18 +91,20 @@ class ExtensionApi {
                     ...rest,
                 });
 
-                return filterStream('ACTION_RESPONSE', requestId, this.background$);
+                return filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
             },
             sendRegisterTransaction: async ({
                 params: {
-                    address,
+                    address: userAddress,
                     linkedPublicKey,
                     signature,
+                    spendingPublicKey,
                 },
                 requestId,
                 clientId,
             }) => {
-                this.backgroundPort.postMessage({
+                // we need to extract the spending public key
+                ClientConnection.backgroundPort.postMessage({
                     type: sendTransactionEvent,
                     requestId,
                     clientId,
@@ -119,18 +112,19 @@ class ExtensionApi {
                         method: 'registerAZTECExtension',
                         contract: 'AZTECAccountRegistry',
                         params: [
-                            address,
+                            userAddress,
                             linkedPublicKey,
+                            spendingPublicKey,
                             signature,
                         ],
                     },
                 });
 
-                const response = await filterStream('ACTION_RESPONSE', requestId, this.background$);
+                const response = await filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
                 return response;
             },
             registerAccount: async ({
-                address,
+                address: userAddress,
                 signature,
                 linkedPublicKey,
                 registeredAt = Date.now(),
@@ -139,7 +133,7 @@ class ExtensionApi {
                 await apollo.mutate({
                     mutation: RegisterAccountMutation,
                     variables: {
-                        address,
+                        address: userAddress,
                         signature,
                         linkedPublicKey,
                         domain,
@@ -150,13 +144,13 @@ class ExtensionApi {
             },
             approveDomain: async ({
                 domain,
-                address,
+                address: userAddress,
             }) => {
                 await apollo.mutate({
                     mutation: ApproveDomainMutatuon,
                     variables: {
                         domain,
-                        address,
+                        address: userAddress,
                     },
                 });
             },
@@ -169,8 +163,10 @@ class ExtensionApi {
             signNotes: async ({
                 notes,
                 spender,
+                spendStatus,
+                requestId,
             }) => {
-                this.backgroundPort.postMessage({
+                ClientConnection.backgroundPort.postMessage({
                     type: actionEvent,
                     requestId,
                     data: {
@@ -178,38 +174,166 @@ class ExtensionApi {
                         response: {
                             notes,
                             spender,
-                            status,
+                            spendStatus,
                         },
                     },
-                    ...rest,
                 });
 
-                return filterStream('ACTION_RESPONSE', requestId, this.background$);
+                return filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
             },
-            approveERC20: async ({
+            publicApprove: async ({
                 amount,
-                tokenAddress,
-                aceAddress,
+                assetAddress,
                 requestId,
-                ...rest
+                proofHash,
+                clientId,
             }) => {
+                // get the linkedToken
                 // we only call this if the user is sending the proof
-                this.backgroundPort.postMessage({
+                ClientConnection.backgroundPort.postMessage({
                     type: actionEvent,
                     requestId,
+                    clientId,
                     data: {
                         action: 'metamask.ace.publicApprove',
                         response: {
                             amount,
-                            tokenAddress,
-                            aceAddress,
+                            proofHash,
+                            assetAddress,
                         },
                     },
-                    ...rest,
+                });
+                return filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
+            },
+            createNoteFromBalance,
+            depositProof: async ({
+                owner,
+                transactions,
+                publicOwner,
+                numberOfOutputNotes,
+                domain,
+                currentAddress,
+            }) => {
+                const notesOwner = await validateExtensionAccount({
+                    accountAddress: owner,
+                    domain,
+                    currentAddress,
                 });
 
-                return filterStream('ACTION_RESPONSE', requestId, this.background$);
+                const {
+                    address: notesOwnerAddress,
+                } = notesOwner;
+
+                const outputTransactionNotes = await Promise.all(
+                    transactions.map(async (tx) => {
+                        const noteValues = randomSumArray(tx.amount, numberOfOutputNotes);
+                        const {
+                            spendingPublicKey,
+                            linkedPublicKey,
+                            to,
+                        } = await validateExtensionAccount({
+                            accountAddress: tx.to,
+                            currentAddress,
+                            domain,
+                        });
+
+                        const notes = await createNotes(
+                            noteValues,
+                            // TODO this needs to change to the actual spending public key
+                            spendingPublicKey,
+                            tx.to,
+                            linkedPublicKey,
+                        );
+                        return {
+                            notes,
+                            noteValues,
+                        };
+                    }),
+                );
+                const { outputNotes, outputNoteValues } = outputTransactionNotes.reduce(
+                    ({ notes, values }, obj) => ({
+                        outputNotes: notes.concat(obj.notes),
+                        outputNoteValues: values.concat(obj.noteValues),
+                    }), { notes: [], values: [] },
+                );
+
+                const {
+                    JoinSplitProof,
+                    ProofUtils,
+                } = aztec;
+                const publicValue = ProofUtils.getPublicValue(
+                    [],
+                    outputNoteValues,
+                );
+                const inputNotes = [];
+
+                const proof = new JoinSplitProof(
+                    inputNotes,
+                    outputNotes,
+                    notesOwnerAddress,
+                    publicValue,
+                    publicOwner,
+                );
+
+                return {
+                    proof,
+                    notes: outputNotes,
+                    notesOwner,
+                };
             },
+            withdrawProof: async ({
+                assetAddress,
+                sender,
+                owner,
+                transactions,
+                publicOwner,
+                numberOfInputNotes,
+                numberOfOutputNotes,
+                domain,
+                currentAddress,
+            }) => {
+                const withdrawProof = await createNoteFromBalance({
+                    assetAddress,
+                    sender: address(sender),
+                    owner: address(owner),
+                    transactions,
+                    publicOwner: address(publicOwner),
+                    numberOfInputNotes,
+                    numberOfOutputNotes,
+                    domain,
+                    currentAddress: address(currentAddress),
+                });
+                return withdrawProof;
+            },
+            sendDepositProof: async ({
+                requestId,
+                clientId,
+                params: {
+                    proofData,
+                    assetAddress,
+                },
+            }) => {
+                // we need to extract the spending public key
+                ClientConnection.backgroundPort.postMessage({
+                    type: sendTransactionEvent,
+                    requestId,
+                    clientId,
+                    data: {
+                        // TODO THIS NEEDS TO CHANGE TO BE DYNAMIC
+                        contract: 'ZkAsset',
+                        method: 'confidentialTransfer',
+                        contractAddress: assetAddress,
+                        params: [
+                            proofData,
+                            '0x',
+                        ],
+                    },
+                });
+
+                const response = await filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
+                return response;
+            },
+
             returnToClient: async () => {
 
             },

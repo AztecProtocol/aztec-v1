@@ -4,8 +4,7 @@ import {
 import AuthService from '~background/services/AuthService';
 import GraphNodeService from '~background/services/GraphNodeService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
-import decodeKeyStore from '~background/utils/decodeKeyStore';
-
+import decodeKeyStore from '~background/utils/decodeKeyStore'; 
 export default async function syncUserInfo(args, ctx) {
     const {
         currentAddress: userAddress,

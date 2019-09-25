@@ -32,7 +32,7 @@ export default class Asset {
     }
 
     refresh = async () => {
-        const { assetResponse } = await query({
+        const { asset: assetResponse } = await query({
             type: 'asset',
             args: { id: this.id },
         }) || {};

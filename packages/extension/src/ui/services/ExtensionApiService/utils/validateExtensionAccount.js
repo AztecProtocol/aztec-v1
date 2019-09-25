@@ -1,8 +1,13 @@
 import address from '~utils/address';
-import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
+import UserQuery from '../../../queries/UserQuery';
+import apollo from '../../../../background/services/GraphQLService';
 
-export default async function validateExtensionAccount(accountAddress) {
+export default async function validateExtensionAccount({
+    accountAddress,
+    domain,
+    currentAddress,
+}) {
     const validAddress = address(accountAddress);
     if (accountAddress && !validAddress) {
         throw new ApiError('input.address.not.valid', {
@@ -11,27 +16,21 @@ export default async function validateExtensionAccount(accountAddress) {
     }
 
     const {
-        user,
-    } = await query(`
-        user(id: "${validAddress}") {
-            account {
-                address
-                linkedPublicKey
-                spendingPublicKey
-            }
-            error {
-                type
-                key
-                message
-                response
-            }
-        }
-    `);
+        data: {
+            user,
+        },
+    } = await apollo.query({
+        query: UserQuery,
+        variables: {
+            id: validAddress,
+            domain,
+            currentAddress: address(currentAddress),
+        },
+    });
 
     const {
         account,
     } = user || {};
-    console.log(account);
 
     if (!account) {
         throw new ApiError('account.not.linked', {

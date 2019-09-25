@@ -50,7 +50,9 @@ class Aztec {
             tap(data => window.postMessage({
                 type: 'ACTION_RESPONSE',
                 requestId: data.requestId,
-                signature: data.signature,
+                response: {
+                    ...data.response,
+                },
             }, '*')),
             // respond to content script
         ).subscribe();

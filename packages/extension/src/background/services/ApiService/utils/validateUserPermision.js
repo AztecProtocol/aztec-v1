@@ -1,22 +1,10 @@
-import { handleQuery } from '../../../utils/connectionUtils';
+import apollo from '../../GraphQLService';
+import UserPermissionQuery from '../../../../ui/queries/UserPermissionQuery';
 
-export default async function validateUserPermission(data) {
-    const { response } = await handleQuery({
-        ...data,
-        query: `userPermission {
-                    account { 
-                        linkedPublicKey
-                        registeredAt
-                        address
-                    }
-                    error {
-                        type
-                        key
-                        message
-                        response
-                    }
-                }
-            `,
+export default async function validateUserPermission(variables) {
+    const { data } = await apollo.query({
+        query: UserPermissionQuery,
+        variables,
     }) || {};
-    return response;
+    return data;
 }

@@ -4,6 +4,7 @@ export default async function proveDeposit({
     transactions,
     from,
     sender,
+    assetAddress,
     numberOfOutputNotes,
 }) {
     const data = await query({
@@ -12,6 +13,7 @@ export default async function proveDeposit({
             proofType: 'DEPOSIT_PROOF',
             transactions,
             from,
+            assetAddress,
             sender,
             numberOfOutputNotes,
         },

@@ -13,7 +13,6 @@ class ApproveAssetForDomain extends Component {
     state ={
 
     }
-
     __updatePassword(value) {
         this.setState({ password: value });
     }

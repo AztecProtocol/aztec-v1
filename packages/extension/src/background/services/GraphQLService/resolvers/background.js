@@ -1,6 +1,6 @@
 import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import {
-    ensureKeyvault,
+    ensureKeyvault, // TODO rename this also checks session
     ensureDomainPermission,
 } from '../decorators';
 import mergeResolvers from './utils/mergeResolvers';

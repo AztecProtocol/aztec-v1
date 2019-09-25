@@ -64,10 +64,10 @@ class Web3Service {
             const network = config.networks[lastNetworkId];
             contractAddress = network && network.address;
         }
-        if (!contractAddress) {
-            log(`Contract object "${contractName}" doesn't have an address. Please set an address first.`);
-            return null;
-        }
+        // if (!contractAddress) {
+        //     log(`Contract object "${contractName}" doesn't have an address. Please set an address first.`);
+        //     return null;
+        // }
 
         this.abis[contractName] = config.abi;
 

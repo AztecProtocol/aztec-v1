@@ -11,6 +11,7 @@ export default async function getAccounts(args) {
             // should support more filters
         },
     } = args;
+    console.log(args);
 
     const queryStr = `
         query ($accountCount: Int!, $accountFilter: Account_filter!) {
@@ -33,6 +34,8 @@ export default async function getAccounts(args) {
         query: queryStr,
         variables,
     }) || {};
+
+    console.log(accounts);
 
     const onChainAccounts = accounts || [];
     const invalidAccounts = addresses

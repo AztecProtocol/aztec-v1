@@ -9,6 +9,7 @@ import RegisterExtensionMutation from '../../mutations/RegisterExtension';
 
 class Restore extends Component {
     state = {
+
     }
 
     __updateSeedPhrase(value) {

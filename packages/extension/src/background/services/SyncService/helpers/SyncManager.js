@@ -176,7 +176,16 @@ class SyncManager {
         lastSynced,
         registeredAt,
     }) {
+        console.log({
+            address,
+            privateKey,
+            lastSynced,
+            registeredAt,
+        });
         let account = this.accounts.get(address);
+        console.log({
+            account,
+        });
         if (!account) {
             account = {
                 syncing: false,
@@ -186,6 +195,7 @@ class SyncManager {
             };
             this.accounts.set(address, account);
         }
+        console.log('here');
         return this.syncNotes({
             address,
             privateKey,
@@ -198,11 +208,13 @@ class SyncManager {
         address,
         noteId,
     }) {
+        console.log({ noteId });
         const [rawNote] = await fetchNoteFromServer({
             account: address,
             noteId,
             numberOfNotes: 1,
         }) || [];
+        console.log({ rawNote });
         if (!rawNote) {
             return null;
         }

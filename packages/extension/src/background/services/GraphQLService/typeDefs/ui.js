@@ -16,6 +16,25 @@ const uiTypes = gql`
         success: Boolean
         error: Error
     }
+    type PermissionApiResponse {
+        account: User
+        error: Error
+        action: Action
+    }
+    extend type Query {
+        userPermission(
+            currentAddress: String!
+            domain: String!
+        ): PermissionApiResponse
+        subscribe(
+            type: String!
+            requestId: String!
+            assetId: ID
+            noteId: ID
+            currentAddress: String!
+            domain: String!
+        ): SubscriptionApiResponse
+    }
     extend type Mutation {
         login(
             password: String!

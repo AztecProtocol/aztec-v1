@@ -7,6 +7,9 @@ import {
 } from 'rxjs';
 import { Route, withRouter } from 'react-router-dom';
 import browser from 'webextension-polyfill';
+import {
+    get,
+} from '~utils/storage';
 import { randomId } from '~utils/random';
 import '@aztec/guacamole-ui/dist/styles/guacamole.css';
 
@@ -22,6 +25,8 @@ import Prove from './pages/Prove/index.jsx';
 import actionModel from '~database/models/action';
 
 import AuthService from '../background/services/AuthService';
+import GraphNodeService from '~background/services/GraphNodeService';
+
 
 const actionToRouteMap = {
 
@@ -53,8 +58,15 @@ class App extends Component {
 
         const search = new URLSearchParams(window.location.search);
         AuthService.getCurrentUser().then((resp) => {
-            this.setState({
-                address: resp.address,
+            if (resp) {
+                this.setState({
+                    address: resp.address,
+                });
+            }
+        });
+        get('__graphNode').then((resp) => {
+            GraphNodeService.set({
+                graphNodeServerUrl: resp,
             });
         });
         actionModel.get({ timestamp: search.get('id') })

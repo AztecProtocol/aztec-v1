@@ -1,35 +1,21 @@
-import { handleQuery } from '../../../utils/connectionUtils';
+import apollo from '../../GraphQLService';
+import AssetQuery from '../../../../ui/queries/AssetQuery';
 
 export default async function asset(query) {
     const {
-        data,
+        data: { args },
         domain,
     } = query;
-    const {
-        response,
-    } = await handleQuery({
-        query: `assetResponse: asset {
-            asset {
-                address
-                linkedTokenAddress
-                scalingFactor
-                canAdjustSupply
-                canConvert
-            }
-            error {
-                type
-                key
-                message
-                response
-            }
-        }
-    `,
-        data,
-        domain,
-    });
+    const { data } = await apollo.query({
+        query: AssetQuery,
+        variables: {
+            ...args,
+            domain,
+        },
+    }) || {};
 
     return {
         ...query,
-        response,
+        response: data,
     };
 }

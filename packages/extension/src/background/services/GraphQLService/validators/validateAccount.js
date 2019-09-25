@@ -12,6 +12,7 @@ export default async function validateAccount(_, args, ctx) {
     } = args;
 
     const user = await AuthService.getRegisteredUser(currentAddress);
+
     if (!user) {
         return permissionError('account.not.linked');
     }
@@ -30,7 +31,6 @@ export default async function validateAccount(_, args, ctx) {
     } catch (error) {
         return permissionError('account.incorrect.password', error);
     }
-
     SyncService.syncAccount({
         address: user.address,
         privateKey: decodePrivateKey(decodedKeyStore, pwDerivedKey),
