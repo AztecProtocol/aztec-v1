@@ -1,5 +1,5 @@
 /* global artifacts, contract, expect */
-const { encoder, note, SwapProof } = require('aztec.js');
+const { encoder, note, SwapProof, ProofUtils } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -8,6 +8,8 @@ const truffleAssert = require('truffle-assertions');
 const { keccak256, padLeft } = require('web3-utils');
 
 const SwapABIEncoderTest = artifacts.require('./SwapABIEncoderTest');
+
+const { customMetaData } = require('../../../helpers/ERC1724');
 
 const maker = secp256k1.generateAccount();
 const publicOwner = constants.addresses.ZERO_ADDRESS;
@@ -39,7 +41,7 @@ const getDefaultNotes = async () => {
     return getNotes(asks, bids);
 };
 
-contract.skip('Swap Validator ABI Encoder', (accounts) => {
+contract('Swap Validator ABI Encoder', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -49,9 +51,11 @@ contract.skip('Swap Validator ABI Encoder', (accounts) => {
     describe('Success States', () => {
         it('should encode the output of a Swap proof', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
+            inputNotes[1].setMetaData(customMetaData.data);
+            outputNotes[0].setMetaData(customMetaData.data);
+
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
-
             const result = await swapAbiEncoderTest.validateSwap(data, sender, bn128.CRS, { from: sender });
             const decoded = encoder.outputCoder.decodeProofOutputs(`0x${padLeft('0', 64)}${result.slice(2)}`);
             expect(result).to.equal(proof.eth.outputs);
@@ -98,7 +102,27 @@ contract.skip('Swap Validator ABI Encoder', (accounts) => {
 
         it('should revert if number of metadata entries != 2', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
-            const proof = new SwapProof(inputNotes, outputNotes, sender, [outputNotes[0], outputNotes[1], inputNotes[1]]);
+
+            // Set metaData for > 2 notes
+            outputNotes[0].setMetaData(customMetaData.data);
+            outputNotes[1].setMetaData(customMetaData.data);
+            inputNotes[1].setMetaData(customMetaData.data);
+
+            const proof = new SwapProof(inputNotes, outputNotes, sender);
+
+            sinon.stub(proof, 'encodeABI').callsFake(() => {
+                const notesForMetaDataEncoding = [outputNotes[0], outputNotes[1], inputNotes[1]];
+                const encodedParams = [
+                    encoder.inputCoder.encodeProofData(proof.data),
+                    encoder.inputCoder.encodeOwners([...proof.inputNoteOwners, ...proof.outputNoteOwners]),
+                    encoder.inputCoder.encodeMetaData(notesForMetaDataEncoding),
+                ];
+                const length = 1 + encodedParams.length + 1;
+                const offsets = ProofUtils.getOffsets(length, encodedParams);
+                const abiEncodedParams = [proof.challengeHex.slice(2), ...offsets, ...encodedParams];
+                return `0x${abiEncodedParams.join('').toLowerCase()}`;
+            });
+
             const data = proof.encodeABI();
             await truffleAssert.reverts(swapAbiEncoderTest.validateSwap(data, sender, bn128.CRS));
         });

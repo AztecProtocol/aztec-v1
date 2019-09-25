@@ -41,7 +41,7 @@ jobs:
         docker:
             - image: circleci/node:10.15.3
             - image: trufflesuite/ganache-cli:v6.4.1
-              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
+              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m=\"$TEST_MNEMONIC\"
         steps:
             - restore_cache:
                 keys:
@@ -67,7 +67,7 @@ jobs:
         docker:
             - image: circleci/node:10.15.3
             - image: trufflesuite/ganache-cli:v6.4.1
-              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975
+              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m=\"$TEST_MNEMONIC\"
         steps:
             - restore_cache:
                 keys:

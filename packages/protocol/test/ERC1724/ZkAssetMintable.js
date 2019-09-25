@@ -17,7 +17,7 @@ const ZkAssetMintable = artifacts.require('./ZkAssetMintable');
 
 const helpers = require('../helpers/ERC1724');
 
-const { customMetaData } = note.utils;
+const { customMetaData } = helpers;
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
@@ -43,12 +43,14 @@ const getCustomMintNotes = async (newMintCounterValue, mintedNoteValues) => {
 };
 
 const confidentialApprove = async (zkAssetMintable, delegateAddress, indexes, notes, ownerAccount) => {
+    const spenderApproval = true;
     await Promise.all(
         indexes.map((i) => {
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetMintable.address,
                 notes[i].noteHash,
                 delegateAddress,
+                spenderApproval,
                 ownerAccount.privateKey,
             );
             // eslint-disable-next-line no-await-in-loop
@@ -128,7 +130,11 @@ contract('ZkAssetMintable', (accounts) => {
                 aztecAccount,
                 aztecAccount,
             ]);
-            const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransfer(withdrawalData, withdrawalSignatures);
+            const { receipt: transferReceipt } = await zkAssetMintable.methods['confidentialTransfer(bytes,bytes)'](
+                withdrawalData,
+                withdrawalSignatures,
+                { from: accounts[0] },
+            );
 
             const erc20TotalSupplyAfterWithdrawal = (await erc20.totalSupply()).toNumber();
             expect(erc20TotalSupplyAfterWithdrawal).to.equal(withdrawalPublicValue * scalingFactor);
@@ -175,6 +181,7 @@ contract('ZkAssetMintable', (accounts) => {
             );
             const withdrawalData = withdrawalProof.encodeABI(zkAssetMintable.address);
             await ace.validateProof(JOIN_SPLIT_PROOF, accounts[2], withdrawalData, { from: delegateAddress });
+
             const { receipt: transferReceipt } = await zkAssetMintable.confidentialTransferFrom(
                 JOIN_SPLIT_PROOF,
                 withdrawalProof.eth.output,
@@ -228,10 +235,12 @@ contract('ZkAssetMintable', (accounts) => {
             await ace.publicApprove(zkAssetMintable.address, depositProof.hash, depositPublicValue, { from: sender });
 
             await erc20.approve(ace.address, scalingFactor.mul(new BN(depositPublicValue)), { from: sender });
+            const { receipt: depositReceipt } = await zkAssetMintable.methods['confidentialTransfer(bytes,bytes)'](
+                depositData,
+                depositSignatures,
+                { from: accounts[0] },
+            );
 
-            const { receipt: depositReceipt } = await zkAssetMintable.confidentialTransfer(depositData, depositSignatures, {
-                from: sender,
-            });
             expect(depositReceipt.status).to.equal(true);
 
             const intermediateAceBalance = (await erc20.balanceOf(ace.address)).toNumber();
@@ -284,20 +293,18 @@ contract('ZkAssetMintable', (accounts) => {
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const ephemeral = newMintCounterNote.metaData.slice(2);
 
-            newMintCounterNote.setMetaData(customMetaData);
+            newMintCounterNote.setMetaData(customMetaData.data);
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const { receipt } = await zkAssetMintable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
 
-
             // Crucial check, confirm that the event contains the expected metaData
             const event = receipt.logs.find((l) => l.event === 'UpdateTotalMinted');
             const emittedEphemeral = event.args.metaData.slice(130, 196);
-            const emittedCustomData = event.args.metaData.slice(196, 752);
+            const emittedCustomData = event.args.metaData.slice(196, 196 + customMetaData.data.length);
             expect(emittedEphemeral).to.equal(ephemeral);
-            expect(emittedCustomData).to.equal(customMetaData.slice(2));
-            expect(true).to.equal(false);
+            expect(emittedCustomData).to.equal(customMetaData.data.slice(2));
         });
     });
 

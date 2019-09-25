@@ -58,28 +58,6 @@ contract BehaviourAdjustable201907 is Behaviour201907 {
         updateOutputNotes(mintedNotes);
     }
 
-    function updateNoteRegistry(
-        uint24 _proof,
-        bytes memory _proofOutput
-    ) public onlyOwner {
-        require(registry.active == true, "note registry does not exist for the given address");
-
-        (bytes memory inputNotes,
-        bytes memory outputNotes,
-        ,
-        int256 publicValue) = _proofOutput.extractProofOutput();
-
-        updateInputNotes(inputNotes);
-        updateOutputNotes(outputNotes);
-
-        // If publicValue != 0, enact a token transfer
-        // (publicValue < 0) => transfer from publicOwner to ACE
-        // (publicValue > 0) => transfer from ACE to publicOwner
-        if (publicValue != 0) {
-            require(registry.canConvert == true, "asset cannot be converted into public tokens");
-        }
-    }
-
     function setConfidentialTotalMinted(bytes32 newTotalNoteHash) internal onlyOwner returns (bytes32) {
         registry.confidentialTotalMinted = newTotalNoteHash;
         return newTotalNoteHash;

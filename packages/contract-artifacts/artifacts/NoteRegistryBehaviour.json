@@ -59,6 +59,20 @@
         {
             "constant": true,
             "inputs": [],
+            "name": "PUBLIC_RANGE_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
             "name": "PRIVATE_RANGE_PROOF",
             "outputs": [
                 {
@@ -208,10 +222,6 @@
                     "type": "address"
                 },
                 {
-                    "name": "_linkedTokenAddress",
-                    "type": "address"
-                },
-                {
                     "name": "_scalingFactor",
                     "type": "uint256"
                 },
@@ -236,15 +246,7 @@
             "name": "getRegistry",
             "outputs": [
                 {
-                    "name": "linkedToken",
-                    "type": "address"
-                },
-                {
                     "name": "scalingFactor",
-                    "type": "uint256"
-                },
-                {
-                    "name": "totalSupply",
                     "type": "uint256"
                 },
                 {
@@ -266,20 +268,6 @@
             ],
             "payable": false,
             "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
-                    "name": "_value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "incrementTotalSupply",
-            "outputs": [],
-            "payable": false,
-            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -323,29 +311,20 @@
                 }
             ],
             "name": "updateNoteRegistry",
-            "outputs": [],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
+            "outputs": [
                 {
-                    "name": "_publicOwner",
+                    "name": "publicOwner",
                     "type": "address"
                 },
                 {
-                    "name": "_proofHash",
-                    "type": "bytes32"
+                    "name": "transferValue",
+                    "type": "uint256"
                 },
                 {
-                    "name": "_value",
-                    "type": "uint256"
+                    "name": "publicValue",
+                    "type": "int256"
                 }
             ],
-            "name": "publicApprove",
-            "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
             "type": "function"

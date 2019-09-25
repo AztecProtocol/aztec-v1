@@ -1,13 +1,16 @@
 /* global artifacts, expect, web3, contract, it:true */
-const { JoinSplitProof, signer } = require('aztec.js');
+const { JoinSplitProof, note, signer } = require('aztec.js');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },
 } = require('@aztec/dev-utils');
+const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
+const { randomHex } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
+const { generateFactoryId } = require('../helpers/Factory');
 
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const ACE = artifacts.require('./ACE');
@@ -15,20 +18,16 @@ const ZkAssetOwnable = artifacts.require('./ZkAssetOwnable');
 const ZkAssetOwnableTest = artifacts.require('./ZkAssetOwnableTest');
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
-const ConvertibleFactory = artifacts.require('./noteRegistry/epochs/201907/convertible/FactoryConvertible201907');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
-
-const generateFactoryId = (epoch, cryptoSystem, assetType) => {
-    return epoch * 256 ** 2 + cryptoSystem * 256 ** 1 + assetType * 256 ** 0;
-};
 
 contract('ZkAssetOwnable', (accounts) => {
     let ace;
     let erc20;
     let zkAssetOwnable;
     let zkAssetOwnableTest;
-    let convertibleFactory;
+    let baseFactory;
 
     const epoch = 1;
     const filter = 17; // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
@@ -39,12 +38,14 @@ contract('ZkAssetOwnable', (accounts) => {
     const newFactoryId = generateFactoryId(2, 1, 1);
 
     const confidentialApprove = async (indexes, notes, aztecAccounts) => {
+        const spenderApproval = true;
         await Promise.all(
             indexes.map((i) => {
                 const signature = signer.signNoteForConfidentialApprove(
                     zkAssetOwnable.address,
                     notes[i].noteHash,
                     zkAssetOwnableTest.address,
+                    spenderApproval,
                     aztecAccounts[i].privateKey,
                 );
                 // eslint-disable-next-line no-await-in-loop
@@ -64,8 +65,8 @@ contract('ZkAssetOwnable', (accounts) => {
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();
         await zkAssetOwnableTest.setZkAssetOwnableAddress(zkAssetOwnable.address);
 
-        convertibleFactory = await ConvertibleFactory.new(ace.address);
-        await ace.setFactory(newFactoryId, convertibleFactory.address);
+        baseFactory = await BaseFactory.new(ace.address);
+        await ace.setFactory(newFactoryId, baseFactory.address);
 
         await Promise.all(
             accounts.map((account) => {
@@ -114,7 +115,9 @@ contract('ZkAssetOwnable', (accounts) => {
                 from: accounts[0],
             });
 
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
                 transferOutputNotes,
@@ -172,7 +175,9 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -222,7 +227,9 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -238,6 +245,54 @@ contract('ZkAssetOwnable', (accounts) => {
 
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
+        });
+
+        it('should revoke confidentialApprove() permission granting', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const testNote = await note.create(publicKey, 10);
+            const spenderAddress = randomHex(20);
+
+            // Create some notes in the assets note registry
+            const inputNotes = [];
+            const outputNotes = [testNote];
+            const publicValue = -10;
+
+            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const signatures = [];
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, publicValue, { from: sender });
+
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
+                from: sender,
+            });
+
+            let spenderApproval = true;
+            const approvalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+
+            // Grant permission
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature);
+            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
+            expect(loggedApprovalStatus).to.equal(true);
+
+            spenderApproval = false;
+            const revokeApprovalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+            // Revoke permission
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, revokeApprovalSignature);
+            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
+            expect(loggedRevokedStatus).to.equal(false);
         });
     });
 
@@ -271,12 +326,16 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
 
+            const spenderApproval = true;
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
                 notes[0].noteHash,
                 zkAssetOwnableTest.address,
+                spenderApproval,
                 ownerAccounts[0].privateKey,
             );
             await truffleAssert.reverts(
@@ -315,7 +374,9 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -328,12 +389,14 @@ contract('ZkAssetOwnable', (accounts) => {
 
             const transferSignatures = transferProof.constructSignatures(zkAssetOwnable.address, transferInputOwnerAccounts);
 
-            await zkAssetOwnable.confidentialTransfer(transferData, transferSignatures);
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures);
 
+            const spenderApproval = true;
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetOwnable.address,
                 transferInputNotes[0].noteHash,
                 zkAssetOwnableTest.address,
+                spenderApproval,
                 ownerAccounts[0].privateKey,
             );
             await truffleAssert.reverts(
@@ -363,7 +426,9 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
 
             const emptySignature = '0x';
             await truffleAssert.reverts(
@@ -402,7 +467,9 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
 
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
@@ -445,7 +512,9 @@ contract('ZkAssetOwnable', (accounts) => {
             await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
                 from: accounts[0],
             });
-            await zkAssetOwnable.confidentialTransfer(depositData, depositSignatures, { from: accounts[0] });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
             const transferProof = new JoinSplitProof(
                 transferInputNotes,
                 transferOutputNotes,
@@ -461,6 +530,62 @@ contract('ZkAssetOwnable', (accounts) => {
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output),
                 'sender does not have approval to spend input note',
+            );
+        });
+
+        it('should fail to perform a replay attack, by using a previous signature in confidentialApprove()', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const testNote = await note.create(publicKey, 10);
+            const spenderAddress = randomHex(20);
+
+            // Create some notes in the assets note registry
+            const inputNotes = [];
+            const outputNotes = [testNote];
+            const publicValue = -10;
+
+            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const signatures = [];
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, publicValue, { from: sender });
+
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
+                from: sender,
+            });
+
+            let spenderApproval = true;
+            const approvalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+
+            // Grant permission
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature);
+            const loggedApprovalStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
+            expect(loggedApprovalStatus).to.equal(true);
+
+            spenderApproval = false;
+            const revokeApprovalSignature = signer.signNoteForConfidentialApprove(
+                zkAssetOwnable.address,
+                testNote.noteHash,
+                spenderAddress,
+                spenderApproval,
+                privateKey,
+            );
+
+            // Revoke permission
+            await zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, revokeApprovalSignature);
+            const loggedRevokedStatus = await zkAssetOwnable.confidentialApproved.call(testNote.noteHash, spenderAddress);
+            expect(loggedRevokedStatus).to.equal(false);
+
+            // Attempt replay attack - take the previously used grant permission sig, and use to reverse the revoke permission action
+            spenderApproval = true;
+            await truffleAssert.reverts(
+                zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature),
+                'signature has already been used',
             );
         });
     });

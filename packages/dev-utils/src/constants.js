@@ -33,19 +33,19 @@ const constants = {
      */
     K_MAX: 1048576,
     /** Maximum value that can be held in an AZTEC note during tests
-     *  @constant K_MIN
+     *  @constant K_MAX_TEST
      *  @type {string}
      *  @default 0
      */
     K_MAX_TEST: 14336,
     /** Minimum value that can be held in an AZTEC note
-     *  @constant K_MAX_TEST
+     *  @constant K_MIN
      *  @type { string }
      *  @default 0
      */
     K_MIN: 0,
     /** Minimum value that can be held in an AZTEC note during tests
-     *  @constant K_MAX_TEST
+     *  @constant K_MIN_TEST
      *  @type { string }
      *  @default 10240
      */
@@ -139,7 +139,7 @@ constants.eip712 = {
             NoteSignature: [
                 { name: 'noteHash', type: 'bytes32' },
                 { name: 'spender', type: 'address' },
-                { name: 'status', type: 'bool' },
+                { name: 'spenderApproval', type: 'bool' },
             ],
             EIP712Domain: EIP712_DOMAIN,
         },

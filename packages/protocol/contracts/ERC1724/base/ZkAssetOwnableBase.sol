@@ -11,7 +11,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  * @author AZTEC
  * @dev A contract which inherits from ZkAsset and includes the definition
  * of the contract owner
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 
 contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
@@ -31,6 +31,9 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         _scalingFactor,
         _canAdjustSupply
     ) {
+        // register the basic joinSplit as a valid proof
+        // 16 + 1, recall that 1 is the join-split validator because of 1 * 256**(0)
+        proofs[ace.latestEpoch()] = 17;
     }
 
     function setProofs(
@@ -40,10 +43,28 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         proofs[_epoch] = _proofs;
     }
 
-    function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
-        bool result = supportsProof(_proof);
+    /**
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine.
+    *
+    * Upon successfull verification, it will update note registry state - creating output notes and
+    * destroying input notes.
+    *
+    * @param _proofId - id of proof to be validated. Needs to be a balanced proof.
+    * @param _proofData - bytes variable outputted from a proof verification contract, representing
+    * transfer instructions for the ACE
+    * @param _signatures - array of the ECDSA signatures over all inputNotes
+    */
+    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
+        bool result = supportsProof(_proofId);
         require(result == true, "expected proof to be supported");
-        super.confidentialTransferFrom(_proof, _proofOutput);
+        super.confidentialTransfer(_proofId, _proofData, _signatures);
+    }
+
+    function confidentialTransferFrom(uint24 _proofId, bytes memory _proofOutput) public {
+        bool result = supportsProof(_proofId);
+        require(result == true, "expected proof to be supported");
+        super.confidentialTransferFrom(_proofId, _proofOutput);
     }
 
     // @dev Return whether the proof is supported or not by this asset. Note that we have

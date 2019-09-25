@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "web3-eth-abi": "1.0.0-beta.55",
-    "web3-utils": "1.0.0-beta.55"
+    "web3-utils": "1.2.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.3",
@@ -18,9 +18,8 @@
     "chai": "^4.2.0",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-config-prettier": "^4.1.0",
+    "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.16.0",
-    "fixpack": "^2.3.1",
     "mocha": "^6.0.2",
     "shx": "^0.3.2"
   },

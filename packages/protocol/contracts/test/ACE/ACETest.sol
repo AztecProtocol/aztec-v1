@@ -2,6 +2,11 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "../../ACE/ACE.sol";
 
+/**
+ * @title ACETest
+ * @author AZTEC
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
+ **/
 contract ACETest {
     event DebugValidateProofs(bytes proofOutputs);
 

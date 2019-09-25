@@ -6,7 +6,7 @@ const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-const { mockZeroPublicRangeProof } = require('../../../helpers/proof');
+const { FAKE_CRS, mockZeroPublicRangeProof } = require('../../../helpers/proof');
 
 const PublicRange = artifacts.require('./PublicRange');
 const PublicRangeInterface = artifacts.require('./PublicRangeInterface');
@@ -334,6 +334,16 @@ contract('Public range validator', (accounts) => {
                 const data = proof.encodeABI();
                 await truffleAssert.reverts(
                     publicRangeValidator.validatePublicRange(data, sender, bn128.CRS),
+                    truffleAssert.ErrorType.REVERT,
+                );
+            });
+
+            it('should fail for fake trusted setup public key', async () => {
+                const { originalNote, utilityNote, publicComparison, isGreaterOrEqual } = await getDefaultGreaterThanNotes();
+                const proof = new PublicRangeProof(originalNote, publicComparison, sender, isGreaterOrEqual, utilityNote);
+                const data = proof.encodeABI();
+                await truffleAssert.reverts(
+                    publicRangeValidator.validatePublicRange(data, sender, FAKE_CRS),
                     truffleAssert.ErrorType.REVERT,
                 );
             });

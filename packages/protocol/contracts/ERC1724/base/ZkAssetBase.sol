@@ -14,23 +14,21 @@ import "../../libs/ProofUtils.sol";
  * @author AZTEC
  * @dev A contract defining the standard interface and behaviours of a confidential asset.
  * The ownership values and transfer values are encrypted.
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
+contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     using NoteUtils for bytes;
     using SafeMath for uint256;
+    using ProofUtils for uint24;
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
-
-    // EIP712 Domain Version value
-    string constant internal EIP712_DOMAIN_VERSION = "1";
 
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
             "bytes32 noteHash,",
             "address spender,",
-            "bool status",
+            "bool spenderApproval",
         ")"
     ));
     
@@ -46,9 +44,11 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     ACE public ace;
     IERC20 public linkedToken;
 
-    uint256 public scalingFactor;
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
-    mapping(address => bytes32) noteAccess;
+    mapping(bytes32 => uint256) public metaDataTimeLog;
+    mapping(bytes32 => uint256) public noteAccess;
+    mapping(bytes32 => bool) public signatureLog;
+
 
     constructor(
         address _aceAddress,
@@ -65,15 +65,42 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
         ));
         ace = ACE(_aceAddress);
         linkedToken = IERC20(_linkedTokenAddress);
-        scalingFactor = _scalingFactor;
         ace.createNoteRegistry(
             _linkedTokenAddress,
             _scalingFactor,
             _canAdjustSupply,
             canConvert
         );
+        emit CreateZkAsset(
+            _aceAddress,
+            _linkedTokenAddress,
+            _scalingFactor,
+            _canAdjustSupply,
+            canConvert
+        );
     }
-    
+
+    /**
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine.
+    *
+    * Upon successfull verification, it will update note registry state - creating output notes and
+    * destroying input notes.
+    *
+    * @param _proofId - id of proof to be validated. Needs to be a balanced proof.
+    * @param _proofData - bytes variable outputted from a proof verification contract, representing
+    * transfer instructions for the ACE
+    * @param _signatures - array of the ECDSA signatures over all inputNotes
+    */
+    function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
+        // Check that it's a balanced proof
+        (, uint8 category, ) = _proofId.getProofComponents();
+
+        require(category == uint8(ProofCategory.BALANCED), "this is not a balanced proof");
+        bytes memory proofOutputs = ace.validateProof(_proofId, msg.sender, _proofData);
+        confidentialTransferInternal(_proofId, proofOutputs, _signatures, _proofData);
+    }
+
     /**
     * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
     * Will submit _proofData to the validateProof() function of the Cryptography Engine.
@@ -83,11 +110,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     *
     * @param _proofData - bytes variable outputted from a proof verification contract, representing
     * transfer instructions for the ACE
-    * @param _signatures - array of the ECDSA signatures over all inputNotes 
+    * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
-        bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, msg.sender, _proofData);
-        confidentialTransferInternal(proofOutputs, _signatures, _proofData);
+        confidentialTransfer(JOIN_SPLIT_PROOF, _proofData, _signatures);
     }
 
     /**
@@ -97,7 +123,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     *
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
     * @param _spender - address being approved to spend the note
-    * @param _status - defines whether the _spender address is being approved to spend the
+    * @param _spenderApproval - defines whether the _spender address is being approved to spend the
     * note, or if permission is being revoked
     * @param _signature - ECDSA signature from the note owner that validates the
     * confidentialApprove() instruction
@@ -105,28 +131,33 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
-        bool _status,
+        bool _spenderApproval,
         bytes memory _signature
     ) public {
         ( uint8 status, , , ) = ace.getNote(address(this), _noteHash);
         require(status == 1, "only unspent notes can be approved");
+
+        bytes32 signatureHash = keccak256(abi.encodePacked(_signature));
+        require(signatureLog[signatureHash] != true, "signature has already been used");
+        signatureLog[signatureHash] = true;
+
         bytes32 _hashStruct = keccak256(abi.encode(
                 NOTE_SIGNATURE_TYPEHASH,
                 _noteHash,
                 _spender,
-                status
+                _spenderApproval
         ));
 
         validateSignature(_hashStruct, _noteHash, _signature);
-        confidentialApproved[_noteHash][_spender] = _status;
+        confidentialApproved[_noteHash][_spender] = _spenderApproval;
     }
 
     /**
     * @dev Perform ECDSA signature validation for a signature over an input note
-    * 
+    *
     * @param _hashStruct - the data to sign in an EIP712 signature
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
-    * @param _signature - ECDSA signature for a particular input note 
+    * @param _signature - ECDSA signature for a particular input note
     */
     function validateSignature(
         bytes32 _hashStruct,
@@ -218,21 +249,22 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     }
 
     /**
-    * @dev Internal method to act on transfer instructions from a successful proof validation. 
+    * @dev Internal method to act on transfer instructions from a successful proof validation.
     * Specifically, it:
     * - extracts the relevant objects from the proofOutput object
     * - validates an EIP712 signature over each input note
     * - updates note registry state
     * - emits events for note creation/destruction
     * - converts or redeems tokens, according to the publicValue
-    * 
-    * @param proofOutputs - transfer instructions from a zero-knowledege proof validator 
+    * @param _proofId - id of proof resulting in _proofData
+    * @param proofOutputs - transfer instructions from a zero-knowledege proof validator
     * contract
     * @param _signatures - ECDSA signatures over a set of input notes
-    * @param _proofData - cryptographic proof data outputted from a proof construction 
+    * @param _proofData - cryptographic proof data outputted from a proof construction
     * operation
     */
     function confidentialTransferInternal(
+        uint24 _proofId,
         bytes memory proofOutputs,
         bytes memory _signatures,
         bytes memory _proofData
@@ -244,16 +276,15 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
         for (uint i = 0; i < proofOutputs.getLength(); i += 1) {
             bytes memory proofOutput = proofOutputs.get(i);
-            ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proofOutput, address(this));
-            
+            ace.updateNoteRegistry(_proofId, proofOutput, address(this));
+
             (bytes memory inputNotes,
             bytes memory outputNotes,
             address publicOwner,
             int256 publicValue) = proofOutput.extractProofOutput();
 
- 
+
             if (inputNotes.getLength() > uint(0)) {
-                
                 for (uint j = 0; j < inputNotes.getLength(); j += 1) {
                     bytes memory _signature = extractSignature(_signatures, j);
 
@@ -261,7 +292,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
                     bytes32 hashStruct = keccak256(abi.encode(
                         JOIN_SPLIT_SIGNATURE_TYPE_HASH,
-                        JOIN_SPLIT_PROOF,
+                        _proofId,
                         noteHash,
                         _challenge,
                         msg.sender
@@ -282,28 +313,77 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
 
         }
     }
+
     /**
     * @dev Update the metadata of a note that already exists in storage. 
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */
-    function updateNoteMetaData(bytes32 noteHash, bytes calldata metaData) external {
+    function updateNoteMetaData(bytes32 noteHash, bytes memory metaData) public {
         // Get the note from this assets registry
         ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
-        require(status == 1, "only unspent notes can be approved");
 
+        bytes32 addressID = keccak256(abi.encodePacked(msg.sender, noteHash));
         require(
-            noteAccess[msg.sender] == noteHash || noteOwner == msg.sender,
+            (noteAccess[addressID] >= metaDataTimeLog[noteHash] || noteOwner == msg.sender) && status == 1,
             'caller does not have permission to update metaData'
         );
 
-        address addressToApprove = MetaDataUtils.extractAddresses(metaData);
-        noteAccess[addressToApprove] = noteHash;
+        // Approve the addresses in the note metaData
+        approveAddresses(metaData, noteHash);
 
-        emit ApprovedAddress(addressToApprove, noteHash);
+        // Set the metaDataTimeLog to the latest block time
+        setMetaDataTimeLog(noteHash);
+
         emit UpdateNoteMetaData(noteOwner, noteHash, metaData);
     }
 
+    /**
+    * @dev Set the metaDataTimeLog mapping
+    * @param noteHash - hash of a note, used as a unique identifier for the note
+    */
+    function setMetaDataTimeLog(bytes32 noteHash) internal {
+        metaDataTimeLog[noteHash] = block.timestamp;
+    }
+
+    /**
+    * @dev Add approved addresses to a noteAccess mapping and to the global collection of addresses that
+    * have been approved
+    * @param metaData - metaData of a note, which contains addresses to be approved
+    * @param noteHash - hash of an AZTEC note, a unique identifier of the note
+    */
+    function approveAddresses(bytes memory metaData, bytes32 noteHash) internal {
+        /**
+        * Memory map of metaData
+        * 0x00 - 0x20 : length of metaData
+        * 0x20 - 0x81 : ephemeral key
+        * 0x81 - 0xa1 : approved addresses offset
+        * 0xa1 - 0xc1 : encrypted view keys offset
+        * 0xc1 - 0xe1 : app data offset
+        * 0xe1 - L_addresses : approvedAddresses
+        * (0xe1 + L_addresses) - (0xe1 + L_addresses + L_encryptedViewKeys) : encrypted view keys
+        * (0xe1 + L_addresses + L_encryptedViewKeys) - (0xe1 + L_addresses + L_encryptedViewKeys + L_appData) : appData
+        */
+
+        bytes32 metaDataLength;
+        bytes32 numAddresses;
+        assembly {
+            metaDataLength := mload(metaData)
+            numAddresses := mload(add(metaData, 0xe1))
+        }
+
+        // if customData has been set, approve the relevant addresses
+        if (uint256(metaDataLength) > 0x61) {
+            address[] memory extractedAddresses = new address[](uint256(numAddresses));
+
+            for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
+                address extractedAddress = extractAddress(metaData, i);
+                bytes32 addressID = keccak256(abi.encodePacked(extractedAddress, noteHash));
+                noteAccess[addressID] = block.timestamp;
+            }
+        }
+    }   
+   
 
     /**
     * @dev Emit events for all input notes, which represent notes being destroyed
@@ -326,9 +406,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     */
     function logOutputNotes(bytes memory outputNotes) internal {
         for (uint i = 0; i < outputNotes.getLength(); i += 1) {
-            (address noteOwner, bytes32 noteHash, bytes memory metadata) = outputNotes.get(i).extractNote();
-            emit CreateNote(noteOwner, noteHash, metadata);
+            (address noteOwner, bytes32 noteHash, bytes memory metaData) = outputNotes.get(i).extractNote();
+            setMetaDataTimeLog(noteHash);
+            approveAddresses(metaData, noteHash);
+            emit CreateNote(noteOwner, noteHash, metaData);
         }
     }
-
 }

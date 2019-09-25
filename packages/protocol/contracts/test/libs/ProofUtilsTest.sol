@@ -3,8 +3,9 @@ pragma solidity >= 0.5.0 <0.6.0;
 import "../../libs/ProofUtils.sol";
 
 /**
- * @title Library of proof utility functions
+ * @title ProofUtilsTest
  * @author AZTEC
+ * @dev Library of proof utility functions
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ProofUtilsTest {

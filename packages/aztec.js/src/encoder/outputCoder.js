@@ -11,55 +11,24 @@ const { keccak256, padLeft } = require('web3-utils');
 const outputCoder = {};
 
 /**
- * Decode an inputNote
+ * Decode a note
  *
- * @method decodeInputNote
+ * @method decodeNote
  * @param {note} note - AZTEC note
  * @returns {Object[]} note variables - extracted variables: noteType, owner,
  * noteHash, gamma, sigma, ephemeral
- * // TODO: check what happens on develop; only decoding
  */
-outputCoder.decodeInputNote = (note) => {
-    // expectedLength is 0xc0
+outputCoder.decodeNote = (note) => {
+    const length = parseInt(note.slice(0x00, 0x40), 16);
     const noteType = parseInt(note.slice(0x40, 0x80), 16);
     const owner = `0x${note.slice(0x98, 0xc0)}`;
     const noteHash = `0x${note.slice(0xc0, 0x100)}`;
+    let ephemeral;
 
-    const ephemeral = null;
-    const gamma = bn128.decompressHex(note.slice(0x140, 0x180));
-    const sigma = bn128.decompressHex(note.slice(0x180, 0x1c0));
-
-    return {
-        noteType,
-        owner,
-        noteHash,
-        gamma,
-        sigma,
-        ephemeral,
-    };
-};
-
-/**
- * Decode an output note
- *
- * @method decodeOutputNote
- * @param {note} note - AZTEC note
- * @returns {Object[]} note variables - extracted variables: noteType, owner,
- * noteHash, gamma, sigma, ephemeral
- * // TODO: check what happens on develop; only decoding
- */
-outputCoder.decodeOutputNote = (note) => {
-    const noteType = parseInt(note.slice(0x40, 0x80), 16);
-    const owner = `0x${note.slice(0x98, 0xc0)}`;
-    const noteHash = `0x${note.slice(0xc0, 0x100)}`;
-    const noteDataLength = parseInt(note.slice(0x100, 0x140), 16);
-    let ephemeral = null;
-
-    if (noteDataLength === 0x61) {
-        // ouputNote with no custom metaData set, expectedLength is 0xe1
-        ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
+    if (length === 0xc0) {
+        // inputNote, no metaData attached
+        ephemeral = null;
     } else {
-        // output note with custom metaData set, expectedLength is (0x20 * 4 + 0x20 * 2 + noteDataLength).toString(16);
         ephemeral = secp256k1.decompressHex(note.slice(0x1c0, 0x202));
     }
 
@@ -81,26 +50,16 @@ outputCoder.decodeOutputNote = (note) => {
  *
  * @method decodeNotes
  * @param {note} notes - array of AZTEC notes
- * @param {bool} isOutputNote - boolean determining whether the supplied notes are outputNotes.
- * If they are, decodeOutputNote() is called rather than decodeInputNote()
  * @returns {Object[]} array of note variables - array of decoded and extracted note variables
  * where each element corresponds to the note variables for an individual note
  */
-outputCoder.decodeNotes = (notes, isOutputNote) => {
+outputCoder.decodeNotes = (notes) => {
     const n = parseInt(notes.slice(0x40, 0x80), 16);
     return Array(n)
         .fill()
         .map((x, i) => {
-            let decodedResult;
             const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
-
-            if (isOutputNote) {
-                // multiple notes are being passed
-                decodedResult = outputCoder.decodeOutputNote(notes.slice(noteOffset * 2));
-            } else {
-                decodedResult = outputCoder.decodeInputNote(notes.slice(noteOffset * 2));
-            }
-            return decodedResult;
+            return outputCoder.decodeNote(notes.slice(noteOffset * 2));
         });
 };
 
@@ -141,8 +100,8 @@ outputCoder.decodeProofOutput = (proofOutput) => {
     const publicOwner = `0x${proofOutput.slice(0xd8, 0x100)}`;
     const publicValue = new BN(proofOutput.slice(0x100, 0x140), 16).fromTwos(256).toNumber();
     const challenge = `0x${proofOutput.slice(0x140, 0x180)}`;
-    const inputNotes = outputCoder.decodeNotes(proofOutput.slice(inputNotesOffset * 2), false);
-    const outputNotes = outputCoder.decodeNotes(proofOutput.slice(outputNotesOffset * 2), true);
+    const inputNotes = outputCoder.decodeNotes(proofOutput.slice(inputNotesOffset * 2));
+    const outputNotes = outputCoder.decodeNotes(proofOutput.slice(outputNotesOffset * 2));
 
     return {
         inputNotes,
@@ -154,50 +113,20 @@ outputCoder.decodeProofOutput = (proofOutput) => {
 };
 
 /**
- * Encode an input note, according to the ABI encoding specification
- *
- * @method encodeInputNote
- * @param {Note} note - AZTEC note
- * @returns {string} ABI encoded representation of the notes array
- */
-outputCoder.encodeInputNote = (note) => {
-    const encoded = Array(6).fill();
-    encoded[0] = padLeft('c0', 64);
-    encoded[1] = padLeft('1', 64);
-    encoded[2] = padLeft(note.owner.slice(2), 64);
-    encoded[3] = padLeft(note.noteHash.slice(2), 64);
-    encoded[4] = padLeft('40', 64);
-    encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
-    encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-    return encoded.join('');
-};
-
-/**
  * Encode an array of notes according to the ABI specification. Able to encode both input and output
  * notes
  *
  * @method encodeNotes
  * @param {note[]} notes - array of AZTEC notes
- * @param {boolean} isOutput - boolean describing whether the array of AZTEC notes are input or output notes
+ * @param {boolean} encodeMetaData - boolean controlling whether metaData is to be encoded or not. Typically, if
+ * inputNotes are being encoded the metadata is not encoded whereas if outputNotes are being encoded then
+ * the metaData is encoded
  * @returns {string} ABI encoded representation of the notes array
  */
-outputCoder.encodeNotes = (notes, isOutput) => {
-    let encodedNotes;
-    if (isOutput) {
-        encodedNotes = notes.map((note) => {
-            if (note.switchEncoding) {
-                return outputCoder.encodeInputNote(note);
-            }
-            return outputCoder.encodeOutputNote(note);
-        });
-    } else {
-        encodedNotes = notes.map((note) => {
-            if (note.switchEncoding) {
-                return outputCoder.encodeOutputNote(note);
-            }
-            return outputCoder.encodeInputNote(note);
-        });
-    }
+outputCoder.encodeNotes = (notes, encodeMetaData) => {
+    const encodedNotes = notes.map((note) => {
+        return outputCoder.encodeNote(note, encodeMetaData);
+    });
     const offsetToData = 0x40 + 0x20 * encodedNotes.length;
     const noteLengths = encodedNotes.reduce(
         (acc, p) => {
@@ -218,17 +147,30 @@ outputCoder.encodeNotes = (notes, isOutput) => {
 /**
  * Encode an output note, according to the ABI encoding specification
  *
- * @method encodeOutputNote
+ * @method encodeNote
  * @param {note} note - AZTEC note
+ * @param {bool} encodeMetaData - boolean controlling whether metaData is to be encoded or not. Typically, if
+ * inputNotes are being encoded the metadata is not encoded whereas if outputNotes are being encoded then
+ * the metaData is encoded
  * @returns {string} the various components of an AZTEC output note, encoded appropriately and concatenated
  * together
  */
-outputCoder.encodeOutputNote = (note) => {
-    const metaDataSize = parseInt(note.metaData.slice(2).length / 2, 10);
+outputCoder.encodeNote = (note, encodeMetaData) => {
+    let encoded;
+    let metaDataSize;
+
+    if (encodeMetaData) {
+        encoded = Array(8).fill();
+        encoded[7] = note.metaData.slice(2);
+        metaDataSize = parseInt(note.metaData.slice(2).length / 2, 10);
+    } else {
+        encoded = Array(7).fill();
+        metaDataSize = 0;
+    }
+
     const noteDataLength = (0x20 * 2 + metaDataSize).toString(16);
     const noteLength = (0x20 * 4 + 0x20 * 2 + metaDataSize).toString(16);
 
-    const encoded = Array(7).fill();
     encoded[0] = padLeft(noteLength, 64);
     encoded[1] = padLeft('1', 64);
     encoded[2] = padLeft(note.owner.slice(2), 64);
@@ -236,7 +178,6 @@ outputCoder.encodeOutputNote = (note) => {
     encoded[4] = padLeft(noteDataLength, 64);
     encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
     encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
-    encoded[7] = note.metaData.slice(2);
     return encoded.join('');
 };
 

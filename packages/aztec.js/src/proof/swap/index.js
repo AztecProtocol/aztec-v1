@@ -42,16 +42,29 @@ class SwapProof extends Proof {
                 };
             });
 
+        let xbk;
+        let xba;
+        let reducer = bn128.zeroBnRed; // "x" in the white paper
         this.blindingFactors = this.notes.map(({ gamma }, i) => {
             let { bk } = blindingScalars[i];
             const { ba } = blindingScalars[i];
 
-            // Taker notes
-            if (i > 1) {
-                bk = blindingScalars[i - 2].bk;
+            if (i === 0) {
+                xbk = bk;
+                xba = ba;
             }
 
-            const B = gamma.mul(bk).add(bn128.h.mul(ba));
+            if (i > 0) {
+                reducer = this.rollingHash.redKeccak();
+
+                if (i > 1) {
+                    bk = blindingScalars[i - 2].bk;
+                }
+
+                xbk = bk.redMul(reducer);
+                xba = ba.redMul(reducer);
+            }
+            const B = gamma.mul(xbk).add(bn128.h.mul(xba));
             return { B, ba, bk };
         });
     }
@@ -125,9 +138,8 @@ class SwapProof extends Proof {
         const encodedParams = [
             inputCoder.encodeProofData(this.data),
             inputCoder.encodeOwners([...this.inputNoteOwners, ...this.outputNoteOwners]),
-            inputCoder.encodeMetaData(this.outputNotes),
+            inputCoder.encodeMetaData([this.outputNotes[0], this.inputNotes[1]]),
         ];
-
         const length = 1 + encodedParams.length + 1;
         const offsets = ProofUtils.getOffsets(length, encodedParams);
         const abiEncodedParams = [this.challengeHex.slice(2), ...offsets, ...encodedParams];

@@ -27,5 +27,4 @@ contract ZkAsset is ZkAssetBase {
         false // Can adjust supply
     ) {
     }
-
 }
