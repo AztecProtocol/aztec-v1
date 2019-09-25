@@ -5,7 +5,7 @@
     "license": "MIT",
     "dependencies": {
         "@aztec/dev-utils": "0.0.0-semantically-released",
-        "@aztec/guacamole-ui": "^1.1.0-beta3",
+        "@aztec/guacamole-ui": "^1.1.1",
         "@aztec/secp256k1": "^1.0.1",
         "@aztec/typed-data": "0.0.0-semantically-released",
         "@msgpack/msgpack": "^1.4.0",
@@ -104,6 +104,7 @@
         "node-fetch": "^2.6.0",
         "postcss-loader": "^3.0.0",
         "remove-flow-types-loader": "^1.1.0",
+        "resolve-url-loader": "^3.1.0",
         "sass-loader": "^8.0.0",
         "sinon": "^7.0.0",
         "sinon-chrome": "^3.0.1",
