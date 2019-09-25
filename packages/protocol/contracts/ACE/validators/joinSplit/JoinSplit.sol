@@ -87,14 +87,11 @@ contract JoinSplit {
                 hashCommitments(notes, n)
                 let b := add(0x320, mul(n, 0x80))
 
-                // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
-                // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
-                //  which adds some minor alterations
 
+                let x := 1
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
                 //  which adds some minor alterations
-                let x := 1
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
 
                     // Get the calldata index of this note

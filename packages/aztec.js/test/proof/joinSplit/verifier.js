@@ -17,7 +17,7 @@ describe('Join-Split Proof Verifier', () => {
     const publicOwner = randomHex(20);
 
     describe('Success States', () => {
-        it.only('should verify a valid Join-Split proof', async () => {
+        it('should verify a valid Join-Split proof', async () => {
             const kIn = [80, 60];
             const kOut = [50, 100];
             const publicValue = -10;
