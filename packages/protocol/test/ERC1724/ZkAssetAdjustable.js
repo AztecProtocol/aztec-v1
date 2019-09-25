@@ -41,12 +41,14 @@ const getCustomMintNotes = async (newMintCounterValue, mintedNoteValues) => {
 };
 
 const confidentialApprove = async (zkAssetAdjustable, delegateAddress, indexes, notes, ownerAccount) => {
+    const spenderApproval = true;
     await Promise.all(
         indexes.map((i) => {
             const signature = signer.signNoteForConfidentialApprove(
                 zkAssetAdjustable.address,
                 notes[i].noteHash,
                 delegateAddress,
+                spenderApproval,
                 ownerAccount.privateKey,
             );
             // eslint-disable-next-line no-await-in-loop
@@ -112,7 +114,7 @@ contract('ZkAssetAdjustable', (accounts) => {
                 aztecAccount,
                 aztecAccount,
             ]);
-            const { receipt: transferReceipt } = await zkAssetAdjustable.confidentialTransfer(
+            const { receipt: transferReceipt } = await zkAssetAdjustable.methods['confidentialTransfer(bytes,bytes)'](
                 withdrawalData,
                 withdrawalSignatures,
             );
@@ -239,9 +241,13 @@ contract('ZkAssetAdjustable', (accounts) => {
 
             await erc20.approve(ace.address, scalingFactor.mul(new BN(depositPublicValue)), { from: sender });
 
-            const { receipt: depositReceipt } = await zkAssetAdjustable.confidentialTransfer(depositData, depositSignatures, {
-                from: sender,
-            });
+            const { receipt: depositReceipt } = await zkAssetAdjustable.methods['confidentialTransfer(bytes,bytes)'](
+                depositData,
+                depositSignatures,
+                {
+                    from: sender,
+                },
+            );
             expect(depositReceipt.status).to.equal(true);
 
             const intermediateAceBalance = (await erc20.balanceOf(ace.address)).toNumber();

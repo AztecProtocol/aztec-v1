@@ -1,12 +1,12 @@
 /* global artifacts, expect, contract, it:true */
-const { JoinSplitProof, note, keccak } = require('aztec.js');
+const { JoinSplitProof, keccak, note } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-const { mockZeroJoinSplitProof } = require('../../../helpers/proof');
+const { FAKE_CRS, mockZeroJoinSplitProof } = require('../../../helpers/proof');
 
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
@@ -336,6 +336,16 @@ contract('Join-Split Validator', (accounts) => {
             const malformedCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(
                 joinSplitValidator.validateJoinSplit(data, sender, malformedCRS),
+                truffleAssert.ErrorType.REVERT,
+            );
+        });
+
+        it('should fail for using a fake trusted setup public key', async () => {
+            const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+            const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const data = proof.encodeABI(joinSplitValidator.address);
+            await truffleAssert.reverts(
+                joinSplitValidator.validateJoinSplit(data, sender, FAKE_CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });

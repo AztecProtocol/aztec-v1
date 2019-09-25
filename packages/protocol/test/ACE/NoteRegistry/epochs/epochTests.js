@@ -5,9 +5,6 @@
 const fs = require('fs');
 const path = require('path');
 const truffleAssert = require('truffle-assertions');
-const {
-    constants: { addresses },
-} = require('@aztec/dev-utils');
 
 function findBehaviourContracts(epochPath) {
     const paths = fs.readdirSync(epochPath);
@@ -73,15 +70,15 @@ async function assessProperInitialisation(obj, inherritanceObj, accounts) {
 
         const flagPreInitialise = await contract.initialised();
         expect(flagPreInitialise).to.equal(false);
-        await contract.initialise(newOwner, addresses.ZERO_ADDRESS, 1, true, false, { from: owner });
+        await contract.initialise(newOwner, 1, true, false, { from: owner });
         const flagPostInitialise = await contract.initialised();
         expect(flagPostInitialise).to.equal(true);
         const ownerPostInitialise = await contract.owner();
         expect(ownerPostInitialise).to.equal(newOwner);
 
-        await truffleAssert.reverts(contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: attacker }));
+        await truffleAssert.reverts(contract.initialise(attacker, 1, true, false, { from: attacker }));
 
-        await truffleAssert.reverts(contract.initialise(attacker, addresses.ZERO_ADDRESS, 1, true, false, { from: newOwner }));
+        await truffleAssert.reverts(contract.initialise(attacker, 1, true, false, { from: newOwner }));
     }
     return next;
 }

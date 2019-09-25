@@ -15,6 +15,28 @@
             "type": "function"
         },
         {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofId",
+                    "type": "uint24"
+                },
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_signatures",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialTransfer",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "constant": true,
             "inputs": [],
             "name": "ZERO_VALUE_NOTE_HASH",
@@ -22,6 +44,39 @@
                 {
                     "name": "",
                     "type": "bytes32"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "PUBLIC_RANGE_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "signatureLog",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
                 }
             ],
             "payable": false,
@@ -63,7 +118,7 @@
                     "type": "address"
                 },
                 {
-                    "name": "_status",
+                    "name": "_spenderApproval",
                     "type": "bool"
                 },
                 {
@@ -81,11 +136,25 @@
             "constant": false,
             "inputs": [
                 {
+                    "name": "_factoryId",
+                    "type": "uint24"
+                }
+            ],
+            "name": "upgradeRegistryVersion",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
                     "name": "noteHash",
                     "type": "bytes32"
                 },
                 {
-                    "name": "metadata",
+                    "name": "metaData",
                     "type": "bytes"
                 }
             ],
@@ -107,6 +176,29 @@
             ],
             "payable": false,
             "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "metaData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "addressPos",
+                    "type": "uint256"
+                }
+            ],
+            "name": "extractAddress",
+            "outputs": [
+                {
+                    "name": "desiredAddress",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -168,6 +260,25 @@
                 {
                     "name": "",
                     "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "noteAccess",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
                 }
             ],
             "payable": false,
@@ -250,6 +361,25 @@
         },
         {
             "constant": true,
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "metaDataTimeLog",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
             "inputs": [],
             "name": "ace",
             "outputs": [
@@ -266,7 +396,7 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_proof",
+                    "name": "_proofId",
                     "type": "uint24"
                 },
                 {
@@ -316,20 +446,6 @@
                 {
                     "name": "",
                     "type": "address"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "scalingFactor",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256"
                 }
             ],
             "payable": false,
@@ -525,7 +641,7 @@
                     "type": "bytes"
                 }
             ],
-            "name": "UpdateNoteMetadata",
+            "name": "UpdateNoteMetaData",
             "type": "event"
         },
         {

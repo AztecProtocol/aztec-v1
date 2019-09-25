@@ -7,7 +7,7 @@ const truffleAssert = require('truffle-assertions');
 
 const helpers = require('../helpers/ERC1724');
 
-const { JOIN_SPLIT_PROOF, BURN_PROOF } = devUtils.proofs;
+const { BURN_PROOF } = devUtils.proofs;
 
 const ACE = artifacts.require('./ACE');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');

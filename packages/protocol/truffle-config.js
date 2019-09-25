@@ -73,7 +73,7 @@ switch (process.env.MODE) {
 }
 
 let ganacheSubprovider = {};
-ganacheSubprovider = new GanacheSubprovider();
+ganacheSubprovider = new GanacheSubprovider({ mnemonic: process.env.TEST_MNEMONIC });
 provider.addProvider(ganacheSubprovider);
 
 provider.start((err) => {
@@ -109,8 +109,7 @@ module.exports = {
     },
     networks: {
         development: {
-            host: '127.0.0.1',
-            // provider,
+            provider,
             gas: 6500000,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase

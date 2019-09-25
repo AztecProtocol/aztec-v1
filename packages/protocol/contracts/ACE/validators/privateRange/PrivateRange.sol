@@ -4,9 +4,10 @@ import "../../../interfaces/PrivateRangeInterface.sol";
 import "./PrivateRangeABIEncoder.sol";
 
 /**
- * @title Library to validate AZTEC zero-knowledge private range proofs
+ * @title PrivateRange
  * @author AZTEC
- * @dev Don't include this as an internal library. This contract uses a static memory table to cache
+ * @dev Library to validate AZTEC zero-knowledge private range proofs
+ * Don't include this as an internal library. This contract uses a static memory table to cache
  * elliptic curve primitives and hashes.
  * Calling this internally from another function will lead to memory mutation and undefined behaviour.
  * The intended use case is to call this externally via `staticcall`.

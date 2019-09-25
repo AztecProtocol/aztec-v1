@@ -2,6 +2,11 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "../../libs/SafeMath8.sol";
 
+/**
+ * @title SafeMath8Test
+ * @author AZTEC
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
+ **/
 contract SafeMath8Test {
     using SafeMath8 for uint8;
 

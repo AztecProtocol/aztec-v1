@@ -6,7 +6,7 @@ import "../MultiSig/MultiSigWalletWithTimeLock.sol";
  * @title The ACE Owner
  * @author AZTEC
  * @dev /
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract ACEOwner is MultiSigWalletWithTimeLock {
     constructor(

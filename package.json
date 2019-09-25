@@ -6,24 +6,23 @@
     }
   },
   "devDependencies": {
-    "@commitlint/cli": "7.6.1",
+    "@commitlint/cli": "8.1.0",
     "@commitlint/config-conventional": "7.5.0",
-    "@commitlint/config-lerna-scopes": "7.6.0",
+    "@commitlint/config-lerna-scopes": "8.1.0",
     "@semantic-release/commit-analyzer": "^6.1.0",
     "@semantic-release/git": "^7.0.8",
     "@semantic-release/github": "^5.2.10",
     "@semantic-release/npm": "^5.1.4",
     "@semantic-release/release-notes-generator": "^7.1.4",
-    "commitizen": "^3.0.7",
-    "cz-conventional-changelog": "^2.1.0",
-    "fixpack": "^2.3.1",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "^3.0.2",
     "husky": "^3.0.3",
     "lerna": "^3.13.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.16.4",
     "semantic-release": "^15.12.4",
     "shx": "^0.3.2",
-    "wsrun": "^3.6.4"
+    "wsrun": "^5.0.0"
   },
   "engines": {
     "node": ">=8.3"
@@ -38,7 +37,6 @@
     "commit": "git-cz",
     "compile:contracts": "yarn wsrun --package $PKG --parallel -c compile:contracts",
     "coverage": "yarn wsrun --package $PKG --serial -c coverage",
-    "fixpack": "lerna exec --parallel -- yarn fixpack; fixpack",
     "install:all": "yarn install",
     "lerna": "lerna",
     "lint": "yarn wsrun --package $PKG --parallel -c lint",

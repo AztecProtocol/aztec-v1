@@ -96,7 +96,7 @@ contract('NoteUtils', async (accounts) => {
             const encodedOutputNotes = outputCoder.getOutputNotes(proof.output);
             const testNote = outputCoder.getNote(encodedOutputNotes, 0);
             // eslint-disable-next-line no-unused-vars
-            const { owner, noteHash } = outputCoder.decodeOutputNote(testNote);
+            const { owner, noteHash } = outputCoder.decodeNote(testNote);
             const metadata = outputCoder.getMetadata(testNote);
             const formattedMetadata = `0x${metadata}`;
             const formattedTestNote = `0x${testNote.slice(0x40)}`;
@@ -111,7 +111,7 @@ contract('NoteUtils', async (accounts) => {
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
             const encodedOutputNotes = outputCoder.getOutputNotes(proof.output);
             const testNote = outputCoder.getNote(encodedOutputNotes, 0);
-            const { noteType } = outputCoder.decodeOutputNote(testNote);
+            const { noteType } = outputCoder.decodeNote(testNote);
             const formattedTestNote = `0x${testNote.slice(0x40)}`;
             const result = await noteUtils.getNoteType(formattedTestNote);
             expect(result.toNumber()).to.equal(noteType);

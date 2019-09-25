@@ -1,14 +1,11 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+/**
+ * @title IAZTEC
+ * @author AZTEC
+ * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
+ **/
 contract IAZTEC {
-    event CreateNoteRegistry(
-        address zkAssetAddress,
-        address linkedTokenAddress,
-        uint256 scalingFactor,
-        bool canAdjustSupply,
-        bool canConvert
-    );
-
     enum ProofCategory {
         NULL,
         BALANCED,

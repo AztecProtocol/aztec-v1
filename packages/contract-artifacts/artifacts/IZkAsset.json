@@ -141,7 +141,7 @@
                     "type": "bytes"
                 }
             ],
-            "name": "UpdateNoteMetadata",
+            "name": "UpdateNoteMetaData",
             "type": "event"
         },
         {

@@ -31,6 +31,20 @@
         {
             "constant": true,
             "inputs": [],
+            "name": "PUBLIC_RANGE_PROOF",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
             "name": "defaultRegistryEpoch",
             "outputs": [
                 {
@@ -165,8 +179,24 @@
             "name": "registries",
             "outputs": [
                 {
-                    "name": "",
+                    "name": "behaviour",
                     "type": "address"
+                },
+                {
+                    "name": "linkedToken",
+                    "type": "address"
+                },
+                {
+                    "name": "latestFactory",
+                    "type": "uint24"
+                },
+                {
+                    "name": "totalSupply",
+                    "type": "uint256"
+                },
+                {
+                    "name": "totalSupplemented",
+                    "type": "uint256"
                 }
             ],
             "payable": false,
@@ -263,6 +293,28 @@
                 }
             ],
             "name": "CreateNoteRegistry",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "registryOwner",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "proxyAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "newBehaviourAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "UpgradeNoteRegistry",
             "type": "event"
         },
         {
@@ -457,28 +509,6 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_from",
-                    "type": "address"
-                },
-                {
-                    "name": "_to",
-                    "type": "address"
-                },
-                {
-                    "name": "_value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "transferFrom",
-            "outputs": [],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
                     "name": "_proof",
                     "type": "uint24"
                 },
@@ -523,7 +553,7 @@
             "constant": true,
             "inputs": [
                 {
-                    "name": "_owner",
+                    "name": "_registryOwner",
                     "type": "address"
                 }
             ],
@@ -538,16 +568,20 @@
                     "type": "uint256"
                 },
                 {
-                    "name": "totalSupply",
-                    "type": "uint256"
-                },
-                {
                     "name": "confidentialTotalMinted",
                     "type": "bytes32"
                 },
                 {
                     "name": "confidentialTotalBurned",
                     "type": "bytes32"
+                },
+                {
+                    "name": "totalSupply",
+                    "type": "uint256"
+                },
+                {
+                    "name": "totalSupplemented",
+                    "type": "uint256"
                 },
                 {
                     "name": "canConvert",

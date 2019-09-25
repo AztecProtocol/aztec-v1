@@ -6,7 +6,7 @@ const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-const { mockZeroPrivateRangeProof } = require('../../../helpers/proof');
+const { FAKE_CRS, mockZeroPrivateRangeProof } = require('../../../helpers/proof');
 
 const PrivateRange = artifacts.require('./PrivateRange');
 const PrivateRangeInterface = artifacts.require('./PrivateRangeInterface');
@@ -317,6 +317,16 @@ contract('Private range validator', (accounts) => {
             const data = proof.encodeABI();
             await truffleAssert.reverts(
                 privateRangeValidator.validatePrivateRange(data, sender, bn128.CRS),
+                truffleAssert.ErrorType.REVERT,
+            );
+        });
+
+        it('should fail for fake trusted setup public key', async () => {
+            const { originalNote, comparisonNote, utilityNote } = await getDefaultNotes();
+            const proof = new PrivateRangeProof(originalNote, comparisonNote, utilityNote, sender);
+            const data = proof.encodeABI();
+            await truffleAssert.reverts(
+                privateRangeValidator.validatePrivateRange(data, sender, FAKE_CRS),
                 truffleAssert.ErrorType.REVERT,
             );
         });

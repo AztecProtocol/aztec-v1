@@ -18,11 +18,25 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "newImplementation",
+                    "name": "_newImplementation",
                     "type": "address"
                 }
             ],
             "name": "upgradeTo",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_newAdmin",
+                    "type": "address"
+                }
+            ],
+            "name": "changeAdmin",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",

@@ -6,11 +6,13 @@ const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { padLeft, randomHex } = require('web3-utils');
 
-const { mockZeroSwapProof } = require('../../../helpers/proof');
+const { FAKE_CRS, mockZeroSwapProof } = require('../../../helpers/proof');
 
 const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
 Swap.abi = SwapInterface.abi;
+
+const { customMetaData } = require('../../../helpers/ERC1724');
 
 const Keccak = keccak;
 const maker = secp256k1.generateAccount();
@@ -41,7 +43,7 @@ const getDefaultNotes = async () => {
     return getNotes(asks, bids);
 };
 
-contract.skip('Swap Validator', (accounts) => {
+contract('Swap Validator', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -69,6 +71,17 @@ contract.skip('Swap Validator', (accounts) => {
 
         it('should validate Swap proof with challenge that has group modulus added to it', async () => {
             const { inputNotes, outputNotes } = await getDefaultNotes();
+            const proof = new SwapProof(inputNotes, outputNotes, sender);
+            proof.challenge = proof.challenge.add(bn128.groupModulus);
+            proof.constructOutputs();
+            const data = proof.encodeABI();
+            const result = await swapValidator.validateSwap(data, sender, bn128.CRS, { from: sender });
+            expect(result).to.equal(proof.eth.outputs);
+        });
+
+        it('should validate proof when customMetaData set', async () => {
+            const { inputNotes, outputNotes } = await getDefaultNotes();
+            inputNotes[1].setMetaData(customMetaData.data);
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             proof.challenge = proof.challenge.add(bn128.groupModulus);
             proof.constructOutputs();
@@ -219,6 +232,13 @@ contract.skip('Swap Validator', (accounts) => {
             const malformedHy = bn128.H_Y.add(new BN(1));
             const bogusCRS = [`0x${malformedHx.toString(16)}`, `0x${malformedHy.toString(16)}`, ...bn128.t2];
             await truffleAssert.reverts(swapValidator.validateSwap(data, sender, bogusCRS), truffleAssert.ErrorType.REVERT);
+        });
+
+        it('should fail for using a fake trusted setup public key', async () => {
+            const { inputNotes, outputNotes } = await getDefaultNotes();
+            const proof = new SwapProof(inputNotes, outputNotes, sender);
+            const data = proof.encodeABI(swapValidator.address);
+            await truffleAssert.reverts(swapValidator.validateSwap(data, sender, FAKE_CRS), truffleAssert.ErrorType.REVERT);
         });
     });
 });
