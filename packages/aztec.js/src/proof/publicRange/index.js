@@ -107,7 +107,7 @@ class PublicRangeProof extends Proof {
             }
 
             if (i === 1) {
-                const reducer = this.rollingHash.redKeccak();
+                const reducer = this.rollingHash.redKeccak().redPow(new BN(i));
                 const xbk = bk.redMul(reducer);
                 const xba = ba.redMul(reducer);
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));

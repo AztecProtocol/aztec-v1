@@ -63,7 +63,7 @@ class DividendProof extends Proof {
             const xbk = bk.redMul(reducer); // xbk = bk*x
             const xba = ba.redMul(reducer); // xba = ba*x
             const B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
-            reducer = this.rollingHash.redKeccak();
+            reducer = this.rollingHash.redKeccak().redPow(new BN(i));
             return { B, bk, ba };
         });
     }
