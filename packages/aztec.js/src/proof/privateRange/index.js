@@ -85,14 +85,14 @@ class PrivateRangeProof extends Proof {
             }
 
             if (i === 1) {
-                reducer = this.rollingHash.redKeccak();
+                reducer = this.rollingHash.redKeccak().redPow(new BN(i));
                 const xbk = bk.redMul(reducer);
                 const xba = ba.redMul(reducer);
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             }
 
             if (i === 2) {
-                reducer = this.rollingHash.redKeccak();
+                reducer = this.rollingHash.redKeccak().redPow(new BN(i));
                 bk = blindingScalars[0].bk.redSub(blindingScalars[1].bk);
 
                 const xbk = bk.redMul(reducer);

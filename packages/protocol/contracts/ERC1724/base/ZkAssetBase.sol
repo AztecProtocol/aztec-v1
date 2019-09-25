@@ -225,7 +225,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         bytes memory outputNotes,
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
-        
+
         uint256 length = inputNotes.getLength();
         for (uint i = 0; i < length; i += 1) {
             (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
