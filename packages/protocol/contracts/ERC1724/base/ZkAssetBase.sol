@@ -315,7 +315,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     }
 
     /**
-    * @dev Update the metadata of a note that already exists in storage. 
+    * @dev Update the metadata of a note that already exists in storage.
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */

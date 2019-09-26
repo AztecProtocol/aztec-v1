@@ -1,37 +1,52 @@
 import {
     argsError,
 } from '~utils/error';
-import GraphNodeService from '~background/services/GraphNodeService';
+import EventService from '~background/services/EventService';
 
-export default async function syncUtilityNoteInfo(args) {
+
+export default async function syncUtilityNoteInfo(args, ctx = {}) {
     const {
-        id: noteId,
+        id: noteHash,
     } = args;
 
-    if (!noteId) {
+    const {
+        // TODO: remove default value, when it will be passed here.
+        networkId = 0,
+    } = ctx;
+
+    if (!noteHash) {
         return null;
     }
 
-    const {
+    let note;
+    ({
         note,
-    } = await GraphNodeService.query(`
-        note: utilityNote(id: "${noteId}") {
-            id
-            hash
-            metadata
-            asset {
-                id
-            }
-        }
-    `);
+    } = await EventService.fetchLatestNote({
+        noteHash,
+        networkId,
+    }));
 
     if (!note) {
         throw argsError('utilityNote.not.found.onChain', {
             messageOptions: {
-                id: noteId,
+                id: noteHash,
             },
         });
     }
+
+    const {
+        metadata,
+        asset: assetAddress,
+    } = note;
+
+    note = {
+        id: noteHash,
+        hash: noteHash,
+        metadata,
+        asset: {
+            id: assetAddress,
+        },
+    };
 
     const {
         asset,

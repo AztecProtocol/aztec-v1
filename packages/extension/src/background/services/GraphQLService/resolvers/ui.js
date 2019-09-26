@@ -37,7 +37,7 @@ const uiResolvers = {
             account: await AuthService.registerAddress({
                 address: args.address,
                 linkedPublicKey: args.linkedPublicKey,
-                registeredAt: args.registeredAt,
+                blockNumber: args.blockNumber,
             }),
         })),
         login: ensureAccount(async (_, args) => ({

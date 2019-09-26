@@ -1,7 +1,7 @@
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
-import GraphNodeService from '~background/services/GraphNodeService';
+import StorageService from '~background/services/StorageService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import syncUserInfo from '../syncUserInfo';
 import storyOf, {
@@ -16,16 +16,14 @@ const {
     linkedPublicKey,
 } = registeredUserInfo;
 
-const graphNodeQuerySpy = jest.spyOn(GraphNodeService, 'query')
-    .mockImplementation(() => ({
-        account: registeredUserInfo,
-    }));
+const storageAccountSpy = jest.spyOn(StorageService.query, 'account')
+    .mockImplementation(() => registeredUserInfo);
 
 const registerAddressSpy = jest.spyOn(AuthService, 'registerAddress');
 
 beforeEach(() => {
     storage.reset();
-    graphNodeQuerySpy.mockClear();
+    storageAccountSpy.mockClear();
     registerAddressSpy.mockClear();
     decodeLinkedPublicKey.mockImplementation(() => linkedPublicKey);
 });
@@ -36,13 +34,13 @@ describe('syncUserInfo', () => {
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).not.toHaveBeenCalled();
+        expect(storageAccountSpy).not.toHaveBeenCalled();
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
 
         const response = await ensuredAccount.continueWith(syncUserInfo);
         expect(response).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(1);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -51,7 +49,7 @@ describe('syncUserInfo', () => {
         const emptyUser = await AuthService.getRegisteredUser(userAddress);
         expect(emptyUser).toBe(null);
 
-        expect(graphNodeQuerySpy).not.toHaveBeenCalled();
+        expect(storageAccountSpy).not.toHaveBeenCalled();
         expect(registerAddressSpy).not.toHaveBeenCalled();
 
         const response = await ensuredKeyvault.continueWith(syncUserInfo);
@@ -60,16 +58,16 @@ describe('syncUserInfo', () => {
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(1);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
     });
 
     it('use current credential to generate linkedPublicKey if not registered on chain', async () => {
-        graphNodeQuerySpy.mockImplementationOnce(() => ({
+        storageAccountSpy.mockImplementationOnce(() => ({
             account: {
                 ...registeredUserInfo,
                 linkedPublicKey: '',
-                registeredAt: 0,
+                blockNumber: 0,
             },
         }));
 
@@ -77,10 +75,10 @@ describe('syncUserInfo', () => {
         expect(response).toEqual({
             ...registeredUserInfo,
             linkedPublicKey: registeredUserInfo.linkedPublicKey,
-            registeredAt: 0,
+            blockNumber: 0,
         });
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(1);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -89,12 +87,12 @@ describe('syncUserInfo', () => {
 
         const prevUserInfo = {
             ...registeredUserInfo,
-            registeredAt: registeredUserInfo.registeredAt - 100,
+            blockNumber: registeredUserInfo.blockNumber - 100,
             linkedPublicKey: 'prev_linked_public_key',
         };
         await AuthService.registerAddress(prevUserInfo);
 
-        expect(graphNodeQuerySpy).not.toHaveBeenCalled();
+        expect(storageAccountSpy).not.toHaveBeenCalled();
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
 
         const prevUser = await AuthService.getRegisteredUser(userAddress);
@@ -105,7 +103,7 @@ describe('syncUserInfo', () => {
         expect(response.linkedPublicKey).not.toBe(prevUserInfo.linkedPublicKey);
         expect(response).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(1);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(2);
 
         const user = await AuthService.getRegisteredUser(userAddress);
@@ -120,13 +118,13 @@ describe('syncUserInfo', () => {
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).not.toHaveBeenCalled();
+        expect(storageAccountSpy).not.toHaveBeenCalled();
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
 
         const response = await ensuredKeyvault.continueWith(syncUserInfo);
         expect(response).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(1);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
 
         const newLinkedPublicKey = 'new_linked_public_key';
@@ -136,13 +134,13 @@ describe('syncUserInfo', () => {
         await expectErrorResponse(async () => ensuredKeyvault.continueWith(syncUserInfo))
             .toBe('account.duplicated');
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(2);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(2);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
 
         decodeLinkedPublicKey.mockRestore();
     });
 
-    it('replace linkedPublicKey and reset registeredAt in storage if reset is true', async () => {
+    it('replace linkedPublicKey and reset blockNumber in storage if reset is true', async () => {
         const ensuredKeyvault = await storyOf('ensureKeyvault');
 
         await AuthService.registerAddress(registeredUserInfo);
@@ -150,13 +148,13 @@ describe('syncUserInfo', () => {
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).not.toHaveBeenCalled();
+        expect(storageAccountSpy).not.toHaveBeenCalled();
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
 
         const response = await ensuredKeyvault.continueWith(syncUserInfo);
         expect(response).toEqual(registeredUserInfo);
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(1);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
 
         const newLinkedPublicKey = 'new_linked_public_key';
@@ -173,10 +171,10 @@ describe('syncUserInfo', () => {
         expect(retryResponse).toEqual({
             ...registeredUserInfo,
             linkedPublicKey: newLinkedPublicKey,
-            registeredAt: 0,
+            blockNumber: 0,
         });
 
-        expect(graphNodeQuerySpy).toHaveBeenCalledTimes(2);
+        expect(storageAccountSpy).toHaveBeenCalledTimes(2);
         expect(registerAddressSpy).toHaveBeenCalledTimes(2);
 
         decodeLinkedPublicKey.mockRestore();

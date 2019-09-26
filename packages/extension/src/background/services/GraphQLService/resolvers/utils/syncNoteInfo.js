@@ -15,6 +15,7 @@ import {
     valueOf,
 } from '~utils/note';
 
+
 export default async function syncNoteInfo(args, ctx) {
     const {
         id: noteId,
@@ -28,6 +29,8 @@ export default async function syncNoteInfo(args, ctx) {
         user: {
             address: userAddress,
         },
+        // TODO: remove default value, when it will be passed here.
+        networkId = 0,
     } = ctx;
 
     let note = await noteModel.get({
@@ -47,6 +50,7 @@ export default async function syncNoteInfo(args, ctx) {
         note = await SyncService.syncNote({
             address: userAddress,
             noteId,
+            networkId,
         });
     }
 

@@ -51,7 +51,7 @@ const uiTypes = gql`
         registerAddress(
             address: String!
             linkedPublicKey: String!
-            registeredAt: BigInt
+            blockNumber: BigInt
         ): UserAccountApiResponse
         registerDomain(
             domain: String!

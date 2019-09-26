@@ -1,13 +1,19 @@
 import assetModel from '~database/models/asset';
-import GraphNodeService from '~background/services/GraphNodeService';
+import EventService from '~background/services/EventService';
 import {
     argsError,
 } from '~utils/error';
 
-export default async function syncAssetInfo(args) {
+// TODO: pass ctx where you call this function
+export default async function syncAssetInfo(args, ctx = {}) {
     const {
         id: address,
     } = args;
+
+    const {
+        // TODO: remove default value, when it will be passed here.
+        networkId = 0,
+    } = ctx;
 
     if (!address) {
         return null;
@@ -19,16 +25,20 @@ export default async function syncAssetInfo(args) {
 
     if (!asset) {
         const {
-            onChainAsset,
-        } = await GraphNodeService.query(`
-            onChainAsset: asset(id: "${address}") {
-                address
-                linkedTokenAddress
-                scalingFactor
-                canAdjustSupply
-                canConvert
-            }
-        `);
+            error, 
+            asset: fetchedAsset,
+        } = await EventService.fetchAsset({
+            address,
+            networkId,
+        });
+
+        const onChainAsset = {
+            address: fetchedAsset.registryOwner,
+            linkedTokenAddress: fetchedAsset.linkedTokenAddress,
+            scalingFactor: fetchedAsset.scalingFactor,
+            canAdjustSupply: fetchedAsset.canAdjustSupply,
+            canConvert: fetchedAsset.canConvert,
+        };
 
         if (!onChainAsset) {
             throw argsError('asset.notFound.onChain', {

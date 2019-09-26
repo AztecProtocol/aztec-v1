@@ -9,7 +9,7 @@ export const ensureExtensionInstalled = async () => {
         throw new ApiError('account.not.registered');
     }
 
-    if (account && account.registeredAt) {
+    if (account && account.blockNumber) {
         return account;
     }
 };
