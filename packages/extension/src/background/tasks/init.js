@@ -4,6 +4,13 @@ import {
     set,
     onIdle,
 } from '~utils/storage';
+import {
+    AZTECAccountRegistryConfig,
+    ACEConfig,
+} from '../config/contracts';
+import {
+    infuraProviderConfig,
+} from '../config/infura';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
 import GraphNodeService from '~background/services/GraphNodeService';
@@ -12,15 +19,49 @@ import domainModel from '../../database/models/domain';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
 import ZkAssetTemplate from '../../../build/contracts/ZkAssetTemplate.json';
 import NoteService from '~background/services/NoteService';
-import AuthService from '~background/services/AuthService';
+import Web3ServiceFactory from '~background/services/Web3Service/factory';
+// import { runLoadingEventsTest } from './syncTest'
+
+
+const configureWeb3Service = async () => {
+    const providerUrlGanache = await get('__providerUrlGanache');
+    const infuraProjectId = await get('__infuraProjectId');
+
+    const contractsConfigs = [
+        AZTECAccountRegistryConfig.config,
+        ACEConfig.config,
+    ];
+
+    const infuraNetworksConfigs = ['mainnet', 'ropsten', 'rinkeby', 'goerli', 'kovan']
+        .map(networkName => infuraProviderConfig(networkName, infuraProjectId))
+        .map(config => ({
+            ...config,
+            contractsConfigs,
+        }));
+
+    const ganacheNetworkConfig = {
+        title: 'Ganache',
+        networkId: 0,
+        providerUrl: providerUrlGanache,
+        contractsConfigs,
+    };
+
+    Web3ServiceFactory.setConfigs([
+        ...[ganacheNetworkConfig],
+        ...infuraNetworksConfigs,
+    ]);
+};
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
         // chrome.storage.local.clear();
 
+        // comment it
+        // await runLoadingEventsTest();
+
         await set({
-            // __graphNode: 'http://localhost:4000/',
-            __graphNode: 'http://127.0.0.1:8000/subgraphs/name/aztec/note-management',
+            __providerUrlGanache: 'http://localhost:8545',
+            __infuraProjectId: '',
         });
         await domainModel.set(
             {
@@ -48,17 +89,6 @@ export default async function init() {
         );
     }
 
-    // TODO this will eventually be passed in from the config
-    await Web3Service.init({
-        provider: 'http://localhost:8545',
-    });
-    // load the contracts
-    Web3Service.registerContract(AZTECAccountRegistry);
-    //
-    Web3Service.registerInterface(ZkAssetTemplate, {
-        name: 'ZkAsset',
-    });
-
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),
         syncInterval: await settings('SYNC_INTERVAL'),
@@ -70,6 +100,8 @@ export default async function init() {
     GraphNodeService.set({
         graphNodeServerUrl,
     });
+
+    configureWeb3Service();
 
     NoteService.init();
 }

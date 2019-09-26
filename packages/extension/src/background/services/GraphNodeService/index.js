@@ -17,6 +17,8 @@ class GraphNodeService {
     }
 
     query(query) {
+        console.log(`trid fired query: ${JSON.stringify(query)}`);
+        
         const settings = typeof query !== 'string'
             ? query
             : { query };

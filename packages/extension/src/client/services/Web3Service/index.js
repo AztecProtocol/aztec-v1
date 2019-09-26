@@ -262,8 +262,10 @@ class Web3Service {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }
                 return {
-                    where: (options = {}) => contract.getPastEvents(eventName, {
-                        filter: options,
+                    where: (options = {filter: {}, fromBlock: 0, toBlock: 'latest'}) => contract.getPastEvents(eventName, {
+                        filter: options.filter,
+                        fromBlock: options.fromBlock,
+                        toBlock: options.toBlock,
                     }),
                     all: () => contract.getPastEvents('allEvents', {
                         fromBlock: 0,

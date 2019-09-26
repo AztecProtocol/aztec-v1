@@ -2,9 +2,10 @@ import {
     permissionError,
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
-import GraphNodeService from '~background/services/GraphNodeService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
-import decodeKeyStore from '~background/utils/decodeKeyStore'; 
+import decodeKeyStore from '~background/utils/decodeKeyStore';
+import EventService from '~background/services/EventService';
+
 export default async function syncUserInfo(args, ctx) {
     const {
         currentAddress: userAddress,
@@ -16,22 +17,22 @@ export default async function syncUserInfo(args, ctx) {
         session: {
             pwDerivedKey,
         },
+        // TODO: remove default value, when it will be passed here.
+        networkId = 0,
     } = ctx;
     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
     const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
 
     const {
+        error,
         account,
-    } = await GraphNodeService.query(`
-       account(id: "${userAddress}") {
-           address
-           linkedPublicKey
-           registeredAt
-       }
-    `) || {};
+    } = await EventService.fetchAztecAccount({
+        address: userAddress,
+        networkId,
+    });
 
     const {
-        registeredAt: prevRegisteredAt,
+        blockNumber: prevBlockNumber,
         linkedPublicKey: prevLinkedPublicKey,
     } = account || {};
 

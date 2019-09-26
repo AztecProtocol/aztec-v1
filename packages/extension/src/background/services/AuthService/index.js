@@ -47,7 +47,7 @@ const AuthService = {
             address,
         });
 
-        return user && user.registeredAt
+        return user && user.blockNumber
             ? user
             : null;
     },
@@ -145,7 +145,7 @@ const AuthService = {
     registerAddress: async ({
         address,
         linkedPublicKey,
-        registeredAt,
+        blockNumber,
     }) => {
         let user = await userModel.get({
             address,
@@ -153,13 +153,13 @@ const AuthService = {
 
         if (!user
             || user.linkedPublicKey !== linkedPublicKey
-            || user.registeredAt !== registeredAt
+            || user.blockNumber !== blockNumber
         ) {
             user = {
                 ...user,
                 address,
                 linkedPublicKey,
-                registeredAt,
+                blockNumber,
             };
 
             if (!user) {
