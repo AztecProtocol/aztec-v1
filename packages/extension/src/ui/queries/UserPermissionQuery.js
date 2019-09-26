@@ -3,9 +3,9 @@ import gql from 'graphql-tag';
 export default gql`
     query userPermission($currentAddress: String!, $domain: String!) {
             userPermission(currentAddress: $currentAddress, domain: $domain) {
-                account { 
+                account {
                     linkedPublicKey
-                    registeredAt
+                    blockNumber
                     address
                 }
                 error {

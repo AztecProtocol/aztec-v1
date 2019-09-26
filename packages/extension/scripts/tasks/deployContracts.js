@@ -1,20 +1,19 @@
-import migrateContractsInstance from '../instances/migrateContractsInstance';
+import pipeTasks from '../utils/pipeTasks';
+// import migrateProtocol from './migrateProtocol';
+import migrateExtension from './migrateExtension';
 
-export default function migrate({
+export default function deployContracts({
     onError,
     onClose,
 } = {}) {
-    const migrateExtension = () => {
-        migrateContractsInstance({
-            packageName: 'extension',
+    pipeTasks(
+        [
+            // migrateProtocol,
+            migrateExtension,
+        ],
+        {
             onError,
             onClose,
-        });
-    };
-
-    migrateContractsInstance({
-        packageName: 'protocol',
-        onError,
-        onClose: migrateExtension,
-    });
+        },
+    );
 }

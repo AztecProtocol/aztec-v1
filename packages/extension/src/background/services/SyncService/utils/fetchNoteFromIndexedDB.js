@@ -69,4 +69,4 @@ export default async function fetchNoteFromIndexedDB(options) {
         ...rest,
         ...note,
     }));
-
+}

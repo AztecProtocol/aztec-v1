@@ -181,7 +181,6 @@ class SyncManager {
             address,
             privateKey,
             lastSynced,
-            registeredAt,
         });
         let account = this.accounts.get(address);
         console.log({

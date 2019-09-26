@@ -17,7 +17,8 @@ import GraphNodeService from '~background/services/GraphNodeService';
 import Web3Service from '~client/services/Web3Service';
 import domainModel from '../../database/models/domain';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
-import ZkAssetTemplate from '../../../build/contracts/ZkAssetTemplate.json';
+import ZkAssetMintable from '../../../build/contracts/ZkAssetMintable.json';
+import ZkAssetBurnable from '../../../build/contracts/ZkAssetBurnable.json';
 import NoteService from '~background/services/NoteService';
 import Web3ServiceFactory from '~background/services/Web3Service/factory';
 // import { runLoadingEventsTest } from './syncTest'
@@ -88,6 +89,20 @@ export default async function init() {
             },
         );
     }
+
+    // TODO this will eventually be passed in from the config
+    await Web3Service.init({
+        provider: 'http://localhost:8545',
+    });
+    // load the contracts
+    Web3Service.registerContract(AZTECAccountRegistry);
+    //
+    Web3Service.registerInterface(ZkAssetMintable, {
+        name: 'ZkAsset',
+    });
+    Web3Service.registerInterface(ZkAssetBurnable, {
+        name: 'ZkAssetBurnable',
+    });
 
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),

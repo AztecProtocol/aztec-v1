@@ -34,7 +34,7 @@ const graphProtocolModule = '@graphprotocol';
 const destBuildFolder = 'build';
 const destContractsFolder = 'contracts';
 
-const extensionContractsFolder = 'build/protocol';
+const extensionContractsFolder = 'build/contracts';
 const extensionBackgroundContractsFolder = 'src/background/contracts';
 
 const srcContractsFolder = 'build/contracts';
