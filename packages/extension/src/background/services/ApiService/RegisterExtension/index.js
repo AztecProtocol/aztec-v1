@@ -35,7 +35,7 @@ const registerExtension = async (query, connection) => {
         domain: window.location.host,
     });
     const { userPermission: { account = {} } } = response;
-    if (account && account.registeredAt) {
+    if (account && account.blockNumber) {
         return {
             ...query,
             response: account,

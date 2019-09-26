@@ -114,7 +114,7 @@ class ExtensionApi {
                         params: [
                             userAddress,
                             linkedPublicKey,
-                            spendingPublicKey,
+                            // spendingPublicKey,
                             signature,
                         ],
                     },

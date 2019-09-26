@@ -10,9 +10,9 @@ import {
     from,
 } from 'rxjs';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
-import ZkAssetTemplate from '../../../build/contracts/ZkAssetTemplate';
-import ACE from '../../../build/protocol/ACE';
-import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
+import ZkAssetMintable from '../../../build/contracts/ZkAssetMintable';
+import ACE from '../../../build/contracts/ACE';
+import ERC20Mintable from '../../../build/contracts/ERC20Mintable';
 import {
     actionEvent,
 } from '~config/event';
@@ -91,7 +91,7 @@ class Aztec {
         Web3Service.registerInterface(ERC20Mintable, {
             name: 'ERC20',
         });
-        Web3Service.registerInterface(ZkAssetTemplate, {
+        Web3Service.registerInterface(ZkAssetMintable, {
             name: 'ZkAsset',
         });
 

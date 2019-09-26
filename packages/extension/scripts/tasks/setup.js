@@ -13,7 +13,7 @@ import pipeTasks, {
 } from '../utils/pipeTasks';
 import stopProcesses from '../utils/stopProcesses';
 import deployContracts from './deployContracts';
-import copy from './copy';
+// import copy from './copy';
 
 
 export default function setup({
@@ -103,7 +103,7 @@ export default function setup({
         log('');
     };
 
-    
+
     runningProcesses.ganache = ganacheInstance({
         onClose: makeCloseChildProcessCallback('ganache'),
         onError: handleError,
@@ -112,7 +112,7 @@ export default function setup({
             [
                 deployContracts,
                 logTask('Successfully deployed contracts to ganache.'),
-                copy,
+                // copy,
             ],
             {
                 onError: handleBuildError,
