@@ -1,6 +1,10 @@
 /* eslint-disable func-names */
-const exportHandler = require('./exportHandler');
-const ProofType = require('./base/types');
+const {
+    getProof,
+    setDefaultEpoch,
+    helpers,
+} = require('./exportHandler');
+const { JOIN_SPLIT } = require('./base/types');
 
 /**
  * Export the JoinSplitProof for a default epoch
@@ -10,7 +14,9 @@ const ProofType = require('./base/types');
  * @returns A JoinSplitProof construction for the default epoch
  */
 function JoinSplitProof(...args) {
-    return exportHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.JOIN_SPLIT.name, ...args);
+    const Proof = getProof(JOIN_SPLIT.name, this.epochNum);
+
+    return new Proof(...args);
 }
 
 /**
@@ -18,19 +24,19 @@ function JoinSplitProof(...args) {
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a JoinSplitProof is to be returned
- * @param {bool} setDefaultEpoch - if true, sets the inputted epochNum to be the default. If false, does
+ * @param {bool} setAsDefault - if true, sets the inputted epochNum to be the default. If false, does
  * not set the inputted epoch number to be the default
  * @returns A JoinSplitProof construction for the given epoch number
  */
-JoinSplitProof.epoch = function(epochNum, setDefaultEpoch = false) {
-    exportHandler.helpers.validateEpochNum(epochNum);
+JoinSplitProof.epoch = function(epochNum, setAsDefault = false) {
+    helpers.validateEpochNum(JOIN_SPLIT.name, epochNum);
 
-    if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(ProofType.JOIN_SPLIT.name, epochNum);
+    if (setAsDefault) {
+        setDefaultEpoch(JOIN_SPLIT.name, epochNum);
     }
 
     return (...args) => {
-        return JoinSplitProof.bind({ epochNum })(...args);
+        return JoinSplitProof.call({ epochNum }, ...args);
     };
 };
 
