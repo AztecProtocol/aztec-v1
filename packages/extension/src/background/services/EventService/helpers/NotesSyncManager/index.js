@@ -6,6 +6,9 @@ import Web3Service from '../../../Web3Service';
 import fetchNotes from '../../utils/fetchNotes';
 import saveNotes from '../../utils/saveNotes';
 import saveNotesAccess from '../../utils/saveNotesAccess';
+import {
+    syncedAssets,
+} from '../../utils/asset';
 import AssetsSyncManagerFactory from '../AssetsSyncManager/factory';
 
 /* See more details about limitation
@@ -153,8 +156,10 @@ class SyncManager {
 
         const assetsManager = assetsSyncManager(networkId);
         const currentBlock = assetsManager.lastSyncedBlock();
+        const fromAssets = (await syncedAssets(networkId))
+            .map(({ registryOwner }) => registryOwner);
 
-        console.log(`NotesSyncManager - currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock}`);
+        console.log(`NotesSyncManager - currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock} \n from assets: ${JSON.stringify(fromAssets)}`);
 
         let newLastSyncedBlock = lastSyncedBlock;
 
@@ -170,6 +175,7 @@ class SyncManager {
                 owner: address,
                 fromBlock,
                 toBlock,
+                fromAssets,
                 networkId,
             });
 
