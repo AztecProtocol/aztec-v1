@@ -22,11 +22,6 @@ catalogue.defaultProofEpochNums = {
 };
 
 /*
- * Latest proof epoch
- */
-catalogue.LATEST_EPOCH = 1;
-
-/*
  * Struct containing a mapping of epoch numbers to the individual proofs
  */
 catalogue.versions = {

@@ -1,7 +1,10 @@
 /* eslint-disable func-names */
-const helpers = require('./exportHandler/helpers');
-const exportHandler = require('./exportHandler');
-const ProofType = require('./base/types');
+const {
+    getProof,
+    setDefaultEpoch,
+    helpers,
+} = require('./exportHandler');
+const { MINT } = require('./base/types');
 
 /**
  * Export the MintProof for a default epoch
@@ -11,7 +14,9 @@ const ProofType = require('./base/types');
  * @returns A MintProof construction for the default epoch
  */
 function MintProof(...args) {
-    return exportHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.MINT.name, ...args);
+    const Proof = getProof(MINT.name, this.epochNum);
+
+    return new Proof(...args);
 }
 
 /**
@@ -23,15 +28,15 @@ function MintProof(...args) {
  * not set the inputted epoch number to be the default
  * @returns A MintProof construction for the given epoch number
  */
-MintProof.epoch = function(epochNum, setDefaultEpoch = false) {
-    helpers.validateEpochNum(epochNum);
+MintProof.epoch = function(epochNum, setAsDefault = false) {
+    helpers.validateEpochNum(MINT.name, epochNum);
 
-    if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(ProofType.MINT.name, epochNum);
+    if (setAsDefault) {
+        setDefaultEpoch(MINT.name, epochNum);
     }
 
     return (...args) => {
-        return MintProof.bind({ epochNum })(...args);
+        return MintProof.call({ epochNum }, ...args);
     };
 };
 

@@ -1,7 +1,10 @@
 /* eslint-disable func-names */
-const helpers = require('./exportHandler/helpers');
-const exportHandler = require('./exportHandler');
-const ProofType = require('./base/types');
+const {
+    getProof,
+    setDefaultEpoch,
+    helpers,
+} = require('./exportHandler');
+const { DIVIDEND } = require('./base/types');
 
 /**
  * Export the DividendProof for a default epoch
@@ -11,7 +14,9 @@ const ProofType = require('./base/types');
  * @returns A DividendProof construction for the default epoch
  */
 function DividendProof(...args) {
-    return exportHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.DIVIDEND.name, ...args);
+    const Proof = getProof(DIVIDEND.name, this.epochNum);
+
+    return new Proof(...args);
 }
 
 /**
@@ -23,15 +28,15 @@ function DividendProof(...args) {
  * not set the inputted epoch number to be the default
  * @returns A DividendProof construction for the given epoch number
  */
-DividendProof.epoch = function(epochNum, setDefaultEpoch = false) {
-    helpers.validateEpochNum(epochNum);
+DividendProof.epoch = function(epochNum, setAsDefault = false) {
+    helpers.validateEpochNum(DIVIDEND.name, epochNum);
 
-    if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(ProofType.DIVIDEND.name, epochNum);
+    if (setAsDefault) {
+        setDefaultEpoch(DIVIDEND.name, epochNum);
     }
 
     return (...args) => {
-        return DividendProof.bind({ epochNum })(...args);
+        return DividendProof.call({ epochNum }, ...args);
     };
 };
 

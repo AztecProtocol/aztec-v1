@@ -1,6 +1,10 @@
 /* eslint-disable func-names */
-const exportHandler = require('./exportHandler');
-const ProofType = require('./base/types');
+const {
+    getProof,
+    setDefaultEpoch,
+    helpers,
+} = require('./exportHandler');
+const { BURN } = require('./base/types');
 
 /**
  * Export the BurnProof for a default epoch
@@ -10,7 +14,9 @@ const ProofType = require('./base/types');
  * @returns A BurnProof construction for the default epoch
  */
 function BurnProof(...args) {
-    return exportHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.BURN.name, ...args);
+    const Proof = getProof(BURN.name, this.epochNum);
+
+    return new Proof(...args);
 }
 
 /**
@@ -18,19 +24,19 @@ function BurnProof(...args) {
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a BurnProof is to be returned
- * @param {bool} setDefaultEpoch - if true, sets the inputted epochNum to be the default. If false, does
+ * @param {bool} setAsDefault - if true, sets the inputted epochNum to be the default. If false, does
  * not set the inputted epoch number to be the default
  * @returns A BurnProof construction for the given epoch number
  */
-BurnProof.epoch = function(epochNum, setDefaultEpoch = false) {
-    exportHandler.helpers.validateEpochNum(epochNum);
+BurnProof.epoch = function(epochNum, setAsDefault = false) {
+    helpers.validateEpochNum(BURN.name, epochNum);
 
-    if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(ProofType.BURN.name, epochNum);
+    if (setAsDefault) {
+        setDefaultEpoch(BURN.name, epochNum);
     }
 
     return (...args) => {
-        return BurnProof.bind({ epochNum })(...args);
+        return BurnProof.call({ epochNum }, ...args);
     };
 };
 

@@ -1,7 +1,10 @@
 /* eslint-disable func-names */
-const helpers = require('./exportHandler/helpers');
-const exportHandler = require('./exportHandler');
-const ProofType = require('./base/types');
+const {
+    getProof,
+    setDefaultEpoch,
+    helpers,
+} = require('./exportHandler');
+const { SWAP } = require('./base/types');
 
 /**
  * Export the SwapProof for a default epoch
@@ -11,7 +14,9 @@ const ProofType = require('./base/types');
  * @returns A SwapProof construction for the default epoch
  */
 function SwapProof(...args) {
-    return exportHandler.exportProof.bind({ epochNum: this.epochNum })(ProofType.SWAP.name, ...args);
+    const Proof = getProof(SWAP.name, this.epochNum);
+
+    return new Proof(...args);
 }
 
 /**
@@ -23,15 +28,15 @@ function SwapProof(...args) {
  * not set the inputted epoch number to be the default
  * @returns A SwapProof construction for the given epoch number
  */
-SwapProof.epoch = function(epochNum, setDefaultEpoch = false) {
-    helpers.validateEpochNum(epochNum);
+SwapProof.epoch = function(epochNum, setAsDefault = false) {
+    helpers.validateEpochNum(SWAP.name, epochNum);
 
-    if (setDefaultEpoch) {
-        exportHandler.setDefaultEpoch(ProofType.SWAP.name, epochNum);
+    if (setAsDefault) {
+        setDefaultEpoch(SWAP.name, epochNum);
     }
 
     return (...args) => {
-        return SwapProof.bind({ epochNum })(...args);
+        return SwapProof.call({ epochNum }, ...args);
     };
 };
 
