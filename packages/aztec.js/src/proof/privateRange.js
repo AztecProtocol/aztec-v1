@@ -1,9 +1,5 @@
 /* eslint-disable func-names */
-const {
-    getProof,
-    setDefaultEpoch,
-    helpers,
-} = require('./exportHandler');
+const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
 const { PRIVATE_RANGE } = require('./base/types');
 /**
  * Export the PrivateRangeProof for a default epoch

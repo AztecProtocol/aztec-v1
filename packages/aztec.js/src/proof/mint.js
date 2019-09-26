@@ -1,9 +1,5 @@
 /* eslint-disable func-names */
-const {
-    getProof,
-    setDefaultEpoch,
-    helpers,
-} = require('./exportHandler');
+const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
 const { MINT } = require('./base/types');
 
 /**
@@ -24,7 +20,7 @@ function MintProof(...args) {
  *
  * @method epoch
  * @param {Number} epochNum - epoch number for which a MintProof is to be returned
- * @param {bool} setDefaultEpoch - if true, sets the inputted epochNum to be the default. If false, does
+ * @param {bool} setAsDefault - if true, sets the inputted epochNum to be the default. If false, does
  * not set the inputted epoch number to be the default
  * @returns A MintProof construction for the given epoch number
  */
