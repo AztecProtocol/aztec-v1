@@ -1,9 +1,5 @@
 /* eslint-disable func-names */
-const {
-    getProof,
-    setDefaultEpoch,
-    helpers,
-} = require('./exportHandler');
+const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
 const { SWAP } = require('./base/types');
 
 /**

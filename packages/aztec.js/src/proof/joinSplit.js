@@ -1,9 +1,5 @@
 /* eslint-disable func-names */
-const {
-    getProof,
-    setDefaultEpoch,
-    helpers,
-} = require('./exportHandler');
+const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
 const { JOIN_SPLIT } = require('./base/types');
 
 /**
