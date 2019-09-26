@@ -6,7 +6,6 @@ const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { toWei } = require('web3-utils');
 
-
 const { JOIN_SPLIT_PROOF, MINT_PROOF } = devUtils.proofs;
 
 const ACE = artifacts.require('./ACE');

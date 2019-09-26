@@ -177,7 +177,6 @@ contract('ZkAssetBurnable', (accounts) => {
             const { receipt: joinSplitReceipt } = await zkAssetBurnable.confidentialTransfer(depositData, depositSignatures);
             expect(joinSplitReceipt.status).to.equal(true);
 
-
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, burnNotes, publicOwner);
             const burnData = burnProof.encodeABI(zkAssetBurnable.address);
 

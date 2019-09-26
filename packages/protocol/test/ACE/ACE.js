@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 /* global artifacts, expect, contract, it:true, web3:true */
-const { JoinSplitProof, metaData, note, PublicRangeProof } = require('aztec.js');
+const { JoinSplitProof, note, PublicRangeProof } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -148,7 +148,7 @@ contract('ACE', (accounts) => {
                 const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, data, {
                     value: totalFee,
                 });
-                const event = receipt.logs.find(e => e.event === 'TxFee');
+                const event = receipt.logs.find((e) => e.event === 'TxFee');
                 // eslint-disable-next-line no-underscore-dangle
                 expect(event.args._txFee.toString()).to.equal(totalFee.toString());
             });
@@ -171,7 +171,7 @@ contract('ACE', (accounts) => {
                 await ace.withdraw(feeOwner, totalFee);
                 const postWithdrawBalance = await web3.eth.getBalance(feeOwner);
 
-                expect(preWithdrawBalance.add(totalFee).toString()).to.equal(postWithdrawBalance)
+                expect(preWithdrawBalance.add(totalFee).toString()).to.equal(postWithdrawBalance);
             });
 
             it('should increment the latest epoch', async () => {
@@ -287,8 +287,10 @@ contract('ACE', (accounts) => {
 
                 const fee = await ace.getFeeForProof(JOIN_SPLIT_PROOF);
                 const data = proof.encodeABI(joinSplitValidator.address);
-                await truffleAssert.reverts(ace.validateProof(JOIN_SPLIT_PROOF, sender, data),
-                    "msg.value has insuficient associated fee");
+                await truffleAssert.reverts(
+                    ace.validateProof(JOIN_SPLIT_PROOF, sender, data),
+                    'msg.value has insuficient associated fee',
+                );
             });
 
             it('should not allow non-owner to withdraw fees to an arbitrary address', async () => {
@@ -309,7 +311,7 @@ contract('ACE', (accounts) => {
                 await truffleAssert.reverts(ace.withdraw(feeOwner, totalFee, { from: nonOwner }));
                 const postWithdrawBalance = await web3.eth.getBalance(feeOwner);
 
-                expect(preWithdrawBalance.toString()).to.equal(postWithdrawBalance)
+                expect(preWithdrawBalance.toString()).to.equal(postWithdrawBalance);
             });
 
             it("should not set a proof if the proof's epoch is higher than the contract latest epoch", async () => {
