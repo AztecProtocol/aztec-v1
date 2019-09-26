@@ -213,7 +213,8 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
 
                 await multiSig.confirmTransaction(submissionTxId, { from: owners[1] });
                 await multiSig.executeTransaction(submissionTxId, { from: owners[0] });
-                const secondsTimeLocked = await multiSig.secondsTimeLocked(submissionTxId, { from: owners[0] });
+
+                const secondsTimeLocked = await multiSig.secondsTimeLocked();
 
                 expect(secondsTimeLocked.toNumber()).to.be.equal(SECONDS_TIME_LOCKED.toNumber());
             });
