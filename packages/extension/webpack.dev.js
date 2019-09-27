@@ -25,23 +25,23 @@ module.exports = {
                 enforce: 'pre',
                 use: ['remove-flow-types-loader'],
             },
-            {
-                test: /\.jsx?$/,
-                enforce: 'pre',
-                exclude: [
-                    path.resolve(__dirname, './../../node_modules/'),
-                    path.resolve(__dirname, './../typed-data/'),
-                    path.resolve(__dirname, './../dev-utils/'),
-                    path.resolve(__dirname, './../aztec.js/'),
-                    path.resolve(__dirname, './../secp256k1/'),
-                    path.resolve(__dirname, './../bn128/'),
-                    '/node_modules/',
-                ],
-                use: ['eslint-loader'],
-                // options: {
-                //     presets: ['@babel/env'],
-                // },
-            },
+            // {
+            //     test: /\.jsx?$/,
+            //     enforce: 'pre',
+            //     exclude: [
+            //         path.resolve(__dirname, './../../node_modules/'),
+            //         path.resolve(__dirname, './../typed-data/'),
+            //         path.resolve(__dirname, './../dev-utils/'),
+            //         path.resolve(__dirname, './../aztec.js/'),
+            //         path.resolve(__dirname, './../secp256k1/'),
+            //         path.resolve(__dirname, './../bn128/'),
+            //         '/node_modules/',
+            //     ],
+            //     use: ['eslint-loader'],
+            //     // options: {
+            //     //     presets: ['@babel/env'],
+            //     // },
+            // },
             {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
