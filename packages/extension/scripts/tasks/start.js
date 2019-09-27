@@ -34,12 +34,11 @@ export default function start({
         log('\n');
         log('\n');
         log('  Run the following commands in another terminal window:\n');
-        log(`    ${chalk.cyan('yarn test:run')}          - run all the tests using this setup.`);
         log(`    ${chalk.cyan('yarn rebuild:contracts')} - migrate contracts and copy files`);
         log('\n');
-        log('    Sub-tasks of rebuild:');
+        log('    Sub-tasks of rebuild:contracts');
         log(`    ${chalk.magenta('yarn deploy:contracts')}  - migrate contracts.`);
-        log(`    ${chalk.magenta('yarn copy:contracts')}    - copy contracts, abis, and addresses to this package.`);
+        log(`    ${chalk.magenta('yarn copy')}    - copy contracts, abis, and addresses to this package.`);
         log('\n');
         log('    To test a specific file:');
         log(`    ${chalk.magenta('jest [FILE_NAME]')}`);
@@ -52,7 +51,7 @@ export default function start({
     const handleStart = () => {
         log('\n');
         log('\n');
-        log(`${chalk.green('✔')} Contracts were deployed, artifacts moved, birds are chirping, everything is perfect!`);
+        log(`${chalk.green('✔')} Contracts were deployed, artifacts were copied, birds are chirping, everything is perfect!`);
         log('  Next, you can...');
         showHints();
     };

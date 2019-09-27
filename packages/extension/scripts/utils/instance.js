@@ -77,10 +77,6 @@ const childProcessHandler = (childProcess, {
 
     childProcess.stdout.on('data', (data) => {
         const output = data.toString('utf8');
-        if (!shouldStart && hasNext()) {
-            stashedOutputs.push(output);
-            return;
-        }
         if (!hasStarted && shouldStart) {
             const onStartMessage = shouldStart(output);
             if (onStartMessage) {
@@ -94,6 +90,10 @@ const childProcessHandler = (childProcess, {
                 return;
             }
         }
+
+        if (!shouldStart && hasNext()) {
+            stashedOutputs.push(output);
+        }
         if (onReceiveOutput) {
             onReceiveOutput(output);
         } else {
@@ -105,7 +105,6 @@ const childProcessHandler = (childProcess, {
         const output = data.toString('utf8');
         if (!shouldStart && hasNext()) {
             stashedErrors.push(output);
-            return;
         }
         if (onReceiveErrorOutput) {
             onReceiveErrorOutput(output);

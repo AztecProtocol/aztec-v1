@@ -1,6 +1,7 @@
 import pipeTasks from '../utils/pipeTasks';
 // import migrateProtocol from './migrateProtocol';
 import migrateExtension from './migrateExtension';
+import copyProtocol from './copyProtocol';
 
 export default function deployContracts({
     onError,
@@ -10,6 +11,8 @@ export default function deployContracts({
         [
             // migrateProtocol,
             migrateExtension,
+            // Migrate protocol contracts here in the extension package
+            copyProtocol,
         ],
         {
             onError,
