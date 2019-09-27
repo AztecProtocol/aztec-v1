@@ -148,6 +148,12 @@ const AuthService = {
         spendingPublicKey,
         blockNumber,
     }) => {
+        console.log({
+            address,
+            linkedPublicKey,
+            spendingPublicKey,
+            blockNumber,
+        });
         let user = await userModel.get({
             address,
         });

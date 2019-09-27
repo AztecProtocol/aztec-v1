@@ -43,7 +43,6 @@ class RegisterExtension extends Component {
             requestId,
             clientId,
         });
-        console.log(spendingPublicKey);
         this.setState({
             signature,
             spendingPublicKey,
