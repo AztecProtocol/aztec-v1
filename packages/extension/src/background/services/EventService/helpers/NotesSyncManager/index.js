@@ -25,7 +25,7 @@ class SyncManager {
     constructor() {
         this.config = {
             syncInterval: 5000, // ms
-            blocksPerRequest: 180000, // ~ per month (~6000 per day)
+            blocksPerRequest: 540000, // ~ per 3 months (~6000 per day)
             precisionDelta: 10, //
         };
         this.addresses = new Map();
@@ -158,8 +158,6 @@ class SyncManager {
         const currentBlock = assetsManager.lastSyncedBlock();
         const fromAssets = (await syncedAssets(networkId))
             .map(({ registryOwner }) => registryOwner);
-
-        console.log(`NotesSyncManager - currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock} \n from assets: ${JSON.stringify(fromAssets)}`);
 
         let newLastSyncedBlock = lastSyncedBlock;
 
