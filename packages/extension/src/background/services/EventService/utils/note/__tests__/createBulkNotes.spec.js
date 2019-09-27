@@ -2,9 +2,7 @@ import {
     createBulkNotes,
 } from '..';
 import Note from '~background/database/models/note';
-import {
-    clearDB,
-} from '~background/database';
+import clearDB from '~background/database/utils/clearDB';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
@@ -17,8 +15,7 @@ describe('createBulkNotes', () => {
             blockNumber: 1,
         },
         {
-            noteHash: '0x00000002',
-            owner: '0x123',
+            noteHash: '0x00000002', owner: '0x123',
             metadata: '0x1234',
             blockNumber: 1,
         },

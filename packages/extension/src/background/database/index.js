@@ -1,5 +1,5 @@
 import Dexie from 'dexie';
-import clearDBModule from './utils/clearDB';
+
 
 if (process.env.NODE_ENV === 'test') {
     Dexie.dependencies.indexedDB = require('fake-indexeddb'); // eslint-disable-line global-require
@@ -30,5 +30,3 @@ export const storedNetworks = () => Object.keys(dbs);
 export const registerModel = (registerCallback) => {
     registerModelsCallbacks.push(registerCallback);
 };
-
-export const clearDB = clearDBModule;

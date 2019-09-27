@@ -1,24 +1,22 @@
 import Web3 from 'web3';
-import {
-    Web3Service
- } from './';
+import Web3Service from './service';
 import {
     errorLog,
 } from '~utils/log';
 
 
 class Web3ServiceFactory {
-    _web3ServicesByNetworks = {};
+    web3ServicesByNetworks = {};
 
-    _networksConfigs = {};
+    networksConfigs = {};
 
     _ensureWeb3Service = (networkId) => {
-        const config = this._networksConfigs[networkId];
+        const config = this.networksConfigs[networkId];
         if (!config) {
             errorLog(`No network config for such networkId: ${networkId}`);
             return;
         }
-        if (this._web3ServicesByNetworks[networkId]) {
+        if (this.web3ServicesByNetworks[networkId]) {
             return;
         }
         const {
@@ -31,11 +29,11 @@ class Web3ServiceFactory {
         service.init({
             provider,
         });
-        for (let i = 0; i < contractsConfigs.length; i++) {
+        for (let i = 0; i < contractsConfigs.length; i += 1) {
             const contractConfig = contractsConfigs[i];
             service.registerContract(contractConfig);
         }
-        this._web3ServicesByNetworks[networkId] = service;
+        this.web3ServicesByNetworks[networkId] = service;
     };
 
     setConfigs(networksConfigs) {
@@ -50,7 +48,7 @@ class Web3ServiceFactory {
         }
 
         const tempConfig = {};
-        for (let i = 0; i < networksConfigs.length; i++) {
+        for (let i = 0; i < networksConfigs.length; i += 1) {
             const {
                 title,
                 networkId,
@@ -65,18 +63,18 @@ class Web3ServiceFactory {
             tempConfig[networkId] = networksConfigs[i];
         }
 
-        this._networksConfigs = tempConfig;
+        this.networksConfigs = tempConfig;
     }
 
     getConfigs() {
         return {
-            ...this._networksConfigs,
+            ...this.networksConfigs,
         };
     }
 
     create(networkId) {
-        this._ensureWeb3Service(networkId);
-        return this._web3ServicesByNetworks[networkId];
+        this.ensureWeb3Service(networkId);
+        return this.web3ServicesByNetworks[networkId];
     }
 }
 
