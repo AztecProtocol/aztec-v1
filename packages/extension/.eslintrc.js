@@ -2,7 +2,6 @@ const path = require('path');
 
 module.exports = {
     extends: 'airbnb',
-    parser: 'babel-eslint',
     env: {
         browser: true,
         es6: true,
@@ -33,6 +32,7 @@ module.exports = {
                 SwitchCase: 1,
             },
         ],
+        "template-curly-spacing" : "off",
         'react/jsx-indent': ['error', 4],
         'react/jsx-indent-props': ['error', 4],
         'max-len': ['error', {
