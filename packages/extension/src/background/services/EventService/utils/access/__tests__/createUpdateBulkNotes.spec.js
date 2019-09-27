@@ -7,9 +7,7 @@ import {
 } from '../../note/index';
 import NoteAccess from '~background/database/models/noteAccess';
 import Note from '~background/database/models/note';
-import {
-    clearDB,
-} from '~background/database';
+import clearDB from '~background/database/utils/clearDB';
 import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,

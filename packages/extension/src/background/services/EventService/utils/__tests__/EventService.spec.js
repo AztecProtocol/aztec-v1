@@ -7,9 +7,7 @@ import {
 } from '~background/config/constants';
 import * as fetchAccountModule from '../fetchAccount';
 import * as fetchNotesModule from '../fetchNotes';
-import {
-    clearDB,
-} from '~background/database';
+import clearDB from '~background/database/utils/clearDB';
 
 
 describe('LastSyncedBlock', () => {
