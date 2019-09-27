@@ -128,7 +128,6 @@ class ExtensionApi {
                 signature,
                 linkedPublicKey,
                 spendingPublicKey,
-                registeredAt = Date.now(),
                 domain = window.location.origin,
             }) => {
                 await apollo.mutate({
@@ -139,7 +138,7 @@ class ExtensionApi {
                         linkedPublicKey,
                         spendingPublicKey,
                         domain,
-                        registeredAt,
+                        blockNumber: 1,
                     },
 
                 });
