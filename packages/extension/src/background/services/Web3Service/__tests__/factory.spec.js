@@ -1,18 +1,17 @@
-import Web3ServiceFactory from "../factory";
-import Web3Service from "../";
+import Web3ServiceFactory from '../factory';
+import Web3Service from '..';
 
 describe('Web3ServiceFactory', () => {
-
     const configs = [
         {
             title: 'best network',
             networkId: 5,
-            providerUrl: 'https://best-url.ever'
+            providerUrl: 'https://best-url.ever',
         },
         {
             title: 'best network 2',
             networkId: 6,
-            providerUrl: 'https://best-url2.ever'
+            providerUrl: 'https://best-url2.ever',
         },
     ];
 
@@ -24,7 +23,7 @@ describe('Web3ServiceFactory', () => {
         // given
         const networksConfigsBefore = Web3ServiceFactory.getConfigs();
         expect(networksConfigsBefore).toEqual({});
-        
+
         // action
         Web3ServiceFactory.setConfigs(configs);
 
@@ -46,14 +45,14 @@ describe('Web3ServiceFactory', () => {
             {
                 title: 'best network',
                 networkId: 5,
-                providerUrl: 'https://best-url.ever'
+                providerUrl: 'https://best-url.ever',
             },
             {
                 networkId: 6,
-                providerUrl: 'https://best-url2.ever'
+                providerUrl: 'https://best-url2.ever',
             },
         ];
-        
+
         // action
         Web3ServiceFactory.setConfigs(notRightConfigs);
 
@@ -71,15 +70,15 @@ describe('Web3ServiceFactory', () => {
         const notRightConfigs = [
             {
                 title: 'best network',
-                providerUrl: 'https://best-url.ever'
+                providerUrl: 'https://best-url.ever',
             },
             {
                 title: 'ropsten',
                 networkId: 6,
-                providerUrl: 'https://best-url2.ever'
+                providerUrl: 'https://best-url2.ever',
             },
         ];
-        
+
         // action
         Web3ServiceFactory.setConfigs(notRightConfigs);
 
@@ -102,10 +101,10 @@ describe('Web3ServiceFactory', () => {
             {
                 title: 'ropsten',
                 networkId: 6,
-                providerUrl: 'https://best-url2.ever'
+                providerUrl: 'https://best-url2.ever',
             },
         ];
-        
+
         // action
         Web3ServiceFactory.setConfigs(notRightConfigs);
 
@@ -122,7 +121,7 @@ describe('Web3ServiceFactory', () => {
 
         // action
         const web3Service = Web3ServiceFactory.create(networkConfig.networkId);
-        
+
         // expected
         expect(web3Service).toBeDefined();
         expect(web3Service.web3.currentProvider.host).toEqual(networkConfig.providerUrl);
@@ -137,7 +136,7 @@ describe('Web3ServiceFactory', () => {
         // action
         const web3Service = Web3ServiceFactory.create(networkConfig.networkId);
         const web3Service_2 = Web3ServiceFactory.create(networkConfig_2.networkId);
-        web3Service.someAddFunc = (a, b) => { return a + b };
+        web3Service.someAddFunc = (a, b) => a + b;
 
         // expected
         const web3ServiceRetrieved = Web3ServiceFactory.create(networkConfig.networkId);
@@ -153,9 +152,8 @@ describe('Web3ServiceFactory', () => {
 
         // action
         const service = Web3Service(networkConfig.networkId);
-        
+
         // expect
         expect(service).toBeDefined();
     });
-
 });

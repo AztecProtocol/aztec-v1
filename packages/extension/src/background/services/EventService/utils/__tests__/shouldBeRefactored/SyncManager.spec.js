@@ -10,90 +10,87 @@ const networkId_1 = '2293';
 
 
 describe('Sync Block Number', () => {
-   
-   it.skip('should call own syncAssets method with inputed start block and network id', async () => {
-      // given
-      const manager = new SyncManager();
-      const lastSyncedBlock = 4434;
+    it.skip('should call own syncAssets method with inputed start block and network id', async () => {
+        // given
+        const manager = new SyncManager();
+        const lastSyncedBlock = 4434;
 
-      const syncAssetsMock = jest.spyOn(manager, 'syncAssets');
-      syncAssetsMock.mockImplementation(() => {});
+        const syncAssetsMock = jest.spyOn(manager, 'syncAssets');
+        syncAssetsMock.mockImplementation(() => {});
 
-      const inputs = {
-         networkId: networkId_1,
-         lastSyncedBlock,
-      };
-      
-      // action
-      await manager.sync(inputs);
+        const inputs = {
+            networkId: networkId_1,
+            lastSyncedBlock,
+        };
 
-      // expectation
-      const expectedResult = {
-         networkId: networkId_1,
-         lastSyncedBlock,
-      };
+        // action
+        await manager.sync(inputs);
 
-      expect(syncAssetsMock).toHaveBeenCalledWith(expectedResult);
-   });
+        // expectation
+        const expectedResult = {
+            networkId: networkId_1,
+            lastSyncedBlock,
+        };
 
-   it.skip('should save lastSyncedBlock into syncManager', async () => {
-      // given
-      const manager = new SyncManager();
-      const lastSyncedBlock = 4434;
-      const currentBlock = 3453453;
+        expect(syncAssetsMock).toHaveBeenCalledWith(expectedResult);
+    });
 
-      Web3Service.eth = {
-         getBlockNumber: () => currentBlock
-      };
-      fetchAssets.mockResolvedValue([]);
+    it.skip('should save lastSyncedBlock into syncManager', async () => {
+        // given
+        const manager = new SyncManager();
+        const lastSyncedBlock = 4434;
+        const currentBlock = 3453453;
 
-      const inputs = {
-         networkId: networkId_1,
-         lastSyncedBlock: lastSyncedBlock,
-      };
-      
-      // action
-      await manager.sync(inputs);
+        Web3Service.eth = {
+            getBlockNumber: () => currentBlock,
+        };
+        fetchAssets.mockResolvedValue([]);
 
-      // expectation
-      const expectedResult = {
-         lastSyncedBlock: currentBlock,
-      };
+        const inputs = {
+            networkId: networkId_1,
+            lastSyncedBlock,
+        };
 
-      const stateForNetwork = manager.networks.get(inputs.networkId);
-      expect(stateForNetwork.lastSyncedBlock).toEqual(expectedResult.lastSyncedBlock);
-   });
+        // action
+        await manager.sync(inputs);
 
-   it.skip('should call "fetchAssets" with right: fromBlock, fromBlock, networkId', async () => {
-      // given
-      const manager = new SyncManager();
-      const lastSyncedBlock = 4434;
-      const currentBlock = 3453453;
+        // expectation
+        const expectedResult = {
+            lastSyncedBlock: currentBlock,
+        };
 
-      Web3Service.eth = {
-         getBlockNumber: () => currentBlock
-      };
+        const stateForNetwork = manager.networks.get(inputs.networkId);
+        expect(stateForNetwork.lastSyncedBlock).toEqual(expectedResult.lastSyncedBlock);
+    });
 
-      fetchAssets.mockImplementation(() => []);
+    it.skip('should call "fetchAssets" with right: fromBlock, fromBlock, networkId', async () => {
+        // given
+        const manager = new SyncManager();
+        const lastSyncedBlock = 4434;
+        const currentBlock = 3453453;
 
-      const inputs = {
-         networkId: networkId_1,
-         lastSyncedBlock: lastSyncedBlock,
-      };
-      
-      // action
-      await manager.sync(inputs);
+        Web3Service.eth = {
+            getBlockNumber: () => currentBlock,
+        };
 
-      // expectation
-      const expectedResult = {
-         networkId: inputs.networkId,
-         fromBlock: inputs.lastSyncedBlock + 1,
-         toBlock: currentBlock,
-         onError: manager.handleFetchError,
-      };
+        fetchAssets.mockImplementation(() => []);
 
-      expect(fetchAssets).toHaveBeenCalledWith(expectedResult);
-   });
+        const inputs = {
+            networkId: networkId_1,
+            lastSyncedBlock,
+        };
 
+        // action
+        await manager.sync(inputs);
+
+        // expectation
+        const expectedResult = {
+            networkId: inputs.networkId,
+            fromBlock: inputs.lastSyncedBlock + 1,
+            toBlock: currentBlock,
+            onError: manager.handleFetchError,
+        };
+
+        expect(fetchAssets).toHaveBeenCalledWith(expectedResult);
+    });
 });
-

@@ -1,15 +1,14 @@
-import { 
+import {
     createBulkNotes,
-} from '../';
+} from '..';
 import Note from '~background/database/models/note';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
 describe('createBulkNotes', () => {
-
     const rawNotes = [
         {
             noteHash: '0x00000001',
@@ -42,7 +41,7 @@ describe('createBulkNotes', () => {
         const expectedNotes = rawNotes.map(note => ({
             ...note,
             status: NOTE_STATUS.CREATED,
-        }))
+        }));
 
         expect(notesAfter.length).toEqual(rawNotes.length);
         expect(notesAfter[0]).toEqual(expectedNotes[0]);
@@ -68,5 +67,4 @@ describe('createBulkNotes', () => {
         // action / expected
         await expect(createBulkNotes([updateFirstNote])).rejects.toThrow();
     });
-
 });

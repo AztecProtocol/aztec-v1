@@ -1,17 +1,16 @@
-import { 
+import {
     createBulkNotes,
     updateBulkNotes,
     destroyBulkNotes,
-} from '../';
+} from '..';
 import Note from '~background/database/models/note';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
 describe('updateBulkNotes', () => {
-
     const rawNotes = [
         {
             noteHash: '0x00000001',
@@ -44,7 +43,7 @@ describe('updateBulkNotes', () => {
         const expectedNotes = rawNotes.map(note => ({
             ...note,
             status: NOTE_STATUS.CREATED,
-        }))
+        }));
 
         expect(notesAfter.length).toEqual(rawNotes.length);
         expect(notesAfter[0]).toEqual(expectedNotes[0]);
@@ -71,7 +70,7 @@ describe('updateBulkNotes', () => {
         const expectedNotes = rawNotes.map(note => ({
             ...note,
             status: NOTE_STATUS.CREATED,
-        }))
+        }));
         const expectedUpdatedNote = {
             ...updateFirstNote,
             status: NOTE_STATUS.CREATED,
@@ -81,12 +80,10 @@ describe('updateBulkNotes', () => {
         expect(notesAfter[0]).toEqual(expectedUpdatedNote);
         expect(notesAfter[1]).toEqual(expectedNotes[1]);
     });
-
 });
 
 
 describe('destroyBulkNotes', () => {
-
     const rawNotes = [
         {
             noteHash: '0x00000001',
@@ -111,7 +108,7 @@ describe('destroyBulkNotes', () => {
         await createBulkNotes(rawNotes);
         const notesBefore = await Note.query().toArray();
         expect(notesBefore.length).toEqual(2);
-        
+
         // action
         await destroyBulkNotes(rawNotes);
 
@@ -126,5 +123,4 @@ describe('destroyBulkNotes', () => {
         expect(notesAfter[0]).toEqual(notesExpected[0]);
         expect(notesAfter[1]).toEqual(notesExpected[1]);
     });
-
 });

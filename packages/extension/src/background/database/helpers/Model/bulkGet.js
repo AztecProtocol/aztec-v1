@@ -1,6 +1,6 @@
 import {
     getDB,
-} from '../../';
+} from '../..';
 
 
 export default async function bulkGet(modelName, { networkId }, primaryKeys) {

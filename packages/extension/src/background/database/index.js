@@ -12,10 +12,10 @@ const registerModelsCallbacks = [];
 const ensureDB = (networkId) => {
     if (!dbs[networkId]) {
         const db = new Dexie(`aztec_network_${networkId}`);
-        
+
         dbs[networkId] = db;
 
-        registerModelsCallbacks.forEach(registerCallback => {
+        registerModelsCallbacks.forEach((registerCallback) => {
             registerCallback(db);
         });
     }
@@ -27,13 +27,10 @@ export const getDB = (networkId) => {
     return dbs[networkId];
 };
 
-export const storedNetworks = () => {
-    return Object.keys(dbs);
-};
+export const storedNetworks = () => Object.keys(dbs);
 
 export const registerModel = (registerCallback) => {
     registerModelsCallbacks.push(registerCallback);
 };
 
 export const clearDB = clearDBModule;
-

@@ -1,278 +1,272 @@
-import EventService from '../../';
+import EventService from '../..';
 import Note from '~background/database/models/note';
 import Account from '~background/database/models/account';
 import Asset from '~background/database/models/asset';
 import {
-   NOTE_STATUS,
-} from '~background/config/constants'
+    NOTE_STATUS,
+} from '~background/config/constants';
 import * as fetchAccountModule from '../fetchAccount';
 import * as fetchNotesModule from '../fetchNotes';
 import {
-   clearDB,
+    clearDB,
 } from '~background/database';
 
 
 describe('LastSyncedBlock', () => {
+    const account_1 = {
+        address: '0x12345678',
+        linkedPublicKey: '34563',
+        blockNumber: 234,
+    };
 
-   const account_1 = {
-      address: '0x12345678',
-      linkedPublicKey: '34563',
-      blockNumber: 234,
-   };
-   
-   const note_1 = {
-      noteHash: '0x432',
-      owner: account_1.address,
-      metadata: '0x0',
-      blockNumber: 344,
-      status: NOTE_STATUS.CREATED,
-   }
-   
-   it('should call NotesSyncManager.sync with account block number and inputed address', async () => {
-      // given
-      const syncMock = jest.spyOn(EventService.notesSyncManager, 'sync');
-      syncMock.mockImplementation(() => {});
+    const note_1 = {
+        noteHash: '0x432',
+        owner: account_1.address,
+        metadata: '0x0',
+        blockNumber: 344,
+        status: NOTE_STATUS.CREATED,
+    };
 
-      const fetchAccountMock = jest.spyOn(EventService, 'fetchAztecAccount');
-      fetchAccountMock.mockImplementation(() => ({
-         error: null,
-         account: account_1
-      }));
+    it('should call NotesSyncManager.sync with account block number and inputed address', async () => {
+        // given
+        const syncMock = jest.spyOn(EventService.notesSyncManager, 'sync');
+        syncMock.mockImplementation(() => {});
 
-      const noteLatestMock = jest.spyOn(Note, 'latest');
-      noteLatestMock.mockResolvedValue(null);
+        const fetchAccountMock = jest.spyOn(EventService, 'fetchAztecAccount');
+        fetchAccountMock.mockImplementation(() => ({
+            error: null,
+            account: account_1,
+        }));
 
-      const inputs = {
-         address: account_1.address,
-      };
-      
-      // action
-      await EventService.syncNotes(inputs);
+        const noteLatestMock = jest.spyOn(Note, 'latest');
+        noteLatestMock.mockResolvedValue(null);
 
-      // expectation
-      const expectedResult = {
-         address: inputs.address,
-         lastSyncedBlock: account_1.blockNumber,
-      };
+        const inputs = {
+            address: account_1.address,
+        };
 
-      expect(syncMock).toHaveBeenCalledWith(expectedResult);
+        // action
+        await EventService.syncNotes(inputs);
 
-      syncMock.mockRestore();
-      noteLatestMock.mockRestore();
-      noteLatestMock.mockRestore();
-   });
+        // expectation
+        const expectedResult = {
+            address: inputs.address,
+            lastSyncedBlock: account_1.blockNumber,
+        };
 
-   it('should call NotesSyncManager.sync with last synced Note number and inputed address', async () => {
-      // given
-      const syncMock = jest.spyOn(EventService.notesSyncManager, 'sync');
-      syncMock.mockImplementation(() => {});
+        expect(syncMock).toHaveBeenCalledWith(expectedResult);
 
-      const fetchAccountMock = jest.spyOn(EventService, 'fetchAztecAccount');
-      fetchAccountMock.mockImplementation(() => ({
-         error: null,
-         account: account_1
-      }));
+        syncMock.mockRestore();
+        noteLatestMock.mockRestore();
+        noteLatestMock.mockRestore();
+    });
 
-      const noteLatestMock = jest.spyOn(Note, 'latest');
-      noteLatestMock.mockResolvedValue(note_1);
+    it('should call NotesSyncManager.sync with last synced Note number and inputed address', async () => {
+        // given
+        const syncMock = jest.spyOn(EventService.notesSyncManager, 'sync');
+        syncMock.mockImplementation(() => {});
 
-      const inputs = {
-         address: account_1.address,
-      };
-      
-      // action
-      await EventService.syncNotes(inputs);
+        const fetchAccountMock = jest.spyOn(EventService, 'fetchAztecAccount');
+        fetchAccountMock.mockImplementation(() => ({
+            error: null,
+            account: account_1,
+        }));
 
-      // expectation
-      const expectedResult = {
-         address: inputs.address,
-         lastSyncedBlock: note_1.blockNumber,
-      };
+        const noteLatestMock = jest.spyOn(Note, 'latest');
+        noteLatestMock.mockResolvedValue(note_1);
 
-      expect(syncMock).toHaveBeenCalledWith(expectedResult);
+        const inputs = {
+            address: account_1.address,
+        };
 
-      syncMock.mockRestore();
-      noteLatestMock.mockRestore();
-      noteLatestMock.mockRestore();
-   });
+        // action
+        await EventService.syncNotes(inputs);
 
+        // expectation
+        const expectedResult = {
+            address: inputs.address,
+            lastSyncedBlock: note_1.blockNumber,
+        };
+
+        expect(syncMock).toHaveBeenCalledWith(expectedResult);
+
+        syncMock.mockRestore();
+        noteLatestMock.mockRestore();
+        noteLatestMock.mockRestore();
+    });
 });
 
 
 describe('fetchAztecAccount', () => {
+    const account_1 = {
+        address: '0x12345678',
+        linkedPublicKey: '34563',
+        blockNumber: 234,
+    };
 
-   const account_1 = {
-      address: '0x12345678',
-      linkedPublicKey: '34563',
-      blockNumber: 234,
-   };
+    afterEach(async () => {
+        clearDB();
+    });
 
-   afterEach(async () => {
-      clearDB();
-   });
+    it('should return latest account which stored in the db', async () => {
+        // given
+        const accountLatestMock = jest.spyOn(Account, 'latest');
+        accountLatestMock.mockResolvedValue(account_1);
 
-   it('should return latest account which stored in the db', async () => {
-      // given
-      const accountLatestMock = jest.spyOn(Account, 'latest');
-      accountLatestMock.mockResolvedValue(account_1);
+        // action
+        const { error, account } = await EventService.fetchAztecAccount({
+            address: account_1.address,
+        });
 
-      // action
-      const { error, account } = await EventService.fetchAztecAccount({
-         address: account_1.address,
-      });
+        // expectation
+        expect(error).toEqual(null);
+        expect(account).toEqual(account_1);
 
-      // expectation
-      expect(error).toEqual(null);
-      expect(account).toEqual(account_1);
+        accountLatestMock.mockRestore();
+    });
 
-      accountLatestMock.mockRestore();
-   });
+    it('should return latest account which stored in the db', async () => {
+        // given
+        const fetchAccountMock = jest.spyOn(fetchAccountModule, 'fetchAccount');
+        fetchAccountMock.mockResolvedValue({
+            error: null,
+            account: account_1,
+        });
 
-   it('should return latest account which stored in the db', async () => {
-      // given
-      const fetchAccountMock = jest.spyOn(fetchAccountModule, 'fetchAccount');
-      fetchAccountMock.mockResolvedValue({
-         error: null,
-         account: account_1,
-      });
+        // action
+        const { error, account } = await EventService.fetchAztecAccount({
+            address: account_1.address,
+        });
 
-      // action
-      const { error, account } = await EventService.fetchAztecAccount({
-         address: account_1.address,
-      });
+        // expectation
+        expect(error).toBeNull();
+        expect(account).toEqual(account_1);
 
-      // expectation
-      expect(error).toBeNull();
-      expect(account).toEqual(account_1);
-
-      fetchAccountMock.mockRestore();
-   });
-
+        fetchAccountMock.mockRestore();
+    });
 });
 
 
 describe('fetchLatestNote', () => {
+    const account_1 = {
+        address: '0x123445378',
+        linkedPublicKey: '34563',
+        blockNumber: 234,
+    };
 
-   const account_1 = {
-      address: '0x123445378',
-      linkedPublicKey: '34563',
-      blockNumber: 234,
-   };
+    const note_1 = {
+        noteHash: '0x432',
+        owner: account_1.address,
+        metadata: '0x0',
+        blockNumber: 344,
+        status: NOTE_STATUS.CREATED,
+        networkId: 1,
+        asset: '0x34533',
+    };
 
-   const note_1 = {
-      noteHash: '0x432',
-      owner: account_1.address,
-      metadata: '0x0',
-      blockNumber: 344,
-      status: NOTE_STATUS.CREATED,
-      networkId: 1,
-      asset: '0x34533',
-   };
+    const note_2 = {
+        noteHash: '0x434',
+        owner: account_1.address,
+        metadata: '0x0',
+        blockNumber: 344,
+        status: NOTE_STATUS.CREATED,
+        networkId: 1,
+        asset: '0x34533',
+    };
 
-   const note_2 = {
-      noteHash: '0x434',
-      owner: account_1.address,
-      metadata: '0x0',
-      blockNumber: 344,
-      status: NOTE_STATUS.CREATED,
-      networkId: 1,
-      asset: '0x34533',
-   }
+    const rawAssets = [
+        {
+            registryOwner: '0x21',
+            registryAddress: '0x24',
+            scalingFactor: 1,
+            linkedTokenAddress: '0x25',
+            canAdjustSupply: true,
+            canConvert: false,
+            blockNumber: 4,
+        },
+        {
+            registryOwner: '0x02',
+            registryAddress: '0x01',
+            scalingFactor: 2,
+            linkedTokenAddress: '0xff',
+            canAdjustSupply: false,
+            canConvert: true,
+            blockNumber: 5,
+        },
+    ];
 
-   const rawAssets = [
-      {
-          registryOwner: '0x21',
-          registryAddress: '0x24',
-          scalingFactor: 1,
-          linkedTokenAddress: '0x25',
-          canAdjustSupply: true,
-          canConvert: false,
-          blockNumber: 4,
-      },
-      {
-          registryOwner: '0x02',
-          registryAddress: '0x01',
-          scalingFactor: 2,
-          linkedTokenAddress: '0xff',
-          canAdjustSupply: false,
-          canConvert: true,
-          blockNumber: 5,
-      },
-  ];
+    const networkId = 1;
 
-  const networkId = 1;
+    afterEach(() => {
+        clearDB();
+    });
 
-   afterEach(() => {
-      clearDB();
-   });
+    it('should call fetchNotes with passed assetAddress', async () => {
+        // given
+        const isSyncedMocked = jest.spyOn(EventService.assetsSyncManager, 'isSynced');
+        isSyncedMocked.mockResolvedValue(true);
 
-   it('should call fetchNotes with passed assetAddress', async () => {
-      // given
-      const isSyncedMocked = jest.spyOn(EventService.assetsSyncManager, 'isSynced');
-      isSyncedMocked.mockResolvedValue(true);
+        const fetchNotesMocked = jest.spyOn(fetchNotesModule, 'fetchNotes');
+        fetchNotesMocked.mockImplementation(() => ({
+            error: null,
+            groupedNotes: {
+                createNotes: [],
+                updateNotes: [],
+                destroyNotes: [],
+                isEmpty: () => true,
+            },
+        }));
 
-      const fetchNotesMocked = jest.spyOn(fetchNotesModule, 'fetchNotes')
-      fetchNotesMocked.mockImplementation(() => ({
-         error: null,
-         groupedNotes: {
-            createNotes: [],
-            updateNotes: [],
-            destroyNotes: [],
-            isEmpty: () => true,
-         },
-      }));
+        await EventService.fetchLatestNote({
+            noteHash: note_1.noteHash,
+            assetAddress: note_1.asset,
+            networkId: note_1.networkId,
+        });
 
-      await EventService.fetchLatestNote({
-         noteHash: note_1.noteHash,
-         assetAddress: note_1.asset,
-         networkId: note_1.networkId,
-      });
+        // expected
+        const expectedInputParams = {
+            noteHash: note_1.noteHash,
+            fromAssets: [note_1.asset],
+            networkId: note_1.networkId,
+        };
 
-      // expected
-      const expectedInputParams = {
-         noteHash: note_1.noteHash,
-         fromAssets: [note_1.asset],
-         networkId: note_1.networkId,
-      };
+        expect(fetchNotesMocked).toHaveBeenCalledWith(expectedInputParams);
+        isSyncedMocked.mockRestore();
+        fetchNotesMocked.mockRestore();
+    });
 
-      expect(fetchNotesMocked).toHaveBeenCalledWith(expectedInputParams);
-      isSyncedMocked.mockRestore();
-      fetchNotesMocked.mockRestore();
-   });
+    it('should call fetchNotes with synced assets if assetAddress wasnt passes as input param', async () => {
+        // given
+        const isSyncedMocked = jest.spyOn(EventService.assetsSyncManager, 'isSynced');
+        isSyncedMocked.mockResolvedValue(true);
 
-   it('should call fetchNotes with synced assets if assetAddress wasnt passes as input param', async () => {
-      // given
-      const isSyncedMocked = jest.spyOn(EventService.assetsSyncManager, 'isSynced');
-      isSyncedMocked.mockResolvedValue(true);
+        const fetchNotesMocked = jest.spyOn(fetchNotesModule, 'fetchNotes');
+        fetchNotesMocked.mockImplementation(() => ({
+            error: null,
+            groupedNotes: {
+                createNotes: [],
+                updateNotes: [],
+                destroyNotes: [],
+                isEmpty: () => true,
+            },
+        }));
 
-      const fetchNotesMocked = jest.spyOn(fetchNotesModule, 'fetchNotes')
-      fetchNotesMocked.mockImplementation(() => ({
-         error: null,
-         groupedNotes: {
-            createNotes: [],
-            updateNotes: [],
-            destroyNotes: [],
-            isEmpty: () => true,
-         },
-      }));
+        await Asset.bulkAdd(rawAssets, { networkId });
 
-      await Asset.bulkAdd(rawAssets, {networkId});
+        await EventService.fetchLatestNote({
+            noteHash: note_1.noteHash,
+            networkId: note_1.networkId,
+        });
 
-      await EventService.fetchLatestNote({
-         noteHash: note_1.noteHash,
-         networkId: note_1.networkId,
-      });
+        // expected
+        const expectedInputParams = {
+            noteHash: note_1.noteHash,
+            fromAssets: rawAssets.map(({ registryOwner }) => registryOwner),
+            networkId: note_1.networkId,
+        };
 
-      // expected
-      const expectedInputParams = {
-         noteHash: note_1.noteHash,
-         fromAssets: rawAssets.map(({registryOwner}) => registryOwner),
-         networkId: note_1.networkId,
-      };
-
-      expect(fetchNotesMocked).toHaveBeenCalledWith(expectedInputParams);
-      isSyncedMocked.mockRestore();
-      fetchNotesMocked.mockRestore();
-   });
-
-})
+        expect(fetchNotesMocked).toHaveBeenCalledWith(expectedInputParams);
+        isSyncedMocked.mockRestore();
+        fetchNotesMocked.mockRestore();
+    });
+});

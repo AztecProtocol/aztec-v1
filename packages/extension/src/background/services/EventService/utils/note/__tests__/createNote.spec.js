@@ -1,15 +1,14 @@
-import { 
+import {
     createNote,
-} from '../';
+} from '..';
 import Note from '~background/database/models/note';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
 describe('createNote', () => {
-
     const rawNote = {
         noteHash: '0x00000001',
         owner: '0x123',
@@ -58,6 +57,4 @@ describe('createNote', () => {
         // action / expected
         await expect(createNote(updateNote)).rejects.toThrow();
     });
-
-
 });

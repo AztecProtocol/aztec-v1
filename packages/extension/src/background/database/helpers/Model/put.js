@@ -1,6 +1,6 @@
 import {
     getDB,
-} from '../../';
+} from '../..';
 
 /*
 * If the operation succeeds then the returned Promise resolves to the key under which the object was stored in the Table

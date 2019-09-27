@@ -25,7 +25,7 @@ export default async function syncAssetInfo(args, ctx = {}) {
 
     if (!asset) {
         const {
-            error, 
+            error,
             asset: fetchedAsset,
         } = await EventService.fetchAsset({
             address,

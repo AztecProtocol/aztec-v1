@@ -1,6 +1,6 @@
 import {
     getDB,
-} from '../../';
+} from '../..';
 
 
 export default async function bulkPut(modelName, items, { networkId }) {

@@ -1,10 +1,8 @@
-import Account from '~background/database/models/account'
+import Account from '~background/database/models/account';
 
-const account = (networkId, address) => {
-    return Account.get(networkId, address);
-};
+const account = (networkId, address) => Account.get(networkId, address);
 
 
 export default {
     account,
-}
+};
