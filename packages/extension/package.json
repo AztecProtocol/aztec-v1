@@ -65,7 +65,7 @@
     },
     "scripts": {
         "start:ganache": "babel-node scripts/run start",
-        "copy:contracts": "babel-node scripts/run copy",
+        "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deployContracts",
         "rebuild:contracts": "yarn deploy:contracts && yarn copy",
         "build:dev": "webpack --config webpack.dev.js",

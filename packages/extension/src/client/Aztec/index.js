@@ -10,9 +10,9 @@ import {
     from,
 } from 'rxjs';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
-import ZkAssetMintable from '../../../build/contracts/ZkAssetMintable';
-import ACE from '../../../build/contracts/ACE';
-import ERC20Mintable from '../../../build/contracts/ERC20Mintable';
+import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable';
+import ACE from '../../../build/protocol/ACE';
+import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 import {
     actionEvent,
 } from '~config/event';

@@ -3,12 +3,12 @@ import {
     log,
 } from '~utils/log';
 import Web3Service from '~client/services/Web3Service';
-import ZkAssetOwnable from '../../../../build/contracts/ZkAssetOwnable';
-import ZkAssetMintable from '../../../../build/contracts/ZkAssetMintable';
-import ZkAssetBurnable from '../../../../build/contracts/ZkAssetBurnable';
-import ERC20Mintable from '../../../../build/contracts/ERC20Mintable';
-import JoinSplit from '../../../../build/contracts/JoinSplit';
-import JoinSplitFluid from '../../../../build/contracts/JoinSplitFluid';
+import ZkAssetOwnable from '../../../../build/protocol/ZkAssetOwnable';
+import ZkAssetMintable from '../../../../build/protocol/ZkAssetMintable';
+import ZkAssetBurnable from '../../../../build/protocol/ZkAssetBurnable';
+import ERC20Mintable from '../../../../build/protocol/ERC20Mintable';
+import JoinSplit from '../../../../build/protocol/JoinSplit';
+import JoinSplitFluid from '../../../../build/protocol/JoinSplitFluid';
 
 const contractMapping = {
     ZkAssetOwnable,

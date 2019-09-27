@@ -13,8 +13,7 @@ import pipeTasks, {
 } from '../utils/pipeTasks';
 import stopProcesses from '../utils/stopProcesses';
 import deployContracts from './deployContracts';
-// import copy from './copy';
-
+import copy from './copy';
 
 export default function setup({
     onStart,
@@ -42,19 +41,18 @@ export default function setup({
         });
     };
 
-    const makeCloseChildProcessCallback = name =>
-        () => {
-            if (!(name in runningProcesses)) return;
+    const makeCloseChildProcessCallback = name => () => {
+        if (!(name in runningProcesses)) return;
 
-            delete runningProcesses[name];
-            successLog(`${name} instance stopped.`);
+        delete runningProcesses[name];
+        successLog(`${name} instance stopped.`);
 
-            if (Object.keys(runningProcesses).length) {
-                handleClose();
-            } else {
-                doClose();
-            }
-        };
+        if (Object.keys(runningProcesses).length) {
+            handleClose();
+        } else {
+            doClose();
+        }
+    };
 
     terminal.grabInput(true);
     terminal.on('key', (key) => {
@@ -99,10 +97,9 @@ export default function setup({
         log('');
         warnLog('Something went wrong');
         log('');
-        log(`Please fix the above error and then run ${chalk.cyan('yarn rebuild')} in another terminal window.`);
+        log(`Please fix the above error and then run ${chalk.cyan('yarn rebuild:contracts')} in another terminal window.`);
         log('');
     };
-
 
     runningProcesses.ganache = ganacheInstance({
         onClose: makeCloseChildProcessCallback('ganache'),
@@ -112,7 +109,7 @@ export default function setup({
             [
                 deployContracts,
                 logTask('Successfully deployed contracts to ganache.'),
-                // copy,
+                copy,
             ],
             {
                 onError: handleBuildError,

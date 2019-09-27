@@ -2,142 +2,70 @@ import path from 'path';
 import chalk from 'chalk';
 import {
     ensureDirectory,
-    copyFolder,
     copyFile,
     isFile,
 } from '../utils/fs';
 import {
     projectRoot,
-    locateModule,
-    locatePackage,
 } from '../utils/path';
 import {
     logEntries,
     successLog,
     errorLog,
-    log,
 } from '../utils/log';
-import {
-    AZTECAccountRegistryConfig,
-    ACEConfig,
-    IZkAssetConfig,
-} from '../config/contracts';
 
-
-const targetPackages = [
-    'protocol',
-    'extension',
+const contractsToCopy = [
+    'AZTECAccountRegistry',
+    'ACE',
+    'IZkAsset',
 ];
 
-const graphProtocolModule = '@graphprotocol';
-
-const destBuildFolder = 'build';
-const destContractsFolder = 'contracts';
-
-const extensionContractsFolder = 'build/contracts';
+const srcContractsFolder = 'build/contracts';
 const extensionBackgroundContractsFolder = 'src/background/contracts';
 
-const srcContractsFolder = 'build/contracts';
+const validateContractSrc = (contractName) => {
+    const srcPath = path.join(projectRoot, srcContractsFolder, `${contractName}.json`);
 
+    if (!isFile(srcPath)) {
+        errorLog(`Contract '${contractName}' does not exist.`);
+        return '';
+    }
 
-const retrieveAbis = dataSources =>
-    dataSources.reduce((arr, cur) => [
-        ...arr,
-        ...((cur.mapping && cur.mapping.abis) || []),
-        ...((cur.templates && retrieveAbis(cur.templates)) || []),
-    ], []);
-
-
-const extractNetworks = (contractPath) => {
-    const contract = require(path.relative( // eslint-disable-line
-        __dirname,
-        contractPath,
-    ));
-    const {
-        networks,
-    } = contract || {};
-
-    return networks
-}
-
+    return srcPath;
+};
 
 export default async function copy({
     onError,
     onClose,
 } = {}) {
-    const packagePathsMap = {};
-    targetPackages.forEach((name) => {
-        packagePathsMap[name] = locatePackage(name);
-    });
-    const packagePaths = Object.values(packagePathsMap);
-
-    if (packagePaths.some(p => !p)) {
-        packagePaths.forEach((p, i) => {
-            if (!p) {
-                errorLog(`Package '${targetPackages[i]}' not found'`);
-            }
-        });
-        log('Please run `yarn install` to get required node_modules.');
-        if (onError) {
-            onError();
-        }
-        return;
-    }
-
     const promises = [];
-
-    ensureDirectory(path.join(projectRoot, destBuildFolder));
-
-    const srcContractsPaths = packagePaths
-        .map(p => path.join(p, srcContractsFolder));
-
-
-    srcContractsPaths.forEach((srcContractsPath) => {
-        promises.push(copyFolder(
-            srcContractsPath,
-            path.join(projectRoot, destBuildFolder, destContractsFolder),
-        ));
-    });
-    promises.push(copyFolder(
-        path.join(packagePathsMap.protocol, srcContractsFolder),
-        path.join(packagePathsMap.extension, extensionContractsFolder),
-    ));
 
     /*
     * Copy Contracts into background folder for syncing events
     */
-    ensureDirectory(path.join(packagePathsMap.extension, extensionBackgroundContractsFolder));
-    [AZTECAccountRegistryConfig, ACEConfig, IZkAssetConfig]
-            .map(c => c.name)
+    const destContractsPath = path.join(projectRoot, extensionBackgroundContractsFolder);
+    try {
+        ensureDirectory(destContractsPath);
+
+        contractsToCopy
             .map(contractName => ({
                 contractName,
-                sourcPath: srcContractsPaths
-                    .map(p => path.join(p, `${contractName}.json`))
-                    .filter(isFile)
-                    .find(p => !!extractNetworks(p))
+                sourcePath: validateContractSrc(contractName),
             }))
-            .forEach(({contractName, sourcPath}) => 
+            .filter(({ sourcePath }) => sourcePath)
+            .forEach(({ contractName, sourcePath }) => {
                 promises.push(
                     copyFile(
-                        sourcPath,
-                        path.join(packagePathsMap.extension, extensionBackgroundContractsFolder, `${contractName}.json`),
-                    )
-                )
-            )
-
-    /*
-     * graph-cli (v) doesn't work with yarn workspaces
-     * So we need to manually copy the packages to current project's node_modules folder.
-     */
-    const graphProtocolPath = locateModule(graphProtocolModule);
-    const targetGraphProtocolPath = path.join(projectRoot, 'node_modules', graphProtocolModule);
-    if (graphProtocolPath
-        && (graphProtocolPath !== targetGraphProtocolPath)
-    ) {
-        promises.push(copyFolder(
-            graphProtocolPath,
-            targetGraphProtocolPath,
-        ));
+                        sourcePath,
+                        path.join(destContractsPath, `${contractName}.json`),
+                    ),
+                );
+            });
+    } catch (error) {
+        if (onError) {
+            onError(error);
+        }
+        return;
     }
 
     const result = await Promise.all(promises);
