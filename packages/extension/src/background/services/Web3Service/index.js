@@ -7,6 +7,7 @@ import {
 } from '~utils/log';
 import Web3ServiceFactory from './factory';
 
+
 export class Web3Service {
     constructor() {
         this.web3 = null;
