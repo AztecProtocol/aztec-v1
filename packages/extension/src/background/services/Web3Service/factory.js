@@ -73,7 +73,7 @@ class Web3ServiceFactory {
     }
 
     create(networkId) {
-        this.ensureWeb3Service(networkId);
+        this._ensureWeb3Service(networkId);
         return this.web3ServicesByNetworks[networkId];
     }
 }
