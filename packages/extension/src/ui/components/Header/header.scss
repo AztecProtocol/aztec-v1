@@ -1,0 +1,6 @@
+@import '../../styles/variables';
+
+.button-holder {
+    $icon-width: map-get($icon-size-map, 'l');
+    width: $icon-width;
+}

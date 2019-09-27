@@ -1,9 +1,11 @@
 # ignored directories
 node_modules/*
-/client/build/*
 /contracts/*
+/client/*
+/test/*
+/migrations/*
 
-# ignored extensions
+# ignored file types
 **/*.json
 **/*.css
 **/*.scss
@@ -15,7 +17,4 @@ node_modules/*
 **/*.yml
 
 # ignored file
-/src/utils/hot-reload.js
-/client/*
-/test/*
-/migrations/*
+/src/ui/styles/guacamole-vars.js

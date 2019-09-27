@@ -26,6 +26,7 @@ module.exports = {
                     '~background': './src/background',
                     '~content': './src/content',
                     '~client': './src/client',
+                    '~ui': './src/ui',
                     'aztec.js': path.resolve(__dirname, '../aztec.js/src'),
                 },
             },

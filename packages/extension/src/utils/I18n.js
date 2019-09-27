@@ -66,4 +66,20 @@ export default class I18n {
 
         return phrase;
     }
+
+    ordinal(number) {
+        const locale = this.getLocale();
+        switch (locale) {
+            case 'en': {
+                const s = ['th', 'st', 'nd', 'rd'];
+                const tens = number % 100;
+                const suffix = (s[(tens - 20) % 10])
+                    || s[tens]
+                    || s[0];
+                return `${number}${suffix}`;
+            }
+            default:
+                return `${number}`;
+        }
+    }
 }

@@ -1,0 +1,12 @@
+@import './guacamole-vars';
+
+$popup-width: 340px;
+$popup-height: 550px;
+
+$bg-gradient-primary: #808DFF;
+$bg-gradient-primary-light: #9FC4FF;
+$bg-gradient: linear-gradient(111deg, $bg-gradient-primary 0%, $bg-gradient-primary-light 100%);
+
+$code-font-family: Consolas, "Liberation Mono", Menlo, monospace;
+
+$tiny-text-size: 10px;
