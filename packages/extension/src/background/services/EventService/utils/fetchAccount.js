@@ -3,7 +3,6 @@ import {
     AZTECAccountRegistryConfig,
 } from '~background/config/contracts';
 
-
 export const fetchAccount = async ({
     address,
     networkId,
