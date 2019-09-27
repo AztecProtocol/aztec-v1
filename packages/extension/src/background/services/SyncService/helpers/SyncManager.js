@@ -139,8 +139,22 @@ class SyncManager {
         if (newNotes.length) {
             const notesToStore = keepAll
                 ? newNotes
-                : newNotes.filter(({ owner }) => owner.address === address);
-            await Promise.all(notesToStore.map(note => addNote(note, privateKey)));
+                : newNotes.filter(({ owner }) => owner.address.toLowerCase() === address);
+            await Promise.all(notesToStore.map(({
+                owner,
+                account: noteAccount,
+                ...note
+            }) => addNote({
+                ...note,
+                owner: {
+                    ...owner,
+                    address: owner.address.toLowerCase(),
+                },
+                account: {
+                    ...noteAccount,
+                    address: noteAccount.address.toLowerCase(),
+                },
+            }, privateKey)));
 
             if (newNotes.length === notesPerRequest) {
                 await this.syncNotes({
