@@ -1,0 +1,6 @@
+@import './variables';
+
+@mixin tiny-text() {
+  font-size: $tiny-text-size;
+  line-height: $tiny-text-size + 2;
+}

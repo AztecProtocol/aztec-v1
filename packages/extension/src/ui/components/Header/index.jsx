@@ -1,0 +1,104 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import {
+    Block,
+    FlexBox,
+    Offset,
+    Text,
+    Icon,
+    Clickable,
+} from '@aztec/guacamole-ui';
+import styles from './header.scss';
+
+const Header = ({
+    title,
+    leftIconName,
+    onClickLeftIcon,
+    rightIconName,
+    onClickRightIcon,
+}) => {
+    const hasButtons = !!(onClickLeftIcon || onClickRightIcon);
+    if (!hasButtons && !title) {
+        return null;
+    }
+
+    return (
+        <Offset margin="0 l">
+            <FlexBox
+                align="space-between"
+                valign="flex-start"
+                nowrap
+            >
+                {hasButtons && (
+                    <Block
+                        className="flex-fixed"
+                        padding="0 l"
+                    >
+                        <div className={styles['button-holder']}>
+                            {onClickLeftIcon && (
+                                <Clickable
+                                    onClick={onClickLeftIcon}
+                                    inline
+                                >
+                                    <Icon
+                                        name={leftIconName}
+                                        size="l"
+                                    />
+                                </Clickable>
+                            )}
+                        </div>
+                    </Block>
+                )}
+                <Block
+                    className="flex-free-expand"
+                    align="center"
+                >
+                    <Text
+                        text={title}
+                        size="m"
+                        weight="light"
+                        textAlign="center"
+                    />
+                </Block>
+                {hasButtons && (
+                    <Block
+                        className="flex-fixed"
+                        padding="0 l"
+                    >
+                        <div className={styles['button-holder']}>
+                            {onClickRightIcon && (
+                                <Clickable
+                                    onClick={onClickRightIcon}
+                                    inline
+                                >
+                                    <Icon
+                                        name={rightIconName}
+                                        size="l"
+                                    />
+                                </Clickable>
+                            )}
+                        </div>
+                    </Block>
+                )}
+            </FlexBox>
+        </Offset>
+    );
+};
+
+Header.propTypes = {
+    title: PropTypes.string,
+    leftIconName: PropTypes.string,
+    onClickLeftIcon: PropTypes.func,
+    rightIconName: PropTypes.string,
+    onClickRightIcon: PropTypes.func,
+};
+
+Header.defaultProps = {
+    title: '',
+    leftIconName: '',
+    onClickLeftIcon: null,
+    rightIconName: '',
+    onClickRightIcon: null,
+};
+
+export default Header;

@@ -1,0 +1,31 @@
+@import '../../styles/variables';
+
+$link-bg: map-get($color-map, 'white-lightest');
+
+.link {
+  background: $link-bg;
+  color: map-get($color-map, 'white');
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+
+    .arrow {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+.content {
+  text-align: left;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+}
+
+.arrow {
+  padding: map-get($spacing-map, 'm') map-get($spacing-map, 's');
+  height: 100%;
+  background: $link-bg;
+}

@@ -1,0 +1,145 @@
+@import '../../styles/variables';
+
+$logo-icon-size-map: (
+  'm': 56px,
+);
+
+$logo-base-color: map-get($color-map, 'white');
+$animation-duration: 2.2s;
+$animation-delay: 1s;
+$animation-timing: cubic-bezier(0.05, 0.46, 0.92, 0.4);
+$core-border-radius: 4px;
+
+@keyframes iconBaseRotation {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  26% {
+    opacity: 0.9;
+  }
+  30% {
+    transform: rotate(180deg) scale(1.4);
+    opacity: 0.85;
+  }
+  40% {
+    opacity: 0.9;
+  }
+  60% {
+    transform: rotate(360deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes iconCoreRotation {
+  0% {
+    transform: rotate(45deg) scale(1);
+    border-radius: $core-border-radius;
+  }
+  20% {
+    border-radius: $core-border-radius;
+    opacity: 1;
+  }
+  24% {
+    transform: rotate(405deg) scale(0.8);
+  }
+  26% {
+    border-radius: $core-border-radius + 2px;
+    opacity: 1;
+  }
+  30% {
+    transform: rotate(405deg) scale(0.5);
+    opacity: 0.8;
+    border-radius: 100%;
+  }
+  34% {
+    opacity: 0.8;
+    border-radius: 100%;
+  }
+  40% {
+    transform: rotate(-315deg) scale(0.8);
+    opacity: 1;
+  }
+  46% {
+    border-radius: $core-border-radius;
+  }
+  60% {
+    transform: rotate(45deg) scale(1);
+    border-radius: $core-border-radius;
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(45deg) scale(1);
+    border-radius: $core-border-radius;
+  }
+}
+
+.iconWapper {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+@each $key, $size in $logo-icon-size-map {
+  .size-#{$key} {
+    width: $size;
+    height: $size;
+    margin: ($size * 1.414 - $size) / 2;
+  }
+}
+
+.baseHolder {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  transform: rotate(0deg) scale(1);
+}
+
+.base {
+  width: 100%;
+  height: 100%;
+  border: 8px solid $logo-base-color;
+  border-radius: 4px;
+  transform: rotate(45deg);
+}
+
+.coreHolder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36%;
+  height: 36%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.core {
+  width: 100%;
+  height: 100%;
+  background: map-get($color-map, 'white');
+  border-radius: $core-border-radius;
+  transform-origin: center;
+  transform: rotate(45deg);
+}
+
+.rotating {
+  .baseHolder {
+    animation-duration: $animation-duration;
+    animation-delay: $animation-delay;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: iconBaseRotation;
+    animation-timing-function: $animation-timing;
+  }
+
+  .core {
+    animation-duration: $animation-duration;
+    animation-delay: $animation-delay;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: iconCoreRotation;
+    animation-timing-function: $animation-timing;
+  }
+}
