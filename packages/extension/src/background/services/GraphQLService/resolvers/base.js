@@ -20,7 +20,7 @@ import syncNoteInfo from './utils/syncNoteInfo';
 import syncUtilityNoteInfo from './utils/syncUtilityNoteInfo';
 
 export default {
-    BigInt: new BigInt('safe'),
+    BigInt: new BigInt('bigInt'),
     User: {
         spendingPublicKey: async () => getUserSpendingPublicKey(),
     },

@@ -145,6 +145,7 @@ const AuthService = {
     registerAddress: async ({
         address,
         linkedPublicKey,
+        spendingPublicKey,
         blockNumber,
     }) => {
         let user = await userModel.get({
@@ -159,6 +160,7 @@ const AuthService = {
                 ...user,
                 address,
                 linkedPublicKey,
+                spendingPublicKey,
                 blockNumber,
             };
 

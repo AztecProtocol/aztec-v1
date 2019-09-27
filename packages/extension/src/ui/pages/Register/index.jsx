@@ -95,6 +95,14 @@ class RegisterExtension extends Component {
                 requestId,
             },
         } = this.props;
+        console.log(
+            address,
+            linkedPublicKey,
+            signature,
+            spendingPublicKey,
+
+        );
+
         await ExtensionApi.auth.sendRegisterTransaction({
             params: {
                 address,
@@ -114,11 +122,13 @@ class RegisterExtension extends Component {
                 address,
                 linkedPublicKey,
             },
+            spendingPublicKey,
             signature,
         } = this.state;
         await ExtensionApi.auth.registerAccount({
             address,
             linkedPublicKey,
+            spendingPublicKey,
             signature,
         });
     }

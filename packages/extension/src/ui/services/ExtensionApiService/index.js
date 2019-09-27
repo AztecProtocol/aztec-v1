@@ -114,7 +114,7 @@ class ExtensionApi {
                         params: [
                             userAddress,
                             linkedPublicKey,
-                            // spendingPublicKey,
+                            spendingPublicKey,
                             signature,
                         ],
                     },
@@ -127,6 +127,7 @@ class ExtensionApi {
                 address: userAddress,
                 signature,
                 linkedPublicKey,
+                spendingPublicKey,
                 registeredAt = Date.now(),
                 domain = window.location.origin,
             }) => {
@@ -136,6 +137,7 @@ class ExtensionApi {
                         address: userAddress,
                         signature,
                         linkedPublicKey,
+                        spendingPublicKey,
                         domain,
                         registeredAt,
                     },
@@ -146,13 +148,14 @@ class ExtensionApi {
                 domain,
                 address: userAddress,
             }) => {
-                await apollo.mutate({
+                const d = await apollo.mutate({
                     mutation: ApproveDomainMutatuon,
                     variables: {
                         domain,
                         address: userAddress,
                     },
                 });
+                console.log(d);
             },
 
         };
@@ -205,8 +208,8 @@ class ExtensionApi {
                 });
                 return filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
             },
-            createNoteFromBalance,
-            depositProof: async ({
+            send: createNoteFromBalance,
+            deposit: async ({
                 owner,
                 transactions,
                 publicOwner,
@@ -230,7 +233,6 @@ class ExtensionApi {
                         const {
                             spendingPublicKey,
                             linkedPublicKey,
-                            to,
                         } = await validateExtensionAccount({
                             accountAddress: tx.to,
                             currentAddress,

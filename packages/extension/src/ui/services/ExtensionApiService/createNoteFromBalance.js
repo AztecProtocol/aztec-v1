@@ -46,6 +46,7 @@ export default async function proveCreateNoteFromBalance({
             domain,
             currentAddress,
         });
+        console.log(notesOwners);
         notesOwners.forEach((o) => {
             outputNotesOwnerMapping[o.address] = o;
         });
@@ -65,6 +66,7 @@ export default async function proveCreateNoteFromBalance({
         }
         outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
     }
+    console.log(transactions);
 
     console.log('______________');
 
@@ -83,6 +85,7 @@ export default async function proveCreateNoteFromBalance({
             currentAddress,
         },
     });
+    console.log(pickNotesFromBalance);
 
     const {
         notes,

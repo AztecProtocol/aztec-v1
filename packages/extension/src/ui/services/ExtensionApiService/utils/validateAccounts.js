@@ -25,6 +25,7 @@ export default async function validateAccounts({
         data: {
             accounts: accountsResponse,
         },
+        ...rest
     } = await apollo.query({
         query: AccountsQuery,
         variables: {
@@ -33,6 +34,7 @@ export default async function validateAccounts({
             currentAddress,
         },
     });
+    console.log(rest, accountsResponse);
 
     const {
         accounts = [],
