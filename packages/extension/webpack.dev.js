@@ -27,8 +27,24 @@ module.exports = {
             },
             {
                 test: /\.jsx?$/,
+                enforce: 'pre',
+                exclude: [
+                    path.resolve(__dirname, './../../node_modules/'),
+                    path.resolve(__dirname, './../packages/typed-data/'),
+                    path.resolve(__dirname, './../packages/aztec.js/'),
+                    path.resolve(__dirname, './../packages/secp256k1/'),
+                    path.resolve(__dirname, './../packages/bn128/'),
+                    '/node_modules/',
+                ],
+                use: ['eslint-loader'],
+                // options: {
+                //     presets: ['@babel/env'],
+                // },
+            },
+            {
+                test: /\.jsx?$/,
                 exclude: /node_modules/,
-                use: ['babel-loader', 'eslint-loader'],
+                use: ['babel-loader'],
                 // options: {
                 //     presets: ['@babel/env'],
                 // },
@@ -39,7 +55,7 @@ module.exports = {
                 type: 'javascript/auto',
             },
             {
-                test: /\.css$/,
+                test: /\.s?css$/,
                 use: [
                     {
                         loader: MiniCssExtractPlugin.loader,
