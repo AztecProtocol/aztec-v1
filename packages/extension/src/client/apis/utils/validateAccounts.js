@@ -17,6 +17,7 @@ export default async function validateAccounts(accountAddress = '') {
     const addressArrStr = validAddresses.map(a => `"${a}"`).join(',');
     const {
         accountsResponse,
+        error,
     } = await query(`
         accountsResponse: accounts(where: { address_in: [${addressArrStr}] }) {
             accounts {

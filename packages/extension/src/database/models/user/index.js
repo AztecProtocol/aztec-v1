@@ -7,6 +7,7 @@ export default Model({
         fields: [
             'address',
             'linkedPublicKey',
+            'spendingPublicKey',
             'lastSynced',
             'blockNumber',
         ],

@@ -37,6 +37,7 @@ const uiResolvers = {
             account: await AuthService.registerAddress({
                 address: args.address,
                 linkedPublicKey: args.linkedPublicKey,
+                spendingPublicKey: args.spendingPublicKey,
                 blockNumber: args.blockNumber,
             }),
         })),
@@ -44,6 +45,7 @@ const uiResolvers = {
             session: await AuthService.login(args),
         })),
         registerDomain: ensureAccount(async (_, args) => {
+            console.log(args);
             await AuthService.registerDomain(args.domain);
             return {
                 success: true,

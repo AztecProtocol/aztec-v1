@@ -42,7 +42,7 @@ export default gql`
         address: String!
         balance: Int
         linkedTokenAddress: String
-        scalingFactor: Int
+        scalingFactor: BigInt
         canAdjustSupply: Boolean
         canConvert: Boolean
     }
