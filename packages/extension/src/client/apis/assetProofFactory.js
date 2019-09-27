@@ -26,7 +26,8 @@ const deposit = data => ({
 const withdraw = data => ({
     approve: async () => approveCreateNoteFromBalance(data),
     send: async () => yieldNotes(sendCreateNoteFromBalance, data),
-    export: () => data.proof, });
+    export: () => data.proof,
+});
 
 const mint = data => ({
     send: async () => yieldNotes(sendMint, data),

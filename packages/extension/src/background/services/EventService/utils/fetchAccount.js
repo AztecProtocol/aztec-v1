@@ -1,10 +1,10 @@
 import Web3Service from '~background/services/Web3Service';
 import {
     AZTECAccountRegistryConfig,
-} from '~background/config/contracts'
- 
+} from '~background/config/contracts';
 
-export const fetchAccount = async({
+
+export const fetchAccount = async ({
     address,
     networkId,
 } = {}) => {
@@ -13,7 +13,7 @@ export const fetchAccount = async({
             error: new Error("'address' cannot be empty in fetchAccount"),
             account: null,
         };
-    };
+    }
 
     if (!networkId && networkId !== 0) {
         return {
@@ -28,7 +28,7 @@ export const fetchAccount = async({
         filter: {
             account: address,
         },
-        fromBlock: 'earliest', 
+        fromBlock: 'earliest',
         toBlock: 'latest',
     };
 
@@ -42,7 +42,7 @@ export const fetchAccount = async({
             blockNumber,
             returnValues: {
                 linkedPublicKey,
-            }
+            },
         }) => ({
             address,
             blockNumber,
@@ -53,14 +53,12 @@ export const fetchAccount = async({
 
         return {
             error: null,
-            account: account
+            account,
         };
-
     } catch (error) {
-
         return {
             error,
-            account: null
-        }
-    };
-}
+            account: null,
+        };
+    }
+};

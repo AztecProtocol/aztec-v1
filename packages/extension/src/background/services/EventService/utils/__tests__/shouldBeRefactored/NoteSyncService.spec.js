@@ -10,7 +10,7 @@ import ZkAssetOwnable from '../../../../../contracts/ZkAssetOwnable';
 import JoinSplit from '../../../../../contracts/JoinSplit';
 /* eslint-enable */
 import Web3Service from '~background/services/Web3Service';
-import NoteSyncService from '../../';
+import NoteSyncService from '../..';
 import SyncManager from '../../helpers/SyncManager';
 import asyncMap from '~utils/asyncMap';
 import fetchNotes from '../fetchNotes';
@@ -32,7 +32,7 @@ const {
 } = aztec;
 
 describe('ZkAsset', () => {
-    const providerUrl = `http://localhost:8545`;
+    const providerUrl = 'http://localhost:8545';
     const prepopulateEventsCount = 340;
     const epoch = 1;
     const category = 1;
@@ -61,7 +61,7 @@ describe('ZkAsset', () => {
 
     beforeAll(async () => {
         const provider = new Web3.providers.HttpProvider(providerUrl);
-        Web3Service.init({provider, account: AuthService.getAccount()});
+        Web3Service.init({ provider, account: AuthService.getAccount() });
         Web3Service.registerContract(ACE);
 
         sender = Web3Service.account;
@@ -102,14 +102,14 @@ describe('ZkAsset', () => {
                 );
         }
 
-        
+
         ({
             address: erc20Address,
         } = await Web3Service.deploy(ERC20Mintable));
 
-        let notesPerRequest = 20;
+        const notesPerRequest = 20;
         let createdNotes = eventsInGanache;
-        
+
         await Web3Service
             .useContract('ERC20Mintable')
             .at(erc20Address)
@@ -196,13 +196,11 @@ describe('ZkAsset', () => {
 
             createdNotes += (notesPerRequest + 1);
 
-            console.log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateEventsCount)} %`)
-
+            console.log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateEventsCount)} %`);
         } while (createdNotes < prepopulateEventsCount);
-
     });
 
-    beforeEach(async() => {
+    beforeEach(async () => {
         syncManager = new SyncManager();
         syncManager.setConfig({
             blocksPerRequest: 99999999999,
@@ -219,10 +217,10 @@ describe('ZkAsset', () => {
             IZkAssetConfig.events.destroyNote,
             IZkAssetConfig.events.updateNoteMetaData,
         ]
-            .map(e => IZkAssetConfig.config.abi.find(({name, type})=> name === e && type === 'event'))
+            .map(e => IZkAssetConfig.config.abi.find(({ name, type }) => name === e && type === 'event'))
             .map(abi.encodeEventSignature);
 
-        const options = {"fromBlock":1,"toBlock":"latest","topics":[["0x5ffb3072e4515cf3bfae8b16be9dff6313cf7c313a0c26faafe6971d8c7585f1","0xebd4bb7b61198df63305dd538f077db9df9b14339d8a6221e301487770d79227","0xda392cb8aa0843e7e474e7bacfae355313fc4202094b3e81d2a488b5c05207bf"]]};
+        const options = { fromBlock: 1, toBlock: 'latest', topics: [['0x5ffb3072e4515cf3bfae8b16be9dff6313cf7c313a0c26faafe6971d8c7585f1', '0xebd4bb7b61198df63305dd538f077db9df9b14339d8a6221e301487770d79227', '0xda392cb8aa0843e7e474e7bacfae355313fc4202094b3e81d2a488b5c05207bf']] };
 
         // action
         const tStart = performance.now();
@@ -235,22 +233,21 @@ describe('ZkAsset', () => {
         t0 = performance.now();
         const decodedLogs = decodeNoteLogs(eventsTopics, rawLogs);
         t1 = performance.now();
-        console.log(`Decode raw logs took: ${((t1 - t0) / 1000)} seconds.`)
-        
+        console.log(`Decode raw logs took: ${((t1 - t0) / 1000)} seconds.`);
+
         t0 = performance.now();
         const notes = associatedNotesWithOwner(decodedLogs, sender.address);
         t1 = performance.now();
-        console.log(`Filtering logs took: ${((t1 - t0) / 1000)} seconds.`)
+        console.log(`Filtering logs took: ${((t1 - t0) / 1000)} seconds.`);
 
         t0 = performance.now();
         await saveNotes(notes);
         t1 = performance.now();
-        console.log(`Saving logs into fake db took: ${((t1 - t0) / 1000)} seconds.`)
+        console.log(`Saving logs into fake db took: ${((t1 - t0) / 1000)} seconds.`);
 
         const tEnd = performance.now();
 
         // result
-        console.log(`Full amount of time: ${((tEnd - tStart) / 1000)} seconds.`)
+        console.log(`Full amount of time: ${((tEnd - tStart) / 1000)} seconds.`);
     });
-
 });

@@ -1,4 +1,4 @@
-import EventService from './';
+import EventService from '.';
 import {
     errorLog,
 } from '~utils/log';

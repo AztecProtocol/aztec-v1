@@ -1,7 +1,7 @@
 // import Web3Service from '~background/services/Web3Service';
 // import decodeNoteLogs from '../services/EventService/utils/helpers/decodeNoteLogs';
-// import { 
-//     saveNotes 
+// import {
+//     saveNotes
 // } from '../services/EventService/utils/saveNotes';
 // import {
 //     IZkAssetConfig,

@@ -1,14 +1,13 @@
-import { 
+import {
     createBulkAssets,
-} from '../';
+} from '..';
 import Asset from '~background/database/models/asset';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 
 
 describe('createBulkAssets', () => {
-
     const rawAssets = [
         {
             registryOwner: '0x21',
@@ -49,5 +48,4 @@ describe('createBulkAssets', () => {
         expect(assetsAfter[0]).toMatchObject(rawAssets[0]);
         expect(assetsAfter[1]).toMatchObject(rawAssets[1]);
     });
-
 });

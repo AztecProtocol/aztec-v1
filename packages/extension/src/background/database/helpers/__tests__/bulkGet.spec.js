@@ -1,10 +1,9 @@
 import Account from '~background/database/models/account';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 
 describe('bulkGet', () => {
-
     const rawAccountBlock_1 = {
         address: '0x01',
         linkedPublicKey: '0xff',
@@ -38,17 +37,16 @@ describe('bulkGet', () => {
 
     it.skip('should retrive several items by keys', async () => {
         // given
-        await Account.add(rawAccountBlock_2, {networkId});
-        await Account.add(rawAccountBlock_1, {networkId});
-        await Account.add(rawAccountBlock_4, {networkId});
-        await Account.add(rawAccountBlock_3, {networkId});
+        await Account.add(rawAccountBlock_2, { networkId });
+        await Account.add(rawAccountBlock_1, { networkId });
+        await Account.add(rawAccountBlock_4, { networkId });
+        await Account.add(rawAccountBlock_3, { networkId });
 
         // actiion
         const keys = [rawAccountBlock_2.address, rawAccountBlock_1.address, '0xsome_non_existing_address', rawAccountBlock_3.address];
-        const accounts = await Account.bulkGet({networkId}, keys);
-        
+        const accounts = await Account.bulkGet({ networkId }, keys);
+
         // expected
         expect(accounts.length).toEqual(4);
     });
-
-})
+});

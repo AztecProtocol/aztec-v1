@@ -1,17 +1,16 @@
-import { 
+import {
     createNote,
     updateNote,
     destroyNote,
-} from '../';
+} from '..';
 import Note from '~background/database/models/note';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
 describe('updateNote', () => {
-
     const rawNote = {
         noteHash: '0x00000001',
         owner: '0x123',
@@ -67,12 +66,10 @@ describe('updateNote', () => {
         expect(notesAfter.length).toEqual(1);
         expect(notesAfter[0]).toEqual(noteExpected);
     });
-
 });
 
 
 describe('destroyNote', () => {
-
     const rawNote = {
         noteHash: '0x00000001',
         owner: '0x123',
@@ -89,7 +86,7 @@ describe('destroyNote', () => {
         await createNote(rawNote);
         const notesBefore = await Note.query().toArray();
         expect(notesBefore.length).toEqual(1);
-        
+
         // action
         await destroyNote(rawNote);
 
@@ -103,5 +100,4 @@ describe('destroyNote', () => {
         expect(notesAfter.length).toEqual(1);
         expect(notesAfter[0]).toEqual(noteExpected);
     });
-
 });

@@ -25,23 +25,21 @@ describe('ZkAsset', () => {
     let assetEventsEmitterAddress = '0x67995fa2131b79af3fab4d1062451bd07ce96010';
 
 
-    const generateCreateNoteEvents = (owner, countEvents) => {
-        return {
-            owner: owner,
-            metadata: metadata,
-            // Index is note hash
-            count: countEvents,
-        }
-    }
+    const generateCreateNoteEvents = (owner, countEvents) => ({
+        owner,
+        metadata,
+        // Index is note hash
+        count: countEvents,
+    });
 
     const generateHoteHashes = (count) => {
         const { abi } = Web3Service.eth;
         const noteHashTopics = new Array(count);
-        for(let i = 0; i<noteHashTopics.length; i++) {
-            noteHashTopics[i] = abi.encodeParameter("bytes32", Web3.utils.toTwosComplement(i+1));
+        for (let i = 0; i < noteHashTopics.length; i++) {
+            noteHashTopics[i] = abi.encodeParameter('bytes32', Web3.utils.toTwosComplement(i + 1));
         }
-        return noteHashTopics    
-    }
+        return noteHashTopics;
+    };
 
     const optionsForAllEvents = (address, countNoteHashTopics) => {
         const { abi } = Web3Service.eth;
@@ -51,30 +49,30 @@ describe('ZkAsset', () => {
             IZkAssetConfig.events.destroyNote,
             IZkAssetConfig.events.updateNoteMetaData,
         ]
-            .map(e => IZkAssetConfig.config.abi.find(({name, type})=> name === e && type === 'event'))
+            .map(e => IZkAssetConfig.config.abi.find(({ name, type }) => name === e && type === 'event'))
             .map(abi.encodeEventSignature);
-        
+
         const noteHashTopics = countNoteHashTopics ? generateHoteHashes(countNoteHashTopics) : [];
 
         const options = {
-            "address": address,
-            "fromBlock": 1,
-            "toBlock": "latest",
-            "topics":[
+            address,
+            fromBlock: 1,
+            toBlock: 'latest',
+            topics: [
                 eventsTopics,
                 null, // owner topics
                 noteHashTopics,
             ],
         };
         return { options, eventsTopics };
-    }
+    };
 
     beforeAll(async () => {
         sender = AuthService.getAccount();
 
         const provider = new Web3.providers.HttpProvider(isGancheProvider ? ganacheProviderUrl : infuraHttpProviderURI);
-        Web3Service.init({provider, account: sender});
-        
+        Web3Service.init({ provider, account: sender });
+
         if (isGancheProvider && !assetEventsEmitterAddress) {
             console.log('Deploying Events emitter...');
             ({
@@ -89,12 +87,12 @@ describe('ZkAsset', () => {
             return;
         }
 
-        if(!isGancheProvider) {
+        if (!isGancheProvider) {
             console.log(`Using ${assetEventsEmitterAddress} ZkAssetEventsEmitter address...`);
-            Web3Service.registerContract(ZkAssetEventsEmitterTest, {address: assetEventsEmitterAddress});
+            Web3Service.registerContract(ZkAssetEventsEmitterTest, { address: assetEventsEmitterAddress });
         }
 
-        if(prepopulateEventsCount < eventsPerTransaction) {
+        if (prepopulateEventsCount < eventsPerTransaction) {
             console.warn('eventsPerTransaction should be less than prepopulateEventsCount');
         }
 
@@ -104,9 +102,9 @@ describe('ZkAsset', () => {
             .method('createdNotes')
             .call();
 
-        console.log(`Already exists ${alreadyExistEventsCount} of ${prepopulateEventsCount} events`)
+        console.log(`Already exists ${alreadyExistEventsCount} of ${prepopulateEventsCount} events`);
         if (!isGancheProvider && alreadyExistEventsCount < prepopulateEventsCount) {
-            console.log(`Skipping prepopulation cause not ganache provider`)
+            console.log('Skipping prepopulation cause not ganache provider');
         }
 
         let prepopulatedCount = alreadyExistEventsCount;
@@ -138,7 +136,7 @@ describe('ZkAsset', () => {
         const { getPastLogs } = Web3Service.eth;
 
         // action
-        let t0 = performance.now();
+        const t0 = performance.now();
         const rawLogs = await getPastLogs(options);
         const t1 = performance.now();
         console.log(`Load past logs (${rawLogs.length}) with filtering by ${countFilterNoteHashTopics} topics took: ${((t1 - t0) / 1000)} seconds.`);
@@ -147,7 +145,7 @@ describe('ZkAsset', () => {
         expect(rawLogs.length).toEqual(countFilterNoteHashTopics);
     });
 
-    it.skip(`check loading all logs without filtering topics`, async () => {
+    it.skip('check loading all logs without filtering topics', async () => {
         // given
         const {
             options,
@@ -164,5 +162,4 @@ describe('ZkAsset', () => {
         // expectation
         expect(rawLogs.length).toEqual(countFilterNoteHashTopics);
     });
-
 });

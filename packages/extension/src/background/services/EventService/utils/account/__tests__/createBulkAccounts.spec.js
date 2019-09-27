@@ -1,14 +1,13 @@
-import { 
+import {
     createBulkAccounts,
-} from '../';
+} from '..';
 import Account from '~background/database/models/account';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 
 
 describe('createBulkAccount', () => {
-
     const rawAccounts = [
         {
             address: '0x01',
@@ -41,5 +40,4 @@ describe('createBulkAccount', () => {
         expect(accountsAfter[0]).toMatchObject(rawAccounts[0]);
         expect(accountsAfter[1]).toMatchObject(rawAccounts[1]);
     });
-
 });

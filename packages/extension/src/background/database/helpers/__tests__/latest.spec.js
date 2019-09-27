@@ -1,10 +1,9 @@
 import Account from '~background/database/models/account';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 
 describe('lates', () => {
-
     const rawAccountBlock_1 = {
         address: '0x01',
         linkedPublicKey: '0xff',
@@ -38,52 +37,52 @@ describe('lates', () => {
 
     it('should retrive last item without filtering', async () => {
         // given
-        await Account.add(rawAccountBlock_2, {networkId});
-        await Account.add(rawAccountBlock_1, {networkId});
-        await Account.add(rawAccountBlock_4, {networkId});
-        await Account.add(rawAccountBlock_3, {networkId});
+        await Account.add(rawAccountBlock_2, { networkId });
+        await Account.add(rawAccountBlock_1, { networkId });
+        await Account.add(rawAccountBlock_4, { networkId });
+        await Account.add(rawAccountBlock_3, { networkId });
 
-        const accounts = await Account.query({networkId}).toArray();
+        const accounts = await Account.query({ networkId }).toArray();
         expect(accounts.length).toEqual(4);
 
         // expected
-        const accountExpected = await Account.latest({networkId}, {orderBy: 'blockNumber'});
+        const accountExpected = await Account.latest({ networkId }, { orderBy: 'blockNumber' });
         expect(accountExpected).toEqual(rawAccountBlock_4);
     });
 
     it('should retrive last item without filtering and specifying orderBy param', async () => {
         // given
-        await Account.add(rawAccountBlock_2, {networkId});
-        await Account.add(rawAccountBlock_1, {networkId});
-        await Account.add(rawAccountBlock_4, {networkId});
-        await Account.add(rawAccountBlock_3, {networkId});
+        await Account.add(rawAccountBlock_2, { networkId });
+        await Account.add(rawAccountBlock_1, { networkId });
+        await Account.add(rawAccountBlock_4, { networkId });
+        await Account.add(rawAccountBlock_3, { networkId });
 
-        const accounts = await Account.query({networkId}).toArray();
+        const accounts = await Account.query({ networkId }).toArray();
         expect(accounts.length).toEqual(4);
 
         // expected
-        const accountExpected = await Account.latest({networkId});
+        const accountExpected = await Account.latest({ networkId });
         expect(accountExpected).toEqual(rawAccountBlock_4);
     });
 
     it('should retrive last item with filtering', async () => {
         // given
-        await Account.add(rawAccountBlock_2, {networkId});
-        await Account.add(rawAccountBlock_1, {networkId});
-        await Account.add(rawAccountBlock_4, {networkId});
-        await Account.add(rawAccountBlock_3, {networkId});
+        await Account.add(rawAccountBlock_2, { networkId });
+        await Account.add(rawAccountBlock_1, { networkId });
+        await Account.add(rawAccountBlock_4, { networkId });
+        await Account.add(rawAccountBlock_3, { networkId });
 
-        const accounts = await Account.query({networkId}).toArray();
+        const accounts = await Account.query({ networkId }).toArray();
         expect(accounts.length).toEqual(4);
 
         // expected
-        const accountExpected = await Account.latest({ 
-            networkId 
+        const accountExpected = await Account.latest({
+            networkId,
         },
         {
             filterOptions: {
-                address: rawAccountBlock_3.address
-            }
+                address: rawAccountBlock_3.address,
+            },
         });
         expect(accountExpected).toEqual(rawAccountBlock_3);
     });
@@ -94,21 +93,20 @@ describe('lates', () => {
         const account = {
 
         };
-        await Account.add(account, {networkId});
+        await Account.add(account, { networkId });
 
-        const accounts = await Account.query({networkId: 0}).toArray();
+        const accounts = await Account.query({ networkId: 0 }).toArray();
         expect(accounts.length).toEqual(1);
 
         // expected
-        const accountExpected = await Account.latest({ 
-            networkId 
+        const accountExpected = await Account.latest({
+            networkId,
         },
         {
             filterOptions: {
-                address: rawAccountBlock_3.address
-            }
+                address: rawAccountBlock_3.address,
+            },
         });
         expect(accountExpected).toEqual(rawAccountBlock_3);
     });
-
-})
+});

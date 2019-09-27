@@ -1,19 +1,18 @@
-import { 
+import {
     createAccount,
-} from '../';
+} from '..';
 import Account from '~background/database/models/account';
 import {
-    clearDB
+    clearDB,
 } from '~background/database';
 
 
 describe('createAccount', () => {
-
     const rawAccount = {
         address: '0x12345678',
         linkedPublicKey: '34563',
         blockNumber: 234,
-     };
+    };
 
     afterEach(async () => {
         clearDB();
@@ -36,5 +35,4 @@ describe('createAccount', () => {
         expect(accountsAfter.length).toEqual(1);
         expect(accountsAfter[0]).toEqual(accountExpected);
     });
-
 });

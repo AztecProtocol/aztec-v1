@@ -1,13 +1,13 @@
-import { 
+import {
     getDB,
     storedNetworks,
-} from '../'
+} from '..';
 import {
     errorLog,
 } from '~utils/log';
 
 const performClearDB = (networkId) => {
-    getDB(networkId).tables.forEach(function (table) {
+    getDB(networkId).tables.forEach((table) => {
         table.clear();
     });
 };
@@ -21,13 +21,11 @@ export default function clearDB({
 }) {
     if (networkId || networkId === 0) {
         performClearDB(networkId);
-
     } else if (clearAllNetworks) {
-        storedNetworks().forEach(networkId => {
+        storedNetworks().forEach((networkId) => {
             performClearDB(networkId);
         });
-
     } else {
         errorLog('Cannot clear DB. Should be specified "networkId" or "clearAllNetworks"');
     }
-};
+}
