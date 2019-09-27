@@ -1,4 +1,4 @@
-<p align="center"><img src="https://i.imgur.com/Cmu8ocU.png" width="280px"/></p>
+<p align="center"><img src="https://i.imgur.com/BxVHzD4.png" width="280px"/></p>
 
 <p align="center"> AZTEC is an efficient zero-knowledge privacy protocol. The protocol powers real world financial applications on Ethereum mainnet today. A complete explanation of AZTEC can be found in our <a href="https://github.com/AztecProtocol/AZTEC/blob/master/AZTEC.pdf">white paper</a>.
 
