@@ -32,18 +32,28 @@ export const createKeyVault = async ({
 export const linkAccountToMetaMask = async ({
     requestId,
     ...account
-}, cb) => ActionService.post(
-    requestId,
-    'metamask.register.extension',
-    account,
-    response => cb(response),
-);
+}, cb) => ActionService
+    .post(
+        requestId,
+        'metamask.register.extension',
+        account,
+    )
+    .onReceiveResponse((response) => {
+        const {
+            publicKey: spendingPublicKey,
+            ...data
+        } = response;
+        cb({
+            ...data,
+            spendingPublicKey,
+        });
+    });
 
 export const sendRegisterAddress = async ({
     requestId,
     address,
     linkedPublicKey,
-    // spendingPublicKey,
+    spendingPublicKey,
     signature,
 }, cb) => ActionService
     .sendTransaction(
@@ -53,7 +63,7 @@ export const sendRegisterAddress = async ({
         [
             address,
             linkedPublicKey,
-            // spendingPublicKey,
+            spendingPublicKey,
             signature,
         ],
     )
@@ -71,6 +81,7 @@ export const sendRegisterAddress = async ({
 export const registerAccount = async ({
     address,
     linkedPublicKey,
+    spendingPublicKey,
     signature,
     blockNumber,
 }, cb) => {
@@ -84,6 +95,7 @@ export const registerAccount = async ({
             address,
             signature,
             linkedPublicKey,
+            spendingPublicKey,
             blockNumber,
             domain: window.location.origin,
         },
