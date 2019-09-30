@@ -139,7 +139,7 @@ class SyncManager {
         if (newNotes.length) {
             const notesToStore = keepAll
                 ? newNotes
-                : newNotes.filter(({ owner }) => owner.address.toLowerCase() === address);
+                : newNotes.filter(({ owner }) => owner.address === address);
             await Promise.all(notesToStore.map(({
                 owner,
                 account: noteAccount,
@@ -148,11 +148,11 @@ class SyncManager {
                 ...note,
                 owner: {
                     ...owner,
-                    address: owner.address.toLowerCase(),
+                    address: owner.address,
                 },
                 account: {
                     ...noteAccount,
-                    address: noteAccount.address.toLowerCase(),
+                    address: noteAccount.address,
                 },
             }, privateKey)));
 
@@ -237,8 +237,7 @@ class SyncManager {
         } = this.accounts.get(address);
 
         if (this.config.keepAll
-            || rawNote.owner.address.toLowerCase() === address.toLowerCase()
-        ) {
+            || rawNote.owner.address === address) {
             const newNote = await addNote(rawNote, privateKey);
             return newNote.data;
         }

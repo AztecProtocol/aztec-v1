@@ -11,7 +11,6 @@ import {
     sendTransactionEvent,
 } from '~config/event';
 
-import address from '~utils/address';
 import { randomSumArray } from '~utils/random';
 import filterStream from '~utils/filterStream';
 import RegisterExtensionMutation from '../../mutations/RegisterExtension';
@@ -294,14 +293,14 @@ class ExtensionApi {
             }) => {
                 const withdrawProof = await createNoteFromBalance({
                     assetAddress,
-                    sender: address(sender),
-                    owner: address(owner),
+                    sender,
+                    owner,
                     transactions,
-                    publicOwner: address(publicOwner),
+                    publicOwner,
                     numberOfInputNotes,
                     numberOfOutputNotes,
                     domain,
-                    currentAddress: address(currentAddress),
+                    currentAddress,
                 });
                 return withdrawProof;
             },

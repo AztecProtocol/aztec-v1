@@ -132,7 +132,7 @@ class DividendProof extends Proof {
             ...offsets,
             ...encodedParams,
         ];
-        return `0x${abiEncodedParams.join('').toLowerCase()}`;
+        return `0x${abiEncodedParams.join('')}`;
     }
 
     validateInputs() {

@@ -12,7 +12,7 @@ import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
 import query from '~client/utils/query';
-import validateExtensionAccount from '../utils/validateExtensionAccount';
+// import validateExtensionAccount from '../utils/validateExtensionAccount';
 
 const {
     MintProof,
@@ -24,7 +24,7 @@ export default async function proveMint({
     numberOfOutputNotes,
     sender,
 }) {
-    const notesOwner = await validateExtensionAccount(sender);
+    const notesOwner = {};
 
     let confidentialTotalMinted;
     try {
