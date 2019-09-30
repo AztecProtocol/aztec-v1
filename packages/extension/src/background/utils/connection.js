@@ -87,7 +87,8 @@ class Connection {
         this.message$.pipe(
             // we filter the stream here
             filter(({ data }) => data.type === actionEvent),
-            mergeMap(data => from(ClientActionService.triggerClientAction(data, this)())),
+            mergeMap(data => from(ClientActionService.triggerClientAction(data, this)())
+                .pipe(map(result => ({ ...result, responseId: data.data.responseId })))),
             tap(({ uiClientId, ...rest }) => {
                 this.connections[uiClientId].postMessage({
                     ...rest,
@@ -97,7 +98,8 @@ class Connection {
 
         this.message$.pipe(
             filter(({ data }) => data.type === sendTransactionEvent),
-            mergeMap(data => from(TransactionSendingService.sendTransaction(data))),
+            mergeMap(data => from(TransactionSendingService.sendTransaction(data))
+                .pipe(map(result => ({ ...result, responseId: data.data.responseId })))),
             tap(({ uiClientId, ...rest }) => {
                 this.connections[uiClientId].postMessage({
                     ...rest,
