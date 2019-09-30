@@ -13,8 +13,11 @@ import {
 
 const dummyFunc = () => {};
 
+const requestId = 'client-request-id';
+
 export default {
     register: {
+        requestId,
         address: addresses[0],
         next: 'register.backup',
     },
@@ -33,6 +36,7 @@ export default {
         next: 'register.address',
     },
     'register.address': {
+        requestId,
         address: addresses[0],
         goNext: dummyFunc,
     },

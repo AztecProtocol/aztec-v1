@@ -14,12 +14,14 @@ class CustomRoute extends PureComponent {
             goToPage,
         } = this.props;
         const {
+            requestId,
             data,
         } = action || {};
 
         return (
             <Component
                 {...data}
+                requestId={requestId}
                 goToPage={goToPage}
             />
         );
@@ -42,7 +44,8 @@ class CustomRoute extends PureComponent {
 CustomRoute.propTypes = {
     path: PropTypes.string.isRequired,
     action: PropTypes.shape({
-        path: PropTypes.string,
+        requestId: PropTypes.string.isRequired,
+        data: PropTypes.object,
     }),
     Component: PropTypes.func.isRequired,
     goToPage: PropTypes.func.isRequired,

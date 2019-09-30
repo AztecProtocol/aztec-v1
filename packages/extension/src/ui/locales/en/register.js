@@ -34,8 +34,9 @@ export default {
     extension: {
         description: 'Last step! Link your address with your extension account.',
         step: {
-            send: 'Create Extension Account',
-            completed: 'Account Created',
+            create: 'Link Account to MetaMask',
+            register: 'Register Account',
+            completed: 'Account Created!',
         },
     },
     address: {
