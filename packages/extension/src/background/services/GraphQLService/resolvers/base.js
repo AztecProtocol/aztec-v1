@@ -12,7 +12,8 @@ import getUserSpendingPublicKey from './utils/getUserSpendingPublicKey';
 import getAccounts from './utils/getAccounts';
 import decryptViewingKey from './utils/decryptViewingKey';
 import getViewingKeyFromMetadata from './utils/getViewingKeyFromMetadata';
-import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata'; import getAssetBalance from './utils/getAssetBalance';
+import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
+import getAssetBalance from './utils/getAssetBalance';
 import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
 import syncAssetInfo from './utils/syncAssetInfo';
@@ -42,11 +43,14 @@ export default {
         asset: ({ asset }) => asset && assetModel.get({ id: asset }),
     },
     Query: {
-        user: ensureDomainPermission(async (_, args, ...rest) => ({
-            account: await userModel.get({
-                id: (args.id || args.currentAddress).toLowerCase(),
-            }),
-        })),
+        user: ensureDomainPermission(async (_, args, ...rest) => {
+            console.log(args, rest);
+            return ({
+                account: await userModel.get({
+                    id: (args.id || args.currentAddress),
+                }),
+            });
+        }),
         asset: ensureDomainPermission(async (_, args) => ({
             asset: await syncAssetInfo(args),
         })),
