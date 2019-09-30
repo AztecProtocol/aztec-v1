@@ -10,10 +10,8 @@ export const createKeyVault = async ({
     salt = 'salty',
 }, cb) => {
     const {
-        data: {
-            registerExtension: {
-                account,
-            },
+        registerExtension: {
+            account,
         },
     } = await apollo.mutate({
         mutation: RegisterExtensionMutation,
