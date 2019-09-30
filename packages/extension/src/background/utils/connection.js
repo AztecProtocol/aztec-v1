@@ -98,7 +98,7 @@ class Connection {
 
         this.message$.pipe(
             filter(({ data }) => data.type === sendTransactionEvent),
-            mergeMap(data => from(TransactionSendingService.sendTransaction(data)),
+            mergeMap(data => from(TransactionSendingService.sendTransaction(data))),
             tap(({ uiClientId, requestId, ...rest }) => {
                 this.connections[uiClientId].postMessage({
                     requestId,
