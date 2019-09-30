@@ -8,7 +8,7 @@ import {
     errorLog,
 } from '~utils/log';
 
-const acessesFromMetadata = (note, prevNote) => {
+const accessesFromMetadata = (note, prevNote) => {
     const {
         metadata: metadataStr,
         noteHash,
@@ -63,7 +63,7 @@ const acessesFromMetadata = (note, prevNote) => {
 /* Create */
 
 export const createBulkNoteAccessFromNotes = async (rawNotes, networkId) => {
-    const accesses = rawNotes.flatMap(note => acessesFromMetadata(note));
+    const accesses = rawNotes.flatMap(note => accessesFromMetadata(note));
 
     return updateBulkNoteAccess(accesses, networkId);
 };

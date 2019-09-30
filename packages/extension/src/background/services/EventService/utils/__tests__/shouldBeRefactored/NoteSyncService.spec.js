@@ -137,7 +137,7 @@ describe('ZkAsset', () => {
             erc20Address,
             scalingFactor,
         ]);
-        zkAssetAddress = zkAssetContractAddress.toLowerCase();
+        zkAssetAddress = zkAssetContractAddress;
 
         await Web3Service
             .useContract('ZkAssetOwnable')

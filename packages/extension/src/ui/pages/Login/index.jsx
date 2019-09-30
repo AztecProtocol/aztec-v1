@@ -13,6 +13,7 @@ class ApproveAssetForDomain extends Component {
     state ={
 
     }
+
     __updatePassword(value) {
         this.setState({ password: value });
     }
@@ -31,7 +32,7 @@ class ApproveAssetForDomain extends Component {
 
         const data = await mutation({
             variables: {
-                address: currentAddress.toLowerCase(),
+                address: currentAddress,
                 password: this.state.password,
                 domain: window.location.host,
             },

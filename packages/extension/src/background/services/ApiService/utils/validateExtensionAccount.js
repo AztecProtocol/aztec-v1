@@ -1,11 +1,10 @@
-import address from '~utils/address';
 import { handleQuery } from '../../../utils/connectionUtils';
 import {
     dataError,
 } from '~utils/error';
 
 export default async function validateExtensionAccount(accountAddress) {
-    const validAddress = address(accountAddress);
+    const validAddress = accountAddress;
     if (accountAddress && !validAddress) {
         throw dataError('input.address.notValid', {
             address: accountAddress,

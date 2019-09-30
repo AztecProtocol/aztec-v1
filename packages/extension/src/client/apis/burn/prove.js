@@ -9,7 +9,7 @@ import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
 import query from '~client/utils/query';
-import validateExtensionAccount from '../utils/validateExtensionAccount';
+// import validateExtensionAccount from '../utils/validateExtensionAccount';
 import toAztecNote from '../utils/toAztecNote';
 
 const {
@@ -21,7 +21,7 @@ export default async function proveBurn({
     notes,
     sender,
 }) {
-    const notesOwner = await validateExtensionAccount(sender);
+    const notesOwner = {};
 
     let confidentialTotalBurned;
     try {

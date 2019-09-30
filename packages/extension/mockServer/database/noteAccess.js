@@ -27,6 +27,7 @@ const createAccessForAccount = (note, accountAddress, viewingKey) => {
     const account = accounts.find(({
         address,
     }) => address === accountAddress);
+    conosole.log({accountAddress, account});
 
     noteAccess.push({
         id: accessId,
