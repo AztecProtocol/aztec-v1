@@ -18,7 +18,9 @@ const sendTransaction = async (data) => {
 
         ...data,
         data: {
-            txReceipt: receipt,
+            response: {
+                txReceipt: receipt,
+            },
         },
 
     };

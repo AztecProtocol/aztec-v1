@@ -34,10 +34,7 @@ export const linkAccountToMetaMask = async ({
     requestId,
     'metamask.register.extension',
     account,
-    (response) => {
-        console.log('>>> linkAccountToMetaMask', response);
-        cb(response);
-    },
+    response => cb(response),
 );
 
 export const sendRegisterAddress = async ({
@@ -46,40 +43,51 @@ export const sendRegisterAddress = async ({
     linkedPublicKey,
     // spendingPublicKey,
     signature,
-}, cb) => ActionService.sendTransaction(
-    requestId,
-    'AZTECAccountRegistry',
-    'registerAZTECExtension',
-    [
-        address,
-        linkedPublicKey,
-        // spendingPublicKey,
-        signature,
-    ],
-    cb,
-);
+}, cb) => ActionService
+    .sendTransaction(
+        requestId,
+        'AZTECAccountRegistry',
+        'registerAZTECExtension',
+        [
+            address,
+            linkedPublicKey,
+            // spendingPublicKey,
+            signature,
+        ],
+    )
+    .onReceiveResponse((response) => {
+        const {
+            txReceipt: {
+                blockNumber,
+            } = {},
+        } = response || {};
+        cb({
+            blockNumber,
+        });
+    });
 
 export const registerAccount = async ({
     address,
     linkedPublicKey,
     signature,
+    blockNumber,
 }, cb) => {
-    const response = await apollo.mutate({
+    const {
+        registerAddress: {
+            account,
+        } = {},
+    } = await apollo.mutate({
         mutation: RegisterAccountMutation,
         variables: {
             address,
             signature,
             linkedPublicKey,
+            blockNumber,
             domain: window.location.origin,
-            registeredAt: 0,
         },
     });
-    console.log(response);
-    const {
-        error,
-    } = response;
 
     cb({
-        success: !error,
+        success: !!account,
     });
 };

@@ -28,7 +28,6 @@ class ActionManager {
     }
 
     handlePortResponse = (response) => {
-        console.log('ActionManager handlePortResponse', response);
         const {
             responseId,
             data: {
