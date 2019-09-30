@@ -7,7 +7,10 @@ import {
     FlexBox,
     Block,
     TextButton,
+    Text,
+    Icon,
 } from '@aztec/guacamole-ui';
+import i18n from '~ui/helpers/i18n';
 import Button from '~ui/components/Button';
 import Header from '../Header';
 import Description from './Description';
@@ -22,10 +25,14 @@ const Popup = ({
     rightIconName,
     onClickRightIcon,
     submitButtonText,
+    successMessage,
     onSubmit,
     submitButton,
     footerLink,
     children,
+    loading,
+    success,
+    error,
 }) => {
     const hasHeader = !!(title || onClickLeftIcon || onClickRightIcon);
     const headerNode = hasHeader
@@ -84,18 +91,50 @@ const Popup = ({
                         >
                             {children}
                         </Block>
-                        {!!(onSubmit || submitButton) && (
+                        {!!(onSubmit || submitButton || error) && (
                             <Block
                                 className="flex-fixed"
                                 top="l"
                             >
-                                {!onSubmit && submitButton}
-                                {onSubmit && (
-                                    <Button
-                                        text={submitButtonText}
-                                        onClick={onSubmit}
-                                    />
+                                {error && (
+                                    <Block bottom={error.fetal ? 's' : 'm'}>
+                                        <Text
+                                            text={error.message
+                                                || i18n.t(error.key, error.response)}
+                                            color="red"
+                                            size="xxs"
+                                        />
+                                    </Block>
                                 )}
+                                {success && successMessage && (
+                                    <Block bottom="s">
+                                        <Text
+                                            text={successMessage}
+                                            color="primary"
+                                            size="xs"
+                                            weight="semibold"
+                                        />
+                                    </Block>
+                                )}
+                                {submitButton}
+                                {!submitButton
+                                    && onSubmit
+                                    && (!error || !error.fetal)
+                                    && (!success || !successMessage)
+                                    && (
+                                        <Button
+                                            onClick={onSubmit}
+                                            loading={loading}
+                                        >
+                                            {!success && submitButtonText}
+                                            {success && (
+                                                <Icon
+                                                    name="done"
+                                                    size="m"
+                                                />
+                                            )}
+                                        </Button>
+                                    )}
                             </Block>
                         )}
                         {!!footerLink && (
@@ -127,6 +166,7 @@ Popup.propTypes = {
     rightIconName: PropTypes.string,
     onClickRightIcon: PropTypes.func,
     submitButtonText: PropTypes.string,
+    successMessage: PropTypes.string,
     onSubmit: PropTypes.func,
     submitButton: PropTypes.node,
     footerLink: PropTypes.shape({
@@ -135,6 +175,14 @@ Popup.propTypes = {
         onClick: PropTypes.func,
     }),
     children: PropTypes.node,
+    loading: PropTypes.bool,
+    success: PropTypes.bool,
+    error: PropTypes.shape({
+        key: PropTypes.string,
+        message: PropTypes.string,
+        response: PropTypes.object,
+        fetal: PropTypes.bool,
+    }),
 };
 
 Popup.defaultProps = {
@@ -146,10 +194,14 @@ Popup.defaultProps = {
     rightIconName: '',
     onClickRightIcon: null,
     submitButtonText: '',
+    successMessage: '',
     onSubmit: null,
     submitButton: null,
     footerLink: null,
     children: null,
+    loading: false,
+    success: false,
+    error: null,
 };
 
 export default Popup;
