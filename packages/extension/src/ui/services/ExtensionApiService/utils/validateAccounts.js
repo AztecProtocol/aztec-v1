@@ -1,4 +1,3 @@
-import address from '~utils/address';
 import ApiError from '~client/utils/ApiError';
 import apollo from '../../../../background/services/GraphQLService';
 import AccountsQuery from '../../../queries/AccountsQuery';
@@ -11,7 +10,7 @@ export default async function validateAccounts({
     const addressInputs = typeof accountAddress === 'string'
         ? [accountAddress]
         : accountAddress;
-    const validAddresses = addressInputs.map(addr => address(addr));
+    const validAddresses = addressInputs.map(addr => addr);
     const invalidInputs = validAddresses.filter((addr, i) => !validAddresses[i]);
     if (invalidInputs.length > 0) {
         throw new ApiError('input.address.not.valid', {
@@ -19,12 +18,15 @@ export default async function validateAccounts({
         });
     }
 
+    console.log({ accountAddress });
+
     const addressArrStr = validAddresses.map(a => `${a}`).join(',');
 
     const {
         data: {
             accounts: accountsResponse,
         },
+        ...rest
     } = await apollo.query({
         query: AccountsQuery,
         variables: {
@@ -33,6 +35,7 @@ export default async function validateAccounts({
             currentAddress,
         },
     });
+    console.log(rest, accountsResponse);
 
     const {
         accounts = [],

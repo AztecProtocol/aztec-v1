@@ -44,7 +44,8 @@ contract AZTECAccountRegistry is LibEIP712 {
 
     event RegisterExtension(
         address indexed account,
-        bytes linkedPublicKey
+        bytes linkedPublicKey,
+        bytes spendingPublicKey 
     );
 
     event LogAddress(
@@ -75,6 +76,7 @@ contract AZTECAccountRegistry is LibEIP712 {
     function registerAZTECExtension(
         address _account,
         bytes memory _linkedPublicKey,
+        bytes memory _spendingPublicKey,
         bytes memory _signature
     ) public {
         address signer = recoverSignature(
@@ -84,7 +86,7 @@ contract AZTECAccountRegistry is LibEIP712 {
         require(_account == signer, 'signer must be the account');
         accountMapping[_account] = _linkedPublicKey;
         // emit event for the graph
-        emit RegisterExtension(_account, _linkedPublicKey);
+        emit RegisterExtension(_account, _linkedPublicKey, _spendingPublicKey);
     }
 
 }

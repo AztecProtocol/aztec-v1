@@ -3,7 +3,6 @@ import {
     AZTECAccountRegistryConfig,
 } from '~background/config/contracts';
 
-
 export const fetchAccount = async ({
     address,
     networkId,
@@ -42,11 +41,13 @@ export const fetchAccount = async ({
             blockNumber,
             returnValues: {
                 linkedPublicKey,
+                spendingPublicKey,
             },
         }) => ({
             address,
             blockNumber,
             linkedPublicKey,
+            spendingPublicKey,
         }));
 
         const account = accounts.length ? accounts[accounts.length - 1] : null;

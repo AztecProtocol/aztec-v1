@@ -5,7 +5,7 @@ import {
 import Web3Service from '../../../Web3Service';
 import fetchAssets from '../../utils/fetchAssets';
 import {
-    createBulkAssets
+    createBulkAssets,
 } from '../../utils/asset';
 
 
@@ -38,7 +38,7 @@ class SyncManager {
 
     pause = (prevState = {}) => {
         if (!this.syncConfig) {
-            warnLog(`Assets syncing with is not in process.`);
+            warnLog('Assets syncing with is not in process.');
             return;
         }
 
@@ -55,26 +55,27 @@ class SyncManager {
         );
     }
 
-    syncProgress = async() => {
+    syncProgress = async () => {
         if (!this.syncConfig) {
-            warnLog(`Assets syncing is not in process.`);
-            return;
+            warnLog('Assets syncing is not in process.');
+            return null;
         }
-
-        const blocks = await Web3Service(networkId).eth.getBlockNumber();
         const {
             lastSyncedBlock,
+            networkId,
         } = this.syncConfig;
 
+        const blocks = await Web3Service(networkId).eth.getBlockNumber();
+
         return {
-            blocks, 
+            blocks,
             lastSyncedBlock,
         };
     };
 
     lastSyncedBlock = () => {
         if (!this.syncConfig) {
-            warnLog(`Assets syncing is not in process.`);
+            warnLog('Assets syncing is not in process.');
             return 0;
         }
 
@@ -91,7 +92,7 @@ class SyncManager {
 
     resume = () => {
         if (!this.syncConfig) {
-            warnLog(`Assets syncing is not in process.`);
+            warnLog('Assets syncing is not in process.');
             return;
         }
 
@@ -99,7 +100,7 @@ class SyncManager {
             pausedState,
         } = this.syncConfig;
         if (!pausedState) {
-            warnLog(`Assets syncing is already running.`);
+            warnLog('Assets syncing is already running.');
             return;
         }
 
@@ -115,8 +116,8 @@ class SyncManager {
 
     isSynced = () => {
         if (!this.syncConfig) {
-            warnLog(`Assets syncing is not in process.`);
-            return;
+            warnLog('Assets syncing is not in process.');
+            return null;
         }
 
         const {
@@ -160,7 +161,7 @@ class SyncManager {
         const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
         let newLastSyncedBlock = lastSyncedBlock;
 
-        if(currentBlock > lastSyncedBlock) {
+        if (currentBlock > lastSyncedBlock) {
             const fromBlock = lastSyncedBlock + 1;
             const toBlock = currentBlock;
 
@@ -172,18 +173,19 @@ class SyncManager {
                 toBlock,
                 networkId,
             });
-    
+
             if (error) {
                 this.handleFetchError(error);
-
             } else {
                 await createBulkAssets(newAssets, networkId);
                 newLastSyncedBlock = toBlock;
 
-                !this.progressSubscriber || this.progressSubscriber({
-                    blocks: currentBlock, 
-                    lastSyncedBlock: newLastSyncedBlock,
-                });
+                if (this.progressSubscriber) {
+                    this.progressSubscriber({
+                        blocks: currentBlock,
+                        lastSyncedBlock: newLastSyncedBlock,
+                    });
+                }
             }
         }
 

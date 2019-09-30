@@ -219,14 +219,14 @@
     "absolutePath": "@aztec/protocol/contracts/interfaces/IZkAsset.sol",
     "exportedSymbols": {
       "IZkAsset": [
-        5150
+        5155
       ]
     },
-    "id": 5151,
+    "id": 5156,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5072,
+        "id": 5077,
         "literals": [
           "solidity",
           ">=",
@@ -245,9 +245,9 @@
         "contractKind": "contract",
         "documentation": "@title IZkAsset\n@author AZTEC\n@dev An interface defining the ZkAsset standard \nCopyright Spilsbury Holdings Ltd 2019. All rights reserved.*",
         "fullyImplemented": false,
-        "id": 5150,
+        "id": 5155,
         "linearizedBaseContracts": [
-          5150
+          5155
         ],
         "name": "IZkAsset",
         "nodeType": "ContractDefinition",
@@ -255,20 +255,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5084,
+            "id": 5089,
             "name": "CreateZkAsset",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5083,
+              "id": 5088,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5074,
+                  "id": 5079,
                   "indexed": true,
                   "name": "aceAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "247:26:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -277,7 +277,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5073,
+                    "id": 5078,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "247:7:42",
@@ -292,11 +292,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5076,
+                  "id": 5081,
                   "indexed": true,
                   "name": "linkedTokenAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "283:34:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -305,7 +305,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5075,
+                    "id": 5080,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "283:7:42",
@@ -320,11 +320,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5078,
+                  "id": 5083,
                   "indexed": false,
                   "name": "scalingFactor",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "327:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -333,7 +333,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5077,
+                    "id": 5082,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "327:7:42",
@@ -347,11 +347,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5080,
+                  "id": 5085,
                   "indexed": true,
                   "name": "_canAdjustSupply",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "358:29:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -360,7 +360,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 5079,
+                    "id": 5084,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "358:4:42",
@@ -374,11 +374,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5082,
+                  "id": 5087,
                   "indexed": false,
                   "name": "_canConvert",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "397:16:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -387,7 +387,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 5081,
+                    "id": 5086,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "397:4:42",
@@ -407,20 +407,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5088,
+            "id": 5093,
             "name": "CreateNoteRegistry",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5087,
+              "id": 5092,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5086,
+                  "id": 5091,
                   "indexed": false,
                   "name": "noteRegistryId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5088,
+                  "scope": 5093,
                   "src": "450:22:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -429,7 +429,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5085,
+                    "id": 5090,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "450:7:42",
@@ -449,20 +449,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5096,
+            "id": 5101,
             "name": "CreateNote",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5095,
+              "id": 5100,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5090,
+                  "id": 5095,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5096,
+                  "scope": 5101,
                   "src": "496:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -471,7 +471,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5089,
+                    "id": 5094,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "496:7:42",
@@ -486,11 +486,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5092,
+                  "id": 5097,
                   "indexed": true,
                   "name": "noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5096,
+                  "scope": 5101,
                   "src": "519:24:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -499,7 +499,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5091,
+                    "id": 5096,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "519:7:42",
@@ -513,11 +513,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5094,
+                  "id": 5099,
                   "indexed": false,
                   "name": "metadata",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5096,
+                  "scope": 5101,
                   "src": "545:14:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -526,7 +526,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5093,
+                    "id": 5098,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "545:5:42",
@@ -546,20 +546,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5104,
+            "id": 5109,
             "name": "DestroyNote",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5103,
+              "id": 5108,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5098,
+                  "id": 5103,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5104,
+                  "scope": 5109,
                   "src": "584:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -568,7 +568,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5097,
+                    "id": 5102,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "584:7:42",
@@ -583,11 +583,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5100,
+                  "id": 5105,
                   "indexed": true,
                   "name": "noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5104,
+                  "scope": 5109,
                   "src": "607:24:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -596,7 +596,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5099,
+                    "id": 5104,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "607:7:42",
@@ -610,11 +610,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5102,
+                  "id": 5107,
                   "indexed": false,
                   "name": "metadata",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5104,
+                  "scope": 5109,
                   "src": "633:14:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -623,7 +623,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5101,
+                    "id": 5106,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "633:5:42",
@@ -643,20 +643,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5110,
+            "id": 5115,
             "name": "ConvertTokens",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5109,
+              "id": 5114,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5106,
+                  "id": 5111,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5110,
+                  "scope": 5115,
                   "src": "674:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -665,7 +665,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5105,
+                    "id": 5110,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "674:7:42",
@@ -680,11 +680,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5108,
+                  "id": 5113,
                   "indexed": false,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5110,
+                  "scope": 5115,
                   "src": "697:13:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -693,7 +693,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5107,
+                    "id": 5112,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "697:7:42",
@@ -713,20 +713,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5116,
+            "id": 5121,
             "name": "RedeemTokens",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5115,
+              "id": 5120,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5112,
+                  "id": 5117,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5116,
+                  "scope": 5121,
                   "src": "736:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -735,7 +735,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5111,
+                    "id": 5116,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "736:7:42",
@@ -750,11 +750,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5114,
+                  "id": 5119,
                   "indexed": false,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5116,
+                  "scope": 5121,
                   "src": "759:13:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -763,7 +763,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5113,
+                    "id": 5118,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "759:7:42",
@@ -783,20 +783,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5124,
+            "id": 5129,
             "name": "UpdateNoteMetaData",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5123,
+              "id": 5128,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5118,
+                  "id": 5123,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5124,
+                  "scope": 5129,
                   "src": "804:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -805,7 +805,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5117,
+                    "id": 5122,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "804:7:42",
@@ -820,11 +820,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5120,
+                  "id": 5125,
                   "indexed": true,
                   "name": "noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5124,
+                  "scope": 5129,
                   "src": "827:24:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -833,7 +833,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5119,
+                    "id": 5124,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "827:7:42",
@@ -847,11 +847,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5122,
+                  "id": 5127,
                   "indexed": false,
                   "name": "metadata",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5124,
+                  "scope": 5129,
                   "src": "853:14:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -860,7 +860,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5121,
+                    "id": 5126,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "853:5:42",
@@ -880,22 +880,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 5135,
+            "id": 5140,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "confidentialApprove",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5133,
+              "id": 5138,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5126,
+                  "id": 5131,
                   "name": "_noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "917:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -904,7 +904,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5125,
+                    "id": 5130,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "917:7:42",
@@ -918,10 +918,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5128,
+                  "id": 5133,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "944:16:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -930,7 +930,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5127,
+                    "id": 5132,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "944:7:42",
@@ -945,10 +945,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5130,
+                  "id": 5135,
                   "name": "_status",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "970:12:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -957,7 +957,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 5129,
+                    "id": 5134,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "970:4:42",
@@ -971,10 +971,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5132,
+                  "id": 5137,
                   "name": "_signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "992:25:42",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -983,7 +983,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5131,
+                    "id": 5136,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "992:5:42",
@@ -999,12 +999,12 @@
               "src": "907:116:42"
             },
             "returnParameters": {
-              "id": 5134,
+              "id": 5139,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1032:0:42"
             },
-            "scope": 5150,
+            "scope": 5155,
             "src": "879:154:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1013,22 +1013,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 5142,
+            "id": 5147,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "confidentialTransferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5140,
+              "id": 5145,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5137,
+                  "id": 5142,
                   "name": "_proof",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5142,
+                  "scope": 5147,
                   "src": "1073:13:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1037,7 +1037,7 @@
                     "typeString": "uint24"
                   },
                   "typeName": {
-                    "id": 5136,
+                    "id": 5141,
                     "name": "uint24",
                     "nodeType": "ElementaryTypeName",
                     "src": "1073:6:42",
@@ -1051,10 +1051,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5139,
+                  "id": 5144,
                   "name": "_proofOutput",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5142,
+                  "scope": 5147,
                   "src": "1088:27:42",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -1063,7 +1063,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5138,
+                    "id": 5143,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1088:5:42",
@@ -1079,12 +1079,12 @@
               "src": "1072:44:42"
             },
             "returnParameters": {
-              "id": 5141,
+              "id": 5146,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1125:0:42"
             },
-            "scope": 5150,
+            "scope": 5155,
             "src": "1039:87:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1093,22 +1093,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 5149,
+            "id": 5154,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "confidentialTransfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5147,
+              "id": 5152,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5144,
+                  "id": 5149,
                   "name": "_proofData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5149,
+                  "scope": 5154,
                   "src": "1166:23:42",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1117,7 +1117,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5143,
+                    "id": 5148,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1166:5:42",
@@ -1131,10 +1131,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5146,
+                  "id": 5151,
                   "name": "_signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5149,
+                  "scope": 5154,
                   "src": "1191:24:42",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1143,7 +1143,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5145,
+                    "id": 5150,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1191:5:42",
@@ -1159,19 +1159,19 @@
               "src": "1165:51:42"
             },
             "returnParameters": {
-              "id": 5148,
+              "id": 5153,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1223:0:42"
             },
-            "scope": 5150,
+            "scope": 5155,
             "src": "1136:88:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 5151,
+        "scope": 5156,
         "src": "193:1033:42"
       }
     ],
@@ -1181,14 +1181,14 @@
     "absolutePath": "@aztec/protocol/contracts/interfaces/IZkAsset.sol",
     "exportedSymbols": {
       "IZkAsset": [
-        5150
+        5155
       ]
     },
-    "id": 5151,
+    "id": 5156,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5072,
+        "id": 5077,
         "literals": [
           "solidity",
           ">=",
@@ -1207,9 +1207,9 @@
         "contractKind": "contract",
         "documentation": "@title IZkAsset\n@author AZTEC\n@dev An interface defining the ZkAsset standard \nCopyright Spilsbury Holdings Ltd 2019. All rights reserved.*",
         "fullyImplemented": false,
-        "id": 5150,
+        "id": 5155,
         "linearizedBaseContracts": [
-          5150
+          5155
         ],
         "name": "IZkAsset",
         "nodeType": "ContractDefinition",
@@ -1217,20 +1217,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5084,
+            "id": 5089,
             "name": "CreateZkAsset",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5083,
+              "id": 5088,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5074,
+                  "id": 5079,
                   "indexed": true,
                   "name": "aceAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "247:26:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1239,7 +1239,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5073,
+                    "id": 5078,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "247:7:42",
@@ -1254,11 +1254,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5076,
+                  "id": 5081,
                   "indexed": true,
                   "name": "linkedTokenAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "283:34:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1267,7 +1267,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5075,
+                    "id": 5080,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "283:7:42",
@@ -1282,11 +1282,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5078,
+                  "id": 5083,
                   "indexed": false,
                   "name": "scalingFactor",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "327:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1295,7 +1295,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5077,
+                    "id": 5082,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "327:7:42",
@@ -1309,11 +1309,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5080,
+                  "id": 5085,
                   "indexed": true,
                   "name": "_canAdjustSupply",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "358:29:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1322,7 +1322,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 5079,
+                    "id": 5084,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "358:4:42",
@@ -1336,11 +1336,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5082,
+                  "id": 5087,
                   "indexed": false,
                   "name": "_canConvert",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5084,
+                  "scope": 5089,
                   "src": "397:16:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1349,7 +1349,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 5081,
+                    "id": 5086,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "397:4:42",
@@ -1369,20 +1369,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5088,
+            "id": 5093,
             "name": "CreateNoteRegistry",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5087,
+              "id": 5092,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5086,
+                  "id": 5091,
                   "indexed": false,
                   "name": "noteRegistryId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5088,
+                  "scope": 5093,
                   "src": "450:22:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1391,7 +1391,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5085,
+                    "id": 5090,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "450:7:42",
@@ -1411,20 +1411,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5096,
+            "id": 5101,
             "name": "CreateNote",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5095,
+              "id": 5100,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5090,
+                  "id": 5095,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5096,
+                  "scope": 5101,
                   "src": "496:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1433,7 +1433,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5089,
+                    "id": 5094,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "496:7:42",
@@ -1448,11 +1448,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5092,
+                  "id": 5097,
                   "indexed": true,
                   "name": "noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5096,
+                  "scope": 5101,
                   "src": "519:24:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1461,7 +1461,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5091,
+                    "id": 5096,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "519:7:42",
@@ -1475,11 +1475,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5094,
+                  "id": 5099,
                   "indexed": false,
                   "name": "metadata",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5096,
+                  "scope": 5101,
                   "src": "545:14:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1488,7 +1488,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5093,
+                    "id": 5098,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "545:5:42",
@@ -1508,20 +1508,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5104,
+            "id": 5109,
             "name": "DestroyNote",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5103,
+              "id": 5108,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5098,
+                  "id": 5103,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5104,
+                  "scope": 5109,
                   "src": "584:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1530,7 +1530,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5097,
+                    "id": 5102,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "584:7:42",
@@ -1545,11 +1545,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5100,
+                  "id": 5105,
                   "indexed": true,
                   "name": "noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5104,
+                  "scope": 5109,
                   "src": "607:24:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1558,7 +1558,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5099,
+                    "id": 5104,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "607:7:42",
@@ -1572,11 +1572,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5102,
+                  "id": 5107,
                   "indexed": false,
                   "name": "metadata",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5104,
+                  "scope": 5109,
                   "src": "633:14:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1585,7 +1585,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5101,
+                    "id": 5106,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "633:5:42",
@@ -1605,20 +1605,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5110,
+            "id": 5115,
             "name": "ConvertTokens",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5109,
+              "id": 5114,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5106,
+                  "id": 5111,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5110,
+                  "scope": 5115,
                   "src": "674:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1627,7 +1627,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5105,
+                    "id": 5110,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "674:7:42",
@@ -1642,11 +1642,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5108,
+                  "id": 5113,
                   "indexed": false,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5110,
+                  "scope": 5115,
                   "src": "697:13:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1655,7 +1655,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5107,
+                    "id": 5112,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "697:7:42",
@@ -1675,20 +1675,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5116,
+            "id": 5121,
             "name": "RedeemTokens",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5115,
+              "id": 5120,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5112,
+                  "id": 5117,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5116,
+                  "scope": 5121,
                   "src": "736:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1697,7 +1697,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5111,
+                    "id": 5116,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "736:7:42",
@@ -1712,11 +1712,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5114,
+                  "id": 5119,
                   "indexed": false,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5116,
+                  "scope": 5121,
                   "src": "759:13:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1725,7 +1725,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5113,
+                    "id": 5118,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "759:7:42",
@@ -1745,20 +1745,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 5124,
+            "id": 5129,
             "name": "UpdateNoteMetaData",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 5123,
+              "id": 5128,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5118,
+                  "id": 5123,
                   "indexed": true,
                   "name": "owner",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5124,
+                  "scope": 5129,
                   "src": "804:21:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1767,7 +1767,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5117,
+                    "id": 5122,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "804:7:42",
@@ -1782,11 +1782,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5120,
+                  "id": 5125,
                   "indexed": true,
                   "name": "noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5124,
+                  "scope": 5129,
                   "src": "827:24:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1795,7 +1795,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5119,
+                    "id": 5124,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "827:7:42",
@@ -1809,11 +1809,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 5122,
+                  "id": 5127,
                   "indexed": false,
                   "name": "metadata",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5124,
+                  "scope": 5129,
                   "src": "853:14:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1822,7 +1822,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5121,
+                    "id": 5126,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "853:5:42",
@@ -1842,22 +1842,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 5135,
+            "id": 5140,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "confidentialApprove",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5133,
+              "id": 5138,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5126,
+                  "id": 5131,
                   "name": "_noteHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "917:17:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1866,7 +1866,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 5125,
+                    "id": 5130,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "917:7:42",
@@ -1880,10 +1880,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5128,
+                  "id": 5133,
                   "name": "_spender",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "944:16:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1892,7 +1892,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5127,
+                    "id": 5132,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "944:7:42",
@@ -1907,10 +1907,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5130,
+                  "id": 5135,
                   "name": "_status",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "970:12:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1919,7 +1919,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 5129,
+                    "id": 5134,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "970:4:42",
@@ -1933,10 +1933,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5132,
+                  "id": 5137,
                   "name": "_signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5135,
+                  "scope": 5140,
                   "src": "992:25:42",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -1945,7 +1945,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5131,
+                    "id": 5136,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "992:5:42",
@@ -1961,12 +1961,12 @@
               "src": "907:116:42"
             },
             "returnParameters": {
-              "id": 5134,
+              "id": 5139,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1032:0:42"
             },
-            "scope": 5150,
+            "scope": 5155,
             "src": "879:154:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -1975,22 +1975,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 5142,
+            "id": 5147,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "confidentialTransferFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5140,
+              "id": 5145,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5137,
+                  "id": 5142,
                   "name": "_proof",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5142,
+                  "scope": 5147,
                   "src": "1073:13:42",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1999,7 +1999,7 @@
                     "typeString": "uint24"
                   },
                   "typeName": {
-                    "id": 5136,
+                    "id": 5141,
                     "name": "uint24",
                     "nodeType": "ElementaryTypeName",
                     "src": "1073:6:42",
@@ -2013,10 +2013,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5139,
+                  "id": 5144,
                   "name": "_proofOutput",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5142,
+                  "scope": 5147,
                   "src": "1088:27:42",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -2025,7 +2025,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5138,
+                    "id": 5143,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1088:5:42",
@@ -2041,12 +2041,12 @@
               "src": "1072:44:42"
             },
             "returnParameters": {
-              "id": 5141,
+              "id": 5146,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1125:0:42"
             },
-            "scope": 5150,
+            "scope": 5155,
             "src": "1039:87:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -2055,22 +2055,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 5149,
+            "id": 5154,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "confidentialTransfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5147,
+              "id": 5152,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5144,
+                  "id": 5149,
                   "name": "_proofData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5149,
+                  "scope": 5154,
                   "src": "1166:23:42",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2079,7 +2079,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5143,
+                    "id": 5148,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1166:5:42",
@@ -2093,10 +2093,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5146,
+                  "id": 5151,
                   "name": "_signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5149,
+                  "scope": 5154,
                   "src": "1191:24:42",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2105,7 +2105,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5145,
+                    "id": 5150,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1191:5:42",
@@ -2121,19 +2121,19 @@
               "src": "1165:51:42"
             },
             "returnParameters": {
-              "id": 5148,
+              "id": 5153,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1223:0:42"
             },
-            "scope": 5150,
+            "scope": 5155,
             "src": "1136:88:42",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 5151,
+        "scope": 5156,
         "src": "193:1033:42"
       }
     ],
@@ -2145,7 +2145,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-09-26T16:54:20.376Z",
+  "updatedAt": "2019-09-30T10:44:39.925Z",
   "devdoc": {
     "author": "AZTEC",
     "details": "An interface defining the ZkAsset standard  Copyright Spilsbury Holdings Ltd 2019. All rights reserved.*",

@@ -35,7 +35,6 @@ module.exports = {
                 SwitchCase: 1,
             },
         ],
-        "template-curly-spacing" : "off",
         'react/jsx-indent': ['error', 4],
         'react/jsx-indent-props': ['error', 4],
         'max-len': ['error', {

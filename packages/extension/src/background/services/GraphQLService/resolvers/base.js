@@ -12,7 +12,8 @@ import getUserSpendingPublicKey from './utils/getUserSpendingPublicKey';
 import getAccounts from './utils/getAccounts';
 import decryptViewingKey from './utils/decryptViewingKey';
 import getViewingKeyFromMetadata from './utils/getViewingKeyFromMetadata';
-import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata'; import getAssetBalance from './utils/getAssetBalance';
+import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
+import getAssetBalance from './utils/getAssetBalance';
 import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
 import syncAssetInfo from './utils/syncAssetInfo';
@@ -20,7 +21,7 @@ import syncNoteInfo from './utils/syncNoteInfo';
 import syncUtilityNoteInfo from './utils/syncUtilityNoteInfo';
 
 export default {
-    BigInt: new BigInt('safe'),
+    BigInt: new BigInt('bigInt'),
     User: {
         spendingPublicKey: async () => getUserSpendingPublicKey(),
     },
@@ -44,7 +45,7 @@ export default {
     Query: {
         user: ensureDomainPermission(async (_, args, ...rest) => ({
             account: await userModel.get({
-                id: (args.id || args.currentAddress).toLowerCase(),
+                id: (args.id || args.currentAddress),
             }),
         })),
         asset: ensureDomainPermission(async (_, args) => ({

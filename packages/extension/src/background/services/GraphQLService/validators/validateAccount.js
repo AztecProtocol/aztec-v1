@@ -3,6 +3,7 @@ import {
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
+import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodePrivateKey from '~background/utils/decodePrivateKey';
@@ -45,6 +46,13 @@ export default async function validateAccount(_, args, ctx) {
         privateKey: decodePrivateKey(decodedKeyStore, pwDerivedKey),
         networkId,
     });
+
+
+    NoteService.initWithUser(
+        user.address,
+        decodePrivateKey(decodedKeyStore, pwDerivedKey),
+        user.linkedPublicKey,
+    );
 
     const newSession = await AuthService.updateSession(currentAddress);
 

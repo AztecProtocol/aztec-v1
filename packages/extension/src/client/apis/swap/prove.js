@@ -1,6 +1,5 @@
 import aztec from 'aztec.js';
 import ApiError from '~client/utils/ApiError';
-import validateAccount from '../utils/validateAccount';
 
 export default async function proveSwap({
     swap: {
@@ -18,8 +17,8 @@ export default async function proveSwap({
         note,
     } = aztec;
 
-    const taker = await validateAccount(takerBid.owner, true);
-    const maker = await validateAccount(takerAsk.owner, true);
+    // const taker = await validateAccount(takerBid.owner, true);
+    // const maker = await validateAccount(takerAsk.owner, true);
 
     const inputNotes = [makerBid, takerBid];
     const outputNotes = [makerAsk, takerAsk];

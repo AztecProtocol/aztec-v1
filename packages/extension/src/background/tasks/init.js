@@ -117,6 +117,4 @@ export default async function init() {
     });
 
     configureWeb3Service();
-
-    NoteService.init();
 }

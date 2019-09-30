@@ -1,4 +1,3 @@
-import address from '~utils/address';
 import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
@@ -18,7 +17,7 @@ export default class Asset {
     constructor({
         id,
     } = {}) {
-        this.id = address(id);
+        this.id = id;
         this.subscriptions = {
             balance: {
                 receipt: null,
@@ -49,15 +48,16 @@ export default class Asset {
 
     async balance() {
         const {
-            assetResponse,
+            asset: data,
         } = await query({
-            type: 'asset',
+            type: 'assetBalance',
             args: { id: this.id },
         }) || {};
 
+
         const {
             asset,
-        } = assetResponse || {};
+        } = data || {};
 
         return (asset && asset.balance) || 0;
     }

@@ -7,6 +7,7 @@ import {
 import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
 import recoverFromStorage from '../utils/recoverFromStorage';
 import syncAssetNoteData from '../utils/syncAssetNoteData';
+import mergeWithLatestAsset from '../utils/mergeWithLatestAsset';
 import mergeAssetNoteData from '../utils/mergeAssetNoteData';
 import removeDestroyedNotes from '../utils/removeDestroyedNotes';
 import saveToStorage from '../utils/saveToStorage';
@@ -61,10 +62,11 @@ export default class NoteManager {
             linkedPublicKey,
             linkedPrivateKey,
         };
-        const assetNoteDataMapping = await recoverFromStorage(
+        let assetNoteDataMapping = await recoverFromStorage(
             ownerAddress,
             linkedPrivateKey,
         );
+        assetNoteDataMapping = await mergeWithLatestAsset(ownerAddress, linkedPrivateKey, assetNoteDataMapping);
         // check if the input owner is still the same
         // 'init' might have been called again with a different address
         // before 'recoverFromStorage' is done

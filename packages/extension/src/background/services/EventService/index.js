@@ -205,7 +205,7 @@ const fetchAsset = async ({
     address,
     networkId,
 }) => {
-    const asset = await Asset.get({ networkId }, address);
+    const asset = await Asset.get({ networkId }, { registryOwner: address });
 
     if (asset) {
         return {
