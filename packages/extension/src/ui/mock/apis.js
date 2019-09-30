@@ -4,6 +4,7 @@ import {
 import sleep from '~utils/sleep';
 import realApis from '~ui/apis';
 import {
+    addresses,
     assets,
     pastTransactions,
 } from './data';
@@ -25,6 +26,9 @@ Object.keys(realApis).forEach((apiName) => {
 
 export default {
     ...mockApis,
+    getCurrentUser: () => ({
+        address: addresses[0],
+    }),
     getAssets: async () => assets,
     getPastTransactions: async (assetCode = '', count = 2) => {
         const transactions = !assetCode

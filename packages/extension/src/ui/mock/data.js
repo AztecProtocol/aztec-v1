@@ -64,6 +64,7 @@ export const domains = [
         name: 'Compound Finance',
         iconSrc: compoundLogo,
         url: 'https://compound.finance/',
+        domain: 'compound.finance',
     },
 ];
 
