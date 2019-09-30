@@ -146,7 +146,7 @@ class ExtensionApi {
                 domain,
                 address: userAddress,
             }) => {
-                const d = await apollo.mutate({
+                await apollo.mutate({
                     mutation: ApproveDomainMutatuon,
                     variables: {
                         domain,
@@ -170,11 +170,12 @@ class ExtensionApi {
                     type: actionEvent,
                     requestId,
                     data: {
-                        action: 'metamask.ace.publicApprove',
+                        action: 'metamask.zkAsset.confidentialApprove',
                         response: {
                             notes,
                             spender,
                             spendStatus,
+                            signature,
                         },
                     },
                 });
@@ -333,8 +334,19 @@ class ExtensionApi {
                 return response;
             },
 
-            returnToClient: async () => {
-
+            returnToClient: async ({
+                requestId,
+                clientId,
+            }) => {
+                ClientConnection.backgroundPort.postMessage({
+                    type: 'UI_RESPONSE',
+                    requestId,
+                    clientId,
+                    data: {
+                        requestId,
+                        clientId,
+                    },
+                });
             },
         };
     }

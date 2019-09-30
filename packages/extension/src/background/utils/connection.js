@@ -98,11 +98,14 @@ class Connection {
 
         this.message$.pipe(
             filter(({ data }) => data.type === sendTransactionEvent),
-            mergeMap(data => from(TransactionSendingService.sendTransaction(data))
-                .pipe(map(result => ({ ...result, responseId: data.data.responseId })))),
-            tap(({ uiClientId, ...rest }) => {
+            mergeMap(data => from(TransactionSendingService.sendTransaction(data)),
+            tap(({ uiClientId, requestId, ...rest }) => {
                 this.connections[uiClientId].postMessage({
-                    ...rest,
+                    requestId,
+                    data: {
+                        type: 'ACTION_RESPONSE',
+                        ...rest,
+                    },
                 });
             }),
         ).subscribe();
@@ -123,7 +126,6 @@ class Connection {
                         variables: args,
                         query: graphQueryMap[query],
                     });
-                    console.log(response);
                     return {
                         ...data,
                         response,
@@ -131,7 +133,6 @@ class Connection {
                 })());
             }),
             tap(({ uiClientId, ...rest }) => {
-                console.log(uiClientId, rest);
                 this.connections[uiClientId].postMessage({
                     ...rest,
                     type: 'UI_QUERY_RESPONSE',

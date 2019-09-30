@@ -24,7 +24,7 @@ export default async function demoOwnable({
         address: userAddress,
     } = Web3Service.account;
 
-    let zkAssetAddress = '0xD4ACbA57eEbC90d8f48F1ae00d6075a84ae024C6'; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = '0x439505a6AA1A9927b7550182d0a63dcd849E0a32'; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {
@@ -105,11 +105,11 @@ export default async function demoOwnable({
     await logBalance();
 
 
-    // const withdrawAmount = randomInt(1, 10);
-    // await withdraw(asset, withdrawAmount);
+    const withdrawAmount = randomInt(1, 10);
+    await withdraw(asset, withdrawAmount);
 
 
-    // await logBalance();
+    await logBalance();
 
 
     // const sendAmount = 1;

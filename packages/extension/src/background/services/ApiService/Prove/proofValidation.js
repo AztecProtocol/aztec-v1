@@ -1,6 +1,7 @@
 import { Validator, validate } from 'jsonschema';
 import sendProofSchema from './sendProofSchema';
 import depositProofSchema from './depositProofSchema';
+import withdrawProofSchema from './withdrawProofSchema';
 
 
 const v = new Validator();
@@ -8,6 +9,7 @@ const v = new Validator();
 
 const proofSchemaMap = {
     DEPOSIT_PROOF: depositProofSchema,
+    WITHDRAW_PROOF: withdrawProofSchema,
     SEND_PROOF: sendProofSchema,
 };
 

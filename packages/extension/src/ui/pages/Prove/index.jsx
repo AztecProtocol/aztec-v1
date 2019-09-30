@@ -4,6 +4,7 @@ import {
     Block,
     Button,
     Text,
+    Accordion,
 } from '@aztec/guacamole-ui';
 import assetModel from '~database/models/asset';
 
@@ -126,7 +127,11 @@ class Prove extends Component {
             clientId,
 
         });
-        console.log(receipt);
+        console.log({ receipt });
+        ExtensionApi.prove.returnToClient({
+            requestId,
+            clientId,
+        });
     }
 
     render() {
@@ -150,55 +155,82 @@ class Prove extends Component {
                 align="center"
                 background="white"
             >
+                <Accordion
+                    title={(
+                        <Text
+                            size="m"
+                            text="Deposit"
+                            weight="bold"
+                        />
+                    )}
+                    content={(
+                        <Block>
 
-                <div>
-                    <br />
-                    <br />
-                    <Button
-                        text="Deposit"
-                        onClick={() => this.deposit()}
-                    />
-                </div>
-                <div>
-                    <br />
-                    <br />
-                    <Button
-                        text="Approve Deposit ERC20"
-                        onClick={() => this.publicApprove()}
-                    />
-                </div>
-                <div>
-                    <br />
-                    <br />
-                    <Button
-                        text="Send Desposit"
-                        onClick={() => this.sendDepositProof()}
-                    />
-                </div>
-                <div>
-                    <br />
-                    <br />
-                    <Button
-                        text="Send"
-                        onClick={() => this.send()}
-                    />
-                </div>
-                <div>
-                    <br />
-                    <br />
-                    <Button
-                        text="Sign Notes (multile)"
-                        onClick={() => this.signNotes()}
-                    />
-                </div>
-                <div>
-                    <br />
-                    <br />
-                    <Button
-                        text="Send Send"
-                        onClick={() => this.sendSendProof()}
-                    />
-                </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Deposit"
+                                    onClick={() => this.deposit()}
+                                />
+                            </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Approve Deposit ERC20"
+                                    onClick={() => this.publicApprove()}
+                                />
+                            </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Send Desposit"
+                                    onClick={() => this.sendDepositProof()}
+                                />
+                            </div>
+                        </Block>
+                    )}
+                />
+                <Accordion
+                    title={(
+                        <Text
+                            size="m"
+                            text="Withdraw"
+                            weight="bold"
+                        />
+                    )}
+                    content={(
+                        <Block>
+
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Generate Proof"
+                                    onClick={() => this.withdraw()}
+                                />
+                            </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Sign Notes"
+                                    onClick={() => this.signNotes()}
+                                />
+                            </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Send Withdraw"
+                                    onClick={() => this.sendWithdraw()}
+                                />
+                            </div>
+                        </Block>
+                    )}
+                />
             </Block>
         );
     }
