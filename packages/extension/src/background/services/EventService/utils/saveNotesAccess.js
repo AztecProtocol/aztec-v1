@@ -9,7 +9,6 @@ export default async function saveNotesAccess({
     updateNotes,
     destroyNotes,
 }, networkId) {
-    console.log(createNotes);
     // save it in serial
     await createBulkNoteAccessFromNotes(createNotes, networkId);
     await updateBulkNoteAccessFromNotes(updateNotes, networkId);
