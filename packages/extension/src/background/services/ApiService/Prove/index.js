@@ -34,15 +34,23 @@ const proofUi = (query, connection) => async () => {
         },
     });
 
-    return filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+    const resp = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+    return {
+        ...query,
+        response: {
+            prove: {
+                prove: {
+                    ...resp.data,
+                },
+            },
+        },
+    };
     // we now know the UI has completed
 };
 
 
-const triggerProofUi = async (query, connection) => {
-    await validateProof(query, connection)
-        .then(proofUi(query, connection));
-};
+const triggerProofUi = async (query, connection) => validateProof(query, connection)
+    .then(proofUi(query, connection));
 
 
 export default triggerProofUi;

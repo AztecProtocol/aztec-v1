@@ -5,6 +5,7 @@ import {
 export default async function deposit(asset, transactions, options) {
     log('Generating deposit proof...');
     const depositProof = await asset.deposit(transactions, options);
+    console.log('depositProof', depositProof);
     if (!depositProof) {
         log('Failed to generate deposit proof.');
         return null;

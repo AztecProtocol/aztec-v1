@@ -2,6 +2,7 @@ import Web3Service from '~client/services/Web3Service';
 
 const sendTransaction = async (data) => {
     const {
+        responseId,
         data: {
             data: {
                 contract,
@@ -15,8 +16,9 @@ const sendTransaction = async (data) => {
         .method(method)
         .send(...params);
     return {
-
         ...data,
+
+        responseId,
         data: {
             response: {
                 txReceipt: receipt,

@@ -2,7 +2,7 @@ export default function makeProofFactory(proveMapping, proofResultMapping) {
     return async (type, options) => {
         const prove = proveMapping[type];
         const {
-            proof,
+            prove: proof,
             ...data
         } = await prove(options) || {};
 
