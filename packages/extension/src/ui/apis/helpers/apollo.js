@@ -10,7 +10,7 @@ const schema = makeExecutableSchema({
     resolvers,
 });
 
-export default new ApolloClient({
+const apollo = new ApolloClient({
     link: new SchemaLink({ schema }),
     cache: new InMemoryCache({
         addTypename: false,
@@ -25,3 +25,14 @@ export default new ApolloClient({
     },
     connectToDevTools: true,
 });
+
+export default {
+    mutate: async (...args) => {
+        const response = await apollo.mutate(...args);
+        return (response && response.data) || response;
+    },
+    query: async (...args) => {
+        const response = await apollo.query(...args);
+        return (response && response.data) || response;
+    },
+};
