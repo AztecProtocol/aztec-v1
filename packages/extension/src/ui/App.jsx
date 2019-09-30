@@ -95,6 +95,7 @@ class App extends PureComponent {
             } = this.props;
             if (mock) {
                 this.setState({
+                    nextRoute: '/',
                     loading: false,
                 });
                 return;
@@ -141,7 +142,8 @@ class App extends PureComponent {
                 path: parentPath,
                 name: parentName,
             } = parent;
-            const path = `${parentPath || ''}/${subPath || subName || ''}`.replace(/\/{2,}/g, '/');
+            const childPath = (subPath || subName || '').replace(/^_$/, '');
+            const path = `${parentPath || ''}/${childPath}`.replace(/\/{2,}/g, '/');
             const name = parentName ? `${parentName}.${subName}` : subName;
 
             if (childRoutes) {
