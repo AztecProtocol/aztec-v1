@@ -14,6 +14,8 @@ import getPathsFromRouteConfig from '~ui/utils/getPathsFromRouteConfig';
 import Loading from '~ui/views/Loading';
 import routes from '~ui/config/routes';
 import actions from '~ui/config/actions';
+import './styles/guacamole.css';
+import './styles/_reset.scss';
 
 class App extends PureComponent {
     constructor(props) {
