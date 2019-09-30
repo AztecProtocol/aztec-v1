@@ -10,8 +10,14 @@ import {
 
 export const updateActionState = async (action) => {
     const timestamp = Date.now();
+    const {
+        data: {
+            response,
+        },
+    } = action;
     const newAction = {
         ...action,
+        data: response,
         timestamp,
     };
     await actionModel.set(newAction);
