@@ -10,8 +10,6 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
 import typeDefs from '~background/services/GraphQLService/typeDefs/ui';
 import resolvers from '~background/services/GraphQLService/resolvers/ui';
-import '../styles/guacamole.css';
-import '../styles/_reset.scss';
 import App from '../App';
 import ControlPanel from './ControlPanel';
 
