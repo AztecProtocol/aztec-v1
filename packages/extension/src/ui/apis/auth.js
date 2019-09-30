@@ -1,6 +1,8 @@
+import AuthService from '~background/services/AuthService';
 import ActionService from '~ui/services/ActionService';
-import RegisterExtensionMutation from '~ui/mutations/RegisterExtension';
-import RegisterAccountMutation from '~ui/mutations/RegisterAccount';
+import RegisterExtension from '~ui/mutations/RegisterExtension';
+import RegisterAccount from '~ui/mutations/RegisterAccount';
+import ApproveDomain from '~ui/mutations/ApproveDomain';
 import apollo from './helpers/apollo';
 
 export const createKeyVault = async ({
@@ -14,7 +16,7 @@ export const createKeyVault = async ({
             account,
         },
     } = await apollo.mutate({
-        mutation: RegisterExtensionMutation,
+        mutation: RegisterExtension,
         variables: {
             seedPhrase,
             address,
@@ -77,7 +79,7 @@ export const registerAccount = async ({
             account,
         } = {},
     } = await apollo.mutate({
-        mutation: RegisterAccountMutation,
+        mutation: RegisterAccount,
         variables: {
             address,
             signature,
@@ -91,3 +93,24 @@ export const registerAccount = async ({
         success: !!account,
     });
 };
+
+export const approveDomain = async ({
+    address,
+    domain,
+}, cb) => {
+    const {
+        registerDomain: {
+            success,
+        },
+    } = await apollo.mutate({
+        mutation: ApproveDomain,
+        variables: {
+            address,
+            domain,
+        },
+    });
+
+    cb({ success });
+};
+
+export const getCurrentUser = async () => AuthService.getCurrentUser();

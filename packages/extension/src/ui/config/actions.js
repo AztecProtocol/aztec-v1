@@ -5,7 +5,7 @@ export default {
     'account.not.register': {
         route: 'register.address',
     },
-    'domain.not.register': {
+    'ui.domain.approve': {
         route: 'register.domain',
     },
 };

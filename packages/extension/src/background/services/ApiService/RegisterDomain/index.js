@@ -5,13 +5,32 @@ const registerDomain = async (query, connection) => {
     const registeredDomain = await AuthService.getRegisteredDomain(query.domain);
 
     if (!registeredDomain) {
+        const {
+            webClientId,
+        } = query;
+        const senderPort = connection.connections[webClientId];
+        if (!senderPort) {
+            return null;
+        }
+
+        const {
+            favIconUrl,
+            title,
+            url,
+        } = senderPort.sender.tab;
+
         connection.UiActionSubject.next({
-            type: 'ui.asset.approve',
+            type: 'ui.domain.approve',
             requestId: query.requestId,
             clientId: query.clientId,
             data: {
                 response: {
-                    domain: query.domain,
+                    domain: {
+                        iconSrc: favIconUrl,
+                        name: title,
+                        domain: query.domain,
+                        url,
+                    },
                     ...query.args,
                 },
                 requestId: query.requestId,
