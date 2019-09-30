@@ -18,12 +18,9 @@ const sendTransaction = async (data) => {
     return {
         ...data,
         responseId,
-        data: {
-            response: {
-                txReceipt: receipt,
-            },
+        response: {
+            txReceipt: receipt,
         },
-
     };
 };
 // TODO change this to use the gas station network
