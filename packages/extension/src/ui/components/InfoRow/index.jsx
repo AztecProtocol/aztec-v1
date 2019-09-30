@@ -6,6 +6,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import ProfileIcon from '~ui/components/ProfileIcon';
+import styles from './info.scss';
 
 const InfoRow = ({
     className,
@@ -20,16 +21,21 @@ const InfoRow = ({
         nowrap
     >
         <ProfileIcon
+            className="flex-fixed"
             src={iconSrc}
             alt={name}
             size="m"
         />
-        <Block left="m">
+        <Block
+            className={`flex-free-expand ${styles.content}`}
+            left="m"
+        >
             <FlexBox valign="center">
                 <Text
                     text={name}
                     size="m"
                     weight="semibold"
+                    showEllipsis
                 />
                 {!!nameHint && (
                     <Block left="s">

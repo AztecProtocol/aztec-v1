@@ -1,0 +1,7 @@
+@import '../../styles/variables.scss';
+
+$icon-col-width: map-get($icon-size-map, 'm');
+
+.content {
+  width: calc(100% - #{$icon-col-width + map-get($spacing-map, 's')});
+}
