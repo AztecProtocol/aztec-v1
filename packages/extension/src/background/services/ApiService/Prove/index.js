@@ -25,12 +25,18 @@ const validateProof = async (query) => {
 };
 
 const proofUi = (query, connection) => async () => {
+    const {
+        args: {
+            proofType,
+            ...rest
+        },
+    } = query;
     connection.UiActionSubject.next({
-        type: 'ui.asset.prove',
+        type: `ui.asset.prove.${proofType.toLowerCase()}`,
         requestId: query.requestId,
         clientId: query.clientId,
         data: {
-            ...query.data.args,
+            ...rest,
         },
     });
 
