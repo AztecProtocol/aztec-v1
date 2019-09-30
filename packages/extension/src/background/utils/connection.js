@@ -74,7 +74,12 @@ class Connection {
 
         this.ui$.pipe(
             mergeMap(action => from(updateActionState(action))),
-            map(openPopup), // we can extend this to automatically close the window after a timeout
+            map((action) => {
+                const {
+                    timestamp,
+                } = action;
+                return openPopup({ timestamp });
+            }), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
         // this.message$.subscribe();
