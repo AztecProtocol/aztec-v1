@@ -1,6 +1,8 @@
 // solhint-disable
 pragma solidity ^0.5.7;
 
+import "openzeppelin-solidity/contracts/utils/Address.sol";
+
 
 /// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
 /// @author Stefan George - <stefan.george@consensys.net>
@@ -89,6 +91,11 @@ contract MultiSigWallet {
             && _required <= ownerCount
             && _required != 0
             && ownerCount != 0);
+        _;
+    }
+
+    modifier isValidContract(address _destination) {
+        require(Address.isContract(_destination));
         _;
     }
 
@@ -243,7 +250,11 @@ contract MultiSigWallet {
 
     // call has been separated into its own function in order to take advantage
     // of the Solidity's code generator to produce a loop that copies tx.data into memory.
-    function external_call(address destination, uint value, uint dataLength, bytes memory data) internal returns (bool) {
+    function external_call(address destination, uint value, uint dataLength, bytes memory data)
+        internal
+        isValidContract(destination)
+        returns (bool)
+    {
         bool result;
         assembly {
             let x := mload(0x40)   // "Allocate" memory for output (0x40 is where "free memory" pointer is stored by convention)
