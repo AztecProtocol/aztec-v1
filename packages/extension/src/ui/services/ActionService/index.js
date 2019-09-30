@@ -1,3 +1,7 @@
+import {
+    actionEvent,
+    sendTransactionEvent,
+} from '~config/event';
 import AuthService from '~background/services/AuthService';
 import ensureAccount from '~background/services/GraphQLService/decorators/ensureAccount';
 import ActionManager from './helpers/ActionManager';
@@ -7,21 +11,39 @@ const manager = new ActionManager();
 
 export default {
     openConnection: () => manager.openConnection(),
-    post: (query, args = {}, defaultCallback = null) => {
-        const requestId = manager.postToBackground({
-            query,
-            args,
-        }, defaultCallback);
-        return {
-            onReceiveResponse: callback => manager.registerResponse(
-                requestId,
-                callback,
-            ),
-        };
-    },
+    post: (
+        requestId,
+        actionName,
+        data = {},
+        defaultCallback = null,
+    ) => manager.postToBackground({
+        type: actionEvent,
+        requestId,
+        data: {
+            action: actionName,
+            response: data,
+        },
+    }, defaultCallback),
+    sendTransaction: (
+        requestId,
+        contract,
+        method,
+        data,
+        defaultCallback = null,
+    ) => manager.postToBackground({
+        type: sendTransactionEvent,
+        requestId,
+        data: {
+            contract,
+            method,
+            params: data,
+        },
+    }, defaultCallback),
     get: async (actionId) => {
-        const action = await actionModel.get({ id: actionId });
-        return action;
+        if (!actionId) {
+            return null;
+        }
+        return actionModel.get({ id: actionId });
     },
     isLoggedIn: async () => {
         try {

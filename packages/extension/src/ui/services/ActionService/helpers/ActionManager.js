@@ -9,13 +9,10 @@ import LRU from '~utils/caches/LRU';
 
 class ActionManager {
     constructor({
-        portName = 'aztec-ui-action',
-        queryName = 'aztec-extension-client-query',
         maxActiveResponses = 50,
     } = {}) {
         this.port = null;
-        this.portName = portName;
-        this.queryName = queryName;
+        this.portId = '';
         this.callbacks = {};
         this.portResponses = new LRU(maxActiveResponses);
     }
@@ -25,53 +22,69 @@ class ActionManager {
             warnLog('Connection has been established.');
             return;
         }
-        this.port = browser.runtime.connect({ name: this.portName });
+        this.portId = randomId();
+        this.port = browser.runtime.connect({ name: this.portId });
         this.port.onMessage.addListener(this.handlePortResponse);
     }
 
     handlePortResponse = (response) => {
+        console.log('ActionManager handlePortResponse', response);
         const {
-            requestId,
-            ...data
+            responseId,
+            data: {
+                response: returnData,
+            } = {},
         } = response;
-        const callbacks = this.callbacks[requestId];
+        const callbacks = this.callbacks[responseId];
         if (callbacks) {
-            delete this.callbacks[requestId];
-            callbacks.forEach(callback => callback(data));
+            delete this.callbacks[responseId];
+            callbacks.forEach(callback => callback(returnData));
         }
-        this.portResponses.add(requestId, data);
+        this.portResponses.add(responseId, returnData);
     };
 
     postToBackground({
-        query,
-        args,
+        type,
+        requestId,
+        data,
     }, callback = null) {
-        const requestId = randomId();
-        this.callbacks[requestId] = callback
+        const responseId = randomId();
+        this.callbacks[responseId] = callback
             ? [callback]
             : [];
 
-        this.port.postMessage({
-            type: this.queryName,
+        console.log('postToBackground', {
+            type,
             requestId,
-            query,
-            args,
+            responseId,
+            data,
+        });
+        this.port.postMessage({
+            type,
+            requestId,
+            responseId,
+            data,
         });
 
-        return requestId;
+        return {
+            onReceiveResponse: otherCallback => this.registerResponse(
+                responseId,
+                otherCallback,
+            ),
+        };
     }
 
-    registerResponse(requestId, callback) {
-        if (this.callbacks[requestId]) {
-            this.callbacks[requestId].push(callback);
+    registerResponse(responseId, callback) {
+        if (this.callbacks[responseId]) {
+            this.callbacks[responseId].push(callback);
             return;
         }
 
-        const data = this.portResponses.get(requestId);
+        const data = this.portResponses.get(responseId);
         if (data) {
             callback(data);
         } else {
-            warnLog(`Cannot find request with id '${requestId}'`);
+            warnLog(`Cannot find request with id '${responseId}'`);
         }
     }
 }
