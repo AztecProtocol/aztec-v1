@@ -72,7 +72,7 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(png|woff|woff2|eot|ttf)$/,
+                test: /\.(png|jpe?g|gif|woff|woff2|eot|ttf)$/,
                 loader: 'file-loader?limit=100000',
                 options: {
                     outputPath: 'ui',
