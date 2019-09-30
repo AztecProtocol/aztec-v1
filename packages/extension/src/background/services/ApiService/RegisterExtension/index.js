@@ -1,5 +1,4 @@
 import filterStream from '~utils/filterStream';
-import address from '~utils/address';
 import validateUserPermission from '../utils/validateUserPermision';
 
 const registerExtensionUi = async (query, connection) => {
@@ -11,13 +10,11 @@ const registerExtensionUi = async (query, connection) => {
         connection.UiActionSubject.next({
             type: 'ui.register.extension',
             requestId: query.requestId,
-            clientId: query.clientId,
             data: {
                 response: {
                     ...account,
                 },
                 requestId: query.requestId,
-                clientId: query.clientId,
             },
         });
         return filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
@@ -44,7 +41,7 @@ const registerExtension = async (query, connection) => {
 
     const queryWithAccount = {
         ...query,
-        account: account && account.address ? account : { address: address(query.data.args.currentAddress) },
+        account: account && account.address ? account : { address: query.data.args.currentAddress },
     };
 
     return registerExtensionUi(queryWithAccount, connection);

@@ -42,7 +42,7 @@ export default function subscribeToContentScript(options, cb) {
             type: "${entity.toUpperCase()}_${type.toUpperCase()}",
             assetId: "${assetId || ''}",
             noteId: "${noteId || ''}",
-            currentAddress: "${address.toLowerCase()}"
+            currentAddress: "${address}"
         ) {
             success
             error {

@@ -1,3 +1,6 @@
+import {
+    utils,
+} from 'web3';
 import config from '~config/metadata';
 import {
     DYNAMIC_VAR_CONFIG_LENGTH,
@@ -71,6 +74,8 @@ export default function constructor(metadataStr) {
         addresses,
         viewingKeys,
     } = metadata;
+
+    metadata.addresses = addresses.map(a => utils.toChecksumAddress(a));
 
     return {
         ...metadata,

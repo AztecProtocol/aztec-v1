@@ -45,7 +45,7 @@ class Prove extends Component {
         });
     }
 
-    prove = async () => {
+    deposit = async () => {
         const {
             action: {
                 data: {
@@ -58,7 +58,7 @@ class Prove extends Component {
             address,
         } = this.props;
 
-        const { proof } = await ExtensionApi.prove.depositProof({
+        const { proof } = await ExtensionApi.prove.deposit({
             assetAddress,
             sender,
             owner: from,
@@ -74,7 +74,35 @@ class Prove extends Component {
         });
     }
 
-    sendProof= async () => {
+    send = async () => {
+        const {
+            action: {
+                data: {
+                    assetAddress,
+                    transactions,
+                    from,
+                    sender,
+                },
+            },
+            address,
+        } = this.props;
+
+        const { proof } = await ExtensionApi.prove.send({
+            assetAddress,
+            sender,
+            transactions,
+            currentAddress: from,
+            domain: window.location.origin,
+        });
+        console.log(proof);
+        const encoded = proof.encodeABI(assetAddress);
+        this.setState({
+            sendProof: encoded,
+            proofHash: proof.hash,
+        });
+    }
+
+    sendDepositProof= async () => {
         const {
             depositProof,
         } = this.state;
@@ -127,15 +155,15 @@ class Prove extends Component {
                     <br />
                     <br />
                     <Button
-                        text="Prove"
-                        onClick={() => this.prove()}
+                        text="Deposit"
+                        onClick={() => this.deposit()}
                     />
                 </div>
                 <div>
                     <br />
                     <br />
                     <Button
-                        text="Approve ERC20"
+                        text="Approve Deposit ERC20"
                         onClick={() => this.publicApprove()}
                     />
                 </div>
@@ -143,8 +171,32 @@ class Prove extends Component {
                     <br />
                     <br />
                     <Button
-                        text="Send Proof"
-                        onClick={() => this.sendProof()}
+                        text="Send Desposit"
+                        onClick={() => this.sendDepositProof()}
+                    />
+                </div>
+                <div>
+                    <br />
+                    <br />
+                    <Button
+                        text="Send"
+                        onClick={() => this.send()}
+                    />
+                </div>
+                <div>
+                    <br />
+                    <br />
+                    <Button
+                        text="Sign Notes (multile)"
+                        onClick={() => this.signNotes()}
+                    />
+                </div>
+                <div>
+                    <br />
+                    <br />
+                    <Button
+                        text="Send Send"
+                        onClick={() => this.sendSendProof()}
                     />
                 </div>
             </Block>

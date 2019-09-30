@@ -13,8 +13,7 @@ const uiTypes = gql`
         action: Action
     }
     type SubscriptionApiResponse {
-        success: Boolean
-        error: Error
+        success: Boolean error: Error
     }
     type PermissionApiResponse {
         account: User
@@ -51,6 +50,7 @@ const uiTypes = gql`
         registerAddress(
             address: String!
             linkedPublicKey: String!
+            spendingPublicKey: String!
             blockNumber: BigInt
         ): UserAccountApiResponse
         registerDomain(

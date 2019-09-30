@@ -1,4 +1,3 @@
-import address from '~utils/address';
 import ApiError from '~client/utils/ApiError';
 import UserQuery from '../../../queries/UserQuery';
 import apollo from '../../../../background/services/GraphQLService';
@@ -8,12 +7,17 @@ export default async function validateExtensionAccount({
     domain,
     currentAddress,
 }) {
-    const validAddress = address(accountAddress);
+    const validAddress = accountAddress;
     if (accountAddress && !validAddress) {
         throw new ApiError('input.address.not.valid', {
             address: accountAddress,
         });
     }
+    console.log({
+        accountAddress,
+        domain,
+        currentAddress,
+    });
 
     const {
         data: {
@@ -24,9 +28,11 @@ export default async function validateExtensionAccount({
         variables: {
             id: validAddress,
             domain,
-            currentAddress: address(currentAddress),
+            currentAddress,
         },
     });
+
+    console.log(user);
 
     const {
         account,

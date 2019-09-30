@@ -103,7 +103,7 @@ class JoinSplitFluidProof extends JoinSplitProof {
         const length = 1 + encodedParams.length + 1;
         const offsets = ProofUtils.getOffsets(length, encodedParams);
         const abiEncodedParams = [this.challengeHex.slice(2), ...offsets, ...encodedParams];
-        return `0x${abiEncodedParams.join('').toLowerCase()}`;
+        return `0x${abiEncodedParams.join('')}`;
     }
 
     validateInputs() {

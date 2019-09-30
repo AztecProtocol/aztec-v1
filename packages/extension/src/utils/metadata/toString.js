@@ -8,6 +8,7 @@ const toConfigVar = num => num.toString(16).padStart(DYNAMIC_VAR_CONFIG_LENGTH, 
 const ensureMinVarSize = (str, len) => str.padStart(Math.max(len || str.length, MIN_BYTES_VAR_LENGTH), '0');
 
 export default function toString(metadataObj) {
+    console.log(metadataObj);
     const metadata = {};
     let accumOffset = 0;
     config.forEach(({
@@ -44,6 +45,7 @@ export default function toString(metadataObj) {
     const str = config
         .map(({ name }) => metadata[name])
         .join('');
+    console.log(str);
 
     return `0x${str}`;
 }

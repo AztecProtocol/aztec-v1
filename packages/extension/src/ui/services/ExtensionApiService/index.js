@@ -11,7 +11,6 @@ import {
     sendTransactionEvent,
 } from '~config/event';
 
-import address from '~utils/address';
 import { randomSumArray } from '~utils/random';
 import filterStream from '~utils/filterStream';
 import RegisterExtensionMutation from '../../mutations/RegisterExtension';
@@ -114,7 +113,7 @@ class ExtensionApi {
                         params: [
                             userAddress,
                             linkedPublicKey,
-                            // spendingPublicKey,
+                            spendingPublicKey,
                             signature,
                         ],
                     },
@@ -127,7 +126,7 @@ class ExtensionApi {
                 address: userAddress,
                 signature,
                 linkedPublicKey,
-                registeredAt = Date.now(),
+                spendingPublicKey,
                 domain = window.location.origin,
             }) => {
                 await apollo.mutate({
@@ -136,8 +135,9 @@ class ExtensionApi {
                         address: userAddress,
                         signature,
                         linkedPublicKey,
+                        spendingPublicKey,
                         domain,
-                        registeredAt,
+                        blockNumber: 10,
                     },
 
                 });
@@ -146,7 +146,7 @@ class ExtensionApi {
                 domain,
                 address: userAddress,
             }) => {
-                await apollo.mutate({
+                const d = await apollo.mutate({
                     mutation: ApproveDomainMutatuon,
                     variables: {
                         domain,
@@ -205,8 +205,8 @@ class ExtensionApi {
                 });
                 return filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
             },
-            createNoteFromBalance,
-            depositProof: async ({
+            send: createNoteFromBalance,
+            deposit: async ({
                 owner,
                 transactions,
                 publicOwner,
@@ -230,7 +230,6 @@ class ExtensionApi {
                         const {
                             spendingPublicKey,
                             linkedPublicKey,
-                            to,
                         } = await validateExtensionAccount({
                             accountAddress: tx.to,
                             currentAddress,
@@ -294,14 +293,14 @@ class ExtensionApi {
             }) => {
                 const withdrawProof = await createNoteFromBalance({
                     assetAddress,
-                    sender: address(sender),
-                    owner: address(owner),
+                    sender,
+                    owner,
                     transactions,
-                    publicOwner: address(publicOwner),
+                    publicOwner,
                     numberOfInputNotes,
                     numberOfOutputNotes,
                     domain,
-                    currentAddress: address(currentAddress),
+                    currentAddress,
                 });
                 return withdrawProof;
             },

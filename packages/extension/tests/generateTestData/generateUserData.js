@@ -45,7 +45,7 @@ const generateAccount = async () => {
         salt,
         mnemonic,
         userAccount: {
-            address: address.toLowerCase(),
+            address,
             linkedPublicKey,
             linkedPrivateKey,
             spendingPublicKey,

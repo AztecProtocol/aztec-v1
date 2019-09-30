@@ -2,9 +2,7 @@ import {
     createBulkAccounts,
 } from '..';
 import Account from '~background/database/models/account';
-import {
-    clearDB,
-} from '~background/database';
+import clearDB from '~background/database/utils/clearDB';
 
 
 describe('createBulkAccount', () => {

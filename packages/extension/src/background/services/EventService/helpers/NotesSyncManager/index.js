@@ -6,6 +6,9 @@ import Web3Service from '../../../Web3Service';
 import fetchNotes from '../../utils/fetchNotes';
 import saveNotes from '../../utils/saveNotes';
 import saveNotesAccess from '../../utils/saveNotesAccess';
+import {
+    syncedAssets,
+} from '../../utils/asset';
 import AssetsSyncManagerFactory from '../AssetsSyncManager/factory';
 
 /* See more details about limitation
@@ -22,7 +25,7 @@ class SyncManager {
     constructor() {
         this.config = {
             syncInterval: 5000, // ms
-            blocksPerRequest: 180000, // ~ per month (~6000 per day)
+            blocksPerRequest: 540000, // ~ per 3 months (~6000 per day)
             precisionDelta: 10, //
         };
         this.addresses = new Map();
@@ -153,8 +156,8 @@ class SyncManager {
 
         const assetsManager = assetsSyncManager(networkId);
         const currentBlock = assetsManager.lastSyncedBlock();
-
-        console.log(`NotesSyncManager - currentBlock: ${currentBlock} || lastSyncedBlock: ${lastSyncedBlock}`);
+        const fromAssets = (await syncedAssets(networkId))
+            .map(({ registryOwner }) => registryOwner);
 
         let newLastSyncedBlock = lastSyncedBlock;
 
@@ -170,6 +173,7 @@ class SyncManager {
                 owner: address,
                 fromBlock,
                 toBlock,
+                fromAssets,
                 networkId,
             });
 

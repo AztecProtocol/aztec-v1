@@ -4,7 +4,7 @@ import {
     valueOf,
 } from '~utils/note';
 import ApiError from '~client/utils/ApiError';
-import validateExtensionAccount from '../utils/validateExtensionAccount';
+// import validateExtensionAccount from '../utils/validateExtensionAccount';
 import toAztecNote from '../utils/toAztecNote';
 
 const {
@@ -24,7 +24,7 @@ export default async function provePrivateRange({
     utilityNote: inputUtilityNote = null,
     sender,
 }) {
-    const notesSender = await validateExtensionAccount(sender);
+    const notesSender = {};
 
     if (!inputOriginNote
         || !inputComparisonNote

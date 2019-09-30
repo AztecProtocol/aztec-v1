@@ -7,7 +7,6 @@ import {
 import {
     randomSumArray,
 } from '~utils/random';
-import address from '~utils/address';
 import asyncMap from '~utils/asyncMap';
 import asyncForEach from '~utils/asyncForEach';
 import ApiError from '~client/utils/ApiError';
@@ -46,6 +45,7 @@ export default async function proveCreateNoteFromBalance({
             domain,
             currentAddress,
         });
+        console.log(notesOwners);
         notesOwners.forEach((o) => {
             outputNotesOwnerMapping[o.address] = o;
         });
@@ -55,7 +55,7 @@ export default async function proveCreateNoteFromBalance({
             throw new ApiError('input.amount.not.match.transaction');
         }
     } else if (owner) {
-        if (address(owner) !== inputNotesOwner.address) {
+        if (owner !== inputNotesOwner.address) {
             outputNotesOwner = await validateAccounts({
 
                 accountAddress: owner,
@@ -65,6 +65,7 @@ export default async function proveCreateNoteFromBalance({
         }
         outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
     }
+    console.log(transactions);
 
     console.log('______________');
 
@@ -83,6 +84,7 @@ export default async function proveCreateNoteFromBalance({
             currentAddress,
         },
     });
+    console.log(pickNotesFromBalance);
 
     const {
         notes,
@@ -132,7 +134,7 @@ export default async function proveCreateNoteFromBalance({
             to,
             numberOfOutputNotes: count,
         }) => {
-            const notesOwner = outputNotesOwnerMapping[address(to)];
+            const notesOwner = outputNotesOwnerMapping[to];
             const values = randomSumArray(
                 transactionAmount,
                 count || numberOfOutputNotes,

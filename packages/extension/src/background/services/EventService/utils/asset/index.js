@@ -1,4 +1,7 @@
-import performCreateBulkAssetss from './createBulkAssets';
+import createBulkAssets from './createBulkAssets';
+import syncedAssets from './syncedAssets';
 
-
-export const createBulkAssets = (asset, networkId) => performCreateBulkAssetss(asset, networkId);
+export {
+    createBulkAssets,
+    syncedAssets,
+};
