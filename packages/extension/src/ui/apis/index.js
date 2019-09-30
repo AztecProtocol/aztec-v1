@@ -2,6 +2,7 @@ import {
     randomInt,
 } from '~utils/random';
 import sleep from '~utils/sleep';
+import * as auth from './auth';
 
 export default {
     mock: async (data, cb) => {
@@ -13,4 +14,5 @@ export default {
         };
         cb(fakeData);
     },
+    ...auth,
 };
