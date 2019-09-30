@@ -18,6 +18,8 @@
 
 pragma solidity ^0.5.7;
 
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 import "./MultiSigWallet.sol";
 
 
@@ -28,6 +30,8 @@ import "./MultiSigWallet.sol";
 contract MultiSigWalletWithTimeLock is
     MultiSigWallet
 {
+    using SafeMath for uint256;
+
     event ConfirmationTimeSet(uint256 indexed transactionId, uint256 confirmationTime);
     event TimeLockChange(uint256 secondsTimeLocked);
 
