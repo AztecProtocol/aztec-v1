@@ -26,9 +26,12 @@ const validateProof = async (query) => {
 
 const proofUi = (query, connection) => async () => {
     const {
-        args: {
-            proofType,
-            ...rest
+        data: {
+            args: {
+                proofType,
+                ...rest
+            },
+
         },
     } = query;
     connection.UiActionSubject.next({
@@ -36,7 +39,9 @@ const proofUi = (query, connection) => async () => {
         requestId: query.requestId,
         clientId: query.clientId,
         data: {
-            ...rest,
+            response: {
+                ...rest,
+            },
         },
     });
 
