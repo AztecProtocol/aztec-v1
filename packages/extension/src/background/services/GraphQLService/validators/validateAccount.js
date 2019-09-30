@@ -47,7 +47,12 @@ export default async function validateAccount(_, args, ctx) {
         networkId,
     });
 
-    NoteService.initWithUser(user.address, decodePrivateKey(decodedKeyStore, pwDerivedKey), user.linkedPublicKey);
+
+    NoteService.initWithUser(
+        user.address,
+        decodePrivateKey(decodedKeyStore, pwDerivedKey),
+        user.linkedPublicKey,
+    );
 
     const newSession = await AuthService.updateSession(currentAddress);
 

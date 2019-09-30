@@ -24,6 +24,7 @@ export default async function mergeWithLatestAsset(
         key: lastEntry.asset,
     });
 
+
     if (prevAssetNoteDataMappinig[assetId]) {
         return prevAssetNoteDataMappinig;
     }

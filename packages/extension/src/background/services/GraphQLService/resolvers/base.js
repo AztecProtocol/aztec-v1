@@ -43,14 +43,11 @@ export default {
         asset: ({ asset }) => asset && assetModel.get({ id: asset }),
     },
     Query: {
-        user: ensureDomainPermission(async (_, args, ...rest) => {
-            console.log(args, rest);
-            return ({
-                account: await userModel.get({
-                    id: (args.id || args.currentAddress),
-                }),
-            });
-        }),
+        user: ensureDomainPermission(async (_, args, ...rest) => ({
+            account: await userModel.get({
+                id: (args.id || args.currentAddress),
+            }),
+        })),
         asset: ensureDomainPermission(async (_, args) => ({
             asset: await syncAssetInfo(args),
         })),

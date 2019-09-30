@@ -48,15 +48,16 @@ export default class Asset {
 
     async balance() {
         const {
-            assetResponse,
+            asset: data,
         } = await query({
-            type: 'asset',
+            type: 'assetBalance',
             args: { id: this.id },
         }) || {};
 
+
         const {
             asset,
-        } = assetResponse || {};
+        } = data || {};
 
         return (asset && asset.balance) || 0;
     }

@@ -72,7 +72,6 @@ const uiResolvers = {
             });
 
             const { response } = await filterStream('UI_QUERY_RESPONSE', requestId, ClientConnection.background$);
-            console.log(response);
             return {
                 notes: response.notes,
             };
