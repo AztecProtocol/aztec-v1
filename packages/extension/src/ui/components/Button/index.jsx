@@ -12,6 +12,7 @@ const CustomButton = ({
     outlined,
     rounded,
     disabled,
+    loading,
     ...props
 }) => (
     <Button
@@ -21,12 +22,14 @@ const CustomButton = ({
                 [styles[theme]]: theme === 'primary',
                 [styles.outlined]: outlined,
                 [styles.disabled]: disabled,
+                [styles.loading]: loading,
             },
         )}
         theme={theme}
         rounded={rounded}
         disabled={disabled}
         outlined={outlined}
+        isLoading={loading}
         {...props}
     />
 );
@@ -40,6 +43,7 @@ CustomButton.propTypes = {
     outlined: PropTypes.bool,
     rounded: PropTypes.bool,
     disabled: PropTypes.bool,
+    loading: PropTypes.bool,
 };
 
 CustomButton.defaultProps = {
@@ -48,6 +52,7 @@ CustomButton.defaultProps = {
     outlined: false,
     rounded: true,
     disabled: false,
+    loading: false,
 };
 
 export default CustomButton;
