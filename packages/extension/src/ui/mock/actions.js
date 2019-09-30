@@ -5,19 +5,19 @@ import {
 
 export default [
     {
-        key: 'extension.not.registered',
+        type: 'extension.not.registered',
         data: {
             address: addresses[1],
         },
     },
     {
-        key: 'account.not.register',
+        type: 'account.not.register',
         data: {
             address: addresses[1],
         },
     },
     {
-        key: 'domain.not.register',
+        type: 'domain.not.register',
         data: {
             domain: domains[0],
         },

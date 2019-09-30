@@ -23,7 +23,7 @@ class App extends PureComponent {
 
         this.state = {
             loading: true,
-            initialAction: null,
+            action: null,
             nextRoute: '',
         };
     }
@@ -75,32 +75,30 @@ class App extends PureComponent {
     }
 
     async loadInitialStates() {
-        const {
-            location,
-        } = this.props;
-        const search = new URLSearchParams(location.search);
+        const search = new URLSearchParams(window.location.search);
         const actionId = search.get('id');
 
         let route;
-        let initialAction;
+        let action;
         if (actionId) {
-            initialAction = await ActionService.get(actionId);
+            action = await ActionService.get(actionId);
             const {
-                key: actionKey,
-            } = initialAction || {};
+                type,
+            } = action || {};
             ({
                 route,
-            } = actions[actionKey] || {});
-        } else {
+            } = actions[type] || {});
+        }
+        if (!route) {
             const isLoggedIn = await ActionService.isLoggedIn();
             route = isLoggedIn ? 'account' : 'welcome';
         }
 
-        if (route && !this.isCurrentPage(route)) {
+        if (!this.isCurrentPage(route)) {
             this.setState(
                 {
                     nextRoute: route,
-                    initialAction,
+                    action,
                 },
                 () => this.goToPage(route),
             );
@@ -109,7 +107,7 @@ class App extends PureComponent {
 
         this.setState({
             loading: false,
-            initialAction,
+            action,
         });
     }
 
@@ -117,7 +115,7 @@ class App extends PureComponent {
         const routeNodes = [];
         let defaultRoute;
         const {
-            initialAction,
+            action,
         } = this.state;
 
         Object.keys(config).forEach((subName) => {
@@ -150,7 +148,7 @@ class App extends PureComponent {
                         key={path}
                         name={name}
                         path={path}
-                        action={initialAction}
+                        action={action}
                         goToPage={this.goToPage}
                         Component={Component || View}
                     />
