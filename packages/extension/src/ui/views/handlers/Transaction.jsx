@@ -131,7 +131,7 @@ class Transaction extends PureComponent {
         }
     };
 
-    handleResponse = (response) => {
+    handleResponse = (response = {}) => {
         console.log(response);
         const {
             error,

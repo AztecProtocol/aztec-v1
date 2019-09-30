@@ -1,5 +1,5 @@
 export default {
-    'extension.not.registered': {
+    'ui.register.extension': {
         route: 'register',
     },
     'account.not.register': {

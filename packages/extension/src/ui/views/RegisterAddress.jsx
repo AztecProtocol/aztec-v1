@@ -15,7 +15,7 @@ const registerAddressSteps = [
         tasks: [
             {
                 name: 'authorise',
-                run: apis.mock,
+                run: apis.sendRegisterAddress,
             },
         ],
     },
@@ -24,7 +24,7 @@ const registerAddressSteps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.mock,
+                run: apis.registerAccount,
             },
         ],
     },
@@ -39,21 +39,26 @@ const stepsForExistingAccount = [
 
 const stepsForNewAccount = [
     {
-        titleKey: 'register.extension.step.send',
+        titleKey: 'register.extension.step.create',
         tasks: [
             {
-                name: 'authorise',
-                run: apis.mock,
+                name: 'create',
+                run: apis.createKeyVault,
+            },
+            {
+                name: 'link',
+                run: apis.linkAccountToMetaMask,
             },
         ],
     },
     ...registerAddressSteps,
     {
-        titleKey: 'register.extension.step.completed',
+        titleKey: 'register.extension.step.register',
     },
 ];
 
 const RegisterAddress = ({
+    requestId,
     seedPhrase,
     password,
     address,
@@ -89,6 +94,7 @@ const RegisterAddress = ({
     );
 
     const initialData = {
+        requestId,
         seedPhrase,
         password,
         address,
@@ -108,7 +114,9 @@ const RegisterAddress = ({
             submitButtonText={i18n.t(isNewExtensionAccount
                 ? 'register.create.account'
                 : 'proof.create')}
-            successMessage={i18n.t('transaction.success')}
+            successMessage={i18n.t(isNewExtensionAccount
+                ? 'register.extension.step.completed'
+                : 'transaction.success')}
             goNext={goNext}
             goBack={goBack}
             onClose={onClose}
@@ -118,6 +126,7 @@ const RegisterAddress = ({
 };
 
 RegisterAddress.propTypes = {
+    requestId: PropTypes.string.isRequired,
     seedPhrase: PropTypes.string,
     password: PropTypes.string,
     address: PropTypes.string.isRequired,
