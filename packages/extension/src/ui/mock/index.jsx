@@ -38,7 +38,7 @@ ReactDOM.render(
     <ApolloProvider client={apollo}>
         <Router>
             <ControlPanel>
-                <App />
+                <App mock />
             </ControlPanel>
         </Router>
     </ApolloProvider>,

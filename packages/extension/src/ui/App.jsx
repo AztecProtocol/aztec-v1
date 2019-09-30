@@ -90,6 +90,15 @@ class App extends PureComponent {
             } = actions[type] || {});
         }
         if (!route) {
+            const {
+                mock,
+            } = this.props;
+            if (mock) {
+                this.setState({
+                    loading: false,
+                });
+                return;
+            }
             const isLoggedIn = await ActionService.isLoggedIn();
             route = isLoggedIn ? 'account' : 'welcome';
         }
@@ -117,6 +126,9 @@ class App extends PureComponent {
         const {
             action,
         } = this.state;
+        const {
+            mock,
+        } = this.props;
 
         Object.keys(config).forEach((subName) => {
             const {
@@ -150,7 +162,10 @@ class App extends PureComponent {
                         path={path}
                         action={action}
                         goToPage={this.goToPage}
-                        Component={Component || View}
+                        Component={mock
+                            ? View || Component
+                            : Component || View
+                        }
                     />
                 );
 
@@ -193,6 +208,11 @@ App.propTypes = {
         pathname: PropTypes.string.isRequired,
         search: PropTypes.string.isRequired,
     }).isRequired,
+    mock: PropTypes.bool,
+};
+
+App.defaultProps = {
+    mock: false,
 };
 
 export default withRouter(App);
