@@ -14,6 +14,11 @@ export default async function validateExtensionAccount({
             address: accountAddress,
         });
     }
+    console.log({
+        accountAddress,
+        domain,
+        currentAddress,
+    });
 
     const {
         data: {
@@ -27,6 +32,8 @@ export default async function validateExtensionAccount({
             currentAddress: address(currentAddress),
         },
     });
+
+    console.log(user);
 
     const {
         account,

@@ -1,13 +1,12 @@
 import {
     warnLog,
 } from '~utils/log';
-import address from '~utils/address';
 import query from '~client/utils/query';
 import ApiError from '~client/utils/ApiError';
 
 const validateUser = async (accountAddress) => {
     warnLog(`validateAccount(address, isUser) is deprecated. Use 'validateExtensionAccount(${accountAddress})' instead.`);
-    const validAddress = address(accountAddress);
+    const validAddress = accountAddress;
     if (accountAddress && !validAddress) {
         throw new ApiError('input.address.not.valid', {
             address: accountAddress,

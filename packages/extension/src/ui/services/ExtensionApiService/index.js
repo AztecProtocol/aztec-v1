@@ -138,7 +138,7 @@ class ExtensionApi {
                         linkedPublicKey,
                         spendingPublicKey,
                         domain,
-                        blockNumber: 1,
+                        blockNumber: 10,
                     },
 
                 });
@@ -154,7 +154,6 @@ class ExtensionApi {
                         address: userAddress,
                     },
                 });
-                console.log(d);
             },
 
         };
