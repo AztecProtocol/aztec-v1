@@ -8,7 +8,7 @@ export default function _getAccess(metadata, address) { // eslint-disable-line n
         viewingKeys,
     } = metadata;
 
-    const idx = addresses.findIndex(a => utils.toChecksumAddress(a) === utils.toChecksumAddress(address));
+    const idx = addresses.findIndex(a => a === utils.toChecksumAddress(address));
     if (idx < 0) {
         return null;
     }
