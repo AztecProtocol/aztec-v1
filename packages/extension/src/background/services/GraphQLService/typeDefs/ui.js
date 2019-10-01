@@ -21,10 +21,6 @@ const uiTypes = gql`
         action: Action
     }
     extend type Query {
-        userPermission(
-            currentAddress: String!
-            domain: String!
-        ): PermissionApiResponse
         subscribe(
             type: String!
             requestId: String!
@@ -56,7 +52,7 @@ const uiTypes = gql`
         registerDomain(
             domain: String!
             currentAddress: String!
-        ): SubscriptionApiResponse 
+        ): SubscriptionApiResponse
     }
 `;
 
