@@ -1,6 +1,6 @@
-import AZTECAccountRegistryContract from '~background/contracts/AZTECAccountRegistry';
-import ACE from '~background/contracts/ACE';
-import IZkAsset from '~background/contracts/IZkAsset';
+import AZTECAccountRegistryContract from '../../../build/contracts/AZTECAccountRegistry.json';
+import ACE from '../../../build/contracts/ACE.json';
+import IZkAsset from '../../../build/contracts/IZkAsset.json';
 
 
 export const AZTECAccountRegistryConfig = {
