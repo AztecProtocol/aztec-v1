@@ -20,6 +20,7 @@ import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
 import ACE from '../../../build/protocol/ACE.json';
 import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
+import EventService from '~background/services/EventService';
 import Web3ServiceFactory from '~background/services/Web3Service/factory';
 // import { runLoadingEventsTest } from './syncTest'
 
@@ -61,7 +62,7 @@ export default async function init() {
         // await runLoadingEventsTest();
 
         await set({
-            __providerUrlGanache: 'http://localhost:8545',
+            __providerUrlGanache: 'ws://localhost:8545',
             __infuraProjectId: '',
         });
         await domainModel.set(
@@ -119,4 +120,9 @@ export default async function init() {
     });
 
     configureWeb3Service();
+
+    // TODO: remove this, just for test purpose
+    EventService.syncAssets({
+        networkId: 0,
+    });
 }

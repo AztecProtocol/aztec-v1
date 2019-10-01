@@ -1,4 +1,3 @@
-import EventService from '.';
 import {
     errorLog,
 } from '~utils/log';
@@ -8,13 +7,15 @@ import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
 import {
-    fetchAccount,
-} from './utils/fetchAccount';
-import fetchAssets from './utils/fetchAssets';
-import fetchNotes from './utils/fetchNotes';
-import {
     createAccount,
+    fetchAccount,
 } from './utils/account';
+import {
+    fetchAssets,
+} from './utils/asset';
+import {
+    fetchNotes,
+} from './utils/note';
 import Note from '~background/database/models/note';
 import Account from '~background/database/models/account';
 import Asset from '~background/database/models/asset';
@@ -22,6 +23,43 @@ import Asset from '~background/database/models/asset';
 
 const notesSyncManager = networkId => NotesSyncManagerFactory.create(networkId);
 const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId);
+
+const fetchAztecAccount = async ({
+    address,
+    networkId,
+}) => {
+    const account = await Account.get({ networkId }, address);
+
+    if (account) {
+        return {
+            error: null,
+            account,
+        };
+    }
+
+    const {
+        error,
+        account: newAccount,
+    } = await fetchAccount({
+        address,
+        networkId,
+    });
+
+    if (newAccount) {
+        await createAccount(newAccount, networkId);
+        const latestAccount = await Account.get({ networkId }, address);
+
+        return {
+            error: null,
+            account: latestAccount,
+        };
+    }
+
+    return {
+        error,
+        account: null,
+    };
+};
 
 const syncAssets = async ({
     networkId,
@@ -78,7 +116,7 @@ const syncNotes = async ({
     const {
         error,
         account,
-    } = await EventService.fetchAztecAccount({
+    } = await fetchAztecAccount({
         address,
         networkId,
     });
@@ -161,43 +199,6 @@ const fetchLatestNote = async ({
     return {
         error,
         note: null,
-    };
-};
-
-const fetchAztecAccount = async ({
-    address,
-    networkId,
-}) => {
-    const account = await Account.get({ networkId }, address);
-
-    if (account) {
-        return {
-            error: null,
-            account,
-        };
-    }
-
-    const {
-        error,
-        account: newAccount,
-    } = await fetchAccount({
-        address,
-        networkId,
-    });
-
-    if (newAccount) {
-        await createAccount(newAccount, networkId);
-        const latestAccount = await Account.get({ networkId }, address);
-
-        return {
-            error: null,
-            account: latestAccount,
-        };
-    }
-
-    return {
-        error,
-        account: null,
     };
 };
 

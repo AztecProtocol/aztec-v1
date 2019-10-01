@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import { eth } from './eth';
 import {
     log,
     warnLog,
@@ -26,7 +25,7 @@ export default class Web3Service {
         }
 
         this.web3 = new Web3(provider);
-        this.eth = eth(this.web3);
+        this.eth = this.web3.eth;
 
         if (account) {
             this.account = account;
@@ -262,7 +261,7 @@ export default class Web3Service {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }
                 return {
-                    where: async (options = { filter: {}, fromBlock: 0, toBlock: 'latest' }) => contract.getPastEvents(eventName, {
+                    where: async (options = { filter: {}, fromBlock: 1, toBlock: 'latest' }) => contract.getPastEvents(eventName, {
                         filter: options.filter,
                         fromBlock: options.fromBlock,
                         toBlock: options.toBlock,
@@ -270,6 +269,14 @@ export default class Web3Service {
                     all: async () => contract.getPastEvents('allEvents', {
                         fromBlock: 0,
                     }),
+                    subscribe: (options = { filter: {}, fromBlock: 1 }, callback) => contract.events[eventName]({
+                        filter: options.filter,
+                        fromBlock: options.fromBlock,
+                    }, callback),
+                    subscribeAll: (options = { filter: {}, fromBlock: 1 }, callback) => contract.events.allEvents({
+                        filter: options.filter,
+                        fromBlock: options.fromBlock,
+                    }, callback),
                 };
             },
             at: (address) => {
