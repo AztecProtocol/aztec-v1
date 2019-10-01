@@ -343,13 +343,14 @@ describe('AuthService setters', () => {
         expect(await AuthService.getRegisteredUser(address)).toEqual(registeredUserInfo);
     });
 
-    it('replace existing user info in storage if register with a new linkedPublicKey or blockNumber', async () => {
+    it('replace existing user info in storage if register with a new linkedPublicKey or spendingPublicKey or blockNumber', async () => {
         const {
             address,
         } = userAccount;
         const userInfo = {
             address,
             linkedPublicKey: 'linked_public_key',
+            spendingPublicKey: 'spending_public_key',
             blockNumber: Date.now(),
         };
 
@@ -364,6 +365,13 @@ describe('AuthService setters', () => {
         await AuthService.registerAddress(updatedKey);
         expect(await AuthService.getRegisteredUser(address)).toEqual(updatedKey);
 
+        const updatedSpending = {
+            ...updatedKey,
+            spendingPublicKey: 'spending_public_key_2',
+        };
+        await AuthService.registerAddress(updatedSpending);
+        expect(await AuthService.getRegisteredUser(address)).toEqual(updatedSpending);
+
         const updatedTime = {
             ...updatedKey,
             blockNumber: updatedKey.blockNumber + 1,
@@ -372,7 +380,7 @@ describe('AuthService setters', () => {
         expect(await AuthService.getRegisteredUser(address)).toEqual(updatedTime);
     });
 
-    it('will not replace existing user in storage if linkedPublicKey and blockNumber are still the same', async () => {
+    it('will not replace existing user in storage if linkedPublicKey, spendingPublicKey and blockNumber are still the same', async () => {
         const setSpy = jest.spyOn(storage, 'set');
 
         const {
@@ -381,6 +389,7 @@ describe('AuthService setters', () => {
         const userInfo = {
             address,
             linkedPublicKey: 'linked_public_key',
+            spendingPublicKey: 'spending_public_key',
             blockNumber: Date.now(),
         };
         const storageUserInfo = {
