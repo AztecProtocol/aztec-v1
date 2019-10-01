@@ -154,6 +154,7 @@ const AuthService = {
 
         if (!user
             || user.linkedPublicKey !== linkedPublicKey
+            || user.spendingPublicKey !== spendingPublicKey
             || user.blockNumber !== blockNumber
         ) {
             user = {
