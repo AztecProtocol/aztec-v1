@@ -8,7 +8,7 @@
         "128": "./images/icons/icon-128.png"
     },
     "background": {
-        "page": "./pages/background.html",
+        "scripts": ["./build/bundle.background.js"],
         "persistent": true
     },
     "permissions": ["tabs", "storage", "http://*/*", "https://*/*"],
