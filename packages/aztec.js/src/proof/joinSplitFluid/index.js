@@ -1,5 +1,5 @@
 const { constants, errors, proofs } = require('@aztec/dev-utils');
-const { AbiCoder } = require('web3-eth-abi');
+const AbiCoder = require('web3-eth-abi');
 const { keccak256 } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../encoder');
@@ -84,7 +84,7 @@ class JoinSplitFluidProof extends JoinSplitProof {
         this.hash = outputCoder.hashProofOutput(this.outputs);
         const proofId = this.type === ProofType.BURN.name ? proofs.BURN_PROOF : proofs.MINT_PROOF;
         this.validatedProofHash = keccak256(
-            new AbiCoder().encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofId, this.sender]),
+            AbiCoder.encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofId, this.sender]),
         );
     }
 
