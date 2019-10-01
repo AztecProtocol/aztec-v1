@@ -2,14 +2,16 @@ import {
     permissionError,
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
+import SyncService from '~background/services/SyncService';
+import NoteService from '~background/services/NoteService';
+import EventService from '~background/services/EventService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
-import EventService from '~background/services/EventService';
+import decodePrivateKey from '~background/utils/decodePrivateKey';
 
 export default async function syncUserInfo(args, ctx) {
     const {
         currentAddress: userAddress,
-        reset = false,
     } = args;
 
     const {
@@ -24,28 +26,62 @@ export default async function syncUserInfo(args, ctx) {
     const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
 
     const {
-        error,
         account,
     } = await EventService.fetchAztecAccount({
         address: userAddress,
         networkId,
     });
-
     const {
-        blockNumber: prevBlockNumber,
         linkedPublicKey: prevLinkedPublicKey,
     } = account || {};
 
-    // if (prevLinkedPublicKey
-    //     && linkedPublicKey !== prevLinkedPublicKey
-    //     && !reset
-    // ) {
-    //     // TODO
-    //     // we need to show different UI saying the account is registered, please restore from seed phrase
-    //     return permissionError('account.duplicated');
-    // }
+    if (!prevLinkedPublicKey) {
+        throw permissionError('address.not.registered', {
+            messageOptions: {
+                address: userAddress,
+            },
+        });
+    }
+
+    if (linkedPublicKey !== prevLinkedPublicKey) {
+        // TODO
+        // we need to show different UI saying the account is registered, please restore from seed phrase
+        throw permissionError('account.duplicated');
+    }
+
+    const {
+        spendingPublicKey,
+        blockNumber,
+    } = account;
+
+    await AuthService.registerAddress({
+        address: userAddress,
+        linkedPublicKey,
+        spendingPublicKey,
+        blockNumber,
+    });
 
     const user = await AuthService.getRegisteredUser(userAddress);
+    if (user) {
+        const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
+
+        EventService.syncNotes({
+            address: user.address,
+            networkId,
+        });
+
+        SyncService.syncAccount({
+            address: user.address,
+            privateKey,
+            networkId,
+        });
+
+        NoteService.initWithUser(
+            user.address,
+            privateKey,
+            user.linkedPublicKey,
+        );
+    }
 
     return user;
 }

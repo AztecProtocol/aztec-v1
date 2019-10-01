@@ -30,6 +30,11 @@ export default {
             password: 'Could not decrypt key vault with password.',
         },
     },
+    address: {
+        not: {
+            registered: 'Address %{address} is not registered.',
+        },
+    },
     domain: {
         not: {
             register: 'Domain %{domain} is not registered.',

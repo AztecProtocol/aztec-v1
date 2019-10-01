@@ -1,7 +1,9 @@
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
-import StorageService from '~background/services/StorageService';
+import EventService from '~background/services/EventService';
+import SyncService from '~background/services/SyncService';
+import NoteService from '~background/services/NoteService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import syncUserInfo from '../syncUserInfo';
 import storyOf, {
@@ -16,41 +18,63 @@ const {
     linkedPublicKey,
 } = registeredUserInfo;
 
-const storageAccountSpy = jest.spyOn(StorageService.query, 'account')
-    .mockImplementation(() => registeredUserInfo);
+const fetchAccountSpy = jest.spyOn(EventService, 'fetchAztecAccount')
+    .mockImplementation(() => ({
+        account: registeredUserInfo,
+    }));
+
+const syncNotesSpy = jest.spyOn(EventService, 'syncNotes')
+    .mockImplementation(() => {});
+
+const syncAccountSpy = jest.spyOn(SyncService, 'syncAccount')
+    .mockImplementation(() => {});
+
+const syncUserNoteSpy = jest.spyOn(NoteService, 'initWithUser')
+    .mockImplementation(() => {});
 
 const registerAddressSpy = jest.spyOn(AuthService, 'registerAddress');
 
 beforeEach(() => {
     storage.reset();
-    storageAccountSpy.mockClear();
+    fetchAccountSpy.mockClear();
+    syncNotesSpy.mockClear();
+    syncAccountSpy.mockClear();
+    syncUserNoteSpy.mockClear();
     registerAddressSpy.mockClear();
     decodeLinkedPublicKey.mockImplementation(() => linkedPublicKey);
 });
 
+const expectStartSyncing = (called = 1) => {
+    expect(syncNotesSpy).toHaveBeenCalledTimes(called);
+    expect(syncAccountSpy).toHaveBeenCalledTimes(called);
+    expect(syncUserNoteSpy).toHaveBeenCalledTimes(called);
+};
+
 describe('syncUserInfo', () => {
     it('return existing user info in storage', async () => {
         const ensuredAccount = await storyOf('ensureAccount');
+        registerAddressSpy.mockClear();
+
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
-        expect(storageAccountSpy).not.toHaveBeenCalled();
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
+        expect(registerAddressSpy).not.toHaveBeenCalled();
+        expectStartSyncing(0);
 
         const response = await ensuredAccount.continueWith(syncUserInfo);
         expect(response).toEqual(registeredUserInfo);
 
-        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
+        expectStartSyncing();
     });
 
-    it('register the address if not found in storage', async () => {
+    it('register the address if not found in storage and is registered on chain', async () => {
         const ensuredKeyvault = await storyOf('ensureKeyvault');
         const emptyUser = await AuthService.getRegisteredUser(userAddress);
         expect(emptyUser).toBe(null);
 
-        expect(storageAccountSpy).not.toHaveBeenCalled();
         expect(registerAddressSpy).not.toHaveBeenCalled();
+        expectStartSyncing(0);
 
         const response = await ensuredKeyvault.continueWith(syncUserInfo);
         expect(response).toEqual(registeredUserInfo);
@@ -58,12 +82,14 @@ describe('syncUserInfo', () => {
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
-        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
         expect(registerAddressSpy).toHaveBeenCalledTimes(1);
+        expectStartSyncing(1);
     });
 
     it('use current credential to generate linkedPublicKey if not registered on chain', async () => {
-        storageAccountSpy.mockImplementationOnce(() => ({
+        const ensuredKeyvault = await storyOf('ensureKeyvault');
+
+        fetchAccountSpy.mockImplementationOnce(() => ({
             account: {
                 ...registeredUserInfo,
                 linkedPublicKey: '',
@@ -71,15 +97,11 @@ describe('syncUserInfo', () => {
             },
         }));
 
-        const response = await storyOf('ensureKeyvault', syncUserInfo);
-        expect(response).toEqual({
-            ...registeredUserInfo,
-            linkedPublicKey: registeredUserInfo.linkedPublicKey,
-            blockNumber: 0,
-        });
+        await expectErrorResponse(async () => ensuredKeyvault.continueWith(syncUserInfo))
+            .toBe('address.not.registered');
 
-        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
+        expect(registerAddressSpy).not.toHaveBeenCalled();
+        expectStartSyncing(0);
     });
 
     it('replace account in storage if current linkedPublicKey is different than previous one', async () => {
@@ -92,19 +114,20 @@ describe('syncUserInfo', () => {
         };
         await AuthService.registerAddress(prevUserInfo);
 
-        expect(storageAccountSpy).not.toHaveBeenCalled();
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
+        registerAddressSpy.mockClear();
 
         const prevUser = await AuthService.getRegisteredUser(userAddress);
         expect(prevUser).toEqual(prevUserInfo);
+        expectStartSyncing(0);
+        expect(registerAddressSpy).not.toHaveBeenCalled();
 
         const response = await ensuredKeyvault.continueWith(syncUserInfo);
 
         expect(response.linkedPublicKey).not.toBe(prevUserInfo.linkedPublicKey);
         expect(response).toEqual(registeredUserInfo);
 
-        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
-        expect(registerAddressSpy).toHaveBeenCalledTimes(2);
+        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
+        expectStartSyncing(1);
 
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
@@ -118,65 +141,20 @@ describe('syncUserInfo', () => {
         const user = await AuthService.getRegisteredUser(userAddress);
         expect(user).toEqual(registeredUserInfo);
 
-        expect(storageAccountSpy).not.toHaveBeenCalled();
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
+        registerAddressSpy.mockClear();
 
-        const response = await ensuredKeyvault.continueWith(syncUserInfo);
-        expect(response).toEqual(registeredUserInfo);
-
-        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
-
-        const newLinkedPublicKey = 'new_linked_public_key';
-        expect(response.linkedPublicKey).not.toBe(newLinkedPublicKey);
-        decodeLinkedPublicKey.mockImplementation(() => newLinkedPublicKey);
+        fetchAccountSpy.mockImplementationOnce(() => ({
+            account: {
+                ...registeredUserInfo,
+                linkedPublicKey: 'real_linked_public_key',
+                blockNumber: 0,
+            },
+        }));
 
         await expectErrorResponse(async () => ensuredKeyvault.continueWith(syncUserInfo))
             .toBe('account.duplicated');
 
-        expect(storageAccountSpy).toHaveBeenCalledTimes(2);
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
-
-        decodeLinkedPublicKey.mockRestore();
-    });
-
-    it('replace linkedPublicKey and reset blockNumber in storage if reset is true', async () => {
-        const ensuredKeyvault = await storyOf('ensureKeyvault');
-
-        await AuthService.registerAddress(registeredUserInfo);
-
-        const user = await AuthService.getRegisteredUser(userAddress);
-        expect(user).toEqual(registeredUserInfo);
-
-        expect(storageAccountSpy).not.toHaveBeenCalled();
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
-
-        const response = await ensuredKeyvault.continueWith(syncUserInfo);
-        expect(response).toEqual(registeredUserInfo);
-
-        expect(storageAccountSpy).toHaveBeenCalledTimes(1);
-        expect(registerAddressSpy).toHaveBeenCalledTimes(1);
-
-        const newLinkedPublicKey = 'new_linked_public_key';
-        expect(response.linkedPublicKey).not.toBe(newLinkedPublicKey);
-        decodeLinkedPublicKey.mockImplementation(() => newLinkedPublicKey);
-
-        const retryResponse = await ensuredKeyvault.continueWith(
-            syncUserInfo,
-            {
-                reset: true,
-            },
-        );
-
-        expect(retryResponse).toEqual({
-            ...registeredUserInfo,
-            linkedPublicKey: newLinkedPublicKey,
-            blockNumber: 0,
-        });
-
-        expect(storageAccountSpy).toHaveBeenCalledTimes(2);
-        expect(registerAddressSpy).toHaveBeenCalledTimes(2);
-
-        decodeLinkedPublicKey.mockRestore();
+        expect(registerAddressSpy).not.toHaveBeenCalled();
+        expectStartSyncing(0);
     });
 });
