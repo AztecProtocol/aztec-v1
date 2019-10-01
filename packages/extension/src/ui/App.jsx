@@ -7,6 +7,7 @@ import {
     withRouter,
 } from 'react-router-dom';
 import Route from '~uiModules/components/Route';
+import ConnectionService from '~ui/services/ConnectionService';
 import ActionService from '~uiModules/services/ActionService';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
@@ -14,6 +15,9 @@ import getPathsFromRouteConfig from '~ui/utils/getPathsFromRouteConfig';
 import Loading from '~ui/views/Loading';
 import routes from '~ui/config/routes';
 import actions from '~ui/config/actions';
+import {
+    isLoggedIn,
+} from '~ui/apis/auth';
 import './styles/guacamole.css';
 import './styles/_reset.scss';
 
@@ -38,7 +42,7 @@ class App extends PureComponent {
     }
 
     componentDidMount() {
-        ActionService.openConnection();
+        ConnectionService.openConnection();
         this.loadInitialStates();
     }
 
@@ -100,8 +104,8 @@ class App extends PureComponent {
                 });
                 return;
             }
-            const isLoggedIn = await ActionService.isLoggedIn();
-            route = isLoggedIn ? 'account' : 'welcome';
+            const loggedIn = await isLoggedIn();
+            route = loggedIn ? 'account' : 'welcome';
         }
 
         if (!this.isCurrentPage(route)) {
