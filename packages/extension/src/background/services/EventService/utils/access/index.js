@@ -73,7 +73,7 @@ export const createBulkNoteAccessFromNotes = async (rawNotes, networkId) => {
 export const updateBulkNoteAccessFromNotes = async (rawNotes, networkId) => {
     const accesses = await asyncFlatMap(rawNotes, async (note) => {
         const prevNote = await Note.get({ networkId }, note.noteHash);
-        return acessesFromMetadata(note, prevNote);
+        return accessesFromMetadata(note, prevNote);
     });
 
     return updateBulkNoteAccess(accesses, networkId);
