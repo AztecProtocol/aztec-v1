@@ -2,11 +2,7 @@ import {
     permissionError,
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
-import SyncService from '~background/services/SyncService';
-import NoteService from '~background/services/NoteService';
-import EventService from '~background/services/EventService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
-import decodePrivateKey from '~background/utils/decodePrivateKey';
 
 export default async function validateAccount(_, args, ctx) {
     const {
@@ -23,7 +19,6 @@ export default async function validateAccount(_, args, ctx) {
         keyStore,
         session,
         // TODO: remove default value,
-        networkId = 0,
     } = ctx;
     const {
         pwDerivedKey,
@@ -35,24 +30,6 @@ export default async function validateAccount(_, args, ctx) {
     } catch (error) {
         return permissionError('account.incorrect.password', error);
     }
-
-    EventService.syncNotes({
-        address: user.address,
-        networkId,
-    });
-
-    SyncService.syncAccount({
-        address: user.address,
-        privateKey: decodePrivateKey(decodedKeyStore, pwDerivedKey),
-        networkId,
-    });
-
-
-    NoteService.initWithUser(
-        user.address,
-        decodePrivateKey(decodedKeyStore, pwDerivedKey),
-        user.linkedPublicKey,
-    );
 
     const newSession = await AuthService.updateSession(currentAddress);
 

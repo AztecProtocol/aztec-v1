@@ -151,8 +151,6 @@ describe('validateAccount', () => {
     let registeredUserInfo;
     let accumContext;
     const updateSessionSpy = jest.spyOn(AuthService, 'updateSession');
-    const syncAccountSpy = jest.spyOn(SyncService, 'syncAccount')
-        .mockImplementation(() => null);
 
     const useAccountValidator = async () => useValidator(
         validateAccount,
@@ -166,7 +164,6 @@ describe('validateAccount', () => {
 
     beforeEach(async () => {
         updateSessionSpy.mockClear();
-        syncAccountSpy.mockClear();
 
         await AuthService.registerExtension(registrationData);
 
@@ -194,7 +191,6 @@ describe('validateAccount', () => {
 
     afterAll(() => {
         updateSessionSpy.mockRestore();
-        syncAccountSpy.mockRestore();
     });
 
     it('pass and return user info with decoded keyStore and session', async () => {
@@ -205,7 +201,6 @@ describe('validateAccount', () => {
         const response = await useAccountValidator();
 
         expect(updateSessionSpy).toHaveBeenCalled();
-        expect(syncAccountSpy).toHaveBeenCalled();
 
         const session = await AuthService.getSession();
         expect(response).toEqual({
@@ -213,21 +208,6 @@ describe('validateAccount', () => {
             session,
             user: registeredUserInfo,
         });
-    });
-
-    it('start syncAccount with privateKey if user is registered', async () => {
-        await AuthService.registerAddress(registeredUserInfo);
-        await useAccountValidator();
-
-        expect(syncAccountSpy).toHaveBeenCalledTimes(1);
-
-        const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        expect(syncAccountSpy.mock.calls[0]).toMatchObject([
-            {
-                address: registeredUserInfo.address,
-                privateKey,
-            },
-        ]);
     });
 
     it('fail if blockNumber is empty', async () => {
@@ -241,7 +221,6 @@ describe('validateAccount', () => {
             .toBe('account.not.linked');
 
         expect(updateSessionSpy).not.toHaveBeenCalled();
-        expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 
     it('fail if user is not in storage', async () => {
@@ -252,7 +231,6 @@ describe('validateAccount', () => {
             .toBe('account.not.linked');
 
         expect(updateSessionSpy).not.toHaveBeenCalled();
-        expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 
     it('fail if not receive valid keyStore through context', async () => {
@@ -265,7 +243,6 @@ describe('validateAccount', () => {
         )).toBe('account.incorrect.password');
 
         expect(updateSessionSpy).not.toHaveBeenCalled();
-        expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 });
 
