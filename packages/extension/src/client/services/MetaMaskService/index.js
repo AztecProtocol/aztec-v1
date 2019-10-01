@@ -2,6 +2,7 @@ import ethSigUtil from 'eth-sig-util';
 import { utils } from 'web3';
 import Web3Service from '../Web3Service';
 import registerExtension from './registerExtension';
+import signNote from './signNote';
 
 export default async ({ data }) => {
     let eip712Data;
@@ -63,19 +64,37 @@ export default async ({ data }) => {
             };
         }
         case 'metamask.eip712.signNotes': {
-            // we have a choice do this as a loop, use the wallet contract, or ammend confidential approve
+            const {
+                response: {
+                    response: {
+                        assetAddress,
+                        noteHashes,
+                        challenge,
+                        sender,
+                    },
+                },
+            } = data;
+            const signatures = (await Promise.all(noteHashes.map(async (noteHash) => {
+                const noteSchema = signNote({
+                    assetAddress,
+                    noteHash,
+                    challenge,
+                    sender,
+                });
+                method = 'eth_signTypedData_v3';
+                return Web3Service.sendAsync({
+                    method,
+                    params: [address, noteSchema],
+                    from: address,
+                });
+            }))).map(({ result }) => result);
 
-            // eip712Data = signNote(data);
-            // method = 'eth_signTypedData_v3';
-            // const { result } = await Web3Service.sendAsync({
-            //     method,
-            //     params: [address, eip712Data],
-            //     from: address,
-            // });
-            // return {
-            //     ...data,
-            //     signature: result,
-            // };
+            return {
+                ...data,
+                response: {
+                    signatures,
+                },
+            };
         }
         default: {
             break;

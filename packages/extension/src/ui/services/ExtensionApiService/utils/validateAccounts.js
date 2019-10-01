@@ -18,8 +18,6 @@ export default async function validateAccounts({
         });
     }
 
-    console.log({ accountAddress });
-
     const addressArrStr = validAddresses.map(a => `${a}`).join(',');
 
     const {
@@ -35,7 +33,6 @@ export default async function validateAccounts({
             currentAddress,
         },
     });
-    console.log(rest, accountsResponse);
 
     const {
         accounts = [],

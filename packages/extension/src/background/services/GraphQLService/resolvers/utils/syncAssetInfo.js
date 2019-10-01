@@ -31,7 +31,6 @@ export default async function syncAssetInfo(args, ctx = {}) {
             address,
             networkId,
         });
-        console.log({ fetchedAsset });
 
         const onChainAsset = {
             address: fetchedAsset.registryOwner,
@@ -60,7 +59,6 @@ export default async function syncAssetInfo(args, ctx = {}) {
                 ignoreDuplicate: true,
             },
         );
-        console.log(onChainAsset);
 
         asset = await assetModel.get({
             address,

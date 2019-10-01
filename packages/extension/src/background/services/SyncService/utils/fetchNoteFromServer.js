@@ -92,7 +92,6 @@ export default async function fetchNoteFromServer({
         variables,
         onError,
     });
-    console.log(data);
 
     const {
         noteLogs = [],
