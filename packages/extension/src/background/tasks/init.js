@@ -20,6 +20,7 @@ import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
 import ACE from '../../../build/protocol/ACE.json';
 import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
+import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 import Web3ServiceFactory from '~background/services/Web3Service/factory';
 // import { runLoadingEventsTest } from './syncTest'
