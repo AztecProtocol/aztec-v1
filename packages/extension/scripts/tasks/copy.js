@@ -21,7 +21,6 @@ const contractsToCopy = [
 ];
 
 const srcContractsFolder = 'build/contracts';
-const extensionBackgroundContractsFolder = 'src/background/contracts';
 
 const validateContractSrc = (contractName) => {
     const srcPath = path.join(projectRoot, srcContractsFolder, `${contractName}.json`);
@@ -39,34 +38,6 @@ export default async function copy({
     onClose,
 } = {}) {
     const promises = [];
-
-    /*
-    * Copy Contracts into background folder for syncing events
-    */
-    const destContractsPath = path.join(projectRoot, extensionBackgroundContractsFolder);
-    try {
-        ensureDirectory(destContractsPath);
-
-        contractsToCopy
-            .map(contractName => ({
-                contractName,
-                sourcePath: validateContractSrc(contractName),
-            }))
-            .filter(({ sourcePath }) => sourcePath)
-            .forEach(({ contractName, sourcePath }) => {
-                promises.push(
-                    copyFile(
-                        sourcePath,
-                        path.join(destContractsPath, `${contractName}.json`),
-                    ),
-                );
-            });
-    } catch (error) {
-        if (onError) {
-            onError(error);
-        }
-        return;
-    }
 
     const result = await Promise.all(promises);
     const copiedMessages = [];
