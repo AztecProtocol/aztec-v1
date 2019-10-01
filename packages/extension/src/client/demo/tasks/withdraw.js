@@ -21,11 +21,5 @@ export default async function withdraw(asset, withdrawAmount, {
     }
     log(withdrawProof.export());
 
-    log('Approving withdrawal...');
-    await withdrawProof.approve();
-    log('Approved!');
-
-    log('Withdrawing...');
-    await withdrawProof.send();
     log(`Successfully withdrew ${withdrawAmount}!`);
 }
