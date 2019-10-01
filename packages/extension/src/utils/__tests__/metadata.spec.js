@@ -1,4 +1,7 @@
 import {
+    utils,
+} from 'web3';
+import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
     METADATA_AZTEC_DATA_LENGTH,
@@ -32,7 +35,10 @@ for (let i = 0; i < numberOfAccounts; i += 1) {
     viewingKeys.push(viewingKey);
     viewingKeyBytes.push(`0x${viewingKey}`);
 }
-const addressesStr = addresses.map(a => a.padStart(MIN_BYTES_VAR_LENGTH, '0')).join('');
+const addressesStr = addresses
+    .map(a => utils.toChecksumAddress(a).slice(2))
+    .map(a => a.padStart(MIN_BYTES_VAR_LENGTH, '0'))
+    .join('');
 const viewingKeysStr = viewingKeys.join('');
 
 const numberOfNewAccounts = 2;
@@ -62,7 +68,7 @@ describe('metadata toString', () => {
             padValues(appData, appData.length),
         ].join('');
 
-        expect(expectedStr).toMatch(/^0x[0-9a-f]+$/);
+        expect(expectedStr).toMatch(/^0x[0-9a-f]+$/i);
 
         expect(toString({
             aztecData,
@@ -134,7 +140,7 @@ describe('metadata constructor', () => {
     it('parse a string into object', () => {
         expect(metadata(metadataStr)).toMatchObject({
             aztecData: aztecDataByte,
-            addresses: addressBytes,
+            addresses: addressBytes.map(utils.toChecksumAddress),
             viewingKeys: viewingKeyBytes,
             appData: appDataByte,
         });
@@ -167,11 +173,11 @@ describe('metadata constructor', () => {
     it('get access by address', () => {
         const m = metadata(metadataStr);
         expect(m.getAccess(addressBytes[0])).toEqual({
-            address: addressBytes[0],
+            address: utils.toChecksumAddress(addressBytes[0]),
             viewingKey: viewingKeyBytes[0],
         });
         expect(m.getAccess(addressBytes[1])).toEqual({
-            address: addressBytes[1],
+            address: utils.toChecksumAddress(addressBytes[1]),
             viewingKey: viewingKeyBytes[1],
         });
     });
@@ -185,7 +191,7 @@ describe('metadata constructor', () => {
         expect(m.addresses).toEqual([
             ...addressBytes,
             newAddressBytes[0],
-        ]);
+        ].map(utils.toChecksumAddress));
         expect(m.viewingKeys).toEqual([
             ...viewingKeyBytes,
             newViewingKeyBytes[0],
@@ -208,7 +214,7 @@ describe('metadata constructor', () => {
             ...addressBytes,
             newAddressBytes[0],
             newAddressBytes[1],
-        ]);
+        ].map(utils.toChecksumAddress));
         expect(m.viewingKeys).toEqual([
             ...viewingKeyBytes,
             newViewingKeyBytes[0],
@@ -225,7 +231,7 @@ describe('metadata constructor', () => {
         expect(m.addresses).toEqual([
             ...addressBytes,
             newAddressBytes[0],
-        ]);
+        ].map(utils.toChecksumAddress));
         expect(m.viewingKeys).toEqual([
             ...viewingKeyBytes,
             newViewingKeyBytes[0],
@@ -238,7 +244,7 @@ describe('metadata constructor', () => {
         expect(m.addresses).toEqual([
             ...addressBytes,
             newAddressBytes[0],
-        ]);
+        ].map(utils.toChecksumAddress));
         expect(m.viewingKeys).toEqual([
             ...viewingKeyBytes,
             newViewingKeyBytes[0],
@@ -258,7 +264,7 @@ describe('metadata constructor', () => {
             ...addressBytes,
             newAddressBytes[0],
             newAddressBytes[1],
-        ]);
+        ].map(utils.toChecksumAddress));
         expect(m.viewingKeys).toEqual([
             ...viewingKeyBytes,
             newViewingKeyBytes[0],
@@ -288,7 +294,7 @@ describe('addAccess util', () => {
             addresses: [
                 ...addressBytes,
                 newAddressBytes[0],
-            ],
+            ].map(utils.toChecksumAddress),
             viewingKeys: [
                 ...viewingKeyBytes,
                 newViewingKeyBytes[0],
@@ -308,7 +314,7 @@ describe('addAccess util', () => {
             addresses: [
                 ...addressBytes,
                 newAddressBytes[0],
-            ],
+            ].map(utils.toChecksumAddress),
             viewingKeys: [
                 ...viewingKeyBytes,
                 newViewingKeyBytes[0],
@@ -336,7 +342,7 @@ describe('addAccess util', () => {
                 ...addressBytes,
                 newAddressBytes[0],
                 newAddressBytes[1],
-            ],
+            ].map(utils.toChecksumAddress),
             viewingKeys: [
                 ...viewingKeyBytes,
                 newViewingKeyBytes[0],
@@ -373,7 +379,7 @@ describe('addAccess util', () => {
         ]);
 
         const addressStr = padValues(
-            addresses[0].padStart(MIN_BYTES_VAR_LENGTH, '0'),
+            utils.toChecksumAddress(addresses[0]).slice(2).padStart(MIN_BYTES_VAR_LENGTH, '0'),
             MIN_BYTES_VAR_LENGTH,
         );
         const viewingKeyStr = padValues(

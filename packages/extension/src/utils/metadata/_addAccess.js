@@ -1,3 +1,7 @@
+import {
+    utils,
+} from 'web3';
+
 export default function _addAccess(metadata, access) { // eslint-disable-line no-underscore-dangle
     const noteAccess = Array.isArray(access)
         ? access
@@ -12,8 +16,9 @@ export default function _addAccess(metadata, access) { // eslint-disable-line no
         address,
         viewingKey,
     }) => {
-        if (addresses.indexOf(address) >= 0) return;
-        newAddresses.push(address);
+        const formattedAddress = utils.toChecksumAddress(address);
+        if (addresses.indexOf(formattedAddress) >= 0) return;
+        newAddresses.push(formattedAddress);
         newViewingKeys.push(viewingKey);
     });
 

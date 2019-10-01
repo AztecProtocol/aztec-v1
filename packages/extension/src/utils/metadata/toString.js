@@ -1,4 +1,7 @@
 import {
+    utils,
+} from 'web3';
+import {
     DYNAMIC_VAR_CONFIG_LENGTH,
     MIN_BYTES_VAR_LENGTH,
 } from '~config/constants';
@@ -8,7 +11,6 @@ const toConfigVar = num => num.toString(16).padStart(DYNAMIC_VAR_CONFIG_LENGTH, 
 const ensureMinVarSize = (str, len) => str.padStart(Math.max(len || str.length, MIN_BYTES_VAR_LENGTH), '0');
 
 export default function toString(metadataObj) {
-    console.log(metadataObj);
     const metadata = {};
     let accumOffset = 0;
     config.forEach(({
@@ -22,6 +24,7 @@ export default function toString(metadataObj) {
                 ? metadataObj[name]
                 : [metadataObj[name] || ''];
             data = dataArr
+                .map(v => (name === 'addresses' && utils.toChecksumAddress(v)) || v)
                 .map(v => `${v}`.replace(/^0x/, ''))
                 .map(v => ensureMinVarSize(v, length))
                 .join('');
@@ -45,7 +48,6 @@ export default function toString(metadataObj) {
     const str = config
         .map(({ name }) => metadata[name])
         .join('');
-    console.log(str);
 
     return `0x${str}`;
 }

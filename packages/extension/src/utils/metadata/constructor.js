@@ -59,7 +59,11 @@ export default function constructor(metadataStr) {
             } else if (length) {
                 val = val.slice(segLen - (length || 0));
             }
-            arr.push(val ? `0x${val}` : '');
+            if (name === 'addresses') {
+                arr.push(utils.toChecksumAddress(val));
+            } else {
+                arr.push(val ? `0x${val}` : '');
+            }
             start += segLen;
         }
 
@@ -74,8 +78,6 @@ export default function constructor(metadataStr) {
         addresses,
         viewingKeys,
     } = metadata;
-
-    metadata.addresses = addresses.map(a => utils.toChecksumAddress(a));
 
     return {
         ...metadata,
