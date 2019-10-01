@@ -56,9 +56,6 @@ const uiResolvers = {
         subscribe: ensureDomainPermission(async (_, args) => ({
             success: ClientSubscriptionService.grantSubscription(args),
         })),
-        userPermission: ensureKeyvault(async (_, args, ctx) => ({
-            account: await syncUserInfo(args, ctx),
-        })),
         // TODO use RXJS connection
         pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx, info) => {
             const requestId = randomId();
