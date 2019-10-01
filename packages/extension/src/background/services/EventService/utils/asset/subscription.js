@@ -2,17 +2,41 @@ import Web3Service from '~background/services/Web3Service';
 import {
     ACEConfig,
 } from '~background/config/contracts';
+import {
+    errorLog,
+} from '~utils/log';
 
+const converEvent = (event) => {
+    const {
+        blockNumber,
+        returnValues: {
+            registryOwner,
+            registryAddress,
+            scalingFactor,
+            linkedTokenAddress,
+            canAdjustSupply,
+            canConvert,
+        },
+    } = event;
 
-const subscribe = ({
+    return {
+        blockNumber,
+        registryOwner,
+        registryAddress,
+        scalingFactor,
+        linkedTokenAddress,
+        canAdjustSupply,
+        canConvert,
+    };
+};
+
+const subscribe = async ({
     fromBlock,
     networkId,
 } = {}) => {
     if (!networkId && networkId !== 0) {
-        return {
-            error: new Error("'networkId' cannot be empty in fetchAssets"),
-            assets: null,
-        };
+        errorLog("'networkId' cannot be empty in assets subscription");
+        return null;
     }
 
     const eventName = ACEConfig.events.сreateNoteRegistry;
@@ -21,50 +45,30 @@ const subscribe = ({
         fromBlock,
     };
 
-    if (assetAddress) {
-        options.filter = {
-            registryOwner: assetAddress,
-        };
-    }
+    const subscription = await Web3Service(networkId)
+        .useContract(ACEConfig.name)
+        .events(eventName)
+        .subscribe(options, (error) => {
+            if (error) {
+                errorLog(error);
+            }
+        });
 
-    try {
-        const data = await Web3Service(networkId)
-            .useContract(ACEConfig.name)
-            .events(eventName)
-            .where(options);
+    return {
+        onData: (callback) => {
+            subscription.on('data', (event) => {
+                callback(converEvent(event));
+            });
+        },
+        onError: (callback) => {
+            subscription.on('error', (error) => {
+                callback(error);
+            });
+        },
+    };
+};
 
-        const assets = data.map(({
-            blockNumber,
-            returnValues: {
-                registryOwner,
-                registryAddress,
-                scalingFactor,
-                linkedTokenAddress,
-                canAdjustSupply,
-                canConvert,
-            },
-        }) => ({
-            blockNumber,
-            registryOwner,
-            registryAddress,
-            scalingFactor,
-            linkedTokenAddress,
-            canAdjustSupply,
-            canConvert,
-        }));
 
-        return {
-            error: null,
-            assets,
-        };
-    } catch (error) {
-        return {
-            error,
-            assets: null,
-        };
-    }
-}
-
-export {
-
-}
+export default {
+    subscribe,
+};

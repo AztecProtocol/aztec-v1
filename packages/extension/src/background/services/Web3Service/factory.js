@@ -25,7 +25,7 @@ class Web3ServiceFactory {
         } = config;
 
         const service = new Web3Service();
-        const provider = new Web3.providers.HttpProvider(providerUrl);
+        const provider = new Web3.providers.WebsocketProvider(providerUrl);
         service.init({
             provider,
         });
