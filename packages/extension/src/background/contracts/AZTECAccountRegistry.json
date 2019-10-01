@@ -4452,10 +4452,16 @@
       "links": {},
       "address": "0xF616b73dddF7dEaB2630EB49A163D2192629c980",
       "transactionHash": "0x6b1ac411e2757c964f07d5e1a7acf2ed8501e3116013d6a20075072a296c8952"
+    },
+    "1569947229539": {
+      "events": {},
+      "links": {},
+      "address": "0xF616b73dddF7dEaB2630EB49A163D2192629c980",
+      "transactionHash": "0x6b1ac411e2757c964f07d5e1a7acf2ed8501e3116013d6a20075072a296c8952"
     }
   },
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-09-30T17:00:59.761Z",
+  "updatedAt": "2019-10-01T16:27:33.324Z",
   "devdoc": {
     "author": "AZTEC Copyright Spilbury Holdings Ltd 2019. All rights reserved.*",
     "methods": {

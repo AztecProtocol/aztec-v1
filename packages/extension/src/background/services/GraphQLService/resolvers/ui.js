@@ -16,11 +16,12 @@ import ClientConnection from '../../../../ui/services/ClientConnectionService';
 const uiResolvers = {
     Asset: {
         // TODO use RXJS connection
-        balance: async (_, { address }, ctx, info) => {
+        balance: async (_, args, ctx, info) => {
             const requestId = randomId();
             ClientConnection.backgroundPort.postMessage({
                 requestId,
                 type: 'UI_QUERY_REQUEST',
+                domain: window.location.orgin,
                 data: {
                     ...info,
                 },
@@ -28,6 +29,9 @@ const uiResolvers = {
             const response = await filterStream('UI_QUERY_RESPONSE', requestId, ClientConnection.background$);
             return response.balance;
         },
+    },
+    Note: {
+        decryptedViewingKey: async ({ decryptedViewingKey }) => decryptedViewingKey,
     },
     Mutation: {
         registerExtension: async (_, args) => ({
@@ -55,21 +59,28 @@ const uiResolvers = {
         subscribe: ensureDomainPermission(async (_, args) => ({
             success: ClientSubscriptionService.grantSubscription(args),
         })),
-        // TODO use RXJS connection
         pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx, info) => {
             const requestId = randomId();
             ClientConnection.backgroundPort.postMessage({
                 requestId,
                 type: 'UI_QUERY_REQUEST',
+                clientId: ClientConnection.clientId,
                 data: {
                     query: 'asset.pickNotesFromBalance',
                     args,
                 },
+                domain: window.location.orgin,
             });
 
-            const { response } = await filterStream('UI_QUERY_RESPONSE', requestId, ClientConnection.background$);
+            const {
+                data: {
+                    response: {
+                        pickNotesFromBalance,
+                    },
+                },
+            } = await filterStream('UI_QUERY_RESPONSE', requestId, ClientConnection.background$);
             return {
-                notes: response.notes,
+                notes: pickNotesFromBalance.notes,
             };
         }),
     },
