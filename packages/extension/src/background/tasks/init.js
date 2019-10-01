@@ -20,7 +20,6 @@ import domainModel from '../../database/models/domain';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
 import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
-import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 import NetworkService from '~background/services/NetworkService/factory';
 // import { runLoadingEventsTest } from './syncTest'

@@ -309,6 +309,7 @@ class EventService {
         });
     };
 
+
     fetchLatestNote = async ({
         noteHash,
         assetAddress,
