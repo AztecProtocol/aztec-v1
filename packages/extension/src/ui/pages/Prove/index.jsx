@@ -197,7 +197,6 @@ class Prove extends Component {
             clientId,
 
         });
-        console.log(receipt);
         ExtensionApi.prove.returnToClient({
             requestId,
             clientId,

@@ -45,7 +45,6 @@ class Connection {
 
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
-            // map(withConnectionIds),
             tap(({ webClientId, ...rest }) => {
                 this.connections[webClientId].postMessage({
                     ...rest,
@@ -102,7 +101,6 @@ class Connection {
             tap(({
                 uiClientId, requestId, responseId, ...rest
             }) => {
-                console.log(rest, requestId);
                 this.connections[uiClientId].postMessage({
                     requestId,
                     responseId,
@@ -126,7 +124,7 @@ class Connection {
                     },
                 } = data;
                 return from((async () => {
-                    const response = await GraphQLService.query({
+                    const { data: response } = await GraphQLService.query({
                         variables: args,
                         query: graphQueryMap[query],
                     });
@@ -136,10 +134,20 @@ class Connection {
                     };
                 })());
             }),
-            tap(({ uiClientId, ...rest }) => {
+            tap(({
+                uiClientId,
+                requestId,
+                response,
+                ...rest
+            }) => {
                 this.connections[uiClientId].postMessage({
-                    ...rest,
-                    type: 'UI_QUERY_RESPONSE',
+                    requestId,
+                    data: {
+                        type: 'UI_QUERY_RESPONSE',
+                        response: {
+                            ...response,
+                        },
+                    },
                 });
             }),
         ).subscribe();
@@ -198,7 +206,6 @@ class Connection {
             requestId,
             ...data
         }, sender) => {
-            console.log(sender);
             this.MessageSubject.next({
                 data,
                 senderId: client.name,

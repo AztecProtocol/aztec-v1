@@ -206,7 +206,6 @@ class ExtensionApi {
                 });
                 return filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
             },
-            send: createNoteFromBalance,
             deposit: async ({
                 owner,
                 transactions,
@@ -290,7 +289,7 @@ class ExtensionApi {
                 domain,
                 currentAddress,
             }) => {
-                const withdrawProof = await createNoteFromBalance({
+                const withdrawProof = await createNoteFromBalance(apollo, {
                     assetAddress,
                     sender,
                     publicOwner: to,

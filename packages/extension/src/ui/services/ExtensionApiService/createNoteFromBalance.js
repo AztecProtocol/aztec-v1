@@ -13,9 +13,8 @@ import ApiError from '~client/utils/ApiError';
 import validateExtensionAccount from './utils/validateExtensionAccount';
 import validateAccounts from './utils/validateAccounts';
 import PickNotesQuery from '../../queries/PickNotesQuery';
-import apollo from '../../../background/services/GraphQLService';
 
-export default async function proveCreateNoteFromBalance({
+export default async function proveCreateNoteFromBalance(apollo, {
     assetAddress,
     amount,
     sender,
@@ -66,9 +65,7 @@ export default async function proveCreateNoteFromBalance({
 
 
     const {
-        data: {
-            pickNotesFromBalance,
-        },
+        data: { pickNotesFromBalance },
     } = await apollo.query({
         query: PickNotesQuery,
         variables: {
