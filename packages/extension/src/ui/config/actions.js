@@ -8,4 +8,10 @@ export default {
     'ui.domain.approve': {
         route: 'register.domain',
     },
+    'ui.asset.prove.deposit_proof': {
+        route: 'deposit',
+    },
+    'ui.asset.prove.withdraw_proof': {
+        route: 'withdraw',
+    },
 };

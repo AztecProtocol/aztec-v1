@@ -191,15 +191,7 @@ class SyncManager {
         lastSynced,
         networkId,
     }) {
-        console.log({
-            address,
-            privateKey,
-            lastSynced,
-        });
         let account = this.accounts.get(address);
-        console.log({
-            account,
-        });
         if (!account) {
             account = {
                 syncing: false,
@@ -208,7 +200,6 @@ class SyncManager {
             };
             this.accounts.set(address, account);
         }
-        console.log('here');
         return this.syncNotes({
             address,
             privateKey,
@@ -227,7 +218,6 @@ class SyncManager {
             noteId,
             networkId,
         }) || [];
-        console.log({ rawNote });
         if (!rawNote) {
             return null;
         }

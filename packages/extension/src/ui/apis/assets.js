@@ -4,8 +4,5 @@ import {
 
 export const getAssets = () => assets;
 
-export const getDomainAssets = (domain) => {
-    // exclude blacklist for domain
-    console.log('getDomainAssets', domain);
-    return assets;
-};
+export // exclude blacklist for domain
+const getDomainAssets = domain => assets;

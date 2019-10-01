@@ -12,7 +12,6 @@ export default async function getAccounts(args, ctx = {}) {
             // should support more filters
         },
     } = args;
-    console.log(args);
 
     const {
         // TODO: remove default value, when it will be passed here.
@@ -35,7 +34,6 @@ export default async function getAccounts(args, ctx = {}) {
         linkedPublicKey,
     }));
 
-    console.log(accounts);
 
     const onChainAccounts = accounts || [];
     const invalidAccounts = addresses

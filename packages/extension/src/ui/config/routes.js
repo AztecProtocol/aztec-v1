@@ -16,11 +16,12 @@ import RegisterAddress from '~ui/views/RegisterAddress';
 import NoteAccess from '~ui/views/pages/NoteAccess';
 import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
 import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
-import DepositTransaction from '~ui/views/DepositTransaction';
+// import DepositTransaction from '~ui/views/DepositTransaction';
+import DepositTransaction from '../pages/Prove';
 import Send from '~ui/views/pages/Send';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
-import WithdrawTransaction from '~ui/views/WithdrawTransaction';
+// import WithdrawTransaction from '~ui/views/WithdrawTransaction';
 import MintTransaction from '~ui/views/MintTransaction';
 import BurnTransaction from '~ui/views/BurnTransaction';
 
@@ -89,13 +90,21 @@ export default {
             },
         },
     },
+    // deposit: {
+    //     path: 'deposit',
+    //     Component: DepositTransaction,
+    // },
     deposit: {
         path: 'deposit',
         Component: DepositTransaction,
     },
+    // withdraw: {
+    //     path: 'withdraw',
+    //     Component: WithdrawTransaction,
+    // },
     withdraw: {
         path: 'withdraw',
-        Component: WithdrawTransaction,
+        Component: DepositTransaction,
     },
     mint: {
         path: 'mint',

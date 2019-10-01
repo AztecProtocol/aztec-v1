@@ -1,12 +1,12 @@
 export default {
     id: '/WithdrawProof',
     properties: {
-        from: {
+        sender: {
             type: 'string',
             minLength: 42,
             maxLength: 42,
         },
-        sender: {
+        to: {
             type: 'string',
             minLength: 42,
             maxLength: 42,
@@ -14,6 +14,6 @@ export default {
         amount: {
             type: 'number',
         },
-        required: ['from', 'sender', 'amount'],
+        required: ['to', 'sender', 'amount'],
     },
 };

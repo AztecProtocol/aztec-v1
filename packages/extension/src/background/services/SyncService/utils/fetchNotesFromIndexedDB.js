@@ -50,7 +50,6 @@ export default async function fetchNotesFromIndexedDB({
     const notes = await Note.query(networkOptions).where('blockNumber').above(lastSynced).toArray();
     const assetsKeys = notes.map(({ asset }) => asset);
     const noteAccessKeys = assetsKeys.map(assetAddress => getNoteAccessId(account, assetAddress));
-    console.log(noteAccessKeys);
 
     // Since v3.0.0-alpha.8
     // const assets = await Asset.bulkGet(networkOptions, assetsKeys);
@@ -65,7 +64,6 @@ export default async function fetchNotesFromIndexedDB({
         if (assetKey && noteAccessKey) {
             const asset = await Asset.get(networkOptions, { registryOwner: assetKey }); // eslint-disable-line no-await-in-loop
             const access = await NoteAccess.get(networkOptions, noteAccessKey); // eslint-disable-line no-await-in-loop
-            console.log({ access, note });
             noteLogs.push(packNote(note, access, asset));
         }
     }

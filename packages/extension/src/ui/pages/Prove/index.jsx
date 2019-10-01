@@ -20,15 +20,11 @@ class Prove extends Component {
 
     publicApprove = async () => {
         const {
-            action: {
-                clientId,
-                requestId,
-                data: {
-                    assetAddress,
-                    transactions,
-                },
-            },
-            address,
+            clientId,
+            requestId,
+            assetAddress,
+            transactions,
+            currentAddress,
         } = this.props;
 
         const {
@@ -48,15 +44,11 @@ class Prove extends Component {
 
     deposit = async () => {
         const {
-            action: {
-                data: {
-                    assetAddress,
-                    transactions,
-                    from,
-                    sender,
-                },
-            },
-            address,
+            assetAddress,
+            transactions,
+            from,
+            sender,
+            currentAddress,
         } = this.props;
 
         const { proof } = await ExtensionApi.prove.deposit({
@@ -77,15 +69,11 @@ class Prove extends Component {
 
     send = async () => {
         const {
-            action: {
-                data: {
-                    assetAddress,
-                    transactions,
-                    from,
-                    sender,
-                },
-            },
-            address,
+            assetAddress,
+            transactions,
+            from,
+            sender,
+            currentAddress,
         } = this.props;
 
         const { proof } = await ExtensionApi.prove.send({
@@ -95,7 +83,6 @@ class Prove extends Component {
             currentAddress: from,
             domain: window.location.origin,
         });
-        console.log(proof);
         const encoded = proof.encodeABI(assetAddress);
         this.setState({
             sendProof: encoded,
@@ -109,16 +96,12 @@ class Prove extends Component {
         } = this.state;
 
         const {
-            action: {
-                clientId,
-                requestId,
-                data: {
-                    assetAddress,
-                },
-            },
+            clientId,
+            requestId,
+            assetAddress,
         } = this.props;
 
-        const receipt = await ExtensionApi.prove.sendDepositProof({
+        const receipt = await ExtensionApi.prove.sendTransferProof({
             params: {
                 proofData: depositProof,
                 assetAddress,
@@ -127,7 +110,94 @@ class Prove extends Component {
             clientId,
 
         });
-        console.log({ receipt });
+        ExtensionApi.prove.returnToClient({
+            requestId,
+            clientId,
+        });
+    }
+
+    withdraw = async () => {
+        const {
+            assetAddress,
+            amount,
+            from,
+            to,
+            sender,
+            currentAddress,
+        } = this.props;
+
+        const { proof } = await ExtensionApi.prove.withdraw({
+            assetAddress,
+            sender,
+            from,
+            to,
+            amount,
+            publicOwner: to,
+            currentAddress,
+            domain: window.location.origin,
+        });
+        const encoded = proof.encodeABI(assetAddress);
+        this.setState({
+            withdrawProof: encoded,
+            proofHash: proof.hash,
+            challenge: proof.challengeHex,
+            noteHashes: proof.notes.map(({ noteHash }) => noteHash),
+        });
+    }
+
+    signNotes = async () => {
+        const {
+            noteHashes,
+            challenge,
+        } = this.state;
+
+        const {
+            assetAddress,
+            currentAddress,
+            clientId,
+            requestId,
+        } = this.props;
+
+        const {
+            data: {
+                response: {
+                    signatures,
+                },
+            },
+        } = await ExtensionApi.prove.signNotes({
+            noteHashes,
+            sender: currentAddress,
+            assetAddress,
+            requestId,
+            challenge,
+            clientId,
+        });
+        this.setState({ signatures: signatures.reduce((accum, sig) => accum + sig.slice(2), '0x') });
+    }
+
+    sendWithdraw = async () => {
+        const {
+            withdrawProof,
+            signatures,
+        } = this.state;
+
+        const {
+            clientId,
+            requestId,
+            assetAddress,
+        } = this.props;
+
+        const receipt = await ExtensionApi.prove.sendTransferProof({
+            params: {
+                proofData: withdrawProof,
+                assetAddress,
+                signatures,
+            },
+            requestId,
+            clientId,
+
+        });
+        console.log(receipt);
         ExtensionApi.prove.returnToClient({
             requestId,
             clientId,
@@ -135,7 +205,7 @@ class Prove extends Component {
     }
 
     render() {
-        if (!this.props.action) {
+        if (!this.props.requestId) {
             return (
                 <Block style={{
                     background: 'linear-gradient(115deg, #808DFF 0%, #9FC4FF 100%, #7174FF 100%)',
@@ -156,6 +226,7 @@ class Prove extends Component {
                 background="white"
             >
                 <Accordion
+                    defaultIsOpen={false}
                     title={(
                         <Text
                             size="m"
@@ -194,6 +265,7 @@ class Prove extends Component {
                     )}
                 />
                 <Accordion
+                    defaultIsOpen={false}
                     title={(
                         <Text
                             size="m"

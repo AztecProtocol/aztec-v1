@@ -161,25 +161,25 @@ class ExtensionApi {
         this.prove = {
             // sendTransaction,
             signNotes: async ({
-                notes,
-                spender,
-                spendStatus,
+                noteHashes,
+                sender,
+                assetAddress,
+                challenge,
                 requestId,
             }) => {
                 ClientConnection.backgroundPort.postMessage({
                     type: actionEvent,
                     requestId,
                     data: {
-                        action: 'metamask.zkAsset.confidentialApprove',
+                        action: 'metamask.eip712.signNotes',
                         response: {
-                            notes,
-                            spender,
-                            spendStatus,
-                            signature,
+                            noteHashes,
+                            assetAddress,
+                            challenge,
+                            sender,
                         },
                     },
                 });
-
                 return filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
             },
             publicApprove: async ({
@@ -281,36 +281,34 @@ class ExtensionApi {
                     notesOwner,
                 };
             },
-            withdrawProof: async ({
+            withdraw: async ({
                 assetAddress,
                 sender,
-                owner,
-                transactions,
-                publicOwner,
+                to,
+                amount,
                 numberOfInputNotes,
-                numberOfOutputNotes,
                 domain,
                 currentAddress,
             }) => {
                 const withdrawProof = await createNoteFromBalance({
                     assetAddress,
                     sender,
-                    owner,
-                    transactions,
-                    publicOwner,
+                    publicOwner: to,
+                    amount,
                     numberOfInputNotes,
-                    numberOfOutputNotes,
+                    numberOfOutputNotes: 0,
                     domain,
                     currentAddress,
                 });
                 return withdrawProof;
             },
-            sendDepositProof: async ({
+            sendTransferProof: async ({
                 requestId,
                 clientId,
                 params: {
                     proofData,
                     assetAddress,
+                    signatures = '0x',
                 },
             }) => {
                 // we need to extract the spending public key
@@ -325,7 +323,7 @@ class ExtensionApi {
                         contractAddress: assetAddress,
                         params: [
                             proofData,
-                            '0x',
+                            signatures,
                         ],
                     },
                 });

@@ -172,12 +172,14 @@ export default class Asset {
 
     withdraw = async (amount, {
         sender = '',
+        to,
         numberOfInputNotes,
     } = {}) => proofFactory(
         'withdraw',
         {
             assetAddress: this.address,
             amount,
+            to,
             sender,
             numberOfInputNotes,
         },

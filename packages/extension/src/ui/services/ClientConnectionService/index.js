@@ -15,11 +15,10 @@ class ClientConnection {
         this.backgroundSubject = new Subject();
         this.background$ = this.backgroundSubject.asObservable();
         this.background$.pipe(
-            tap(console.log),
+            // tap(console.log),
         ).subscribe();
 
         this.backgroundPort.onMessage.addListener((msg) => {
-            console.log(msg);
             this.backgroundSubject.next(msg);
         });
     }

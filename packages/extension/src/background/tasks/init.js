@@ -19,7 +19,6 @@ import domainModel from '../../database/models/domain';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
 import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
-import NoteService from '~background/services/NoteService';
 import Web3ServiceFactory from '~background/services/Web3Service/factory';
 // import { runLoadingEventsTest } from './syncTest'
 

@@ -198,6 +198,7 @@ class Connection {
             requestId,
             ...data
         }, sender) => {
+            console.log(sender);
             this.MessageSubject.next({
                 data,
                 senderId: client.name,
