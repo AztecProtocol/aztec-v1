@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = {
     presets: [
         [
@@ -27,7 +25,6 @@ module.exports = {
                     '~content': './src/content',
                     '~client': './src/client',
                     '~ui': './src/ui',
-                    'aztec.js': path.resolve(__dirname, '../aztec.js/src'),
                 },
             },
         ],
