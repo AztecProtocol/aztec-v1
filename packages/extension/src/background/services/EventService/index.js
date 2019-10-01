@@ -29,6 +29,7 @@ const notesSyncManager = networkId => NotesSyncManagerFactory.create(networkId);
 const notesWatcher = networkId => NotesWatcherFactory.create(networkId);
 const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId);
 
+
 const AUTOSYNC_STATUS = {
     NOT_STARTED: 'NOT_STARTED',
     STARTED: 'STARTED',
@@ -75,6 +76,7 @@ class EventService {
             });
         }
     }
+
 
     removeAccountFromSyncing = async ({
         address,
@@ -193,6 +195,7 @@ class EventService {
             networkId,
         }, assetsHandler);
     };
+
 
     syncNotes = async ({
         address,

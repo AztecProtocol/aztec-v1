@@ -7,9 +7,7 @@ export default async function saveNotes({
     destroyNotes,
 }, networkId) {
     // save it in serial
-    await updateBulkNotes([
-        ...createNotes,
-        ...updateNotes,
-        ...destroyNotes,
-    ], networkId);
+    await updateBulkNotes(createNotes, networkId);
+    await updateBulkNotes(updateNotes, networkId);
+    await updateBulkNotes(destroyNotes, networkId);
 }
