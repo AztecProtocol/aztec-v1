@@ -124,11 +124,22 @@ class SyncManager {
             }
         });
 
+        const subscription = await NoteSubscription.subscribe({
+            fromBlock: lastSyncedBlock + 1,
+            fromAssets,
+            networkId,
+        });
+
+        const syncAddress = this.addresses.get(address);
         this.addresses.set(address, {
             ...syncAddress,
             syncDetails: updatedSyncDetails,
         });
-    };
+
+        subscription.onError(async (error) => {
+            this.handleFetchError(error);
+        });
+    }
 
     async syncNotes(options) {
         const {
@@ -344,6 +355,21 @@ class SyncManager {
             assets: nonExistingAssets,
             lastSyncedBlock: lowestSyncedBlock,
             progressCallbacks,
+        });
+    }
+
+    restartAllSyncing() {
+        this.addresses.forEach((syncAddress, address) => {
+            const {
+                lastSyncedBlock,
+                networkId,
+            } = syncAddress;
+
+            this.syncNotes({
+                address,
+                lastSyncedBlock,
+                networkId,
+            });
         });
     }
 }
