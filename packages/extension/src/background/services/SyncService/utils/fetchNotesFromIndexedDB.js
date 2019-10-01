@@ -53,7 +53,7 @@ export default async function fetchNotesFromIndexedDB({
 
     // Since v3.0.0-alpha.8
     // const assets = await Asset.bulkGet(networkOptions, assetsKeys);
-    // const acesses = await NoteAccess.bulkGet(networkOptions, noteAccessKeys);
+    // const accesses = await NoteAccess.bulkGet(networkOptions, noteAccessKeys);
 
     const noteLogs = [];
     for (let i = 0; i < notes.length; i += 1) {

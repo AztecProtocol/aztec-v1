@@ -5,7 +5,6 @@ export default Model({
     version: 1,
     fields: [
         // Primary Key | first key is always primary key
-        '++id',
         'registryOwner',
         'blockNumber',
         'registryAddress',

@@ -1,12 +1,14 @@
 import {
+    log,
     warnLog,
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../../Web3Service';
-import fetchAssets from '../../utils/fetchAssets';
 import {
     createBulkAssets,
+    fetchAssets,
 } from '../../utils/asset';
+import EventSubscription from '../../utils/asset/subscription';
 
 
 class SyncManager {
@@ -51,7 +53,7 @@ class SyncManager {
     isInProcess() {
         const config = this.syncConfig;
         return !!(config
-            && (config.syncing || config.syncReq)
+            && (config.syncing || config.subscription)
         );
     }
 
@@ -62,28 +64,19 @@ class SyncManager {
         }
         const {
             lastSyncedBlock,
+            pausedState,
+            subscription,
             networkId,
         } = this.syncConfig;
 
         const blocks = await Web3Service(networkId).eth.getBlockNumber();
+        const isSubscribedOnNewAssets = !!subscription && !pausedState;
 
         return {
             blocks,
             lastSyncedBlock,
+            isSubscribedOnNewAssets,
         };
-    };
-
-    lastSyncedBlock = () => {
-        if (!this.syncConfig) {
-            warnLog('Assets syncing is not in process.');
-            return 0;
-        }
-
-        const {
-            lastSyncedBlock,
-        } = this.syncConfig;
-
-        return lastSyncedBlock;
     };
 
     setProgressCallback = (callback) => {
@@ -126,6 +119,43 @@ class SyncManager {
         return !syncing;
     }
 
+    async subscribeOnNewAsset(options) {
+        const {
+            lastSyncedBlock,
+        } = options;
+
+        const {
+            networkId,
+        } = this.syncConfig;
+
+        const subscription = await EventSubscription.subscribe({
+            fromBlock: lastSyncedBlock + 1,
+            networkId,
+        }, (error) => {
+            if (error) {
+                errorLog(error);
+            }
+        });
+
+        this.syncConfig = {
+            ...this.syncConfig,
+            subscription,
+        };
+
+        subscription.onData(async (event) => {
+            log(`WebSockets received asset: ${JSON.stringify(event)}`);
+            await createBulkAssets([event], networkId);
+            this.syncConfig = {
+                ...this.syncConfig,
+                lastSyncedBlock: event.blockNumber,
+            };
+        });
+
+        subscription.onError(async (error) => {
+            this.handleFetchError(error);
+        });
+    }
+
     async syncAssets(options) {
         const {
             lastSyncedBlock,
@@ -142,29 +172,18 @@ class SyncManager {
         this.syncConfig = {
             ...this.syncConfig,
             syncing: true,
-            syncReq: null,
         };
 
         const {
-            syncReq: prevSyncReq,
             networkId,
         } = this.syncConfig;
 
-        if (prevSyncReq) {
-            clearTimeout(prevSyncReq);
-        }
-
-        const {
-            syncInterval,
-        } = this.config;
-
         const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
         let newLastSyncedBlock = lastSyncedBlock;
+        const fromBlock = lastSyncedBlock + 1;
+        const toBlock = currentBlock;
 
         if (currentBlock > lastSyncedBlock) {
-            const fromBlock = lastSyncedBlock + 1;
-            const toBlock = currentBlock;
-
             const {
                 error,
                 assets: newAssets,
@@ -179,7 +198,6 @@ class SyncManager {
             } else {
                 await createBulkAssets(newAssets, networkId);
                 newLastSyncedBlock = toBlock;
-
                 if (this.progressSubscriber) {
                     this.progressSubscriber({
                         blocks: currentBlock,
@@ -189,19 +207,15 @@ class SyncManager {
             }
         }
 
-        const syncReq = setTimeout(() => {
-            this.syncAssets({
-                ...options,
-                lastSyncedBlock: newLastSyncedBlock,
-            });
-        }, syncInterval);
-
         this.syncConfig = {
             ...this.syncConfig,
             syncing: false,
-            syncReq,
             lastSyncedBlock: newLastSyncedBlock,
         };
+
+        this.subscribeOnNewAsset({
+            lastSyncedBlock: newLastSyncedBlock,
+        });
     }
 
     async sync({
@@ -211,7 +225,7 @@ class SyncManager {
         if (!this.syncConfig) {
             this.syncConfig = {
                 syncing: false,
-                syncReq: null,
+                subscription: null,
                 lastSyncedBlock,
                 networkId,
             };
