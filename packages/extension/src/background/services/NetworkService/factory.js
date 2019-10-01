@@ -50,7 +50,6 @@ class NetworkSwitcher {
 
         const service = new Web3Service();
         const provider = new Web3.providers.WebsocketProvider(providerUrl);
-        // const provider = new Web3.providers.HttpProvider(providerUrl);
         service.init({
             provider,
             account,

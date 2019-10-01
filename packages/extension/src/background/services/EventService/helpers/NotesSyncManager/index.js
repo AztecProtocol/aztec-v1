@@ -97,6 +97,7 @@ class SyncManager {
         }
     };
 
+
     stop = ({
         address,
         assetsAddresses,
@@ -355,6 +356,21 @@ class SyncManager {
             assets: nonExistingAssets,
             lastSyncedBlock: lowestSyncedBlock,
             progressCallbacks,
+        });
+    }
+
+    restartAllSyncing() {
+        this.addresses.forEach((syncAddress, address) => {
+            const {
+                lastSyncedBlock,
+                networkId,
+            } = syncAddress;
+
+            this.syncNotes({
+                address,
+                lastSyncedBlock,
+                networkId,
+            });
         });
     }
 
