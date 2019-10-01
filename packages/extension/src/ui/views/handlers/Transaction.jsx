@@ -32,6 +32,7 @@ class Transaction extends PureComponent {
             data: initialData,
             pending: true,
             loading: false,
+            done: false,
             error: null,
         };
     }
@@ -104,6 +105,7 @@ class Transaction extends PureComponent {
                 data,
                 pending: false,
                 loading: !!task,
+                done: !task,
             },
             task
                 ? () => this.runTask(task)
@@ -132,7 +134,6 @@ class Transaction extends PureComponent {
     };
 
     handleResponse = (response = {}) => {
-        console.log(response);
         const {
             error,
             ...data
@@ -189,6 +190,7 @@ class Transaction extends PureComponent {
         const {
             pending,
             loading,
+            done,
         } = this.state;
         const task = this.getTask();
         const {
@@ -198,7 +200,7 @@ class Transaction extends PureComponent {
 
         let text;
         let textColor;
-        if (!task && !pending) {
+        if (done) {
             text = successMessage;
             textColor = 'primary';
         } else if (loading) {
@@ -250,12 +252,13 @@ class Transaction extends PureComponent {
         } = this.props;
         const {
             error,
+            loading,
+            done,
         } = this.state;
 
-        let ticketHeaderNode = ticketHeader;
-        if (renderTicketHeader) {
-            ticketHeaderNode = renderTicketHeader();
-        }
+        const ticketHeaderNode = renderTicketHeader
+            ? renderTicketHeader()
+            : ticketHeader;
 
         return (
             <Popup
@@ -264,7 +267,9 @@ class Transaction extends PureComponent {
                 description={description || i18n.t('transaction.description')}
                 leftIconName={goBack ? 'chevron_left' : 'close'}
                 onClickLeftIcon={goBack || onClose}
+                disableOnClickLeftIcon={loading || done}
                 submitButton={this.renderSubmitButton()}
+                error={error}
             >
                 {!!content && (
                     <Block
@@ -279,15 +284,6 @@ class Transaction extends PureComponent {
                 >
                     {this.renderSteps()}
                 </Ticket>
-                {!!error && (
-                    <Block top="s">
-                        <Text
-                            text={error.message || i18n.t(error.key, error.response)}
-                            color="red"
-                            size="xxs"
-                        />
-                    </Block>
-                )}
             </Popup>
         );
     }
