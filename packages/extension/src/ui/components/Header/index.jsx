@@ -14,6 +14,7 @@ const Header = ({
     title,
     leftIconName,
     onClickLeftIcon,
+    disableOnClickLeftIcon,
     rightIconName,
     onClickRightIcon,
 }) => {
@@ -35,7 +36,7 @@ const Header = ({
                         padding="0 l"
                     >
                         <div className={styles['button-holder']}>
-                            {onClickLeftIcon && (
+                            {onClickLeftIcon && !disableOnClickLeftIcon && (
                                 <Clickable
                                     onClick={onClickLeftIcon}
                                     inline
@@ -89,6 +90,7 @@ Header.propTypes = {
     title: PropTypes.string,
     leftIconName: PropTypes.string,
     onClickLeftIcon: PropTypes.func,
+    disableOnClickLeftIcon: PropTypes.bool,
     rightIconName: PropTypes.string,
     onClickRightIcon: PropTypes.func,
 };
@@ -97,6 +99,7 @@ Header.defaultProps = {
     title: '',
     leftIconName: '',
     onClickLeftIcon: null,
+    disableOnClickLeftIcon: false,
     rightIconName: '',
     onClickRightIcon: null,
 };

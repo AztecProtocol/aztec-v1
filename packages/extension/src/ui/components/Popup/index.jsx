@@ -22,6 +22,7 @@ const Popup = ({
     description,
     leftIconName,
     onClickLeftIcon,
+    disableOnClickLeftIcon,
     rightIconName,
     onClickRightIcon,
     submitButtonText,
@@ -41,6 +42,7 @@ const Popup = ({
                 title={title}
                 leftIconName={leftIconName}
                 onClickLeftIcon={onClickLeftIcon}
+                disableOnClickLeftIcon={disableOnClickLeftIcon}
                 rightIconName={rightIconName}
                 onClickRightIcon={onClickRightIcon}
             />
@@ -163,6 +165,7 @@ Popup.propTypes = {
     description: PropTypes.string,
     leftIconName: PropTypes.string,
     onClickLeftIcon: PropTypes.func,
+    disableOnClickLeftIcon: PropTypes.bool,
     rightIconName: PropTypes.string,
     onClickRightIcon: PropTypes.func,
     submitButtonText: PropTypes.string,
@@ -191,6 +194,7 @@ Popup.defaultProps = {
     description: '',
     leftIconName: '',
     onClickLeftIcon: null,
+    disableOnClickLeftIcon: false,
     rightIconName: '',
     onClickRightIcon: null,
     submitButtonText: '',
