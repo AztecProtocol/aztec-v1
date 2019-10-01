@@ -1,9 +1,29 @@
 import AuthService from '~background/services/AuthService';
-import ActionService from '~ui/services/ActionService';
+import ensureAccount from '~background/services/GraphQLService/decorators/ensureAccount';
+import ConnectionService from '~ui/services/ConnectionService';
 import RegisterExtension from '~ui/mutations/RegisterExtension';
 import RegisterAccount from '~ui/mutations/RegisterAccount';
 import ApproveDomain from '~ui/mutations/ApproveDomain';
 import apollo from './helpers/apollo';
+
+export const isLoggedIn = async () => {
+    try {
+        const {
+            address: currentAddress,
+        } = await AuthService.getCurrentUser() || {};
+        if (!currentAddress) {
+            return false;
+        }
+
+        const {
+            error,
+        } = await ensureAccount(() => {})(null, { currentAddress }) || {};
+
+        return !error;
+    } catch (error) {
+        return false;
+    }
+};
 
 export const createKeyVault = async ({
     seedPhrase,
@@ -32,7 +52,7 @@ export const createKeyVault = async ({
 export const linkAccountToMetaMask = async ({
     requestId,
     ...account
-}, cb) => ActionService
+}, cb) => ConnectionService
     .post(
         requestId,
         'metamask.register.extension',
@@ -55,7 +75,7 @@ export const sendRegisterAddress = async ({
     linkedPublicKey,
     spendingPublicKey,
     signature,
-}, cb) => ActionService
+}, cb) => ConnectionService
     .sendTransaction(
         requestId,
         'AZTECAccountRegistry',

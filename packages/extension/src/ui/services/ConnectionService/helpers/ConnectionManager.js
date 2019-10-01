@@ -7,7 +7,7 @@ import {
 } from '~utils/random';
 import LRU from '~utils/caches/LRU';
 
-class ActionManager {
+class ConnectionManager {
     constructor({
         maxActiveResponses = 50,
     } = {}) {
@@ -88,4 +88,4 @@ class ActionManager {
     }
 }
 
-export default ActionManager;
+export default ConnectionManager;
