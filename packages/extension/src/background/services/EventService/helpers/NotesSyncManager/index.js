@@ -1,15 +1,21 @@
 import {
+    log,
     warnLog,
     errorLog,
 } from '~utils/log';
 import Web3Service from '../../../Web3Service';
-import fetchNotes from '../../utils/fetchNotes';
-import saveNotes from '../../utils/saveNotes';
-import saveNotesAccess from '../../utils/saveNotesAccess';
 import {
     syncedAssets,
 } from '../../utils/asset';
 import AssetsSyncManagerFactory from '../AssetsSyncManager/factory';
+import {
+    fetchNotes,
+    subscription as NoteSubscription,
+    saveNotes,
+} from '../../utils/note';
+import {
+    saveAccessesFromNotes,
+} from '../../utils/access';
 
 /* See more details about limitation
  * https://infura.io/docs/ethereum/json-rpc/eth_getLogs
@@ -24,7 +30,6 @@ const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId
 class SyncManager {
     constructor() {
         this.config = {
-            syncInterval: 5000, // ms
             blocksPerRequest: 540000, // ~ per 3 months (~6000 per day)
             precisionDelta: 10, //
         };
@@ -45,7 +50,7 @@ class SyncManager {
     isInQueue(address) {
         const syncAddress = this.addresses.get(address);
         return !!(syncAddress
-            && (syncAddress.syncing || syncAddress.syncReq)
+            && (syncAddress.syncing || syncAddress.subscription)
         );
     }
 
@@ -56,40 +61,32 @@ class SyncManager {
         }
     };
 
-    pause = (address, prevState = {}) => {
+    pause = async (address, prevState = {}) => {
         const syncAddress = this.addresses.get(address);
         if (!syncAddress) {
             warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
             return;
         }
 
+        const {
+            subscription,
+        } = syncAddress;
+
+        if (subscription) {
+            const {
+                error: unsubscribeError,
+            } = await NoteSubscription.unsubscribe(subscription);
+
+            if (unsubscribeError) {
+                errorLog(`Pause error in NotesSyncManager. Can't unsubscribe from sockets for address ${address}.`);
+                return;
+            }
+        }
+
         this.addresses.set(address, {
             ...syncAddress,
             pausedState: prevState,
         });
-    };
-
-    syncProgress = async (address) => {
-        const syncAddress = this.addresses.get(address);
-        if (!syncAddress) {
-            warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
-            return null;
-        }
-        const {
-            lastSyncedBlock,
-            networkId,
-        } = syncAddress;
-
-        const blocks = await Web3Service(networkId).eth.getBlockNumber();
-
-        return {
-            blocks,
-            lastSyncedBlock,
-        };
-    };
-
-    setProgressCallback = (callback) => {
-        this.progressSubscriber = callback;
     };
 
     resume = (address) => {
@@ -118,6 +115,73 @@ class SyncManager {
         });
     };
 
+    syncProgress = async (address) => {
+        const syncAddress = this.addresses.get(address);
+        if (!syncAddress) {
+            warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
+            return null;
+        }
+        const {
+            lastSyncedBlock,
+            networkId,
+            subscription,
+        } = syncAddress;
+
+        const blocks = await Web3Service(networkId).eth.getBlockNumber();
+        const synced = subscription ? 'latest' : lastSyncedBlock;
+
+        return {
+            blocks,
+            lastSyncedBlock: synced,
+        };
+    };
+
+    setProgressCallback = (callback) => {
+        this.progressSubscriber = callback;
+    };
+
+    async subscribeOnNewNotes(options) {
+        const {
+            address,
+            lastSyncedBlock,
+            fromAssets,
+            networkId,
+        } = options;
+
+        const subscription = await NoteSubscription.subscribe({
+            fromBlock: lastSyncedBlock + 1,
+            fromAssets,
+            networkId,
+        });
+
+        const syncAddress = this.addresses.get(address);
+        this.addresses.set(address, {
+            ...syncAddress,
+            subscription,
+        });
+
+        let newLastSyncedBlock = lastSyncedBlock;
+
+        subscription.onData(async (groupedNotes) => {
+            if (groupedNotes.isEmpty()) {
+                return;
+            }
+            await Promise.all([
+                saveNotes(groupedNotes, networkId),
+                saveAccessesFromNotes(groupedNotes, networkId),
+            ]);
+            newLastSyncedBlock = groupedNotes.lastBlockNumber() || newLastSyncedBlock;
+            this.syncConfig = {
+                ...this.syncConfig,
+                lastSyncedBlock: newLastSyncedBlock,
+            };
+        });
+
+        subscription.onError(async (error) => {
+            this.handleFetchError(error);
+        });
+    }
+
     async syncNotes(options) {
         const {
             address,
@@ -126,44 +190,53 @@ class SyncManager {
         } = options;
 
         const syncAddress = this.addresses.get(address);
-        if (syncAddress.pausedState) {
+        const {
+            pausedState,
+            subscription: prevSubscription,
+        } = syncAddress;
+        if (pausedState) {
             return;
         }
         if (this.paused) {
-            this.pause(address, options);
+            await this.pause(address, options);
             return;
         }
 
         this.addresses.set(address, {
             ...syncAddress,
             syncing: true,
-            syncReq: null,
+            subscription: null,
         });
 
         const {
-            syncReq: prevSyncReq,
-        } = syncAddress;
-
-        if (prevSyncReq) {
-            clearTimeout(prevSyncReq);
-        }
-
-        const {
-            syncInterval,
             precisionDelta,
             blocksPerRequest,
         } = this.config;
 
+        if (prevSubscription) {
+            const {
+                error: unsubscribeError,
+            } = await NoteSubscription.unsubscribe(prevSubscription);
+
+            if (unsubscribeError) {
+                errorLog(`NotesSyncManager can't unsubscribe from sockets for address ${address}.`);
+                return;
+            }
+        }
+
         const assetsManager = assetsSyncManager(networkId);
-        const currentBlock = assetsManager.lastSyncedBlock();
-        const fromAssets = (await syncedAssets(networkId))
-            .map(({ registryOwner }) => registryOwner);
+        const {
+            blocks,
+            lastSyncedBlock: lastAssetsBlock,
+            isSubscribedOnNewAssets,
+        } = assetsManager.syncProgress();
+        const currentBlock = isSubscribedOnNewAssets ? blocks : lastAssetsBlock;
+        const assets = (await syncedAssets(networkId)).map(({ registryOwner }) => registryOwner);
+        const fromBlock = lastSyncedBlock + 1;
+        const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
 
         let newLastSyncedBlock = lastSyncedBlock;
-
         if (currentBlock > lastSyncedBlock) {
-            const fromBlock = lastSyncedBlock + 1;
-            const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
             let shouldLoadNextPortion = currentBlock - fromBlock > precisionDelta;
 
             const {
@@ -173,17 +246,16 @@ class SyncManager {
                 owner: address,
                 fromBlock,
                 toBlock,
-                fromAssets,
+                fromAssets: assets,
                 networkId,
             });
 
             if (groupedNotes) {
                 const promises = [
                     saveNotes(groupedNotes, networkId),
-                    saveNotesAccess(groupedNotes, networkId),
+                    saveAccessesFromNotes(groupedNotes, networkId),
                 ];
                 await Promise.all(promises);
-
                 newLastSyncedBlock = toBlock;
 
                 if (this.progressSubscriber) {
@@ -216,18 +288,17 @@ class SyncManager {
             }
         }
 
-        const syncReq = setTimeout(() => {
-            this.syncNotes({
-                ...options,
-                lastSyncedBlock: newLastSyncedBlock,
-            });
-        }, syncInterval);
-
         this.addresses.set(address, {
             ...syncAddress,
             syncing: false,
-            syncReq,
             lastSyncedBlock: newLastSyncedBlock,
+        });
+
+        this.subscribeOnNewNotes({
+            address,
+            fromAssets: assets,
+            lastSyncedBlock: newLastSyncedBlock,
+            networkId,
         });
     }
 
@@ -236,11 +307,12 @@ class SyncManager {
         lastSyncedBlock,
         networkId,
     }) {
+        log(`Sync notes was started with las synced block: ${lastSyncedBlock} and address: ${address}`);
         let syncAddress = this.addresses.get(address);
         if (!syncAddress) {
             syncAddress = {
                 syncing: false,
-                syncReq: null,
+                subscription: null,
                 lastSyncedBlock,
                 networkId,
             };
@@ -250,6 +322,21 @@ class SyncManager {
             address,
             lastSyncedBlock,
             networkId,
+        });
+    }
+
+    restartAllSyncing() {
+        this.addresses.forEach((syncAddress, address) => {
+            const {
+                lastSyncedBlock,
+                networkId,
+            } = syncAddress;
+
+            this.syncNotes({
+                address,
+                lastSyncedBlock,
+                networkId,
+            });
         });
     }
 }

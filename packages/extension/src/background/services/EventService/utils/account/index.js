@@ -1,6 +1,9 @@
-import performCreateAccount from './createAccount';
-import performCreateBulkAccounts from './createBulkAccounts';
+import createAccount from './createAccount';
+import createBulkAccounts from './createBulkAccounts';
+import fetchAccount from './fetchAccount';
 
-export const createAccount = (account, networkId) => performCreateAccount(account, networkId);
-
-export const createBulkAccounts = (accounts, networkId) => performCreateBulkAccounts(accounts, networkId);
+export {
+    createAccount,
+    createBulkAccounts,
+    fetchAccount,
+};
