@@ -1,7 +1,7 @@
 const bn128 = require('@aztec/bn128');
 const { constants, errors, proofs } = require('@aztec/dev-utils');
 const BN = require('bn.js');
-const { AbiCoder } = require('web3-eth-abi');
+const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
 
 const { inputCoder, outputCoder } = require('../../encoder');
@@ -166,10 +166,7 @@ class PublicRangeProof extends Proof {
         this.outputs = outputCoder.encodeProofOutputs([proofOutput]);
         this.hash = outputCoder.hashProofOutput(this.output);
         this.validatedProofHash = keccak256(
-            new AbiCoder().encodeParameters(
-                ['bytes32', 'uint24', 'address'],
-                [this.hash, proofs.PUBLIC_RANGE_PROOF, this.sender],
-            ),
+            AbiCoder.encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofs.PUBLIC_RANGE_PROOF, this.sender]),
         );
     }
 
