@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 import {
     Avatar,
     Icon,
@@ -12,6 +13,7 @@ import {
 import {
     avatarSizesMap,
 } from '~ui/styles/guacamole-vars';
+import styles from './icon.scss';
 
 export const themeStyleMapping = {
     primary: {
@@ -29,6 +31,9 @@ export const themeStyleMapping = {
 };
 
 export const typeIconMapping = {
+    token: {
+        name: 'blur_on',
+    },
     asset: {
         name: 'blur_on',
     },
@@ -38,6 +43,12 @@ export const typeIconMapping = {
 };
 
 export const inlineIconMapping = {
+    token: {
+        name: 'blur_circular',
+    },
+    asset: {
+        name: 'blur_circular',
+    },
     user: {
         name: 'person_outline',
     },
@@ -84,7 +95,15 @@ const ProfileIcon = ({
 
     return (
         <Avatar
-            className={className}
+            className={classnames(
+                className,
+                styles[`theme-${theme}`],
+                styles[`size-${size}`],
+                {
+                    [styles['wrapped-asset-icon']]: type === 'asset',
+                    [styles['with-icon']]: !src,
+                },
+            )}
             src={src}
             alt={alt}
             iconName={iconName}

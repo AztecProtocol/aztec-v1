@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 import {
     AvatarGroup,
 } from '@aztec/guacamole-ui';
@@ -14,6 +15,7 @@ import {
     themeStyleMapping,
     typeIconMapping,
 } from '~ui/components/ProfileIcon';
+import styles from '~ui/components/ProfileIcon/icon.scss';
 import Tooltip from './Tooltip';
 
 const groupStyleMapping = {
@@ -50,6 +52,14 @@ const ProfileIconGroup = ({
             ...iconStyle,
             ...icon,
             iconName,
+            className: classnames(
+                styles[`theme-${theme}`],
+                styles[`size-${size}`],
+                {
+                    [styles['wrapped-asset-icon']]: type === 'asset',
+                    [styles['with-icon']]: !icon.src,
+                },
+            ),
         };
     });
     if (moreItems && moreItems.length) {
