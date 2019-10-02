@@ -79,7 +79,7 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
  * ECSA signature is formatted as follows:
  * - `r` and `s` occupy 32 bytes
  * - `v` occupies 1 byte
- * 
+ *
  * @method signMultipleNotesForBatchConfidentialApprove
  * @param {string} verifyingContract address of target contract
  * @param {string[]} noteHashes array of the keccak256 hashes of notes, for which approval is being granted or revoked
