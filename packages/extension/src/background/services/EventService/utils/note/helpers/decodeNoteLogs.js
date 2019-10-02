@@ -77,11 +77,11 @@ export default function decodeNoteLogs(eventsTopics, rawLogs, networkId) {
         .map(noteLog);
 
     const updateNotes = (groupedRawLogs[updateNoteMetaDataTopic] || [])
-        .map(log => decodeLog(log, networkId).destroyNote())
+        .map(log => decodeLog(log, networkId).updateNoteMetaData())
         .map(noteLog);
 
     const destroyNotes = (groupedRawLogs[destroyNoteTopic] || [])
-        .map(log => decodeLog(log, networkId).updateNoteMetaData())
+        .map(log => decodeLog(log, networkId).destroyNote())
         .map(noteLog);
 
     const lastBlockNumber = () => [
