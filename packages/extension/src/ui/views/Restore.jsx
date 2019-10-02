@@ -8,7 +8,7 @@ import {
     TextInput,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import ActionService from '~ui/services/ActionService';
+import ConnectionService from '~ui/services/ConnectionService';
 import Popup from '~ui/components/Popup';
 
 class Restore extends PureComponent {
@@ -43,7 +43,7 @@ class Restore extends PureComponent {
             seedPhrase,
         } = this.state;
 
-        ActionService.post('restore', { seedPhrase })
+        ConnectionService.post('restore', { seedPhrase })
             .onReceiveResponse(this.handleResponse);
     };
 
