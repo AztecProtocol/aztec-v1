@@ -2,6 +2,8 @@ import React, {
     PureComponent,
 } from 'react';
 import PropTypes from 'prop-types';
+import closeWindow from '~ui/utils/closeWindow';
+import Loading from '~ui/views/Loading';
 
 class CombinedViews extends PureComponent {
     constructor(props) {
@@ -10,12 +12,18 @@ class CombinedViews extends PureComponent {
         const {
             initialStep,
             initialData,
+            fetchInitialData,
         } = props;
 
         this.state = {
             step: initialStep,
             data: initialData,
+            loading: !!fetchInitialData,
         };
+    }
+
+    componentDidMount() {
+        this.fetchInitialData();
     }
 
     handleGoBack = () => {
@@ -43,9 +51,10 @@ class CombinedViews extends PureComponent {
 
     handleGoNext = (childState = {}) => {
         const {
+            Steps,
             onGoNext,
             onExit,
-            Steps,
+            autoClose,
         } = this.props;
         const {
             step,
@@ -59,6 +68,8 @@ class CombinedViews extends PureComponent {
         if (step === Steps.length - 1) {
             if (onExit) {
                 onExit(data);
+            } else if (autoClose >= 0) {
+                closeWindow(autoClose);
             }
             return;
         }
@@ -77,6 +88,23 @@ class CombinedViews extends PureComponent {
         });
     };
 
+    async fetchInitialData() {
+        const {
+            fetchInitialData,
+            initialData,
+        } = this.props;
+        if (!fetchInitialData) return;
+
+        const data = await fetchInitialData();
+        this.setState({
+            data: {
+                ...initialData,
+                ...data,
+            },
+            loading: false,
+        });
+    }
+
     render() {
         const {
             Steps,
@@ -84,7 +112,13 @@ class CombinedViews extends PureComponent {
         const {
             step,
             data,
+            loading,
         } = this.state;
+
+        if (loading) {
+            return <Loading />;
+        }
+
         const Step = Steps[step];
 
         if (!Step) {
@@ -105,17 +139,21 @@ CombinedViews.propTypes = {
     initialStep: PropTypes.number,
     initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
     Steps: PropTypes.arrayOf(PropTypes.func).isRequired,
+    fetchInitialData: PropTypes.func,
     onGoBack: PropTypes.func,
     onGoNext: PropTypes.func,
     onExit: PropTypes.func,
+    autoClose: PropTypes.number,
 };
 
 CombinedViews.defaultProps = {
     initialStep: 0,
     initialData: {},
+    fetchInitialData: null,
     onGoBack: null,
     onGoNext: null,
     onExit: null,
+    autoClose: -1,
 };
 
 export default CombinedViews;
