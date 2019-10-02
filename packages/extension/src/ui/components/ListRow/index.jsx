@@ -26,7 +26,6 @@ const ListRow = ({
             >
                 <Text
                     size="xs"
-                    weight="light"
                     color="grey"
                 >
                     {content}
