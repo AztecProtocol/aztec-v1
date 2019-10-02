@@ -12,6 +12,10 @@ import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 import {
     avatarSizesMap,
 } from '~ui/styles/guacamole-vars';
+import {
+    themeType,
+    profileType,
+} from '~ui/config/propTypes';
 import styles from './connection.scss';
 
 const Connection = ({
@@ -143,11 +147,11 @@ const Connection = ({
 
 Connection.propTypes = {
     className: PropTypes.string,
-    theme: PropTypes.oneOf(['primary', 'white']),
+    theme: themeType,
     actionIconName: PropTypes.string,
     actionIconColor: PropTypes.string,
     from: PropTypes.shape({
-        type: PropTypes.oneOf(['', 'asset', 'user']),
+        type: profileType,
         src: PropTypes.string,
         alt: PropTypes.string,
         title: PropTypes.oneOfType([
@@ -160,7 +164,7 @@ Connection.propTypes = {
         ]),
     }).isRequired,
     to: PropTypes.shape({
-        type: PropTypes.oneOf(['', 'asset', 'user']),
+        type: profileType,
         src: PropTypes.string,
         alt: PropTypes.string,
         title: PropTypes.oneOfType([

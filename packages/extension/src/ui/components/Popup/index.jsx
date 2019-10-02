@@ -10,6 +10,9 @@ import {
     Text,
     Icon,
 } from '@aztec/guacamole-ui';
+import {
+    themeType,
+} from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import Button from '~ui/components/Button';
 import Header from '../Header';
@@ -160,7 +163,7 @@ const Popup = ({
 };
 
 Popup.propTypes = {
-    theme: PropTypes.oneOf(['primary', 'white']),
+    theme: themeType,
     title: PropTypes.string,
     description: PropTypes.string,
     leftIconName: PropTypes.string,

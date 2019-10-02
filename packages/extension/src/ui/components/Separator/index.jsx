@@ -4,6 +4,9 @@ import classnames from 'classnames';
 import {
     Text,
 } from '@aztec/guacamole-ui';
+import {
+    themeType,
+} from '~ui/config/propTypes';
 import styles from './separator.scss';
 
 const Separator = ({
@@ -23,7 +26,7 @@ const Separator = ({
 );
 
 Separator.propTypes = {
-    theme: PropTypes.oneOf(['primary', 'white']),
+    theme: themeType,
     title: PropTypes.string.isRequired,
 };
 
