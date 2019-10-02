@@ -1,0 +1,77 @@
+@import '../../styles/variables';
+
+@function rgba-to-rgb($rgba, $background: 'white') {
+  $rgb-color: rgb(red($rgba), green($rgba), blue($rgba));
+  $background-color: map-get($color-map, $background);
+  @return mix($rgb-color, $background-color, alpha($rgba) * 100%);
+}
+
+$profile-icon-bg-mapping: (
+  'white': 'grey-lighter',
+);
+
+.wrapped-asset-icon {
+  transform: scale(0.925);
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    background: $bg-gradient;
+    transform: scale(1.08);
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    background: $bg-gradient;
+    transform: scale(1.08);
+    opacity: 0.1;
+    z-index: 1;
+  }
+
+  &.theme-white {
+    &:before {
+      opacity: 0.7;
+    }
+  }
+
+  &.with-icon {
+    > * {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 100%;
+    }
+
+    &.theme-primary {
+      &:after {
+        opacity: 0;
+      }
+    }
+
+    @each $theme, $bg-name in $profile-icon-bg-mapping {
+      &.theme-#{$theme} {
+        > * {
+          background: rgba-to-rgb(map-get($color-map, $bg-name));
+        }
+      }
+    }
+
+    @each $key, $size in $avatar-sizes-map {
+      &.size-#{$key} {
+        > * {
+          line-height: $size;
+        }
+      }
+    }
+  }
+}
