@@ -14,4 +14,7 @@ export default {
     'ui.asset.prove.withdraw_proof': {
         route: 'withdraw',
     },
+    'ui.asset.prove.transfer_proof': {
+        route: 'send',
+    },
 };

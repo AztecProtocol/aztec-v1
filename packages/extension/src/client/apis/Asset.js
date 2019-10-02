@@ -145,13 +145,13 @@ export default class Asset {
      *
      * Deposit
      *
-     * - amount (Int! or [Int!])
+     * - transaction ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
      * - options
-     *       from (Address):            The address that will be funding the deposit of ERC20 tokens.
-     *                                  This address needs to approve on the linked ERC20 token.
      *       sender (Address):          The proof sender.
-     *       numberOfOutputNotes (Int): Number of new notes.
-     *                                  If input amount is an array, this value will be ignored.
+     *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
+     *                                  Will use extension's or user's setting if undefined.
+     *       numberOfOutputNotes (Int): Number of new notes for each transaction.
+     *                                  Unless numberOfOutputNotes is defined in that transaction.
      *
      * @returns ([Notes!])
      */
@@ -189,7 +189,7 @@ export default class Asset {
      *
      * Send
      *
-     * - transaction (Transaction! or [Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
+     * - transaction ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
      * - options
      *       sender (Address):          The proof sender.
      *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
@@ -199,7 +199,7 @@ export default class Asset {
      *
      * @returns ([Notes!])
      */
-    send = async (transaction, {
+    send = async (transactions, {
         sender = '',
         numberOfInputNotes,
         numberOfOutputNotes,
@@ -207,7 +207,7 @@ export default class Asset {
         'send',
         {
             assetAddress: this.address,
-            transaction,
+            transactions,
             sender,
             numberOfInputNotes,
             numberOfOutputNotes,

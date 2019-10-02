@@ -22,6 +22,6 @@ export default {
                 },
             },
         },
-        required: ['from', 'sender'],
+        required: ['from', 'sender', 'transactions'],
     },
 };

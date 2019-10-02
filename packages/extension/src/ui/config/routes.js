@@ -130,16 +130,20 @@ export default {
     },
     send: {
         path: 'send',
-        Component: Send,
-        routes: {
-            confirm: {
-                path: 'confirm',
-                View: SendConfirm,
-            },
-            grant: {
-                path: 'grant',
-                View: SendTransaction,
-            },
-        },
+        Component: DepositTransaction,
     },
+    // send: {
+    //     path: 'send',
+    //     Component: Send,
+    //     routes: {
+    //         confirm: {
+    //             path: 'confirm',
+    //             View: SendConfirm,
+    //         },
+    //         grant: {
+    //             path: 'grant',
+    //             View: SendTransaction,
+    //         },
+    //     },
+    // },
 };
