@@ -243,7 +243,7 @@ outputCoder.encodeProofOutputs = (proofOutputs) => {
         ...proofLengths.slice(0, -1).map((n) => padLeft(n.toString(16), 64)),
         ...encodedProofOutputs,
     ];
-    return `0x${encoded.join('')}`;
+    return `0x${encoded.join('')}`.toLowerCase();
 };
 
 /**

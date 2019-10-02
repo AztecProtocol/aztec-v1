@@ -4458,21 +4458,151 @@
       "links": {},
       "address": "0xF616b73dddF7dEaB2630EB49A163D2192629c980",
       "transactionHash": "0x6b1ac411e2757c964f07d5e1a7acf2ed8501e3116013d6a20075072a296c8952"
+    },
+    "1569954354830": {
+      "events": {
+        "0x6943ea2c7fa944e0014e912e815bb331b63af36341f53622fce2f97d26a928e2": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "linkedPublicKey",
+              "type": "bytes"
+            },
+            {
+              "indexed": false,
+              "name": "spendingPublicKey",
+              "type": "bytes"
+            }
+          ],
+          "name": "RegisterExtension",
+          "type": "event",
+          "signature": "0x6943ea2c7fa944e0014e912e815bb331b63af36341f53622fce2f97d26a928e2"
+        },
+        "0xb123f68b8ba02b447d91a6629e121111b7dd6061ff418a60139c8bf00522a284": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "LogAddress",
+          "type": "event",
+          "signature": "0xb123f68b8ba02b447d91a6629e121111b7dd6061ff418a60139c8bf00522a284"
+        },
+        "0xa95e6e2a182411e7a6f9ed114a85c3761d87f9b8f453d842c71235aa64fff99f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "message",
+              "type": "string"
+            }
+          ],
+          "name": "LogString",
+          "type": "event",
+          "signature": "0xa95e6e2a182411e7a6f9ed114a85c3761d87f9b8f453d842c71235aa64fff99f"
+        },
+        "0xdda46087f37cd4c2135846abab15f32ba8fdf277cc07f584d13736bfbf895b98": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "sig",
+              "type": "bytes32"
+            }
+          ],
+          "name": "LogBytes",
+          "type": "event",
+          "signature": "0xdda46087f37cd4c2135846abab15f32ba8fdf277cc07f584d13736bfbf895b98"
+        }
+      },
+      "links": {},
+      "address": "0xF616b73dddF7dEaB2630EB49A163D2192629c980",
+      "transactionHash": "0x6b1ac411e2757c964f07d5e1a7acf2ed8501e3116013d6a20075072a296c8952"
+    },
+    "1570006217554": {
+      "events": {
+        "0x6943ea2c7fa944e0014e912e815bb331b63af36341f53622fce2f97d26a928e2": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "linkedPublicKey",
+              "type": "bytes"
+            },
+            {
+              "indexed": false,
+              "name": "spendingPublicKey",
+              "type": "bytes"
+            }
+          ],
+          "name": "RegisterExtension",
+          "type": "event",
+          "signature": "0x6943ea2c7fa944e0014e912e815bb331b63af36341f53622fce2f97d26a928e2"
+        },
+        "0xb123f68b8ba02b447d91a6629e121111b7dd6061ff418a60139c8bf00522a284": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "LogAddress",
+          "type": "event",
+          "signature": "0xb123f68b8ba02b447d91a6629e121111b7dd6061ff418a60139c8bf00522a284"
+        },
+        "0xa95e6e2a182411e7a6f9ed114a85c3761d87f9b8f453d842c71235aa64fff99f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "message",
+              "type": "string"
+            }
+          ],
+          "name": "LogString",
+          "type": "event",
+          "signature": "0xa95e6e2a182411e7a6f9ed114a85c3761d87f9b8f453d842c71235aa64fff99f"
+        },
+        "0xdda46087f37cd4c2135846abab15f32ba8fdf277cc07f584d13736bfbf895b98": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "sig",
+              "type": "bytes32"
+            }
+          ],
+          "name": "LogBytes",
+          "type": "event",
+          "signature": "0xdda46087f37cd4c2135846abab15f32ba8fdf277cc07f584d13736bfbf895b98"
+        }
+      },
+      "links": {},
+      "address": "0xF616b73dddF7dEaB2630EB49A163D2192629c980",
+      "transactionHash": "0x6b1ac411e2757c964f07d5e1a7acf2ed8501e3116013d6a20075072a296c8952"
     }
   },
-  "schemaVersion": "3.0.9",
-  "updatedAt": "2019-10-01T16:27:33.324Z",
+  "schemaVersion": "3.0.16",
+  "updatedAt": "2019-10-02T08:50:38.621Z",
   "devdoc": {
     "author": "AZTEC Copyright Spilbury Holdings Ltd 2019. All rights reserved.*",
     "methods": {
-      "registerAZTECExtension(address,bytes,bytes)": {
-        "details": "Registers a specific public key pair to an ethereum address if a valid signature is provided or the sender is the ethereum address in question        *",
-        "params": {
-          "_account": "- address the address to which a public key is being         registered",
-          "_linkedPublicKey": "- the public key the sender wishes to link to the _account",
-          "_signature": "- an EIP712 compatible signature of the acount & public key "
-        }
-      },
       "registerAZTECExtension(address,bytes,bytes,bytes)": {
         "details": "Registers a specific public key pair to an ethereum address if a valid signature is provided or the sender is the ethereum address in question        *",
         "params": {

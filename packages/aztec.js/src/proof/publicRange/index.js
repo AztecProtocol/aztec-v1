@@ -189,7 +189,7 @@ class PublicRangeProof extends Proof {
         const abiEncodedPublicInteger = padLeft(this.publicComparison.toString(16), 64);
 
         const abiEncodedParams = [this.challengeHex.slice(2), abiEncodedPublicInteger, ...offsets, ...encodedParams];
-        return `0x${abiEncodedParams.join('')}`;
+        return `0x${abiEncodedParams.join('').toLowerCase()}`;
     }
 
     validateInputs() {
