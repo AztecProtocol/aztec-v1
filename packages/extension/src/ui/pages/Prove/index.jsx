@@ -116,6 +116,34 @@ class Prove extends Component {
         });
     }
 
+    transfer = async () => {
+        const {
+            assetAddress,
+            from,
+            transactions,
+            sender,
+            currentAddress,
+        } = this.props;
+
+        const { proof } = await ExtensionApi.prove.transfer({
+            assetAddress,
+            sender,
+            from,
+            transactions,
+            currentAddress,
+            domain: window.location.origin,
+        });
+        const encoded = proof.encodeABI(assetAddress);
+        console.log(proof);
+        this.setState({
+            transferProof: encoded,
+            proofHash: proof.hash,
+            challenge: proof.challengeHex,
+            noteHashes: proof.notes.map(({ noteHash }) => noteHash),
+        });
+
+    }
+
     withdraw = async () => {
         const {
             assetAddress,
@@ -138,7 +166,7 @@ class Prove extends Component {
         });
         const encoded = proof.encodeABI(assetAddress);
         this.setState({
-            withdrawProof: encoded,
+            transferProof: encoded,
             proofHash: proof.hash,
             challenge: proof.challengeHex,
             noteHashes: proof.notes.map(({ noteHash }) => noteHash),
@@ -175,9 +203,9 @@ class Prove extends Component {
         this.setState({ signatures: signatures.reduce((accum, sig) => accum + sig.slice(2), '0x') });
     }
 
-    sendWithdraw = async () => {
+    sendTransferProof = async () => {
         const {
-            withdrawProof,
+            transferProof,
             signatures,
         } = this.state;
 
@@ -189,7 +217,7 @@ class Prove extends Component {
 
         const receipt = await ExtensionApi.prove.sendTransferProof({
             params: {
-                proofData: withdrawProof,
+                proofData: transferProof,
                 assetAddress,
                 signatures,
             },
@@ -296,12 +324,52 @@ class Prove extends Component {
                                 <br />
                                 <Button
                                     text="Send Withdraw"
-                                    onClick={() => this.sendWithdraw()}
+                                    onClick={() => this.sendTransferProof()}
                                 />
                             </div>
                         </Block>
                     )}
                 />
+
+            <Accordion
+                defaultIsOpen={false}
+                title={(
+                    <Text
+                        size="m"
+                        text="Send"
+                        weight="bold"
+                    />
+                )}
+                content={(
+                    <Block>
+
+                        <div>
+                            <br />
+                            <br />
+                            <Button
+                                text="Generate Proof"
+                                onClick={() => this.transfer()}
+                            />
+                        </div>
+                        <div>
+                            <br />
+                            <br />
+                            <Button
+                                text="Sign Notes"
+                                onClick={() => this.signNotes()}
+                            />
+                        </div>
+                        <div>
+                            <br />
+                            <br />
+                            <Button
+                                text="Send Send Proof"
+                                onClick={() => this.sendTransferProof()}
+                            />
+                        </div>
+                    </Block>
+                )}
+            />
             </Block>
         );
     }

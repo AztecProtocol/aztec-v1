@@ -10,7 +10,7 @@ const v = new Validator();
 const proofSchemaMap = {
     DEPOSIT_PROOF: depositProofSchema,
     WITHDRAW_PROOF: withdrawProofSchema,
-    SEND_PROOF: sendProofSchema,
+    TRANSFER_PROOF: sendProofSchema,
 };
 
 

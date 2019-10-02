@@ -11,20 +11,12 @@ export default async function validateAccounts({
         ? [accountAddress]
         : accountAddress;
     const validAddresses = addressInputs.map(addr => addr);
-    const invalidInputs = validAddresses.filter((addr, i) => !validAddresses[i]);
-    if (invalidInputs.length > 0) {
-        throw new ApiError('input.address.not.valid', {
-            address: invalidInputs,
-        });
-    }
-
     const addressArrStr = validAddresses.map(a => `${a}`).join(',');
 
     const {
         data: {
             accounts: accountsResponse,
         },
-        ...rest
     } = await apollo.query({
         query: AccountsQuery,
         variables: {

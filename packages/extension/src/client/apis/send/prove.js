@@ -1,17 +1,31 @@
-import createNoteFromBalance from '../createNoteFromBalance/prove';
+import query from '~client/utils/query';
 
 export default async function proveSend({
-    assetAddress,
-    transaction,
+    transactions,
+    from,
     sender,
-    numberOfInputNotes,
+    assetAddress,
     numberOfOutputNotes,
 }) {
-    return createNoteFromBalance({
-        assetAddress,
+    console.log({
+
+        transactions,
+        from,
         sender,
-        transaction,
-        numberOfInputNotes,
+        assetAddress,
         numberOfOutputNotes,
     });
+    const data = await query({
+        type: 'constructProof',
+        args: {
+            proofType: 'TRANSFER_PROOF',
+            transactions,
+            from,
+            assetAddress,
+            sender,
+            numberOfOutputNotes,
+        },
+    }) || {};
+
+    return data;
 }

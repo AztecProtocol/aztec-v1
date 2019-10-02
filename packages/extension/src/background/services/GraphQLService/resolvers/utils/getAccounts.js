@@ -27,11 +27,12 @@ export default async function getAccounts(args, ctx = {}) {
         promises.push(accountPromise);
     });
 
-    const accounts = Promise.all(promises);
-    accounts.map(({ error, account: { address, linkedPublicKey } }) => ({
+    let accounts = await Promise.all(promises);
+    accounts = accounts.map(({ error, account: { address, linkedPublicKey, spendingPublicKey } }) => ({
         id: address,
         address,
         linkedPublicKey,
+        spendingPublicKey,
     }));
 
 

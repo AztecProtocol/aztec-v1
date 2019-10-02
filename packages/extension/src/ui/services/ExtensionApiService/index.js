@@ -280,6 +280,26 @@ class ExtensionApi {
                     notesOwner,
                 };
             },
+            transfer: async ({
+                assetAddress,
+                sender,
+                transactions,
+                numberOfInputNotes,
+                domain,
+                currentAddress,
+            }) => {
+                const transferProof = await createNoteFromBalance(apollo, {
+                    assetAddress,
+                    sender,
+                    transactions,
+                    numberOfInputNotes,
+                    numberOfOutputNotes: 0,
+                    domain,
+                    currentAddress,
+                });
+                return transferProof;
+            },
+
             withdraw: async ({
                 assetAddress,
                 sender,
