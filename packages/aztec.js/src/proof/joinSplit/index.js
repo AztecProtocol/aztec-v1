@@ -181,7 +181,7 @@ class JoinSplitProof extends Proof {
             ...offsets,
             ...encodedParams,
         ];
-        return `0x${abiEncodedParams.join('')}`;
+        return `0x${abiEncodedParams.join('').toLowerCase()}`;
     }
 }
 
