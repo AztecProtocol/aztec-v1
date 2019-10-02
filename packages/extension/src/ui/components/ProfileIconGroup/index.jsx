@@ -4,6 +4,10 @@ import {
     AvatarGroup,
 } from '@aztec/guacamole-ui';
 import {
+    themeType,
+    profileType,
+} from '~ui/config/propTypes';
+import {
     avatarSizesMap,
 } from '~ui/styles/guacamole-vars';
 import {
@@ -75,10 +79,10 @@ const ProfileIconGroup = ({
 
 ProfileIconGroup.propTypes = {
     className: PropTypes.string,
-    theme: PropTypes.oneOf(Object.keys(themeStyleMapping)),
+    theme: themeType,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
     icons: PropTypes.arrayOf(PropTypes.shape({
-        type: PropTypes.oneOf(['', 'asset', 'user']),
+        type: profileType,
         src: PropTypes.string,
         alt: PropTypes.string,
     })).isRequired,

@@ -4,6 +4,9 @@ import classnames from 'classnames';
 import {
     Button,
 } from '@aztec/guacamole-ui';
+import {
+    themeType,
+} from '~ui/config/propTypes';
 import styles from './button.scss';
 
 const CustomButton = ({
@@ -36,10 +39,7 @@ const CustomButton = ({
 
 CustomButton.propTypes = {
     className: PropTypes.string,
-    theme: PropTypes.oneOf([
-        'primary',
-        'white',
-    ]),
+    theme: themeType,
     outlined: PropTypes.bool,
     rounded: PropTypes.bool,
     disabled: PropTypes.bool,

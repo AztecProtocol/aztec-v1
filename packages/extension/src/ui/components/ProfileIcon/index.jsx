@@ -6,6 +6,10 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    themeType,
+    profileType,
+} from '~ui/config/propTypes';
+import {
     avatarSizesMap,
 } from '~ui/styles/guacamole-vars';
 
@@ -94,8 +98,8 @@ const ProfileIcon = ({
 
 ProfileIcon.propTypes = {
     className: PropTypes.string,
-    theme: PropTypes.oneOf(Object.keys(themeStyleMapping)),
-    type: PropTypes.oneOf(['', 'asset', 'user']),
+    theme: themeType,
+    type: profileType,
     src: PropTypes.string,
     alt: PropTypes.string,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),

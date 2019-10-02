@@ -10,6 +10,9 @@ import {
     Icon,
     Clickable,
 } from '@aztec/guacamole-ui';
+import {
+    themeType,
+} from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import styles from './popup.scss';
 
@@ -182,7 +185,7 @@ class InplacePopup extends PureComponent {
 
 InplacePopup.propTypes = {
     className: PropTypes.string,
-    theme: PropTypes.oneOf(['primary', 'white']),
+    theme: themeType,
     items: PropTypes.array.isRequired, // eslint-disable-line react/forbid-prop-types
     renderItem: PropTypes.func.isRequired,
     renderContent: PropTypes.func,
