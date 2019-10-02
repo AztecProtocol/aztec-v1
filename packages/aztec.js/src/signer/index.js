@@ -73,6 +73,36 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
 };
 
 /**
+ * Create an EIP712 ECDSA signature over an array of AZTEC notes, used to either grant or revoke delegation of note control
+ * to a third party using the batchConfidentialApprove() of a ZkAsset.
+ *
+ * ECSA signature is formatted as follows:
+ * - `r` and `s` occupy 32 bytes
+ * - `v` occupies 1 byte
+ * 
+ * @method signMultipleNotesForBatchConfidentialApprove
+ * @param {string} verifyingContract address of target contract
+ * @param {string[]} noteHashes array of the keccak256 hashes of notes, for which approval is being granted or revoked
+ * @param {string} spender address to which note control is being delegated
+ * @param {bool} spenderApproval boolean determining whether the spender is being granted approval
+ * @param {string} privateKey the private key of message signer
+ * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
+ */
+signer.signNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, spenderApproval, privateKey) => {
+    const domain = signer.generateZKAssetDomainParams(verifyingContract);
+    const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
+    const message = {
+        noteHashes,
+        spender,
+        spenderApproval,
+    };
+
+    const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
+    const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    return signature;
+};
+
+/**
  * Construct EIP712 ECDSA signatures over an array of notes for use in calling confidentialTransfer()
  *
  * @method signNotesForConfidentialTransfer
