@@ -24,4 +24,13 @@ contract ZkAssetOwnableTest {
         // throws if not approval had not been given before
         zkAssetOwnable.confidentialTransferFrom(_proof, _proofOutput);
     }
+
+    function callBatchConfidentialApprove(
+        bytes32[] memory _noteHashes,
+        address _spender,
+        bool _spenderApproval,
+        bytes memory _batchSignature
+    ) public {
+        zkAssetOwnable.batchConfidentialApprove(_noteHashes, _spender, _spenderApproval, _batchSignature);
+    }
 }

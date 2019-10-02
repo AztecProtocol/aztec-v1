@@ -24,6 +24,14 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
 
+    bytes32 constant internal MULTIPLE_NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
+        "MultipleNoteSignature(",
+            "bytes32[] noteHashes,",
+            "address spender,",
+            "bool spenderApproval",
+        ")"
+    ));
+
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
             "bytes32 noteHash,",
@@ -48,7 +56,6 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     mapping(bytes32 => uint256) public metaDataTimeLog;
     mapping(bytes32 => uint256) public noteAccess;
     mapping(bytes32 => bool) public signatureLog;
-
 
     constructor(
         address _aceAddress,
@@ -124,7 +131,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
     * @param _spender - address being approved to spend the note
     * @param _spenderApproval - defines whether the _spender address is being approved to spend the
-    * note, or if permission is being revoked
+    * note, or if permission is being revoked. True if approved, false if not approved
     * @param _signature - ECDSA signature from the note owner that validates the
     * confidentialApprove() instruction
     */
@@ -150,6 +157,51 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         validateSignature(_hashStruct, _noteHash, _signature);
         confidentialApproved[_noteHash][_spender] = _spenderApproval;
+    }
+
+    /**
+     * @dev Note owner can approve a third party address, such as a smart contract,
+     * to spend multiple notes on their behalf. This allows a batch approval of notes
+     * to be performed, rather than individually for each note via confidentialApprove(). 
+     *
+     * @param _noteHashes - array of the keccak256 hashes of notes, due to be spent
+     * @param _spender - address being approved to spend the notes
+     * @param _spenderApproval - defines whether the _spender address is being approved to spend the
+     * note, or if permission is being revoked. True if approved, false if not approved
+     * @param _batchSignature - ECDSA signature over the notes, approving them to be spent
+     */
+    function batchConfidentialApprove(
+        bytes32[] memory _noteHashes,
+        address _spender,
+        bool _spenderApproval,
+        bytes memory _batchSignature
+    ) public {
+
+        // Prevent possible replay attacks
+        bytes32 signatureHash = keccak256(abi.encodePacked(_batchSignature));
+        require(signatureLog[signatureHash] != true, "signature has already been used");
+        signatureLog[signatureHash] = true;
+
+        bytes32 _hashStruct = keccak256(abi.encode(
+            MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
+            keccak256(abi.encode(_noteHashes)),
+            _spender,
+            _spenderApproval
+        ));
+
+        bytes32 msgHash = hashEIP712Message(_hashStruct);
+        address signer = recoverSignature(
+            msgHash,
+            _batchSignature
+        );
+
+        // Permissioning check and approve
+        for (uint256 i = 0; i < _noteHashes.length; i += 1) {
+            ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHashes[i]);
+            require(status == 1, "only unspent notes can be approved");
+            require(noteOwner == signer, "the note owner did not sign this message");
+            confidentialApproved[_noteHashes[i]][_spender] = _spenderApproval;
+        }
     }
 
     /**

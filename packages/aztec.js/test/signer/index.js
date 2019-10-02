@@ -162,7 +162,7 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
-        it('should recover publicKey from signNotesForBatchConfidentialApprove() sig params', async() => {
+        it('should recover publicKey from signNotesForBatchConfidentialApprove() sig params', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
