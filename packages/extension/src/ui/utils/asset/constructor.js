@@ -12,7 +12,7 @@ export default async function assetConstructor(address) {
 
     return {
         code,
-        token: tokenAddress,
+        tokenAddress,
         address,
         icon: icon(code),
     };

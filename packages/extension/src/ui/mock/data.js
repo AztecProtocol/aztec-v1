@@ -27,40 +27,28 @@ export const assets = [
     {
         code: 'dai',
         address: randomAddress(),
+        tokenAddress: randomAddress(),
         icon: daiIcon,
         balance: 0.51232,
     },
     {
         code: 'usdc',
         address: randomAddress(),
+        tokenAddress: randomAddress(),
         icon: usdcIcon,
         balance: 2832.21,
     },
     {
         code: 'cc',
         address: randomAddress(),
+        tokenAddress: randomAddress(),
         balance: 0,
     },
-    {
-        code: 'da',
+    ...generate(5, () => ({
         address: randomAddress(),
+        tokenAddress: randomAddress(),
         balance: 0,
-    },
-    {
-        code: 'ec',
-        address: randomAddress(),
-        balance: 0,
-    },
-    {
-        code: 'ffc',
-        address: randomAddress(),
-        balance: 0,
-    },
-    {
-        code: 'ica',
-        address: randomAddress(),
-        balance: 0,
-    },
+    })),
 ];
 
 export const domains = [

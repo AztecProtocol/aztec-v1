@@ -6,6 +6,10 @@ import tokens from '~ui/config/tokens';
 
 class UII18n extends I18n {
     token(tokenCode = '') {
+        if (!tokenCode) {
+            return '';
+        }
+
         const code = tokenCode.toLowerCase();
         if (this.has(code)) {
             return this.t(code);
