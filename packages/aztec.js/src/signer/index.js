@@ -84,17 +84,18 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
  * @param {string} verifyingContract address of target contract
  * @param {string[]} noteHashes array of the keccak256 hashes of notes, for which approval is being granted or revoked
  * @param {string} spender address to which note control is being delegated
- * @param {bool} spenderApproval boolean determining whether the spender is being granted approval
+ * @param {bool} spenderApprovals array of booleans determining whether the spender is being granted or revoked approval
+ * for each note
  * @param {string} privateKey the private key of message signer
  * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
  */
-signer.signNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, spenderApproval, privateKey) => {
+signer.signNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, spenderApprovals, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
     const message = {
         noteHashes,
         spender,
-        spenderApproval,
+        spenderApprovals,
     };
 
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);

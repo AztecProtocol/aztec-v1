@@ -28,7 +28,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         "MultipleNoteSignature(",
             "bytes32[] noteHashes,",
             "address spender,",
-            "bool spenderApproval",
+            "bool[] spenderApprovals",
         ")"
     ));
 
@@ -36,7 +36,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         "NoteSignature(",
             "bytes32 noteHash,",
             "address spender,",
-            "bool spenderApproval",
+            "bool[] spenderApprovals",
         ")"
     ));
     
@@ -166,14 +166,14 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
      *
      * @param _noteHashes - array of the keccak256 hashes of notes, due to be spent
      * @param _spender - address being approved to spend the notes
-     * @param _spenderApproval - defines whether the _spender address is being approved to spend the
-     * note, or if permission is being revoked. True if approved, false if not approved
+     * @param _spenderApprovals - array of approvals, defining whether the _spender being approved or revoked permission
+     * to spend the relevant note. True if approval granted, false if revoked
      * @param _batchSignature - ECDSA signature over the notes, approving them to be spent
      */
     function batchConfidentialApprove(
         bytes32[] memory _noteHashes,
         address _spender,
-        bool _spenderApproval,
+        bool[] memory _spenderApprovals,
         bytes memory _batchSignature
     ) public {
 
@@ -186,7 +186,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
             keccak256(abi.encode(_noteHashes)),
             _spender,
-            _spenderApproval
+            keccak256(abi.encode(_spenderApprovals))
         ));
 
         bytes32 msgHash = hashEIP712Message(_hashStruct);
@@ -200,7 +200,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHashes[i]);
             require(status == 1, "only unspent notes can be approved");
             require(noteOwner == signer, "the note owner did not sign this message");
-            confidentialApproved[_noteHashes[i]][_spender] = _spenderApproval;
+            confidentialApproved[_noteHashes[i]][_spender] = _spenderApprovals[i];
         }
     }
 
