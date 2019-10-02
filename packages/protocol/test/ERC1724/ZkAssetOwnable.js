@@ -295,7 +295,7 @@ contract('ZkAssetOwnable', (accounts) => {
             expect(loggedRevokedStatus).to.equal(false);
         });
 
-        it.only('should delegate spending control of multiple notes, using batchConfidentialApprove()', async () => {
+        it('should delegate spending control of multiple notes, using batchConfidentialApprove()', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const testNoteA = await note.create(publicKey, 10);
             const testNoteB = await note.create(publicKey, 40);
@@ -336,7 +336,7 @@ contract('ZkAssetOwnable', (accounts) => {
 
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            const spenderApproval = true;
+            const spenderApprovals = [true, true];
             const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
             const spender = zkAssetOwnableTest.address;
 
@@ -344,13 +344,75 @@ contract('ZkAssetOwnable', (accounts) => {
                 zkAssetOwnable.address,
                 noteHashes,
                 spender,
-                spenderApproval,
+                spenderApprovals,
                 privateKey,
             );
 
-            await zkAssetOwnableTest.callBatchConfidentialApprove(noteHashes, spender, spenderApproval, batchSignature);
+            await zkAssetOwnableTest.callBatchConfidentialApprove(noteHashes, spender, spenderApprovals, batchSignature);
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
+        });
+
+        it('should seletively approve and revoke spending control of multiple notes, using batchConfidentialApprove()', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const testNoteA = await note.create(publicKey, 10);
+            const testNoteB = await note.create(publicKey, 40);
+
+            // Create some notes in the assets note registry
+            const depositInputNotes = [];
+            const depositOutputNotes = [testNoteA, testNoteB];
+            const depositPublicValue = -50;
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const signatures = [];
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, { from: sender });
+
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
+                from: sender,
+            });
+
+            const transferInputNotes = depositOutputNotes;
+            const transferOutputNotes = [await note.create(publicKey, 50)];
+            const withdrawalPublicValue = 0;
+
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnableTest.address);
+
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
+
+            const spenderApprovals = [true, false];
+            const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
+            const spender = zkAssetOwnableTest.address;
+
+            const batchSignature = signer.signNotesForBatchConfidentialApprove(
+                zkAssetOwnable.address,
+                noteHashes,
+                spender,
+                spenderApprovals,
+                privateKey,
+            );
+
+            await zkAssetOwnableTest.callBatchConfidentialApprove(noteHashes, spender, spenderApprovals, batchSignature);
+
+            const loggedApprovalStatusA = await zkAssetOwnable.confidentialApproved.call(testNoteA.noteHash, spender);
+            expect(loggedApprovalStatusA).to.equal(true);
+
+            const loggedApprovalStatusB = await zkAssetOwnable.confidentialApproved.call(testNoteB.noteHash, spender);
+            expect(loggedApprovalStatusB).to.equal(false);
         });
     });
 
@@ -644,6 +706,54 @@ contract('ZkAssetOwnable', (accounts) => {
             await truffleAssert.reverts(
                 zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, approvalSignature),
                 'signature has already been used',
+            );
+        });
+
+        it('should fail to perform confidentialTransferFrom() if batchConfidentialApprove() not previously called', async () => {
+            const { publicKey } = secp256k1.generateAccount();
+            const testNoteA = await note.create(publicKey, 10);
+            const testNoteB = await note.create(publicKey, 40);
+
+            // Create some notes in the assets note registry
+            const depositInputNotes = [];
+            const depositOutputNotes = [testNoteA, testNoteB];
+            const depositPublicValue = -50;
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const signatures = [];
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, { from: sender });
+
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, signatures, {
+                from: sender,
+            });
+
+            const transferInputNotes = depositOutputNotes;
+            const transferOutputNotes = [await note.create(publicKey, 50)];
+            const withdrawalPublicValue = 0;
+
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnableTest.address);
+
+            await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
+
+            // batchConfidentialApprove() not called
+            await truffleAssert.reverts(
+                zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output),
+                'sender does not have approval to spend input note',
             );
         });
     });

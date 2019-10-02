@@ -166,16 +166,17 @@ describe('Signer', () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
-            const spenderApproval = true;
+            const spenderApprovals = [true, true];
             const testNoteA = await note.create(publicKey, 10);
             const testNoteB = await note.create(publicKey, 30);
 
             const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
+
             const signature = signer.signNotesForBatchConfidentialApprove(
                 verifyingContract,
                 noteHashes,
                 spender,
-                spenderApproval,
+                spenderApprovals,
                 privateKey,
             );
 
@@ -189,7 +190,7 @@ describe('Signer', () => {
             const message = {
                 noteHashes,
                 spender,
-                spenderApproval,
+                spenderApprovals,
             };
 
             const { encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);

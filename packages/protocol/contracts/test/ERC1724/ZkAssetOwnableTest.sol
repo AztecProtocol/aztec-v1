@@ -28,9 +28,9 @@ contract ZkAssetOwnableTest {
     function callBatchConfidentialApprove(
         bytes32[] memory _noteHashes,
         address _spender,
-        bool _spenderApproval,
+        bool[] memory _spenderApprovals,
         bytes memory _batchSignature
     ) public {
-        zkAssetOwnable.batchConfidentialApprove(_noteHashes, _spender, _spenderApproval, _batchSignature);
+        zkAssetOwnable.batchConfidentialApprove(_noteHashes, _spender, _spenderApprovals, _batchSignature);
     }
 }
