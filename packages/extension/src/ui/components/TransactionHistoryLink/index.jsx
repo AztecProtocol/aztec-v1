@@ -40,6 +40,7 @@ const TransactionHistoryLink = ({
     <div className={className}>
         <SummaryLink
             assetCode={asset.code}
+            assetIcon={asset.icon}
             title={type}
             onClick={onClick}
         >
@@ -91,7 +92,8 @@ TransactionHistoryLink.propTypes = {
         'withdraw',
     ]).isRequired,
     asset: PropTypes.shape({
-        code: PropTypes.string.isRequired,
+        code: PropTypes.string,
+        icon: PropTypes.string,
     }).isRequired,
     address: PropTypes.string.isRequired,
     value: PropTypes.number.isRequired,

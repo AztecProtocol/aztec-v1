@@ -52,7 +52,7 @@ TransactionHistorySummary.propTypes = {
     transactions: PropTypes.arrayOf(PropTypes.shape({
         type: PropTypes.string.isRequired,
         asset: PropTypes.shape({
-            code: PropTypes.string.isRequired,
+            code: PropTypes.string,
         }),
         address: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,

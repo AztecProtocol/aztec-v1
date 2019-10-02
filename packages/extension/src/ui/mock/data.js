@@ -2,6 +2,8 @@ import {
     randomId,
     randomInt,
 } from '~utils/random';
+import daiIcon from '~ui/images/tokens/dai.png';
+import usdcIcon from '~ui/images/tokens/usdc.png';
 import compoundLogo from './images/compound.png';
 
 const generate = (count, generator) => {
@@ -25,11 +27,13 @@ export const assets = [
     {
         code: 'dai',
         address: randomAddress(),
+        icon: daiIcon,
         balance: 0.51232,
     },
     {
         code: 'usdc',
         address: randomAddress(),
+        icon: usdcIcon,
         balance: 2832.21,
     },
     {

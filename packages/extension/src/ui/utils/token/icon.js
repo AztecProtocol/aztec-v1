@@ -1,9 +1,9 @@
-import assetsConfig from '~ui/config/assets';
+import tokensConfig from '~ui/config/tokens';
 
 export default function icon(code) {
     const {
         iconSrc,
-    } = assetsConfig[code] || {};
+    } = tokensConfig[code] || {};
 
     return iconSrc;
 }

@@ -1,8 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    icon,
-} from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
 import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
@@ -67,7 +64,7 @@ const NoteAccessTransaction = ({
             theme="white"
             from={{
                 type: 'asset',
-                src: icon(code),
+                src: asset.icon,
                 alt: code,
                 description: formatAddress(hash, 6, 4),
             }}
@@ -110,8 +107,9 @@ NoteAccessTransaction.propTypes = {
         hash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         asset: PropTypes.shape({
-            code: PropTypes.string.isRequired,
             address: PropTypes.string.isRequired,
+            code: PropTypes.string,
+            icon: PropTypes.string,
         }).isRequired,
     }).isRequired,
     accounts: PropTypes.arrayOf(PropTypes.shape({

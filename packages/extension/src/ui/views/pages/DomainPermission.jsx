@@ -22,7 +22,7 @@ class DomainPermission extends PureComponent {
             assets: [],
             loading: false,
             success: false,
-            error: '',
+            error: null,
         };
     }
 

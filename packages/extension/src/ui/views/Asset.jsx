@@ -10,6 +10,7 @@ import TransactionHistorySummary from '~ui/components/TransactionHistorySummary'
 
 const Asset = ({
     code,
+    icon,
     balance,
     goBack,
     onClose,
@@ -25,6 +26,7 @@ const Asset = ({
         <Block padding="0 l l">
             <AssetSummary
                 code={code}
+                icon={icon}
                 balance={balance}
             />
         </Block>
@@ -36,7 +38,8 @@ const Asset = ({
 );
 
 Asset.propTypes = {
-    code: PropTypes.string.isRequired,
+    code: PropTypes.string,
+    icon: PropTypes.string,
     balance: PropTypes.number,
     pastTransactions: PropTypes.arrayOf(PropTypes.shape({
         type: PropTypes.string.isRequired,
@@ -53,6 +56,8 @@ Asset.propTypes = {
 };
 
 Asset.defaultProps = {
+    code: '',
+    icon: '',
     balance: null,
     pastTransactions: [],
     isLoadingTransactions: false,
