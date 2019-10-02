@@ -11,10 +11,7 @@ import {
     textColorNames,
     defaultLabelColorName,
 } from '~ui/styles/guacamole-vars';
-import {
-    name,
-    icon,
-} from '~ui/utils/asset';
+import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
 import ProfileIcon from '~ui/components/ProfileIcon';
 import {
@@ -26,6 +23,7 @@ const AssetRow = ({
     size,
     textSize,
     code,
+    icon,
     address,
     prefixLength,
     suffixLength,
@@ -37,13 +35,13 @@ const AssetRow = ({
         nowrap
     >
         <ProfileIcon
-            src={icon(code)}
+            src={icon}
             size={size}
         />
         <Block left={spacingMapping[size]}>
             <FlexBox valign="center" nowrap>
                 <Text
-                    text={name(code)}
+                    text={i18n.token(code)}
                     size={textSize || size}
                     color={color}
                 />
@@ -64,7 +62,8 @@ AssetRow.propTypes = {
     className: PropTypes.string,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
     textSize: PropTypes.oneOf(['', 'inherit', ...fontSizeKeys]),
-    code: PropTypes.string.isRequired,
+    code: PropTypes.string,
+    icon: PropTypes.string,
     address: PropTypes.string.isRequired,
     prefixLength: PropTypes.number,
     suffixLength: PropTypes.number,
@@ -75,6 +74,8 @@ AssetRow.defaultProps = {
     className: '',
     size: 's',
     textSize: '',
+    code: '',
+    icon: '',
     prefixLength: 6,
     suffixLength: 4,
     color: defaultLabelColorName,

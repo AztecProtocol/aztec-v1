@@ -43,8 +43,8 @@ const Send = ({
 
 Send.propTypes = {
     asset: PropTypes.shape({
-        code: PropTypes.string.isRequired,
         address: PropTypes.string.isRequired,
+        code: PropTypes.string,
     }).isRequired,
     user: PropTypes.shape({
         address: PropTypes.string.isRequired,

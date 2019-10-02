@@ -8,8 +8,6 @@ import {
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import {
-    name,
-    icon,
     formatValue,
 } from '~ui/utils/asset';
 import ProfileIcon from '~ui/components/ProfileIcon';
@@ -18,6 +16,7 @@ import Button from '~ui/components/Button';
 const AssetSummary = ({
     className,
     code,
+    icon,
     balance,
 }) => (
     <Block
@@ -27,13 +26,13 @@ const AssetSummary = ({
         borderRadius="xs"
     >
         <ProfileIcon
-            src={icon(code)}
+            src={icon}
             alt={code}
             size="l"
         />
         <Block top="m">
             <Text
-                text={name(code)}
+                text={i18n.token(code)}
                 size="m"
             />
         </Block>
@@ -71,12 +70,15 @@ const AssetSummary = ({
 
 AssetSummary.propTypes = {
     className: PropTypes.string,
-    code: PropTypes.string.isRequired,
+    code: PropTypes.string,
+    icon: PropTypes.string,
     balance: PropTypes.number.isRequired,
 };
 
 AssetSummary.defaultProps = {
     className: '',
+    code: '',
+    icon: '',
 };
 
 export default AssetSummary;

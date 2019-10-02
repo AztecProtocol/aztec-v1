@@ -28,15 +28,13 @@ const SendConfirm = ({
 }) => {
     const {
         code,
-        address: assetAddress,
     } = asset;
 
     const assetInfoNode = (
         <AssetRow
+            {...asset}
             size="xxs"
             textSize="inherit"
-            code={code}
-            address={assetAddress}
             prefixLength={6}
             suffixLength={4}
         />
@@ -149,8 +147,9 @@ const SendConfirm = ({
 
 SendConfirm.propTypes = {
     asset: PropTypes.shape({
-        code: PropTypes.string.isRequired,
         address: PropTypes.string.isRequired,
+        code: PropTypes.string,
+        icon: PropTypes.string,
     }).isRequired,
     user: PropTypes.shape({
         address: PropTypes.string.isRequired,

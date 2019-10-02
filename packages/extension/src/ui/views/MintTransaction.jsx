@@ -5,7 +5,6 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
-    icon,
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
@@ -82,7 +81,7 @@ const MintTransaction = ({
                 }}
                 to={{
                     type: 'asset',
-                    src: icon(code),
+                    src: asset.icon,
                     alt: code,
                     description: formatAddress(assetAddress, 6, 4),
                 }}
@@ -120,8 +119,9 @@ const MintTransaction = ({
 
 MintTransaction.propTypes = {
     asset: PropTypes.shape({
-        code: PropTypes.string.isRequired,
         address: PropTypes.string.isRequired,
+        code: PropTypes.string,
+        icon: PropTypes.string,
     }).isRequired,
     user: PropTypes.shape({
         address: PropTypes.string.isRequired,

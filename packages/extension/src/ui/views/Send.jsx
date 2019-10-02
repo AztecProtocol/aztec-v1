@@ -111,8 +111,8 @@ const Send = ({
 
 Send.propTypes = {
     asset: PropTypes.shape({
-        code: PropTypes.string.isRequired,
         address: PropTypes.string.isRequired,
+        code: PropTypes.string,
     }).isRequired,
     fromAddress: PropTypes.string.isRequired,
     // toAddresses: PropTypes.arrayOf(PropTypes.string).isRequired,

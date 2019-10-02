@@ -6,10 +6,6 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import {
-    name,
-    icon,
-} from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
 import Popup from '~ui/components/Popup';
 import Ticket from '~ui/components/Ticket';
@@ -38,15 +34,16 @@ const DomainPermissionTransaction = ({
         const maxAvatars = 3;
         assets.slice(0, maxAvatars).forEach(({
             code,
+            icon,
         }) => {
             icons.push({
-                src: icon(code),
+                src: icon,
                 alt: code.length > 2 ? code[0] : code,
-                tooltip: name(code),
+                tooltip: i18n.token(code),
             });
         });
         if (assets.length > maxAvatars) {
-            moreItems = assets.slice(maxAvatars).map(({ code }) => name(code));
+            moreItems = assets.slice(maxAvatars).map(({ code }) => i18n.token(code));
         }
     }
 
@@ -84,8 +81,8 @@ const DomainPermissionTransaction = ({
                     </Block>
                     {assets.length === 1 && (
                         <InfoRow
-                            name={name(firstAsset.code)}
-                            iconSrc={icon(firstAsset.code)}
+                            name={i18n.token(firstAsset.code)}
+                            iconSrc={firstAsset.icon}
                             nameHint={`(${formatAddress(firstAsset.address)})`}
                         />
                     )}
@@ -117,8 +114,9 @@ DomainPermissionTransaction.propTypes = {
         iconSrc: PropTypes.string,
     }).isRequired,
     assets: PropTypes.arrayOf(PropTypes.shape({
-        code: PropTypes.string.isRequired,
         address: PropTypes.string.isRequired,
+        code: PropTypes.string,
+        icon: PropTypes.string,
     })),
     loading: PropTypes.bool,
     success: PropTypes.bool,

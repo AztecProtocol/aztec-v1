@@ -33,15 +33,13 @@ const NoteAccessConfirm = ({
     } = note;
     const {
         code,
-        address: assetAddress,
     } = asset;
 
     const assetInfoNode = (
         <AssetRow
+            {...asset}
             size="xs"
             textSize="inherit"
-            code={code}
-            address={assetAddress}
             prefixLength={6}
             suffixLength={4}
         />
@@ -124,8 +122,9 @@ NoteAccessConfirm.propTypes = {
         hash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         asset: PropTypes.shape({
-            code: PropTypes.string.isRequired,
             address: PropTypes.string.isRequired,
+            code: PropTypes.string,
+            icon: PropTypes.string,
         }).isRequired,
     }).isRequired,
     accounts: PropTypes.arrayOf(PropTypes.shape({

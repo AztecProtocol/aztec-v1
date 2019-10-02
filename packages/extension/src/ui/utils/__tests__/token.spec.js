@@ -1,9 +1,9 @@
 import {
     formatValue,
-} from '../asset';
+} from '../token';
 
 
-jest.mock('~ui/config/assets', () => ({
+jest.mock('~ui/config/tokens', () => ({
     __esModule: true,
     default: {
         bar: {
@@ -16,7 +16,7 @@ jest.mock('~ui/config/assets', () => ({
 }));
 
 describe('formatValue', () => {
-    it('format asset value with specific decimal', () => {
+    it('format token value with specific decimal', () => {
         expect(formatValue('foo', 0)).toBe('0');
         expect(formatValue('foo', 123)).toBe('123');
         expect(formatValue('foo', 1000)).toBe('1,000');
@@ -26,7 +26,7 @@ describe('formatValue', () => {
         expect(formatValue('foo', 1000.234)).toBe('1,000.23');
     });
 
-    it('format asset value with zero decimal', () => {
+    it('format token value with zero decimal', () => {
         expect(formatValue('bar', 0)).toBe('0');
         expect(formatValue('bar', 123)).toBe('123');
         expect(formatValue('bar', 1000)).toBe('1,000');
@@ -34,7 +34,7 @@ describe('formatValue', () => {
         expect(formatValue('bar', 1000.00)).toBe('1,000');
     });
 
-    it('format asset value with no config', () => {
+    it('format token value with no config', () => {
         expect(formatValue('foobar', 0)).toBe('0');
         expect(formatValue('foobar', 123)).toBe('123');
         expect(formatValue('foobar', 1000)).toBe('1,000');

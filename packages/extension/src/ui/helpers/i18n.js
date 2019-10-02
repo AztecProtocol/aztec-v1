@@ -2,23 +2,23 @@ import I18n from '~utils/I18n';
 import {
     warnLog,
 } from '~utils/log';
-import assets from '~ui/config/assets';
+import tokens from '~ui/config/tokens';
 
 class UII18n extends I18n {
-    asset(assetCode = '') {
-        const code = assetCode.toLowerCase();
+    token(tokenCode = '') {
+        const code = tokenCode.toLowerCase();
         if (this.has(code)) {
             return this.t(code);
         }
 
         const {
             name,
-        } = assets[code] || {};
+        } = tokens[code] || {};
         if (!name) {
-            warnLog(`Asset name is not defined for '${code}'.`);
+            warnLog(`Token name is not defined for '${code}'.`);
         }
 
-        return name || assetCode;
+        return name || tokenCode;
     }
 }
 

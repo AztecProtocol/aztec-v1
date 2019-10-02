@@ -44,8 +44,8 @@ NoteAccess.propTypes = {
         hash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         asset: PropTypes.shape({
-            code: PropTypes.string.isRequired,
             address: PropTypes.string.isRequired,
+            code: PropTypes.string,
         }).isRequired,
     }).isRequired,
     accounts: PropTypes.arrayOf(PropTypes.shape({
