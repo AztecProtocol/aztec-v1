@@ -246,12 +246,7 @@ const fetchLatestNote = async ({
     });
 
     if (!groupedNotes.isEmpty()) {
-        const allNotes = [
-            ...groupedNotes.createNotes,
-            ...groupedNotes.updateNotes,
-            ...groupedNotes.destroyNotes,
-        ];
-
+        const allNotes = groupedNotes.allNotes();
         return {
             error: null,
             note: allNotes[allNotes.length - 1],
