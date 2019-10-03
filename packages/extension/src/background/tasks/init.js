@@ -13,7 +13,6 @@ import {
 } from '../config/infura';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
-import GraphNodeService from '~background/services/GraphNodeService';
 import Web3Service from '~client/services/Web3Service';
 import domainModel from '../../database/models/domain';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
@@ -111,13 +110,6 @@ export default async function init() {
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),
         syncInterval: await settings('SYNC_INTERVAL'),
-    });
-
-
-    const graphNodeServerUrl = await get('__graphNode');
-
-    GraphNodeService.set({
-        graphNodeServerUrl,
     });
 
     configureWeb3Service();
