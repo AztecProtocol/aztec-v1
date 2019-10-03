@@ -12,23 +12,20 @@ const uiTypes = gql`
         error: Error
         action: Action
     }
-    type SubscriptionApiResponse {
-        success: Boolean error: Error
-    }
-    type PermissionApiResponse {
+    type UserAccountApiResponse {
         account: User
         error: Error
-        action: Action
     }
     extend type Query {
-        subscribe(
-            type: String!
-            requestId: String!
-            assetId: ID
-            noteId: ID
-            currentAddress: String!
-            domain: String!
-        ): SubscriptionApiResponse
+        user(
+            id: ID!
+        ): User
+        asset(
+            id: ID!
+        ): Asset
+        account(
+            address: String!
+        ): Account
     }
     extend type Mutation {
         login(
@@ -52,7 +49,7 @@ const uiTypes = gql`
         registerDomain(
             domain: String!
             currentAddress: String!
-        ): SubscriptionApiResponse
+        ): ValidationApiResponse
     }
 `;
 

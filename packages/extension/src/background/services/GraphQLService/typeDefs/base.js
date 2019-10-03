@@ -57,6 +57,15 @@ export default gql`
         value: Int
         status: String
     }
+    type NotesApiResponse {
+        notes: [Note!]
+        error: Error
+        action: Action
+    }
+    type ValidationApiResponse {
+        success: Boolean
+        error: Error
+    }
     type UtilityNote {
         id: ID!
         hash: String!
@@ -74,81 +83,7 @@ export default gql`
         address: String
         address_in: [String!]
     }
-    type AssetApiResponse {
-        asset: Asset
-        error: Error
-        action: Action
-    }
-    type AccountApiResponse {
-        account: Account
-        error: Error
-        action: Action
-    }
-    type AccountsApiResponse {
-        accounts: [Account!]
-        error: Error
-        action: Action
-    }
-    type NoteApiResponse {
-        note: Note
-        error: Error
-        action: Action
-    }
-    type NotesApiResponse {
-        notes: [Note!]
-        error: Error
-        action: Action
-    }
-    type UtilityNoteApiResponse {
-      note: UtilityNote
-      error: Error
-      action: Action
-    }
-    type GrantAccessApiResponse {
-        permission: GrantNoteAccessPermission
-        error: Error
-        action: Action
-    }
-    type UserAccountApiResponse {
-        account: User
-        error: Error
-    }
     type Query {
-        user(
-            id: ID
-            currentAddress: String!
-            domain: String!
-        ): UserAccountApiResponse
-        asset(
-            id: ID!
-            currentAddress: String!
-            domain: String!
-        ): AssetApiResponse
-        account(
-            currentAddress: String!
-            domain: String!
-        ): AccountApiResponse
-        accounts(
-            where: Account_filter!
-            currentAddress: String!
-            domain: String!
-        ): AccountsApiResponse
-        note(
-            id: ID!
-            currentAddress: String!
-            domain: String!
-        ): NoteApiResponse
-        utilityNote(
-            id: ID!
-            currentAddress: String!
-            domain: String!
-        ): UtilityNoteApiResponse
-        grantNoteAccessPermission(
-            noteId: ID!
-            address: String!
-            currentAddress: String!
-            domain: String!
-        ): GrantAccessApiResponse
         pickNotesFromBalance(
             assetId: ID!
             amount: Int!

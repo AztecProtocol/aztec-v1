@@ -2,16 +2,81 @@ import gql from 'graphql-tag';
 import base from './base';
 
 const backgroundTypes = gql`
+    type AssetApiResponse {
+        asset: Asset
+        error: Error
+        action: Action
+    }
+    type AccountApiResponse {
+        account: Account
+        error: Error
+        action: Action
+    }
+    type AccountsApiResponse {
+        accounts: [Account!]
+        error: Error
+        action: Action
+    }
+    type NoteApiResponse {
+        note: Note
+        error: Error
+        action: Action
+    }
+    type UtilityNoteApiResponse {
+      note: UtilityNote
+      error: Error
+      action: Action
+    }
+    type GrantAccessApiResponse {
+        permission: GrantNoteAccessPermission
+        error: Error
+        action: Action
+    }
+    type UserAccountApiResponse {
+        account: User
+        error: Error
+    }
     type PermissionApiResponse {
         account: User
         error: Error
         action: Action
     }
-    type SubscriptionApiResponse {
-        success: Boolean
-        error: Error
-    }
     extend type Query {
+        user(
+            id: ID
+            currentAddress: String!
+            domain: String!
+        ): UserAccountApiResponse
+        asset(
+            id: ID!
+            currentAddress: String!
+            domain: String!
+        ): AssetApiResponse
+        account(
+            currentAddress: String!
+            domain: String!
+        ): AccountApiResponse
+        accounts(
+            where: Account_filter!
+            currentAddress: String!
+            domain: String!
+        ): AccountsApiResponse
+        note(
+            id: ID!
+            currentAddress: String!
+            domain: String!
+        ): NoteApiResponse
+        utilityNote(
+            id: ID!
+            currentAddress: String!
+            domain: String!
+        ): UtilityNoteApiResponse
+        grantNoteAccessPermission(
+            noteId: ID!
+            address: String!
+            currentAddress: String!
+            domain: String!
+        ): GrantAccessApiResponse
         userPermission(
             currentAddress: String!
             domain: String!
@@ -23,7 +88,7 @@ const backgroundTypes = gql`
             noteId: ID
             currentAddress: String!
             domain: String!
-        ): SubscriptionApiResponse
+        ): ValidationApiResponse
     }
 `;
 

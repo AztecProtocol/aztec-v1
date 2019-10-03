@@ -1,15 +1,14 @@
-import assetModel from '~database/models/asset';
 import AuthService from '~background/services/AuthService';
 import {
     ensureKeyvault,
     ensureAccount,
-    ensureDomainPermission,
 } from '../decorators';
-import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
+import assetModel from '~database/models/asset';
+import userModel from '~database/models/user';
 import mergeResolvers from './utils/mergeResolvers';
 import filterStream from '~utils/filterStream';
 import { randomId } from '~utils/random';
-import syncUserInfo from './utils/syncUserInfo';
+import Web3Service from '~ui/services/Web3Service';
 import base from './base';
 import ClientConnection from '../../../../ui/services/ClientConnectionService';
 
@@ -30,36 +29,27 @@ const uiResolvers = {
             return response.balance;
         },
     },
+    Account: {
+        linkedPublicKey: async ({ address }) => Web3Service
+            .useContract('AZTECAccountRegistry')
+            .method('accountMapping')
+            .call(address),
+    },
     Note: {
         decryptedViewingKey: async ({ decryptedViewingKey }) => decryptedViewingKey,
     },
-    Mutation: {
-        registerExtension: async (_, args) => ({
-            account: await AuthService.registerExtension(args),
-        }),
-        registerAddress: ensureKeyvault(async (_, args) => ({
-            account: await AuthService.registerAddress({
-                address: args.address,
-                linkedPublicKey: args.linkedPublicKey,
-                spendingPublicKey: args.spendingPublicKey,
-                blockNumber: args.blockNumber,
-            }),
-        })),
-        login: ensureAccount(async (_, args) => ({
-            session: await AuthService.login(args),
-        })),
-        registerDomain: ensureAccount(async (_, args) => {
-            await AuthService.registerDomain(args.domain);
-            return {
-                success: true,
-            };
-        }),
-    },
     Query: {
-        subscribe: ensureDomainPermission(async (_, args) => ({
-            success: ClientSubscriptionService.grantSubscription(args),
-        })),
-        pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx, info) => {
+        user: async (_, { id }) => userModel.get({
+            id,
+        }),
+        asset: async (_, { id }) => assetModel.get({
+            address: id,
+        }),
+        account: async (_, { address }) => ({
+            id: address,
+            address,
+        }),
+        pickNotesFromBalance: async (_, args) => {
             const requestId = randomId();
             ClientConnection.backgroundPort.postMessage({
                 requestId,
@@ -81,6 +71,28 @@ const uiResolvers = {
             } = await filterStream('UI_QUERY_RESPONSE', requestId, ClientConnection.background$);
             return {
                 notes: pickNotesFromBalance.notes,
+            };
+        },
+    },
+    Mutation: {
+        registerExtension: async (_, args) => ({
+            account: await AuthService.registerExtension(args),
+        }),
+        registerAddress: ensureKeyvault(async (_, args) => ({
+            account: await AuthService.registerAddress({
+                address: args.address,
+                linkedPublicKey: args.linkedPublicKey,
+                spendingPublicKey: args.spendingPublicKey,
+                blockNumber: args.blockNumber,
+            }),
+        })),
+        login: ensureAccount(async (_, args) => ({
+            session: await AuthService.login(args),
+        })),
+        registerDomain: ensureAccount(async (_, args) => {
+            await AuthService.registerDomain(args.domain);
+            return {
+                success: true,
             };
         }),
     },
