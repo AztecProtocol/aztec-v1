@@ -42,7 +42,7 @@ setup.fetchPoint = async (inputValue) => {
 
     return new Promise((resolve, reject) => {
         const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
-        const fileName = path.posix.resolve(partialPath, `data${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
+        const fileName = path.posix.resolve(partialPath, `data${fileNum * constants.SIGNATURES_PER_FILE - 10}.dat`);
 
         fs.readFile(fileName, (err, data) => {
             if (err) {

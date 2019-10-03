@@ -55,7 +55,7 @@ const constants = {
      *  @type {number}
      *  @default 1024
      */
-    SIGNATURES_PER_FILE: 1024,
+    SIGNATURES_PER_FILE: 10,
     /**
      * BN value equal to 0
      */
