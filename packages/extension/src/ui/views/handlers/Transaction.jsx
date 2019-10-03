@@ -123,34 +123,40 @@ class Transaction extends PureComponent {
         const {
             run,
         } = task;
-        let response;
-        if (run) {
-            response = await run(data);
-        } else if (runTask) {
-            response = await runTask(task, data);
-        } else {
+        if (!run && !runTask) {
             warnLog(`Task '${task.name}' is not handled properly. Please pass 'runTask' to <Transaction /> or assign a custom 'run' to the task in its config.`);
             this.goToNextTask();
             return;
         }
 
-        this.handleResponse(response);
-    };
+        let response;
+        try {
+            response = run
+                ? await run(data)
+                : await runTask(task, data);
+        } catch (error) {
+            console.log(error);
+            response = {
+                error,
+            };
+        }
 
-    handleResponse = (response = {}) => {
         const {
             error,
-            ...data
-        } = response;
+            ...responseData
+        } = response || {};
 
         if (error) {
             this.setState({
-                error,
+                loading: false,
+                error: typeof error === 'string'
+                    ? { message: error }
+                    : error,
             });
             return;
         }
 
-        this.goToNextTask(data);
+        this.goToNextTask(responseData);
     };
 
     handleTransactionComplete = () => {
@@ -180,7 +186,7 @@ class Transaction extends PureComponent {
                 steps={steps}
                 currentStep={currentStep}
                 loading={loading}
-                error={(error && error.key) || ''}
+                error={error}
             />
         );
     }
