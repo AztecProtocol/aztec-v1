@@ -43,11 +43,11 @@ export default async function syncUserInfo(args, ctx) {
         });
     }
 
-    if (linkedPublicKey !== prevLinkedPublicKey) {
-        // TODO
-        // we need to show different UI saying the account is registered, please restore from seed phrase
-        throw permissionError('account.duplicated');
-    }
+    // if (linkedPublicKey !== prevLinkedPublicKey) {
+    //     // TODO
+    //     // we need to show different UI saying the account is registered, please restore from seed phrase
+    //     throw permissionError('account.duplicated');
+    // }
 
     await AuthService.registerAddress(account);
 
