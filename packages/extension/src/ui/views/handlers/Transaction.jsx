@@ -113,7 +113,7 @@ class Transaction extends PureComponent {
         );
     };
 
-    runTask = (task) => {
+    runTask = async (task) => {
         const {
             runTask,
         } = this.props;
@@ -123,14 +123,18 @@ class Transaction extends PureComponent {
         const {
             run,
         } = task;
+        let response;
         if (run) {
-            run(data, this.handleResponse);
+            response = await run(data);
         } else if (runTask) {
-            runTask(task, data, this.handleResponse);
+            response = await runTask(task, data);
         } else {
             warnLog(`Task '${task.name}' is not handled properly. Please pass 'runTask' to <Transaction /> or assign a custom 'run' to the task in its config.`);
             this.goToNextTask();
+            return;
         }
+
+        this.handleResponse(response);
     };
 
     handleResponse = (response = {}) => {
