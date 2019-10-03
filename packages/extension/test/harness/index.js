@@ -43,33 +43,6 @@ const Environment = {
 
         return this;
     },
-
-    createPageObject: function (page, metadata) {
-        const self = this;
-        const data = {
-            index: this.openPages.length,
-            api: page,
-            metadata,
-            clickMain: async function(selector = "button") {
-                const main = await this.api.$(selector);
-                await main.click();
-            },
-            typeMain: async function(text, selector = "input") {
-                const main = await this.api.$(selector);
-                await main.type(text);
-            },
-            close: async function() {
-                try {
-                    await this.api.close();
-                } catch (e) {
-                    console.log('page already closed');
-                }
-                self.openPages.splice(this.index, 1);
-            },
-        };
-        this.openPages.push(data);
-        return data;
-    },
     ...steps,
     ...scenarios
 }
