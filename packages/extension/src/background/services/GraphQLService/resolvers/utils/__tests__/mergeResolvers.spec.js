@@ -11,7 +11,9 @@ describe('mergeResolvers', () => {
 
     it('take two resolvers and return a merged object', () => {
         const resolverA = {
-            note: queryA3,
+            note: {
+                value: queryA3,
+            },
             Query: {
                 query1: queryA1,
                 query2: queryA2,
@@ -22,7 +24,9 @@ describe('mergeResolvers', () => {
         };
 
         const resolverB = {
-            foo: queryB2,
+            foo: {
+                value: queryB2,
+            },
             Query: {
                 query3: queryB1,
             },
@@ -32,8 +36,12 @@ describe('mergeResolvers', () => {
         };
 
         expect(mergeResolvers(resolverA, resolverB)).toEqual({
-            note: queryA3,
-            foo: queryB2,
+            note: {
+                value: queryA3,
+            },
+            foo: {
+                value: queryB2,
+            },
             Query: {
                 query1: queryA1,
                 query2: queryA2,
@@ -71,7 +79,10 @@ describe('mergeResolvers', () => {
 
     it('override previous value with same key', () => {
         const resolverA = {
-            foo: queryA3,
+            foo: {
+                two: queryA2,
+                bar: queryA3,
+            },
             Query: {
                 query1: queryA1,
                 query2: queryA2,
@@ -79,7 +90,10 @@ describe('mergeResolvers', () => {
         };
 
         const resolverB = {
-            foo: queryB2,
+            foo: {
+                one: queryB1,
+                bar: queryB2,
+            },
             Query: {
                 query2: queryB1,
             },
@@ -89,7 +103,11 @@ describe('mergeResolvers', () => {
         };
 
         expect(mergeResolvers(resolverA, resolverB)).toEqual({
-            foo: queryB2,
+            foo: {
+                two: queryA2,
+                bar: queryB2,
+                one: queryB1,
+            },
             Query: {
                 query1: queryA1,
                 query2: queryB1,

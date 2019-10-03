@@ -1,3 +1,19 @@
+const mergeSubType = (resolver1, resolver2) => {
+    const resolver = {
+        ...resolver2,
+    };
+    Object.keys(resolver1).forEach((key) => {
+        resolver[key] = !resolver[key]
+            ? resolver1[key]
+            : {
+                ...resolver1[key],
+                ...resolver[key],
+            };
+    });
+
+    return resolver;
+};
+
 export default function mergeResolvers(...resolvers) {
     return resolvers.reduce((accum, resolver) => {
         const {
@@ -12,8 +28,7 @@ export default function mergeResolvers(...resolvers) {
         } = resolver;
 
         return {
-            ...resolver1,
-            ...resolver2,
+            ...mergeSubType(resolver1, resolver2),
             Query: {
                 ...Query1,
                 ...Query2,
