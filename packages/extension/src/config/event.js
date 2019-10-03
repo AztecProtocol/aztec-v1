@@ -6,3 +6,4 @@ export const contentSubscribeEvent = 'aztec-extension-subscribe';
 export const contentUnsubscribeEvent = 'aztec-extension-unsubscribe';
 export const sendTransactionEvent = 'aztec-extension-send-transaction';
 export const actionEvent = 'aztec-extension-client-action';
+export const uiResponseEvent = 'UI_RESPONSE';
