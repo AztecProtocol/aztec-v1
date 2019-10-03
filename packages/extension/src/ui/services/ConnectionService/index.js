@@ -1,6 +1,7 @@
 import {
     actionEvent,
     sendTransactionEvent,
+    uiResponseEvent,
 } from '~config/event';
 import ConnectionManager from './helpers/ConnectionManager';
 
@@ -15,7 +16,7 @@ export default {
         data = {},
     }) => manager.postToBackground({
         type: actionEvent,
-        clientRequestId,
+        clientRequestId: clientRequestId || manager.clientRequestId,
         data: {
             action,
             response: data,
@@ -34,5 +35,10 @@ export default {
             method,
             params: data,
         },
+    }),
+    returnToClient: data => manager.postToBackground({
+        type: uiResponseEvent,
+        clientRequestId: manager.clientRequestId,
+        data,
     }),
 };
