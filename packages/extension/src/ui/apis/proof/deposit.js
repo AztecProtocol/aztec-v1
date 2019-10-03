@@ -23,7 +23,6 @@ export default async function deposit({
     numberOfOutputNotes,
 }) {
     const notesOwner = await getNoteOwnerAccount(owner);
-    console.log('notesOwner', notesOwner);
 
     const {
         address: notesOwnerAddress,

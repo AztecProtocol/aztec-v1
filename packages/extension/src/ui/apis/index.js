@@ -2,9 +2,10 @@ import {
     randomInt,
 } from '~utils/random';
 import sleep from '~utils/sleep';
-import * as auth from './auth';
+import * as ace from './ace';
 import * as asset from './asset';
-import deposit from './deposit';
+import * as auth from './auth';
+import * as proof from './proof';
 
 export default {
     mock: async (data) => {
@@ -16,7 +17,8 @@ export default {
         };
         return fakeData;
     },
-    auth,
+    ace,
     asset,
-    deposit,
+    auth,
+    proof,
 };
