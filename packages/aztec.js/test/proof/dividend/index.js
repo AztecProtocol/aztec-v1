@@ -19,12 +19,13 @@ describe('Dividend Proof', () => {
         notionalNote = await note.create(publicKey, notionalNoteValue);
         targetNote = await note.create(publicKey, targetNoteValue);
         residualNote = await note.create(publicKey, residualNoteValue);
+        console.log({ notionalNote, targetNote, residualNote });
     });
 
     /**
      * In this test case, the interest rate if 5% (as `za` is 100 and `zb` is 5)
      */
-    it('should construct a Dividend proof with well-formed outputs', async () => {
+    it.only('should construct a Dividend proof with well-formed outputs', async () => {
         const za = 100;
         const zb = 5;
         const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
