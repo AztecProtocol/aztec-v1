@@ -6,8 +6,12 @@ import {
     Switch,
     withRouter,
 } from 'react-router-dom';
+import AZTECAccountRegistry from '../../build/contracts/AZTECAccountRegistry.json';
+import ZkAssetMintable from '../../build/protocol/ZkAssetMintable.json';
+import ZkAssetBurnable from '../../build/protocol/ZkAssetBurnable.json';
 import Route from '~uiModules/components/Route';
 import ConnectionService from '~ui/services/ConnectionService';
+import Web3Service from '~ui/services/Web3Service';
 import ActionService from '~uiModules/services/ActionService';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
@@ -20,6 +24,19 @@ import {
 } from '~ui/apis/auth';
 import './styles/guacamole.css';
 import './styles/_reset.scss';
+
+const initWeb3 = async () => {
+    Web3Service.init({
+        provider: 'http://localhost:8545',
+    });
+    Web3Service.registerContract(AZTECAccountRegistry);
+    Web3Service.registerInterface(ZkAssetMintable, {
+        name: 'ZkAsset',
+    });
+    Web3Service.registerInterface(ZkAssetBurnable, {
+        name: 'ZkAssetBurnable',
+    });
+};
 
 class App extends PureComponent {
     constructor(props) {
@@ -43,8 +60,9 @@ class App extends PureComponent {
         router.register(paths);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         ConnectionService.openConnection();
+        await initWeb3();
         this.loadInitialStates();
     }
 
