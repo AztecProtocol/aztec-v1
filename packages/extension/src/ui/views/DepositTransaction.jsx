@@ -19,7 +19,7 @@ const steps = [
         tasks: [
             {
                 name: 'proof',
-                run: apis.deposit.prove,
+                run: apis.proof.deposit,
             },
         ],
     },
@@ -29,7 +29,7 @@ const steps = [
             {
                 type: 'sign',
                 name: 'approve',
-                run: apis.deposit.approve,
+                run: apis.ace.publicApprove,
             },
         ],
     },
@@ -38,7 +38,7 @@ const steps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.deposit.send,
+                run: apis.asset.confidentialTransfer,
             },
         ],
     },

@@ -1,6 +1,6 @@
 import ConnectionService from '~ui/services/ConnectionService';
 
-export default async function approve({
+export default async function publicApprove({
     amount,
     proof,
     assetAddress,
