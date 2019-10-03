@@ -112,6 +112,13 @@ export default {
         amount: randomInt(1, 1000),
         goNext: dummyFunc,
     },
+    withdraw: {
+        asset: assets[0],
+        sender: addresses[0],
+        to: addresses[0],
+        amount: randomInt(1, 1000),
+        goNext: dummyFunc,
+    },
     send: {
         asset: assets[0],
         user: {
@@ -134,14 +141,6 @@ export default {
             address: addresses[0],
         },
         transactions: sendTransactions,
-        goNext: dummyFunc,
-    },
-    withdraw: {
-        asset: assets[0],
-        user: {
-            address: addresses[0],
-        },
-        amount: randomInt(1, 1000),
         goNext: dummyFunc,
     },
     mint: {

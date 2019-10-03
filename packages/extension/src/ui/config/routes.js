@@ -19,10 +19,11 @@ import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
 import Deposit from '~ui/views/pages/Deposit';
 import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositTransaction from '~ui/views/DepositTransaction';
-import Send from '~ui/views/pages/Send';
-import SendConfirm from '~ui/views/SendConfirm';
-import SendTransaction from '~ui/views/SendTransaction';
-// import WithdrawTransaction from '~ui/views/WithdrawTransaction';
+import Withdraw from '~ui/views/pages/Withdraw';
+import WithdrawTransaction from '~ui/views/WithdrawTransaction';
+// import Send from '~ui/views/pages/Send';
+// import SendConfirm from '~ui/views/SendConfirm';
+// import SendTransaction from '~ui/views/SendTransaction';
 import MintTransaction from '~ui/views/MintTransaction';
 import BurnTransaction from '~ui/views/BurnTransaction';
 
@@ -105,13 +106,10 @@ export default {
             },
         },
     },
-    // withdraw: {
-    //     path: 'withdraw',
-    //     Component: WithdrawTransaction,
-    // },
     withdraw: {
         path: 'withdraw',
-        Component: DepositTransaction,
+        Component: Withdraw,
+        View: WithdrawTransaction,
     },
     mint: {
         path: 'mint',

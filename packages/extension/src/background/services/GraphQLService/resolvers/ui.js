@@ -49,30 +49,6 @@ const uiResolvers = {
             id: address,
             address,
         }),
-        pickNotesFromBalance: async (_, args) => {
-            const requestId = randomId();
-            ClientConnection.backgroundPort.postMessage({
-                requestId,
-                type: 'UI_QUERY_REQUEST',
-                clientId: ClientConnection.clientId,
-                data: {
-                    query: 'asset.pickNotesFromBalance',
-                    args,
-                },
-                domain: window.location.orgin,
-            });
-
-            const {
-                data: {
-                    response: {
-                        pickNotesFromBalance,
-                    },
-                },
-            } = await filterStream('UI_QUERY_RESPONSE', requestId, ClientConnection.background$);
-            return {
-                notes: pickNotesFromBalance.notes,
-            };
-        },
     },
     Mutation: {
         registerExtension: async (_, args) => ({

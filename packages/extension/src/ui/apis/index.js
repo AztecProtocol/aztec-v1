@@ -5,6 +5,7 @@ import sleep from '~utils/sleep';
 import * as ace from './ace';
 import * as asset from './asset';
 import * as auth from './auth';
+import * as note from './note';
 import * as proof from './proof';
 
 export default {
@@ -20,5 +21,6 @@ export default {
     ace,
     asset,
     auth,
+    note,
     proof,
 };
