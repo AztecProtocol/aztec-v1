@@ -4,12 +4,9 @@ import {
 
 export default async function latest(modelName, { networkId }, { orderBy, filterOptions }) {
     const table = getDB(networkId)[modelName];
-    const keys = Object.keys(filterOptions);
 
-    if (keys.length > 0) {
-        const collection = await keys.reduce((acum, key) => acum.where(key)
-            .equalsIgnoreCase(filterOptions[key]), table).sortBy(orderBy);
-
+    if (Object.keys(filterOptions).length > 0) {
+        const collection = table.where(filterOptions).sortBy(orderBy);
         return collection[collection.length - 1];
     }
 

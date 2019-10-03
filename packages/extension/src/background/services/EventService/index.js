@@ -1,7 +1,9 @@
 import {
+    log,
     errorLog,
 } from '~utils/log';
 import NotesSyncManagerFactory from './helpers/NotesSyncManager/factory';
+import NotesWatcherFactory from './helpers/NotesWatcher/factory';
 import AssetsSyncManagerFactory from './helpers/AssetsSyncManager/factory';
 import {
     START_EVENTS_SYNCING_BLOCK,
@@ -22,6 +24,7 @@ import Asset from '~background/database/models/asset';
 
 
 const notesSyncManager = networkId => NotesSyncManagerFactory.create(networkId);
+const notesWatcher = networkId => NotesWatcherFactory.create(networkId);
 const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId);
 
 const fetchAztecAccount = async ({
@@ -63,7 +66,7 @@ const fetchAztecAccount = async ({
 
 const syncAssets = async ({
     networkId,
-}) => {
+}, subscriberOnNewAssets) => {
     if (!networkId && networkId !== 0) {
         errorLog("'networkId' can not be empty in EventService.syncAssets()");
         return;
@@ -86,7 +89,7 @@ const syncAssets = async ({
     manager.sync({
         lastSyncedBlock,
         networkId,
-    });
+    }, subscriberOnNewAssets);
 };
 
 const syncNotes = async ({
@@ -100,16 +103,6 @@ const syncNotes = async ({
 
     if (!networkId && networkId !== 0) {
         errorLog(`'networkId' can not be ${networkId} in EventService.syncEthAddress()`);
-        return;
-    }
-
-    syncAssets({
-        networkId,
-    });
-
-    const manager = notesSyncManager(networkId);
-
-    if (manager.isInQueue(address)) {
         return;
     }
 
@@ -131,26 +124,95 @@ const syncNotes = async ({
         return;
     }
 
-    const options = {
-        filterOptions: {
-            owner: address,
-        },
+    const manager = notesSyncManager(networkId);
+    const watcher = notesWatcher(networkId);
+
+    const latestNoteSyncedBlock = async (assetAddress) => {
+        const options = {
+            filterOptions: {
+                asset: assetAddress,
+                owner: address,
+            },
+        };
+        const note = await Note.latest({ networkId }, options);
+        return {
+            lastSyncedBlock: note ? note.blockNumber : account.blockNumber,
+            assetAddress,
+        };
     };
 
-    const lastSyncedNote = await Note.latest({ networkId }, options);
-
-    let lastSyncedBlock;
-    if (lastSyncedNote) {
-        lastSyncedBlock = lastSyncedNote.blockNumber;
-    } else {
-        lastSyncedBlock = account.blockNumber;
-    }
-
-    manager.sync({
-        address,
+    const onCompleatePulling = ({
+        blocks,
         lastSyncedBlock,
+        assets,
+    }) => {
+        log(`Finished pulling (${lastSyncedBlock} from ${blocks} blocks) for assets: ${JSON.stringify(assets)}`);
+        watcher.appendAssets({
+            address,
+            assets,
+            lastSyncedBlock,
+        });
+    };
+
+    const onProggressChangePulling = ({
+        blocks,
+        assets,
+        lastSyncedBlock,
+    }) => {
+        log(`Proggress changed (${lastSyncedBlock} from ${blocks} blocks) for pulling for assets: ${JSON.stringify(assets)}`);
+    };
+
+    const onFailurePulling = ({
+        assets,
+        error: pullingError,
+    }) => {
+        errorLog(`Error occured for pulling notes for assets: ${JSON.stringify(assets)}`, pullingError);
+    };
+
+    const progressCallbacks = {
+        onCompleate: onCompleatePulling,
+        onProggressChange: onProggressChangePulling,
+        onFailure: onFailurePulling,
+    };
+
+    const addNewAssetsToSyncNotes = async (assets) => {
+        const newAssets = assets.filter(({ registryOwner }) => {
+            const options = {
+                address,
+                assetAddress: registryOwner,
+            };
+            return !manager.isInQueue(options) && !watcher.isUnderWatching(options);
+        });
+        if (!newAssets.length) { return; }
+
+        const syncedBlocksPromises = newAssets
+            .map(({ registryOwner }) => latestNoteSyncedBlock(registryOwner));
+        const syncedBlocksArray = await Promise.all(syncedBlocksPromises);
+        const syncedBlocks = syncedBlocksArray
+            .reduce((acum, info) => {
+                const result = {
+                    ...acum,
+                };
+                result[info.assetAddress] = info.lastSyncedBlock;
+                return result;
+            }, {});
+
+        manager.sync({
+            address,
+            assets,
+            syncedBlocks,
+            progressCallbacks,
+        });
+    };
+
+    // start sync notes for existing Assets
+    const existingAssets = await Asset.query({ networkId }).toArray();
+    await addNewAssetsToSyncNotes(existingAssets);
+
+    // start Looking for New Assets
+    syncAssets({
         networkId,
-    });
+    }, addNewAssetsToSyncNotes);
 };
 
 const fetchLatestNote = async ({
