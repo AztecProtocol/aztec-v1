@@ -36,10 +36,23 @@ class DomainPermission extends PureComponent {
         }, this.approveDomain);
     };
 
-    handleResponse = (response) => {
+    async approveDomain() {
+        const {
+            address,
+        } = this.state;
+        const {
+            domain,
+        } = this.props;
+
         const {
             success,
-        } = response;
+        } = await approveDomain(
+            {
+                address,
+                domain: domain.domain,
+            },
+        );
+
         if (!success) {
             this.setState({
                 error: {
@@ -53,23 +66,6 @@ class DomainPermission extends PureComponent {
                 success: true,
             }, () => closeWindow(500));
         }
-    };
-
-    async approveDomain() {
-        const {
-            address,
-        } = this.state;
-        const {
-            domain,
-        } = this.props;
-
-        await approveDomain(
-            {
-                address,
-                domain: domain.domain,
-            },
-            this.handleResponse,
-        );
     }
 
     async fetchDataForPage() {

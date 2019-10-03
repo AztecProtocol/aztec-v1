@@ -43,7 +43,10 @@ const DomainPermissionTransaction = ({
             });
         });
         if (assets.length > maxAvatars) {
-            moreItems = assets.slice(maxAvatars).map(({ code }) => i18n.token(code));
+            moreItems = assets.slice(maxAvatars).map(({
+                address,
+                code,
+            }) => i18n.token(code) || formatAddress(address));
         }
     }
 
