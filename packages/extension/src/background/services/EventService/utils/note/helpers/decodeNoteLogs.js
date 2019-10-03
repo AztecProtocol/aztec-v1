@@ -98,6 +98,11 @@ export default function decodeNoteLogs(eventsTopics, rawLogs, networkId) {
         updateNotes,
         destroyNotes,
         isEmpty: () => !createNotes.length && !updateNotes.length && !destroyNotes.length,
+        allNotes: () => [
+            ...createNotes,
+            ...updateNotes,
+            ...destroyNotes,
+        ],
         lastBlockNumber,
     };
 }

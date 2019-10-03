@@ -1,6 +1,6 @@
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import * as storage from '~utils/storage';
-import GraphNodeService from '~background/services/GraphNodeService';
+// import GraphNodeService from '~background/services/GraphNodeService';
 import noteModel from '~database/models/note';
 import syncUtilityNoteInfo from '../syncUtilityNoteInfo';
 import storyOf from './helpers/stories';

@@ -1,4 +1,3 @@
-import GraphNodeService from '~background/services/GraphNodeService';
 import {
     ADDRESS_LENGTH,
 } from '~config/constants';
@@ -182,58 +181,3 @@ export default async function requestGrantAccess(args, ctx) {
         asset: assetId,
     };
 }
-
-// const queryStr = `
-//     query (
-//         $userAccessesWhere: NoteAccess_filter
-//         $noteAccessesWhere: NoteAccess_filter
-//         $accountsWhere: Account_filter
-//     ) {
-//         userAccess: noteAccesses(first: 1, where: $userAccessesWhere) {
-//             note {
-//                 metadata
-//                 asset {
-//                     id
-//                 }
-//             }
-//             viewingKey
-//         }
-//         existingAccesses: noteAccesses(first: ${addressList.length}, where: $noteAccessesWhere) {
-//             account {
-//                 address
-//             }
-//         }
-//         sharedAccounts: accounts(first: ${addressList.length}, where: $accountsWhere) {
-//             address
-//             publicKey
-//         }
-//     }
-// `;
-// const {
-//     error,
-//     account,
-// } = await EventService.fetchAztecAccount({
-//     address: userAddress,
-//     networkId,
-// });
-
-// const variables = {
-//     userAccessesWhere: {
-//         account: userAddress,
-//     },
-//     noteAccessesWhere: {
-//         note: noteId,
-//         account_in: addressList,
-//     },
-//     accountsWhere: {
-//         address_in: addressList,
-//     },
-// };
-// const {
-//     userAccess,
-//     existingAccesses,
-//     sharedAccounts,
-// } = await GraphNodeService.query({
-//     query: queryStr,
-//     variables,
-// }) || {};
