@@ -5,12 +5,7 @@ import {
 } from '~utils/log';
 import Web3Service from '../../../Web3Service';
 import {
-    syncedAssets,
-} from '../../utils/asset';
-import AssetsSyncManagerFactory from '../AssetsSyncManager/factory';
-import {
     fetchNotes,
-    subscription as NoteSubscription,
     saveNotes,
 } from '../../utils/note';
 import {
@@ -25,17 +20,25 @@ const infuraLimitError = {
     message: 'query returned more than 10000 results',
 };
 
-const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId);
+const isInfuraLimitError = error => error && error.code === infuraLimitError.code;
+
+const SYNCING_STATUS = {
+    ACTIVE: 'ACTIVE',
+    SHOULD_LOAD_NEXT_PORTION: 'SHOULD_LOAD_NEXT_PORTION',
+    RETRY: 'RETRY',
+    FINISHED: 'FINISHED',
+    FAILED: 'FAILED',
+};
 
 class SyncManager {
     constructor() {
         this.config = {
             blocksPerRequest: 540000, // ~ per 3 months (~6000 per day)
             precisionDelta: 10, //
+            maxNumberOfAttempts: 5,
+            networkId: null,
         };
         this.addresses = new Map();
-        this.paused = false;
-        this.progressSubscriber = null;
     }
 
     setConfig(config) {
@@ -45,13 +48,46 @@ class SyncManager {
                     this.config[key] = config[key];
                 }
             });
+        const {
+            networkId,
+        } = this.config;
+        if (!networkId && networkId !== 0) {
+            errorLog('Dont passed networkId into NotesSyncManager configuration');
+        }
     }
 
-    isInQueue(address) {
+    increaseBlocksPerRequest(byCount = this.config.blocksPerRequest * 1.5) {
+        const {
+            blocksPerRequest,
+        } = this.config;
+
+        this.config = {
+            ...this.config,
+            blocksPerRequest: blocksPerRequest + byCount,
+        };
+    }
+
+    decreaseBlocksPerRequest(byCount = -this.config.blocksPerRequest * 0.5) {
+        const {
+            blocksPerRequest,
+        } = this.config;
+
+        this.config = {
+            ...this.config,
+            blocksPerRequest: blocksPerRequest + byCount,
+        };
+    }
+
+    isInQueue({
+        address,
+        assetAddress,
+    }) {
         const syncAddress = this.addresses.get(address);
-        return !!(syncAddress
-            && (syncAddress.syncing || syncAddress.subscription)
-        );
+        const {
+            syncDetails = {},
+        } = syncAddress || {};
+
+        return syncDetails[assetAddress] && syncDetails[assetAddress].syncing;
     }
 
     handleFetchError = (error) => {
@@ -61,184 +97,78 @@ class SyncManager {
         }
     };
 
-    pause = async (address, prevState = {}) => {
+    stop = ({
+        address,
+        assetsAddresses,
+    }) => {
+        if (!assetsAddresses || !assetsAddresses.length) {
+            warnLog(`NotesSyncManager cannot stop assets with addresses "${JSON.stringify(assetsAddresses)}".`);
+            return;
+        }
+
         const syncAddress = this.addresses.get(address);
         if (!syncAddress) {
             warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
             return;
         }
-
         const {
-            subscription,
+            syncDetails,
         } = syncAddress;
 
-        if (subscription) {
-            const {
-                error: unsubscribeError,
-            } = await NoteSubscription.unsubscribe(subscription);
-
-            if (unsubscribeError) {
-                errorLog(`Pause error in NotesSyncManager. Can't unsubscribe from sockets for address ${address}.`);
-                return;
-            }
-        }
-
-        this.addresses.set(address, {
-            ...syncAddress,
-            pausedState: prevState,
-        });
-    };
-
-    resume = (address) => {
-        const syncAddress = this.addresses.get(address);
-        if (!syncAddress) {
-            warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
-            return;
-        }
-
-        const {
-            pausedState,
-        } = syncAddress;
-        if (!pausedState) {
-            warnLog(`NotesSyncManager with ${address} eth address is already running.`);
-            return;
-        }
-
-        this.addresses.set(address, {
-            ...syncAddress,
-            pausedState: null,
-        });
-
-        this.syncNotes({
-            ...pausedState,
-            address,
-        });
-    };
-
-    syncProgress = async (address) => {
-        const syncAddress = this.addresses.get(address);
-        if (!syncAddress) {
-            warnLog(`NotesSyncManager syncing with "${address}" eth address is not in process.`);
-            return null;
-        }
-        const {
-            lastSyncedBlock,
-            networkId,
-            subscription,
-        } = syncAddress;
-
-        const blocks = await Web3Service(networkId).eth.getBlockNumber();
-        const synced = subscription ? 'latest' : lastSyncedBlock;
-
-        return {
-            blocks,
-            lastSyncedBlock: synced,
+        const updatedSyncDetails = {
+            ...syncDetails,
         };
-    };
-
-    setProgressCallback = (callback) => {
-        this.progressSubscriber = callback;
-    };
-
-    async subscribeOnNewNotes(options) {
-        const {
-            address,
-            lastSyncedBlock,
-            fromAssets,
-            networkId,
-        } = options;
-
-        const subscription = await NoteSubscription.subscribe({
-            fromBlock: lastSyncedBlock + 1,
-            fromAssets,
-            networkId,
+        assetsAddresses.forEach((assetAddress) => {
+            if (updatedSyncDetails[assetAddress]) {
+                updatedSyncDetails[assetAddress].syncing = false;
+            }
         });
 
-        const syncAddress = this.addresses.get(address);
         this.addresses.set(address, {
             ...syncAddress,
-            subscription,
+            syncDetails: updatedSyncDetails,
         });
-
-        let newLastSyncedBlock = lastSyncedBlock;
-
-        subscription.onData(async (groupedNotes) => {
-            if (groupedNotes.isEmpty()) {
-                return;
-            }
-            await Promise.all([
-                saveNotes(groupedNotes, networkId),
-                saveAccessesFromNotes(groupedNotes, networkId),
-            ]);
-            newLastSyncedBlock = groupedNotes.lastBlockNumber() || newLastSyncedBlock;
-            this.syncConfig = {
-                ...this.syncConfig,
-                lastSyncedBlock: newLastSyncedBlock,
-            };
-        });
-
-        subscription.onError(async (error) => {
-            this.handleFetchError(error);
-        });
-    }
+    };
 
     async syncNotes(options) {
         const {
             address,
             lastSyncedBlock,
-            networkId,
+            assets,
+            progressCallbacks,
+            retriedNumber = 0,
         } = options;
 
         const syncAddress = this.addresses.get(address);
         const {
-            pausedState,
-            subscription: prevSubscription,
+            syncDetails,
         } = syncAddress;
-        if (pausedState) {
-            return;
-        }
-        if (this.paused) {
-            await this.pause(address, options);
-            return;
-        }
 
-        this.addresses.set(address, {
-            ...syncAddress,
-            syncing: true,
-            subscription: null,
-        });
+        const fromAssets = assets
+            .filter(({ registryOwner }) => syncDetails[registryOwner].syncing);
+        const fromAssetsAddresses = fromAssets.map(({ registryOwner }) => registryOwner);
+        if (!fromAssets.length) { return; }
 
         const {
             precisionDelta,
             blocksPerRequest,
+            networkId,
+            maxNumberOfAttempts,
         } = this.config;
 
-        if (prevSubscription) {
-            const {
-                error: unsubscribeError,
-            } = await NoteSubscription.unsubscribe(prevSubscription);
-
-            if (unsubscribeError) {
-                errorLog(`NotesSyncManager can't unsubscribe from sockets for address ${address}.`);
-                return;
-            }
-        }
-
-        const assetsManager = assetsSyncManager(networkId);
         const {
-            blocks,
-            lastSyncedBlock: lastAssetsBlock,
-            isSubscribedOnNewAssets,
-        } = assetsManager.syncProgress();
-        const currentBlock = isSubscribedOnNewAssets ? blocks : lastAssetsBlock;
-        const assets = (await syncedAssets(networkId)).map(({ registryOwner }) => registryOwner);
+            onCompleate,
+            onProggressChange,
+            onFailure,
+        } = progressCallbacks;
+
+        const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
         const fromBlock = lastSyncedBlock + 1;
         const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
 
         let newLastSyncedBlock = lastSyncedBlock;
-        if (currentBlock > lastSyncedBlock) {
-            let shouldLoadNextPortion = currentBlock - fromBlock > precisionDelta;
-
+        let status = null;
+        if (currentBlock > lastSyncedBlock + precisionDelta) {
             const {
                 error,
                 groupedNotes,
@@ -246,97 +176,173 @@ class SyncManager {
                 owner: address,
                 fromBlock,
                 toBlock,
-                fromAssets: assets,
+                fromAssets: fromAssetsAddresses,
                 networkId,
             });
 
+            let newRetriedNumber = retriedNumber;
             if (groupedNotes) {
-                const promises = [
-                    saveNotes(groupedNotes, networkId),
-                    saveAccessesFromNotes(groupedNotes, networkId),
-                ];
-                await Promise.all(promises);
                 newLastSyncedBlock = toBlock;
+                newRetriedNumber = 0;
 
-                if (this.progressSubscriber) {
-                    this.progressSubscriber({
-                        blocks: currentBlock,
-                        lastSyncedBlock: newLastSyncedBlock,
-                    });
+                if (!groupedNotes.isEmpty()) {
+                    const promises = [
+                        saveNotes(groupedNotes, networkId),
+                        saveAccessesFromNotes(groupedNotes, networkId),
+                    ];
+                    await Promise.all(promises);
+                } else {
+                    this.increaseBlocksPerRequest();
                 }
-            } else if (error && error.code === infuraLimitError.code) {
-                this.config = {
-                    ...this.config,
-                    blocksPerRequest: blocksPerRequest / 2,
-                };
-                shouldLoadNextPortion = true;
-            } else {
-                this.handleFetchError(error);
-            }
 
-            if (shouldLoadNextPortion) {
-                this.addresses.set(address, {
-                    ...syncAddress,
-                    lastSyncedBlock: newLastSyncedBlock,
+                if (currentBlock - newLastSyncedBlock > precisionDelta) {
+                    status = SYNCING_STATUS.SHOULD_LOAD_NEXT_PORTION;
+                } else {
+                    status = SYNCING_STATUS.FINISHED;
+                }
+
+                const updatedSyncDetails = {};
+                fromAssets.forEach(({ registryOwner }) => {
+                    updatedSyncDetails[registryOwner] = {
+                        ...syncDetails[registryOwner],
+                        lastSyncedBlock: newLastSyncedBlock,
+                    };
                 });
 
+                this.addresses.set(address, {
+                    ...syncAddress,
+                    syncDetails: {
+                        ...syncDetails,
+                        ...updatedSyncDetails,
+                    },
+                });
+
+                if (onProggressChange) {
+                    onProggressChange({
+                        blocks: currentBlock,
+                        lastSyncedBlock: newLastSyncedBlock,
+                        assets: fromAssets,
+                    });
+                }
+            } else if (isInfuraLimitError(error)) {
+                this.decreaseBlocksPerRequest();
+                status = SYNCING_STATUS.RETRY;
+            } else {
+                status = SYNCING_STATUS.RETRY;
+                if (maxNumberOfAttempts >= retriedNumber) {
+                    newRetriedNumber += 1;
+                } else {
+                    const updatedSyncDetails = {};
+                    fromAssets.forEach(({ registryOwner }) => {
+                        updatedSyncDetails[registryOwner] = {
+                            ...syncDetails[registryOwner],
+                            syncing: false,
+                        };
+                    });
+
+                    this.addresses.set(address, {
+                        ...syncAddress,
+                        syncDetails: {
+                            ...syncDetails,
+                            ...updatedSyncDetails,
+                        },
+                    });
+                    onFailure({
+                        blocks: currentBlock,
+                        lastSyncedBlock: newLastSyncedBlock,
+                        assets: fromAssets,
+                        error,
+                    });
+                }
+            }
+
+            if ([SYNCING_STATUS.RETRY, SYNCING_STATUS.SHOULD_LOAD_NEXT_PORTION].includes(status)) {
                 await this.syncNotes({
                     ...options,
+                    assets: fromAssets,
                     lastSyncedBlock: newLastSyncedBlock,
+                    progressCallbacks,
+                    retriedNumber: newRetriedNumber,
                 });
                 return;
             }
+        } else {
+            status = SYNCING_STATUS.FINISHED;
         }
 
-        this.addresses.set(address, {
-            ...syncAddress,
-            syncing: false,
-            lastSyncedBlock: newLastSyncedBlock,
-        });
+        if (status === SYNCING_STATUS.FINISHED) {
+            const updatedSyncDetails = {
+                ...syncDetails,
+            };
 
-        this.subscribeOnNewNotes({
-            address,
-            fromAssets: assets,
-            lastSyncedBlock: newLastSyncedBlock,
-            networkId,
-        });
+            fromAssets.forEach(({ registryOwner }) => {
+                delete updatedSyncDetails[registryOwner];
+            });
+
+            this.addresses.set(address, {
+                ...syncAddress,
+                syncDetails: updatedSyncDetails,
+            });
+
+            onCompleate({
+                blocks: currentBlock,
+                lastSyncedBlock: newLastSyncedBlock,
+                assets: fromAssets,
+            });
+        }
     }
 
     async sync({
         address,
-        lastSyncedBlock,
-        networkId,
+        assets,
+        syncedBlocks = {},
+        progressCallbacks = {},
     }) {
-        log(`Sync notes was started with las synced block: ${lastSyncedBlock} and address: ${address}`);
-        let syncAddress = this.addresses.get(address);
-        if (!syncAddress) {
-            syncAddress = {
-                syncing: false,
-                subscription: null,
-                lastSyncedBlock,
-                networkId,
-            };
-            this.addresses.set(address, syncAddress);
+        const syncAddress = this.addresses.get(address);
+        const {
+            syncDetails: prevSyncDetails = {},
+        } = syncAddress || {};
+
+        const nonExistingAssets = assets.filter(({ registryOwner }) => !this.isInQueue({
+            address,
+            assetAddress: registryOwner,
+        }));
+
+        if (!nonExistingAssets.length) {
+            return null;
         }
+        log(`Sync notes was started for assets: ${JSON.stringify(nonExistingAssets)} and address: ${address}`);
+
+        const syncDetails = {
+            ...prevSyncDetails,
+        };
+
+        let lowestSyncedBlock;
+        for (let i = 0; i < nonExistingAssets.length; i += 1) {
+            const {
+                registryOwner,
+                blockNumber,
+            } = nonExistingAssets[i];
+            const lastSyncedBlock = syncedBlocks[registryOwner] || blockNumber;
+            // eslint-disable-next-line max-len
+            lowestSyncedBlock = lowestSyncedBlock ? Math.min(lowestSyncedBlock, lastSyncedBlock) : lastSyncedBlock;
+
+            syncDetails[registryOwner] = {
+                syncing: true,
+                lastSyncedBlock,
+            };
+        }
+
+        this.addresses.set(address, {
+            ...syncAddress,
+            syncDetails,
+        });
+
         return this.syncNotes({
             address,
-            lastSyncedBlock,
-            networkId,
-        });
-    }
-
-    restartAllSyncing() {
-        this.addresses.forEach((syncAddress, address) => {
-            const {
-                lastSyncedBlock,
-                networkId,
-            } = syncAddress;
-
-            this.syncNotes({
-                address,
-                lastSyncedBlock,
-                networkId,
-            });
+            assets: nonExistingAssets,
+            lastSyncedBlock: lowestSyncedBlock,
+            progressCallbacks,
         });
     }
 }

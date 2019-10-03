@@ -2,18 +2,29 @@ import NotesSyncManager from '.';
 
 
 class NotesSyncManagerFactory {
-    _managersByNetworks = {};
+    managersByNetworks = {};
 
-    _ensureManager = (networkId) => {
-        if (this._managersByNetworks[networkId]) {
+    config = {
+        blocksPerRequest: 540000, // ~ per 3 months (~6000 per day)
+        precisionDelta: 10, //
+        networkId: null,
+    };
+
+    ensureManager = (networkId) => {
+        if (this.managersByNetworks[networkId]) {
             return;
         }
-        this._managersByNetworks[networkId] = new NotesSyncManager();
+        const manager = new NotesSyncManager();
+        manager.setConfig({
+            ...this.config,
+            networkId,
+        });
+        this.managersByNetworks[networkId] = manager;
     };
 
     create(networkId) {
-        this._ensureManager(networkId);
-        return this._managersByNetworks[networkId];
+        this.ensureManager(networkId);
+        return this.managersByNetworks[networkId];
     }
 }
 

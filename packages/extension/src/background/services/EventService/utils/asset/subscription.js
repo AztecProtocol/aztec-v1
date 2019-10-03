@@ -55,6 +55,7 @@ const subscribe = async ({
         });
 
     return {
+        subscription,
         onData: (callback) => {
             subscription.on('data', (event) => {
                 callback(converEvent(event));

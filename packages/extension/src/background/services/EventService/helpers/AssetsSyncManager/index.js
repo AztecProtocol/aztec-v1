@@ -126,6 +126,7 @@ class SyncManager {
 
         const {
             networkId,
+            subscriberOnNewAssets,
         } = this.syncConfig;
 
         const subscription = await EventSubscription.subscribe({
@@ -142,13 +143,16 @@ class SyncManager {
             subscription,
         };
 
-        subscription.onData(async (event) => {
-            log(`WebSockets received asset: ${JSON.stringify(event)}`);
-            await createBulkAssets([event], networkId);
+        subscription.onData(async (asset) => {
+            log(`WebSockets received asset: ${JSON.stringify(asset)}`);
+            await createBulkAssets([asset], networkId);
             this.syncConfig = {
                 ...this.syncConfig,
-                lastSyncedBlock: event.blockNumber,
+                lastSyncedBlock: asset.blockNumber,
             };
+            if (subscriberOnNewAssets) {
+                subscriberOnNewAssets([asset]);
+            }
         });
 
         subscription.onError(async (error) => {
@@ -176,6 +180,7 @@ class SyncManager {
 
         const {
             networkId,
+            subscriberOnNewAssets,
         } = this.syncConfig;
 
         const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
@@ -204,6 +209,9 @@ class SyncManager {
                         lastSyncedBlock: newLastSyncedBlock,
                     });
                 }
+                if (subscriberOnNewAssets && newAssets.length) {
+                    subscriberOnNewAssets(newAssets);
+                }
             }
         }
 
@@ -221,13 +229,14 @@ class SyncManager {
     async sync({
         lastSyncedBlock,
         networkId,
-    }) {
+    }, subscriberOnNewAssets) {
         if (!this.syncConfig) {
             this.syncConfig = {
                 syncing: false,
                 subscription: null,
                 lastSyncedBlock,
                 networkId,
+                subscriberOnNewAssets,
             };
         }
         await this.syncAssets({
