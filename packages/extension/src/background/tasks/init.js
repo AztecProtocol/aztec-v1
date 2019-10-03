@@ -117,9 +117,4 @@ export default async function init() {
     });
 
     configureWeb3Service();
-
-    // TODO: remove this, just for test purpose
-    EventService.syncAssets({
-        networkId: 0,
-    });
 }
