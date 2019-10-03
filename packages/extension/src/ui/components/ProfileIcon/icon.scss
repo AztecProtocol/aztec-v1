@@ -46,7 +46,7 @@ $profile-icon-bg-mapping: (
   }
 
   &.with-icon {
-    > * {
+    i {
       width: 100% !important;
       height: 100% !important;
       border-radius: 100%;
@@ -60,7 +60,7 @@ $profile-icon-bg-mapping: (
 
     @each $theme, $bg-name in $profile-icon-bg-mapping {
       &.theme-#{$theme} {
-        > * {
+        i {
           background: rgba-to-rgb(map-get($color-map, $bg-name));
         }
       }
@@ -68,7 +68,7 @@ $profile-icon-bg-mapping: (
 
     @each $key, $size in $avatar-sizes-map {
       &.size-#{$key} {
-        > * {
+        i {
           line-height: $size;
         }
       }
