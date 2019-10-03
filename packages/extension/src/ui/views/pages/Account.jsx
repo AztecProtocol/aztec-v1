@@ -57,7 +57,7 @@ class Account extends PureComponent {
     };
 
     async fetchAssets() {
-        const assets = await apis.getAssets();
+        const assets = await apis.asset.getAssets();
         this.setState({
             assets,
             isLoadingAssets: false,
@@ -65,7 +65,7 @@ class Account extends PureComponent {
     }
 
     async fetchPastTransactions(code) {
-        const pastTransactions = await apis.getPastTransactions(code);
+        const pastTransactions = await apis.asset.getPastTransactions(code);
         this.cachedTransactions[code] = pastTransactions;
         this.setState({
             pastTransactions,

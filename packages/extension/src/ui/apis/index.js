@@ -3,18 +3,20 @@ import {
 } from '~utils/random';
 import sleep from '~utils/sleep';
 import * as auth from './auth';
-import * as assets from './assets';
+import * as asset from './asset';
+import deposit from './deposit';
 
 export default {
-    mock: async (data, cb) => {
+    mock: async (data) => {
         await sleep(randomInt(2000));
         const fakeData = {
             ...data,
             mock: true,
             timestamp: Date.now(),
         };
-        cb(fakeData);
+        return fakeData;
     },
-    ...auth,
-    ...assets,
+    auth,
+    asset,
+    deposit,
 };

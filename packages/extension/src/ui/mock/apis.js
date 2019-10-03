@@ -9,35 +9,46 @@ import {
     pastTransactions,
 } from './data';
 
-const mock = async (data, cb) => {
+const mock = async (data) => {
     await sleep(randomInt(2000));
     const fakeData = {
         ...data,
         mock: true,
         timestamp: Date.now(),
     };
-    cb(fakeData);
+    return fakeData;
 };
 
-const mockApis = {};
-Object.keys(realApis).forEach((apiName) => {
-    mockApis[apiName] = mock;
-});
+const mergeApis = (defaultApis, customApis = {}) => {
+    const mockApis = {};
+    Object.keys(defaultApis).forEach((name) => {
+        if (typeof defaultApis[name] === 'object') {
+            mockApis[name] = mergeApis(defaultApis[name], customApis[name]);
+        } else {
+            mockApis[name] = customApis[name] || mock;
+        }
+    });
 
-export default {
-    ...mockApis,
-    getCurrentUser: () => ({
-        address: addresses[0],
-    }),
-    getAssets: async () => assets,
-    getPastTransactions: async (assetCode = '', count = 2) => {
-        const transactions = !assetCode
-            ? pastTransactions
-            : pastTransactions
-                .filter(({ asset }) => asset.code === assetCode);
+    return mockApis;
+};
 
-        return !count
-            ? transactions
-            : transactions.slice(0, count);
+export default mergeApis(realApis, {
+    auth: {
+        getCurrentUser: () => ({
+            address: addresses[0],
+        }),
     },
-};
+    asset: {
+        getAssets: async () => assets,
+        getPastTransactions: async (assetCode = '', count = 2) => {
+            const transactions = !assetCode
+                ? pastTransactions
+                : pastTransactions
+                    .filter(({ asset }) => asset.code === assetCode);
+
+            return !count
+                ? transactions
+                : transactions.slice(0, count);
+        },
+    },
+});
