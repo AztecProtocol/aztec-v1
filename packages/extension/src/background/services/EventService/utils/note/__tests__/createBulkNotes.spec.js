@@ -15,7 +15,8 @@ describe('createBulkNotes', () => {
             blockNumber: 1,
         },
         {
-            noteHash: '0x00000002', owner: '0x123',
+            noteHash: '0x00000002',
+            owner: '0x123',
             metadata: '0x1234',
             blockNumber: 1,
         },

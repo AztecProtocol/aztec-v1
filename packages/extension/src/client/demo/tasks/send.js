@@ -9,4 +9,4 @@ export default async function send(asset, transactions, options) {
     transactions.forEach(({ amount, to }) => {
         log(`Successfully sent ${amount} to account '${to}'.`);
     });
-};
+}

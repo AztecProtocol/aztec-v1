@@ -1,8 +1,7 @@
-import NotesSyncManager from './';
+import NotesSyncManager from '.';
 
 
 class NotesSyncManagerFactory {
-
     _managersByNetworks = {};
 
     _ensureManager = (networkId) => {
@@ -16,7 +15,6 @@ class NotesSyncManagerFactory {
         this._ensureManager(networkId);
         return this._managersByNetworks[networkId];
     }
-
 }
 
 export default new NotesSyncManagerFactory();
