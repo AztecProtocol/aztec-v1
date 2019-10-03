@@ -1,68 +1,77 @@
 const puppeteer = require('puppeteer');
+const dappeteer = require('dappeteer');
 const path = require('path');
 
 const scenarios = require('./scenarios');
 const steps = require('./steps');
-const Metamask = require('./metamask');
 
-async function init(extensionPath, {
-    metamaskPath = path.resolve(__dirname + '/metamask-extension/'),
-    metamaskMnemonic = process.env.GANACHE_TESTING_ACCOUNT_0_MNEMONIC,
-    extensionName = "AZTEC",
-    network = 'Localhost',
-    extensionHomePage = 'pages/defaultPopup.html',
-    screenshotPath = path.resolve(__dirname + '/screenshots'),
-    debug = false,
-    observeTime = 0,
-} = {}) {
-    const environment = {
-        extension: undefined,
-        metamask: undefined,
-        metamaskInit: Metamask,
-        metadata: {},
-        openPages: {},
-        debug,
-        screenshotPath,
-        observeTime,
-        ...steps,
-        ...scenarios,
-        clean: async function() {
-            return Promise.all(Object.values(this.openPages).map(async page => page.close()))
-        },
-    };
-    environment.extensionName = extensionName;
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
-    environment.browser = await puppeteer.launch({
-        defaultViewport: null,
-        devtools: true,
-        slowMo: 60,
-        headless: false, // extension are allowed only in head-full mode
-        args: [
-            `--disable-extensions-except=${extensionPath},${metamaskPath}`,
-            `--load-extension=${extensionPath},${metamaskPath}`,
-            // '--disable-dev-shm-usage'
-        ]
-    });
+const Environment = {
+    extension: undefined,
+    metamask: undefined,
+    metadata: {},
+    openPages: [],
+    init: async function(extensionPath, {
+        metamaskPath = path.resolve(__dirname + '/../../../../node_modules/dappeteer/metamask/5.3.0/'),
+        extensionName = "AZTEC",
+        network = 'localhost',
+        extensionHomePage = 'pages/defaultPopup.html',
+    } = {}) {
+        this.extensionName = extensionName;
+        this.browser = await dappeteer.launch(puppeteer, {
+            headless: false, // extension are allowed only in head-full mode
+            args: [
+                `--disable-extensions-except=${extensionPath},${metamaskPath}`,
+                `--load-extension=${extensionPath}`
+            ]
+        });
 
-    await environment.metamaskInit();
-    await environment.metamask.signup(metamaskMnemonic);
-    await environment.metamask.selectNetwork(network);
+        this.metamask = await dappeteer.getMetamask(this.browser);
+        await this.metamask.switchNetwork(network);
 
-    const extensionBackgroundTarget = await environment.getExtensionBackground();
-    const extensionUrl = extensionBackgroundTarget._targetInfo.url || '';
-    const [,, extensionID] = extensionUrl.split('/');
+        const extensionBackgroundTarget = await this.getExtensionBackground();
+        const extensionUrl = extensionBackgroundTarget._targetInfo.url || '';
+        const [,, extensionID] = extensionUrl.split('/');
+    
+        const extensionLink = `chrome-extension://${extensionID}/${extensionHomePage}`;
+        this.metadata = {
+            url: extensionUrl,
+            id: extensionID,
+            link: extensionLink
+        };
 
-    const extensionLink = `chrome-extension://${extensionID}/${extensionHomePage}`;
-    environment.metadata = {
-        url: extensionUrl,
-        id: extensionID,
-        link: extensionLink,
-        network,
-    };
+        return this;
+    },
 
-    return environment;
+    createPageObject: function (page, metadata) {
+        const self = this;
+        const data = {
+            index: this.openPages.length,
+            api: page,
+            metadata,
+            clickMain: async function(selector = "button") {
+                const main = await this.api.$(selector);
+                await main.click();
+            },
+            typeMain: async function(text, selector = "input") {
+                const main = await this.api.$(selector);
+                await main.type(text);
+            },
+            close: async function() {
+                try {
+                    await this.api.close();
+                } catch (e) {
+                    console.log('page already closed');
+                }
+                self.openPages.splice(this.index, 1);
+            },
+        };
+        this.openPages.push(data);
+        return data;
+    },
+    ...steps,
+    ...scenarios
 }
 
-module.exports = {
-    init
-};
+module.exports = Environment;

@@ -4,10 +4,17 @@ async function createAccount() {
         throw new Error('Please initialise your environment first');
     }
 
-    let homepage = await environment.openPage('https://www.aztecprotocol.com/');
-    await homepage.initialiseAztec();
-
+    let extensionPage = await environment.openExtension();
+    await extensionPage.clickMain();
+    
     await environment.metamask.approve();
+
+    targets = await environment.browser.targets();
+
+    await environment.findAndClosePage(({ _targetInfo }) => _targetInfo.title === 'https://www.aztecprotocol.com')
+
+    extensionPage = await environment.openExtension();
+    await extensionPage.clickMain();
 
     const registerPage = await environment.getPage(target => target.url().match(/register/));
     await registerPage.clickMain();
@@ -21,8 +28,15 @@ async function createAccount() {
 
     await environment.metamask.sign();
 
+    const aztecProtocolPage = await environment.getPage(({ _targetInfo }) => _targetInfo.title === 'https://www.aztecprotocol.com');
+    await aztecProtocolPage.api.bringToFront();
+    await aztecProtocolPage.api.reload();
+
     const authorizePage = await environment.getPage(target => target.url().match(/register\/domain/));
     await authorizePage.clickMain();
+
+    extensionPage = await environment.openExtension();
+    await environment.clean();
 }
 
 async function restoreAccount(seedPhrase) {
