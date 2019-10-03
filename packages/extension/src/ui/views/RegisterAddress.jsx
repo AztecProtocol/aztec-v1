@@ -58,7 +58,6 @@ const stepsForNewAccount = [
 ];
 
 const RegisterAddress = ({
-    requestId,
     seedPhrase,
     password,
     address,
@@ -94,7 +93,6 @@ const RegisterAddress = ({
     );
 
     const initialData = {
-        requestId,
         seedPhrase,
         password,
         address,
@@ -126,7 +124,6 @@ const RegisterAddress = ({
 };
 
 RegisterAddress.propTypes = {
-    requestId: PropTypes.string.isRequired,
     seedPhrase: PropTypes.string,
     password: PropTypes.string,
     address: PropTypes.string.isRequired,

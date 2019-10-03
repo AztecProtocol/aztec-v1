@@ -18,6 +18,7 @@ class ConnectionManager {
         this.portId = '';
         this.callbacks = {};
         this.portResponses = new LRU(maxActiveResponses);
+        this.clientRequestId = '';
     }
 
     openConnection() {
@@ -28,6 +29,13 @@ class ConnectionManager {
         this.portId = randomId();
         this.port = browser.runtime.connect({ name: this.portId });
         this.port.onMessage.addListener(this.handlePortResponse);
+    }
+
+    setDefaultClientRequestId(clientRequestId) {
+        if (this.clientRequestId) {
+            warnLog(`clientRequestId has been set with '${this.clientRequestId}'.`);
+        }
+        this.clientRequestId = clientRequestId;
     }
 
     handlePortResponse = (response) => {
@@ -51,7 +59,7 @@ class ConnectionManager {
         data,
     }, callback = null) {
         const requestId = type === actionEvent
-            ? clientRequestId
+            ? clientRequestId || this.clientRequestId
             : randomId();
         const responseId = type === actionEvent
             ? randomId()
