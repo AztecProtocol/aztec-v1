@@ -5,6 +5,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    defaultInt,
+} from '~ui/config/settings';
+import {
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
@@ -19,7 +22,7 @@ const steps = [
         tasks: [
             {
                 name: 'proof',
-                run: apis.mock,
+                run: apis.proof.withdraw,
             },
         ],
     },
@@ -29,7 +32,7 @@ const steps = [
             {
                 type: 'sign',
                 name: 'approve',
-                run: apis.mock,
+                run: apis.note.signNotes,
             },
         ],
     },
@@ -38,7 +41,7 @@ const steps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.mock,
+                run: apis.asset.confidentialTransfer,
             },
         ],
     },
@@ -49,8 +52,10 @@ const steps = [
 
 const WithdrawTransaction = ({
     asset,
-    user,
+    sender,
+    to,
     amount,
+    numberOfInputNotes,
     initialStep,
     initialTask,
     autoStart,
@@ -83,7 +88,7 @@ const WithdrawTransaction = ({
                 }}
                 to={{
                     type: 'user',
-                    description: formatAddress(user.address, 6, 4),
+                    description: formatAddress(to, 6, 4),
                 }}
                 size="s"
                 actionIconName="double_arrow"
@@ -92,9 +97,11 @@ const WithdrawTransaction = ({
     );
 
     const initialData = {
-        asset,
-        user,
+        assetAddress: asset.address,
+        sender,
+        to,
         amount,
+        numberOfInputNotes,
     };
 
     return (
@@ -123,10 +130,10 @@ WithdrawTransaction.propTypes = {
         code: PropTypes.string,
         icon: PropTypes.string,
     }).isRequired,
-    user: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    }).isRequired,
+    sender: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
     amount: PropTypes.number.isRequired,
+    numberOfInputNotes: PropTypes.number,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     autoStart: PropTypes.bool,
@@ -136,6 +143,7 @@ WithdrawTransaction.propTypes = {
 };
 
 WithdrawTransaction.defaultProps = {
+    numberOfInputNotes: defaultInt,
     initialStep: -1,
     initialTask: 0,
     autoStart: false,

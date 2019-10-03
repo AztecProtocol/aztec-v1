@@ -77,6 +77,14 @@ const backgroundTypes = gql`
             currentAddress: String!
             domain: String!
         ): GrantAccessApiResponse
+        pickNotesFromBalance(
+            assetId: ID!
+            amount: Int!
+            owner: String
+            numberOfNotes: Int
+            currentAddress: String!
+            domain: String!
+        ): NotesApiResponse
         userPermission(
             currentAddress: String!
             domain: String!

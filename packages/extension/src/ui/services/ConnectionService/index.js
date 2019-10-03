@@ -1,8 +1,10 @@
 import {
     actionEvent,
     sendTransactionEvent,
+    uiQueryEvent,
     uiResponseEvent,
 } from '~config/event';
+import AuthService from '~background/services/AuthService';
 import ConnectionManager from './helpers/ConnectionManager';
 
 const manager = new ConnectionManager();
@@ -36,6 +38,23 @@ export default {
             params: data,
         },
     }),
+    query: async ({
+        query,
+        data,
+    }) => {
+        const currentUser = await AuthService.getCurrentUser();
+        return manager.postToBackground({
+            type: uiQueryEvent,
+            data: {
+                query,
+                args: {
+                    ...data,
+                    domain: window.location.href,
+                    currentAddress: currentUser.address,
+                },
+            },
+        });
+    },
     returnToClient: data => manager.postToBackground({
         type: uiResponseEvent,
         clientRequestId: manager.clientRequestId,

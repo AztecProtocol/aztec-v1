@@ -1,0 +1,163 @@
+import aztec from 'aztec.js';
+import {
+    createNote,
+    createNotes,
+    fromViewingKey,
+} from '~utils/note';
+import {
+    randomSumArray,
+} from '~utils/random';
+import asyncMap from '~utils/asyncMap';
+import asyncForEach from '~utils/asyncForEach';
+import ConnectionService from '~ui/services/ConnectionService';
+import UIError from '~ui/helpers/UIError';
+import {
+    getNoteOwnerAccount,
+} from '~ui/apis/account';
+
+export default async function createNoteFromBalance({
+    assetAddress,
+    amount,
+    sender,
+    owner, // will be ignore if transaction is not empty
+    transactions,
+    publicOwner,
+    // userAccess,
+    numberOfInputNotes = 1,
+    numberOfOutputNotes = 1,
+}) {
+    const inputNotesOwner = await getNoteOwnerAccount(sender);
+    let inputAmount = amount;
+
+    const outputNotesOwnerMapping = {};
+    let outputNotesOwner = inputNotesOwner;
+    if (transactions) {
+        const notesOwners = asyncMap(transactions, async ({ to }) => getNoteOwnerAccount(to));
+        notesOwners.forEach((o) => {
+            outputNotesOwnerMapping[o.address] = o;
+        });
+
+        inputAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
+        if (amount && inputAmount !== amount) {
+            throw new UIError('input.amount.not.match.transaction');
+        }
+    } else if (owner) {
+        if (owner !== inputNotesOwner.address) {
+            outputNotesOwner = await getNoteOwnerAccount(owner);
+        }
+        outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
+    }
+
+    const {
+        pickNotesFromBalance,
+    } = await ConnectionService.query({
+        query: 'asset.pickNotesFromBalance',
+        data: {
+            assetId: assetAddress,
+            amount: inputAmount,
+            owner: inputNotesOwner.address,
+            numberOfNotes: numberOfInputNotes,
+        },
+    });
+
+    const {
+        notes,
+        error,
+    } = pickNotesFromBalance || {};
+
+    if (error) {
+        throw new UIError({ error });
+    }
+
+    if (!notes) {
+        throw new UIError('note.pick.empty');
+    }
+
+    let inputNotes;
+    try {
+        inputNotes = await asyncMap(
+            notes,
+            async ({ decryptedViewingKey }) => fromViewingKey(
+                decryptedViewingKey,
+                inputNotesOwner.address,
+            ),
+        );
+    } catch {
+        throw new UIError('note.fromViewingKey', {
+            notes,
+        });
+    }
+
+    const outputValues = [];
+    const outputNotes = [];
+    const inputValues = notes.map(({ value }) => value);
+    const sum = notes.reduce((accum, { value }) => accum + value, 0);
+    const extraAmount = sum - inputAmount;
+    if (extraAmount > 0) {
+        const remainderNote = await createNote(
+            extraAmount,
+            inputNotesOwner.spendingPublicKey,
+            inputNotesOwner.address,
+            inputNotesOwner.linkedPublicKey,
+        );
+        outputValues.push(extraAmount);
+        outputNotes.push(remainderNote);
+        outputNotesOwnerMapping[inputNotesOwner.address] = inputNotesOwner;
+    }
+
+    if (transactions) {
+        await asyncForEach(transactions, async ({
+            amount: transactionAmount,
+            to,
+            numberOfOutputNotes: count,
+        }) => {
+            const notesOwner = outputNotesOwnerMapping[to];
+            const values = randomSumArray(
+                transactionAmount,
+                count || numberOfOutputNotes,
+            );
+            outputValues.push(...values);
+            const newNotes = await createNotes(
+                values,
+                inputNotesOwner.spendingPublicKey,
+                notesOwner.address,
+                notesOwner.linkedPublicKey,
+            );
+            outputNotes.push(...newNotes);
+        });
+    } else if (numberOfOutputNotes > 0) {
+        const values = randomSumArray(
+            inputAmount,
+            numberOfOutputNotes,
+        );
+        outputValues.push(...values);
+
+        const newNotes = await createNotes(
+            values,
+            inputNotesOwner.spendingPublicKey,
+            outputNotesOwner.address,
+            outputNotesOwner.linkedPublicKey,
+        );
+        outputNotes.push(...newNotes);
+    }
+
+    const {
+        JoinSplitProof,
+        ProofUtils,
+    } = aztec;
+    const publicValue = ProofUtils.getPublicValue(
+        inputValues,
+        outputValues,
+    );
+    const proof = new JoinSplitProof(
+        inputNotes,
+        outputNotes,
+        inputNotesOwner.address,
+        publicValue,
+        publicOwner || inputNotesOwner.address,
+    );
+
+    return {
+        proof,
+    };
+}

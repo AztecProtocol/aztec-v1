@@ -84,14 +84,7 @@ export default gql`
         address_in: [String!]
     }
     type Query {
-        pickNotesFromBalance(
-            assetId: ID!
-            amount: Int!
-            owner: String
-            numberOfNotes: Int
-            currentAddress: String!
-            domain: String!
-        ): NotesApiResponse
+        root: String
     }
     type Mutation {
         root: String
