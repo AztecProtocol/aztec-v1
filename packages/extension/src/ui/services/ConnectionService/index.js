@@ -8,27 +8,29 @@ const manager = new ConnectionManager();
 
 export default {
     openConnection: () => manager.openConnection(),
-    post: async (
-        clientRequestId,
-        actionName,
+    setDefaultClientRequestId: id => manager.setDefaultClientRequestId(id),
+    post: async ({
+        clientRequestId = '',
+        action,
         data = {},
-    ) => manager.postToBackground({
+    }) => manager.postToBackground({
         type: actionEvent,
         clientRequestId,
         data: {
-            action: actionName,
+            action,
             response: data,
         },
     }),
-    sendTransaction: async (
+    sendTransaction: async ({
         contract,
+        contractAddress,
         method,
         data,
-    ) => manager.postToBackground({
+    }) => manager.postToBackground({
         type: sendTransactionEvent,
         data: {
-            contract: typeof contract === 'string' ? contract : contract.name,
-            contractAddress: typeof contract === 'string' ? '' : contract.address,
+            contract,
+            contractAddress,
             method,
             params: data,
         },

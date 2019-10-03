@@ -86,12 +86,18 @@ class App extends PureComponent {
         let action;
         if (actionId) {
             action = await ActionService.get(actionId);
-            const {
-                type,
-            } = action || {};
-            ({
-                route,
-            } = actions[type] || {});
+            if (action) {
+                const {
+                    type,
+                    requestId,
+                } = action;
+
+                ({
+                    route,
+                } = actions[type] || {});
+
+                ConnectionService.setDefaultClientRequestId(requestId);
+            }
         }
         if (!route) {
             const {

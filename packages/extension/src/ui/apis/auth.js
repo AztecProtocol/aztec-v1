@@ -49,18 +49,14 @@ export const createKeyVault = async ({
     return account;
 };
 
-export const linkAccountToMetaMask = async ({
-    clientRequestId,
-    ...account
-}) => {
+export const linkAccountToMetaMask = async (account) => {
     const {
         publicKey: spendingPublicKey,
         ...data
-    } = await ConnectionService.post(
-        clientRequestId,
-        'metamask.register.extension',
-        account,
-    ) || {};
+    } = await ConnectionService.post({
+        action: 'metamask.register.extension',
+        data: account,
+    }) || {};
 
     return {
         ...data,
@@ -76,16 +72,16 @@ export const sendRegisterAddress = async ({
 }) => {
     const {
         txReceipt,
-    } = ConnectionService.sendTransaction(
-        'AZTECAccountRegistry',
-        'registerAZTECExtension',
-        [
+    } = ConnectionService.sendTransaction({
+        contract: 'AZTECAccountRegistry',
+        method: 'registerAZTECExtension',
+        data: [
             address,
             linkedPublicKey,
             spendingPublicKey,
             signature,
         ],
-    ) || {};
+    }) || {};
     const {
         blockNumber,
     } = txReceipt || {};

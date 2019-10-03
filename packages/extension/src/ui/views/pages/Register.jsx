@@ -56,13 +56,11 @@ const handleGoNext = (step, prevData) => {
 
 const Register = ({
     address,
-    requestId,
 }) => (
     <CombinedViews
         Steps={Steps}
         initialData={{
             address,
-            requestId,
         }}
         onGoBack={handleGoBack}
         onGoNext={handleGoNext}
@@ -71,7 +69,6 @@ const Register = ({
 );
 
 Register.propTypes = {
-    requestId: PropTypes.string.isRequired,
     address: PropTypes.string.isRequired,
 };
 
