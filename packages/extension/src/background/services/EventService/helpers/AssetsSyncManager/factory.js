@@ -1,8 +1,7 @@
-import AssetsSyncManager from './';
+import AssetsSyncManager from '.';
 
 
 class AssetsSyncManagerFactory {
-
     _managersByNetworks = {};
 
     _ensureManager = (networkId) => {
@@ -15,8 +14,7 @@ class AssetsSyncManagerFactory {
     create(networkId) {
         this._ensureManager(networkId);
         return this._managersByNetworks[networkId];
-    };
-
+    }
 }
 
 export default new AssetsSyncManagerFactory();

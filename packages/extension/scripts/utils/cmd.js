@@ -1,5 +1,4 @@
-const args = index =>
-    process.argv[index + 3];
+const args = index => process.argv[index + 3];
 
 const argv = (name) => {
     const params = process.argv.slice(3);

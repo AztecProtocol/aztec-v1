@@ -8,8 +8,7 @@ const projectRoot = path.resolve(__dirname, '../../');
 const highestLevel = 2;
 
 
-const prettyPath = composedPath =>
-    composedPath.replace(/\/{1,}/g, '/');
+const prettyPath = composedPath => composedPath.replace(/\/{1,}/g, '/');
 
 const locateModule = (name, isFileType = false) => {
     const validator = isFileType ? isFile : isDirectory;

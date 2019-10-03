@@ -36,45 +36,43 @@ export const safeReadFileSync = (filePath, encode = 'utf8') => {
     }
 };
 
-export const copyFile = (src, dest) =>
-    new Promise((resolve) => {
-        const readStream = fs.createReadStream(src);
+export const copyFile = (src, dest) => new Promise((resolve) => {
+    const readStream = fs.createReadStream(src);
 
-        readStream.on('error', error => resolve({
-            error,
-            src,
-            dest,
-        }));
+    readStream.on('error', error => resolve({
+        error,
+        src,
+        dest,
+    }));
 
-        readStream.on('end', () => resolve({
-            src,
-            dest,
-        }));
+    readStream.on('end', () => resolve({
+        src,
+        dest,
+    }));
 
-        readStream.pipe(fs.createWriteStream(dest));
+    readStream.pipe(fs.createWriteStream(dest));
+});
+
+export const copyFolder = (src, dest, overwrite = false) => new Promise(async (resolve) => {
+    ensureDirectory(dest);
+    await Promise.all(fs.readdirSync(src)
+        .map((name) => {
+            const srcPath = path.join(src, name);
+            const destPath = path.join(dest, name);
+            if (isDirectory(srcPath)) {
+                return copyFolder(srcPath, destPath);
+            }
+
+            if (!overwrite && isFile(destPath)) {
+                return null;
+            }
+
+            return copyFile(srcPath, destPath);
+        })
+        .filter(p => p));
+
+    resolve({
+        src,
+        dest,
     });
-
-export const copyFolder = (src, dest, overwrite = false) =>
-    new Promise(async (resolve) => {
-        ensureDirectory(dest);
-        await Promise.all(fs.readdirSync(src)
-            .map((name) => {
-                const srcPath = path.join(src, name);
-                const destPath = path.join(dest, name);
-                if (isDirectory(srcPath)) {
-                    return copyFolder(srcPath, destPath);
-                }
-
-                if (!overwrite && isFile(destPath)) {
-                    return null;
-                }
-
-                return copyFile(srcPath, destPath);
-            })
-            .filter(p => p));
-
-        resolve({
-            src,
-            dest,
-        });
-    });
+});
