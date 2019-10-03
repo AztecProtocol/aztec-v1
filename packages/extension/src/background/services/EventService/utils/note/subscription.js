@@ -50,6 +50,7 @@ const subscribe = async ({
     });
 
     return {
+        subscription,
         onData: (callback) => {
             subscription.on('data', (event) => {
                 const decodedLogs = decodeNoteLogs(eventsTopics, [event], networkId);
@@ -66,7 +67,7 @@ const subscribe = async ({
 
 const unsubscribe = async (subscription) => {
     try {
-        await Promise((resolve, reject) => {
+        await new Promise((resolve, reject) => {
             subscription.unsubscribe((error, success) => {
                 if (success) {
                     resolve();
@@ -87,32 +88,7 @@ const unsubscribe = async (subscription) => {
     }
 };
 
-const resubscribe = async (subscription) => {
-    try {
-        await Promise((resolve, reject) => {
-            subscription.subscribe((error, success) => {
-                if (success) {
-                    resolve();
-                } else {
-                    reject(error);
-                }
-            });
-        });
-        return {
-            error: null,
-            subscription,
-        };
-    } catch (error) {
-        return {
-            error,
-            subscription,
-        };
-    }
-};
-
-
 export default {
     subscribe,
     unsubscribe,
-    resubscribe,
 };

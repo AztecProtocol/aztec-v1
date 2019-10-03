@@ -1,22 +1,31 @@
-import NotesSyncManager from './';
+import NotesSyncManager from '.';
 
 
 class NotesSyncManagerFactory {
+    managersByNetworks = {};
 
-    _managersByNetworks = {};
+    config = {
+        blocksPerRequest: 540000, // ~ per 3 months (~6000 per day)
+        precisionDelta: 10, //
+        networkId: null,
+    };
 
-    _ensureManager = (networkId) => {
-        if (this._managersByNetworks[networkId]) {
+    ensureManager = (networkId) => {
+        if (this.managersByNetworks[networkId]) {
             return;
         }
-        this._managersByNetworks[networkId] = new NotesSyncManager();
+        const manager = new NotesSyncManager();
+        manager.setConfig({
+            ...this.config,
+            networkId,
+        });
+        this.managersByNetworks[networkId] = manager;
     };
 
     create(networkId) {
-        this._ensureManager(networkId);
-        return this._managersByNetworks[networkId];
+        this.ensureManager(networkId);
+        return this.managersByNetworks[networkId];
     }
-
 }
 
 export default new NotesSyncManagerFactory();
