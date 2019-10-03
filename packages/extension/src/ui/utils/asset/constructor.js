@@ -1,6 +1,6 @@
 import {
     getLinkedTokenAddress,
-} from '~ui/apis/assets';
+} from '~ui/apis/asset';
 import {
     icon,
 } from '~ui/utils/token';

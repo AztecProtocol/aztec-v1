@@ -6,7 +6,7 @@ import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
 import Loading from '~ui/views/Loading';
 import {
     getDomainAssets,
-} from '~ui/apis/assets';
+} from '~ui/apis/asset';
 import {
     getCurrentUser,
     approveDomain,

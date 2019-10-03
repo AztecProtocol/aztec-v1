@@ -15,7 +15,7 @@ const registerAddressSteps = [
         tasks: [
             {
                 name: 'authorise',
-                run: apis.sendRegisterAddress,
+                run: apis.auth.sendRegisterAddress,
             },
         ],
     },
@@ -24,7 +24,7 @@ const registerAddressSteps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.registerAccount,
+                run: apis.auth.registerAccount,
             },
         ],
     },
@@ -43,11 +43,11 @@ const stepsForNewAccount = [
         tasks: [
             {
                 name: 'create',
-                run: apis.createKeyVault,
+                run: apis.auth.createKeyVault,
             },
             {
                 name: 'link',
-                run: apis.linkAccountToMetaMask,
+                run: apis.auth.linkAccountToMetaMask,
             },
         ],
     },
