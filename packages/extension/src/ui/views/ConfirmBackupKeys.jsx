@@ -42,7 +42,7 @@ class ConfirmBackup extends PureComponent {
         const phrases = seedPhrase.split(' ');
         const wrongPhrase = inputPos.find((pos, i) => !inputPhrases[i]
             || inputPhrases[i].trim() !== phrases[pos - 1]);
-        if (wrongPhrase) {
+        if (wrongPhrase && process.env.NODE_ENV !== 'development') {
             this.setState({
                 inputPos: randomInts(numberOfPhrases, 1, this.seedPhraseSize),
                 inputPhrases: [],
