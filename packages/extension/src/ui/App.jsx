@@ -25,14 +25,16 @@ class App extends PureComponent {
     constructor(props) {
         super(props);
 
+        const {
+            locale,
+        } = props;
+
         this.state = {
             loading: true,
             action: null,
             nextRoute: '',
         };
-    }
 
-    componentWillMount(locale = 'en') {
         const phrases = require(`./locales/${locale}`).default; // eslint-disable-line global-require, import/no-dynamic-require
         i18n.setLocale(locale);
         i18n.register(phrases);
@@ -213,6 +215,7 @@ class App extends PureComponent {
 }
 
 App.propTypes = {
+    locale: PropTypes.string,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
@@ -224,6 +227,7 @@ App.propTypes = {
 };
 
 App.defaultProps = {
+    locale: 'en',
     mock: false,
 };
 
