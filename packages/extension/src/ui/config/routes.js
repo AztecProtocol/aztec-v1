@@ -16,8 +16,9 @@ import RegisterAddress from '~ui/views/RegisterAddress';
 import NoteAccess from '~ui/views/pages/NoteAccess';
 import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
 import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
-// import DepositTransaction from '~ui/views/DepositTransaction';
-import DepositTransaction from '../pages/Prove';
+import Deposit from '~ui/views/pages/Deposit';
+import DepositConfirm from '~ui/views/DepositConfirm';
+import DepositTransaction from '~ui/views/DepositTransaction';
 import Send from '~ui/views/pages/Send';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
@@ -90,13 +91,19 @@ export default {
             },
         },
     },
-    // deposit: {
-    //     path: 'deposit',
-    //     Component: DepositTransaction,
-    // },
     deposit: {
         path: 'deposit',
-        Component: DepositTransaction,
+        Component: Deposit,
+        routes: {
+            confirm: {
+                path: 'confirm',
+                View: DepositConfirm,
+            },
+            grant: {
+                path: 'grant',
+                View: DepositTransaction,
+            },
+        },
     },
     // withdraw: {
     //     path: 'withdraw',

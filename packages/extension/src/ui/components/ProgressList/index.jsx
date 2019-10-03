@@ -72,13 +72,16 @@ ProgressList.propTypes = {
         titleKey: PropTypes.string,
     })).isRequired,
     currentStep: PropTypes.number.isRequired,
-    error: PropTypes.string,
+    error: PropTypes.shape({
+        key: PropTypes.string,
+        message: PropTypes.string,
+    }),
     loading: PropTypes.bool,
 };
 
 ProgressList.defaultProps = {
     className: '',
-    error: '',
+    error: null,
     loading: false,
 };
 

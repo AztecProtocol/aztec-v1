@@ -19,7 +19,7 @@ const steps = [
         tasks: [
             {
                 name: 'proof',
-                run: apis.mock,
+                run: apis.deposit.prove,
             },
         ],
     },
@@ -29,7 +29,7 @@ const steps = [
             {
                 type: 'sign',
                 name: 'approve',
-                run: apis.mock,
+                run: apis.deposit.approve,
             },
         ],
     },
@@ -38,7 +38,7 @@ const steps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.mock,
+                run: apis.deposit.send,
             },
         ],
     },
@@ -49,8 +49,10 @@ const steps = [
 
 const DepositTransaction = ({
     asset,
-    user,
+    from: fromAddress,
+    transactions,
     amount,
+    numberOfOutputNotes,
     initialStep,
     initialTask,
     autoStart,
@@ -64,6 +66,15 @@ const DepositTransaction = ({
         tokenAddress,
         icon,
     } = asset;
+
+    const initialData = {
+        assetAddress,
+        owner: fromAddress,
+        publicOwner: fromAddress,
+        transactions,
+        amount,
+        numberOfOutputNotes,
+    };
 
     const ticketHeader = (
         <div>
@@ -95,12 +106,6 @@ const DepositTransaction = ({
         </div>
     );
 
-    const initialData = {
-        asset,
-        user,
-        amount,
-    };
-
     return (
         <Transaction
             title={i18n.t('deposit.transaction')}
@@ -128,10 +133,13 @@ DepositTransaction.propTypes = {
         code: PropTypes.string,
         icon: PropTypes.string,
     }).isRequired,
-    user: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    }).isRequired,
+    from: PropTypes.string.isRequired,
+    transactions: PropTypes.arrayOf(PropTypes.shape({
+        amount: PropTypes.number.isRequired,
+        to: PropTypes.string.isRequired,
+    })).isRequired,
     amount: PropTypes.number.isRequired,
+    numberOfOutputNotes: PropTypes.number,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     autoStart: PropTypes.bool,
@@ -141,6 +149,7 @@ DepositTransaction.propTypes = {
 };
 
 DepositTransaction.defaultProps = {
+    numberOfOutputNotes: 0,
     initialStep: -1,
     initialTask: 0,
     autoStart: false,

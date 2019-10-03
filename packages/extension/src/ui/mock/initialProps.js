@@ -1,7 +1,9 @@
 import {
+    randomInts,
     randomInt,
 } from '~utils/random';
 import {
+    generate,
     seedPhrase,
     addresses,
     assets,
@@ -80,10 +82,33 @@ export default {
         goNext: dummyFunc,
     },
     deposit: {
+        from: addresses[0],
+        assetAddress: assets[0].address,
+        transactions: [
+            {
+                amount: randomInt(1000),
+                to: addresses[1],
+            },
+        ],
+        goNext: dummyFunc,
+    },
+    'deposit.confirm': () => {
+        const amounts = randomInts(3, 1000);
+        return {
+            asset: assets[0],
+            from: addresses[0],
+            transactions: generate(3, i => ({
+                amount: amounts[i],
+                to: addresses[i + 1],
+            })),
+            amount: amounts.reduce((sum, a) => sum + a, 0),
+            goNext: dummyFunc,
+        };
+    },
+    'deposit.grant': {
         asset: assets[0],
-        user: {
-            address: addresses[0],
-        },
+        from: addresses[0],
+        transactions: [],
         amount: randomInt(1, 1000),
         goNext: dummyFunc,
     },
