@@ -1,13 +1,13 @@
 const BN = require('bn.js');
 
 // Precomputed values from MPC setup
-const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
-const H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
+// const H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
+// const H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
 const t2 = [
-    '0x01cf7cc93bfbf7b2c5f04a3bc9cb8b72bbcf2defcabdceb09860c493bdf1588d',
-    '0x08d554bf59102bbb961ba81107ec71785ef9ce6638e5332b6c1a58b87447d181',
-    '0x204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2',
-    '0x02cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc',
+    '0xc332790575a124b4e0719ea8b8de7dd3f05c4cd17bc33bec7e6eef4118dd8df',
+    '0x24cd5e5e3ecb3c5ff762f2019ff27b21964e98e12f859d2e5d86e1a0582dc9be',
+    '0x8baa9ddaa219f46c462de4b3577ba514d3989d1eb06f34fcc0c0d4b62d4c4d5',
+    '0x2419a805e1384577d9081b465a793e6a18d8335923b1bae4884c8ca80b28fea',
 ];
 /**
  * Helper module that contains key constants for our zero-knowledge proving system
@@ -20,7 +20,11 @@ const constants = {
      * @constant CRS
      * @type {string}
      */
-    CRS: [`0x${H_X.toString(16)}`, `0x${H_Y.toString(16)}`, ...t2],
+    CRS: [
+        '0x2883d3b3bc1069ebc6de30d112fbcf338ca221a054e82b80a380d7d3bb571d9f',
+        `0x249ea3a110a7700146e43fd8274ec1e40a1071ae1aa043b2fdbd91221a2091e6`,
+        ...t2,
+    ],
     /**
      * Generic scaling factor that maps between AZTEC note values and ERC20 token balances. When used for DAI,
      * 1 note value = 0.1 DAI
@@ -55,7 +59,7 @@ const constants = {
      *  @type {number}
      *  @default 1024
      */
-    SIGNATURES_PER_FILE: 10,
+    SIGNATURES_PER_FILE: 1025,
     /**
      * BN value equal to 0
      */
