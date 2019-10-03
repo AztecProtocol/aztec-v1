@@ -1,5 +1,8 @@
 import browser from 'webextension-polyfill';
 import {
+    actionEvent,
+} from '~config/event';
+import {
     warnLog,
 } from '~utils/log';
 import {
@@ -42,12 +45,17 @@ class ConnectionManager {
         this.portResponses.add(responseId, returnData);
     };
 
-    postToBackground({
+    async postToBackground({
         type,
-        requestId,
+        clientRequestId,
         data,
     }, callback = null) {
-        const responseId = randomId();
+        const requestId = type === actionEvent
+            ? clientRequestId
+            : randomId();
+        const responseId = type === actionEvent
+            ? randomId()
+            : requestId;
         this.callbacks[responseId] = callback
             ? [callback]
             : [];
@@ -56,6 +64,7 @@ class ConnectionManager {
             type,
             requestId,
             responseId,
+            clientRequestId,
             data,
         });
         this.port.postMessage({
@@ -65,12 +74,10 @@ class ConnectionManager {
             data,
         });
 
-        return {
-            onReceiveResponse: otherCallback => this.registerResponse(
-                responseId,
-                otherCallback,
-            ),
-        };
+        return new Promise(resolve => this.registerResponse(
+            responseId,
+            resolve,
+        ));
     }
 
     registerResponse(responseId, callback) {

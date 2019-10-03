@@ -32,7 +32,7 @@ class MockRoute extends PureComponent {
 
         return (
             <Component
-                requestId="client-request-id"
+                clientRequestId="client-request-id"
                 goBack={handleGoBack}
                 goNext={handleGoNext}
                 goToPage={goToPage}

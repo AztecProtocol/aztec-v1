@@ -30,7 +30,7 @@ export const createKeyVault = async ({
     address,
     password,
     salt = 'salty',
-}, cb) => {
+}) => {
     const {
         registerExtension: {
             account,
@@ -46,38 +46,37 @@ export const createKeyVault = async ({
         },
     });
 
-    cb(account);
+    return account;
 };
 
 export const linkAccountToMetaMask = async ({
-    requestId,
+    clientRequestId,
     ...account
-}, cb) => ConnectionService
-    .post(
-        requestId,
+}) => {
+    const {
+        publicKey: spendingPublicKey,
+        ...data
+    } = await ConnectionService.post(
+        clientRequestId,
         'metamask.register.extension',
         account,
-    )
-    .onReceiveResponse((response) => {
-        const {
-            publicKey: spendingPublicKey,
-            ...data
-        } = response;
-        cb({
-            ...data,
-            spendingPublicKey,
-        });
-    });
+    ) || {};
+
+    return {
+        ...data,
+        spendingPublicKey,
+    };
+};
 
 export const sendRegisterAddress = async ({
-    requestId,
     address,
     linkedPublicKey,
     spendingPublicKey,
     signature,
-}, cb) => ConnectionService
-    .sendTransaction(
-        requestId,
+}) => {
+    const {
+        txReceipt,
+    } = ConnectionService.sendTransaction(
         'AZTECAccountRegistry',
         'registerAZTECExtension',
         [
@@ -86,17 +85,15 @@ export const sendRegisterAddress = async ({
             spendingPublicKey,
             signature,
         ],
-    )
-    .onReceiveResponse((response) => {
-        const {
-            txReceipt: {
-                blockNumber,
-            } = {},
-        } = response || {};
-        cb({
-            blockNumber,
-        });
-    });
+    ) || {};
+    const {
+        blockNumber,
+    } = txReceipt || {};
+
+    return {
+        blockNumber,
+    };
+};
 
 export const registerAccount = async ({
     address,
@@ -104,7 +101,7 @@ export const registerAccount = async ({
     spendingPublicKey,
     signature,
     blockNumber,
-}, cb) => {
+}) => {
     const {
         registerAddress: {
             account,
@@ -121,15 +118,15 @@ export const registerAccount = async ({
         },
     });
 
-    cb({
+    return {
         success: !!account,
-    });
+    };
 };
 
 export const approveDomain = async ({
     address,
     domain,
-}, cb) => {
+}) => {
     const {
         registerDomain: {
             success,
@@ -142,7 +139,7 @@ export const approveDomain = async ({
         },
     });
 
-    cb({ success });
+    return { success };
 };
 
 export const getCurrentUser = async () => AuthService.getCurrentUser();
