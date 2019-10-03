@@ -18,11 +18,15 @@ class MockRoute extends PureComponent {
         const {
             data,
         } = action || {};
+        let childProps = initialProps[name];
+        if (typeof childProps === 'function') {
+            childProps = childProps();
+        }
         const {
             prev,
             next,
             ...props
-        } = initialProps[name] || {};
+        } = childProps || {};
         const handleGoBack = prev
             ? () => goToPage(prev)
             : null;

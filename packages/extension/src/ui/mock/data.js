@@ -6,15 +6,15 @@ import daiIcon from '~ui/images/tokens/dai.png';
 import usdcIcon from '~ui/images/tokens/usdc.png';
 import compoundLogo from './images/compound.png';
 
-const generate = (count, generator) => {
+export const generate = (count, generator) => {
     const data = [];
     for (let i = 0; i < count; i += 1) {
-        data.push(generator());
+        data.push(generator(i));
     }
     return data;
 };
 
-const randomAddress = () => `0x${randomId(40)}`;
+export const randomAddress = () => `0x${randomId(40)}`;
 
 export const seedPhrase = 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle';
 

@@ -135,7 +135,6 @@ class Transaction extends PureComponent {
                 ? await run(data)
                 : await runTask(task, data);
         } catch (error) {
-            console.log(error);
             response = {
                 error,
             };

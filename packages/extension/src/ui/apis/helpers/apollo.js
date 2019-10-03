@@ -2,6 +2,7 @@ import ApolloClient from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
+import gql from 'graphql-tag';
 import typeDefs from '~background/services/GraphQLService/typeDefs/ui';
 import resolvers from '~background/services/GraphQLService/resolvers/ui';
 
@@ -32,7 +33,14 @@ export default {
         return (response && response.data) || response;
     },
     query: async (...args) => {
-        const response = await apollo.query(...args);
+        let response;
+        if (typeof args[0] !== 'string') {
+            response = await apollo.query(...args);
+        } else {
+            response = await apollo.query({
+                query: gql(`query {${args[0]}}`),
+            });
+        }
         return (response && response.data) || response;
     },
 };

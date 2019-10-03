@@ -4,6 +4,10 @@ export default {
         _: 'Deposit Transaction',
         description: '',
     },
+    from: 'From',
+    amount: {
+        total: 'Total amount',
+    },
     step: {
         approve: {
             erc20: 'Approve ERC20',
