@@ -4,19 +4,13 @@ import {
     defaultInt,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
-import closeWindow from '~ui/utils/closeWindow';
-import ConnectionService from '~ui/services/ConnectionService';
+import returnAndClose from '~ui/helpers/returnAndClose';
 import WithdrawTransaction from '~ui/views/WithdrawTransaction';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 
 const Steps = [
     WithdrawTransaction,
 ];
-
-const handleExit = () => {
-    ConnectionService.returnToClient();
-    closeWindow(1000);
-};
 
 const Withdraw = ({
     assetAddress,
@@ -40,7 +34,7 @@ const Withdraw = ({
         <CombinedViews
             Steps={Steps}
             fetchInitialData={fetchInitialData}
-            onExit={handleExit}
+            onExit={returnAndClose}
         />
     );
 };

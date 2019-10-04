@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import makeAsset from '~uiModules/utils/asset';
-import closeWindow from '~ui/utils/closeWindow';
-import ConnectionService from '~ui/services/ConnectionService';
+import returnAndClose from '~ui/helpers/returnAndClose';
 import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositTransaction from '~ui/views/DepositTransaction';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
@@ -28,11 +27,6 @@ const handleGoNext = (step, prevData) => {
     return data;
 };
 
-const handleExit = () => {
-    ConnectionService.returnToClient();
-    closeWindow(1000);
-};
-
 const Deposit = ({
     from,
     assetAddress,
@@ -55,7 +49,7 @@ const Deposit = ({
             Steps={Steps}
             fetchInitialData={fetchInitialData}
             onGoNext={handleGoNext}
-            onExit={handleExit}
+            onExit={returnAndClose}
         />
     );
 };
