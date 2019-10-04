@@ -13,7 +13,9 @@ dotenv.config();
 describe.only('Extension', (accounts) => {
     let environment;
     before(async () => {
-        environment = await Environment.init(extensionPath);
+        environment = await Environment.init(extensionPath, 
+            //{ debug: true, observeTime: 2000 }
+        );
     });
 
     after(async () => {
