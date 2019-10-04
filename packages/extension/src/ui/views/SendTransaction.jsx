@@ -19,7 +19,7 @@ const steps = [
         tasks: [
             {
                 name: 'proof',
-                run: apis.mock,
+                run: apis.proof.transfer,
             },
         ],
     },
@@ -27,9 +27,9 @@ const steps = [
         titleKey: 'transaction.step.approve',
         tasks: [
             {
-                type: 'sign',
                 name: 'approve',
-                run: apis.mock,
+                type: 'sign',
+                run: apis.note.signNotes,
             },
         ],
     },
@@ -38,7 +38,7 @@ const steps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.mock,
+                run: apis.asset.confidentialTransfer,
             },
         ],
     },
@@ -49,8 +49,9 @@ const steps = [
 
 const SendTransaction = ({
     asset,
-    user,
+    sender,
     transactions,
+    amount: totalAmount,
     initialStep,
     initialTask,
     autoStart,
@@ -63,18 +64,17 @@ const SendTransaction = ({
         address: assetAddress,
     } = asset;
 
-    const totalAmount = transactions.reduce((accum, {
-        amount,
-    }) => accum + amount, 0);
-
     const [firstTransaction, ...rest] = transactions;
-    const firstUser = firstTransaction.account;
     const moreItems = rest.map(({
         amount,
-        account: {
-            address,
-        },
-    }) => `${formatAddress(address, 6, 4)} (+${formatValue(code, amount)})`);
+        to,
+    }) => `${formatAddress(to, 6, 4)} (+${formatValue(code, amount)})`);
+
+    const initialData = {
+        assetAddress: asset.address,
+        sender,
+        transactions,
+    };
 
     const ticketHeader = (
         <div>
@@ -96,7 +96,7 @@ const SendTransaction = ({
                 }}
                 to={{
                     type: 'user',
-                    description: formatAddress(firstUser.address, 6, 4),
+                    description: formatAddress(firstTransaction.to, 6, 4),
                     moreItems,
                 }}
                 size="s"
@@ -104,12 +104,6 @@ const SendTransaction = ({
             />
         </div>
     );
-
-    const initialData = {
-        asset,
-        user,
-        transactions,
-    };
 
     return (
         <Transaction
@@ -137,15 +131,12 @@ SendTransaction.propTypes = {
         code: PropTypes.string,
         icon: PropTypes.string,
     }).isRequired,
-    user: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    }).isRequired,
+    sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,
-        account: PropTypes.shape({
-            address: PropTypes.string.isRequired,
-        }).isRequired,
+        to: PropTypes.string.isRequired,
     })).isRequired,
+    amount: PropTypes.number.isRequired,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     autoStart: PropTypes.bool,

@@ -21,9 +21,9 @@ import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositTransaction from '~ui/views/DepositTransaction';
 import Withdraw from '~ui/views/pages/Withdraw';
 import WithdrawTransaction from '~ui/views/WithdrawTransaction';
-// import Send from '~ui/views/pages/Send';
-// import SendConfirm from '~ui/views/SendConfirm';
-// import SendTransaction from '~ui/views/SendTransaction';
+import Send from '~ui/views/pages/Send';
+import SendConfirm from '~ui/views/SendConfirm';
+import SendTransaction from '~ui/views/SendTransaction';
 import MintTransaction from '~ui/views/MintTransaction';
 import BurnTransaction from '~ui/views/BurnTransaction';
 
@@ -58,6 +58,10 @@ export default {
             password: {
                 path: 'password',
                 View: CreatePassword,
+            },
+            account: {
+                path: 'account',
+                View: RegisterAddress,
             },
             address: {
                 path: 'address',
@@ -135,20 +139,16 @@ export default {
     },
     send: {
         path: 'send',
-        Component: DepositTransaction,
+        Component: Send,
+        routes: {
+            confirm: {
+                path: 'confirm',
+                View: SendConfirm,
+            },
+            grant: {
+                path: 'grant',
+                View: SendTransaction,
+            },
+        },
     },
-    // send: {
-    //     path: 'send',
-    //     Component: Send,
-    //     routes: {
-    //         confirm: {
-    //             path: 'confirm',
-    //             View: SendConfirm,
-    //         },
-    //         grant: {
-    //             path: 'grant',
-    //             View: SendTransaction,
-    //         },
-    //     },
-    // },
 };
