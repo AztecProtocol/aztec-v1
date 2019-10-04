@@ -32,7 +32,8 @@ class Prove extends Component {
         } = this.state;
 
         const amount = transactions.reduce((accum, { amount }) => accum + amount, 0);
-const { proof } = await ExtensionApi.prove.publicApprove({ clientId,
+        const { proof } = await ExtensionApi.prove.publicApprove({
+            clientId,
             requestId,
             proofHash,
             amount,
@@ -138,7 +139,6 @@ const { proof } = await ExtensionApi.prove.publicApprove({ clientId,
             challenge: proof.challengeHex,
             noteHashes: proof.notes.map(({ noteHash }) => noteHash),
         });
-
     }
 
     withdraw = async () => {
@@ -250,7 +250,7 @@ const { proof } = await ExtensionApi.prove.publicApprove({ clientId,
         });
     }
 
-    sendMintProof = async() => {
+    sendMintProof = async () => {
         const {
             mintProof,
         } = this.state;
@@ -274,7 +274,6 @@ const { proof } = await ExtensionApi.prove.publicApprove({ clientId,
             requestId,
             clientId,
         });
-
     }
 
     render() {
@@ -298,36 +297,36 @@ const { proof } = await ExtensionApi.prove.publicApprove({ clientId,
                 align="center"
                 background="white"
             >
-            <Accordion
-                defaultIsOpen={false}
-                title={(
-                    <Text
-                        size="m"
-                        text="Mint"
-                        weight="bold"
-                    />
-                )}
-                content={(
-                    <Block>
-                        <div>
-                            <br />
-                            <br />
-                            <Button
-                                text="Generate Proof"
-                                onClick={() => this.mint()}
-                            />
-                        </div>
-                        <div>
-                            <br />
-                            <br />
-                            <Button
-                                text="Send Mint Proof"
-                                onClick={() => this.sendMintProof()}
-                            />
-                        </div>
-                    </Block>
-                )}
-            />
+                <Accordion
+                    defaultIsOpen={false}
+                    title={(
+                        <Text
+                            size="m"
+                            text="Mint"
+                            weight="bold"
+                        />
+                    )}
+                    content={(
+                        <Block>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Generate Proof"
+                                    onClick={() => this.mint()}
+                                />
+                            </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Send Mint Proof"
+                                    onClick={() => this.sendMintProof()}
+                                />
+                            </div>
+                        </Block>
+                    )}
+                />
             </Block>
         );
     }

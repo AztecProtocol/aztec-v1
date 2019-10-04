@@ -4,8 +4,7 @@ import { proofs } from '@aztec/dev-utils';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
-import {
-    createNote,
+import { createNote,
     createNotes,
     fromViewingKey,
     valueOf,
