@@ -19380,10 +19380,1354 @@
       "links": {},
       "address": "0x5D704a5b820b9B3b58c86D9cfa424c0B0CF9E750",
       "transactionHash": "0x24e3c54536b173493c0bf50f5e443cfad94a97b4d3590750f01c14d47713cdd0"
+    },
+    "1570190886340": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0xEc85f3D1FC95cA5e02a9E4b08998bd4BF92EF914",
+      "transactionHash": "0x30721799aed41c3c460b483c1705885692754be2a54e32daf4d3e06516917d76"
+    },
+    "1570192327917": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0x59Bb9FEF8dA35054886F0461248392F847010F3a",
+      "transactionHash": "0xed88b1f174fba05cd2bf6e18234942611a83829ffdd7bab627e7df647680d5c0"
+    },
+    "1570204237368": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0x59Bb9FEF8dA35054886F0461248392F847010F3a",
+      "transactionHash": "0xed88b1f174fba05cd2bf6e18234942611a83829ffdd7bab627e7df647680d5c0"
+    },
+    "1570205912878": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0x59Bb9FEF8dA35054886F0461248392F847010F3a",
+      "transactionHash": "0xed88b1f174fba05cd2bf6e18234942611a83829ffdd7bab627e7df647680d5c0"
+    },
+    "1570206473440": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0x59Bb9FEF8dA35054886F0461248392F847010F3a",
+      "transactionHash": "0xed88b1f174fba05cd2bf6e18234942611a83829ffdd7bab627e7df647680d5c0"
+    },
+    "1570206794663": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0x59Bb9FEF8dA35054886F0461248392F847010F3a",
+      "transactionHash": "0xed88b1f174fba05cd2bf6e18234942611a83829ffdd7bab627e7df647680d5c0"
+    },
+    "1570215515364": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0x59Bb9FEF8dA35054886F0461248392F847010F3a",
+      "transactionHash": "0xed88b1f174fba05cd2bf6e18234942611a83829ffdd7bab627e7df647680d5c0"
+    },
+    "1570216651741": {
+      "events": {
+        "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_commonReferenceString",
+              "type": "bytes32[6]"
+            }
+          ],
+          "name": "SetCommonReferenceString",
+          "type": "event",
+          "signature": "0x85adab12e45179738a96f914df934f3d0b656588ea13f75093bd4796dc3e2736"
+        },
+        "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "id",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "validatorAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetProof",
+          "type": "event",
+          "signature": "0x056d19b176848b2ba83ba7d1d83c9022e6c1bd37d5c648a143ccec369e53f3c9"
+        },
+        "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "newLatestEpoch",
+              "type": "uint8"
+            }
+          ],
+          "name": "IncrementLatestEpoch",
+          "type": "event",
+          "signature": "0x9a76c82938224c049c704b5f4bfdbe9ef61749be7b65291103b97274b874665d"
+        },
+        "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "epoch",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "cryptoSystem",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "name": "assetType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "factoryAddress",
+              "type": "address"
+            }
+          ],
+          "name": "SetFactory",
+          "type": "event",
+          "signature": "0x3506459ad40b99177e1a043acb15be95b16ae5e3101c3b5b12ae5d289781d2ce"
+        },
+        "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "registryAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "scalingFactor",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "linkedTokenAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "canAdjustSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "name": "canConvert",
+              "type": "bool"
+            }
+          ],
+          "name": "CreateNoteRegistry",
+          "type": "event",
+          "signature": "0x34fbbb932061028a5177da0c6ca6a7359202a390c458f2c2c042ca3e4357d53e"
+        },
+        "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "registryOwner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "proxyAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "newBehaviourAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UpgradeNoteRegistry",
+          "type": "event",
+          "signature": "0x42d58b58975590b8c8025b2176eac714ec611e69ee7cc1bbc562f2e0f7069448"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      },
+      "links": {},
+      "address": "0x59Bb9FEF8dA35054886F0461248392F847010F3a",
+      "transactionHash": "0xed88b1f174fba05cd2bf6e18234942611a83829ffdd7bab627e7df647680d5c0"
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-10-03T19:36:39.272Z",
+  "updatedAt": "2019-10-04T19:18:03.996Z",
   "devdoc": {
     "author": "AZTEC",
     "details": "ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables     digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard. Copyright Spilsbury Holdings Ltd 2019. All rights reserved.*",
