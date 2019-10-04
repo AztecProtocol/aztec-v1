@@ -5,13 +5,11 @@ import ApiError from '~client/utils/ApiError';
 export const ensureExtensionInstalled = async () => {
     const account = await registerExtension() || {};
 
-    if (!account) {
+    if (!account || account.error) {
         throw new ApiError('account.not.registered');
     }
 
-    if (account && account.blockNumber) {
-        return account;
-    }
+    return account;
 };
 
 export const ensureDomainRegistered = async () => {

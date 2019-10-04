@@ -201,7 +201,6 @@ class Connection {
 
     registerClient = (client) => {
         this.connections[client.name] = client;
-        this.connections[client.name].requests = {};
         client.onMessage.addListener(({
             requestId,
             ...data
