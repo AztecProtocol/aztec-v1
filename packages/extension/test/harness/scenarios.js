@@ -6,13 +6,11 @@ async function createAccount() {
 
     let extensionPage = await environment.openExtension();
     await extensionPage.clickMain();
-    
+
+    let homepage = await environment.getPage(({ _targetInfo }) => _targetInfo.url === 'https://www.aztecprotocol.com/');
+    await homepage.initialiseAztec();
+
     await environment.metamask.approve();
-
-    await environment.findAndClosePage(({ _targetInfo }) => _targetInfo.title === 'https://www.aztecprotocol.com')
-
-    extensionPage = await environment.openExtension();
-    await extensionPage.clickMain();
 
     const registerPage = await environment.getPage(target => target.url().match(/register/));
     await registerPage.clickMain();
@@ -26,12 +24,10 @@ async function createAccount() {
 
     await environment.metamask.sign();
 
-    const aztecProtocolPage = await environment.getPage(({ _targetInfo }) => _targetInfo.title === 'https://www.aztecprotocol.com');
-    await aztecProtocolPage.api.bringToFront();
-    await aztecProtocolPage.api.reload();
-
     const authorizePage = await environment.getPage(target => target.url().match(/register\/domain/));
+
     await authorizePage.clickMain();
+    await environment.wait(200000);
 
     await environment.clean();
 }
