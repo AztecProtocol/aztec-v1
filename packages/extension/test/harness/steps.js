@@ -52,7 +52,4 @@ module.exports = {
         const page = await this.openPage(this.metadata.link);
         return page;
     },
-    clean: async function() {
-        return Promise.all(this.openPages.map(async page => page.close()))
-    },
 }
