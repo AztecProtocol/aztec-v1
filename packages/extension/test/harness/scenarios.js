@@ -9,8 +9,6 @@ async function createAccount() {
     
     await environment.metamask.approve();
 
-    targets = await environment.browser.targets();
-
     await environment.findAndClosePage(({ _targetInfo }) => _targetInfo.title === 'https://www.aztecprotocol.com')
 
     extensionPage = await environment.openExtension();
