@@ -1,5 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+    defaultInt,
+} from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
@@ -31,6 +34,7 @@ const Send = ({
     assetAddress,
     sender,
     transactions,
+    numberOfInputNotes,
 }) => {
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
@@ -41,6 +45,7 @@ const Send = ({
             sender,
             amount,
             transactions,
+            numberOfInputNotes,
         };
     };
     return (
@@ -60,6 +65,11 @@ Send.propTypes = {
         amount: PropTypes.number.isRequired,
         to: PropTypes.string.isRequired,
     })).isRequired,
+    numberOfInputNotes: PropTypes.number,
+};
+
+Send.defaultProps = {
+    numberOfInputNotes: defaultInt,
 };
 
 export default Send;

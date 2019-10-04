@@ -7,6 +7,9 @@ import {
 import {
     formatValue,
 } from '~ui/utils/asset';
+import {
+    defaultInt,
+} from '~ui/config/settings';
 import formatAddress from '~ui/utils/formatAddress';
 import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
@@ -52,6 +55,7 @@ const SendTransaction = ({
     sender,
     transactions,
     amount: totalAmount,
+    numberOfInputNotes,
     initialStep,
     initialTask,
     autoStart,
@@ -74,6 +78,7 @@ const SendTransaction = ({
         assetAddress: asset.address,
         sender,
         transactions,
+        numberOfInputNotes,
     };
 
     const ticketHeader = (
@@ -137,6 +142,7 @@ SendTransaction.propTypes = {
         to: PropTypes.string.isRequired,
     })).isRequired,
     amount: PropTypes.number.isRequired,
+    numberOfInputNotes: PropTypes.number,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     autoStart: PropTypes.bool,
@@ -146,6 +152,7 @@ SendTransaction.propTypes = {
 };
 
 SendTransaction.defaultProps = {
+    numberOfInputNotes: defaultInt,
     initialStep: -1,
     initialTask: 0,
     autoStart: false,
