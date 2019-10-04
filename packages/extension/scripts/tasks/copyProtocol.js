@@ -35,6 +35,7 @@ export default async function copyProtocol({
         copyFolder(
             srcContractsPath,
             destContractsPath,
+            true,
         ),
     ]);
     const copiedMessages = [];
