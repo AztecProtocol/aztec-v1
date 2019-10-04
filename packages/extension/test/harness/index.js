@@ -5,19 +5,23 @@ const path = require('path');
 const scenarios = require('./scenarios');
 const steps = require('./steps');
 
-const wait = ms => new Promise(r => setTimeout(r, ms));
-
 async function init(extensionPath, {
     metamaskPath = path.resolve(__dirname + '/../../../../node_modules/dappeteer/metamask/5.3.0/'),
     extensionName = "AZTEC",
     network = 'localhost',
     extensionHomePage = 'pages/defaultPopup.html',
+    screenshotPath = path.resolve(__dirname + '/screenshots'),
+    debug = false,
+    observeTime = 0,
 } = {}) {
     const environment = {
         extension: undefined,
         metamask: undefined,
         metadata: {},
         openPages: [],
+        debug,
+        screenshotPath,
+        observeTime,
         ...steps,
         ...scenarios,
         clean: async function() {

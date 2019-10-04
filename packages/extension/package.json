@@ -67,7 +67,6 @@
         "terminal-kit": "^1.31.3",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
-        "uuid": "^3.3.3",
         "web3": "1.2.1",
         "web3-utils": "1.2.1",
         "webextension-polyfill": "^0.4.0",
@@ -87,8 +86,7 @@
         "start:ui": "babel-node ./src/ui/mock/devServer",
         "test": "jest ./src",
         "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
-        "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=integration truffle test ./test/*",
-        "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
+        "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
         "watch": "webpack --watch --config webpack.dev.js"
     },
     "devDependencies": {
