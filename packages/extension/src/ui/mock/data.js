@@ -104,9 +104,12 @@ export const pastTransactions = [
     },
 ];
 
+export const depositTransactions = generate(3, i => ({
+    amount: randomInt(1, 100),
+    to: addresses[i + 1],
+}));
+
 export const sendTransactions = generate(3, () => ({
     amount: randomInt(1, 100),
-    account: {
-        address: addresses[randomInt(1, addresses.length - 1)],
-    },
+    to: addresses[randomInt(1, addresses.length - 1)],
 }));

@@ -1,15 +1,14 @@
 import {
-    randomInts,
     randomInt,
 } from '~utils/random';
 import {
-    generate,
     seedPhrase,
     addresses,
     assets,
     domains,
     notes,
     pastTransactions,
+    depositTransactions,
     sendTransactions,
 } from './data';
 
@@ -21,7 +20,7 @@ export default {
         next: 'register.backup',
     },
     'register.backup': {
-        seedPhrase: 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle',
+        seedPhrase,
         prev: 'register',
         next: 'register.confirm',
     },
@@ -33,6 +32,12 @@ export default {
     'register.password': {
         prev: 'register.confirm',
         next: 'register.address',
+    },
+    'register.account': {
+        seedPhrase,
+        password: 'password01',
+        address: addresses[0],
+        goNext: dummyFunc,
     },
     'register.address': {
         address: addresses[0],
@@ -84,26 +89,15 @@ export default {
     deposit: {
         from: addresses[0],
         assetAddress: assets[0].address,
-        transactions: [
-            {
-                amount: randomInt(1000),
-                to: addresses[1],
-            },
-        ],
+        transactions: [depositTransactions[0]],
         goNext: dummyFunc,
     },
-    'deposit.confirm': () => {
-        const amounts = randomInts(3, 1000);
-        return {
-            asset: assets[0],
-            from: addresses[0],
-            transactions: generate(3, i => ({
-                amount: amounts[i],
-                to: addresses[i + 1],
-            })),
-            amount: amounts.reduce((sum, a) => sum + a, 0),
-            goNext: dummyFunc,
-        };
+    'deposit.confirm': {
+        asset: assets[0],
+        from: addresses[0],
+        transactions: depositTransactions,
+        amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+        goNext: dummyFunc,
     },
     'deposit.grant': {
         asset: assets[0],
@@ -120,27 +114,23 @@ export default {
         goNext: dummyFunc,
     },
     send: {
-        asset: assets[0],
-        user: {
-            address: addresses[0],
-        },
-        transactions: sendTransactions,
+        assetAddress: assets[0].address,
+        sender: addresses[0],
+        transactions: sendTransactions.slice(0, 1),
         goNext: dummyFunc,
     },
     'send.confirm': {
         asset: assets[0],
-        user: {
-            address: addresses[0],
-        },
+        sender: addresses[0],
         transactions: sendTransactions,
+        amount: sendTransactions.reduce((sum, tx) => sum + tx.amount, 0),
         goNext: dummyFunc,
     },
     'send.grant': {
         asset: assets[0],
-        user: {
-            address: addresses[0],
-        },
+        sender: addresses[0],
         transactions: sendTransactions,
+        amount: sendTransactions.reduce((sum, tx) => sum + tx.amount, 0),
         goNext: dummyFunc,
     },
     mint: {

@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import makeAsset from '~uiModules/utils/asset';
+import returnAndClose from '~ui/helpers/returnAndClose';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
@@ -26,34 +28,37 @@ const handleGoNext = (step, prevData) => {
 };
 
 const Send = ({
-    asset,
-    user,
+    assetAddress,
+    sender,
     transactions,
-}) => (
-    <CombinedViews
-        Steps={Steps}
-        initialData={{
+}) => {
+    const fetchInitialData = async () => {
+        const asset = await makeAsset(assetAddress);
+        const amount = transactions.reduce((sum, t) => sum + t.amount, 0);
+
+        return {
             asset,
-            user,
+            sender,
+            amount,
             transactions,
-        }}
-        onGoNext={handleGoNext}
-    />
-);
+        };
+    };
+    return (
+        <CombinedViews
+            Steps={Steps}
+            fetchInitialData={fetchInitialData}
+            onGoNext={handleGoNext}
+            onExit={returnAndClose}
+        />
+    );
+};
 
 Send.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-    }).isRequired,
-    user: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    }).isRequired,
+    assetAddress: PropTypes.string.isRequired,
+    sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,
-        account: PropTypes.shape({
-            address: PropTypes.string.isRequired,
-        }).isRequired,
+        to: PropTypes.string.isRequired,
     })).isRequired,
 };
 

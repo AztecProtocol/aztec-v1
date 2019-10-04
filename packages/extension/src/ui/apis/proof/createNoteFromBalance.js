@@ -35,9 +35,9 @@ export default async function createNoteFromBalance({
     const outputNotesOwnerMapping = {};
     let outputNotesOwner = inputNotesOwner;
     if (transactions && transactions.length) {
-        const notesOwners = asyncMap(transactions, async ({ to }) => getNoteOwnerAccount(to));
-        notesOwners.forEach((o) => {
-            outputNotesOwnerMapping[o.address] = o;
+        await asyncForEach(transactions, async ({ to }) => {
+            const account = await getNoteOwnerAccount(to);
+            outputNotesOwnerMapping[to] = account;
         });
 
         inputAmount = transactions.reduce((sum, t) => sum + t.amount, 0);

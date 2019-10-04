@@ -20,8 +20,9 @@ import InplacePopup from '~ui/components/InplacePopup';
 
 const SendConfirm = ({
     asset,
-    user,
+    sender,
     transactions,
+    amount: totalAmount,
     goNext,
     goBack,
     onClose,
@@ -40,23 +41,15 @@ const SendConfirm = ({
         />
     );
 
-    const {
-        address: fromAddress,
-    } = user;
-
     const userInfoNode = (
         <AddressRow
-            address={fromAddress}
+            address={sender}
             textSize="inherit"
             size="xxs"
             prefixLength={6}
             suffixLength={4}
         />
     );
-
-    const totalAmount = transactions.reduce((accum, {
-        amount,
-    }) => accum + amount, 0);
 
     return (
         <Popup
@@ -102,16 +95,14 @@ const SendConfirm = ({
                                     items={transactions}
                                     renderItem={({
                                         amount,
-                                        account: {
-                                            address,
-                                        },
+                                        to,
                                     }) => (
                                         <FlexBox
                                             align="space-between"
                                             valign="center"
                                         >
                                             <AddressRow
-                                                address={address}
+                                                address={to}
                                                 size="xs"
                                                 textSize="xxs"
                                                 prefixLength={12}
@@ -151,15 +142,12 @@ SendConfirm.propTypes = {
         code: PropTypes.string,
         icon: PropTypes.string,
     }).isRequired,
-    user: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    }).isRequired,
+    sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,
-        account: PropTypes.shape({
-            address: PropTypes.string.isRequired,
-        }).isRequired,
+        to: PropTypes.string.isRequired,
     })).isRequired,
+    amount: PropTypes.number.isRequired,
     goNext: PropTypes.func.isRequired,
     goBack: PropTypes.func,
     onClose: PropTypes.func,
