@@ -30,7 +30,7 @@ module.exports = {
                 await this.api.screenshot({ path });
             },
         };
-        this.openPages.push(data);
+        environment.openPages.push(data);
         if (environment.debug) await data.screenshot(`${Date.now()}-open.png`);
         return data;
     },
