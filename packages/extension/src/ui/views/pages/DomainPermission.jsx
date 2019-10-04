@@ -2,6 +2,7 @@ import React, {
     PureComponent,
 } from 'react';
 import PropTypes from 'prop-types';
+import returnAndClose from '~ui/helpers/returnAndClose';
 import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
 import Loading from '~ui/views/Loading';
 import {
@@ -11,7 +12,6 @@ import {
     getCurrentUser,
     approveDomain,
 } from '~ui/apis/auth';
-import closeWindow from '~ui/utils/closeWindow';
 
 class DomainPermission extends PureComponent {
     constructor(props) {
@@ -61,10 +61,13 @@ class DomainPermission extends PureComponent {
                 loading: false,
             });
         } else {
-            this.setState({
-                loading: false,
-                success: true,
-            }, () => closeWindow(500));
+            this.setState(
+                {
+                    loading: false,
+                    success: true,
+                },
+                returnAndClose,
+            );
         }
     }
 
