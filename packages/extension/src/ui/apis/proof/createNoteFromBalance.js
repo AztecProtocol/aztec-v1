@@ -13,6 +13,10 @@ import {
 import asyncMap from '~utils/asyncMap';
 import asyncForEach from '~utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
+import settings from '~background/utils/settings';
+import {
+    defaultInt,
+} from '~ui/config/settings';
 import ConnectionService from '~ui/services/ConnectionService';
 import {
     getNoteOwnerAccount,
@@ -26,11 +30,18 @@ export default async function createNoteFromBalance({
     transactions,
     publicOwner,
     // userAccess,
-    numberOfInputNotes = 1,
-    numberOfOutputNotes = 1,
+    numberOfInputNotes: customNumberOfInputNotes,
+    numberOfOutputNotes: customNumberOfOutputNotes,
 }) {
     const inputNotesOwner = await getNoteOwnerAccount(sender);
     let inputAmount = amount;
+
+    const numberOfInputNotes = customNumberOfInputNotes !== defaultInt
+        ? customNumberOfInputNotes
+        : await settings('NUMBER_OF_INPUT_NOTES');
+    const numberOfOutputNotes = customNumberOfOutputNotes !== defaultInt
+        ? customNumberOfOutputNotes
+        : await settings('NUMBER_OF_OUTPUT_NOTES');
 
     const outputNotesOwnerMapping = {};
     let outputNotesOwner = inputNotesOwner;
