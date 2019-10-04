@@ -1,14 +1,15 @@
 const puppeteer = require('puppeteer');
-const dappeteer = require('dappeteer');
 const path = require('path');
 
 const scenarios = require('./scenarios');
 const steps = require('./steps');
+const Metamask = require('./metamask');
 
 async function init(extensionPath, {
-    metamaskPath = path.resolve(__dirname + '/../../../../node_modules/dappeteer/metamask/5.3.0/'),
+    metamaskPath = path.resolve(__dirname + '/metamask/'),
+    metamaskMnemonic = process.env.GANACHE_TESTING_ACCOUNT_0_MNEMONIC,
     extensionName = "AZTEC",
-    network = 'localhost',
+    network = 'Localhost',
     extensionHomePage = 'pages/defaultPopup.html',
     screenshotPath = path.resolve(__dirname + '/screenshots'),
     debug = false,
@@ -17,6 +18,7 @@ async function init(extensionPath, {
     const environment = {
         extension: undefined,
         metamask: undefined,
+        metamaskInit: Metamask,
         metadata: {},
         openPages: [],
         debug,
@@ -28,18 +30,18 @@ async function init(extensionPath, {
             return Promise.all(this.openPages.map(async page => page.close()))
         },
     };
-
     environment.extensionName = extensionName;
-    environment.browser = await dappeteer.launch(puppeteer, {
+    environment.browser = await puppeteer.launch({
         headless: false, // extension are allowed only in head-full mode
         args: [
             `--disable-extensions-except=${extensionPath},${metamaskPath}`,
-            `--load-extension=${extensionPath}`
+            `--load-extension=${extensionPath},${metamaskPath}`
         ]
     });
 
-    environment.metamask = await dappeteer.getMetamask(environment.browser);
-    await environment.metamask.switchNetwork(network);
+    await environment.metamaskInit();
+    await environment.metamask.signup(metamaskMnemonic);
+    await environment.metamask.selectNetwork(network);
 
     const extensionBackgroundTarget = await environment.getExtensionBackground();
     const extensionUrl = extensionBackgroundTarget._targetInfo.url || '';
