@@ -8,6 +8,7 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     warnLog,
+    errorLog,
 } from '~utils/log';
 import i18n from '~ui/helpers/i18n';
 import closeWindow from '~ui/utils/closeWindow';
@@ -135,6 +136,7 @@ class Transaction extends PureComponent {
                 ? await run(data)
                 : await runTask(task, data);
         } catch (error) {
+            errorLog(error);
             response = {
                 error,
             };

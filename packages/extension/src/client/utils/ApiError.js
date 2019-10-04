@@ -20,12 +20,13 @@ export default function ApiError(errorMessage, data) {
         type,
         key,
         message,
-        response: responseStr,
+        response: errorResponse,
     } = error || {};
 
     this.type = type;
     this.key = key;
     this.message = message;
     this.response = response
-        || (responseStr && JSON.parse(responseStr));
+        || (typeof errorResponse === 'string' && JSON.parse(errorResponse))
+        || errorResponse;
 }

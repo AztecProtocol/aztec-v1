@@ -1,5 +1,8 @@
 import aztec from 'aztec.js';
 import {
+    errorLog,
+} from '~utils/log';
+import {
     createNote,
     createNotes,
     fromViewingKey,
@@ -9,8 +12,8 @@ import {
 } from '~utils/random';
 import asyncMap from '~utils/asyncMap';
 import asyncForEach from '~utils/asyncForEach';
+import ApiError from '~/helpers/ApiError';
 import ConnectionService from '~ui/services/ConnectionService';
-import UIError from '~ui/helpers/UIError';
 import {
     getNoteOwnerAccount,
 } from '~ui/apis/account';
@@ -31,7 +34,7 @@ export default async function createNoteFromBalance({
 
     const outputNotesOwnerMapping = {};
     let outputNotesOwner = inputNotesOwner;
-    if (transactions) {
+    if (transactions && transactions.length) {
         const notesOwners = asyncMap(transactions, async ({ to }) => getNoteOwnerAccount(to));
         notesOwners.forEach((o) => {
             outputNotesOwnerMapping[o.address] = o;
@@ -39,7 +42,7 @@ export default async function createNoteFromBalance({
 
         inputAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
         if (amount && inputAmount !== amount) {
-            throw new UIError('input.amount.not.match.transaction');
+            errorLog(`Input amount (${amount}) does not match total transactions (${inputAmount}).`);
         }
     } else if (owner) {
         if (owner !== inputNotesOwner.address) {
@@ -66,11 +69,11 @@ export default async function createNoteFromBalance({
     } = pickNotesFromBalance || {};
 
     if (error) {
-        throw new UIError({ error });
+        throw new ApiError({ error });
     }
 
     if (!notes) {
-        throw new UIError('note.pick.empty');
+        throw new ApiError('note.pick.empty');
     }
 
     let inputNotes;
@@ -83,7 +86,7 @@ export default async function createNoteFromBalance({
             ),
         );
     } catch {
-        throw new UIError('note.fromViewingKey', {
+        throw new ApiError('note.viewingKey.recover', {
             notes,
         });
     }

@@ -56,9 +56,11 @@ export default {
     note: {
         viewingKey: {
             encrypt: 'Failed to encrypt viewing key.',
+            recover: 'Failed to recover note from its viewing key.',
         },
         pick: {
             sum: 'Asset balance is not enough to generate a note with value %{value}.',
+            empty: 'Failed to pick notes from balance.',
             minSum: {
                 _: 'Cannot pick %{count} notes whose sum is equal to or larger than %{value}.',
                 1: 'Cannot pick a note whose value is equal to or larger than %{value}.',
