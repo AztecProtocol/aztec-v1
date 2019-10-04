@@ -22,6 +22,7 @@ module.exports = {
                     ['~ui', path.resolve(__dirname, './src/ui')],
                     ['~uiModules', path.resolve(__dirname, './src/ui')],
                     ['~helpers', path.resolve(__dirname, './tests/helpers')],
+                    ['~', path.resolve(__dirname, './src')],
                 ],
                 extensions: ['.js', '.jsx'],
             },
