@@ -350,32 +350,32 @@ class ExtensionApi {
                 const response = await filterStream('ACTION_RESPONSE', requestId, ClientConnection.background$);
                 return response;
             },
-            // mint: async ({
-            //     assetAddress,
-            //     transactions,
-            //     numberOfOutputNotes,
-            //     sender,
+            mint: async ({
+                assetAddress,
+                transactions,
+                numberOfOutputNotes,
+                sender,
 
-            // }) => {
-            //     const notesOwner = {};
+            }) => {
+                const notesOwner = {};
 
-            //     let confidentialTotalMinted;
-            //     try {
-            //         ({
-            //             confidentialTotalMinted,
-            //         } = await Web3Service
-            //             .useContract('ACE')
-            //             .method('getRegistry')
-            //             .call(assetAddress));
-            //     } catch (error) {
-            //         throw new ContractError('ace.getRegistry', {
-            //             messageOptions: {
-            //                 asset: assetAddress,
-            //             },
-            //             error,
-            //         });
-            //     }
-            // },
+                let confidentialTotalMinted;
+                try {
+                    ({
+                        confidentialTotalMinted,
+                    } = await Web3Service
+                        .useContract('ACE')
+                        .method('getRegistry')
+                        .call(assetAddress));
+                } catch (error) {
+                    throw new ContractError('ace.getRegistry', {
+                        messageOptions: {
+                            asset: assetAddress,
+                        },
+                        error,
+                    });
+                }
+            },
 
             returnToClient: async ({
                 requestId,

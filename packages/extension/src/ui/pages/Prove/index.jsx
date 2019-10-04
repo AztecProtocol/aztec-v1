@@ -231,6 +231,56 @@ class Prove extends Component {
         });
     }
 
+    mint = async()=> {
+        const {
+            assetAddress,
+            transactions,
+            from,
+            sender,
+            currentAddress,
+        } = this.props;
+
+        const { proof } = await ExtensionApi.prove.mint({
+            assetAddress,
+            sender,
+            transactions,
+            currentAddress: from,
+            domain: window.location.origin,
+        });
+        const encoded = proof.encodeABI(assetAddress);
+        this.setState({
+            mintProof: encoded,
+            proofHash: proof.hash,
+        });
+    }
+
+    sendMintProof = async() => {
+        const {
+            mintProof,
+        } = this.state;
+
+        const {
+            clientId,
+            requestId,
+            assetAddress,
+        } = this.props;
+
+        const receipt = await ExtensionApi.prove.sendMintProof({
+            params: {
+                proofData: mintProof,
+                assetAddress,
+            },
+            requestId,
+            clientId,
+
+        });
+        ExtensionApi.prove.returnToClient({
+            requestId,
+            clientId,
+        });
+
+    }
+
     render() {
         if (!this.props.requestId) {
             return (
@@ -252,119 +302,31 @@ class Prove extends Component {
                 align="center"
                 background="white"
             >
-                <Accordion
-                    defaultIsOpen={false}
-                    title={(
-                        <Text
-                            size="m"
-                            text="Deposit"
-                            weight="bold"
-                        />
-                    )}
-                    content={(
-                        <Block>
-
-                            <div>
-                                <br />
-                                <br />
-                                <Button
-                                    text="Deposit"
-                                    onClick={() => this.deposit()}
-                                />
-                            </div>
-                            <div>
-                                <br />
-                                <br />
-                                <Button
-                                    text="Approve Deposit ERC20"
-                                    onClick={() => this.publicApprove()}
-                                />
-                            </div>
-                            <div>
-                                <br />
-                                <br />
-                                <Button
-                                    text="Send Desposit"
-                                    onClick={() => this.sendDepositProof()}
-                                />
-                            </div>
-                        </Block>
-                    )}
-                />
-                <Accordion
-                    defaultIsOpen={false}
-                    title={(
-                        <Text
-                            size="m"
-                            text="Withdraw"
-                            weight="bold"
-                        />
-                    )}
-                    content={(
-                        <Block>
-
-                            <div>
-                                <br />
-                                <br />
-                                <Button
-                                    text="Generate Proof"
-                                    onClick={() => this.withdraw()}
-                                />
-                            </div>
-                            <div>
-                                <br />
-                                <br />
-                                <Button
-                                    text="Sign Notes"
-                                    onClick={() => this.signNotes()}
-                                />
-                            </div>
-                            <div>
-                                <br />
-                                <br />
-                                <Button
-                                    text="Send Withdraw"
-                                    onClick={() => this.sendTransferProof()}
-                                />
-                            </div>
-                        </Block>
-                    )}
-                />
-
             <Accordion
                 defaultIsOpen={false}
                 title={(
                     <Text
                         size="m"
-                        text="Send"
+                        text="Mint"
                         weight="bold"
                     />
                 )}
                 content={(
                     <Block>
-
                         <div>
                             <br />
                             <br />
                             <Button
                                 text="Generate Proof"
-                                onClick={() => this.transfer()}
+                                onClick={() => this.mint()}
                             />
                         </div>
                         <div>
                             <br />
                             <br />
                             <Button
-                                text="Sign Notes"
-                                onClick={() => this.signNotes()}
-                            />
-                        </div>
-                        <div>
-                            <br />
-                            <br />
-                            <Button
-                                text="Send Send Proof"
-                                onClick={() => this.sendTransferProof()}
+                                text="Send Mint Proof"
+                                onClick={() => this.sendMintProof()}
                             />
                         </div>
                     </Block>

@@ -15,6 +15,9 @@ export default async function demoMintable({
     const { aztec } = window;
     await aztec.enable();
 
+    const {
+        address: userAddress,
+    } = Web3Service.account;
 
     let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
@@ -57,19 +60,17 @@ export default async function demoMintable({
     const mintAmount = randomInt(1, 50);
 
     log('Generating mint proof...');
-    const mintProof = await asset.mint(mintAmount);
+    const mintProof = await asset.mint({
+        amount: mintAmount,
+        to: userAddress,
+    });
+
     log('Mint proof generated!', mintProof.export());
 
     log('Minting...');
-    const notes = await mintProof.send();
-    log(`Successfully minted ${mintAmount}!`, notes);
 
-
-    await logBalances();
-
-
-    const withdrawAmount = randomInt(1, mintAmount);
-    await withdraw(asset, withdrawAmount);
+    // const withdrawAmount = randomInt(1, mintAmount);
+    // await withdraw(asset, withdrawAmount);
 
 
     await logBalances();
