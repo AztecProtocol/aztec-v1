@@ -1,17 +1,19 @@
 module.exports = {
-    createPageObject: function (page, metadata) {
-        const self = this;
+    createPageObject: async function (page, metadata) {
+        const environment = this;
         const data = {
-            index: this.openPages.length,
+            index: environment.openPages.length,
             api: page,
             metadata,
             clickMain: async function(selector = "button") {
                 const main = await this.api.$(selector);
+                if (environment.debug) await this.screenshot(`${Date.now()}-click.png`);
                 await main.click();
             },
             typeMain: async function(text, selector = "input") {
                 const main = await this.api.$(selector);
                 await main.type(text);
+                if (environment.debug) await this.screenshot(`${Date.now()}-type.png`);
             },
             close: async function() {
                 try {
@@ -19,10 +21,17 @@ module.exports = {
                 } catch (e) {
                     console.log('page already closed');
                 }
-                self.openPages.splice(this.index, 1);
+                environment.openPages.splice(this.index, 1);
+            },
+            screenshot: async function(fileName) {
+                const name = fileName || `${Date.now()}.png`;
+                const path = `${environment.screenshotPath}/${name}`;
+                if (environment.observeTime !== 0) await environment.wait(environment.observeTime);
+                await this.api.screenshot({ path });
             },
         };
         this.openPages.push(data);
+        if (environment.debug) await data.screenshot(`${Date.now()}-open.png`);
         return data;
     },
     getExtensionBackground: async function(extensionName) {
@@ -36,13 +45,13 @@ module.exports = {
         const target = await this.browser.waitForTarget(predicate);
 
         const page = await target.page();
-        return this.createPageObject(page, { link: target._targetInfo.url });
+        return await this.createPageObject(page, { link: target._targetInfo.url });
     },
     openPage: async function(link) {
         const page = await this.browser.newPage();
         await page.goto(link);
 
-        return this.createPageObject(page, { link });
+        return await this.createPageObject(page, { link });
     },
     findAndClosePage: async function(predicate) {
         const page = await this.getPage(predicate);
@@ -52,4 +61,5 @@ module.exports = {
         const page = await this.openPage(this.metadata.link);
         return page;
     },
+    wait: ms => new Promise(r => setTimeout(r, ms)),
 }

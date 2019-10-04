@@ -86,7 +86,7 @@
         "start:ui": "babel-node ./src/ui/mock/devServer",
         "test": "jest ./src",
         "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
-        "test:test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+        "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
         "watch": "webpack --watch --config webpack.dev.js"
     },
     "devDependencies": {
