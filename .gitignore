@@ -10,6 +10,7 @@ dist/
 docs/
 lib/
 node_modules/
+screenshots/
 
 # files
 .DS_Store
