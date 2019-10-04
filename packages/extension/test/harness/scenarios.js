@@ -33,7 +33,6 @@ async function createAccount() {
     const authorizePage = await environment.getPage(target => target.url().match(/register\/domain/));
     await authorizePage.clickMain();
 
-    extensionPage = await environment.openExtension();
     await environment.clean();
 }
 
