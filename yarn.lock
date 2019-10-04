@@ -7132,11 +7132,6 @@ damerau-levenshtein@^1.0.4:
   resolved "https://registry.yarnpkg.com/damerau-levenshtein/-/damerau-levenshtein-1.0.5.tgz#780cf7144eb2e8dbd1c3bb83ae31100ccc31a414"
   integrity sha512-CBCRqFnpu715iPmw1KrdOrzRqbdFwQTwAWyyyYS42+iAgHCuXZ+/TdMgQkUENPomxEz9z1BEzuQU2Xw0kUuAgA==
 
-dappeteer@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/dappeteer/-/dappeteer-0.6.0.tgz#b9668f4481dd9be1bdf647e141f56b542aeb987c"
-  integrity sha512-AqdWDku2w6IlLerqfstQlQ5KK9ABMjJMohl35xsUQQyQjJgrmGOv99SQt9I6C+7xhF/7FjML6S4b0zzi04U+Jw==
-
 dargs@^4.0.1:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/dargs/-/dargs-4.1.0.tgz#03a9dbb4b5c2f139bf14ae53f0b8a2a6a86f4e17"

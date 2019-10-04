@@ -6,12 +6,12 @@ module.exports = {
             api: page,
             metadata,
             clickMain: async function(selector = "button") {
-                const main = await this.api.$(selector);
+                const main = await this.api.waitFor(selector);
                 if (environment.debug) await this.screenshot(`${Date.now()}-click.png`);
                 await main.click();
             },
             typeMain: async function(text, selector = "input") {
-                const main = await this.api.$(selector);
+                const main = await this.api.waitFor(selector);
                 await main.type(text);
                 if (environment.debug) await this.screenshot(`${Date.now()}-type.png`);
             },
@@ -22,6 +22,10 @@ module.exports = {
                     console.log('page already closed');
                 }
                 environment.openPages.splice(this.index, 1);
+            },
+            initialiseAztec: async function() {
+                await this.api.waitFor(() => !!window.aztec);
+                this.api.evaluate(() => window.aztec.enable());
             },
             screenshot: async function(fileName) {
                 const name = fileName || `${Date.now()}.png`;
