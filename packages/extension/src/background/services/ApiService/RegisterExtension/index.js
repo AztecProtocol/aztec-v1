@@ -17,11 +17,15 @@ const registerExtensionUi = async (query, connection) => {
                 requestId: query.requestId,
             },
         });
-        return filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+        const response = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+
+        return {
+            ...query,
+            response,
+        };
     }
     return query;
 };
-
 
 const registerExtension = async (query, connection) => {
     const {
