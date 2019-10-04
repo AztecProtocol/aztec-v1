@@ -145,7 +145,7 @@ export default class Asset {
      *
      * Deposit
      *
-     * - transaction ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
+     * - transactions ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
      * - options
      *       sender (Address):          The proof sender.
      *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
@@ -250,7 +250,7 @@ export default class Asset {
      * Mint
      * This api is available only when the asset is ZkAssetMintable
      *
-     * - amount (Int! or [Int!])
+    * - transactions ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
      * - options
      *       sender (Address):          The proof sender.
      *                                  If empty, will use extension's current user.
@@ -259,7 +259,7 @@ export default class Asset {
      *
      * @returns ([Notes!])
      */
-    mint = async (amount, {
+    mint = async (transactions, {
         sender = '',
         numberOfOutputNotes = 1,
     } = {}) => {
@@ -271,7 +271,7 @@ export default class Asset {
             'mint',
             {
                 assetAddress: this.address,
-                amount,
+                transactions,
                 sender,
                 numberOfOutputNotes,
             },

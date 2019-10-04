@@ -24,7 +24,7 @@ export default async function demoOwnable({
         address: userAddress,
     } = Web3Service.account;
 
-    let zkAssetAddress = '0x2baEFf6946CD6904Da9387FcF56169058fFE5Bf6'; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {

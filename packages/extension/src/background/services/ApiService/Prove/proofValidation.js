@@ -11,6 +11,7 @@ const proofSchemaMap = {
     DEPOSIT_PROOF: depositProofSchema,
     WITHDRAW_PROOF: withdrawProofSchema,
     TRANSFER_PROOF: sendProofSchema,
+    MINT_PROOF: sendProofSchema,
 };
 
 
