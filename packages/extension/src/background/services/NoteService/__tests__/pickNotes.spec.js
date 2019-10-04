@@ -1,6 +1,7 @@
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import pickNotes from '../utils/pickNotes';
 import generateSortedValues from '../utils/pickNotes/generateSortedValues';
+import getStartIndex from '../utils/pickNotes/getStartIndex';
 import pickKeysByValues from '../utils/pickNotes/pickKeysByValues';
 import * as pickValues from '../utils/pickNotes/pickValues';
 
@@ -22,6 +23,31 @@ describe('generateSortedValues', () => {
             4,
             10,
         ]);
+    });
+});
+
+describe('getStartIndex', () => {
+    it('return a start index that will guarantee at least one valid combination from that point', () => {
+        const sortedValues = [0, 1, 2, 3, 4, 5, 6];
+        expect(getStartIndex(sortedValues, 4, 1)).toBe(4);
+        expect(getStartIndex(sortedValues, 4, 2)).toBe(0);
+        expect(getStartIndex(sortedValues, 4, 3)).toBe(0);
+        expect(getStartIndex(sortedValues, 9, 2)).toBe(3);
+        expect(getStartIndex(sortedValues, 9, 3)).toBe(0);
+    });
+
+    it('properly process repeating values', () => {
+        const sortedValues = [0, 1, 1, 1, 1, 1, 2, 3, 4, 5];
+        expect(getStartIndex(sortedValues, 3, 1)).toBe(7);
+        expect(getStartIndex(sortedValues, 3, 2)).toBe(0);
+        expect(getStartIndex(sortedValues, 6, 2)).toBe(1);
+        expect(getStartIndex(sortedValues, 7, 2)).toBe(6);
+    });
+
+    it('return -1 if there is no valid combination in it', () => {
+        const sortedValues = [0, 1, 2, 3, 4, 5, 6];
+        expect(getStartIndex(sortedValues, 7, 1)).toBe(-1);
+        expect(getStartIndex(sortedValues, 12, 2)).toBe(-1);
     });
 });
 

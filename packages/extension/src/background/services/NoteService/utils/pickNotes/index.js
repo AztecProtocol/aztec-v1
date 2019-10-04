@@ -2,6 +2,7 @@ import {
     argsError,
 } from '~utils/error';
 import generateSortedValues from './generateSortedValues';
+import getStartIndex from './getStartIndex';
 import pickValues from './pickValues';
 import pickKeysByValues from './pickKeysByValues';
 
@@ -39,7 +40,7 @@ export default function pickNotes({
 
     let values = [];
     const totalNotes = sortedValues.length;
-    let start = 0;
+    let start = getStartIndex(sortedValues, minSum, count);
     while (start <= totalNotes - count) {
         values = pickValues(sortedValues, count, start, totalNotes - 1);
         if (arraySum(values) >= minSum) {
