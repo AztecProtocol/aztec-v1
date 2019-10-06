@@ -4,7 +4,6 @@ import {
     emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import WithdrawTransaction from '~ui/views/WithdrawTransaction';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 
@@ -34,7 +33,7 @@ const Withdraw = ({
         <CombinedViews
             Steps={Steps}
             fetchInitialData={fetchInitialData}
-            onExit={returnAndClose}
+            autoClose
         />
     );
 };

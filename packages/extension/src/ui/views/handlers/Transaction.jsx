@@ -10,8 +10,11 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
+import {
+    closeWindowDelay,
+} from '~ui/config/settings';
 import i18n from '~ui/helpers/i18n';
-import closeWindow from '~ui/utils/closeWindow';
+import returnAndClose from '~uiModules/helpers/returnAndClose';
 import Popup from '~ui/components/Popup';
 import Ticket from '~ui/components/Ticket';
 import ProgressList from '~ui/components/ProgressList';
@@ -163,12 +166,16 @@ class Transaction extends PureComponent {
     handleTransactionComplete = () => {
         const {
             goNext,
-            autoCloseTimeout,
+            autoClose,
+            closeDelay,
         } = this.props;
+        const {
+            data,
+        } = this.state;
         if (goNext) {
-            goNext();
-        } else if (autoCloseTimeout) {
-            setTimeout(() => closeWindow, autoCloseTimeout);
+            goNext(data);
+        } else if (autoClose) {
+            returnAndClose(data, closeDelay);
         }
     };
 
@@ -327,7 +334,8 @@ Transaction.propTypes = {
     goBack: PropTypes.func,
     onClose: PropTypes.func,
     autoStart: PropTypes.bool,
-    autoCloseTimeout: PropTypes.number,
+    autoClose: PropTypes.bool,
+    closeDelay: PropTypes.number,
 };
 
 Transaction.defaultProps = {
@@ -345,7 +353,8 @@ Transaction.defaultProps = {
     goBack: null,
     onClose: null,
     autoStart: false,
-    autoCloseTimeout: 2000,
+    autoClose: false,
+    closeDelay: closeWindowDelay,
 };
 
 export default Transaction;

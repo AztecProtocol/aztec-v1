@@ -4,7 +4,6 @@ import {
     emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
@@ -53,7 +52,7 @@ const Send = ({
             Steps={Steps}
             fetchInitialData={fetchInitialData}
             onGoNext={handleGoNext}
-            onExit={returnAndClose}
+            autoClose
         />
     );
 };
