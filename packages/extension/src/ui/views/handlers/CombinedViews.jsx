@@ -18,6 +18,7 @@ class CombinedViews extends PureComponent {
         this.state = {
             step: initialStep,
             data: initialData,
+            history: [initialData],
             loading: !!fetchInitialData,
         };
     }
@@ -26,26 +27,39 @@ class CombinedViews extends PureComponent {
         this.fetchInitialData();
     }
 
-    handleGoBack = () => {
+    handleGoBack = (childState = {}) => {
         const {
             onGoBack,
         } = this.props;
         const {
             step,
             data: prevData,
+            history,
         } = this.state;
-        let data = prevData;
+
         let stepOffset = 1;
+        let modifiedData;
         if (onGoBack) {
             ({
                 stepOffset = 1,
-                ...data
-            } = onGoBack(step, prevData));
+                ...modifiedData
+            } = onGoBack(step, {
+                ...prevData,
+                ...childState,
+            }));
         }
 
-        this.setState({
-            step: step - stepOffset,
-            data,
+        const backToStep = step - stepOffset;
+        const historyData = history[backToStep];
+
+        this.goToStep({
+            step: backToStep,
+            data: {
+                ...historyData,
+                ...childState,
+                ...modifiedData,
+            },
+            history: history.slice(0, backToStep),
         });
     };
 
@@ -80,17 +94,53 @@ class CombinedViews extends PureComponent {
 
         let stepOffset = 1;
         if (onGoNext) {
+            let newProps = null;
             ({
                 stepOffset = 1,
-                ...data
+                ...newProps
             } = onGoNext(step, data));
+            data = {
+                ...data,
+                ...newProps,
+            };
+        }
+
+        const nextStep = step + stepOffset;
+        const {
+            history: prevHistory,
+        } = this.state;
+        const history = [...prevHistory];
+        history[nextStep] = data;
+
+        this.goToStep({
+            step: nextStep,
+            data,
+            history,
+        });
+    };
+
+    goToStep(state) {
+        const {
+            onStep,
+        } = this.props;
+        const {
+            step,
+            data,
+        } = state;
+        let newData = data;
+        if (onStep) {
+            const newProps = onStep(step);
+            newData = {
+                ...newData,
+                ...newProps,
+            };
         }
 
         this.setState({
-            step: step + stepOffset,
-            data,
+            ...state,
+            data: newData,
         });
-    };
+    }
 
     async fetchInitialData() {
         const {
@@ -145,6 +195,7 @@ CombinedViews.propTypes = {
     Steps: PropTypes.arrayOf(PropTypes.func).isRequired,
     fetchInitialData: PropTypes.func,
     onGoBack: PropTypes.func,
+    onStep: PropTypes.func,
     onGoNext: PropTypes.func,
     onExit: PropTypes.func,
     autoClose: PropTypes.bool,
@@ -156,6 +207,7 @@ CombinedViews.defaultProps = {
     initialData: {},
     fetchInitialData: null,
     onGoBack: null,
+    onStep: null,
     onGoNext: null,
     onExit: null,
     autoClose: false,
