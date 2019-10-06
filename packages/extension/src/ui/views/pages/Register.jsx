@@ -2,11 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { KeyStore } from '~utils/keyvault';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
-import Intro from '../RegisterIntro';
-import BackupKeys from '../BackupKeys';
-import ConfirmBackupKeys from '../ConfirmBackupKeys';
-import CreatePassword from '../CreatePassword';
-import RegisterAddress from '../RegisterAddress';
+import Intro from '~ui/views/RegisterIntro';
+import BackupKeys from '~ui/views/BackupKeys';
+import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
+import CreatePassword from '~ui/views/CreatePassword';
+import RegisterAddress from '~ui/views/RegisterAddress';
 
 const Steps = [
     Intro,
@@ -16,41 +16,29 @@ const Steps = [
     RegisterAddress,
 ];
 
-const handleGoBack = (step, prevData) => {
-    let data = prevData;
+const handleGoBack = (step) => {
+    const newProps = {};
     switch (step) {
-        case 1: {
-            data = { ...data };
-            delete data.seedPhrase;
-            break;
-        }
         case 3: {
-            data = {
-                ...data,
-                stepOffset: 2,
-            };
+            newProps.stepOffset = 2;
             break;
         }
         default:
     }
 
-    return data;
+    return newProps;
 };
 
-const handleGoNext = (step, prevData) => {
-    let data = prevData;
+const handleGoNext = (step) => {
+    const newProps = {};
     switch (step) {
-        case 0: {
-            data = {
-                ...data,
-                seedPhrase: KeyStore.generateRandomSeed(Date.now().toString()),
-            };
+        case 0:
+            newProps.seedPhrase = KeyStore.generateRandomSeed(Date.now().toString());
             break;
-        }
         default:
     }
 
-    return data;
+    return newProps;
 };
 
 const Register = ({

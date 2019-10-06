@@ -13,20 +13,16 @@ const Steps = [
     SendTransaction,
 ];
 
-const handleGoNext = (step, prevData) => {
-    let data = prevData;
+const handleOnStep = (step) => {
+    const newProps = {};
     switch (step) {
-        case 0: {
-            data = {
-                ...data,
-                autoStart: true,
-            };
+        case 1:
+            newProps.autoStart = true;
             break;
-        }
         default:
     }
 
-    return data;
+    return newProps;
 };
 
 const Send = ({
@@ -51,7 +47,7 @@ const Send = ({
         <CombinedViews
             Steps={Steps}
             fetchInitialData={fetchInitialData}
-            onGoNext={handleGoNext}
+            onStep={handleOnStep}
             autoClose
         />
     );

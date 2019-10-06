@@ -9,20 +9,16 @@ const Steps = [
     NoteAccessTransaction,
 ];
 
-const handleGoNext = (step, prevData) => {
-    let data = prevData;
+const handleGoNext = (step) => {
+    const newProps = {};
     switch (step) {
-        case 0: {
-            data = {
-                ...data,
-                autoStart: true,
-            };
+        case 0:
+            newProps.autoStart = true;
             break;
-        }
         default:
     }
 
-    return data;
+    return newProps;
 };
 
 const NoteAccess = ({
