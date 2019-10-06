@@ -5,7 +5,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
-    defaultInt,
+    emptyIntValue,
 } from '~ui/config/settings';
 import {
     formatValue,
@@ -143,7 +143,7 @@ WithdrawTransaction.propTypes = {
 };
 
 WithdrawTransaction.defaultProps = {
-    numberOfInputNotes: defaultInt,
+    numberOfInputNotes: emptyIntValue,
     initialStep: -1,
     initialTask: 0,
     autoStart: false,

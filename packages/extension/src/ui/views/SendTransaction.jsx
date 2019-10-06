@@ -8,7 +8,7 @@ import {
     formatValue,
 } from '~ui/utils/asset';
 import {
-    defaultInt,
+    emptyIntValue,
 } from '~ui/config/settings';
 import formatAddress from '~ui/utils/formatAddress';
 import i18n from '~ui/helpers/i18n';
@@ -152,7 +152,7 @@ SendTransaction.propTypes = {
 };
 
 SendTransaction.defaultProps = {
-    numberOfInputNotes: defaultInt,
+    numberOfInputNotes: emptyIntValue,
     initialStep: -1,
     initialTask: 0,
     autoStart: false,
