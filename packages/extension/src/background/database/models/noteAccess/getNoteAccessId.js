@@ -1,4 +1,4 @@
 
-export default function getNoteAccessId(account, asset) {
-    return `${account}_${asset}`;
+export default function getNoteAccessId(account, noteHash) {
+    return `${account}_${noteHash}`;
 }

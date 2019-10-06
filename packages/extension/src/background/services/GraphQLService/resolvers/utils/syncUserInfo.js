@@ -65,8 +65,12 @@ export default async function syncUserInfo(args, ctx) {
     if (user) {
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
 
-        EventService.syncNotes({
+        EventService.addAccountToSync({
             address: user.address,
+            networkId,
+        });
+
+        EventService.startAutoSync({
             networkId,
         });
 

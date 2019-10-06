@@ -10,7 +10,7 @@ class Web3ServiceFactory {
 
     networksConfigs = {};
 
-    _ensureWeb3Service = (networkId) => {
+    ensureWeb3Service = (networkId, account) => {
         const config = this.networksConfigs[networkId];
         if (!config) {
             errorLog(`No network config for such networkId: ${networkId}`);
@@ -28,6 +28,7 @@ class Web3ServiceFactory {
         const provider = new Web3.providers.WebsocketProvider(providerUrl);
         service.init({
             provider,
+            account,
         });
         for (let i = 0; i < contractsConfigs.length; i += 1) {
             const contractConfig = contractsConfigs[i];
@@ -73,7 +74,7 @@ class Web3ServiceFactory {
     }
 
     create(networkId) {
-        this._ensureWeb3Service(networkId);
+        this.ensureWeb3Service(networkId);
         return this.web3ServicesByNetworks[networkId];
     }
 }
