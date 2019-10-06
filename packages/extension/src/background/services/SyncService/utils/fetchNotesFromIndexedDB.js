@@ -49,7 +49,7 @@ export default async function fetchNotesFromIndexedDB({
 
     const notes = await Note.query(networkOptions).where('blockNumber').above(lastSynced).toArray();
     const assetsKeys = notes.map(({ asset }) => asset);
-    const noteAccessKeys = assetsKeys.map(assetAddress => getNoteAccessId(account, assetAddress));
+    const noteAccessKeys = notes.map(({ noteHash }) => getNoteAccessId(account, noteHash));
 
     // Since v3.0.0-alpha.8
     // const assets = await Asset.bulkGet(networkOptions, assetsKeys);

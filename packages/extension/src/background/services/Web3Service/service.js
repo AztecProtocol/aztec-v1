@@ -166,7 +166,7 @@ export default class Web3Service {
                 .deploy(deployOptions)
                 .send({
                     from: address,
-                    gas: gas * 2,
+                    gas,
                 })
                 .once('transactionHash', (receipt) => {
                     const interval = setInterval(() => {
