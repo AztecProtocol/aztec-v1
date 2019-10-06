@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { KeyStore } from '~utils/keyvault';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 import Intro from '../RegisterIntro';
 import BackupKeys from '../BackupKeys';
@@ -64,7 +63,7 @@ const Register = ({
         }}
         onGoBack={handleGoBack}
         onGoNext={handleGoNext}
-        onExit={returnAndClose}
+        autoClose
     />
 );
 

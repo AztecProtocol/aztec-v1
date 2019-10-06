@@ -2,7 +2,7 @@ import React, {
     PureComponent,
 } from 'react';
 import PropTypes from 'prop-types';
-import returnAndClose from '~ui/helpers/returnAndClose';
+import returnAndClose from '~uiModules/helpers/returnAndClose';
 import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
 import Loading from '~ui/views/Loading';
 import {

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import makeAsset from '~uiModules/utils/asset';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositTransaction from '~ui/views/DepositTransaction';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
@@ -49,7 +48,7 @@ const Deposit = ({
             Steps={Steps}
             fetchInitialData={fetchInitialData}
             onGoNext={handleGoNext}
-            onExit={returnAndClose}
+            autoClose
         />
     );
 };

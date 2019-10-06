@@ -2,7 +2,7 @@ import React, {
     PureComponent,
 } from 'react';
 import PropTypes from 'prop-types';
-import closeWindow from '~ui/utils/closeWindow';
+import returnAndClose from '~uiModules/helpers/returnAndClose';
 import Loading from '~ui/views/Loading';
 
 class CombinedViews extends PureComponent {
@@ -53,8 +53,6 @@ class CombinedViews extends PureComponent {
         const {
             Steps,
             onGoNext,
-            onExit,
-            autoClose,
         } = this.props;
         const {
             step,
@@ -66,10 +64,16 @@ class CombinedViews extends PureComponent {
         };
 
         if (step === Steps.length - 1) {
+            const {
+                onExit,
+                autoClose,
+                closeDelay,
+            } = this.props;
+
             if (onExit) {
                 onExit(data);
-            } else if (autoClose >= 0) {
-                closeWindow(autoClose);
+            } else if (autoClose) {
+                returnAndClose(data, closeDelay);
             }
             return;
         }
@@ -143,7 +147,8 @@ CombinedViews.propTypes = {
     onGoBack: PropTypes.func,
     onGoNext: PropTypes.func,
     onExit: PropTypes.func,
-    autoClose: PropTypes.number,
+    autoClose: PropTypes.bool,
+    closeDelay: PropTypes.number,
 };
 
 CombinedViews.defaultProps = {
@@ -153,7 +158,8 @@ CombinedViews.defaultProps = {
     onGoBack: null,
     onGoNext: null,
     onExit: null,
-    autoClose: -1,
+    autoClose: false,
+    closeDelay: 1500,
 };
 
 export default CombinedViews;
