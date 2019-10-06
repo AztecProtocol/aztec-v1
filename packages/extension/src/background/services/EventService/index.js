@@ -35,6 +35,7 @@ const AUTOSYNC_STATUS = {
     STARTED: 'STARTED',
 };
 
+
 class EventService {
     constructor() {
         this.accounts = {};
@@ -76,7 +77,6 @@ class EventService {
             });
         }
     }
-
 
     removeAccountFromSyncing = async ({
         address,
@@ -233,14 +233,14 @@ class EventService {
             };
             const note = await Note.latest({ networkId }, options);
             return {
-                lastSyncedBlock: note ? note.blockNumber : 0, // TODO: replace 0 to => account.blockNumber
+                lastSyncedBlock: note ? note.blockNumber : account.blockNumber,
                 assetAddress,
             };
         };
 
         const onlyNewAssets = fromAssets.filter(({ registryOwner }) => {
             const options = {
-                address,
+                address: account.address,
                 assetAddress: registryOwner,
             };
             return !manager.isInQueue(options) && !watcher.isUnderWatching(options);

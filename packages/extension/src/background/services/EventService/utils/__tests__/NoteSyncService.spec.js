@@ -284,4 +284,3 @@ describe('ZkAsset', () => {
         console.log(`Full amount of time: ${((tEnd - tStart) / 1000)} seconds.`);
     });
 });
-
