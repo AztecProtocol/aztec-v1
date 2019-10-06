@@ -15,7 +15,7 @@ import asyncForEach from '~utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
 import settings from '~background/utils/settings';
 import {
-    defaultInt,
+    emptyIntValue,
 } from '~ui/config/settings';
 import ConnectionService from '~ui/services/ConnectionService';
 import {
@@ -36,10 +36,10 @@ export default async function createNoteFromBalance({
     const inputNotesOwner = await getNoteOwnerAccount(sender);
     let inputAmount = amount;
 
-    const numberOfInputNotes = customNumberOfInputNotes !== defaultInt
+    const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
         ? customNumberOfInputNotes
         : await settings('NUMBER_OF_INPUT_NOTES');
-    const numberOfOutputNotes = customNumberOfOutputNotes !== defaultInt
+    const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
         ? customNumberOfOutputNotes
         : await settings('NUMBER_OF_OUTPUT_NOTES');
 

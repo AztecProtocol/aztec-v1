@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    defaultInt,
+    emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
 import returnAndClose from '~ui/helpers/returnAndClose';
@@ -47,7 +47,7 @@ Withdraw.propTypes = {
 };
 
 Withdraw.defaultProps = {
-    numberOfInputNotes: defaultInt,
+    numberOfInputNotes: emptyIntValue,
 };
 
 export default Withdraw;
