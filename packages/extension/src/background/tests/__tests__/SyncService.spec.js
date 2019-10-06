@@ -38,6 +38,7 @@ import decodeSpendingPublicKey from '~background/utils/decodeSpendingPublicKey';
 
 
 jest.mock('~utils/storage');
+
 jest.setTimeout(500000000);
 
 const {
@@ -258,9 +259,6 @@ describe('ZkAsset', () => {
         } while (createdNotes < prepopulateNotesCount);
     });
 
-    beforeEach(async () => {
-        clearDB();
-    });
 
     it(`check how does it take to fetch ${prepopulateNotesCount} events, filter by owner and store into faked db`, async () => {
         // given
