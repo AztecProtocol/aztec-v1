@@ -1,5 +1,6 @@
 import {
     log,
+    warnLog,
     errorLog,
 } from '~utils/log';
 import NotesSyncManagerFactory from './helpers/NotesSyncManager/factory';
@@ -14,6 +15,7 @@ import {
 } from './utils/account';
 import {
     fetchAssets,
+    syncedAssets,
 } from './utils/asset';
 import {
     fetchNotes,
@@ -27,165 +29,219 @@ const notesSyncManager = networkId => NotesSyncManagerFactory.create(networkId);
 const notesWatcher = networkId => NotesWatcherFactory.create(networkId);
 const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId);
 
-const fetchAztecAccount = async ({
-    address,
-    networkId,
-}) => {
-    const account = await Account.get({ networkId }, address);
+const AUTOSYNC_STATUS = {
+    NOT_STARTED: 'NOT_STARTED',
+    STARTED: 'STARTED',
+};
 
-    if (account) {
-        return {
-            error: null,
+class EventService {
+    constructor() {
+        this.accounts = {};
+        this.autosyncConfig = new Map();
+    }
+
+    addAccountToSync = async ({
+        address,
+        networkId,
+    }) => {
+        if (this.accounts[address]) return;
+
+        const {
+            error,
             account,
-        };
-    }
-
-    const {
-        error,
-        account: newAccount,
-    } = await fetchAccount({
-        address,
-        networkId,
-    });
-
-    if (newAccount) {
-        await createAccount(newAccount, networkId);
-        const latestAccount = await Account.get({ networkId }, address);
-
-        return {
-            error: null,
-            account: latestAccount,
-        };
-    }
-
-    return {
-        error,
-        account: null,
-    };
-};
-
-const syncAssets = async ({
-    networkId,
-}, subscriberOnNewAssets) => {
-    if (!networkId && networkId !== 0) {
-        errorLog("'networkId' can not be empty in EventService.syncAssets()");
-        return;
-    }
-    const manager = assetsSyncManager(networkId);
-
-    if (manager.isInProcess()) {
-        return;
-    }
-
-    const lastSyncedAsset = await Asset.latest({ networkId });
-
-    // TODO: Improve this for each network separately
-    let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
-
-    if (lastSyncedAsset) {
-        lastSyncedBlock = lastSyncedAsset.blockNumber;
-    }
-
-    manager.sync({
-        lastSyncedBlock,
-        networkId,
-    }, subscriberOnNewAssets);
-};
-
-const syncNotes = async ({
-    address,
-    networkId,
-}) => {
-    if (!address) {
-        errorLog("'address' can not be empty in EventService.syncEthAddress()");
-        return;
-    }
-
-    if (!networkId && networkId !== 0) {
-        errorLog(`'networkId' can not be ${networkId} in EventService.syncEthAddress()`);
-        return;
-    }
-
-    const {
-        error,
-        account,
-    } = await fetchAztecAccount({
-        address,
-        networkId,
-    });
-
-    if (error) {
-        errorLog(`Error syncing address: ${address}. Error: ${error}.`);
-        return;
-    }
-
-    if (!account) {
-        errorLog(`Error syncing address: ${address}. Cannot find an account.`);
-        return;
-    }
-
-    const manager = notesSyncManager(networkId);
-    const watcher = notesWatcher(networkId);
-
-    const latestNoteSyncedBlock = async (assetAddress) => {
-        const options = {
-            filterOptions: {
-                asset: assetAddress,
-                owner: address,
-            },
-        };
-        const note = await Note.latest({ networkId }, options);
-        return {
-            lastSyncedBlock: note ? note.blockNumber : account.blockNumber,
-            assetAddress,
-        };
-    };
-
-    const onCompleatePulling = ({
-        blocks,
-        lastSyncedBlock,
-        assets,
-    }) => {
-        log(`Finished pulling (${lastSyncedBlock} from ${blocks} blocks) for assets: ${JSON.stringify(assets)}`);
-        watcher.appendAssets({
+        } = await this.fetchAztecAccount({
             address,
-            assets,
-            lastSyncedBlock,
+            networkId,
         });
-    };
 
-    const onProggressChangePulling = ({
-        blocks,
-        assets,
-        lastSyncedBlock,
+        if (error) {
+            errorLog(`Error syncing address: ${address}. Error: ${error}.`);
+            return;
+        }
+
+        if (!account) {
+            errorLog(`Error syncing address: ${address}. Cannot find an account.`);
+            return;
+        }
+        this.accounts[address] = account;
+
+        const config = this.autosyncConfig.get(networkId) || {};
+        if (config.status === AUTOSYNC_STATUS.STARTED) {
+            const fromAssets = await this.syncedAssets(networkId);
+            this.syncNotes({
+                account,
+                networkId,
+                fromAssets,
+            });
+        }
+    }
+
+    removeAccountFromSyncing = async ({
+        address,
+        networkId,
     }) => {
-        log(`Proggress changed (${lastSyncedBlock} from ${blocks} blocks) for pulling for assets: ${JSON.stringify(assets)}`);
-    };
+        warnLog('TODO: Not implemented yet');
+    }
 
-    const onFailurePulling = ({
-        assets,
-        error: pullingError,
+    syncedAssets = async ({
+        networkId,
+    }) => syncedAssets(networkId);
+
+    fetchAztecAccount = async ({
+        address,
+        networkId,
     }) => {
-        errorLog(`Error occured for pulling notes for assets: ${JSON.stringify(assets)}`, pullingError);
+        const account = await Account.get({ networkId }, address);
+
+        if (account) {
+            return {
+                error: null,
+                account,
+            };
+        }
+
+        const {
+            error,
+            account: newAccount,
+        } = await fetchAccount({
+            address,
+            networkId,
+        });
+
+        if (newAccount) {
+            await createAccount(newAccount, networkId);
+            const latestAccount = await Account.get({ networkId }, address);
+
+            return {
+                error: null,
+                account: latestAccount,
+            };
+        }
+
+        return {
+            error,
+            account: null,
+        };
     };
 
-    const progressCallbacks = {
-        onCompleate: onCompleatePulling,
-        onProggressChange: onProggressChangePulling,
-        onFailure: onFailurePulling,
+    startAutoSync = async ({
+        networkId,
+    }) => {
+        if (!networkId && networkId !== 0) {
+            errorLog("'networkId' can not be empty in EventService.syncAssets()");
+            return;
+        }
+        const config = this.autosyncConfig.get(networkId) || {};
+        if (config.status === AUTOSYNC_STATUS.STARTED) return;
+
+        this.syncAssets({
+            networkId,
+        }, (newAssets) => {
+            if (config.status === AUTOSYNC_STATUS.NOT_STARTED) return;
+            Object.values(this.accounts).forEach(account => this.syncNotes({
+                account,
+                networkId,
+                fromAssets: newAssets,
+            }));
+        });
+
+        this.autosyncConfig.set(networkId, {
+            status: AUTOSYNC_STATUS.STARTED,
+        });
+    }
+
+    stopAutoSync = async ({
+        networkId,
+    }) => {
+        if (!networkId && networkId !== 0) {
+            errorLog("'networkId' can not be empty in EventService.syncAssets()");
+            return;
+        }
+        this.autosyncConfig.set(networkId, {
+            status: AUTOSYNC_STATUS.NOT_STARTED,
+        });
+    }
+
+    syncAssets = async ({
+        networkId,
+    }, assetsHandler) => {
+        if (!networkId && networkId !== 0) {
+            errorLog("'networkId' can not be empty in EventService.syncAssets()");
+            return;
+        }
+        const manager = assetsSyncManager(networkId);
+        if (manager.isInProcess()) {
+            return;
+        }
+
+        if (assetsHandler) {
+            const assets = await this.syncedAssets({ networkId });
+            assetsHandler(assets);
+        }
+
+        const lastSyncedAsset = await Asset.latest({ networkId });
+
+        // TODO: Improve this for each network separately
+        let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
+
+        if (lastSyncedAsset) {
+            lastSyncedBlock = lastSyncedAsset.blockNumber;
+        }
+
+        manager.sync({
+            lastSyncedBlock,
+            networkId,
+        }, assetsHandler);
     };
 
-    const addNewAssetsToSyncNotes = async (assets) => {
-        const newAssets = assets.filter(({ registryOwner }) => {
+    syncNotes = async ({
+        account,
+        networkId,
+        fromAssets,
+    }) => {
+        if (!account) {
+            errorLog("'address' can not be empty in EventService.syncEthAddress()");
+            return;
+        }
+        if (!this.accounts[account.address]) {
+            errorLog('Firstly account should be added with help of "addAccountToSync"');
+            return;
+        }
+        if (!networkId && networkId !== 0) {
+            errorLog(`'networkId' can not be ${networkId} in EventService.syncEthAddress()`);
+            return;
+        }
+        if (!fromAssets.length) {
+            return;
+        }
+
+        const manager = notesSyncManager(networkId);
+        const watcher = notesWatcher(networkId);
+
+        const latestNoteSyncedBlock = async (assetAddress) => {
             const options = {
-                address,
+                filterOptions: {
+                    asset: assetAddress,
+                    owner: account.address,
+                },
+            };
+            const note = await Note.latest({ networkId }, options);
+            return {
+                lastSyncedBlock: note ? note.blockNumber : account.blockNumber,
+                assetAddress,
+            };
+        };
+
+        const onlyNewAssets = fromAssets.filter(({ registryOwner }) => {
+            const options = {
+                address: account.address,
                 assetAddress: registryOwner,
             };
             return !manager.isInQueue(options) && !watcher.isUnderWatching(options);
         });
-        if (!newAssets.length) { return; }
+        if (!onlyNewAssets.length) return;
 
-        const syncedBlocksPromises = newAssets
+        const syncedBlocksPromises = onlyNewAssets
             .map(({ registryOwner }) => latestNoteSyncedBlock(registryOwner));
         const syncedBlocksArray = await Promise.all(syncedBlocksPromises);
         const syncedBlocks = syncedBlocksArray
@@ -197,101 +253,119 @@ const syncNotes = async ({
                 return result;
             }, {});
 
-        manager.sync({
-            address,
+
+        const onCompleatePulling = ({
+            blocks,
+            lastSyncedBlock,
             assets,
+        }) => {
+            log(`Finished pulling (${lastSyncedBlock} from ${blocks} blocks) for assets: ${JSON.stringify(assets)}`);
+            watcher.appendAssets({
+                address: account.address,
+                assets,
+                lastSyncedBlock,
+            });
+        };
+
+        const onProggressChangePulling = ({
+            blocks,
+            assets,
+            lastSyncedBlock,
+        }) => {
+            log(`Proggress changed (${lastSyncedBlock} from ${blocks} blocks) for pulling for assets: ${JSON.stringify(assets)}`);
+        };
+
+        const onFailurePulling = ({
+            assets,
+            error: pullingError,
+        }) => {
+            errorLog(`Error occured for pulling notes for assets: ${JSON.stringify(assets)}`, pullingError);
+        };
+
+        const progressCallbacks = {
+            onCompleate: onCompleatePulling,
+            onProggressChange: onProggressChangePulling,
+            onFailure: onFailurePulling,
+        };
+
+        manager.sync({
+            address: account.address,
+            assets: fromAssets,
             syncedBlocks,
             progressCallbacks,
         });
     };
 
-    // start sync notes for existing Assets
-    const existingAssets = await Asset.query({ networkId }).toArray();
-    await addNewAssetsToSyncNotes(existingAssets);
-
-    // start Looking for New Assets
-    syncAssets({
+    fetchLatestNote = async ({
+        noteHash,
+        assetAddress,
         networkId,
-    }, addNewAssetsToSyncNotes);
-};
+    }) => {
+        let fromAssets;
+        const manager = assetsSyncManager(networkId);
 
-const fetchLatestNote = async ({
-    noteHash,
-    assetAddress,
-    networkId,
-}) => {
-    let fromAssets;
-    const manager = assetsSyncManager(networkId);
+        if (assetAddress) {
+            fromAssets = [assetAddress];
+        } else if (!manager.isSynced(networkId)) {
+            return {
+                error: new Error(`Error: assets are not synced for networkId: ${networkId}`),
+                note: null,
+            };
+        } else {
+            fromAssets = (await Asset.query({ networkId })
+                .toArray())
+                .map(({ registryOwner }) => registryOwner);
+        }
 
-    if (assetAddress) {
-        fromAssets = [assetAddress];
-    } else if (!manager.isSynced(networkId)) {
+        const {
+            error,
+            groupedNotes,
+        } = await fetchNotes({
+            noteHash,
+            fromAssets,
+            networkId,
+        });
+
+        if (!groupedNotes.isEmpty()) {
+            const allNotes = groupedNotes.allNotes();
+            return {
+                error: null,
+                note: allNotes[allNotes.length - 1],
+            };
+        }
+
         return {
-            error: new Error(`Error: assets are not synced for networkId: ${networkId}`),
+            error,
             note: null,
         };
-    } else {
-        fromAssets = (await Asset.query({ networkId })
-            .toArray())
-            .map(({ registryOwner }) => registryOwner);
-    }
-
-    const {
-        error,
-        groupedNotes,
-    } = await fetchNotes({
-        noteHash,
-        fromAssets,
-        networkId,
-    });
-
-    if (!groupedNotes.isEmpty()) {
-        const allNotes = groupedNotes.allNotes();
-        return {
-            error: null,
-            note: allNotes[allNotes.length - 1],
-        };
-    }
-
-    return {
-        error,
-        note: null,
     };
-};
 
-const fetchAsset = async ({
-    address,
-    networkId,
-}) => {
-    const asset = await Asset.get({ networkId }, { registryOwner: address });
-
-    if (asset) {
-        return {
-            error: null,
-            asset,
-        };
-    }
-
-    const {
-        error,
-        assets,
-    } = await fetchAssets({
-        assetAddress: address,
+    fetchAsset = async ({
+        address,
         networkId,
-    });
+    }) => {
+        const asset = await Asset.get({ networkId }, { registryOwner: address });
 
-    return {
-        error,
-        asset: assets ? assets[assets.length - 1] : null,
+        if (asset) {
+            return {
+                error: null,
+                asset,
+            };
+        }
+
+        const {
+            error,
+            assets,
+        } = await fetchAssets({
+            assetAddress: address,
+            networkId,
+        });
+
+        return {
+            error,
+            asset: assets ? assets[assets.length - 1] : null,
+        };
     };
-};
+}
 
-export default {
-    syncAssets,
-    syncNotes,
-    fetchLatestNote,
-    fetchAztecAccount,
-    fetchAsset,
-    notesSyncManager,
-    assetsSyncManager,
-};
+export default new EventService();

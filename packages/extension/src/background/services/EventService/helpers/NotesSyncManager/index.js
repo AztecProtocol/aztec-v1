@@ -321,9 +321,9 @@ class SyncManager {
         for (let i = 0; i < nonExistingAssets.length; i += 1) {
             const {
                 registryOwner,
-                blockNumber,
+                blockNumber: assetRegisteredAtBlock,
             } = nonExistingAssets[i];
-            const lastSyncedBlock = syncedBlocks[registryOwner] || blockNumber;
+            const lastSyncedBlock = syncedBlocks[registryOwner] || assetRegisteredAtBlock;
             // eslint-disable-next-line max-len
             lowestSyncedBlock = lowestSyncedBlock ? Math.min(lowestSyncedBlock, lastSyncedBlock) : lastSyncedBlock;
 
