@@ -9,8 +9,9 @@ import {
     ACEConfig,
 } from '../config/contracts';
 import {
-    infuraProviderConfig,
-} from '../config/infura';
+    NETWORKS,
+} from '../config/constants';
+import Provider from '../config/provider';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
 import Web3Service from '~client/services/Web3Service';
@@ -23,7 +24,7 @@ import Web3ServiceFactory from '~background/services/Web3Service/factory';
 
 
 const configureWeb3Service = async () => {
-    const providerUrlGanache = await get('__providerUrlGanache');
+    const providerUrlGanache = await get('__providerUrl');
     const infuraProjectId = await get('__infuraProjectId');
 
     const contractsConfigs = [
@@ -31,24 +32,29 @@ const configureWeb3Service = async () => {
         ACEConfig.config,
     ];
 
-    const infuraNetworksConfigs = ['mainnet', 'ropsten', 'rinkeby', 'goerli', 'kovan']
-        .map(networkName => infuraProviderConfig(networkName, infuraProjectId))
-        .map(config => ({
-            ...config,
-            contractsConfigs,
-        }));
+    const infuraNetworksConfigs = [
+        NETWORKS.MAIN, NETWORKS.ROPSTEN,
+        NETWORKS.RINKEBY, NETWORKS.GOERLI, NETWORKS.KOVAN,
+    ].map(networkName => Provider.infuraConfig(networkName, infuraProjectId));
 
+    const {
+        id: ganacheNetworkId,
+        networkName: ganacheNetworkName,
+    } = NETWORKS.GANACHE;
     const ganacheNetworkConfig = {
-        title: 'Ganache',
-        networkId: 0,
+        title: ganacheNetworkName,
+        networkId: ganacheNetworkId,
         providerUrl: providerUrlGanache,
-        contractsConfigs,
     };
-
-    Web3ServiceFactory.setConfigs([
+    const configs = [
         ...[ganacheNetworkConfig],
         ...infuraNetworksConfigs,
-    ]);
+    ].map(config => ({
+        ...config,
+        contractsConfigs,
+    }));
+
+    Web3ServiceFactory.setConfigs(configs);
 };
 
 export default async function init() {
@@ -59,7 +65,7 @@ export default async function init() {
         // await runLoadingEventsTest();
 
         await set({
-            __providerUrlGanache: 'ws://localhost:8545',
+            __providerUrl: 'ws://localhost:8545',
             __infuraProjectId: '',
         });
         await domainModel.set(

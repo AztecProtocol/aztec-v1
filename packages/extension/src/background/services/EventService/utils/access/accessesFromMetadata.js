@@ -33,7 +33,7 @@ export default function accessesFromMetadata(note, prevNote) {
     for (let i = 0; i < addresses.length; i += 1) {
         const account = addresses[i];
         const viewingKey = viewingKeys[i];
-        const id = getNoteAccessId(account, asset);
+        const id = getNoteAccessId(account, noteHash);
 
         let prevViewingKey;
         if (prevMetadataObj) {
