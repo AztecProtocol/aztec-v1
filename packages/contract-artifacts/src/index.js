@@ -1,8 +1,5 @@
 /* eslint-disable */
 const ACE = require('../artifacts/ACE');
-const AdjustSupply = require('../artifacts/AdjustSupply');
-const AdjustSupplyABIEncoder = require('../artifacts/AdjustSupplyABIEncoder');
-const AdjustSupplyInterface = require('../artifacts/AdjustSupplyInterface');
 const Dividend = require('../artifacts/Dividend');
 const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
 const DividendInterface = require('../artifacts/DividendInterface');
@@ -16,6 +13,9 @@ const IZkAssetMintable = require('../artifacts/IZkAssetMintable');
 const JoinSplit = require('../artifacts/JoinSplit');
 const JoinSplitABIEncoder = require('../artifacts/JoinSplitABIEncoder');
 const JoinSplitInterface = require('../artifacts/JoinSplitInterface');
+const JoinSplitFluid = require('../artifacts/JoinSplitfluid');
+const JoinSplitFluidABIEncoder = require('../artifacts/JoinSplitFluidABIEncoder');
+const JoinSplitFluidInterface = require('../artifacts/JoinSplitFluidInterface');
 const LibEIP712 = require('../artifacts/LibEIP712');
 const NoteRegistry = require('../artifacts/NoteRegistry');
 const NoteUtils = require('../artifacts/NoteUtils');
@@ -35,9 +35,6 @@ const ZkAssetOwnable = require('../artifacts/ZkAssetOwnable');
 
 module.exports = {
     ACE,
-    AdjustSupply,
-    AdjustSupplyABIEncoder,
-    AdjustSupplyInterface,
     Dividend,
     DividendABIEncoder,
     DividendInterface,
@@ -51,6 +48,9 @@ module.exports = {
     JoinSplit,
     JoinSplitABIEncoder,
     JoinSplitInterface,
+    JoinSplitFluid,
+    JoinSplitFluidABIEncoder,
+    JoinSplitFluidInterface,
     LibEIP712,
     NoteRegistry,
     NoteUtils,
