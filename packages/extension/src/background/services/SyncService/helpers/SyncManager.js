@@ -93,6 +93,7 @@ class SyncManager {
             privateKey,
             lastSynced = 0,
             networkId,
+            callbacks,
         } = options;
 
         const account = this.accounts.get(address);
@@ -183,6 +184,15 @@ class SyncManager {
             syncing: false,
             syncReq,
         });
+
+        const {
+            onCompleate,
+        } = callbacks;
+        if (onCompleate) {
+            onCompleate({
+                lastSynced: nextSynced,
+            });
+        }
     }
 
     async sync({
@@ -190,6 +200,7 @@ class SyncManager {
         privateKey,
         lastSynced,
         networkId,
+        callbacks,
     }) {
         let account = this.accounts.get(address);
         if (!account) {
@@ -205,6 +216,7 @@ class SyncManager {
             privateKey,
             lastSynced,
             networkId,
+            callbacks,
         });
     }
 
