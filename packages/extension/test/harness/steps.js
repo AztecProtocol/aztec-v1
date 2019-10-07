@@ -1,9 +1,12 @@
+const uuid = require('uuid');
+
 module.exports = {
     createPageObject: async function (page, metadata) {
         const environment = this;
         const data = {
-            index: environment.openPages.length,
+            id: uuid.v4(),
             api: page,
+            aztecContext: false,
             metadata,
             clickMain: async function(selector = "button") {
                 const main = await this.api.waitFor(selector);
@@ -16,16 +19,24 @@ module.exports = {
                 if (environment.debug) await this.screenshot(`${Date.now()}-type.png`);
             },
             close: async function() {
+                if (this.aztecContext) return;
                 try {
                     await this.api.close();
                 } catch (e) {
                     console.log('page already closed');
                 }
-                environment.openPages.splice(this.index, 1);
+                delete environment.openPages[this.id];
             },
             initialiseAztec: async function() {
+                this.aztecContext = true;
                 await this.api.waitFor(() => !!window.aztec);
-                this.api.evaluate(() => window.aztec.enable());
+                this.api.evaluate(async () => {
+                    try {
+                        window.aztec.enable();
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
             },
             screenshot: async function(fileName) {
                 const name = fileName || `${Date.now()}.png`;
@@ -34,7 +45,7 @@ module.exports = {
                 await this.api.screenshot({ path });
             },
         };
-        environment.openPages.push(data);
+        environment.openPages[data.id] = (data);
         if (environment.debug) await data.screenshot(`${Date.now()}-open.png`);
         return data;
     },
