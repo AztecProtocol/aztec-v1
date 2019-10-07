@@ -26,6 +26,7 @@ import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
 import MintTransaction from '~ui/views/MintTransaction';
 import BurnTransaction from '~ui/views/BurnTransaction';
+import Icons from '~ui/views/playground/Icons';
 
 /*
  * Component can be rendered from background script and by clicking extension icon
@@ -148,6 +149,15 @@ export default {
             grant: {
                 path: 'grant',
                 View: SendTransaction,
+            },
+        },
+    },
+    playground: {
+        path: 'playground',
+        routes: {
+            icons: {
+                path: 'icons',
+                View: Icons,
             },
         },
     },

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
     Block,
     TextButton,
+    Text,
 } from '@aztec/guacamole-ui';
 import routes from '../../config/routes';
 
@@ -18,12 +19,17 @@ const renderRouteNodes = (config, pathPrefix) => Object.keys(config).map((name) 
     const {
         path: subPath,
         routes: childRoutes,
+        Component,
+        View,
     } = config[name];
     const path = `${pathPrefix || ''}/${subPath || ''}`;
+    const canRender = !!(Component || View);
 
     let childRouteNodes;
     if (childRoutes) {
         childRouteNodes = renderRouteNodes(childRoutes, path);
+    } else if (!canRender) {
+        return null;
     }
 
     return (
@@ -32,12 +38,21 @@ const renderRouteNodes = (config, pathPrefix) => Object.keys(config).map((name) 
             padding={pathPrefix ? 'xs s' : 's'}
             hasBorderBottom={!pathPrefix}
         >
-            <TextButton
-                text={formatName(name)}
-                href={path}
-                Link={Link}
-                size="xxs"
-            />
+            {canRender && (
+                <TextButton
+                    text={formatName(name)}
+                    href={path}
+                    Link={Link}
+                    size="xxs"
+                />
+            )}
+            {!canRender && (
+                <Text
+                    text={formatName(name)}
+                    color="label"
+                    size="xxs"
+                />
+            )}
             {!!childRouteNodes && (
                 <Block left="l">
                     {childRouteNodes}

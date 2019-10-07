@@ -1,0 +1,15 @@
+@import '../../styles/variables';
+
+.profile {
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 100%;
+    line-height: 0;
+}
+
+@each $key, $size in $avatar-sizes-map {
+    .size-#{$key} {
+        width: $size;
+        height: $size;
+    }
+}
