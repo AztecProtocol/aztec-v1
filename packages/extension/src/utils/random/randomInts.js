@@ -1,11 +1,11 @@
 import randomInt from './randomInt';
 
-const pick = (count, start, end) => {
+const pick = (count, start, end, rand) => {
     if (count <= 0 || end < start) {
         return [];
     }
 
-    const mid = randomInt(start, end);
+    const mid = randomInt(start, end, rand);
     if (count === 1) {
         return [mid];
     }
@@ -19,13 +19,13 @@ const pick = (count, start, end) => {
     rightCount += Math.max(0, Math.max(0, leftCount - leftLen));
 
     return [
-        ...pick(leftCount, start, mid - 1),
+        ...pick(leftCount, start, mid - 1, rand),
         mid,
-        ...pick(rightCount, mid + 1, end),
+        ...pick(rightCount, mid + 1, end, rand),
     ];
 };
 
-export default function randomInts(count, from = null, to = null) {
+export default function randomInts(count, from = null, to = null, rand = Math.random) {
     const pivot = to !== null ? from : 0;
     let offset;
     if (to !== null) {
@@ -37,5 +37,7 @@ export default function randomInts(count, from = null, to = null) {
         ? [pivot, pivot + offset]
         : [pivot + offset, pivot];
 
-    return pick(count, start, end);
+    return pick(count, start, end, rand);
 }
+
+export const makeRandomInts = rand => (count, from, to) => randomInts(count, from, to, rand);

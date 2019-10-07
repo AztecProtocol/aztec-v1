@@ -3,6 +3,9 @@ import {
     randomInts,
     randomSumArray,
     randomId,
+    makeRand,
+    makeRandomInt,
+    makeRandomInts,
 } from '../random';
 
 describe('randomInt', () => {
@@ -152,5 +155,49 @@ describe('randomId', () => {
 
         const base36Id = randomId(10, 36);
         expect(base36Id).toMatch(/^[0-9a-z]+$/i);
+    });
+});
+
+describe('makeRand', () => {
+    it('return a custom random function from a seed', () => {
+        const seed = 'pikachu';
+        const rand = makeRand(seed);
+        const numberOfValues = 100;
+        const randomValues = Array.from({ length: numberOfValues }, () => rand());
+
+        expect([...new Set(randomValues)].length).toBe(numberOfValues);
+        expect(randomValues.every(val => val >= 0 && val < 1)).toBe(true);
+    });
+
+    it('random functions with the same seed always return the same numbers in order', () => {
+        const seed = 'pikachu';
+        const randA = makeRand(seed);
+        const randB = makeRand(seed);
+
+        expect(randA()).toBe(randB());
+        expect(randA()).toBe(randB());
+    });
+});
+
+describe('apply custom rand functions', () => {
+    it('allow randomInt to use custom function', () => {
+        const rand = () => 0.5;
+
+        const customRandomInt = makeRandomInt(rand);
+        expect(customRandomInt(0, 10)).toBe(5);
+        expect(customRandomInt(0, 20)).toBe(10);
+
+        expect(randomInt(0, 10, rand)).toBe(5);
+        expect(randomInt(10, null, rand)).toBe(5);
+    });
+
+    it('allow randomInts to use custom function', () => {
+        const rand = () => 0.5;
+
+        const customRandomInts = makeRandomInts(rand);
+        expect(customRandomInts(3, 0, 15)).toEqual([4, 8, 12]);
+
+        expect(randomInts(3, 0, 15, rand)).toEqual([4, 8, 12]);
+        expect(randomInts(3, 15, null, rand)).toEqual([4, 8, 12]);
     });
 });
