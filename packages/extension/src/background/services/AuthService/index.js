@@ -151,7 +151,7 @@ const AuthService = {
         let user = await userModel.get({
             address,
         });
-
+        const userExists = !!user;
         if (!user
             || user.linkedPublicKey !== linkedPublicKey
             || user.spendingPublicKey !== spendingPublicKey
@@ -165,7 +165,7 @@ const AuthService = {
                 blockNumber,
             };
 
-            if (!user) {
+            if (!userExists) {
                 await userModel.set(user);
             } else {
                 await userModel.update(user);

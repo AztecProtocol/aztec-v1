@@ -8,7 +8,7 @@ export default async function sendRegisterAddress({
 }) {
     const {
         txReceipt,
-    } = ConnectionService.sendTransaction({
+    } = await ConnectionService.sendTransaction({
         contract: 'AZTECAccountRegistry',
         method: 'registerAZTECExtension',
         data: [

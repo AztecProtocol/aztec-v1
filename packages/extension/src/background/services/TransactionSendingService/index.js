@@ -17,10 +17,12 @@ const sendTransaction = async (data) => {
         .send(...params);
     return {
         ...data,
-        responseId,
-        response: {
-            txReceipt: receipt,
+        data: {
+            response: {
+                txReceipt: receipt,
+            },
         },
+        responseId,
     };
 };
 // TODO change this to use the gas station network
