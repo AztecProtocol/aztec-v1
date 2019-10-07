@@ -41,6 +41,7 @@ const proofUi = (query, connection) => async () => {
         data: {
             response: {
                 ...rest,
+                requestId: query.requestId,
             },
         },
     });

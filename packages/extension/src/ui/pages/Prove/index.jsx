@@ -32,9 +32,7 @@ class Prove extends Component {
         } = this.state;
 
         const amount = transactions.reduce((accum, { amount }) => accum + amount, 0);
-
-        const { proof } = await ExtensionApi.prove.publicApprove({
-            clientId,
+const { proof } = await ExtensionApi.prove.publicApprove({ clientId,
             requestId,
             proofHash,
             amount,
@@ -134,7 +132,6 @@ class Prove extends Component {
             domain: window.location.origin,
         });
         const encoded = proof.encodeABI(assetAddress);
-        console.log(proof);
         this.setState({
             transferProof: encoded,
             proofHash: proof.hash,
@@ -231,11 +228,10 @@ class Prove extends Component {
         });
     }
 
-    mint = async()=> {
+    mint = async () => {
         const {
             assetAddress,
             transactions,
-            from,
             sender,
             currentAddress,
         } = this.props;
@@ -244,7 +240,7 @@ class Prove extends Component {
             assetAddress,
             sender,
             transactions,
-            currentAddress: from,
+            currentAddress,
             domain: window.location.origin,
         });
         const encoded = proof.encodeABI(assetAddress);

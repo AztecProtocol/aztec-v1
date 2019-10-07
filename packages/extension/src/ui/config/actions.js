@@ -17,4 +17,7 @@ export default {
     'ui.asset.prove.transfer_proof': {
         route: 'send',
     },
+    'ui.asset.prove.mint_proof': {
+        route: 'mint',
+    },
 };

@@ -18,6 +18,7 @@ import Web3Service from '~client/services/Web3Service';
 import domainModel from '../../database/models/domain';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
+import ACE from '../../../build/protocol/ACE.json';
 import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
 import Web3ServiceFactory from '~background/services/Web3Service/factory';
 // import { runLoadingEventsTest } from './syncTest'
@@ -99,6 +100,8 @@ export default async function init() {
     Web3Service.registerInterface(ZkAssetMintable, {
         name: 'ZkAsset',
     });
+
+
     Web3Service.registerInterface(ZkAssetBurnable, {
         name: 'ZkAssetBurnable',
     });
