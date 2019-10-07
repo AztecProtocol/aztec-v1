@@ -1,5 +1,6 @@
 import React, {
     useState,
+    useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -30,12 +31,14 @@ const Login = ({
     const [password, updatePassword] = useState('');
     const [visible, updateVisible] = useState(false);
     const [inputRef, setInputRef] = useState(null);
-    const [didMount, doMount] = useState(false);
+    const [didFocusOnce, setFocus] = useState(false);
 
-    if (inputRef && !didMount) {
-        inputRef.focus();
-        doMount(true);
-    }
+    useEffect(() => {
+        if (inputRef && !didFocusOnce) {
+            inputRef.focus();
+            setFocus(true);
+        }
+    });
 
     return (
         <Popup
