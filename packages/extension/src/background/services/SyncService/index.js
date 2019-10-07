@@ -10,6 +10,7 @@ const syncAccount = async ({
     address,
     privateKey,
     networkId,
+    onCompleate,
 }) => {
     if (!address) {
         errorLog("'address' can not be empty in SyncService.syncAccount()");
@@ -32,7 +33,7 @@ const syncAccount = async ({
         address,
     });
     if (!user) {
-        errorLog(`Account '${address}' has no permission to sync notes from graph node server.`);
+        errorLog(`Account '${address}' has no permission to sync notes from indexedDB.`);
         return;
     }
 
@@ -46,12 +47,17 @@ const syncAccount = async ({
         return;
     }
 
+    const callbacks = {
+        onCompleate,
+    };
+
     manager.sync({
         address,
         privateKey,
         lastSynced,
         blockNumber,
         networkId,
+        callbacks,
     });
 };
 

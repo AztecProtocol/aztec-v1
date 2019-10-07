@@ -195,15 +195,17 @@ class EventService {
     };
 
     syncNotes = async ({
-        account,
+        address,
         networkId,
         fromAssets,
+        callbacks = {},
     }) => {
-        if (!account) {
+        if (!address) {
             errorLog("'address' can not be empty in EventService.syncEthAddress()");
             return;
         }
-        if (!this.accounts[account.address]) {
+        const account = this.accounts[address];
+        if (!account) {
             errorLog('Firstly account should be added with help of "addAccountToSync"');
             return;
         }
@@ -222,7 +224,7 @@ class EventService {
             const options = {
                 filterOptions: {
                     asset: assetAddress,
-                    owner: account.address,
+                    owner: address,
                 },
             };
             const note = await Note.latest({ networkId }, options);
@@ -234,7 +236,7 @@ class EventService {
 
         const onlyNewAssets = fromAssets.filter(({ registryOwner }) => {
             const options = {
-                address: account.address,
+                address,
                 assetAddress: registryOwner,
             };
             return !manager.isInQueue(options) && !watcher.isUnderWatching(options);
@@ -254,17 +256,21 @@ class EventService {
             }, {});
 
 
-        const onCompleatePulling = ({
-            blocks,
-            lastSyncedBlock,
-            assets,
-        }) => {
+        const onCompleatePulling = (result) => {
+            const {
+                blocks,
+                lastSyncedBlock,
+                assets,
+            } = result;
             log(`Finished pulling (${lastSyncedBlock} from ${blocks} blocks) for assets: ${JSON.stringify(assets)}`);
             watcher.appendAssets({
-                address: account.address,
+                address,
                 assets,
                 lastSyncedBlock,
             });
+            if (callbacks.onCompleatePulling) {
+                callbacks.onCompleatePulling(result);
+            }
         };
 
         const onProggressChangePulling = ({
@@ -284,12 +290,12 @@ class EventService {
 
         const progressCallbacks = {
             onCompleate: onCompleatePulling,
-            onProggressChange: onProggressChangePulling,
-            onFailure: onFailurePulling,
+            onProggressChange: callbacks.onProggressChangePulling || onProggressChangePulling,
+            onFailure: callbacks.onFailurePulling || onFailurePulling,
         };
 
         manager.sync({
-            address: account.address,
+            address,
             assets: fromAssets,
             syncedBlocks,
             progressCallbacks,
