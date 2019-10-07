@@ -66,6 +66,7 @@
         "terminal-kit": "^1.31.3",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
+        "uuid": "^3.3.3",
         "web3": "1.2.1",
         "web3-utils": "1.2.1",
         "webextension-polyfill": "^0.4.0",

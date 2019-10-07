@@ -25,11 +25,7 @@ async function createAccount() {
     await environment.metamask.sign();
 
     const authorizePage = await environment.getPage(target => target.url().match(/register\/domain/));
-
     await authorizePage.clickMain();
-    await environment.wait(200000);
-
-    await environment.clean();
 }
 
 module.exports = {
