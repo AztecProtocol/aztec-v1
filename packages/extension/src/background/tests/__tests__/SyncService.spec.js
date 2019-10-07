@@ -10,6 +10,9 @@ import JoinSplit from '../../../../build/contracts/JoinSplit';
 import Web3Service from '~background/services/Web3Service';
 import { fetchNotes } from '../../services/EventService/utils/note';
 import {
+    createBulkAssets,
+} from '../../services/EventService/utils/asset';
+import {
     AZTECAccountRegistryConfig,
     ACEConfig,
 } from '~background/config/contracts';
@@ -30,6 +33,7 @@ import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 
 
+jest.mock('~utils/storage');
 jest.setTimeout(500000000);
 
 const {
@@ -40,7 +44,7 @@ const {
 describe('ZkAsset', () => {
     const networkId = 0;
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 542;
+    const prepopulateNotesCount = 8427;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -145,7 +149,7 @@ describe('ZkAsset', () => {
             amount: depositAmount,
         });
 
-        const notesPerRequest = 8;
+        const notesPerRequest = 5;
         let createdNotes = eventsInGanache.length;
 
         await web3Service
@@ -221,64 +225,105 @@ describe('ZkAsset', () => {
 
     it(`check how does it take to fetch ${prepopulateNotesCount} events, filter by owner and store into faked db`, async () => {
         // given
+        const {
+            address: userAddress,
+            privateKey,
+        } = sender;
+
+        await EventService.addAccountToSync({
+            address: sender.address,
+            networkId,
+        });
+
+        const {
+            error,
+            account,
+        } = await EventService.fetchAztecAccount({
+            address: userAddress,
+            networkId,
+        });
+
+        const {
+            linkedPublicKey,
+            blockNumber: accountBlockNumber,
+            spendingPublicKey,
+        } = account;
+
+        await AuthService.registerAddress({
+            address: userAddress,
+            linkedPublicKey,
+            spendingPublicKey,
+            blockNumber: accountBlockNumber,
+        });
+
+        const {
+            error: assetError,
+            asset,
+        } = await EventService.fetchAsset({
+            address: zkAssetAddress,
+            networkId,
+        });
+        await createBulkAssets([asset], networkId);
+
+        if (error) {
+            errorLog('Error occured during fetchAsset', assetError);
+            return;
+        }
+
+        NoteService.initWithUser(
+            userAddress,
+            privateKey,
+            linkedPublicKey,
+        );
+
+        // Action
+
+        const tStart = performance.now();
+        let t0 = tStart;
+        let t1;
+        /**
+         * Syncing notes with syncNotes
+         */
         await new Promise((resolve, reject) => {
-            const {
+            const onCompleatePulling = (result) => {
+                resolve(result);
+            };
+
+            const onFailurePulling = (result) => {
+                reject(result.error);
+            };
+
+            EventService.syncNotes({
                 address: userAddress,
-                privateKey,
-                linkedPublicKey,
-            } = sender;
-    
-            EventService.addAccountToSync({
-                address: sender.address,
                 networkId,
+                fromAssets: [asset],
+                callbacks: {
+                    onCompleatePulling,
+                    onFailurePulling,
+                },
             });
-    
-            EventService.startAutoSync({
-                networkId,
-            });
-    
+        });
+        t1 = performance.now();
+        console.log(`Syncing notes with syncNotes took: ${((t1 - t0) / 1000)} seconds.`);
+
+        /**
+         * Sync account with syncAccount
+         */
+        t0 = performance.now();
+        await new Promise((resolve, reject) => {
+            const onCompleate = (result) => {
+                console.log(`Finished SyncService: ${result}`);
+                resolve();
+            };
+
             SyncService.syncAccount({
                 address: userAddress,
                 privateKey,
                 networkId,
+                onCompleate,
             });
-    
-            NoteService.initWithUser(
-                userAddress,
-                privateKey,
-                linkedPublicKey,
-            );
         });
-        
-
-        // const options = { fromBlock: 1, toBlock: 'latest', topics: [eventsTopics] };
-
-        // // action
-        // const tStart = performance.now();
-        // let t0 = tStart;
-        // let t1;
-        // const rawLogs = await getPastLogs(options);
-        // t1 = performance.now();
-        // console.log(`Load past logs ${rawLogs.length} took: ${((t1 - t0) / 1000)} seconds.`);
-
-        // t0 = performance.now();
-        // const decodedLogs = decodeNoteLogs(eventsTopics, rawLogs);
-        // t1 = performance.now();
-        // console.log(`Decode raw logs took: ${((t1 - t0) / 1000)} seconds.`);
-
-        // t0 = performance.now();
-        // const notes = associatedNotesWithOwner(decodedLogs, sender.address);
-        // t1 = performance.now();
-        // console.log(`Filtering logs took: ${((t1 - t0) / 1000)} seconds.`);
-
-        // t0 = performance.now();
-        // await saveNotes(notes);
-        // t1 = performance.now();
-        // console.log(`Saving logs into fake db took: ${((t1 - t0) / 1000)} seconds.`);
-
-        // const tEnd = performance.now();
-
-        // // result
-        // console.log(`Full amount of time: ${((tEnd - tStart) / 1000)} seconds.`);
+        t1 = performance.now();
+        console.log(`Syncing notes and decryption with sync service took: ${((t1 - t0) / 1000)} seconds.`);
     });
 });
