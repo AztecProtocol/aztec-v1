@@ -13,12 +13,22 @@ class CombinedViews extends PureComponent {
             initialStep,
             initialData,
             fetchInitialData,
+            onStep,
         } = props;
+
+        let data = initialData;
+        if (!fetchInitialData && onStep) {
+            const newData = onStep(initialStep, data);
+            data = {
+                ...data,
+                ...newData,
+            };
+        }
 
         this.state = {
             step: initialStep,
-            data: initialData,
-            history: [initialData],
+            data,
+            history: [data],
             loading: !!fetchInitialData,
         };
     }
@@ -59,7 +69,7 @@ class CombinedViews extends PureComponent {
                 ...childState,
                 ...modifiedData,
             },
-            history: history.slice(0, backToStep),
+            history: history.slice(0, backToStep + 1),
         });
     };
 
@@ -149,12 +159,15 @@ class CombinedViews extends PureComponent {
         } = this.props;
         if (!fetchInitialData) return;
 
-        const data = await fetchInitialData();
-        this.setState({
-            data: {
-                ...initialData,
-                ...data,
-            },
+        const newData = await fetchInitialData();
+        const data = {
+            ...initialData,
+            ...newData,
+        };
+        this.goToStep({
+            step: 0,
+            data,
+            history: [data],
             loading: false,
         });
     }
