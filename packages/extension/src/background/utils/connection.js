@@ -34,6 +34,10 @@ class Connection {
         this.UiActionSubject = new Subject();
         this.ui$ = this.UiActionSubject.asObservable();
 
+        this.UiResponseSubject = new Subject();
+        this.uiResponse$ = this.UiResponseSubject.asObservable();
+
+
         this.GraphSubject = new Subject();
         this.graph$ = this.GraphSubject.asObservable();
 
@@ -57,10 +61,10 @@ class Connection {
             map(addDomainData),
             map(this.withConnectionIds),
         );
-        // message the UI
-        this.message$.pipe(
-            filter(({ data }) => data.type === 'ACTION_RESPONSE'),
+        // respond to  the UI
+        this.uiResponse$.pipe(
             tap(({ uiClientId, ...rest }) => {
+                console.log(uiClientId, rest, this.connections);
                 this.connections[uiClientId].postMessage({
                     ...rest,
                 });
@@ -88,27 +92,17 @@ class Connection {
             filter(({ data }) => data.type === actionEvent),
             mergeMap(data => from(ClientActionService.triggerClientAction(data, this)())
                 .pipe(map(result => ({ ...result, responseId: data.data.responseId })))),
-            tap(({ uiClientId, ...rest }) => {
-                this.connections[uiClientId].postMessage({
-                    ...rest,
-                });
+            tap((data) => {
+                console.log(data);
+                this.UiResponseSubject.next(data);
             }),
         ).subscribe();
 
         this.message$.pipe(
             filter(({ data }) => data.type === sendTransactionEvent),
             mergeMap(data => from(TransactionSendingService.sendTransaction(data))),
-            tap(({
-                uiClientId, requestId, responseId, ...rest
-            }) => {
-                this.connections[uiClientId].postMessage({
-                    requestId,
-                    responseId,
-                    data: {
-                        type: 'ACTION_RESPONSE',
-                        ...rest,
-                    },
-                });
+            tap((data) => {
+                this.UiResponseSubject.next(data);
             }),
         ).subscribe();
 
