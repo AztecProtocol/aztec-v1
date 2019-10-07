@@ -6,7 +6,7 @@ const steps = require('./steps');
 const Metamask = require('./metamask');
 
 async function init(extensionPath, {
-    metamaskPath = path.resolve(__dirname + '/metamask/'),
+    metamaskPath = path.resolve(__dirname + '/metamask-extension/'),
     metamaskMnemonic = process.env.GANACHE_TESTING_ACCOUNT_0_MNEMONIC,
     extensionName = "AZTEC",
     network = 'Localhost',
@@ -20,22 +20,24 @@ async function init(extensionPath, {
         metamask: undefined,
         metamaskInit: Metamask,
         metadata: {},
-        openPages: [],
+        openPages: {},
         debug,
         screenshotPath,
         observeTime,
         ...steps,
         ...scenarios,
         clean: async function() {
-            return Promise.all(this.openPages.map(async page => page.close()))
+            return Promise.all(Object.values(this.openPages).map(async page => page.close()))
         },
     };
     environment.extensionName = extensionName;
+
     environment.browser = await puppeteer.launch({
         headless: false, // extension are allowed only in head-full mode
         args: [
             `--disable-extensions-except=${extensionPath},${metamaskPath}`,
-            `--load-extension=${extensionPath},${metamaskPath}`
+            `--load-extension=${extensionPath},${metamaskPath}`,
+            // '--disable-dev-shm-usage'
         ]
     });
 
