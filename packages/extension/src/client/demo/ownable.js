@@ -17,57 +17,6 @@ export default async function demoOwnable({
     initialERC20Balance = 200,
     scalingFactor = 1,
 } = {}) {
-    // const { aztec } = window;
-    // await aztec.enable();
-
-    // const {
-    //     address: userAddress,
-    // } = Web3Service.account;
-
-    // // let zkAssetAddress = '0x2baEFf6946CD6904Da9387FcF56169058fFE5Bf6'; // ADD EXISTING ASSET ADDRESS HERE
-    // // if (!zkAssetAddress) {
-    // //     log('Creating new asset...');
-    // //     const {
-    // //         erc20Address,
-    // //         zkAssetAddress: newZkAssetAddress,
-    // //     } = await createNewAsset({
-    // //         zkAssetType: 'ZkAssetOwnable',
-    // //         scalingFactor,
-    // //     });
-
-    // //     await depositToERC20({
-    // //         userAddress,
-    // //         amount: initialERC20Balance,
-    // //         erc20Address,
-    // //     });
-
-    // //     zkAssetAddress = newZkAssetAddress;
-    // //     log(
-    // //         'New zk asset created!',
-    // //         'Asset balance = 0',
-    // //         `Linked ERC20 account balance = ${initialERC20Balance}.`,
-    // //     );
-
-    // //     warnLog(
-    // //         'Add this address to demo file to prevent creating new asset:',
-    // //         zkAssetAddress,
-    // //     );
-    // // }
-
-    // const asset = await aztec.asset(zkAssetAddress);
-
-    // log(asset);
-    // if (!asset.isValid()) {
-    //     log('Asset is not valid.');
-    //     return;
-    // }
-
-    // const logBalance = async () => {
-    //     await sleep(1000);
-    //     log(`Asset balance = ${await asset.balance()}`);
-    // };
-
-    // await logBalance();
 
     // const depositAmount = randomInt(1, 50);
 
