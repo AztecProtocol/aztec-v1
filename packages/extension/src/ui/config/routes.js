@@ -24,7 +24,12 @@ import WithdrawTransaction from '~ui/views/WithdrawTransaction';
 import Send from '~ui/views/pages/Send';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
-import MintTransaction from '~ui/views/MintTransaction';
+// import Send from '~ui/views/pages/Send';
+// import SendConfirm from '~ui/views/SendConfirm';
+// import SendTransaction from '~ui/views/SendTransaction';
+// import MintTransaction from '~ui/views/MintTransaction';
+import MintTransaction from '../pages/Prove';
+
 import BurnTransaction from '~ui/views/BurnTransaction';
 import Icons from '~ui/views/playground/Icons';
 

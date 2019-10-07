@@ -30,6 +30,11 @@ const backgroundResolvers = {
         utilityNote: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncUtilityNoteInfo(args, ctx),
         })),
+        utilityNotes: {
+            asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ id: asset })) || asset,
+            viewingKey: async ({ metadata }) => getViewingKeyFromMetadata(metadata),
+            decryptedViewingKey: async ({ metadata }) => getDecryptedViewingKeyFromMetadata(metadata),
+        },
         grantNoteAccessPermission: ensureDomainPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),
         })),
