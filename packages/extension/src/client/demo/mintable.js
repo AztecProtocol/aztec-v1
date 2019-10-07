@@ -6,6 +6,7 @@ import {
     randomInt,
 } from '~utils/random';
 import createNewAsset from './helpers/createNewAsset';
+import Web3Service from '../services/Web3Service';
 import sleep from './utils/sleep';
 import withdraw from './tasks/withdraw';
 
@@ -19,7 +20,7 @@ export default async function demoMintable({
         address: userAddress,
     } = Web3Service.account;
 
-    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = '0xCfb33FF2E975fdd9f9DCc3D00952491ae5368EC7'; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         ({
@@ -60,9 +61,11 @@ export default async function demoMintable({
     const mintAmount = randomInt(1, 50);
 
     log('Generating mint proof...');
-    const mintProof = await asset.mint({
+    const mintProof = await asset.mint([{
         amount: mintAmount,
         to: userAddress,
+    }], {
+        sender: userAddress,
     });
 
     log('Mint proof generated!', mintProof.export());
