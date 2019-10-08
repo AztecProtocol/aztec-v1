@@ -13,6 +13,7 @@ import Route from '~uiModules/components/Route';
 import ConnectionService from '~ui/services/ConnectionService';
 import Web3Service from '~ui/services/Web3Service';
 import ActionService from '~uiModules/services/ActionService';
+import apis from '~uiModules/apis';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
 import getPathsFromRouteConfig from '~ui/utils/getPathsFromRouteConfig';
@@ -26,7 +27,7 @@ import './styles/guacamole.css';
 import './styles/_reset.scss';
 
 const initWeb3 = async () => {
-    Web3Service.init({
+    await Web3Service.init({
         provider: 'http://localhost:8545',
     });
     Web3Service.registerContract(AZTECAccountRegistry);
@@ -48,6 +49,7 @@ class App extends PureComponent {
 
         this.state = {
             loading: true,
+            currentAccount: null,
             action: null,
             nextRoute: '',
         };
@@ -111,27 +113,52 @@ class App extends PureComponent {
                     type,
                     requestId,
                 } = action;
+                ConnectionService.setDefaultClientRequestId(requestId);
 
                 ({
                     route,
                 } = actions[type] || {});
-
-                ConnectionService.setDefaultClientRequestId(requestId);
             }
         }
-        if (!route) {
+
+        const {
+            address,
+        } = Web3Service.account;
+        const currentAccount = {
+            address,
+        };
+
+        const {
+            mock,
+        } = this.props;
+        if (mock) {
+            this.setState({
+                nextRoute: '/',
+                loading: false,
+                action,
+                currentAccount,
+            });
+            return;
+        }
+
+        if (!route
+            || route === 'register'
+        ) {
             const {
-                mock,
-            } = this.props;
-            if (mock) {
-                this.setState({
-                    nextRoute: '/',
-                    loading: false,
-                });
-                return;
+                linkedPublicKey,
+            } = await apis.account.getExtensionAccount(address) || {};
+            currentAccount.linkedPublicKey = linkedPublicKey;
+
+            if (route) {
+                if (linkedPublicKey) {
+                    route = 'account.restore';
+                }
+            } else {
+                const loggedIn = await isLoggedIn();
+                route = loggedIn
+                    ? 'account'
+                    : (linkedPublicKey && 'account.restore') || 'welcome';
             }
-            const loggedIn = await isLoggedIn();
-            route = loggedIn ? 'account' : 'welcome';
         }
 
         if (!this.isCurrentPage(route)) {
@@ -139,6 +166,7 @@ class App extends PureComponent {
                 {
                     nextRoute: route,
                     action,
+                    currentAccount,
                 },
                 () => this.goToPage(route),
             );
@@ -148,6 +176,7 @@ class App extends PureComponent {
         this.setState({
             loading: false,
             action,
+            currentAccount,
         });
     }
 
@@ -155,6 +184,7 @@ class App extends PureComponent {
         const routeNodes = [];
         let defaultRoute;
         const {
+            currentAccount,
             action,
         } = this.state;
         const {
@@ -192,6 +222,7 @@ class App extends PureComponent {
                         key={path}
                         name={name}
                         path={path}
+                        currentAccount={currentAccount}
                         action={action}
                         goToPage={this.goToPage}
                         Component={mock

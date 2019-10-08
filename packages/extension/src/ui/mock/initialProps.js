@@ -1,6 +1,7 @@
 import {
     randomInt,
 } from '~utils/random';
+import i18n from '~ui/helpers/i18n';
 import {
     seedPhrase,
     addresses,
@@ -10,6 +11,8 @@ import {
     pastTransactions,
     depositTransactions,
     sendTransactions,
+    generate,
+    randomAddress,
 } from './data';
 
 const dummyFunc = () => {};
@@ -31,12 +34,15 @@ export default {
     },
     'register.password': {
         prev: 'register.confirm',
-        next: 'register.address',
+        next: 'register.account',
     },
     'register.account': {
-        seedPhrase,
-        password: 'password01',
-        address: addresses[0],
+        initialStep: 4,
+        initialData: {
+            seedPhrase,
+            password: 'password01',
+        },
+        prev: 'register.password',
         goNext: dummyFunc,
     },
     'register.address': {
@@ -51,6 +57,17 @@ export default {
     'account.restore': {
         goNext: dummyFunc,
     },
+    'account.restore.failed': {
+        seedPhrase,
+        isLinked: true,
+        goNext: dummyFunc,
+    },
+    'account.restore.password': () => ({
+        address: addresses[0],
+        description: i18n.t('account.restore.password.description'),
+        submitButtonText: i18n.t('account.restore.confirm'),
+        goNext: dummyFunc,
+    }),
     'account.login': {
         goNext: dummyFunc,
     },
@@ -64,6 +81,10 @@ export default {
         pastTransactions: pastTransactions
             .filter(({ asset }) => asset.code === assets[0].code)
             .slice(0, 2),
+    },
+    'account.duplicated': {
+        address: addresses[0],
+        goNext: dummyFunc,
     },
     noteAccess: {
         note: notes[0],
@@ -148,5 +169,11 @@ export default {
         },
         amount: randomInt(1, 1000),
         goNext: dummyFunc,
+    },
+    'playground.icons': {
+        addresses: [
+            ...addresses,
+            ...generate(20 - addresses.length, randomAddress),
+        ],
     },
 };

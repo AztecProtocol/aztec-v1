@@ -10,7 +10,9 @@ import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
 import Account from '~ui/views/pages/Account';
 import Assets from '~ui/views/Assets';
 import Asset from '~ui/views/Asset';
-import Restore from '~ui/views/Restore';
+import Restore from '~ui/views/pages/Restore';
+import RestoreFailed from '~ui/views/RestoreFailed';
+import DuplicatedAccount from '~ui/views/DuplicatedAccount';
 import Login from '~ui/views/Login';
 import RegisterAddress from '~ui/views/RegisterAddress';
 import NoteAccess from '~ui/views/pages/NoteAccess';
@@ -24,10 +26,6 @@ import WithdrawTransaction from '~ui/views/WithdrawTransaction';
 import Send from '~ui/views/pages/Send';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
-// import Send from '~ui/views/pages/Send';
-// import SendConfirm from '~ui/views/SendConfirm';
-// import SendTransaction from '~ui/views/SendTransaction';
-// import MintTransaction from '~ui/views/MintTransaction';
 import MintTransaction from '../pages/Prove';
 
 import BurnTransaction from '~ui/views/BurnTransaction';
@@ -67,7 +65,7 @@ export default {
             },
             account: {
                 path: 'account',
-                View: RegisterAddress,
+                View: Register,
             },
             address: {
                 path: 'address',
@@ -87,6 +85,20 @@ export default {
             restore: {
                 path: 'restore',
                 Component: Restore,
+                routes: {
+                    password: {
+                        path: 'set-new-password',
+                        View: CreatePassword,
+                    },
+                    failed: {
+                        path: 'error',
+                        View: RestoreFailed,
+                    },
+                },
+            },
+            duplicated: {
+                path: 'duplicated',
+                View: DuplicatedAccount,
             },
             login: {
                 path: 'login',

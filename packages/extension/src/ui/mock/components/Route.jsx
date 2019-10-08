@@ -11,11 +11,13 @@ class MockRoute extends PureComponent {
     renderComponent = () => {
         const {
             name,
+            currentAccount,
             action,
             Component,
             goToPage,
         } = this.props;
         const {
+            id: actionId,
             data,
         } = action || {};
         let childProps = initialProps[name];
@@ -37,6 +39,8 @@ class MockRoute extends PureComponent {
         return (
             <Component
                 clientRequestId="client-request-id"
+                actionId={actionId}
+                currentAccount={currentAccount}
                 goBack={handleGoBack}
                 goNext={handleGoNext}
                 goToPage={goToPage}
@@ -63,8 +67,12 @@ class MockRoute extends PureComponent {
 MockRoute.propTypes = {
     path: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
+    currentAccount: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+        linkedPublicKey: PropTypes.string,
+    }).isRequired,
     action: PropTypes.shape({
-        key: PropTypes.string.isRequired,
+        id: PropTypes.string.isRequired,
         data: PropTypes.object,
     }),
     Component: PropTypes.func.isRequired,

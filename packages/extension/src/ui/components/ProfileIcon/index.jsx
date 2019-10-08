@@ -40,6 +40,10 @@ export const typeIconMapping = {
     user: {
         name: 'person',
     },
+    aztec: {
+        name: 'crop_square',
+        rotate: 45,
+    },
 };
 
 export const inlineIconMapping = {
