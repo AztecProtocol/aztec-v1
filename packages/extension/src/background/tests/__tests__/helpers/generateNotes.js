@@ -8,9 +8,9 @@ export default async function generateNotes(values, owner) {
     // "Connection refused or URL couldn't be resolved: http://localhost:8545"
     // if create notes ascyncronously and then call .send or .call on contracts
     const {
-        publicKey,
+        spendingPublicKey,
         address,
         linkedPublicKey,
     } = owner;
-    return createNotes(values, publicKey, address, linkedPublicKey);
+    return createNotes(values, spendingPublicKey, address, linkedPublicKey);
 }

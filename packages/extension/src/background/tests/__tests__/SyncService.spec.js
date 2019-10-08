@@ -27,10 +27,14 @@ import {
     log,
 } from '~utils/log';
 import clearDB from '~background/database/utils/clearDB';
-import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
+import KeystoreData from './helpers/keystore';
+import decodeKeyStore from '~background/utils/decodeKeyStore';
+import decodePrivateKey from '~background/utils/decodePrivateKey';
+import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
+import decodeSpendingPublicKey from '~background/utils/decodeSpendingPublicKey';
 
 
 jest.mock('~utils/storage');
@@ -41,10 +45,11 @@ const {
     ProofUtils,
 } = aztec;
 
+
 describe('ZkAsset', () => {
     const networkId = 0;
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 10000;
+    const prepopulateNotesCount = 1000;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -80,9 +85,7 @@ describe('ZkAsset', () => {
     beforeAll(async () => {
         const {
             address: userAddress,
-            privateKey,
         } = sender;
-        log(`Sender address: ${userAddress} private key: ${privateKey}`);
 
         configureWeb3Service();
         web3Service = Web3Service(networkId, sender);
@@ -102,7 +105,25 @@ describe('ZkAsset', () => {
             errorLog('Firstly create account', aztecAccountError);
             return;
         }
-        senderAccount = account;
+
+        const {
+            keyStore,
+            session: {
+                pwDerivedKey,
+            },
+        } = await KeystoreData(account);
+
+        const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
+        const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
+        const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
+        const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
+
+        senderAccount = {
+            address: userAddress,
+            privateKey,
+            linkedPublicKey,
+            spendingPublicKey,
+        };
 
         const {
             error,
@@ -191,7 +212,7 @@ describe('ZkAsset', () => {
             noteValues.fill(1);
 
             // eslint-disable-next-line no-await-in-loop
-            outputNotes = await generateNotes(noteValues, sender);
+            outputNotes = await generateNotes(noteValues, senderAccount);
             const publicValue = ProofUtils.getPublicValue(
                 [],
                 noteValues,
@@ -246,26 +267,12 @@ describe('ZkAsset', () => {
         const {
             address: userAddress,
             privateKey,
-        } = sender;
-
-        log(`Sender address: ${userAddress} private key: ${privateKey}`);
+            linkedPublicKey,
+        } = senderAccount;
 
         await EventService.addAccountToSync({
             address: sender.address,
             networkId,
-        });
-
-        const {
-            linkedPublicKey,
-            blockNumber: accountBlockNumber,
-            spendingPublicKey,
-        } = senderAccount;
-
-        await AuthService.registerAddress({
-            address: userAddress,
-            linkedPublicKey,
-            spendingPublicKey,
-            blockNumber: accountBlockNumber,
         });
 
         const {
@@ -318,6 +325,9 @@ describe('ZkAsset', () => {
         });
         t1 = performance.now();
         log(`Syncing notes with syncNotes took: ${((t1 - t0) / 1000)} seconds.`);
+
+        // const notes = await NoteModel.query({ networkId }).toArray();
+        // log(`EVENTS: ${JSON.stringify(notes)}`);
 
         /**
          * Sync account with syncAccount

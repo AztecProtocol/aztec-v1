@@ -313,7 +313,6 @@ class SyncManager {
         if (!nonExistingAssets.length) {
             return null;
         }
-        log(`Sync notes was started for assets: ${JSON.stringify(nonExistingAssets)} and address: ${address}`);
 
         const syncDetails = {
             ...prevSyncDetails,
