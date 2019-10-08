@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { KeyStore } from '~utils/keyvault';
+import i18n from '~ui/helpers/i18n';
+import returnAndClose from '~ui/helpers/returnAndClose';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 import Intro from '~ui/views/RegisterIntro';
 import BackupKeys from '~ui/views/BackupKeys';
@@ -41,22 +43,57 @@ const handleGoNext = (step) => {
     return newProps;
 };
 
+const handleOnStep = (step) => {
+    let newProps = {};
+    switch (step) {
+        case 4:
+            newProps = {
+                description: i18n.t('register.extension.description'),
+                submitButtonText: i18n.t('register.create.account'),
+                successMessage: i18n.t('register.extension.step.completed'),
+            };
+            break;
+        default:
+    }
+
+    return newProps;
+};
+
 const Register = ({
-    address,
+    actionId,
+    currentAccount,
+    initialStep,
+    initialData,
+    goToPage,
 }) => (
     <CombinedViews
         Steps={Steps}
+        initialStep={initialStep}
         initialData={{
-            address,
+            ...initialData,
+            address: currentAccount.address,
         }}
         onGoBack={handleGoBack}
         onGoNext={handleGoNext}
-        autoClose
+        onStep={handleOnStep}
+        onExit={actionId ? returnAndClose : () => goToPage('account')}
     />
 );
 
 Register.propTypes = {
-    address: PropTypes.string.isRequired,
+    actionId: PropTypes.string,
+    currentAccount: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    }).isRequired,
+    initialStep: PropTypes.number,
+    initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+    goToPage: PropTypes.func.isRequired,
+};
+
+Register.defaultProps = {
+    actionId: '',
+    initialStep: 0,
+    initialData: {},
 };
 
 export default Register;

@@ -11,26 +11,40 @@ import Transaction from './handlers/Transaction';
 
 const registerAddressSteps = [
     {
+        titleKey: 'register.address.step.link',
+        tasks: [
+            {
+                name: 'link',
+                type: 'sign',
+                run: apis.auth.linkAccountToMetaMask,
+            },
+        ],
+    },
+    {
         titleKey: 'register.address.step.authorise',
         tasks: [
             {
                 name: 'authorise',
                 run: apis.auth.sendRegisterAddress,
             },
-        ],
-    },
-    {
-        titleKey: 'transaction.step.send',
-        tasks: [
             {
-                name: 'send',
-                run: apis.auth.registerAccount,
+                name: 'register_address',
+                run: apis.auth.registerAddress,
             },
         ],
     },
 ];
 
 const stepsForExistingAccount = [
+    {
+        titleKey: 'register.address.step.validate',
+        tasks: [
+            {
+                name: 'get',
+                run: apis.auth.getAccountKeys,
+            },
+        ],
+    },
     ...registerAddressSteps,
     {
         titleKey: 'transaction.step.confirmed',
@@ -42,12 +56,16 @@ const stepsForNewAccount = [
         titleKey: 'register.extension.step.create',
         tasks: [
             {
-                name: 'create',
+                name: 'pwDerivedKey',
+                run: apis.auth.createPwDerivedKey,
+            },
+            {
+                name: 'keyvault',
                 run: apis.auth.createKeyVault,
             },
             {
-                name: 'link',
-                run: apis.auth.linkAccountToMetaMask,
+                name: 'register_extension',
+                run: apis.auth.registerExtension,
             },
         ],
     },
@@ -58,6 +76,10 @@ const stepsForNewAccount = [
 ];
 
 const RegisterAddress = ({
+    title,
+    description,
+    submitButtonText,
+    successMessage,
     seedPhrase,
     password,
     address,
@@ -100,21 +122,15 @@ const RegisterAddress = ({
 
     return (
         <Transaction
-            title={i18n.t('register.address.title')}
-            description={i18n.t(isNewExtensionAccount
-                ? 'register.extension.description'
-                : 'register.address.description')}
+            title={title || i18n.t('register.address.title')}
+            description={description || i18n.t('register.address.description')}
             ticketHeader={ticketHeader}
             steps={steps}
             initialStep={initialStep}
             initialTask={initialTask}
             initialData={initialData}
-            submitButtonText={i18n.t(isNewExtensionAccount
-                ? 'register.create.account'
-                : 'proof.create')}
-            successMessage={i18n.t(isNewExtensionAccount
-                ? 'register.extension.step.completed'
-                : 'transaction.success')}
+            submitButtonText={submitButtonText || i18n.t('register.address')}
+            successMessage={successMessage || i18n.t('register.address.complete')}
             goNext={goNext}
             goBack={goBack}
             onClose={onClose}
@@ -124,6 +140,10 @@ const RegisterAddress = ({
 };
 
 RegisterAddress.propTypes = {
+    title: PropTypes.string,
+    description: PropTypes.string,
+    submitButtonText: PropTypes.string,
+    successMessage: PropTypes.string,
     seedPhrase: PropTypes.string,
     password: PropTypes.string,
     address: PropTypes.string.isRequired,
@@ -136,6 +156,10 @@ RegisterAddress.propTypes = {
 };
 
 RegisterAddress.defaultProps = {
+    title: '',
+    description: '',
+    submitButtonText: '',
+    successMessage: '',
     seedPhrase: '',
     password: '',
     initialStep: -1,
