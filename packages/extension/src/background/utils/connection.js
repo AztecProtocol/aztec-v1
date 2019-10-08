@@ -64,7 +64,6 @@ class Connection {
         // respond to  the UI
         this.uiResponse$.pipe(
             tap(({ uiClientId, ...rest }) => {
-                console.log(uiClientId, rest, this.connections);
                 this.connections[uiClientId].postMessage({
                     ...rest,
                 });
@@ -93,7 +92,6 @@ class Connection {
             mergeMap(data => from(ClientActionService.triggerClientAction(data, this)())
                 .pipe(map(result => ({ ...result, responseId: data.data.responseId })))),
             tap((data) => {
-                console.log(data);
                 this.UiResponseSubject.next(data);
             }),
         ).subscribe();
@@ -205,6 +203,21 @@ class Connection {
                 requestId,
                 sender: sender.sender,
             });
+        });
+    }
+
+    removeClient = (client) => {
+        delete this.connections[client.name];
+        Object.keys(this.requests).forEach((reqId) => {
+            const {
+                [reqId]: {
+                    uiClientId,
+                    webClientId,
+                } = {},
+            } = this.requests;
+            if (uiClientId === client.name || webClientId === client.name) {
+                delete this.requests[reqId];
+            }
         });
     }
 }

@@ -31,5 +31,6 @@ export default function acceptConnection() {
     browser.runtime.onConnect.addListener((port) => {
         connection.registerClient(port);
         port.onMessage.addListener(handleContentScriptSubscription);
+        port.onDisconnect.addListener(connection.removeClient);
     });
 }
