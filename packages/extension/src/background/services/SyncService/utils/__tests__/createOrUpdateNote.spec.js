@@ -7,7 +7,7 @@ import createOrUpdateNote from '../addNote/createOrUpdateNote';
 
 jest.mock('~utils/storage');
 jest.mock('~utils/note', () => ({
-    fromViewingKey: jest.fn(),
+    valueFromViewingKey: jest.fn(),
     valueOf: jest.fn(() => 100),
 }));
 jest.mock('~utils/encryptedViewingKey', () => ({

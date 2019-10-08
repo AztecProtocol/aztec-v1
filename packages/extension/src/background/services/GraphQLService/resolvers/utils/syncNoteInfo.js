@@ -11,7 +11,7 @@ import {
     fromHexString,
 } from '~utils/encryptedViewingKey';
 import {
-    fromViewingKey,
+    valueFromViewingKey,
     valueOf,
 } from '~utils/note';
 
@@ -69,7 +69,7 @@ export default async function syncNoteInfo(args, ctx) {
     } = note;
     const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
     const realViewingKey = fromHexString(viewingKey).decrypt(privateKey);
-    const aztecNote = await fromViewingKey(realViewingKey);
+    const aztecNote = valueFromViewingKey(realViewingKey);
     const value = valueOf(aztecNote);
 
     return {
