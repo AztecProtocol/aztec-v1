@@ -334,4 +334,12 @@ KeyStore.deserialize = (jsonKs, pwDerivedKey) => {
     return keystoreX;
 };
 
+export const validateMnemonic = (mnemonic) => {
+    const phrases = mnemonic
+        .split(' ')
+        .filter(p => p);
+    return phrases.length === 12
+        && Mnemonic.isValid(mnemonic, Mnemonic.Words.ENGLISH);
+};
+
 export default KeyStore;
