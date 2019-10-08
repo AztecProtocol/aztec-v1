@@ -26,7 +26,7 @@ import {
     warnLog,
     log,
 } from '~utils/log';
-
+import clearDB from '~background/database/utils/clearDB';
 import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
@@ -44,16 +44,17 @@ const {
 describe('ZkAsset', () => {
     const networkId = 0;
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 8427;
+    const prepopulateNotesCount = 10000;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
     const scalingFactor = 1;
     const depositAmount = prepopulateNotesCount * eachNoteBalance;
     const sender = TestAuthService.getAccount();
+    let senderAccount;
 
     let erc20Address;
-    let zkAssetAddress = '0xE4edF908D85B0Dd7954ac7fc4aC5FCe42F8cBcd8';
+    let zkAssetAddress = '0xF10b155f8Efc3422458652D6A041E5b8E982859D';
     let outputNotes;
     let depositProof;
     let web3Service;
@@ -77,11 +78,31 @@ describe('ZkAsset', () => {
     };
 
     beforeAll(async () => {
+        const {
+            address: userAddress,
+            privateKey,
+        } = sender;
+        log(`Sender address: ${userAddress} private key: ${privateKey}`);
+
         configureWeb3Service();
         web3Service = Web3Service(networkId, sender);
         const aceAddress = web3Service.contract('ACE').address;
 
         log(`aceAddress: ${aceAddress}`);
+
+        const {
+            error: aztecAccountError,
+            account,
+        } = await EventService.fetchAztecAccount({
+            address: userAddress,
+            networkId,
+        });
+
+        if (!account) {
+            errorLog('Firstly create account', aztecAccountError);
+            return;
+        }
+        senderAccount = account;
 
         const {
             error,
@@ -138,7 +159,7 @@ describe('ZkAsset', () => {
         mint({
             web3Service,
             erc20Address,
-            owner: sender.address,
+            owner: userAddress,
             amount: depositAmount,
         });
 
@@ -179,9 +200,9 @@ describe('ZkAsset', () => {
             depositProof = new JoinSplitProof(
                 inputNotes,
                 outputNotes,
-                sender.address,
+                userAddress,
                 publicValue,
-                sender.address,
+                userAddress,
             );
 
             // eslint-disable-next-line no-await-in-loop
@@ -217,10 +238,7 @@ describe('ZkAsset', () => {
     });
 
     beforeEach(async () => {
-        // syncManager = new SyncManager();
-        // syncManager.setConfig({
-        //     blocksPerRequest: 99999999999,
-        // });
+        clearDB();
     });
 
     it(`check how does it take to fetch ${prepopulateNotesCount} events, filter by owner and store into faked db`, async () => {
@@ -230,16 +248,10 @@ describe('ZkAsset', () => {
             privateKey,
         } = sender;
 
+        log(`Sender address: ${userAddress} private key: ${privateKey}`);
+
         await EventService.addAccountToSync({
             address: sender.address,
-            networkId,
-        });
-
-        const {
-            error,
-            account,
-        } = await EventService.fetchAztecAccount({
-            address: userAddress,
             networkId,
         });
 
@@ -247,7 +259,7 @@ describe('ZkAsset', () => {
             linkedPublicKey,
             blockNumber: accountBlockNumber,
             spendingPublicKey,
-        } = account;
+        } = senderAccount;
 
         await AuthService.registerAddress({
             address: userAddress,
@@ -263,12 +275,13 @@ describe('ZkAsset', () => {
             address: zkAssetAddress,
             networkId,
         });
-        await createBulkAssets([asset], networkId);
 
-        if (error) {
+        if (assetError) {
             errorLog('Error occured during fetchAsset', assetError);
             return;
         }
+
+        await createBulkAssets([asset], networkId);
 
         NoteService.initWithUser(
             userAddress,
@@ -277,7 +290,6 @@ describe('ZkAsset', () => {
         );
 
         // Action
-
         const tStart = performance.now();
         let t0 = tStart;
         let t1;
@@ -297,6 +309,7 @@ describe('ZkAsset', () => {
                 address: userAddress,
                 networkId,
                 fromAssets: [asset],
+                continueWatching: false,
                 callbacks: {
                     onCompleatePulling,
                     onFailurePulling,
@@ -304,7 +317,7 @@ describe('ZkAsset', () => {
             });
         });
         t1 = performance.now();
-        console.log(`Syncing notes with syncNotes took: ${((t1 - t0) / 1000)} seconds.`);
+        log(`Syncing notes with syncNotes took: ${((t1 - t0) / 1000)} seconds.`);
 
         /**
          * Sync account with syncAccount
@@ -312,7 +325,7 @@ describe('ZkAsset', () => {
         t0 = performance.now();
         await new Promise((resolve, reject) => {
             const onCompleate = (result) => {
-                console.log(`Finished SyncService: ${result}`);
+                log(`Finished SyncService: ${JSON.stringify(result)}`);
                 resolve();
             };
 
@@ -324,6 +337,6 @@ describe('ZkAsset', () => {
             });
         });
         t1 = performance.now();
-        console.log(`Syncing notes and decryption with sync service took: ${((t1 - t0) / 1000)} seconds.`);
+        log(`Syncing notes and decryption with sync service took: ${((t1 - t0) / 1000)} seconds.`);
     });
 });
