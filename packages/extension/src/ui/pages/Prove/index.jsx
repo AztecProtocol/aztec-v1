@@ -276,6 +276,29 @@ class Prove extends Component {
         });
     }
 
+    burn = async () => {
+        const {
+            assetAddress,
+            transactions,
+            sender,
+            currentAddress,
+        } = this.props;
+
+        const { proof } = await ExtensionApi.prove.burn({
+            assetAddress,
+            sender,
+            transactions,
+            currentAddress,
+            domain: window.location.origin,
+        });
+        const encoded = proof.encodeABI(assetAddress);
+        this.setState({
+            burnProof: encoded,
+            proofHash: proof.hash,
+            noteHashes: proof.notes.map(({ noteHash }) => noteHash),
+        });
+    }
+
     render() {
         if (!this.props.requestId) {
             return (
@@ -327,6 +350,47 @@ class Prove extends Component {
                         </Block>
                     )}
                 />
+<<<<<<< Updated upstream
+=======
+                <Accordion
+                    defaultIsOpen={false}
+                    title={(
+                        <Text
+                            size="m"
+                            text="Burn"
+                            weight="bold"
+                        />
+                    )}
+                    content={(
+                        <Block>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Generate Proof"
+                                    onClick={() => this.burn()}
+                                />
+                            </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Sign Notes"
+                                    onClick={() => this.signNotes()}
+                                />
+                            </div>
+                            <div>
+                                <br />
+                                <br />
+                                <Button
+                                    text="Send Mint Proof"
+                                    onClick={() => this.sendBurnProof()}
+                                />
+                            </div>
+                        </Block>
+                    )}
+                />
+>>>>>>> Stashed changes
             </Block>
         );
     }
