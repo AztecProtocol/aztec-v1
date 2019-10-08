@@ -350,8 +350,6 @@ class Prove extends Component {
                         </Block>
                     )}
                 />
-<<<<<<< Updated upstream
-=======
                 <Accordion
                     defaultIsOpen={false}
                     title={(
@@ -390,7 +388,6 @@ class Prove extends Component {
                         </Block>
                     )}
                 />
->>>>>>> Stashed changes
             </Block>
         );
     }
