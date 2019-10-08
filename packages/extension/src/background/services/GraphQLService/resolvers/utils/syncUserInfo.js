@@ -51,7 +51,7 @@ export default async function syncUserInfo(args, ctx) {
 
     await AuthService.registerAddress(account);
 
-    const user = AuthService.getRegisteredUser(userAddress);
+    const user = await AuthService.getRegisteredUser(userAddress);
     if (user) {
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
 
