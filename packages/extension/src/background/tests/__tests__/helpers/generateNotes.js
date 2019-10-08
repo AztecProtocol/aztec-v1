@@ -13,5 +13,6 @@ export default async function generateNotes(values, owner) {
         address,
         linkedPublicKey,
     } = owner;
+    
     return createNotes(values, spendingPublicKey, address, linkedPublicKey);
 }

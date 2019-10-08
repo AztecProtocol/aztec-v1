@@ -233,7 +233,7 @@ class EventService {
             };
             const note = await Note.latest({ networkId }, options);
             return {
-                lastSyncedBlock: note ? note.blockNumber : account.blockNumber,
+                lastSyncedBlock: note ? note.blockNumber : 0, // TODO: replace 0 to => account.blockNumber
                 assetAddress,
             };
         };

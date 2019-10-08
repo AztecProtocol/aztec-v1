@@ -27,6 +27,7 @@ import {
     log,
 } from '~utils/log';
 import clearDB from '~background/database/utils/clearDB';
+import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
@@ -50,7 +51,7 @@ const {
 describe('ZkAsset', () => {
     const networkId = 0;
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 1000;
+    const prepopulateNotesCount = 10000;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -268,6 +269,8 @@ describe('ZkAsset', () => {
             linkedPublicKey,
         } = senderAccount;
 
+        log(`Sender address: ${userAddress} private key: ${privateKey}`);
+
         await EventService.addAccountToSync({
             address: sender.address,
             networkId,
@@ -324,8 +327,6 @@ describe('ZkAsset', () => {
         t1 = performance.now();
         log(`Syncing notes with syncNotes took: ${((t1 - t0) / 1000)} seconds.`);
 
-        // const notes = await NoteModel.query({ networkId }).toArray();
-        // log(`EVENTS: ${JSON.stringify(notes)}`);
 
         /**
          * Sync account with syncAccount
