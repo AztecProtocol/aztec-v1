@@ -1,21 +1,17 @@
-import ApproveDomain from '~ui/mutations/ApproveDomain';
-import apollo from '~ui/apis/helpers/apollo';
+import AuthService from '~background/services/AuthService';
 
 export default async function approveDomain({
-    address,
     domain,
 }) {
-    const {
-        registerDomain: {
-            success,
-        },
-    } = await apollo.mutate({
-        mutation: ApproveDomain,
-        variables: {
-            address,
-            domain,
-        },
-    });
+    let success;
+    try {
+        const response = await AuthService.registerDomain(domain);
+        success = !!response && !response.error;
+    } catch (e) {
+        success = false;
+    }
 
-    return { success };
+    return {
+        success,
+    };
 }

@@ -127,6 +127,7 @@ describe('validateSession', () => {
         expect(responseInDay21).toEqual({
             session: {
                 ...session,
+                address: userAccount.address,
                 lastActive: session.lastActive + (21 * 86400000),
             },
         });
@@ -136,6 +137,7 @@ describe('validateSession', () => {
         const sessionAfterDay21 = await AuthService.getSession();
         expect(sessionAfterDay21).toEqual({
             ...session,
+            address: userAccount.address,
             lastActive: session.lastActive + (21 * 86400000),
         });
 

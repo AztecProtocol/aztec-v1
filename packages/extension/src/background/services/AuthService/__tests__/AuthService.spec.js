@@ -9,6 +9,7 @@ import {
     userAccount,
     userAccount2,
     registrationData,
+    password,
 } from '~helpers/testUsers';
 import AuthService from '..';
 
@@ -162,13 +163,6 @@ describe('AuthService setters', () => {
         await AuthService.registerExtension(registrationData);
 
         const keyStore = await AuthService.getKeyStore();
-        const {
-            address,
-        } = userAccount;
-        const user = userModel.toStorageData({
-            address,
-            linkedPublicKey: keyStore.privacyKeys.publicKey,
-        });
 
         const {
             pwDerivedKey,
@@ -178,13 +172,9 @@ describe('AuthService setters', () => {
         expect(db).toEqual({
             keyStore,
             session: {
-                address,
                 pwDerivedKey: JSON.stringify(pwDerivedKey),
                 lastActive: constantDate.getTime(),
                 createdAt: constantDate.getTime(),
-            },
-            user: {
-                [address]: user,
             },
         });
     });
@@ -226,9 +216,6 @@ describe('AuthService setters', () => {
         const {
             address,
         } = userAccount;
-        const {
-            password,
-        } = registrationData;
 
         await AuthService.login({
             address,
@@ -251,9 +238,6 @@ describe('AuthService setters', () => {
 
         await AuthService.logout();
 
-        const {
-            password,
-        } = registrationData;
         const {
             address,
         } = userAccount2;
@@ -280,9 +264,6 @@ describe('AuthService setters', () => {
         const {
             address,
         } = userAccount;
-        const {
-            password,
-        } = registrationData;
 
         await expectErrorResponse(async () => AuthService.login({
             address,

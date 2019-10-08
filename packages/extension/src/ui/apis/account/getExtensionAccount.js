@@ -1,4 +1,3 @@
-import ApiError from '~/helpers/ApiError';
 import apollo from '~ui/apis/helpers/apollo';
 
 export default async function getExtensionAccount(address) {
@@ -12,9 +11,7 @@ export default async function getExtensionAccount(address) {
     `);
 
     if (!account || !account.linkedPublicKey) {
-        throw new ApiError('account.not.linked', {
-            address,
-        });
+        return null;
     }
 
     return account;

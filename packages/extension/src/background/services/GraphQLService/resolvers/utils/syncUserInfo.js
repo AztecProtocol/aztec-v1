@@ -43,25 +43,15 @@ export default async function syncUserInfo(args, ctx) {
         });
     }
 
-    // if (linkedPublicKey !== prevLinkedPublicKey) {
-    //     // TODO
-    //     // we need to show different UI saying the account is registered, please restore from seed phrase
-    //     throw permissionError('account.duplicated');
-    // }
+    if (linkedPublicKey !== prevLinkedPublicKey) {
+        // TODO
+        // we need to show different UI saying the account is registered, please restore from seed phrase
+        throw permissionError('account.duplicated');
+    }
 
-    const {
-        spendingPublicKey,
-        blockNumber,
-    } = account;
+    await AuthService.registerAddress(account);
 
-    await AuthService.registerAddress({
-        address: userAddress,
-        linkedPublicKey,
-        spendingPublicKey,
-        blockNumber,
-    });
-
-    const user = await AuthService.getRegisteredUser(userAddress);
+    const user = AuthService.getRegisteredUser(userAddress);
     if (user) {
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
 
