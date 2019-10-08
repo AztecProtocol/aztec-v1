@@ -196,7 +196,8 @@ class SyncManager {
                     this.increaseBlocksPerRequest();
                 }
 
-                if (currentBlock - newLastSyncedBlock > precisionDelta) {
+                //TODO: just for test, remove false
+                if (currentBlock - newLastSyncedBlock > precisionDelta && false) {
                     status = SYNCING_STATUS.SHOULD_LOAD_NEXT_PORTION;
                 } else {
                     status = SYNCING_STATUS.FINISHED;
@@ -325,6 +326,7 @@ class SyncManager {
                 blockNumber: assetRegisteredAtBlock,
             } = nonExistingAssets[i];
             const lastSyncedBlock = syncedBlocks[registryOwner] || assetRegisteredAtBlock;
+       
             // eslint-disable-next-line max-len
             lowestSyncedBlock = lowestSyncedBlock ? Math.min(lowestSyncedBlock, lastSyncedBlock) : lastSyncedBlock;
 

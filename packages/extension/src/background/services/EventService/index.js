@@ -69,7 +69,7 @@ class EventService {
         if (config.status === AUTOSYNC_STATUS.STARTED) {
             const fromAssets = await this.syncedAssets(networkId);
             this.syncNotes({
-                account,
+                address,
                 networkId,
                 fromAssets,
             });
@@ -138,8 +138,8 @@ class EventService {
             networkId,
         }, (newAssets) => {
             if (config.status === AUTOSYNC_STATUS.NOT_STARTED) return;
-            Object.values(this.accounts).forEach(account => this.syncNotes({
-                account,
+            Object.values(this.accounts).forEach(({ address }) => this.syncNotes({
+                address,
                 networkId,
                 fromAssets: newAssets,
             }));
@@ -198,6 +198,7 @@ class EventService {
         address,
         networkId,
         fromAssets,
+        continueWatching = true,
         callbacks = {},
     }) => {
         if (!address) {
@@ -229,7 +230,7 @@ class EventService {
             };
             const note = await Note.latest({ networkId }, options);
             return {
-                lastSyncedBlock: note ? note.blockNumber : account.blockNumber,
+                lastSyncedBlock: note ? note.blockNumber : 0, // TODO: replace 0 to => account.blockNumber
                 assetAddress,
             };
         };
@@ -255,7 +256,6 @@ class EventService {
                 return result;
             }, {});
 
-
         const onCompleatePulling = (result) => {
             const {
                 blocks,
@@ -263,11 +263,15 @@ class EventService {
                 assets,
             } = result;
             log(`Finished pulling (${lastSyncedBlock} from ${blocks} blocks) for assets: ${JSON.stringify(assets)}`);
-            watcher.appendAssets({
-                address,
-                assets,
-                lastSyncedBlock,
-            });
+
+            if (continueWatching) {
+                watcher.appendAssets({
+                    address,
+                    assets,
+                    lastSyncedBlock,
+                });
+            }
+
             if (callbacks.onCompleatePulling) {
                 callbacks.onCompleatePulling(result);
             }

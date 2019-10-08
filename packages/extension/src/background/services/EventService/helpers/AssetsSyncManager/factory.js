@@ -1,22 +1,20 @@
-import AssetsSyncManager from './';
+import AssetsSyncManager from '.';
 
 
 class AssetsSyncManagerFactory {
+    managersByNetworks = {};
 
-    _managersByNetworks = {};
-
-    _ensureManager = (networkId) => {
-        if (this._managersByNetworks[networkId]) {
+    ensureManager = (networkId) => {
+        if (this.managersByNetworks[networkId]) {
             return;
         }
-        this._managersByNetworks[networkId] = new AssetsSyncManager();
+        this.managersByNetworks[networkId] = new AssetsSyncManager();
     };
 
     create(networkId) {
-        this._ensureManager(networkId);
-        return this._managersByNetworks[networkId];
-    };
-
+        this.ensureManager(networkId);
+        return this.managersByNetworks[networkId];
+    }
 }
 
 export default new AssetsSyncManagerFactory();
