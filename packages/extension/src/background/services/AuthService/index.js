@@ -87,60 +87,22 @@ const AuthService = {
         };
     },
     registerExtension: async ({
-        password,
-        salt,
-        address,
-        seedPhrase,
+        keyStore,
+        pwDerivedKey,
     }) => {
-        let keyStore = await get('keyStore');
-        let user = await userModel.get({
-            address,
-        });
-
-        if (keyStore) {
-            return user;
-        }
-        const { pwDerivedKey } = await KeyStore.generateDerivedKey({
-            password,
-            salt,
-        });
-        const mnemonic = seedPhrase;
-
-        keyStore = new KeyStore({
-            pwDerivedKey,
-            salt,
-            mnemonic,
-            hdPathString: "m/44'/60'/0'/0",
-        });
-
         await set({
             keyStore,
             session: {
                 pwDerivedKey: JSON.stringify(pwDerivedKey),
                 lastActive: Date.now(),
                 createdAt: Date.now(),
-                address,
             },
         });
 
-        // TODO: clear storage
-
-        const linkedPublicKey = keyStore.privacyKeys.publicKey;
-
-        if (!user
-            || user.linkedPublicKey !== linkedPublicKey
-        ) {
-            user = {
-                address,
-                linkedPublicKey,
-            };
-
-            await userModel.set(user, {
-                forceReplace: true,
-            });
-        }
-
-        return user;
+        return {
+            keyStore,
+            pwDerivedKey,
+        };
     },
     registerAddress: async ({
         address,
@@ -170,6 +132,15 @@ const AuthService = {
             } else {
                 await userModel.update(user);
             }
+
+            const prevSession = await get('session');
+            await set({
+                session: {
+                    ...prevSession,
+                    lastActive: Date.now(),
+                    address,
+                },
+            });
         }
 
         return user;
@@ -186,7 +157,12 @@ const AuthService = {
 
         return domainModel.get({ domain: domainName });
     },
-    logout: async () => remove('session'),
+    logout: async () => {
+        // TODO - clear data
+        await remove('session');
+
+        return true;
+    },
     login: async ({ password, address }) => {
         const keyStore = await get('keyStore') || {};
         let pwDerivedKey;

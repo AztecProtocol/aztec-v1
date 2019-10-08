@@ -1,15 +1,22 @@
-import AuthService from '~background/services/AuthService';
+import {
+    KeyStore,
+} from '~utils/keyvault';
 
 export default async function createKeyVault({
+    pwDerivedKey,
     seedPhrase,
-    address,
-    password,
     salt = 'salty',
 }) {
-    return AuthService.registerExtension({
-        seedPhrase,
-        address,
-        password,
+    const keyStore = new KeyStore({
+        pwDerivedKey,
         salt,
+        mnemonic: seedPhrase,
+        hdPathString: "m/44'/60'/0'/0",
     });
+    const linkedPublicKey = keyStore.privacyKeys.publicKey;
+
+    return {
+        keyStore,
+        linkedPublicKey,
+    };
 }

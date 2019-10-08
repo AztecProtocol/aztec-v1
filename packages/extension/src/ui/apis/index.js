@@ -2,6 +2,7 @@ import {
     randomInt,
 } from '~utils/random';
 import sleep from '~utils/sleep';
+import * as account from './account';
 import * as ace from './ace';
 import * as asset from './asset';
 import * as auth from './auth';
@@ -18,6 +19,7 @@ export default {
         };
         return fakeData;
     },
+    account,
     ace,
     asset,
     auth,

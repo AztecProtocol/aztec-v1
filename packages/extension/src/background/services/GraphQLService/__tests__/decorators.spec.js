@@ -4,7 +4,6 @@ import {
 } from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
-import SyncService from '~background/services/SyncService';
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import {
     ensureKeyvault,
@@ -29,12 +28,9 @@ const registeredUserInfo = {
 };
 
 let callback;
-const syncAccountSpy = jest.spyOn(SyncService, 'syncAccount')
-    .mockImplementation(() => null);
 
 beforeEach(() => {
     storage.reset();
-    syncAccountSpy.mockClear();
     callback = jest.fn();
 });
 
@@ -81,7 +77,6 @@ describe('ensureAccount', () => {
         await useDecorator(ensureAccount);
 
         expect(callback).toHaveBeenCalledTimes(1);
-        expect(syncAccountSpy).toHaveBeenCalledTimes(1);
 
         const keyStore = await AuthService.getKeyStore();
         const session = await AuthService.getSession();
@@ -96,7 +91,6 @@ describe('ensureAccount', () => {
         await expectErrorResponse(async () => useDecorator(ensureAccount))
             .toBe('extension.not.registered');
         expect(callback).not.toHaveBeenCalled();
-        expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 
     it('fail if extension is not registered', async () => {
@@ -105,7 +99,6 @@ describe('ensureAccount', () => {
         await expectErrorResponse(async () => useDecorator(ensureAccount))
             .toBe('extension.not.registered');
         expect(callback).not.toHaveBeenCalled();
-        expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 
     it('fail if user is not registered', async () => {
@@ -114,7 +107,6 @@ describe('ensureAccount', () => {
         await expectErrorResponse(async () => useDecorator(ensureAccount))
             .toBe('account.not.linked');
         expect(callback).not.toHaveBeenCalled();
-        expect(syncAccountSpy).not.toHaveBeenCalled();
     });
 });
 
