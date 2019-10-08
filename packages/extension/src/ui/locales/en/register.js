@@ -34,17 +34,22 @@ export default {
     extension: {
         description: 'Last step! Link your address with your extension account.',
         step: {
-            create: 'Link Account to MetaMask',
+            create: 'Create key vault',
             register: 'Register Account',
             completed: 'Account Created!',
         },
     },
     address: {
+        _: 'Register Address',
         title: 'Register Ethereum Address with AZTEC',
         description: 'The Ethereum address you are currently using has not been configured to use AZTEC.',
         step: {
+            validate: 'Validate account',
+            recover: 'Recover account',
+            link: 'Link Account to MetaMask',
             authorise: 'Authorise Address',
         },
+        complete: 'Address successfully linked to your account!',
     },
     link: {
         account: 'Link Account',

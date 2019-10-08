@@ -9,17 +9,21 @@ import {
 class CustomRoute extends PureComponent {
     renderComponent = () => {
         const {
+            currentAccount,
             action,
             Component,
             goToPage,
         } = this.props;
         const {
+            id: actionId,
             data,
         } = action || {};
 
         return (
             <Component
                 {...data}
+                actionId={actionId}
+                currentAccount={currentAccount}
                 goToPage={goToPage}
             />
         );
@@ -41,7 +45,12 @@ class CustomRoute extends PureComponent {
 
 CustomRoute.propTypes = {
     path: PropTypes.string.isRequired,
+    currentAccount: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+        linkedPublicKey: PropTypes.string,
+    }).isRequired,
     action: PropTypes.shape({
+        id: PropTypes.string.isRequired,
         data: PropTypes.object,
     }),
     Component: PropTypes.func.isRequired,

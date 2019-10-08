@@ -6,6 +6,7 @@ import {
     createNotes,
 } from '~utils/note';
 import settings from '~background/utils/settings';
+import ApiError from '~/helpers/ApiError';
 import {
     getNoteOwnerAccount,
     getExtensionAccount,
@@ -23,6 +24,11 @@ export default async function deposit({
     numberOfOutputNotes,
 }) {
     const notesOwner = await getNoteOwnerAccount(owner);
+    if (!notesOwner) {
+        throw new ApiError('account.not.linked', {
+            address: owner,
+        });
+    }
 
     const {
         address: notesOwnerAddress,
@@ -37,7 +43,12 @@ export default async function deposit({
             const noteValues = randomSumArray(tx.amount, numberOfNotes);
             const {
                 linkedPublicKey,
-            } = await getExtensionAccount(tx.to);
+            } = await getExtensionAccount(tx.to) || {};
+            if (!linkedPublicKey) {
+                throw new ApiError('account.not.linked', {
+                    address: tx.to,
+                });
+            }
 
             const notes = await createNotes(
                 noteValues,

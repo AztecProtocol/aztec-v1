@@ -37,6 +37,17 @@ export default mergeApis(realApis, {
         getCurrentUser: () => ({
             address: addresses[0],
         }),
+        createKeyVault: () => ({
+            linkedPublicKey: 'linked_public_key',
+        }),
+    },
+    account: {
+        checkDuplicates: () => ({
+            duplicated: true,
+        }),
+        getExtensionAccount: () => ({
+            linkedPublicKey: 'linked_public_key',
+        }),
     },
     asset: {
         getAssets: async () => assets,

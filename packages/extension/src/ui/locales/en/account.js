@@ -24,18 +24,49 @@ export default {
         _: 'Restore account',
         fromSeedPhrase: 'Restore from seed phrase',
         title: 'Recover from seed phrase',
-        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non dictum mauris.',
+        description: 'Please enter the seed phrase you were given when registered with the following address:',
+        link: {
+            description: 'The following address will be linked to your account after recovery.',
+        },
+        password: {
+            description: 'Create a new password for your account.',
+        },
         input: {
             seedPhrase: {
                 placeholder: 'Enter seed phrase...',
             },
         },
         confirm: 'Recover Account',
+        abort: {
+            and: {
+                create: 'Cancel and create new account',
+            },
+        },
+        processing: {
+            _: 'Restoring your account...',
+            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit with the address:',
+        },
+        complete: 'Account successfully restored!',
+        failed: {
+            title: 'Failed to recover account',
+            description: 'We cannot restore your account with the seed phrase you provided. Please use a correct one or create a new account.',
+            linked: {
+                description: 'We cannot restore your account with the seed phrase you provided. Please use the seed phrase you were given when registered with the address.',
+            },
+            retry: 'Restore with another seed phrase',
+        },
         error: {
             seedPhrase: {
                 _: 'Incorrect seed phrase format.',
                 empty: 'Please enter your seed phrase.',
             },
+        },
+    },
+    duplicated: {
+        title: 'Account already exists',
+        description: 'This address has been registered with an AZTEC account.',
+        clear: {
+            _: 'Clear previous account',
         },
     },
     assets: {

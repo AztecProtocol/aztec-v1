@@ -25,6 +25,10 @@ const inputIconMapping = {
 };
 
 const CreatePassword = ({
+    title,
+    description,
+    submitButtonText,
+    footerLink,
     goNext,
     goBack,
     onClose,
@@ -43,11 +47,11 @@ const CreatePassword = ({
     return (
         <Popup
             theme="white"
-            title={i18n.t('register.create.password.title')}
-            description={i18n.t('register.create.password.description')}
+            title={title || i18n.t('register.create.password.title')}
+            description={description || i18n.t('register.create.password.description')}
             leftIconName={goBack ? 'chevron_left' : 'close'}
             onClickLeftIcon={goBack || onClose}
-            submitButtonText={i18n.t('next')}
+            submitButtonText={submitButtonText || i18n.t('next')}
             onSubmit={() => {
                 if (!password) {
                     setError(i18n.t('account.password.error.empty'));
@@ -55,6 +59,7 @@ const CreatePassword = ({
                     goNext({ password });
                 }
             }}
+            footerLink={footerLink}
         >
             <Block align="left">
                 <TextInput
@@ -92,12 +97,23 @@ const CreatePassword = ({
 };
 
 CreatePassword.propTypes = {
+    title: PropTypes.string,
+    description: PropTypes.string,
+    submitButtonText: PropTypes.string,
+    footerLink: PropTypes.shape({
+        text: PropTypes.string.isRequired,
+        href: PropTypes.string.isRequired,
+    }),
     goNext: PropTypes.func.isRequired,
     goBack: PropTypes.func,
     onClose: PropTypes.func,
 };
 
 CreatePassword.defaultProps = {
+    title: '',
+    description: '',
+    submitButtonText: '',
+    footerLink: null,
     goBack: null,
     onClose: null,
 };

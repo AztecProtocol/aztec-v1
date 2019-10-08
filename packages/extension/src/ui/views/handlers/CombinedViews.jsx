@@ -6,30 +6,67 @@ import returnAndClose from '~uiModules/helpers/returnAndClose';
 import Loading from '~ui/views/Loading';
 
 class CombinedViews extends PureComponent {
-    constructor(props) {
-        super(props);
+    static getDerivedStateFromProps(nextProps, prevState) {
+        const {
+            prevProps: {
+                retry: prevRetry,
+            },
+        } = prevState;
+        const {
+            retry,
+        } = nextProps;
+        if (retry === prevRetry) {
+            return null;
+        }
 
         const {
             initialStep,
             initialData,
             fetchInitialData,
             onStep,
-        } = props;
+        } = nextProps;
+        const {
+            history,
+        } = prevState;
 
-        let data = initialData;
-        if (!fetchInitialData && onStep) {
-            const newData = onStep(initialStep, data);
-            data = {
-                ...data,
-                ...newData,
-            };
+        const requireInitialFetch = !history && !!fetchInitialData;
+
+        const data = history
+            ? history[initialStep]
+            : initialData;
+
+        let extraData;
+        if (onStep && !requireInitialFetch) {
+            extraData = onStep(initialStep, data);
         }
 
-        this.state = {
+        return {
             step: initialStep,
-            data,
-            history: [data],
-            loading: !!fetchInitialData,
+            data: {
+                ...data,
+                ...extraData,
+            },
+            history: !history
+                ? [data]
+                : history.slice(0, initialStep + 1),
+            loading: requireInitialFetch,
+            prevProps: {
+                retry,
+            },
+        };
+    }
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            step: -1,
+            data: null,
+            history: null,
+            loading: false,
+            prevProps: {
+                retry: -1,
+            },
         };
     }
 
@@ -80,8 +117,9 @@ class CombinedViews extends PureComponent {
         } = this.props;
         const {
             step,
-            data: prevData,
+            history: prevHistory,
         } = this.state;
+        const prevData = prevHistory[step];
         let data = {
             ...prevData,
             ...childState,
@@ -109,6 +147,7 @@ class CombinedViews extends PureComponent {
                 stepOffset = 1,
                 ...newProps
             } = onGoNext(step, data));
+
             data = {
                 ...data,
                 ...newProps,
@@ -116,9 +155,6 @@ class CombinedViews extends PureComponent {
         }
 
         const nextStep = step + stepOffset;
-        const {
-            history: prevHistory,
-        } = this.state;
         const history = [...prevHistory];
         history[nextStep] = data;
 
@@ -131,15 +167,20 @@ class CombinedViews extends PureComponent {
 
     goToStep(state) {
         const {
-            onStep,
-        } = this.props;
-        const {
             step,
             data,
         } = state;
+        const {
+            redirect,
+        } = data;
+        if (redirect) return;
+
         let newData = data;
+        const {
+            onStep,
+        } = this.props;
         if (onStep) {
-            const newProps = onStep(step);
+            const newProps = onStep(step, data);
             newData = {
                 ...newData,
                 ...newProps,
@@ -213,6 +254,7 @@ CombinedViews.propTypes = {
     onExit: PropTypes.func,
     autoClose: PropTypes.bool,
     closeDelay: PropTypes.number,
+    retry: PropTypes.number,
 };
 
 CombinedViews.defaultProps = {
@@ -225,6 +267,7 @@ CombinedViews.defaultProps = {
     onExit: null,
     autoClose: false,
     closeDelay: 1500,
+    retry: 0,
 };
 
 export default CombinedViews;

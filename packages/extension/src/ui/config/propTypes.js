@@ -16,4 +16,5 @@ export const profileType = PropTypes.oneOf([
     'token',
     'asset',
     'user',
+    'aztec',
 ]);
