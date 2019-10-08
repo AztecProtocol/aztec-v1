@@ -8,7 +8,7 @@ import {
     fromHexString,
 } from '~utils/encryptedViewingKey';
 import {
-    fromViewingKey,
+    valueFromViewingKey,
     valueOf,
 } from '~utils/note';
 import {
@@ -46,7 +46,7 @@ export default async function syncAssetNoteData(
             let value = 0;
             try {
                 const realViewingKey = fromHexString(encryptedVkString).decrypt(linkedPrivateKey);
-                const aztecNote = await fromViewingKey(realViewingKey);
+                const aztecNote = valueFromViewingKey(realViewingKey);
                 value = valueOf(aztecNote);
             } catch (error) {
                 errorLog('Failed to decrypt note from viewingKey.', {

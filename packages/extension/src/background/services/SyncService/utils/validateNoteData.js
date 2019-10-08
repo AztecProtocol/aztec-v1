@@ -8,7 +8,7 @@ import {
     fromHexString,
 } from '~utils/encryptedViewingKey';
 import {
-    fromViewingKey,
+    valueFromViewingKey,
     valueOf,
 } from '~utils/note';
 
@@ -21,7 +21,7 @@ export default async function validateNoteData(note, privateKey) {
     let value = 0;
     try {
         const realViewingKey = fromHexString(encryptedVkString).decrypt(privateKey);
-        const aztecNote = await fromViewingKey(realViewingKey);
+        const aztecNote = valueFromViewingKey(realViewingKey);
         value = valueOf(aztecNote);
     } catch (error) {
         errorLog('Failed to decrypt note from viewingKey.', {
