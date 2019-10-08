@@ -22,8 +22,6 @@ class AuthService {
             publicKey,
             privateKey,
             mnemonic,
-            // TODO: REFACTOR CODE
-            linkedPublicKey: '0x8a27394a04ad770ca1174e64fc6f4f33c1fec4692536f322179428bff954422f',
         };
     }
 
