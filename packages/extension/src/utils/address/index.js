@@ -1,4 +1,7 @@
 import {
+    utils,
+} from 'web3';
+import {
     ADDRESS_LENGTH,
 } from '~config/constants';
 
@@ -11,5 +14,5 @@ export default function address(str) {
         return '';
     }
 
-    return `0x${bytes.toLowerCase()}`;
+    return utils.toChecksumAddress(`0x${bytes}`);
 }
