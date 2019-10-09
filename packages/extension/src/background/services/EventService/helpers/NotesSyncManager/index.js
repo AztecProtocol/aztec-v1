@@ -1,5 +1,4 @@
 import {
-    log,
     warnLog,
     errorLog,
 } from '~utils/log';
@@ -98,7 +97,7 @@ class SyncManager {
     };
 
 
-    stop = ({
+    stop = async ({
         address,
         assetsAddresses,
     }) => {
@@ -123,12 +122,6 @@ class SyncManager {
             if (updatedSyncDetails[assetAddress]) {
                 updatedSyncDetails[assetAddress].syncing = false;
             }
-        });
-
-        const subscription = await NoteSubscription.subscribe({
-            fromBlock: lastSyncedBlock + 1,
-            fromAssets,
-            networkId,
         });
 
         this.addresses.set(address, {

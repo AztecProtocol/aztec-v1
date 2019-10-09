@@ -26,7 +26,7 @@ import {
     warnLog,
     log,
 } from '~utils/log';
-import AuthService from '~background/services/AuthService';
+import Account from '~background/database/models/account';
 import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
@@ -37,7 +37,9 @@ import decodeSpendingPublicKey from '~background/utils/decodeSpendingPublicKey';
 import AuthService from '~background/services/AuthService';
 import validateNoteData from '~background/services/SyncService/utils/validateNoteData.js';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
-import expectExport from 'expect';
+import {
+    KeyStore,
+} from '~utils/keyvault';
 
 
 jest.mock('~utils/storage');
@@ -53,7 +55,7 @@ const {
 describe('ZkAsset', () => {
     const networkId = 0;
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 10000;
+    const prepopulateNotesCount = 100;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -86,190 +88,187 @@ describe('ZkAsset', () => {
         ]);
     };
 
-    beforeAll(async () => {
-        const {
-            address: userAddress,
-        } = sender;
+    // beforeAll(async () => {
+    //     const {
+    //         address: userAddress,
+    //     } = sender;
 
-        configureWeb3Service();
-        web3Service = Web3Service(networkId, sender);
+    //     configureWeb3Service();
+    //     web3Service = Web3Service(networkId, sender);
 
-        const aceAddress = web3Service.contract('ACE').address;
-        log(`aceAddress: ${aceAddress}`);
+    //     const aceAddress = web3Service.contract('ACE').address;
+    //     log(`aceAddress: ${aceAddress}`);
 
-        const registrationData = {
-            password: '5d4hl6xv5r',
-            salt: 'y29qm2',
-            address: userAddress,
-            seedPhrase: 'involve filter stadium reopen symptom better diamond demise evoke ticket alert wine',
-        };
+    //     const registrationData = {
+    //         password: '5d4hl6xv5r',
+    //         salt: 'y29qm2',
+    //         address: userAddress,
+    //         seedPhrase: 'involve filter stadium reopen symptom better diamond demise evoke ticket alert wine',
+    //     };
 
-        await AuthService.registerExtension(registrationData);
-        const keyStore = await AuthService.getKeyStore();
-        const {
-            pwDerivedKey,
-        } = await AuthService.getSession();
+    //     await AuthService.registerExtension(registrationData);
+    //     const keyStore = await AuthService.getKeyStore();
 
-        const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
-        const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
-        const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
+    //     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
+    //     const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
+    //     const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
+    //     const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
 
-        log(`Private key start: ${privateKey}`);
+    //     log(`Private key start: ${privateKey}`);
 
-        senderAccount = {
-            address: userAddress,
-            linkedPublicKey,
-            spendingPublicKey,
-            blockNumber: 1,
-        };
+    //     senderAccount = {
+    //         address: userAddress,
+    //         linkedPublicKey,
+    //         spendingPublicKey,
+    //         blockNumber: 1,
+    //     };
 
-        await Account.add(senderAccount, { networkId });
-        await AuthService.registerAddress(senderAccount);
+    //     await Account.add(senderAccount, { networkId });
+    //     await AuthService.registerAddress(senderAccount);
 
-        senderAccount = {
-            ...senderAccount,
-            privateKey,
-        };
+    //     senderAccount = {
+    //         ...senderAccount,
+    //         privateKey,
+    //     };
 
-        const {
-            error,
-            groupedNotes,
-        } = await fetchNotes({
-            fromBlock: 1,
-            toBlock: 'latest',
-            networkId,
-        });
+    //     const {
+    //         error,
+    //         groupedNotes,
+    //     } = await fetchNotes({
+    //         fromBlock: 1,
+    //         toBlock: 'latest',
+    //         networkId,
+    //     });
 
-        if (error) {
-            errorLog('Cannot fetch all notes', error);
-            return;
-        }
+    //     if (error) {
+    //         errorLog('Cannot fetch all notes', error);
+    //         return;
+    //     }
 
-        const eventsInGanache = groupedNotes.allNotes();
-        log(`Already eventsInGanache: ${eventsInGanache.length}`);
-        if (eventsInGanache.length >= prepopulateNotesCount) return;
+    //     const eventsInGanache = groupedNotes.allNotes();
+    //     log(`Already eventsInGanache: ${eventsInGanache.length}`);
+    //     if (eventsInGanache.length >= prepopulateNotesCount) return;
 
-        await web3Service
-            .useContract('ACE')
-            .method('setCommonReferenceString')
-            .send(bn128.CRS);
+    //     await web3Service
+    //         .useContract('ACE')
+    //         .method('setCommonReferenceString')
+    //         .send(bn128.CRS);
 
-        if (!zkAssetAddress) {
-            log('Creating new asset...');
-            ({
-                erc20Address,
-                zkAssetAddress,
-            } = await createNewAsset({
-                zkAssetType: 'ZkAssetMintable',
-                scalingFactor,
-                web3Service,
-            }));
+    //     if (!zkAssetAddress) {
+    //         log('Creating new asset...');
+    //         ({
+    //             erc20Address,
+    //             zkAssetAddress,
+    //         } = await createNewAsset({
+    //             zkAssetType: 'ZkAssetMintable',
+    //             scalingFactor,
+    //             web3Service,
+    //         }));
 
-            log('New zk mintable asset created!');
-            warnLog(
-                'Add this address to demo file to prevent creating new asset:',
-                zkAssetAddress,
-            );
-        }
+    //         log('New zk mintable asset created!');
+    //         warnLog(
+    //             'Add this address to demo file to prevent creating new asset:',
+    //             zkAssetAddress,
+    //         );
+    //     }
 
-        web3Service.registerContract(JoinSplit);
-        web3Service.registerContract(ZkAssetOwnable, { address: zkAssetAddress });
+    //     web3Service.registerContract(JoinSplit);
+    //     web3Service.registerContract(ZkAssetOwnable, { address: zkAssetAddress });
 
-        if (!erc20Address) {
-            erc20Address = await web3Service
-                .useContract('ZkAssetOwnable')
-                .at(zkAssetAddress)
-                .method('linkedToken')
-                .call();
-        }
-        web3Service.registerContract(ERC20Mintable, { address: erc20Address });
+    //     if (!erc20Address) {
+    //         erc20Address = await web3Service
+    //             .useContract('ZkAssetOwnable')
+    //             .at(zkAssetAddress)
+    //             .method('linkedToken')
+    //             .call();
+    //     }
+    //     web3Service.registerContract(ERC20Mintable, { address: erc20Address });
 
-        mint({
-            web3Service,
-            erc20Address,
-            owner: userAddress,
-            amount: depositAmount,
-        });
+    //     mint({
+    //         web3Service,
+    //         erc20Address,
+    //         owner: userAddress,
+    //         amount: depositAmount,
+    //     });
 
-        approve({
-            web3Service,
-            erc20Address,
-            aceAddress,
-            amount: depositAmount,
-        });
+    //     approve({
+    //         web3Service,
+    //         erc20Address,
+    //         aceAddress,
+    //         amount: depositAmount,
+    //     });
 
-        const notesPerRequest = 5;
-        let createdNotes = eventsInGanache.length;
+    //     const notesPerRequest = 5;
+    //     let createdNotes = eventsInGanache.length;
 
-        await web3Service
-            .useContract('ZkAssetOwnable')
-            .at(zkAssetAddress)
-            .method('setProofs')
-            .send(
-                epoch,
-                filter,
-            );
+    //     await web3Service
+    //         .useContract('ZkAssetOwnable')
+    //         .at(zkAssetAddress)
+    //         .method('setProofs')
+    //         .send(
+    //             epoch,
+    //             filter,
+    //         );
 
-        do {
-            const inputNotes = [];
-            const depositInputOwnerAccounts = [];
+    //     do {
+    //         const inputNotes = [];
+    //         const depositInputOwnerAccounts = [];
 
-            // outputNotes with 1 balances
-            const noteValues = new Array(notesPerRequest);
-            noteValues.fill(1);
+    //         // outputNotes with 1 balances
+    //         const noteValues = new Array(notesPerRequest);
+    //         noteValues.fill(1);
 
-            try {
-                // eslint-disable-next-line no-await-in-loop
-                outputNotes = await generateNotes(noteValues, senderAccount);
-            } catch (error) {
-                errorLog('Error during generation notes', error);
-            }
-            const publicValue = ProofUtils.getPublicValue(
-                [],
-                noteValues,
-            );
+    //         try {
+    //             // eslint-disable-next-line no-await-in-loop
+    //             outputNotes = await generateNotes(noteValues, senderAccount);
+    //         } catch (error) {
+    //             errorLog('Error during generation notes', error);
+    //         }
+    //         const publicValue = ProofUtils.getPublicValue(
+    //             [],
+    //             noteValues,
+    //         );
 
-            depositProof = new JoinSplitProof(
-                inputNotes,
-                outputNotes,
-                userAddress,
-                publicValue,
-                userAddress,
-            );
+    //         depositProof = new JoinSplitProof(
+    //             inputNotes,
+    //             outputNotes,
+    //             userAddress,
+    //             publicValue,
+    //             userAddress,
+    //         );
 
-            // eslint-disable-next-line no-await-in-loop
-            await web3Service
-                .useContract('ACE')
-                .method('publicApprove')
-                .send(
-                    zkAssetAddress,
-                    depositProof.hash,
-                    depositAmount,
-                );
+    //         // eslint-disable-next-line no-await-in-loop
+    //         await web3Service
+    //             .useContract('ACE')
+    //             .method('publicApprove')
+    //             .send(
+    //                 zkAssetAddress,
+    //                 depositProof.hash,
+    //                 depositAmount,
+    //             );
 
-            const depositData = depositProof.encodeABI(zkAssetAddress);
-            const depositSignatures = depositProof.constructSignatures(
-                zkAssetAddress,
-                depositInputOwnerAccounts,
-            );
+    //         const depositData = depositProof.encodeABI(zkAssetAddress);
+    //         const depositSignatures = depositProof.constructSignatures(
+    //             zkAssetAddress,
+    //             depositInputOwnerAccounts,
+    //         );
 
-            // eslint-disable-next-line no-await-in-loop
-            await web3Service
-                .useContract('ZkAssetOwnable')
-                .at(zkAssetAddress)
-                .method('confidentialTransfer')
-                .send(
-                    depositData,
-                    depositSignatures,
-                );
+    //         // eslint-disable-next-line no-await-in-loop
+    //         await web3Service
+    //             .useContract('ZkAssetOwnable')
+    //             .at(zkAssetAddress)
+    //             .method('confidentialTransfer')
+    //             .send(
+    //                 depositData,
+    //                 depositSignatures,
+    //             );
 
-            createdNotes += (notesPerRequest + 1);
+    //         createdNotes += (notesPerRequest + 1);
 
-            // eslint-disable-next-line radix
-            log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateNotesCount)} %`);
-        } while (createdNotes < prepopulateNotesCount);
-    });
+    //         // eslint-disable-next-line radix
+    //         log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateNotesCount)} %`);
+    //     } while (createdNotes < prepopulateNotesCount);
+    // });
 
 
     it(`check how does it take to fetch ${prepopulateNotesCount} events, filter by owner and store into faked db`, async () => {
@@ -360,23 +359,32 @@ describe('ZkAsset', () => {
         log(`Syncing notes and decryption with sync service took: ${((t1 - t0) / 1000)} seconds.`);
     });
 
-    it.skip('validateNoteData', async () => {
+    it.only('validateNoteData', async () => {
         const {
             address,
         } = sender;
 
-        const registrationData = {
+        const keyStorePayload = {
             password: '5d4hl6xv5r',
             salt: 'y29qm2',
             address,
             seedPhrase: 'involve filter stadium reopen symptom better diamond demise evoke ticket alert wine',
+            hdPathString: "m/44'/60'/0'/0",
         };
 
-        await AuthService.registerExtension(registrationData);
-        const keyStore = await AuthService.getKeyStore();
-        const {
+        const { pwDerivedKey } = await KeyStore.generateDerivedKey(keyStorePayload);
+
+        const keyStore = new KeyStore({
             pwDerivedKey,
-        } = await AuthService.getSession();
+            salt: keyStorePayload.salt,
+            mnemonic: keyStorePayload.seedPhrase,
+            hdPathString: keyStorePayload.hdPathString,
+        });
+
+        await AuthService.registerExtension({
+            keyStore,
+            pwDerivedKey,
+        });
 
         const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
