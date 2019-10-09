@@ -30,16 +30,7 @@ import Account from '~background/database/models/account';
 import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
-import decodeKeyStore from '~background/utils/decodeKeyStore';
-import decodePrivateKey from '~background/utils/decodePrivateKey';
-import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
-import decodeSpendingPublicKey from '~background/utils/decodeSpendingPublicKey';
-import AuthService from '~background/services/AuthService';
-import validateNoteData from '~background/services/SyncService/utils/validateNoteData.js';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
-import {
-    KeyStore,
-} from '~utils/keyvault';
 import getSenderAccount from './helpers/senderAccount';
 
 
