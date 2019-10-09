@@ -20,9 +20,6 @@ import getPathsFromRouteConfig from '~ui/utils/getPathsFromRouteConfig';
 import Loading from '~ui/views/Loading';
 import routes from '~ui/config/routes';
 import actions from '~ui/config/actions';
-import {
-    isLoggedIn,
-} from '~ui/apis/auth';
 import './styles/guacamole.css';
 import './styles/_reset.scss';
 
@@ -103,12 +100,13 @@ class App extends PureComponent {
     async loadInitialStates() {
         const search = new URLSearchParams(window.location.search);
         const actionId = search.get('id');
+        const openByUser = !actionId;
 
         let route;
         let action;
         if (actionId) {
-            action = await ActionService.get(actionId);
-            if (action) {
+            action = await ActionService.get(actionId) || {};
+            if (action.requestId) {
                 const {
                     type,
                     requestId,
@@ -145,19 +143,33 @@ class App extends PureComponent {
             || route === 'register'
         ) {
             const {
-                linkedPublicKey,
+                linkedPublicKey: onChainLinkedPublicKey,
             } = await apis.account.getExtensionAccount(address) || {};
-            currentAccount.linkedPublicKey = linkedPublicKey;
+            currentAccount.linkedPublicKey = onChainLinkedPublicKey;
 
-            if (route) {
-                if (linkedPublicKey) {
-                    route = 'account.restore';
-                }
-            } else {
-                const loggedIn = await isLoggedIn();
-                route = loggedIn
-                    ? 'account'
-                    : (linkedPublicKey && 'account.restore') || 'welcome';
+            const {
+                linkedPublicKey: localLinkedPublicKey,
+                validSession,
+            } = await apis.account.getLocalAccount() || {};
+
+            const loggedIn = !openByUser
+                ? false
+                : await apis.auth.isLoggedIn();
+
+            if (loggedIn) {
+                route = 'account';
+            } else if (localLinkedPublicKey
+                && localLinkedPublicKey === onChainLinkedPublicKey
+            ) {
+                route = 'account.login';
+            } else if (openByUser) {
+                route = onChainLinkedPublicKey
+                    ? 'account.restore'
+                    : 'welcome';
+            } else if (!onChainLinkedPublicKey && validSession) {
+                route = 'register.address';
+            } else if (onChainLinkedPublicKey) {
+                route = 'account.restore';
             }
         }
 

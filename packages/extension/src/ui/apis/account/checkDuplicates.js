@@ -1,4 +1,4 @@
-import createKeyVault from '~ui/apis/auth/createKeyVault';
+import createKeyStore from '~ui/apis/auth/createKeyStore';
 import createPwDerivedKey from '~ui/apis/auth/createPwDerivedKey';
 import getExtensionAccount from './getExtensionAccount';
 
@@ -18,7 +18,7 @@ export default async function checkDuplicates({
     });
     const {
         linkedPublicKey,
-    } = await createKeyVault({
+    } = await createKeyStore({
         pwDerivedKey,
         seedPhrase,
     });

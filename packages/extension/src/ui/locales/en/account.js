@@ -18,6 +18,7 @@ export default {
         strong: 'Strong',
         error: {
             empty: 'Please enter your password.',
+            incorrect: 'Incorrect password.',
         },
     },
     restore: {

@@ -1,6 +1,6 @@
 import AuthService from '~background/services/AuthService';
 import createPwDerivedKey from './createPwDerivedKey';
-import createKeyVault from './createKeyVault';
+import createKeyStore from './createKeyStore';
 
 export default async function restoreAccount({
     address,
@@ -14,7 +14,7 @@ export default async function restoreAccount({
     });
     const {
         keyStore,
-    } = await createKeyVault({
+    } = await createKeyStore({
         pwDerivedKey,
         seedPhrase,
     });
