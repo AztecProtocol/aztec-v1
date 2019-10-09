@@ -40,6 +40,7 @@ import encryptedViewingKey from '~utils/encryptedViewingKey';
 import {
     KeyStore,
 } from '~utils/keyvault';
+import getSenderAccount from './helpers/senderAccount';
 
 
 jest.mock('~utils/storage');
@@ -62,8 +63,8 @@ describe('ZkAsset', () => {
     const scalingFactor = 1;
     const depositAmount = prepopulateNotesCount * eachNoteBalance;
     const sender = TestAuthService.getAccount();
-    let senderAccount;
 
+    let account;
     let erc20Address;
     let zkAssetAddress = '0x439505a6AA1A9927b7550182d0a63dcd849E0a32';
     let outputNotes;
@@ -88,187 +89,158 @@ describe('ZkAsset', () => {
         ]);
     };
 
-    // beforeAll(async () => {
-    //     const {
-    //         address: userAddress,
-    //     } = sender;
+    beforeAll(async () => {
+        const {
+            address: userAddress,
+        } = sender;
+        account = await getSenderAccount(sender);
 
-    //     configureWeb3Service();
-    //     web3Service = Web3Service(networkId, sender);
+        configureWeb3Service();
+        web3Service = Web3Service(networkId, sender);
 
-    //     const aceAddress = web3Service.contract('ACE').address;
-    //     log(`aceAddress: ${aceAddress}`);
+        const aceAddress = web3Service.contract('ACE').address;
+        log(`aceAddress: ${aceAddress}`);
 
-    //     const registrationData = {
-    //         password: '5d4hl6xv5r',
-    //         salt: 'y29qm2',
-    //         address: userAddress,
-    //         seedPhrase: 'involve filter stadium reopen symptom better diamond demise evoke ticket alert wine',
-    //     };
+        await Account.add(account, { networkId });
 
-    //     await AuthService.registerExtension(registrationData);
-    //     const keyStore = await AuthService.getKeyStore();
+        const {
+            error,
+            groupedNotes,
+        } = await fetchNotes({
+            fromBlock: 1,
+            toBlock: 'latest',
+            networkId,
+        });
 
-    //     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
-    //     const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-    //     const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
-    //     const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
+        if (error) {
+            errorLog('Cannot fetch all notes', error);
+            return;
+        }
 
-    //     log(`Private key start: ${privateKey}`);
+        const eventsInGanache = groupedNotes.allNotes();
+        log(`Already eventsInGanache: ${eventsInGanache.length}`);
+        if (eventsInGanache.length >= prepopulateNotesCount) return;
 
-    //     senderAccount = {
-    //         address: userAddress,
-    //         linkedPublicKey,
-    //         spendingPublicKey,
-    //         blockNumber: 1,
-    //     };
+        await web3Service
+            .useContract('ACE')
+            .method('setCommonReferenceString')
+            .send(bn128.CRS);
 
-    //     await Account.add(senderAccount, { networkId });
-    //     await AuthService.registerAddress(senderAccount);
+        if (!zkAssetAddress) {
+            log('Creating new asset...');
+            ({
+                erc20Address,
+                zkAssetAddress,
+            } = await createNewAsset({
+                zkAssetType: 'ZkAssetMintable',
+                scalingFactor,
+                web3Service,
+            }));
 
-    //     senderAccount = {
-    //         ...senderAccount,
-    //         privateKey,
-    //     };
+            log('New zk mintable asset created!');
+            warnLog(
+                'Add this address to demo file to prevent creating new asset:',
+                zkAssetAddress,
+            );
+        }
 
-    //     const {
-    //         error,
-    //         groupedNotes,
-    //     } = await fetchNotes({
-    //         fromBlock: 1,
-    //         toBlock: 'latest',
-    //         networkId,
-    //     });
+        web3Service.registerContract(JoinSplit);
+        web3Service.registerContract(ZkAssetOwnable, { address: zkAssetAddress });
 
-    //     if (error) {
-    //         errorLog('Cannot fetch all notes', error);
-    //         return;
-    //     }
+        if (!erc20Address) {
+            erc20Address = await web3Service
+                .useContract('ZkAssetOwnable')
+                .at(zkAssetAddress)
+                .method('linkedToken')
+                .call();
+        }
+        web3Service.registerContract(ERC20Mintable, { address: erc20Address });
 
-    //     const eventsInGanache = groupedNotes.allNotes();
-    //     log(`Already eventsInGanache: ${eventsInGanache.length}`);
-    //     if (eventsInGanache.length >= prepopulateNotesCount) return;
+        mint({
+            web3Service,
+            erc20Address,
+            owner: userAddress,
+            amount: depositAmount,
+        });
 
-    //     await web3Service
-    //         .useContract('ACE')
-    //         .method('setCommonReferenceString')
-    //         .send(bn128.CRS);
+        approve({
+            web3Service,
+            erc20Address,
+            aceAddress,
+            amount: depositAmount,
+        });
 
-    //     if (!zkAssetAddress) {
-    //         log('Creating new asset...');
-    //         ({
-    //             erc20Address,
-    //             zkAssetAddress,
-    //         } = await createNewAsset({
-    //             zkAssetType: 'ZkAssetMintable',
-    //             scalingFactor,
-    //             web3Service,
-    //         }));
+        const notesPerRequest = 5;
+        let createdNotes = eventsInGanache.length;
 
-    //         log('New zk mintable asset created!');
-    //         warnLog(
-    //             'Add this address to demo file to prevent creating new asset:',
-    //             zkAssetAddress,
-    //         );
-    //     }
+        await web3Service
+            .useContract('ZkAssetOwnable')
+            .at(zkAssetAddress)
+            .method('setProofs')
+            .send(
+                epoch,
+                filter,
+            );
 
-    //     web3Service.registerContract(JoinSplit);
-    //     web3Service.registerContract(ZkAssetOwnable, { address: zkAssetAddress });
+        do {
+            const inputNotes = [];
+            const depositInputOwnerAccounts = [];
 
-    //     if (!erc20Address) {
-    //         erc20Address = await web3Service
-    //             .useContract('ZkAssetOwnable')
-    //             .at(zkAssetAddress)
-    //             .method('linkedToken')
-    //             .call();
-    //     }
-    //     web3Service.registerContract(ERC20Mintable, { address: erc20Address });
+            // outputNotes with 1 balances
+            const noteValues = new Array(notesPerRequest);
+            noteValues.fill(1);
 
-    //     mint({
-    //         web3Service,
-    //         erc20Address,
-    //         owner: userAddress,
-    //         amount: depositAmount,
-    //     });
+            try {
+                // eslint-disable-next-line no-await-in-loop
+                outputNotes = await generateNotes(noteValues, account);
+            } catch (createNotesError) {
+                errorLog('Error during generation notes', createNotesError);
+            }
+            const publicValue = ProofUtils.getPublicValue(
+                [],
+                noteValues,
+            );
 
-    //     approve({
-    //         web3Service,
-    //         erc20Address,
-    //         aceAddress,
-    //         amount: depositAmount,
-    //     });
+            depositProof = new JoinSplitProof(
+                inputNotes,
+                outputNotes,
+                userAddress,
+                publicValue,
+                userAddress,
+            );
 
-    //     const notesPerRequest = 5;
-    //     let createdNotes = eventsInGanache.length;
+            // eslint-disable-next-line no-await-in-loop
+            await web3Service
+                .useContract('ACE')
+                .method('publicApprove')
+                .send(
+                    zkAssetAddress,
+                    depositProof.hash,
+                    depositAmount,
+                );
 
-    //     await web3Service
-    //         .useContract('ZkAssetOwnable')
-    //         .at(zkAssetAddress)
-    //         .method('setProofs')
-    //         .send(
-    //             epoch,
-    //             filter,
-    //         );
+            const depositData = depositProof.encodeABI(zkAssetAddress);
+            const depositSignatures = depositProof.constructSignatures(
+                zkAssetAddress,
+                depositInputOwnerAccounts,
+            );
 
-    //     do {
-    //         const inputNotes = [];
-    //         const depositInputOwnerAccounts = [];
+            // eslint-disable-next-line no-await-in-loop
+            await web3Service
+                .useContract('ZkAssetOwnable')
+                .at(zkAssetAddress)
+                .method('confidentialTransfer')
+                .send(
+                    depositData,
+                    depositSignatures,
+                );
 
-    //         // outputNotes with 1 balances
-    //         const noteValues = new Array(notesPerRequest);
-    //         noteValues.fill(1);
+            createdNotes += (notesPerRequest + 1);
 
-    //         try {
-    //             // eslint-disable-next-line no-await-in-loop
-    //             outputNotes = await generateNotes(noteValues, senderAccount);
-    //         } catch (error) {
-    //             errorLog('Error during generation notes', error);
-    //         }
-    //         const publicValue = ProofUtils.getPublicValue(
-    //             [],
-    //             noteValues,
-    //         );
-
-    //         depositProof = new JoinSplitProof(
-    //             inputNotes,
-    //             outputNotes,
-    //             userAddress,
-    //             publicValue,
-    //             userAddress,
-    //         );
-
-    //         // eslint-disable-next-line no-await-in-loop
-    //         await web3Service
-    //             .useContract('ACE')
-    //             .method('publicApprove')
-    //             .send(
-    //                 zkAssetAddress,
-    //                 depositProof.hash,
-    //                 depositAmount,
-    //             );
-
-    //         const depositData = depositProof.encodeABI(zkAssetAddress);
-    //         const depositSignatures = depositProof.constructSignatures(
-    //             zkAssetAddress,
-    //             depositInputOwnerAccounts,
-    //         );
-
-    //         // eslint-disable-next-line no-await-in-loop
-    //         await web3Service
-    //             .useContract('ZkAssetOwnable')
-    //             .at(zkAssetAddress)
-    //             .method('confidentialTransfer')
-    //             .send(
-    //                 depositData,
-    //                 depositSignatures,
-    //             );
-
-    //         createdNotes += (notesPerRequest + 1);
-
-    //         // eslint-disable-next-line radix
-    //         log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateNotesCount)} %`);
-    //     } while (createdNotes < prepopulateNotesCount);
-    // });
+            // eslint-disable-next-line radix
+            log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateNotesCount)} %`);
+        } while (createdNotes < prepopulateNotesCount);
+    });
 
 
     it(`check how does it take to fetch ${prepopulateNotesCount} events, filter by owner and store into faked db`, async () => {
@@ -277,7 +249,7 @@ describe('ZkAsset', () => {
             address: userAddress,
             privateKey,
             linkedPublicKey,
-        } = senderAccount;
+        } = account;
 
         log(`Sender address: ${userAddress} private key: ${privateKey}`);
 
@@ -359,49 +331,13 @@ describe('ZkAsset', () => {
         log(`Syncing notes and decryption with sync service took: ${((t1 - t0) / 1000)} seconds.`);
     });
 
-    it.only('validateNoteData', async () => {
+    it.skip('validateNoteData', async () => {
         const {
-            address,
-        } = sender;
-
-        const keyStorePayload = {
-            password: '5d4hl6xv5r',
-            salt: 'y29qm2',
-            address,
-            seedPhrase: 'involve filter stadium reopen symptom better diamond demise evoke ticket alert wine',
-            hdPathString: "m/44'/60'/0'/0",
-        };
-
-        const { pwDerivedKey } = await KeyStore.generateDerivedKey(keyStorePayload);
-
-        const keyStore = new KeyStore({
-            pwDerivedKey,
-            salt: keyStorePayload.salt,
-            mnemonic: keyStorePayload.seedPhrase,
-            hdPathString: keyStorePayload.hdPathString,
-        });
-
-        await AuthService.registerExtension({
-            keyStore,
-            pwDerivedKey,
-        });
-
-        const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
-        const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
-        const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
-
-        senderAccount = {
-            address,
             linkedPublicKey,
-            spendingPublicKey,
-        };
-        await AuthService.registerAddress({
-            ...senderAccount,
-            blockNumber: 1,
-        });
+            privateKey,
+        } = account;
 
-        const [note] = await generateNotes([1], senderAccount);
+        const [note] = await generateNotes([1], account);
         const viewKey = note.getView();
         const encryptetView = encryptedViewingKey(linkedPublicKey, viewKey);
 
