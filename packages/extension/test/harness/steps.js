@@ -27,16 +27,21 @@ module.exports = {
                 }
                 delete environment.openPages[this.id];
             },
-            initialiseAztec: async function() {
+            initialiseAztec: async function(wait = false) {
                 this.aztecContext = true;
                 await this.api.waitFor(() => !!window.aztec);
-                this.api.evaluate(async () => {
+                await this.api.evaluate(async (wait) => {
                     try {
-                        window.aztec.enable();
+                        if (wait) {
+                            return window.aztec.enable();
+                        } else {
+                            window.aztec.enable();
+                            return ;
+                        }
                     } catch (e) {
                         console.log(e);
                     }
-                });
+                }, wait);
             },
             screenshot: async function(fileName) {
                 const name = fileName || `${Date.now()}.png`;
