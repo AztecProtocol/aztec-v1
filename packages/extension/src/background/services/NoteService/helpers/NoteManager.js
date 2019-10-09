@@ -130,7 +130,7 @@ export default class NoteManager {
                 args,
             );
         }
-
+        
         return this[cbName](args);
     }
 
