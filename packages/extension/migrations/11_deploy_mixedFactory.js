@@ -13,12 +13,25 @@ module.exports = (deployer) => {
         process.exit(1);
     }
 
+    if (process.env.NODE_ENV === 'integration') {
+        /* eslint-disable no-new */
+        new Promise(() => {
+            return deployer.deploy(AdjustableFactory, ACE.address, {overwrite: false}).then(async ({ address }) => {
+                const ace = await ACE.at(ACE.address);
+                try {
+                    await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 3 * 256 ** 0, address);
+                } catch (e) {}
+            });
+        });
+    }
+
     /* eslint-disable no-new */
     new Promise(() => {
         return deployer.deploy(AdjustableFactory, ACE.address).then(async ({ address }) => {
             const ace = await ACE.at(ACE.address);
-
-            await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 3 * 256 ** 0, address);
+            try {
+                await ace.setFactory(1 * 256 ** 2 + 1 * 256 ** 1 + 3 * 256 ** 0, address);
+            } catch (e) {}
         });
     });
 };

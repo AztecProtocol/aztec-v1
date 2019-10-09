@@ -8,8 +8,19 @@ const PublicRangeInterface = artifacts.require('@aztec/protocol/contracts/interf
 PublicRange.abi = PublicRangeInterface.abi;
 
 module.exports = (deployer) => {
+    if (process.env.NODE_ENV === 'integration') {
+        return deployer.deploy(PublicRange, {overwrite: false}).then(async ({ address: PublicRangeAddress }) => {
+            const ace = await ACE.at(ACE.address);
+            try {
+                await ace.setProof(proofs.PUBLIC_RANGE_PROOF, PublicRangeAddress);
+            } catch (e) {}
+        });
+    }
+
     return deployer.deploy(PublicRange).then(async ({ address: PublicRangeAddress }) => {
         const ace = await ACE.at(ACE.address);
-        await ace.setProof(proofs.PUBLIC_RANGE_PROOF, PublicRangeAddress);
+        try {
+            await ace.setProof(proofs.PUBLIC_RANGE_PROOF, PublicRangeAddress);
+        } catch (e) {}
     });
 };
