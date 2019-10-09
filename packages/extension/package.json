@@ -86,7 +86,7 @@
         "start:ui": "babel-node ./src/ui/mock/devServer",
         "test": "jest ./src",
         "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
-        "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=TEST truffle test ./test/*",
+        "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=integration truffle test ./test/*",
         "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
         "watch": "webpack --watch --config webpack.dev.js"
     },

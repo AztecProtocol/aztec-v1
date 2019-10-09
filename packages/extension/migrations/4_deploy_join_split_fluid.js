@@ -8,9 +8,23 @@ const JoinSplitFluidInterface = artifacts.require('@aztec/protocol/contracts/int
 JoinSplitFluid.abi = JoinSplitFluidInterface.abi;
 
 module.exports = (deployer) => {
+    if (process.env.NODE_ENV === 'integration') {
+        return deployer.deploy(JoinSplitFluid, {overwrite: false}).then(async ({ address: joinSplitFluidAddress }) => {
+            const ace = await ACE.at(ACE.address);
+    
+            try {
+                await ace.setProof(proofs.MINT_PROOF, joinSplitFluidAddress);
+                await ace.setProof(proofs.BURN_PROOF, joinSplitFluidAddress);
+            } catch (e) {}
+        });
+    }
+
     return deployer.deploy(JoinSplitFluid).then(async ({ address: joinSplitFluidAddress }) => {
         const ace = await ACE.at(ACE.address);
-        await ace.setProof(proofs.MINT_PROOF, joinSplitFluidAddress);
-        await ace.setProof(proofs.BURN_PROOF, joinSplitFluidAddress);
+
+        try {
+            await ace.setProof(proofs.MINT_PROOF, joinSplitFluidAddress);
+            await ace.setProof(proofs.BURN_PROOF, joinSplitFluidAddress);
+        } catch (e) {}
     });
 };
