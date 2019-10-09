@@ -14,7 +14,7 @@ import Restore from '~ui/views/pages/Restore';
 import RestoreFailed from '~ui/views/RestoreFailed';
 import DuplicatedAccount from '~ui/views/DuplicatedAccount';
 import Login from '~ui/views/Login';
-import RegisterAddress from '~ui/views/RegisterAddress';
+import RegisterAddress from '~ui/views/pages/RegisterAddress';
 import NoteAccess from '~ui/views/pages/NoteAccess';
 import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
 import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
