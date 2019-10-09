@@ -196,8 +196,7 @@ class SyncManager {
                     this.increaseBlocksPerRequest();
                 }
 
-                //TODO: just for test, remove false
-                if (currentBlock - newLastSyncedBlock > precisionDelta && false) {
+                if (currentBlock - newLastSyncedBlock > precisionDelta) {
                     status = SYNCING_STATUS.SHOULD_LOAD_NEXT_PORTION;
                 } else {
                     status = SYNCING_STATUS.FINISHED;
