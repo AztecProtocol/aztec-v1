@@ -61,7 +61,7 @@ const stepsForNewAccount = [
             },
             {
                 name: 'keyvault',
-                run: apis.auth.createKeyVault,
+                run: apis.auth.createKeyStore,
             },
             {
                 name: 'register_extension',
@@ -75,7 +75,7 @@ const stepsForNewAccount = [
     },
 ];
 
-const RegisterAddress = ({
+const RegisterAddressTransaction = ({
     title,
     description,
     submitButtonText,
@@ -139,7 +139,7 @@ const RegisterAddress = ({
     );
 };
 
-RegisterAddress.propTypes = {
+RegisterAddressTransaction.propTypes = {
     title: PropTypes.string,
     description: PropTypes.string,
     submitButtonText: PropTypes.string,
@@ -155,7 +155,7 @@ RegisterAddress.propTypes = {
     onClose: PropTypes.func,
 };
 
-RegisterAddress.defaultProps = {
+RegisterAddressTransaction.defaultProps = {
     title: '',
     description: '',
     submitButtonText: '',
@@ -169,4 +169,4 @@ RegisterAddress.defaultProps = {
     onClose: null,
 };
 
-export default RegisterAddress;
+export default RegisterAddressTransaction;

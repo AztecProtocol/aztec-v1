@@ -10,14 +10,14 @@ import RestoreFromSeedPhrase from '~ui/views/RestoreFromSeedPhrase';
 import CreatePassword from '~ui/views/CreatePassword';
 import Loading from '~ui/views/Loading';
 import RestoreFailed from '~ui/views/RestoreFailed';
-import RegisterAddress from '~ui/views/RegisterAddress';
+import RegisterAddressTransaction from '~ui/views/RegisterAddressTransaction';
 
 const Steps = [
     RestoreFromSeedPhrase,
     CreatePassword,
     Loading,
     RestoreFailed,
-    RegisterAddress,
+    RegisterAddressTransaction,
 ];
 
 const handleOnStep = (step, prevData) => {

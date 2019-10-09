@@ -8,14 +8,14 @@ import Intro from '~ui/views/RegisterIntro';
 import BackupKeys from '~ui/views/BackupKeys';
 import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
 import CreatePassword from '~ui/views/CreatePassword';
-import RegisterAddress from '~ui/views/RegisterAddress';
+import RegisterAddressTransaction from '~ui/views/RegisterAddressTransaction';
 
 const Steps = [
     Intro,
     BackupKeys,
     ConfirmBackupKeys,
     CreatePassword,
-    RegisterAddress,
+    RegisterAddressTransaction,
 ];
 
 const handleGoBack = (step) => {
