@@ -1,7 +1,7 @@
-import Web3Service from '~background/services/Web3Service';
+import NetworkService from '~background/services/NetworkService';
 import {
     IZkAssetConfig,
-} from '~background/config/contracts';
+} from '~config/contracts';
 import decodeNoteLogs from './helpers/decodeNoteLogs';
 
 
@@ -13,7 +13,7 @@ export default async function fetchNotes({
     toBlock = 'latest',
     networkId,
 } = {}) {
-    const { abi, getPastLogs } = Web3Service(networkId).eth;
+    const { abi, getPastLogs } = NetworkService().eth;
 
     const eventsTopics = [
         IZkAssetConfig.events.createNote,

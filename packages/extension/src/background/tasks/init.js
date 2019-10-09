@@ -7,37 +7,41 @@ import {
 import {
     AZTECAccountRegistryConfig,
     ACEConfig,
-} from '../config/contracts';
+    IZkAssetConfig,
+} from '~/config/contracts';
 import {
     NETWORKS,
-} from '../config/constants';
-import Provider from '../config/provider';
+} from '~config/constants';
+import Provider from '~/config/provider';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~utils/Web3Service';
 import domainModel from '../../database/models/domain';
 import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
-import ACE from '../../../build/protocol/ACE.json';
 import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
-import Web3ServiceFactory from '~background/services/Web3Service/factory';
+import NetworkService from '~background/services/NetworkService/factory';
 // import { runLoadingEventsTest } from './syncTest'
 
 
-const configureWeb3Service = async () => {
+const configureWeb3Networks = async () => {
     const providerUrlGanache = await get('__providerUrl');
     const infuraProjectId = await get('__infuraProjectId');
 
     const contractsConfigs = [
         AZTECAccountRegistryConfig.config,
         ACEConfig.config,
+        IZkAssetConfig.config,
     ];
 
     const infuraNetworksConfigs = [
-        NETWORKS.MAIN, NETWORKS.ROPSTEN,
-        NETWORKS.RINKEBY, NETWORKS.GOERLI, NETWORKS.KOVAN,
+        NETWORKS.MAIN,
+        NETWORKS.ROPSTEN,
+        NETWORKS.RINKEBY,
+        NETWORKS.GOERLI,
+        NETWORKS.KOVAN,
     ].map(networkName => Provider.infuraConfig(networkName, infuraProjectId));
 
     const {
@@ -57,7 +61,7 @@ const configureWeb3Service = async () => {
         contractsConfigs,
     }));
 
-    Web3ServiceFactory.setConfigs(configs);
+    NetworkService.setConfigs(configs);
 };
 
 export default async function init() {
@@ -97,26 +101,11 @@ export default async function init() {
         );
     }
 
-    // TODO this will eventually be passed in from the config
-    await Web3Service.init({
-        provider: 'http://localhost:8545',
-    });
-    // load the contracts
-    Web3Service.registerContract(AZTECAccountRegistry);
-    //
-    Web3Service.registerInterface(ZkAssetMintable, {
-        name: 'ZkAsset',
-    });
-
-
-    Web3Service.registerInterface(ZkAssetBurnable, {
-        name: 'ZkAssetBurnable',
-    });
-
     SyncService.set({
         notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),
         syncInterval: await settings('SYNC_INTERVAL'),
     });
 
-    configureWeb3Service();
+    configureWeb3Networks();
+    console.log('____CONFIGURED');
 }

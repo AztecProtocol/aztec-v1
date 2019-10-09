@@ -1,17 +1,17 @@
-// import Web3Service from '~background/services/Web3Service';
+// import Web3Service from '~background/services/NetworkService';
 // import decodeNoteLogs from '../services/EventService/utils/helpers/decodeNoteLogs';
 // import {
 //     saveNotes
 // } from '../services/EventService/utils/saveNotes';
 // import {
 //     IZkAssetConfig,
-// } from '~background/config/contracts';
+// } from '~config/contracts';
 // import { infuraHttpProviderURI } from '~background/helpers/InfuraTestCreds';
-// import Web3ServiceFactory from '~background/services/Web3Service/factory';
+// import NetworkService from '~background/services/NetworkService/factory';
 // import {
 //     AZTECAccountRegistryConfig,
 //     ACEConfig,
-// } from '../config/contracts';
+// } from '~config/contracts';
 // import {
 //     clearDB
 //  } from '~background/database';
@@ -30,7 +30,7 @@
 // };
 
 // const optionsForAllEvents = (address) => {
-//     const { abi } = Web3Service(networksConfig.networkId).eth;
+//     const { abi } = Web3Service().eth;
 
 //     const eventsTopics = [
 //         IZkAssetConfig.events.createNote,
@@ -56,7 +56,7 @@
 
 //     clearDB({networkId: networksConfig.networkId});
 
-//     Web3ServiceFactory.setConfigs([networksConfig]);
+//     NetworkService.setConfigs([networksConfig]);
 
 //     const owner = {
 //         address: '0x27b60ccecad263fd6ba595c68ad0e4c968ad9c67',
@@ -67,7 +67,7 @@
 //     // given
 //     const options = optionsForAllEvents(assetEventsEmitterAddress);
 //     const eventsTopics = options.topics[0];
-//     const { getPastLogs } = Web3Service(networksConfig.networkId).eth;
+//     const { getPastLogs } = Web3Service().eth;
 
 //     // action
 //     const tStart = performance.now();

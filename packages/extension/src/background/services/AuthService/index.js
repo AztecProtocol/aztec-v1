@@ -63,6 +63,11 @@ const AuthService = {
             address,
         };
     },
+    setNetworkId: async (networkId) => {
+        await set({
+            networkId,
+        });
+    },
     updateSession: async (address) => {
         const prevSession = await get('session');
         const session = {

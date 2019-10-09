@@ -1,10 +1,10 @@
 import Web3 from 'web3';
 import AuthService from './helpers/AuthService';
 /* eslint-enable */
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import {
     IZkAssetConfig,
-} from '~background/config/contracts';
+} from '~config/contracts';
 import ZkAssetEventsEmitterTest from '~background/contracts/ZkAssetEventsEmitterTest';
 import { infuraHttpProviderURI } from '~background/helpers/InfuraTestCreds';
 
@@ -33,7 +33,7 @@ describe('ZkAsset', () => {
     });
 
     const generateHoteHashes = (count) => {
-        const { abi } = Web3Service.eth;
+        const { abi } = Web3Service().eth;
         const noteHashTopics = new Array(count);
         for (let i = 0; i < noteHashTopics.length; i++) {
             noteHashTopics[i] = abi.encodeParameter('bytes32', Web3.utils.toTwosComplement(i + 1));
@@ -42,7 +42,7 @@ describe('ZkAsset', () => {
     };
 
     const optionsForAllEvents = (address, countNoteHashTopics) => {
-        const { abi } = Web3Service.eth;
+        const { abi } = Web3Service().eth;
 
         const eventsTopics = [
             IZkAssetConfig.events.createNote,
@@ -71,13 +71,13 @@ describe('ZkAsset', () => {
         sender = AuthService.getAccount();
 
         const provider = new Web3.providers.HttpProvider(isGancheProvider ? ganacheProviderUrl : infuraHttpProviderURI);
-        Web3Service.init({ provider, account: sender });
+        // Web3Service.init({ provider, account: sender });
 
         if (isGancheProvider && !assetEventsEmitterAddress) {
             console.log('Deploying Events emitter...');
             ({
                 address: assetEventsEmitterAddress,
-            } = await Web3Service.deploy(ZkAssetEventsEmitterTest));
+            } = await Web3Service().deploy(ZkAssetEventsEmitterTest));
             console.log(`Set contract address: "${assetEventsEmitterAddress}" to assetEventsEmitterAddress 
                 to prevent creation smart contract each time and prepopulate it with events`);
         }
@@ -89,14 +89,14 @@ describe('ZkAsset', () => {
 
         if (!isGancheProvider) {
             console.log(`Using ${assetEventsEmitterAddress} ZkAssetEventsEmitter address...`);
-            Web3Service.registerContract(ZkAssetEventsEmitterTest, { address: assetEventsEmitterAddress });
+            Web3Service().registerContract(ZkAssetEventsEmitterTest, { address: assetEventsEmitterAddress });
         }
 
         if (prepopulateEventsCount < eventsPerTransaction) {
             console.warn('eventsPerTransaction should be less than prepopulateEventsCount');
         }
-
-        const alreadyExistEventsCount = await Web3Service
+        const web3 = Web3Service();
+        const alreadyExistEventsCount = await web3
             .useContract('ZkAssetEventsEmitterTest')
             .at(assetEventsEmitterAddress)
             .method('createdNotes')
@@ -111,7 +111,7 @@ describe('ZkAsset', () => {
         while (isGancheProvider && prepopulatedCount < prepopulateEventsCount) {
             const eventData = generateCreateNoteEvents(sender.address, eventsPerTransaction);
 
-            await Web3Service
+            await web3
                 .useContract('ZkAssetEventsEmitterTest')
                 .at(assetEventsEmitterAddress)
                 .method('emitCreateNote')
@@ -133,7 +133,7 @@ describe('ZkAsset', () => {
             options,
         } = optionsForAllEvents(assetEventsEmitterAddress, countFilterNoteHashTopics);
 
-        const { getPastLogs } = Web3Service.eth;
+        const { getPastLogs } = Web3Service().eth;
 
         // action
         const t0 = performance.now();
@@ -151,7 +151,7 @@ describe('ZkAsset', () => {
             options,
         } = optionsForAllEvents(assetEventsEmitterAddress);
 
-        const { getPastLogs } = Web3Service.eth;
+        const { getPastLogs } = Web3Service().eth;
 
         // action
         const t0 = performance.now();

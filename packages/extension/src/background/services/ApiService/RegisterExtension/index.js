@@ -1,4 +1,5 @@
 import filterStream from '~utils/filterStream';
+import AuthService from '~background/services/AuthService';
 import validateUserPermission from '../utils/validateUserPermision';
 
 const registerExtensionUi = async (query, connection) => {
@@ -31,6 +32,10 @@ const registerExtension = async (query, connection) => {
     const {
         data: { args },
     } = query;
+
+    // We set the network id here so everything runs correctly
+    await AuthService.setNetworkId(args.networkId);
+
     const response = await validateUserPermission({
         ...args,
         domain: window.location.host,

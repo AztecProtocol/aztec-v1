@@ -1,5 +1,5 @@
 import Web3ServiceFactory from '../factory';
-import Web3Service from '..';
+import Web3Service from '~utils/Web3Service';
 
 describe('Web3ServiceFactory', () => {
     const configs = [

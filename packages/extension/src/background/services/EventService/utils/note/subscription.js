@@ -1,7 +1,7 @@
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import {
     IZkAssetConfig,
-} from '~background/config/contracts';
+} from '~config/contracts';
 import {
     errorLog,
 } from '~utils/log';

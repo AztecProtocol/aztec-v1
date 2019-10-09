@@ -46,8 +46,7 @@ export default async function syncAssetNoteData(
             let value = 0;
             try {
                 const realViewingKey = fromHexString(encryptedVkString).decrypt(linkedPrivateKey);
-                const aztecNote = valueFromViewingKey(realViewingKey);
-                value = valueOf(aztecNote);
+                value = valueFromViewingKey(realViewingKey);
             } catch (error) {
                 errorLog('Failed to decrypt note from viewingKey.', {
                     viewingKey: encryptedVkString,

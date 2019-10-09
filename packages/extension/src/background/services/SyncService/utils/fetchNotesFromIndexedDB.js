@@ -1,9 +1,7 @@
 import Asset from '~background/database/models/asset';
 import Note from '~background/database/models/note';
 import NoteAccess from '~background/database/models/noteAccess';
-import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId';
-import {
-    errorLog,
+import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId'; import { errorLog,
 } from '~utils/log';
 
 

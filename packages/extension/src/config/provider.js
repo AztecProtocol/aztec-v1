@@ -1,6 +1,6 @@
 import {
     NETWORKS,
-} from './constants';
+} from '~config/constants';
 
 const infuraConfig = ({ id: networkId, networkName }, projectId) => ({
     title: networkName,

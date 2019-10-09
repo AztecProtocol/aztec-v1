@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import AuthService from './helpers/AuthService';
 /* eslint-enable */
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import decodeNoteLogs from '../helpers/decodeNoteLogs';
 import associatedNotesWithOwner from '../helpers/associatedNotesWithOwner';
 import saveNotes from '../saveNotes';
@@ -9,9 +9,9 @@ import {
     IZkAssetConfig,
     AZTECAccountRegistryConfig,
     ACEConfig,
-} from '~background/config/contracts';
-import Web3ServiceFactory from '~background/services/Web3Service/factory';
-import ZkAssetEventsEmitterTest from '~background/contracts/ZkAssetEventsEmitterTest';
+} from '~config/contracts';
+import NetworkService from '~background/services/NetworkService/factory';
+import ZkAssetEventsEmitterTest from '~config/contracts/ZkAssetEventsEmitterTest';
 import { infuraHttpProviderURI } from '~background/helpers/InfuraTestCreds';
 
 
@@ -43,7 +43,7 @@ describe('ZkAsset', () => {
     });
 
     const optionsForAllEvents = (address) => {
-        const { abi } = Web3Service.eth;
+        const { abi } = web3Service.eth;
 
         const eventsTopics = [
             IZkAssetConfig.events.createNote,
@@ -64,7 +64,7 @@ describe('ZkAsset', () => {
         return options;
     };
 
-    const configureWeb3Service = async () => {    
+    const configureWeb3Service = async () => {
         const contractsConfigs = [
             AZTECAccountRegistryConfig.config,
             ACEConfig.config,
@@ -77,7 +77,7 @@ describe('ZkAsset', () => {
             contractsConfigs,
         };
 
-        Web3ServiceFactory.setConfigs([
+        NetworkService.setConfigs([
             ...[ganacheNetworkConfig],
         ]);
     };
@@ -85,22 +85,22 @@ describe('ZkAsset', () => {
     beforeAll(async () => {
         sender = AuthService.getAccount();
 
-        web3Service = Web3Service(networkId, sender);
+        web3Service = Web3Service(sender);
 
         if (!assetEventsEmitterAddress) {
             console.log('Deploying Events emitter...');
             ({
                 address: assetEventsEmitterAddress,
-            } = await Web3Service.deploy(ZkAssetEventsEmitterTest));
+            } = await web3Service.deploy(ZkAssetEventsEmitterTest));
             console.log(`Set contract address: "${assetEventsEmitterAddress}" to assetEventsEmitterAddress 
                 to prevent creation smart contract each time and prepopulate it with events`);
         } else {
             console.log('ZkAssetEventsEmitterTest exists...');
-            Web3Service.registerContract(ZkAssetEventsEmitterTest, { address: assetEventsEmitterAddress });
+            web3Service.registerContract(ZkAssetEventsEmitterTest, { address: assetEventsEmitterAddress });
         }
 
         const options = optionsForAllEvents(assetEventsEmitterAddress);
-        const { getPastLogs } = Web3Service.eth;
+        const { getPastLogs } = web3Service.eth;
         const rawLogs = await getPastLogs(options);
 
         let createdEvents = rawLogs.length;
@@ -113,7 +113,7 @@ describe('ZkAsset', () => {
         while (createdEvents < prepopulateEventsCount) {
             const eventData = generateCreateNoteEvents(sender.address, eventsPerTransaction);
 
-            await Web3Service
+            await web3Service
                 .useContract('ZkAssetEventsEmitterTest')
                 .at(assetEventsEmitterAddress)
                 .method('emitCreateNote')
@@ -133,7 +133,7 @@ describe('ZkAsset', () => {
         // given
         const options = optionsForAllEvents(assetEventsEmitterAddress);
         const eventsTopics = options.topics[0];
-        const { getPastLogs } = Web3Service.eth;
+        const { getPastLogs } = web3Service.eth;
 
         // action
         const tStart = performance.now();

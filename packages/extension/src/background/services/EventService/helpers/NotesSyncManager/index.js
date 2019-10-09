@@ -3,7 +3,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '../../../Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import {
     fetchNotes,
     saveNotes,
@@ -162,7 +162,7 @@ class SyncManager {
             onFailure,
         } = progressCallbacks;
 
-        const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
+        const currentBlock = await Web3Service().eth.getBlockNumber();
         const fromBlock = lastSyncedBlock + 1;
         const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
 
@@ -196,8 +196,7 @@ class SyncManager {
                     this.increaseBlocksPerRequest();
                 }
 
-                //TODO: just for test, remove false
-                if (currentBlock - newLastSyncedBlock > precisionDelta && false) {
+                if (currentBlock - newLastSyncedBlock > precisionDelta) {
                     status = SYNCING_STATUS.SHOULD_LOAD_NEXT_PORTION;
                 } else {
                     status = SYNCING_STATUS.FINISHED;
@@ -325,7 +324,7 @@ class SyncManager {
                 blockNumber: assetRegisteredAtBlock,
             } = nonExistingAssets[i];
             const lastSyncedBlock = syncedBlocks[registryOwner] || assetRegisteredAtBlock;
-       
+
             // eslint-disable-next-line max-len
             lowestSyncedBlock = lowestSyncedBlock ? Math.min(lowestSyncedBlock, lastSyncedBlock) : lastSyncedBlock;
 
