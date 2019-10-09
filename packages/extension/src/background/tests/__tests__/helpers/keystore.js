@@ -1,10 +1,11 @@
 import {
+    userAccount,
     registrationData,
 } from '~helpers/testUsers';
 import AuthService from '~background/services/AuthService';
 
 
-export default async function keystoreData(account) {
+export default async function keystoreData() {
     const {
         address,
         linkedPublicKey,
@@ -12,19 +13,11 @@ export default async function keystoreData(account) {
         blockNumber,
     } = account;
 
-    await AuthService.registerExtension(registrationData);
-    await AuthService.registerAddress({
-        address,
-        linkedPublicKey,
-        spendingPublicKey,
-        blockNumber,
-    });
-
-    const keyStore = await AuthService.getKeyStore();
-    const session = await AuthService.getSession();
+    
 
     return {
         keyStore,
         session,
+        userAccount,
     };
 }

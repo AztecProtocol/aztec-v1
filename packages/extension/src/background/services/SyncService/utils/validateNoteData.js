@@ -27,6 +27,7 @@ export default async function validateNoteData(note, privateKey) {
         errorLog('Failed to decrypt note from viewingKey.', {
             viewingKey: encryptedVkString,
             privateKey,
+            error,
         });
         value = -1;
     }

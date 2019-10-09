@@ -26,16 +26,18 @@ import {
     warnLog,
     log,
 } from '~utils/log';
-import clearDB from '~background/database/utils/clearDB';
 import AuthService from '~background/services/AuthService';
 import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
-import KeystoreData from './helpers/keystore';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodePrivateKey from '~background/utils/decodePrivateKey';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import decodeSpendingPublicKey from '~background/utils/decodeSpendingPublicKey';
+import AuthService from '~background/services/AuthService';
+import validateNoteData from '~background/services/SyncService/utils/validateNoteData.js';
+import encryptedViewingKey from '~utils/encryptedViewingKey';
+import expectExport from 'expect';
 
 
 jest.mock('~utils/storage');
@@ -61,7 +63,7 @@ describe('ZkAsset', () => {
     let senderAccount;
 
     let erc20Address;
-    let zkAssetAddress = '0xF10b155f8Efc3422458652D6A041E5b8E982859D';
+    let zkAssetAddress = '0x439505a6AA1A9927b7550182d0a63dcd849E0a32';
     let outputNotes;
     let depositProof;
     let web3Service;
@@ -91,40 +93,43 @@ describe('ZkAsset', () => {
 
         configureWeb3Service();
         web3Service = Web3Service(networkId, sender);
-        const aceAddress = web3Service.contract('ACE').address;
 
+        const aceAddress = web3Service.contract('ACE').address;
         log(`aceAddress: ${aceAddress}`);
 
-        const {
-            error: aztecAccountError,
-            account,
-        } = await EventService.fetchAztecAccount({
+        const registrationData = {
+            password: '5d4hl6xv5r',
+            salt: 'y29qm2',
             address: userAddress,
-            networkId,
-        });
+            seedPhrase: 'involve filter stadium reopen symptom better diamond demise evoke ticket alert wine',
+        };
 
-        if (!account) {
-            errorLog('Firstly create account', aztecAccountError);
-            return;
-        }
-
+        await AuthService.registerExtension(registrationData);
+        const keyStore = await AuthService.getKeyStore();
         const {
-            keyStore,
-            session: {
-                pwDerivedKey,
-            },
-        } = await KeystoreData(account);
+            pwDerivedKey,
+        } = await AuthService.getSession();
 
         const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
         const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
         const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
 
+        log(`Private key start: ${privateKey}`);
+
         senderAccount = {
             address: userAddress,
-            privateKey,
             linkedPublicKey,
             spendingPublicKey,
+            blockNumber: 1,
+        };
+
+        await Account.add(senderAccount, { networkId });
+        await AuthService.registerAddress(senderAccount);
+
+        senderAccount = {
+            ...senderAccount,
+            privateKey,
         };
 
         const {
@@ -138,6 +143,7 @@ describe('ZkAsset', () => {
 
         if (error) {
             errorLog('Cannot fetch all notes', error);
+            return;
         }
 
         const eventsInGanache = groupedNotes.allNotes();
@@ -213,8 +219,12 @@ describe('ZkAsset', () => {
             const noteValues = new Array(notesPerRequest);
             noteValues.fill(1);
 
-            // eslint-disable-next-line no-await-in-loop
-            outputNotes = await generateNotes(noteValues, senderAccount);
+            try {
+                // eslint-disable-next-line no-await-in-loop
+                outputNotes = await generateNotes(noteValues, senderAccount);
+            } catch (error) {
+                errorLog('Error during generation notes', error);
+            }
             const publicValue = ProofUtils.getPublicValue(
                 [],
                 noteValues,
@@ -256,6 +266,7 @@ describe('ZkAsset', () => {
 
             createdNotes += (notesPerRequest + 1);
 
+            // eslint-disable-next-line radix
             log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateNotesCount)} %`);
         } while (createdNotes < prepopulateNotesCount);
     });
@@ -272,7 +283,7 @@ describe('ZkAsset', () => {
         log(`Sender address: ${userAddress} private key: ${privateKey}`);
 
         await EventService.addAccountToSync({
-            address: sender.address,
+            address: userAddress,
             networkId,
         });
 
@@ -332,7 +343,7 @@ describe('ZkAsset', () => {
          * Sync account with syncAccount
          */
         t0 = performance.now();
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
             const onCompleate = (result) => {
                 log(`Finished SyncService: ${JSON.stringify(result)}`);
                 resolve();
@@ -347,5 +358,56 @@ describe('ZkAsset', () => {
         });
         t1 = performance.now();
         log(`Syncing notes and decryption with sync service took: ${((t1 - t0) / 1000)} seconds.`);
+    });
+
+    it.skip('validateNoteData', async () => {
+        const {
+            address,
+        } = sender;
+
+        const registrationData = {
+            password: '5d4hl6xv5r',
+            salt: 'y29qm2',
+            address,
+            seedPhrase: 'involve filter stadium reopen symptom better diamond demise evoke ticket alert wine',
+        };
+
+        await AuthService.registerExtension(registrationData);
+        const keyStore = await AuthService.getKeyStore();
+        const {
+            pwDerivedKey,
+        } = await AuthService.getSession();
+
+        const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
+        const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
+        // const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
+        // const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
+
+        // senderAccount = {
+        //     address,
+        //     linkedPublicKey,
+        //     spendingPublicKey,
+        // };
+        // await AuthService.registerAddress({
+        //     ...senderAccount,
+        //     blockNumber: 1,
+        // });
+
+        // const [note] = await generateNotes([1], senderAccount);
+        // const viewKey = note.getView();
+        // const encryptetView = encryptedViewingKey(linkedPublicKey, viewKey);
+        // log(`encryptetView: ${encryptetView.decrypt(privateKey)}`);
+        // log(`encryptetView: ${JSON.stringify(encryptetView)}`);
+
+        // expect(encryptetView.decrypt(privateKey)).toEqual(viewKey);
+
+        const noteData = {
+            viewingKey: '0x5fcf41a2df244edc273321f0e04f7fae8a2163a2ffbcb77ef103e3313c375d8b77f15b22d1b69244aff3e068169ec339d42bb8919fce90339ced021202ebc8674806da41d9187bf5cd44e4473926ac67fad5eea6df8f568c28fe202ef4c8e8601c5e91dcc5a69375e23e277b058aba576eeee19e0cfb3b748617e9c1bb27bb457e863eb38f1528b81cc5ffe921f9dc28b48c9dd18dea3b0eb8a29fba6af7e30184a45ea3c09d04ba87f7b08559b7e253d11ae8c7863025962b17f9e30ac8b17af018b51c494239ace287ebbba6836a33d634',
+            status: 'CREATED',
+        };
+
+        const result = await validateNoteData(noteData, privateKey);
+
+        log(`RESULT: ${JSON.stringify(result)}`);
     });
 });
