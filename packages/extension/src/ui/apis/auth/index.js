@@ -1,7 +1,7 @@
 import isLoggedIn from './isLoggedIn';
 import getCurrentUser from './getCurrentUser';
 import createPwDerivedKey from './createPwDerivedKey';
-import createKeyVault from './createKeyVault';
+import createKeyStore from './createKeyStore';
 import registerExtension from './registerExtension';
 import linkAccountToMetaMask from './linkAccountToMetaMask';
 import sendRegisterAddress from './sendRegisterAddress';
@@ -9,12 +9,14 @@ import registerAddress from './registerAddress';
 import restoreAccount from './restoreAccount';
 import getAccountKeys from './getAccountKeys';
 import approveDomain from './approveDomain';
+import login from './login';
+import getSession from './getSession';
 
 export {
     isLoggedIn,
     getCurrentUser,
     createPwDerivedKey,
-    createKeyVault,
+    createKeyStore,
     registerExtension,
     linkAccountToMetaMask,
     sendRegisterAddress,
@@ -22,4 +24,6 @@ export {
     restoreAccount,
     getAccountKeys,
     approveDomain,
+    login,
+    getSession,
 };

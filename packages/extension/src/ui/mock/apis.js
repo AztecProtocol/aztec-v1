@@ -37,7 +37,7 @@ export default mergeApis(realApis, {
         getCurrentUser: () => ({
             address: addresses[0],
         }),
-        createKeyVault: () => ({
+        createKeyStore: () => ({
             linkedPublicKey: 'linked_public_key',
         }),
     },

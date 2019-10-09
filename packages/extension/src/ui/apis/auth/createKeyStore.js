@@ -2,7 +2,7 @@ import {
     KeyStore,
 } from '~utils/keyvault';
 
-export default async function createKeyVault({
+export default async function createKeyStore({
     pwDerivedKey,
     seedPhrase,
     salt = 'salty',

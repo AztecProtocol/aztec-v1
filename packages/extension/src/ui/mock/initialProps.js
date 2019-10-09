@@ -46,7 +46,6 @@ export default {
         goNext: dummyFunc,
     },
     'register.address': {
-        address: addresses[0],
         goNext: dummyFunc,
     },
     'register.domain': {
@@ -57,17 +56,16 @@ export default {
     'account.restore': {
         goNext: dummyFunc,
     },
+    'account.restore.password': () => ({
+        description: i18n.t('account.restore.password.description'),
+        submitButtonText: i18n.t('account.restore.confirm'),
+        goNext: dummyFunc,
+    }),
     'account.restore.failed': {
         seedPhrase,
         isLinked: true,
         goNext: dummyFunc,
     },
-    'account.restore.password': () => ({
-        address: addresses[0],
-        description: i18n.t('account.restore.password.description'),
-        submitButtonText: i18n.t('account.restore.confirm'),
-        goNext: dummyFunc,
-    }),
     'account.login': {
         goNext: dummyFunc,
     },
