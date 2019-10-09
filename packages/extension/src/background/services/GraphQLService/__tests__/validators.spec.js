@@ -4,10 +4,8 @@ import {
 } from '~helpers/testUsers';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
-import SyncService from '~background/services/SyncService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
-import decodePrivateKey from '~background/utils/decodePrivateKey';
 import expectErrorResponse from '~helpers/expectErrorResponse';
 import {
     validateExtension,

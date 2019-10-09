@@ -1,6 +1,5 @@
-import noteModel from '~database/models/note';
-import assetModel from '~database/models/asset';
-import addressModel from '~database/models/address';
+// import assetModel from '~database/models/asset';
+// import addressModel from '~database/models/address';
 import {
     errorLog,
 } from '~utils/log';
@@ -9,99 +8,69 @@ import {
 } from '~utils/encryptedViewingKey';
 import {
     valueFromViewingKey,
-    valueOf,
 } from '~utils/note';
+// import {
+//     isDestroyed,
+// } from '~utils/noteStatus';
+import Note from '~background/database/models/note';
+import NoteAccess from '~background/database/models/noteAccess';
+import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId';
 import {
-    isDestroyed,
-} from '~utils/noteStatus';
-import note from '~background/database/models/note';
+    NOTE_STATUS,
+} from '~config/constants';
+import asyncForEach from '~utils/asyncForEach';
 
 export default async function syncAssetNoteData(
     ownerAddress,
     linkedPrivateKey,
     assetId,
     lastSynced = null,
-    // TODO: remove networkId 0
+    // TODO: pass networkId 0
     networkId = 0,
 ) {
     const noteValues = {};
-    const ownerKey = await addressModel.keyOf(ownerAddress);
-    const assetKey = await assetModel.keyOf(assetId);
     let balance = 0;
     let currentSynced = '';
 
-    // await note.query({ networkId }).each((note, cursor) => {
-    //     const {
-    //         key,
-    //         asset,
-    //         owner,
-    //         viewingKey: encryptedVkString,
-    //         status,
-    //     } = note;
-    //     currentSynced = key;
-    //     if (asset !== assetKey
-    //         || owner !== ownerKey
-    //         || isDestroyed(status)
-    //     ) {
-    //         return;
-    //     }
+    const {
+        blockNumber: lastSyncedBlock = 0,
+    } = Note.get({ networkId }, lastSynced);
 
-    //     let value = 0;
-    //     try {
-    //         const realViewingKey = fromHexString(encryptedVkString).decrypt(linkedPrivateKey);
-    //         const aztecNote = await fromViewingKey(realViewingKey);
-    //         value = valueOf(aztecNote);
-    //     } catch (error) {
-    //         errorLog('Failed to decrypt note from viewingKey.', {
-    //             viewingKey: encryptedVkString,
-    //         });
-    //         return;
-    //     }
+    const noteHashes = (await Note.query({ networkId })
+        .where({
+            owner: ownerAddress,
+            asset: assetId,
+            status: NOTE_STATUS.CREATED,
+        })
+        .and(n => n.blockNumber >= lastSyncedBlock && n.noteHash !== lastSynced)
+        .toArray())
+        .map(({ noteHash }) => noteHash);
 
-    //     if (!noteValues[value]) {
-    //         noteValues[value] = [];
-    //     }
-    //     noteValues[value].push(key);
-    //     balance += value;
-    // });
-
-    await noteModel.each(
-        async ({
-            key,
-            asset,
-            owner,
+    await asyncForEach(noteHashes, async (noteHash) => {
+        const accessId = getNoteAccessId(ownerAddress, noteHash);
+        const {
             viewingKey: encryptedVkString,
-            status,
-        }) => {
-            currentSynced = key;
-            if (asset !== assetKey
-                || owner !== ownerKey
-                || isDestroyed(status)
-            ) {
-                return;
-            }
+        } = await NoteAccess.get({ networkId }, accessId);
 
-            let value = 0;
-            try {
-                const realViewingKey = fromHexString(encryptedVkString).decrypt(linkedPrivateKey);
-                value = valueFromViewingKey(realViewingKey);
-            } catch (error) {
-                errorLog('Failed to decrypt note from viewingKey.', {
-                    viewingKey: encryptedVkString,
-                });
-                return;
-            }
+        let value = 0;
+        try {
+            const realViewingKey = fromHexString(encryptedVkString).decrypt(linkedPrivateKey);
+            value = valueFromViewingKey(realViewingKey);
+        } catch (error) {
+            errorLog('Failed to decrypt note from viewingKey.', {
+                viewingKey: encryptedVkString,
+                error,
+            });
+            throw error;
+        }
 
-            if (!noteValues[value]) {
-                noteValues[value] = [];
-            }
-            noteValues[value].push(key);
-            balance += value;
-        },
-        {
-            idGt: lastSynced,
-        },
-    );
+        if (!noteValues[value]) {
+            noteValues[value] = [];
+        }
+        noteValues[value].push(noteHash);
+        balance += value;
+        currentSynced = noteHash;
+    });
 
     return {
         balance,

@@ -13,16 +13,8 @@ import {
     NETWORKS,
 } from '~config/constants';
 import Provider from '~/config/provider';
-import settings from '~background/utils/settings';
-import SyncService from '~background/services/SyncService';
-import Web3Service from '~utils/Web3Service';
 import domainModel from '../../database/models/domain';
-import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
-import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
-import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
-import EventService from '~background/services/EventService';
 import NetworkService from '~background/services/NetworkService/factory';
-// import { runLoadingEventsTest } from './syncTest'
 
 
 const configureWeb3Networks = async () => {
@@ -67,9 +59,6 @@ export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
         // chrome.storage.local.clear();
 
-        // comment it
-        // await runLoadingEventsTest();
-
         await set({
             __providerUrl: 'ws://localhost:8545',
             __infuraProjectId: '',
@@ -99,11 +88,6 @@ export default async function init() {
             },
         );
     }
-
-    SyncService.set({
-        notesPerRequest: await settings('NOTES_PER_SYNC_REQUEST'),
-        syncInterval: await settings('SYNC_INTERVAL'),
-    });
 
     configureWeb3Networks();
     console.log('____CONFIGURED');

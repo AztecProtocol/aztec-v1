@@ -2,7 +2,6 @@ import {
     permissionError,
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
-import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
@@ -54,8 +53,7 @@ export default async function syncUserInfo(args, ctx) {
     const user = await AuthService.getRegisteredUser(userAddress);
     if (user) {
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        // console.log(`privateKey privateKeyprivateKeyprivateKeyprivateKey: ----------- ${JSON.stringify(privateKey)}, user: ${JSON.stringify(user)}`);
-
+        
         EventService.addAccountToSync({
             address: user.address,
             networkId,
@@ -70,12 +68,6 @@ export default async function syncUserInfo(args, ctx) {
             privateKey,
             user.linkedPublicKey,
         );
-
-        SyncService.syncAccount({
-            address: user.address,
-            privateKey,
-            networkId,
-        });
     }
 
     return user;

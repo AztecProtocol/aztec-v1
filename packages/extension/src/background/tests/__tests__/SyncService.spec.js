@@ -27,7 +27,6 @@ import {
     log,
 } from '~utils/log';
 import Account from '~background/database/models/account';
-import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
@@ -47,7 +46,7 @@ const {
 describe('ZkAsset', () => {
     const networkId = 0;
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 100;
+    const prepopulateNotesCount = 3500;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -302,24 +301,29 @@ describe('ZkAsset', () => {
 
 
         /**
-         * Sync account with syncAccount
+         * NoteService
          */
         t0 = performance.now();
-        await new Promise((resolve) => {
-            const onCompleate = (result) => {
-                log(`Finished SyncService: ${JSON.stringify(result)}`);
-                resolve();
-            };
+        await NoteService.initWithUser(
+            userAddress,
+            privateKey,
+            linkedPublicKey,
+        );
 
-            SyncService.syncAccount({
-                address: userAddress,
-                privateKey,
-                networkId,
-                onCompleate,
-            });
-        });
+        await NoteService.syncAsset(
+            userAddress,
+            zkAssetAddress,
+        );
         t1 = performance.now();
-        log(`Syncing notes and decryption with sync service took: ${((t1 - t0) / 1000)} seconds.`);
+        log(`Syncing notes and decryption with NoteService took: ${((t1 - t0) / 1000)} seconds.`);
+
+        await NoteService.save();
+
+        const balance = await NoteService.getBalance(
+            userAddress,
+            zkAssetAddress,
+        );
+        expect(balance).toEqual(depositAmount);
     });
 
     it.skip('validateNoteData', async () => {

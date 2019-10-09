@@ -21,7 +21,11 @@ export default {
         );
     },
     save: async () => manager.save(),
-    syncAsset: async assetId => manager.syncAsset({
+    syncAsset: async (
+        ownerAddress,
+        assetId,
+    ) => manager.syncAsset({
+        ownerAddress,
         assetId,
     }),
     addNoteValue: async (
