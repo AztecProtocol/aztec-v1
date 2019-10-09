@@ -53,7 +53,6 @@ export default async function syncUserInfo(args, ctx) {
 
     const user = await AuthService.getRegisteredUser(userAddress);
     if (user) {
-
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
         // console.log(`privateKey privateKeyprivateKeyprivateKeyprivateKey: ----------- ${JSON.stringify(privateKey)}, user: ${JSON.stringify(user)}`);
 
@@ -77,7 +76,6 @@ export default async function syncUserInfo(args, ctx) {
             privateKey,
             networkId,
         });
-
     }
 
     return user;
