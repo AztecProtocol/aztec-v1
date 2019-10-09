@@ -8,8 +8,21 @@ const Swap = artifacts.require('@aztec/protocol/contracts/ACE/validators/swap/Sw
 // Swap.abi = SwapInterface.abi;
 
 module.exports = (deployer) => {
+    if (process.env.NODE_ENV === 'integration') {
+        return deployer.deploy(Swap, {overwrite: false}).then(async ({ address: swapAddress }) => {
+            const ace = await ACE.at(ACE.address);
+    
+            try {
+                await ace.setProof(proofs.SWAP_PROOF, swapAddress);
+            } catch (e) {}
+        });
+    }
+
     return deployer.deploy(Swap).then(async ({ address: swapAddress }) => {
         const ace = await ACE.at(ACE.address);
-        await ace.setProof(proofs.SWAP_PROOF, swapAddress);
+
+        try {
+            await ace.setProof(proofs.SWAP_PROOF, swapAddress);
+        } catch (e) {}
     });
 };
