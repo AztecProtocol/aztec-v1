@@ -3,7 +3,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '../../../Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import {
     createBulkAssets,
     fetchAssets,

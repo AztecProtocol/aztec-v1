@@ -4,7 +4,7 @@ import Account from '~background/database/models/account';
 import Asset from '~background/database/models/asset';
 import {
     NOTE_STATUS,
-} from '~background/config/constants';
+} from '~config/constants';
 import * as fetchAccountModule from '../fetchAccount';
 import * as fetchNotesModule from '../fetchNotes';
 import clearDB from '~background/database/utils/clearDB';

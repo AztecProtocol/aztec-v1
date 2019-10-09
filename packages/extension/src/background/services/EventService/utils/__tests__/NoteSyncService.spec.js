@@ -7,7 +7,7 @@ import ERC20Mintable from '../../../../../../build/contracts/ERC20Mintable';
 import ZkAssetOwnable from '../../../../../../build/contracts/ZkAssetOwnable';
 import JoinSplit from '../../../../../../build/contracts/JoinSplit';
 
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import asyncMap from '~utils/asyncMap';
 import fetchNotes from '../fetchNotes';
 import decodeNoteLogs from '../note/helpers/decodeNoteLogs';
@@ -17,8 +17,8 @@ import {
     IZkAssetConfig,
     AZTECAccountRegistryConfig,
     ACEConfig,
-} from '~background/config/contracts';
-import Web3ServiceFactory from '~background/services/Web3Service/factory';
+} from '~/config/contracts';
+import NetworkService from '~background/services/NetworkService/factory';
 import {
     errorLog,
     log,
@@ -77,14 +77,14 @@ describe('ZkAsset', () => {
             contractsConfigs,
         };
 
-        Web3ServiceFactory.setConfigs([
+        NetworkService.setConfigs([
             ...[ganacheNetworkConfig],
         ]);
     };
 
     beforeAll(async () => {
         configureWeb3Service();
-        web3Service = Web3Service(networkId, sender);
+        web3Service = Web3Service(sender);
 
         const {
             error,
@@ -135,7 +135,7 @@ describe('ZkAsset', () => {
         } = await web3Service.deploy(ERC20Mintable));
 
         const notesPerRequest = 2;
-        let createdNotes = eventsInGanache;
+        const createdNotes = eventsInGanache;
 
         await web3Service
             .useContract('ERC20Mintable')
@@ -243,7 +243,7 @@ describe('ZkAsset', () => {
 
     it.skip(`check how does it take to fetch ${prepopulateEventsCount} events, filter by owner and store into faked db`, async () => {
         // given
-        const { abi, getPastLogs } = Web3Service.eth;
+        const { abi, getPastLogs } = web3Service.eth;
 
         const eventsTopics = [
             IZkAssetConfig.events.createNote,

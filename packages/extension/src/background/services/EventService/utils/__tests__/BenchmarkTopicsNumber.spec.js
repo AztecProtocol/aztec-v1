@@ -1,10 +1,10 @@
 import Web3 from 'web3';
 import AuthService from './helpers/AuthService';
 /* eslint-enable */
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~utils/Web3Service';
 import {
     IZkAssetConfig,
-} from '~background/config/contracts';
+} from '~config/contracts';
 import ZkAssetEventsEmitterTest from '~background/contracts/ZkAssetEventsEmitterTest';
 import { infuraHttpProviderURI } from '~background/helpers/InfuraTestCreds';
 

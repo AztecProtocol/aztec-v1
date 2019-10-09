@@ -7,7 +7,7 @@ import Note from '~background/database/models/note';
 import {
     clearDB,
 } from '~background/database';
-import { NOTE_STATUS } from '~background/config/constants';
+import { NOTE_STATUS } from '~config/constants';
 
 
 describe('updateNote', () => {

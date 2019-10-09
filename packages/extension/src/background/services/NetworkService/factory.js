@@ -1,22 +1,46 @@
 import Web3 from 'web3';
-import Web3Service from './service';
+import browser from 'webextension-polyfill';
+import Web3Service from '~/utils/Web3Service';
+import defaultContractConfig from '~config/contracts';
 import {
     errorLog,
 } from '~utils/log';
 
 
-class Web3ServiceFactory {
+// The goals of the web3 service
+// In the background
+// 1. return to the developer the correct Web3Instance with contract ABI's and addresses for interacting with the same
+// contract as metamask.
+// 2. send transactions from the users address TODO replace with GSN.
+// 3. provide EVENT apis for syncing
+//
+//
+// The service needs to be initialised with a config for each network. The client scripts should copy contract addresses
+// into this config.
+//
+
+
+class NetworkSwitcher {
+    constructor() {
+        this.networkId = 0;
+        browser.storage.onChanged.addListener((changes, namespace) => {
+            if (namespace === 'local' && changes.networkId) {
+                this.networkId = changes.networkId.newValue;
+            }
+        });
+    }
+
     web3ServicesByNetworks = {};
 
     networksConfigs = {};
 
-    ensureWeb3Service = (networkId, account) => {
-        const config = this.networksConfigs[networkId];
+    ensureWeb3Service = (account) => {
+        const config = this.networksConfigs[this.networkId];
         if (!config) {
-            errorLog(`No network config for such networkId: ${networkId}`);
+            errorLog(`No network config for such networkId: ${this.networkId}`);
             return;
         }
-        if (this.web3ServicesByNetworks[networkId]) {
+        if (this.web3ServicesByNetworks[this.networkId]) {
             return;
         }
         const {
@@ -33,14 +57,18 @@ class Web3ServiceFactory {
         });
         for (let i = 0; i < contractsConfigs.length; i += 1) {
             const contractConfig = contractsConfigs[i];
-            service.registerContract(contractConfig);
+            if (contractConfig.bytecode === '0x') {
+                service.registerInterface(contractConfig);
+            } else {
+                service.registerContract(contractConfig);
+            }
         }
-        this.web3ServicesByNetworks[networkId] = service;
+        this.web3ServicesByNetworks[this.networkId] = service;
     };
 
     setConfigs(networksConfigs) {
         if (!networksConfigs) {
-            errorLog('Config shoulnot be null in Web3ServiceFactory');
+            errorLog('Config should not be null in Web3ServiceFactory');
             return;
         }
 
@@ -74,10 +102,10 @@ class Web3ServiceFactory {
         };
     }
 
-    create(networkId) {
-        this.ensureWeb3Service(networkId);
-        return this.web3ServicesByNetworks[networkId];
+    create(account) {
+        this.ensureWeb3Service(account);
+        return this.web3ServicesByNetworks[this.networkId];
     }
 }
 
-export default new Web3ServiceFactory();
+export default new NetworkSwitcher();

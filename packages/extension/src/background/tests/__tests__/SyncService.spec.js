@@ -7,7 +7,7 @@ import ERC20Mintable from '../../../../build/contracts/ERC20Mintable';
 import ZkAssetOwnable from '../../../../build/contracts/ZkAssetOwnable';
 import JoinSplit from '../../../../build/contracts/JoinSplit';
 
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import { fetchNotes } from '../../services/EventService/utils/note';
 import {
     createBulkAssets,
@@ -15,8 +15,8 @@ import {
 import {
     AZTECAccountRegistryConfig,
     ACEConfig,
-} from '~background/config/contracts';
-import Web3ServiceFactory from '~background/services/Web3Service/factory';
+} from '~config/contracts';
+import Web3ServiceFactory from '~background/services/NetworkService/factory';
 import createNewAsset from './helpers/createNewAsset';
 import mint from './helpers/mint';
 import approve from './helpers/approve';

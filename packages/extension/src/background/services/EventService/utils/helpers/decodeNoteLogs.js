@@ -1,4 +1,4 @@
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import {
     IZkAssetConfig,
 } from '~background/config/contracts';
@@ -6,13 +6,13 @@ import groupBy from '~utils/groupBy';
 import { NOTE_STATUS } from '~background/config/constants';
 
 
-const decode = (inputs, rawLog, networkId) => {
+const decode = (inputs, rawLog) => {
     const [,
         firstInput,
         secondInput,
     ] = rawLog.topics;
 
-    const { abi } = Web3Service(networkId).eth;
+    const { abi } = Web3Service().eth;
     const decoded = {
         ...abi.decodeLog(inputs, rawLog.data, [
             firstInput,

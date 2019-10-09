@@ -10,7 +10,7 @@ import {
     ensureAccount,
     ensureDomainPermission,
 } from '../decorators';
-import configureFactory from '~background/services/Web3Service/__tests__/helpers/configureFactory';
+import configureFactory from '~background/services/NetworkService/__tests__/helpers/configureFactory';
 
 jest.mock('~utils/storage');
 

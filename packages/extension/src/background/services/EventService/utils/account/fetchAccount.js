@@ -1,7 +1,7 @@
-import Web3Service from '~background/services/Web3Service';
+import Web3Service from '~background/services/NetworkService';
 import {
     AZTECAccountRegistryConfig,
-} from '~background/config/contracts';
+} from '~config/contracts';
 
 export default async function fetchAccount({
     address,
@@ -20,6 +20,7 @@ export default async function fetchAccount({
             account: null,
         };
     }
+    const web3Service = Web3Service();
 
     const eventName = AZTECAccountRegistryConfig.events.registerExtension;
 
@@ -32,7 +33,7 @@ export default async function fetchAccount({
     };
 
     try {
-        const data = await Web3Service(networkId)
+        const data = await web3Service
             .useContract(AZTECAccountRegistryConfig.name)
             .events(eventName)
             .where(options);
@@ -62,4 +63,4 @@ export default async function fetchAccount({
             account: null,
         };
     }
-};
+}

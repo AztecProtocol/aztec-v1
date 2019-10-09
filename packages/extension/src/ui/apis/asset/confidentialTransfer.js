@@ -7,7 +7,7 @@ export default async function send({
 }) {
     const proofData = proof.encodeABI(assetAddress);
     const response = await ConnectionService.sendTransaction({
-        contract: 'ZkAsset',
+        contract: 'IZkAsset',
         contractAddress: assetAddress,
         method: 'confidentialTransfer',
         data: [
