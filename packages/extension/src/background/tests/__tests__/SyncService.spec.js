@@ -380,34 +380,23 @@ describe('ZkAsset', () => {
 
         const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        // const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
-        // const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
+        const linkedPublicKey = decodeLinkedPublicKey(keyStore, pwDerivedKey);
+        const spendingPublicKey = decodeSpendingPublicKey(keyStore, pwDerivedKey);
 
-        // senderAccount = {
-        //     address,
-        //     linkedPublicKey,
-        //     spendingPublicKey,
-        // };
-        // await AuthService.registerAddress({
-        //     ...senderAccount,
-        //     blockNumber: 1,
-        // });
-
-        // const [note] = await generateNotes([1], senderAccount);
-        // const viewKey = note.getView();
-        // const encryptetView = encryptedViewingKey(linkedPublicKey, viewKey);
-        // log(`encryptetView: ${encryptetView.decrypt(privateKey)}`);
-        // log(`encryptetView: ${JSON.stringify(encryptetView)}`);
-
-        // expect(encryptetView.decrypt(privateKey)).toEqual(viewKey);
-
-        const noteData = {
-            viewingKey: '0x5fcf41a2df244edc273321f0e04f7fae8a2163a2ffbcb77ef103e3313c375d8b77f15b22d1b69244aff3e068169ec339d42bb8919fce90339ced021202ebc8674806da41d9187bf5cd44e4473926ac67fad5eea6df8f568c28fe202ef4c8e8601c5e91dcc5a69375e23e277b058aba576eeee19e0cfb3b748617e9c1bb27bb457e863eb38f1528b81cc5ffe921f9dc28b48c9dd18dea3b0eb8a29fba6af7e30184a45ea3c09d04ba87f7b08559b7e253d11ae8c7863025962b17f9e30ac8b17af018b51c494239ace287ebbba6836a33d634',
-            status: 'CREATED',
+        senderAccount = {
+            address,
+            linkedPublicKey,
+            spendingPublicKey,
         };
+        await AuthService.registerAddress({
+            ...senderAccount,
+            blockNumber: 1,
+        });
 
-        const result = await validateNoteData(noteData, privateKey);
+        const [note] = await generateNotes([1], senderAccount);
+        const viewKey = note.getView();
+        const encryptetView = encryptedViewingKey(linkedPublicKey, viewKey);
 
-        log(`RESULT: ${JSON.stringify(result)}`);
+        expect(encryptetView.decrypt(privateKey)).toEqual(viewKey);
     });
 });
