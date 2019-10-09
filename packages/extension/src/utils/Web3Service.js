@@ -11,6 +11,7 @@ class Web3Service {
         this.contracts = {};
         this.abis = {};
         this.account = null;
+        this.eth = {};
     }
 
     async init({
@@ -27,6 +28,7 @@ class Web3Service {
         }
 
         this.web3 = new Web3(provider);
+        this.eth = this.web3.eth;
 
         if (account) {
             this.account = account;
@@ -264,18 +266,22 @@ class Web3Service {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }
                 return {
-                    where: ({
-                        filter = {},
-                        fromBlock = 0,
-                        toBlock = 'latest',
-                    } = {}) => contract.getPastEvents(eventName, {
-                        filter,
-                        fromBlock,
-                        toBlock,
+                    where: async (options = { filter: {}, fromBlock: 1, toBlock: 'latest' }) => contract.getPastEvents(eventName, {
+                        filter: options.filter,
+                        fromBlock: options.fromBlock,
+                        toBlock: options.toBlock,
                     }),
-                    all: () => contract.getPastEvents('allEvents', {
+                    all: async () => contract.getPastEvents('allEvents', {
                         fromBlock: 0,
                     }),
+                    subscribe: (options = { filter: {}, fromBlock: 1 }, callback) => contract.events[eventName]({
+                        filter: options.filter,
+                        fromBlock: options.fromBlock,
+                    }, callback),
+                    subscribeAll: (options = { filter: {}, fromBlock: 1 }, callback) => contract.events.allEvents({
+                        filter: options.filter,
+                        fromBlock: options.fromBlock,
+                    }, callback),
                 };
             },
             at: (address) => {
