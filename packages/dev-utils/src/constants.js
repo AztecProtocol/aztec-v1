@@ -49,9 +49,9 @@ const constants = {
      * Hash of a dummy AZTEC note with k = 0 and a = 1
      * @constant ZERO_VALUE_NOTE_HASH
      * @type {string}
-     * @default 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c
+     * @default 0xf4e5f833b89894c43804fdb171562eb9d2713b8d71777183712294f428c57775
      */
-    ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
+    ZERO_VALUE_NOTE_HASH: '0xf4e5f833b89894c43804fdb171562eb9d2713b8d71777183712294f428c57775',
 };
 
 /**

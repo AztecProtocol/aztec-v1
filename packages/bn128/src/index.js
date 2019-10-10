@@ -7,7 +7,7 @@
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const EC = require('elliptic');
-const { randomHex } = require('web3-utils');
+const { randomHex, hexToNumberString, padLeft } = require('web3-utils');
 
 const decodePoint = require('./decodePoint');
 
@@ -43,6 +43,9 @@ bn128.curve = new EC.curve.short({
     g: ['1', '2'],
 });
 
+const hXHex = '0x093a76a96633bd5f0a7177040b349486850d98f3a924986f219cc2366f21e4d1';
+const hYHex = '0x13c6ccce9ac58d3a4b6899acdb17e52be9c88208fbb2fad9aeaf60ab14788e3a';
+
 /**
  * X-Coordinate of AZTEC's second generator point 'h'. Created by taking the keccak256 hash of the ascii string
  *      'just read the instructions', right-padded to 32 bytes. i.e:
@@ -50,16 +53,14 @@ bn128.curve = new EC.curve.short({
  *      the elliptic curve group modulus n.
  *  @type {BN}
  *  @default
- *  7673901602397024137095011250362199966051872585513276903826533215767972925880
  */
-// bn128.H_X = new BN('29510877138996177b6377685d7ad13049824250b4c84b59292b542ec1bd1a2c', 16);
+bn128.H_X = new BN(hexToNumberString(hXHex), 10);
 
-// /** Y-Coordinate of AZTEC's second generator point 'h'. Created from odd-valued root of (H_X^{3} + 3)
-//  *  @type {BN}
-//  *  @default
-//  *  8489654445897228341090914135473290831551238522473825886865492707826370766375
-//  */
-// bn128.H_Y = new BN('245d8aa2a80d7979919b6fafc50e5b954ae6d11625bb93691dfdd110fa0db78d', 16);
+/** Y-Coordinate of AZTEC's second generator point 'h'. Created from odd-valued root of (H_X^{3} + 3)
+ *  @type {BN}
+ *  @default
+ */
+bn128.H_Y = new BN(hexToNumberString(hYHex), 10);
 
 bn128.h = bn128.curve.point(bn128.H_X, bn128.H_Y);
 
@@ -67,16 +68,13 @@ bn128.h = bn128.curve.point(bn128.H_X, bn128.H_Y);
  * The common reference string
  */
 bn128.t2 = [
-    '0xc332790575a124b4e0719ea8b8de7dd3f05c4cd17bc33bec7e6eef4118dd8df',
-    '0x24cd5e5e3ecb3c5ff762f2019ff27b21964e98e12f859d2e5d86e1a0582dc9be',
-    '0x8baa9ddaa219f46c462de4b3577ba514d3989d1eb06f34fcc0c0d4b62d4c4d5',
-    '0x2419a805e1384577d9081b465a793e6a18d8335923b1bae4884c8ca80b28fea',
+    '0x293ac2bf4d234d8c820c91bbbbbe4aeeefeacd407153bd585d288a96372f3a72',
+    '0x2ea4865f019129437c22977d4a460855a30f160d2ea3e224281d1eccd5ce4fa2',
+    '0x29fb36fb858e8886286c7901e5ec956efa65c2b20bed2b5493ef5545da8edb98',
+    '0x0523def7549176dbefc119c5cc975d4a92cd4bed8ce08ecd301fceecbd6efa7f',
 ];
-bn128.CRS = [
-    `0x2883d3b3bc1069ebc6de30d112fbcf338ca221a054e82b80a380d7d3bb571d9f`,
-    `0x249ea3a110a7700146e43fd8274ec1e40a1071ae1aa043b2fdbd91221a2091e6`,
-    ...bn128.t2,
-];
+
+bn128.CRS = [padLeft(`0x${bn128.H_X.toString(16)}`, 64), padLeft(`0x${bn128.H_Y.toString(16)}`, 64), ...bn128.t2];
 
 /**
  * Compress a bn128 point into 256 bits.

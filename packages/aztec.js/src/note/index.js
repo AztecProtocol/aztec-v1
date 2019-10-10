@@ -223,7 +223,7 @@ note.create = async (spendingPublicKey, value, noteOwner) => {
 };
 
 /**
- * Create a zero value note with from a constant a to make the hash of the initial totalMinted note in
+ * Create a zero value note with from a constant `a` to make the hash of the initial totalMinted note in
  * mintable assets a constant
  *
  * @method createZeroValueNote

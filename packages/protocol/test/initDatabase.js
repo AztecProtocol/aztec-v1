@@ -36,15 +36,15 @@ setup.fetchPoint = async (inputValue) => {
     }
 
     return new Promise((resolve, reject) => {
-        const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
-        const fileName = path.posix.resolve(partialPath, `data${fileNum * constants.SIGNATURES_PER_FILE - 10}.dat`);
+        const fileNum = Math.floor(Number(value) / constants.SIGNATURES_PER_FILE);
+        const fileName = path.posix.resolve(partialPath, `data${fileNum * constants.SIGNATURES_PER_FILE}.dat`);
 
         fs.readFile(fileName, (err, data) => {
             if (err) {
                 return reject(err);
             }
             // each file starts at 0 (0, 1024, 2048 etc)
-            const min = (fileNum - 1) * constants.SIGNATURES_PER_FILE;
+            const min = fileNum * constants.SIGNATURES_PER_FILE;
             const bytePosition = (value - min) * 32;
             // eslint-disable-next-line new-cap
             const signatureBuf = new Buffer.alloc(32);
