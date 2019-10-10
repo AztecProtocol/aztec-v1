@@ -6,6 +6,7 @@ import {
 } from '~utils/random';
 import {
     encryptMessage,
+    batchEncrypt,
     decryptMessage,
     batchDecrypt,
     fromHexString,
@@ -83,6 +84,19 @@ describe('batchDecrypt', () => {
         const recovered = batchDecrypt(privateKey, encryptedData);
         expect(recovered).toEqual(messages);
         expect(fromSecretKeySpy).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('batchEncrypt', () => {
+    it('encrypt multiple messages at the same time', () => {
+        const messages = [
+            'my secret',
+            'my second secret',
+            'my last secret',
+        ];
+        const encryptedData = batchEncrypt(publicKey, messages);
+        const recovered = batchDecrypt(privateKey, encryptedData);
+        expect(recovered).toEqual(messages);
     });
 });
 
