@@ -3,10 +3,10 @@ import {
     IZkAssetConfig,
 } from '~config/contracts';
 import groupBy from '~utils/groupBy';
-import { NOTE_STATUS } from '~config/constants';
+import { NOTE_STATUS } from '~background/config/constants';
 
 
-const decode = (inputs, rawLog, networkId) => {
+const decode = (inputs, rawLog) => {
     const [,
         firstInput,
         secondInput,

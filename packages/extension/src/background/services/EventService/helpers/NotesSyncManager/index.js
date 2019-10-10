@@ -1,4 +1,5 @@
 import {
+    log,
     warnLog,
     errorLog,
 } from '~utils/log';
@@ -97,7 +98,7 @@ class SyncManager {
     };
 
 
-    stop = async ({
+    stop = ({
         address,
         assetsAddresses,
     }) => {
@@ -162,12 +163,14 @@ class SyncManager {
             onFailure,
         } = progressCallbacks;
 
-        const currentBlock = await Web3Service().eth.getBlockNumber();
+
+        const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
         const fromBlock = lastSyncedBlock + 1;
         const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
 
         let newLastSyncedBlock = lastSyncedBlock;
         let status = null;
+
         if (currentBlock > lastSyncedBlock + precisionDelta) {
             const {
                 error,
