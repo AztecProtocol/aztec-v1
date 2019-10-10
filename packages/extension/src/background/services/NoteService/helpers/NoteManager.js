@@ -36,6 +36,7 @@ export default class NoteManager {
         };
         this.syncing = false;
         this.queue = [];
+        this.networkId = null;
     }
 
     reset() {
@@ -47,13 +48,14 @@ export default class NoteManager {
         this.assetNoteDataMapping = {};
         this.syncing = false;
         this.queue = [];
+        this.networkId = null;
     }
 
     warnInconsistentOwner(inputAddress) {
         warnLog(`Owner address does not match the current address. ${inputAddress} !== ${this.owner.address}`);
     }
 
-    async init(ownerAddress, linkedPrivateKey, linkedPublicKey) {
+    async init(ownerAddress, linkedPrivateKey, linkedPublicKey, networkId) {
         if (ownerAddress === this.owner.address) return;
 
         this.syncing = true;
@@ -62,11 +64,12 @@ export default class NoteManager {
             linkedPublicKey,
             linkedPrivateKey,
         };
+        this.networkId = networkId;
         let assetNoteDataMapping = await recoverFromStorage(
             ownerAddress,
             linkedPrivateKey,
         );
-        assetNoteDataMapping = await mergeWithLatestAsset(ownerAddress, linkedPrivateKey, assetNoteDataMapping);
+        assetNoteDataMapping = await mergeWithLatestAsset(ownerAddress, linkedPrivateKey, assetNoteDataMapping, networkId);
         // check if the input owner is still the same
         // 'init' might have been called again with a different address
         // before 'recoverFromStorage' is done
@@ -184,6 +187,7 @@ export default class NoteManager {
             this.owner.linkedPrivateKey,
             assetId,
             prevLastSynced,
+            this.networkId,
         );
 
         if (ownerAddress !== this.owner.address) {

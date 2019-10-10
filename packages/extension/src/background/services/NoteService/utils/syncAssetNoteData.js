@@ -9,9 +9,6 @@ import {
 import {
     valueFromViewingKey,
 } from '~utils/note';
-// import {
-//     isDestroyed,
-// } from '~utils/noteStatus';
 import Note from '~background/database/models/note';
 import NoteAccess from '~background/database/models/noteAccess';
 import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId';
@@ -20,18 +17,17 @@ import {
 } from '~config/constants';
 import asyncForEach from '~utils/asyncForEach';
 
+
 export default async function syncAssetNoteData(
     ownerAddress,
     linkedPrivateKey,
     assetId,
     lastSynced = null,
-    // TODO: pass networkId 0
-    networkId = 0,
+    networkId,
 ) {
     const noteValues = {};
     let balance = 0;
     let currentSynced = '';
-
     const {
         blockNumber: lastSyncedBlock = 0,
     } = Note.get({ networkId }, lastSynced);
