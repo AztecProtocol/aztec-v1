@@ -5,7 +5,6 @@ import {
 } from '~utils/storage';
 import domainModel from '../../database/models/domain';
 import configureWeb3Networks from '~utils/configureWeb3Networks';
-// import { runLoadingEventsTest } from './syncTest'
 
 
 export default async function init() {

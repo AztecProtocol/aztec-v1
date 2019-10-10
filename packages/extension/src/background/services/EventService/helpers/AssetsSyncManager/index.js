@@ -68,9 +68,9 @@ class SyncManager {
             subscription,
             networkId,
         } = this.syncConfig;
-        const web3Service = await Web3Service();
+        const web3Service = await Web3Service({ networkId });
 
-        const blocks = await web3Service(networkId).eth.getBlockNumber();
+        const blocks = await web3Service.eth.getBlockNumber();
         const isSubscribedOnNewAssets = !!subscription && !pausedState;
 
         return {
