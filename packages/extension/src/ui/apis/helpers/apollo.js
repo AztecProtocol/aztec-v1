@@ -5,6 +5,7 @@ import { makeExecutableSchema } from 'graphql-tools';
 import gql from 'graphql-tag';
 import typeDefs from '~background/services/GraphQLService/typeDefs/ui';
 import resolvers from '~background/services/GraphQLService/resolvers/ui';
+import NetworkService from '~helpers/NetworkService/factory';
 
 const schema = makeExecutableSchema({
     typeDefs,

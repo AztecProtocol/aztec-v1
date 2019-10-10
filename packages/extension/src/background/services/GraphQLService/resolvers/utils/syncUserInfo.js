@@ -19,8 +19,7 @@ export default async function syncUserInfo(args, ctx) {
         session: {
             pwDerivedKey,
         },
-        // TODO: remove default value, when it will be passed here.
-        networkId = 0,
+        networkId,
     } = ctx;
     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
     const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
@@ -53,9 +52,7 @@ export default async function syncUserInfo(args, ctx) {
 
     const user = await AuthService.getRegisteredUser(userAddress);
     if (user) {
-
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        // console.log(`privateKey privateKeyprivateKeyprivateKeyprivateKey: ----------- ${JSON.stringify(privateKey)}, user: ${JSON.stringify(user)}`);
 
         EventService.addAccountToSync({
             address: user.address,
@@ -77,7 +74,6 @@ export default async function syncUserInfo(args, ctx) {
             privateKey,
             networkId,
         });
-
     }
 
     return user;

@@ -1,7 +1,9 @@
 import Web3 from 'web3';
 import browser from 'webextension-polyfill';
 import Web3Service from '~/utils/Web3Service';
-import defaultContractConfig from '~config/contracts';
+import {
+    get,
+} from '~utils/storage';
 import {
     errorLog,
 } from '~utils/log';
@@ -17,12 +19,9 @@ import {
 //
 // The service needs to be initialised with a config for each network. The client scripts should copy contract addresses
 // into this config.
-//
-
 
 class NetworkSwitcher {
     constructor() {
-        this.networkId = 0;
         browser.storage.onChanged.addListener((changes, namespace) => {
             if (namespace === 'local' && changes.networkId) {
                 this.networkId = changes.networkId.newValue;
@@ -30,11 +29,19 @@ class NetworkSwitcher {
         });
     }
 
+    setNetworkId(networkId) {
+        this.networkId = networkId;
+    }
+
     web3ServicesByNetworks = {};
 
     networksConfigs = {};
 
-    ensureWeb3Service = (account) => {
+    ensureWeb3Service = async (account) => {
+        if (!this.networkId) {
+            const resp = await get('networkId');
+            this.networkId = resp;
+        }
         const config = this.networksConfigs[this.networkId];
         if (!config) {
             errorLog(`No network config for such networkId: ${this.networkId}`);
@@ -49,9 +56,13 @@ class NetworkSwitcher {
         } = config;
 
         const service = new Web3Service();
-        const provider = new Web3.providers.WebsocketProvider(providerUrl);
-        // const provider = new Web3.providers.HttpProvider(providerUrl);
-        service.init({
+        let provider;
+        if (providerUrl.match(/^wss?:\/\//)) {
+            provider = new Web3.providers.WebsocketProvider(providerUrl);
+        } else {
+            provider = new Web3.providers.HttpProvider(providerUrl);
+        }
+        await service.init({
             provider,
             account,
         });
@@ -102,8 +113,8 @@ class NetworkSwitcher {
         };
     }
 
-    create(account) {
-        this.ensureWeb3Service(account);
+    async create(account) {
+        await this.ensureWeb3Service(account);
         return this.web3ServicesByNetworks[this.networkId];
     }
 }

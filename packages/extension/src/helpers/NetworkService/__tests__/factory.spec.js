@@ -1,5 +1,5 @@
 import Web3ServiceFactory from '../factory';
-import Web3Service from '~utils/Web3Service';
+import Web3Service from '~helpers/Web3Service';
 
 describe('Web3ServiceFactory', () => {
     const configs = [
@@ -120,7 +120,7 @@ describe('Web3ServiceFactory', () => {
         const networkConfig = configs[0];
 
         // action
-        const web3Service = Web3ServiceFactory.create(networkConfig.networkId);
+        const web3Service = Web3ServiceFactory.create();
 
         // expected
         expect(web3Service).toBeDefined();
@@ -134,8 +134,8 @@ describe('Web3ServiceFactory', () => {
         const networkConfig_2 = configs[1];
 
         // action
-        const web3Service = Web3ServiceFactory.create(networkConfig.networkId);
-        const web3Service_2 = Web3ServiceFactory.create(networkConfig_2.networkId);
+        const web3Service = Web3ServiceFactory.create();
+        const web3Service_2 = Web3ServiceFactory.create();
         web3Service.someAddFunc = (a, b) => a + b;
 
         // expected
@@ -145,13 +145,13 @@ describe('Web3ServiceFactory', () => {
         expect(web3Service_2.someAddFunc).toBeUndefined();
     });
 
-    it('should create new Web3Service', () => {
+    it('should create new Web3Service', async () => {
         // given
         Web3ServiceFactory.setConfigs(configs);
         const networkConfig = configs[0];
 
         // action
-        const service = Web3Service(networkConfig.networkId);
+        const service = await Web3Service();
 
         // expect
         expect(service).toBeDefined();

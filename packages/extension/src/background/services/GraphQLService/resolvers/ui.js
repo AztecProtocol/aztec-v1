@@ -8,7 +8,7 @@ import userModel from '~database/models/user';
 import mergeResolvers from './utils/mergeResolvers';
 import filterStream from '~utils/filterStream';
 import { randomId } from '~utils/random';
-import Web3Service from '~ui/services/Web3Service';
+import Web3Service from '~helpers/NetworkService';
 import base from './base';
 import ClientConnection from '../../../../ui/services/ClientConnectionService';
 
@@ -30,10 +30,13 @@ const uiResolvers = {
         },
     },
     Account: {
-        linkedPublicKey: async ({ address }) => Web3Service
-            .useContract('AZTECAccountRegistry')
-            .method('accountMapping')
-            .call(address),
+        linkedPublicKey: async ({ address }) => {
+            const web3Service = await Web3Service();
+
+            return web3Service.useContract('AZTECAccountRegistry')
+                .method('accountMapping')
+                .call(address);
+        },
     },
     Note: {
         decryptedViewingKey: async ({ decryptedViewingKey }) => decryptedViewingKey,

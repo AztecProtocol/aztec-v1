@@ -1,12 +1,12 @@
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import {
     AZTECAccountRegistryConfig,
 } from '~config/contracts';
 
 export default async function fetchAccount({
     address,
-    networkId,
 } = {}) {
+    console.log('in fetch account');
     if (!address) {
         return {
             error: new Error("'address' cannot be empty in fetchAccount"),
@@ -14,13 +14,7 @@ export default async function fetchAccount({
         };
     }
 
-    if (!networkId && networkId !== 0) {
-        return {
-            error: new Error("'networkId' cannot be empty in fetchAccount"),
-            account: null,
-        };
-    }
-    const web3Service = Web3Service();
+    const web3Service = await Web3Service();
 
     const eventName = AZTECAccountRegistryConfig.events.registerExtension;
 
@@ -37,6 +31,7 @@ export default async function fetchAccount({
             .useContract(AZTECAccountRegistryConfig.name)
             .events(eventName)
             .where(options);
+        console.log({ data });
 
         const accounts = data.map(({
             blockNumber,
@@ -58,6 +53,7 @@ export default async function fetchAccount({
             account,
         };
     } catch (error) {
+        console.log(error);
         return {
             error,
             account: null,

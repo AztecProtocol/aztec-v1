@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import AuthService from './helpers/AuthService';
 /* eslint-enable */
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import decodeNoteLogs from '../helpers/decodeNoteLogs';
 import associatedNotesWithOwner from '../helpers/associatedNotesWithOwner';
 import saveNotes from '../saveNotes';
@@ -10,7 +10,7 @@ import {
     AZTECAccountRegistryConfig,
     ACEConfig,
 } from '~config/contracts';
-import NetworkService from '~background/services/NetworkService/factory';
+import NetworkService from '~helpers/NetworkService/factory';
 import ZkAssetEventsEmitterTest from '~config/contracts/ZkAssetEventsEmitterTest';
 import { infuraHttpProviderURI } from '~background/helpers/InfuraTestCreds';
 
@@ -85,7 +85,7 @@ describe('ZkAsset', () => {
     beforeAll(async () => {
         sender = AuthService.getAccount();
 
-        web3Service = Web3Service(sender);
+        web3Service = await Web3Service(sender);
 
         if (!assetEventsEmitterAddress) {
             console.log('Deploying Events emitter...');

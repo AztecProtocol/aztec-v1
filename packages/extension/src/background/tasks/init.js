@@ -1,68 +1,14 @@
 /* global chrome */
 import {
-    get,
     set,
     onIdle,
 } from '~utils/storage';
-import {
-    AZTECAccountRegistryConfig,
-    ACEConfig,
-    IZkAssetConfig,
-} from '~/config/contracts';
-import {
-    NETWORKS,
-} from '~config/constants';
-import Provider from '~/config/provider';
 import settings from '~background/utils/settings';
 import SyncService from '~background/services/SyncService';
-import Web3Service from '~utils/Web3Service';
 import domainModel from '../../database/models/domain';
-import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry.json';
-import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable.json';
-import ZkAssetBurnable from '../../../build/protocol/ZkAssetBurnable.json';
-import NoteService from '~background/services/NoteService';
-import EventService from '~background/services/EventService';
-import NetworkService from '~background/services/NetworkService/factory';
+import configureWeb3Networks from '~utils/configureWeb3Networks';
 // import { runLoadingEventsTest } from './syncTest'
 
-
-const configureWeb3Networks = async () => {
-    const providerUrlGanache = await get('__providerUrl');
-    const infuraProjectId = await get('__infuraProjectId');
-
-    const contractsConfigs = [
-        AZTECAccountRegistryConfig.config,
-        ACEConfig.config,
-        IZkAssetConfig.config,
-    ];
-
-    const infuraNetworksConfigs = [
-        NETWORKS.MAIN,
-        NETWORKS.ROPSTEN,
-        NETWORKS.RINKEBY,
-        NETWORKS.GOERLI,
-        NETWORKS.KOVAN,
-    ].map(networkName => Provider.infuraConfig(networkName, infuraProjectId));
-
-    const {
-        id: ganacheNetworkId,
-        networkName: ganacheNetworkName,
-    } = NETWORKS.GANACHE;
-    const ganacheNetworkConfig = {
-        title: ganacheNetworkName,
-        networkId: ganacheNetworkId,
-        providerUrl: providerUrlGanache,
-    };
-    const configs = [
-        ...[ganacheNetworkConfig],
-        ...infuraNetworksConfigs,
-    ].map(config => ({
-        ...config,
-        contractsConfigs,
-    }));
-
-    NetworkService.setConfigs(configs);
-};
 
 export default async function init() {
     if (process.env.NODE_ENV !== 'production') {
@@ -106,6 +52,6 @@ export default async function init() {
         syncInterval: await settings('SYNC_INTERVAL'),
     });
 
-    configureWeb3Networks();
+    await configureWeb3Networks();
     console.log('____CONFIGURED');
 }
