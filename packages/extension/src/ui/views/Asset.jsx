@@ -9,8 +9,9 @@ import AssetSummary from '~ui/components/AssetSummary';
 import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
 
 const Asset = ({
+    address,
+    tokenAddress,
     code,
-    icon,
     balance,
     goBack,
     onClose,
@@ -25,8 +26,9 @@ const Asset = ({
     >
         <Block padding="0 l l">
             <AssetSummary
+                address={address}
+                tokenAddress={tokenAddress}
                 code={code}
-                icon={icon}
                 balance={balance}
             />
         </Block>
@@ -38,8 +40,9 @@ const Asset = ({
 );
 
 Asset.propTypes = {
+    address: PropTypes.string.isRequired,
+    tokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
-    icon: PropTypes.string,
     balance: PropTypes.number,
     pastTransactions: PropTypes.arrayOf(PropTypes.shape({
         type: PropTypes.string.isRequired,
@@ -57,7 +60,6 @@ Asset.propTypes = {
 
 Asset.defaultProps = {
     code: '',
-    icon: '',
     balance: null,
     pastTransactions: [],
     isLoadingTransactions: false,

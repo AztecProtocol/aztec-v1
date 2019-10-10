@@ -62,6 +62,7 @@ export default {
         goNext: dummyFunc,
     }),
     'account.restore.failed': {
+        address: addresses[0],
         seedPhrase,
         isLinked: true,
         goNext: dummyFunc,
@@ -168,7 +169,15 @@ export default {
         amount: randomInt(1, 1000),
         goNext: dummyFunc,
     },
-    'playground.icons': {
+    'playground.icons.assets': {
+        type: 'asset',
+        addresses: [
+            ...addresses,
+            ...generate(20 - addresses.length, randomAddress),
+        ],
+    },
+    'playground.icons.users': {
+        type: 'user',
         addresses: [
             ...addresses,
             ...generate(20 - addresses.length, randomAddress),
