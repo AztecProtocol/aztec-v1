@@ -8,11 +8,11 @@ import {
     AZTECAccountRegistryConfig,
     ACEConfig,
     IZkAssetConfig,
-} from '~/config/contracts';
+} from '~config/contracts';
 import {
     NETWORKS,
 } from '~config/constants';
-import Provider from '~/config/provider';
+import Provider from '~config/provider';
 import domainModel from '../../database/models/domain';
 import NetworkService from '~background/services/NetworkService/factory';
 

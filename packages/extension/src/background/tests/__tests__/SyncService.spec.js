@@ -232,7 +232,6 @@ describe('ZkAsset', () => {
         } while (createdNotes < prepopulateNotesCount);
     });
 
-
     it(`check how does it take to fetch ${prepopulateNotesCount} events, filter by owner and store into faked db`, async () => {
         // given
         const {
